@@ -18,7 +18,7 @@ setup(
     keywords=['cyclone', 'vorticity', 'meteorology', 'atmospherical sciences'],
     classifiers= [
         "Development Status :: 3 - Alpha",
-        "Intended Audience :: Scientists",
+        "Intended Audience :: Developers",
         'License :: OSI Approved :: MIT License',
         "Programming Language :: Python :: 3",
     ]
