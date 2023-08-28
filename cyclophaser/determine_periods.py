@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    determine_periods.py                               :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: Danilo  <danilo.oceano@gmail.com>          +#+  +:+       +#+         #
+#    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/28 12:43:32 by Danilo           ###   ########.fr        #
+#    Updated: 2023/08/28 16:21:53 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,93 +31,6 @@ def check_create_folder(DirName, verbosity=False):
         if verbosity:
             print(DirName+' directory exists')
 
-
-def array_vorticity(zeta_df):
-    """
-    Calculate derivatives of the vorticity and filter the resulting series
-
-    Args:
-    df: pandas DataFrame
-
-    Returns:
-    xarray DataArray
-    """
-
-    # Parameters for filtering and smoothing processes
-    frequency = 24.0
-    savgol_polynomial = 3
-    window_length_lanczo = len(zeta_df) // 2 
-    window_length_savgol = len(zeta_df) | 1
-    if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
-        window_length_savgol_2nd = window_length_savgol // 2 | 1
-    else:
-        window_length_savgol_2nd = window_length_savgol // 4 | 1
-    if window_length_savgol_2nd < savgol_polynomial:
-        window_length_savgol_2nd = 3
-    cutoff_low = 1.0 / (7 * 24.0)
-    cutoff_high = 1.0 / 48.0  # 24 hours
-    
-    # Convert dataframe to xarray
-    da = zeta_df.to_xarray()
-
-    # Apply Lanczos filter to vorticity 
-    zeta_filtred = lanfil.lanczos_bandpass_filter(da['zeta'].copy(), window_length_lanczo, cutoff_low, cutoff_high)
-    zeta_filtred_low_pass = lanfil.lanczos_filter(da.zeta.copy(), window_length_lanczo, frequency)
-    zeta_filtred = xr.DataArray(zeta_filtred, coords={'time':zeta_df.index})
-    da = da.assign(variables={'zeta_filt': zeta_filtred})
-
-    num_samples = len(zeta_filtred)
-    num_copy_samples = int(0.05 * num_samples)
-    zeta_filtred.data[:num_copy_samples] = zeta_filtred_low_pass.data[:num_copy_samples]
-    zeta_filtred.data[-num_copy_samples:] = zeta_filtred_low_pass.data[-num_copy_samples:]
-
-    if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
-        window_length_savgol = window_length_savgol // 2 | 1
-        
-    # Smooth filtered vorticity with Savgol filter
-    zeta_smoothed = xr.DataArray(
-        savgol_filter(zeta_filtred, window_length_savgol//2|1, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-
-    zeta_smoothed2 = xr.DataArray(
-            savgol_filter(zeta_smoothed, window_length_savgol_2nd, savgol_polynomial, mode="nearest"),
-            coords={'time':zeta_df.index})
-    
-    da = da.assign(variables={'zeta_smoothed': zeta_smoothed})
-    da = da.assign(variables={'zeta_smoothed2': zeta_smoothed2})
-
-    # Calculate vorticity derivatives
-    dz_dt = da.zeta.differentiate('time', datetime_unit='h')
-    dz_dt2 = dz_dt.differentiate('time', datetime_unit='h')
-    
-    # Calculate the smoothed vorticity derivatives 
-    dzfilt_dt = zeta_smoothed2.differentiate('time', datetime_unit='h')
-    dzfilt_dt2 = dzfilt_dt.differentiate('time', datetime_unit='h')
-
-    # Filter derivatives
-    dz_dt_filt = xr.DataArray(
-        savgol_filter(dzfilt_dt, window_length_savgol, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-    dz_dt2_filt = xr.DataArray(
-        savgol_filter(dzfilt_dt2, window_length_savgol, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-    
-    dz_dt_smoothed2 = xr.DataArray(
-        savgol_filter(dz_dt_filt, window_length_savgol, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-    dz_dt2_smoothed2 = xr.DataArray(
-        savgol_filter(dz_dt2_filt, window_length_savgol, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-
-    # Assign variables to xarray
-    da = da.assign(variables={'dz_dt': dz_dt,
-                              'dz_dt2': dz_dt2,
-                              'dz_dt_filt': dz_dt_filt,
-                              'dz_dt2_filt': dz_dt2_filt,
-                              'dz_dt_smoothed2': dz_dt_smoothed2,
-                              'dz_dt2_smoothed2': dz_dt2_smoothed2})
-
-    return da 
 
 def find_peaks_valleys(series):
     """
@@ -422,6 +335,118 @@ def periods_to_dict(df):
         
     return periods_dict
 
+
+def export_periods_to_csv(phases_dict, periods_outfile_path):
+
+    filepath = f"{periods_outfile_path}.csv"
+
+    # Extract phase names, start dates, and end dates from the periods dictionary
+    data = [(phase, start, end) for phase, (start, end) in phases_dict.items()]
+    
+    # Write the data to a CSV file
+    with open(filepath, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['', 'start', 'end'])  # Write the header
+        writer.writerows(data)  # Write the data rows
+
+    print(f"{filepath} written.")
+
+def array_vorticity(
+        zeta_df,
+        frequency=24.0,
+        savgol_polynomial=3,
+        window_length_savgol='default',
+        window_length_savgol_2nd='default',
+        window_length_lanczo='default'):
+    """
+    Calculate derivatives of the vorticity and filter the resulting series
+
+    Args:
+    df: pandas DataFrame
+
+    Returns:
+    xarray DataArray
+    """
+
+    # Parameters
+    if window_length_lanczo == 'default':
+        window_length_lanczo = len(zeta_df) // 2 
+
+    if window_length_savgol == 'default':
+        window_length_savgol = len(zeta_df) | 1
+        if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
+            window_length_savgol_2nd = window_length_savgol // 2 | 1
+        else:
+            window_length_savgol_2nd = window_length_savgol // 4 | 1
+
+    if window_length_savgol_2nd < savgol_polynomial:
+        window_length_savgol_2nd = 3
+
+    cutoff_low = 1.0 / (7 * 24.0)
+    cutoff_high = 1.0 / 48.0  # 24 hours
+    
+    # Convert dataframe to xarray
+    da = zeta_df.to_xarray()
+
+    # Apply Lanczos filter to vorticity 
+    zeta_filtred = lanfil.lanczos_bandpass_filter(da['zeta'].copy(), window_length_lanczo, cutoff_low, cutoff_high)
+    zeta_filtred_low_pass = lanfil.lanczos_filter(da.zeta.copy(), window_length_lanczo, frequency)
+    zeta_filtred = xr.DataArray(zeta_filtred, coords={'time':zeta_df.index})
+    da = da.assign(variables={'zeta_filt': zeta_filtred})
+
+    num_samples = len(zeta_filtred)
+    num_copy_samples = int(0.05 * num_samples)
+    zeta_filtred.data[:num_copy_samples] = zeta_filtred_low_pass.data[:num_copy_samples]
+    zeta_filtred.data[-num_copy_samples:] = zeta_filtred_low_pass.data[-num_copy_samples:]
+
+    if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
+        window_length_savgol = window_length_savgol // 2 | 1
+        
+    # Smooth filtered vorticity with Savgol filter
+    zeta_smoothed = xr.DataArray(
+        savgol_filter(zeta_filtred, window_length_savgol//2|1, savgol_polynomial, mode="nearest"),
+        coords={'time':zeta_df.index})
+
+    zeta_smoothed2 = xr.DataArray(
+            savgol_filter(zeta_smoothed, window_length_savgol_2nd, savgol_polynomial, mode="nearest"),
+            coords={'time':zeta_df.index})
+    
+    da = da.assign(variables={'zeta_smoothed': zeta_smoothed})
+    da = da.assign(variables={'zeta_smoothed2': zeta_smoothed2})
+
+    # Calculate vorticity derivatives
+    dz_dt = da.zeta.differentiate('time', datetime_unit='h')
+    dz_dt2 = dz_dt.differentiate('time', datetime_unit='h')
+    
+    # Calculate the smoothed vorticity derivatives 
+    dzfilt_dt = zeta_smoothed2.differentiate('time', datetime_unit='h')
+    dzfilt_dt2 = dzfilt_dt.differentiate('time', datetime_unit='h')
+
+    # Filter derivatives
+    dz_dt_filt = xr.DataArray(
+        savgol_filter(dzfilt_dt, window_length_savgol, savgol_polynomial, mode="nearest"),
+        coords={'time':zeta_df.index})
+    dz_dt2_filt = xr.DataArray(
+        savgol_filter(dzfilt_dt2, window_length_savgol, savgol_polynomial, mode="nearest"),
+        coords={'time':zeta_df.index})
+    
+    dz_dt_smoothed2 = xr.DataArray(
+        savgol_filter(dz_dt_filt, window_length_savgol, savgol_polynomial, mode="nearest"),
+        coords={'time':zeta_df.index})
+    dz_dt2_smoothed2 = xr.DataArray(
+        savgol_filter(dz_dt2_filt, window_length_savgol, savgol_polynomial, mode="nearest"),
+        coords={'time':zeta_df.index})
+
+    # Assign variables to xarray
+    da = da.assign(variables={'dz_dt': dz_dt,
+                              'dz_dt2': dz_dt2,
+                              'dz_dt_filt': dz_dt_filt,
+                              'dz_dt2_filt': dz_dt2_filt,
+                              'dz_dt_smoothed2': dz_dt_smoothed2,
+                              'dz_dt2_smoothed2': dz_dt2_smoothed2})
+
+    return da 
+
 def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, output_directory='./'):
 
     z = vorticity.zeta_smoothed2
@@ -474,21 +499,6 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, out
 
     return df
 
-def export_periods_to_csv(phases_dict, periods_outfile_path):
-
-    filepath = f"{periods_outfile_path}.csv"
-
-    # Extract phase names, start dates, and end dates from the periods dictionary
-    data = [(phase, start, end) for phase, (start, end) in phases_dict.items()]
-    
-    # Write the data to a CSV file
-    with open(filepath, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['', 'start', 'end'])  # Write the header
-        writer.writerows(data)  # Write the data rows
-
-    print(f"{filepath} written.")
-
 def determine_periods(track_file,  plot=False, plot_steps=False, export_dict=False, output_directory='./'):
 
     args = [plot, plot_steps, export_dict, output_directory]
@@ -499,7 +509,7 @@ def determine_periods(track_file,  plot=False, plot_steps=False, export_dict=Fal
     vorticity = array_vorticity(zeta_df.copy())
 
     # Determine the periods
-    get_periods(vorticity.copy(), *args)
+    return get_periods(vorticity.copy(), *args)
 
 if __name__ == "__main__":
     determine_periods('../tests/test.csv',  plot=True, plot_steps=True, export_dict=False, output_directory='./')
