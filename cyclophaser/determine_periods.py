@@ -6,7 +6,7 @@
 #    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/29 01:49:18 by Danilo           ###   ########.fr        #
+#    Updated: 2023/08/29 17:04:52 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -268,7 +268,7 @@ def array_vorticity(
 
     return da 
 
-def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, output_directory='./'):
+def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False):
 
     z = vorticity.vorticity_smoothed2
     dz = vorticity.dz_dt_smoothed2
@@ -305,18 +305,14 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, out
     # Also, add extra 6 hours to the start and end of the periods as "confidence intervals"
     periods_dict = periods_to_dict(df)
 
-    # Set the output file names
-    periods_outfile_path = output_directory + 'periods'
-    periods_didatic_outfile_path = output_directory + 'periods_didatic'
-
     # Create plots, if requested
     if plot:
-        plot_all_periods(periods_dict, df, ax=None, vorticity=vorticity, periods_outfile_path=periods_outfile_path)
+        plot_all_periods(periods_dict, df, ax=None, vorticity=vorticity, periods_outfile_path=plot)
     if plot_steps:
-        plot_didactic(df, vorticity, periods_didatic_outfile_path)
+        plot_didactic(df, vorticity, plot_steps)
     # Export csv, if requested
     if export_dict:
-        export_periods_to_csv(periods_dict, periods_outfile_path)
+        export_periods_to_csv(periods_dict, export_dict)
 
     return df
 
