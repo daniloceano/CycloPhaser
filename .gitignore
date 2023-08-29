@@ -128,6 +128,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+env-testing/
 
 # Spyder project settings
 .spyderproject
@@ -165,7 +166,5 @@ cyclophaser/.vscode/launch.json
 periods_didatic.png
 periods.png
 
-# Virtual environment for testing
-env-testing
-
 .DS_Store
+Pipfile.lock
