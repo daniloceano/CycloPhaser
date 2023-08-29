@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 
 import cmocean.cm as cmo
 
-from find_stages import find_intensification_period, find_decay_period, find_mature_stage
+from .find_stages import find_intensification_period, find_decay_period, find_mature_stage
 
 def plot_phase(df, phase, ax=None, show_title=True):
     # Create a copy of the DataFrame
@@ -193,7 +193,15 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
     else:
         ax.plot(df.time, df.z, linewidth=0.75, color='gray', label=r'ζ')
 
-    legend_labels = set()  # To store unique legend labels
+    legend_labels = []
+    # Add legend labels for Vorticity and ζ
+    for label in [r'$ζ_{f}$', r'$ζ_{fs}$', r'$ζ_{fs^{2}}$']:
+        legend_labels.append(label)
+
+    ax2.legend(legend_labels, loc='lower right', bbox_to_anchor=(1.275, 0.42))
+
+    legend_labels = []  # To store unique legend labels
+    legend_labels.append(r'ζ')
 
     # Shade the areas between the beginning and end of each period
     for phase, (start, end) in phases_dict.items():
@@ -208,32 +216,36 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
                         alpha=0.4, color=color, label=base_phase)
 
         # Add the base phase name to the legend labels set
-        legend_labels.add(base_phase)
-
-    # Add legend labels for Vorticity and ζ
-    for label in [r'ζ', r'$ζ_{f}$', r'$ζ_{fs}$', r'$ζ_{fs^{2}}$']:
-        legend_labels.add(label)
+        legend_labels.append(base_phase)
 
     # Set the title
     ax.set_title('Vorticity Data with Periods')
 
+    # Remove duplicate labels from the legend
+    handles, labels = ax.get_legend_handles_labels()
+
+    # Get handles and labels from ax2
+    handles2, labels2 = ax2.get_legend_handles_labels()
+
+    # Combine handles and labels from both ax and ax2
+    handles += handles2
+    labels += labels2
+
+    unique_labels = []
+    for label in labels:
+        if label not in unique_labels and label in legend_labels:
+            unique_labels.append(label)
+
+    ax.legend(handles, unique_labels, loc='upper right', bbox_to_anchor=(1.5, 1))
+
+    ax.ticklabel_format(axis='y', style='sci', scilimits=(-3, 3))
+    date_format = mdates.DateFormatter("%Y-%m-%d")
+    ax.xaxis.set_major_formatter(date_format)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+
+    plt.tight_layout()
+
     if periods_outfile_path is not None:
-        # Remove duplicate labels from the legend
-        handles, labels = ax.get_legend_handles_labels()
-        unique_labels = []
-        for label in labels:
-            if label not in unique_labels and label in legend_labels:
-                unique_labels.append(label)
-
-        ax.legend(handles, unique_labels, loc='upper right', bbox_to_anchor=(1.5, 1))
-
-        ax.ticklabel_format(axis='y', style='sci', scilimits=(-3, 3))
-        date_format = mdates.DateFormatter("%Y-%m-%d")
-        ax.xaxis.set_major_formatter(date_format)
-        plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
-
-        plt.tight_layout()
-
         fname = f"{periods_outfile_path}.png"
         plt.savefig(fname, dpi=500)
         print(f"{fname} created.")

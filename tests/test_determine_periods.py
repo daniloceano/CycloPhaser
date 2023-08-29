@@ -1,6 +1,6 @@
 from cyclophaser.determine_periods import determine_periods
 
-track_file = 'tests/test.csv'
+track_file = '../tests/test.csv'
 output_directory = './'
 
 # Specify options for the determine_periods function
@@ -11,11 +11,11 @@ options = {
     "output_directory": output_directory,
     "array_vorticity_args": {
         "use_filter": 'auto',
-        "replace_endpoints_with_lowpass": 0.1,
+        "replace_endpoints_with_lowpass": 24,
         "use_smoothing": 'auto',
         "use_smoothing_twice": 'auto',
         "savgol_polynomial": 3,
-        "cutoff_low": 200,
+        "cutoff_low": 168,
         "cutoff_high": 48
     }
 }

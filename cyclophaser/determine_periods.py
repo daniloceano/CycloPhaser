@@ -6,7 +6,7 @@
 #    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/28 23:12:29 by Danilo           ###   ########.fr        #
+#    Updated: 2023/08/29 01:49:18 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,9 +20,9 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.signal import savgol_filter 
 
-import lanczos_filter as lanfil
-from plots import plot_all_periods, plot_didactic
-from find_stages import find_incipient_period, find_intensification_period, find_decay_period, find_mature_stage, find_residual_period
+from . import lanczos_filter as lanfil
+from .plots import plot_all_periods, plot_didactic
+from .find_stages import find_incipient_period, find_intensification_period, find_decay_period, find_mature_stage, find_residual_period
 
 def check_create_folder(DirName, verbosity=False):
     if not os.path.exists(DirName):
@@ -184,16 +184,22 @@ def array_vorticity(
 
     # Calculate window lengths for Savgol smoothing
     if use_smoothing == 'auto':
-        window_length_savgol = len(zeta_df) | 1
         if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
-            window_length_savgol_2nd = window_length_savgol // 2 | 1
+            window_length_savgol = len(zeta_df) // 4 | 1
         else:
-            window_length_savgol_2nd = window_length_savgol // 4 | 1
+            window_length_savgol = len(zeta_df) // 2 | 1
     else:
         window_length_savgol = use_smoothing
-        # Savgol window can't be higher than the polynomial
-        window_length_savgol_2nd = use_smoothing_twice if use_smoothing_twice >= savgol_polynomial else savgol_polynomial
     
+    if use_smoothing_twice == 'auto':
+        if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
+            window_length_savgol_2nd = window_length_savgol * 2  | 1
+        else:
+            window_length_savgol_2nd = window_length_savgol | 1
+    else:
+        window_length_savgol_2nd = use_smoothing_twice
+    
+    # Savgol window can't be higher than the polynomial
     if window_length_savgol_2nd < savgol_polynomial:
         window_length_savgol_2nd = 3
     
@@ -208,18 +214,19 @@ def array_vorticity(
         filtered_vorticity = da['zeta'].copy()
     da = da.assign(variables={'filtered_vorticity': filtered_vorticity})
 
-    # Use the first and last 5% of low pass vorticity to replace bandpass vorticity
+    # Use the first and last 5% of a lower pass filtered vorticity
+    # to replace bandpass filtered vorticity
     if replace_endpoints_with_lowpass:
         num_samples = len(filtered_vorticity)
         num_copy_samples = int(0.05 * num_samples)
         filtered_vorticity_low_pass = lanfil.lanczos_filter(da.zeta.copy(), window_length_lanczo, replace_endpoints_with_lowpass)
         filtered_vorticity.data[:num_copy_samples] = filtered_vorticity_low_pass.data[:num_copy_samples]
-        filtered_vorticity.data[-num_copy_samples:] = filtered_vorticity_low_pass.data[-num_copy_samples:]
-        
+        filtered_vorticity.data[-num_copy_samples:] = filtered_vorticity_low_pass.data[-num_copy_samples:]  
+    
     # Smooth filtered vorticity with Savgol filter
     if use_smoothing:
         vorticity_smoothed = xr.DataArray(
-            savgol_filter(filtered_vorticity, window_length_savgol // 2 | 1, savgol_polynomial, mode="nearest"),
+            savgol_filter(filtered_vorticity, window_length_savgol, savgol_polynomial, mode="nearest"),
             coords={'time': zeta_df.index})
         if use_smoothing_twice:
             vorticity_smoothed2 = xr.DataArray(
@@ -364,27 +371,3 @@ def determine_periods(track_file,
 
     # Determine the periods
     return get_periods(vorticity.copy(), *args)
-
-if __name__ == "__main__":
-    track_file = '../tests/test.csv'
-    output_directory = './'
-
-    # Specify options for the determine_periods function
-    options = {
-        "plot": True,
-        "plot_steps": True,
-        "export_dict": False,
-        "output_directory": output_directory,
-        "array_vorticity_args": {
-            "use_filter": 'auto',
-            "replace_endpoints_with_lowpass": 0.1,
-            "use_smoothing": 'auto',
-            "use_smoothing_twice": 'auto',
-            "savgol_polynomial": 3,
-            "cutoff_low": 200,
-            "cutoff_high": 48
-        }
-    }
-
-    # Call the determine_periods function with options
-    determine_periods(track_file, **options)
