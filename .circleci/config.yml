@@ -10,108 +10,108 @@ jobs:
           name: Build
           command: python3 setup.py sdist bdist_wheel
         
-        - run:
+      - run:
           name: Add Universe
           command: sudo add-apt-repository universe -y
 
-        - run:
+      - run:
           name: Update
           command: sudo apt-get update
 
-        - run:
+      - run:
           name: Install pip
           command: sudo apt install -y python3-pip
         
-        - run:
+      - run:
           name: Install pipenv
           command: sudo pip install pipenv
 
-        - run:
+      - run:
           name: Install package 
           command: pipenv install dist/cyclophaser-1.3.9-py3-none-any.whl
 
-        - run:
+      - run:
           name: Install dependencies from requirements.txt
           command: pipenv install -r requirements.txt
 
-        - run:
+      - run:
           name: Install pytest
           command: pipenv install pytest
 
-        - run:
-            name: Run Tests
-            command: pipenv run pytest
+      - run:
+          name: Run Tests
+          command: pipenv run pytest
 
-        - store_test_results:
-            path: test-reports  
+      - store_test_results:
+          path: test-reports  
 
-    test_pypi_publish:
-      docker:
-        - image: cimg/python:3.11.0
-      steps:
-        - checkout
+  test_pypi_publish:
+    docker:
+      - image: cimg/python:3.11.0
+    steps:
+      - checkout
 
-        - run:
-            name: create whl
-            command: python3 setup.py sdist bdist_wheel
+      - run:
+          name: create whl
+          command: python3 setup.py sdist bdist_wheel
 
-        - run:
-            name: Add Universe
-            command: sudo add-apt-repository universe -y
+      - run:
+          name: Add Universe
+          command: sudo add-apt-repository universe -y
         
-        - run:
-            name: Update
-            command: sudo apt-get update
+      - run:
+          name: Update
+          command: sudo apt-get update
 
-        - run:
-            name: Install pip
-            command: sudo apt install -y python3-pip
+      - run:
+          name: Install pip
+          command: sudo apt install -y python3-pip
 
-        - run:
-            name: Install pipenv
-            command: sudo pip install pipenv
+      - run:
+          name: Install pipenv
+          command: sudo pip install pipenv
 
-        - run:
-            name: Install twine
-            command: sudo pip install twine
+      - run:
+          name: Install twine
+          command: sudo pip install twine
         
-        - run:
-            name: Publish
-            command: pipenv run twine upload --repository testpypi dist/*
+      - run:
+          name: Publish
+          command: pipenv run twine upload --repository testpypi dist/*
 
-    pypi_publish:
-      docker:
-        - image: cimg/python:3.11.0
-      steps:
-        - checkout # checkout source code to working directory
+  pypi_publish:
+    docker:
+      - image: cimg/python:3.11.0
+    steps:
+      - checkout # checkout source code to working directory
 
-        - run:
-            name: create whl
-            command: python3 setup.py sdist bdist_wheel
+      - run:
+          name: create whl
+          command: python3 setup.py sdist bdist_wheel
 
-        - run:
-            name: Add Universe
-            command: sudo add-apt-repository universe -y
+      - run:
+          name: Add Universe
+          command: sudo add-apt-repository universe -y
         
-        - run:
-            name: Update
-            command: sudo apt-get update
+      - run:
+          name: Update
+          command: sudo apt-get update
 
-        - run:
-            name: Install pip
-            command: sudo apt install -y python3-pip
+      - run:
+          name: Install pip
+          command: sudo apt install -y python3-pip
 
-        - run:
-            name: Install pipenv
-            command: sudo pip install pipenv
+      - run:
+          name: Install pipenv
+          command: sudo pip install pipenv
 
-        - run:
-            name: Install twine
-            command: sudo pip install twine
+      - run:
+          name: Install twine
+          command: sudo pip install twine
         
-        - run:
-            name: Publish
-            command: pipenv run twine upload dist/*
+      - run:
+          name: Publish
+          command: pipenv run twine upload dist/*
             
 workflows:
   build_test_publish:
