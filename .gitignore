@@ -164,7 +164,8 @@ cython_debug/
 cyclophaser/.vscode/launch.json
 periods_didatic.png
 periods.png
-env-testing
 
+# Virtual environment for testing
+env-testing
 
 .DS_Store
