@@ -14,6 +14,7 @@ jobs:
             sudo pip install pipenv
             pipenv install dist/cyclophaser-1.3.9-py3-none-any.whl
             pipenv install pytest
+            pipenv install xarray
       - run:
           command: | # Run test suite
             pipenv run pytest
