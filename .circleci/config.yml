@@ -16,8 +16,10 @@ jobs:
             pipenv install -r requirements.txt  # Install dependencies from requirements.txt
             pipenv install pytest
       - run:
-          command: | # Run test suite
-            pipenv run pytest
+          name: Run Tests
+          command: pipenv run pytest
+      - store_test_results:
+          path: test-reports  # Path to the test result files or directory
   test_pypi_publish:
     docker:
       - image: cimg/python:3.11.0
