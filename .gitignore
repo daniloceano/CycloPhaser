@@ -161,8 +161,9 @@ cython_debug/
 #.idea/
 
 # Testing locally
-cyclophaser/periods_didatic.png
-cyclophaser/periods.png
 cyclophaser/.vscode/launch.json
+periods_didatic.png
+periods.png
 
 .DS_Store
+

@@ -6,7 +6,7 @@
 #    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/28 16:21:53 by Danilo           ###   ########.fr        #
+#    Updated: 2023/08/28 23:12:29 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ from scipy.signal import savgol_filter
 
 import lanczos_filter as lanfil
 from plots import plot_all_periods, plot_didactic
+from find_stages import find_incipient_period, find_intensification_period, find_decay_period, find_mature_stage, find_residual_period
 
 def check_create_folder(DirName, verbosity=False):
     if not os.path.exists(DirName):
@@ -61,220 +62,7 @@ def find_peaks_valleys(series):
 
     return result
 
-def find_mature_stage(df):
-    dz_peaks = df[df['dz_peaks_valleys'] == 'peak'].index
-    dz_valleys = df[df['dz_peaks_valleys'] == 'valley'].index
-    z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
-    z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
 
-    series_length = df.index[-1] - df.index[0]
-    dt = df.index[1] - df.index[0]
-
-    # Iterate over z valleys
-    for z_valley in z_valleys:
-        # Find the previous and next dz valleys relative to the current z valley
-        next_z_peak = z_peaks[z_peaks > z_valley]
-        previous_z_peak =  z_peaks[z_peaks < z_valley]
-
-        # Check if there is a previous or next z_peak
-        if len(previous_z_peak) == 0 or len(next_z_peak) == 0:
-            continue
-
-        previous_z_peak = previous_z_peak[-1]
-        next_z_peak = next_z_peak[0]
-
-        # Calculate the distances between z valley and the previous/next dz valleys
-        distance_to_previous_z_peak = z_valley - previous_z_peak
-        distance_to_next_z_peak = next_z_peak - z_valley
-
-        mature_distance_previous = 0.125 * distance_to_previous_z_peak
-        mature_distance_next = 0.125 * distance_to_next_z_peak
-
-        mature_start = z_valley - mature_distance_previous
-        mature_end = z_valley + mature_distance_next
-
-        # Mature stage needs to be at least 3% of total length
-        mature_indexes = df.loc[mature_start:mature_end].index
-        if mature_indexes[-1] - mature_indexes[0] > 0.03 * series_length:
-            # Fill the period between mature_start and mature_end with 'mature'
-            df.loc[mature_start:mature_end, 'periods'] = 'mature'
-
-    # Check if all mature stages are preceeded by an intensification
-    mature_periods = df[df['periods'] == 'mature'].index
-    if len(mature_periods) > 0:
-        blocks = np.split(mature_periods, np.where(np.diff(mature_periods) != dt)[0] + 1)
-        for block in blocks:
-            block_start, block_end = block[0], block[-1]
-            if df.loc[block_start - dt, 'periods'] != 'intensification':
-                df.loc[block_start:block_end, 'periods'] = np.nan
-
-    return df
-
-
-def find_intensification_period(df):
-    # Find z peaks and valleys
-    z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
-    z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
-
-    length = df.index[-1] - df.index[0]
-    dt = df.index[1] - df.index[0]
-
-    # Find intensification periods between z peaks and valleys
-    for z_peak in z_peaks:
-        next_z_valley = z_valleys[z_valleys > z_peak].min()
-        if next_z_valley is not pd.NaT:
-            intensification_start = z_peak
-            intensification_end = next_z_valley
-
-            # Intensification needs to be at least 7.5% of the total series length
-            if intensification_end-intensification_start > length*0.12:
-                df.loc[intensification_start:intensification_end, 'periods'] = 'intensification'
-    
-    # Check if there are multiple blocks of consecutive intensification periods
-    intensefication_periods = df[df['periods'] == 'intensification'].index
-    blocks = np.split(intensefication_periods, np.where(np.diff(intensefication_periods) != dt)[0] + 1)
-
-    for i in range(len(blocks) - 1):
-        block_end = blocks[i][-1]
-        next_block_start = blocks[i+1][0]
-        gap = next_block_start - block_end
-
-        # If the gap between blocks is smaller than 7.5%, fill with intensification
-        if gap < length*0.075:
-            df.loc[block_end:next_block_start, 'periods'] = 'intensification'
-
-    return df
-
-def find_decay_period(df):
-    # Find z peaks and valleys
-    z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
-    z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
-
-    length = df.index[-1] - df.index[0]
-    dt = df.index[1] - df.index[0]
-
-    # Find decay periods between z valleys and peaks
-    for z_valley in z_valleys:
-        next_z_peak = z_peaks[z_peaks > z_valley].min()
-        if next_z_peak is not pd.NaT:
-            decay_start = z_valley
-            decay_end = next_z_peak
-        else:
-            decay_start = z_valley
-            decay_end = df.index[-1]  # Last index of the DataFrame
-
-        # Decay needs to be at least 12% of the total series length
-        if decay_end - decay_start > length*0.12:
-            df.loc[decay_start:decay_end, 'periods'] = 'decay'
-
-    # Check if there are multiple blocks of consecutive decay periods
-    decay_periods = df[df['periods'] == 'decay'].index
-    blocks = np.split(decay_periods, np.where(np.diff(decay_periods) != dt)[0] + 1)
-
-    for i in range(len(blocks) - 1):
-        block_end = blocks[i][-1]
-        next_block_start = blocks[i+1][0]
-        gap = next_block_start - block_end
-
-        # If the gap between blocks is smaller than 7.5%, fill with decay
-        if gap < length*0.075:
-            df.loc[block_end:next_block_start, 'periods'] = 'decay'
-
-    return df
-
-def find_residual_period(df):
-    unique_phases = [item for item in df['periods'].unique() if pd.notnull(item)]
-    num_unique_phases = len(unique_phases)
-
-    if num_unique_phases == 1:
-        phase_to_fill = unique_phases[0]
-
-        last_phase_index = df[df['periods'] == phase_to_fill].index[-1]
-        dt = df.index[1] - df.index[0]
-        df.loc[last_phase_index + dt:, 'periods'].fillna('residual', inplace=True)
-    else:
-        mature_periods = df[df['periods'] == 'mature'].index
-        decay_periods = df[df['periods'] == 'decay'].index
-        intensification_periods = df[df['periods'] == 'intensification'].index
-
-        # Find residual periods where there is no decay stage after the mature stage
-        for mature_period in mature_periods:
-            if len(unique_phases) > 2:
-                next_decay_period = decay_periods[decay_periods > mature_period].min()
-                if next_decay_period is pd.NaT:
-                    df.loc[mature_period:, 'periods'] = 'residual'
-                    
-        # Update mature periods
-        mature_periods = df[df['periods'] == 'mature'].index
-
-        # Fills with residual period intensification stage if there isn't a mature stage after it
-        # but only if there's more than two periods
-        if len(unique_phases) > 2:
-            for intensification_period in intensification_periods:
-                next_mature_period = mature_periods[mature_periods > intensification_period].min()
-                if next_mature_period is pd.NaT:
-                    df.loc[intensification_period:, 'periods'] = 'residual'
-
-        # Fill NaNs after decay with residual if there is a decay, else, fill the NaNs after mature
-        if 'decay' in unique_phases:
-            last_decay_index = df[df['periods'] == 'decay'].index[-1]
-        elif 'mature' in unique_phases:
-            last_decay_index = df[df['periods'] == 'mature'].index[-1]
-        dt = df.index[1] - df.index[0]
-        df.loc[last_decay_index + dt:, 'periods'].fillna('residual', inplace=True)
-
-    return df
-
-def find_incipient_period(df):
-
-    periods = df['periods']
-    mature_periods = df[periods == 'mature'].index
-    decay_periods = df[periods == 'decay'].index
-
-    dt = df.index[1] - df.index[0]
-
-    # if there's more than one period
-    if len([item for item in df['periods'].unique() if (pd.notnull(item) and item != 'residual')]) > 2:
-        # Find blocks of continuous indexes for 'decay' periods
-        blocks = np.split(decay_periods, np.where(np.diff(decay_periods) != dt)[0] + 1)
-
-        # Iterate over the blocks
-        for block in blocks:
-            if len(block) > 0:
-                first_index = block[0]
-
-                if first_index == df.index[0]:
-                    df.loc[block, 'periods'] = 'incipient'
-
-                else:
-                    prev_index = first_index - dt
-                    # Check if the previous index is incipient AND before mature stage
-                    if (df.loc[prev_index, 'periods'] == 'incipient' or pd.isna(df.loc[prev_index, 'periods'])) and \
-                    (len(mature_periods) > 0 and prev_index < mature_periods[-1]):
-                        # Set the first period of the block to incipient
-                        df.loc[block, 'periods'] = 'incipient'
-
-    
-    df['periods'].fillna('incipient', inplace=True)
-
-    # If there's more than 2 unique phases other than residual and life cycle begins with
-    # incipient fill first 6 hours with incipient.
-    # If the life cycle begins with intensification, incipient phase will be from the
-    # beginning of it, until 2/5 to the next dz_valley
-    if len([item for item in df['periods'].unique() if (pd.notnull(item) and item != 'residual')]) > 2:
-        phase_order = [item for item in df['periods'].unique() if pd.notnull(item)]
-        if phase_order[0] in ['incipient', 'intensification'] or (phase_order[0] == 'incipient' and phase_order[1] == 'intensification'):
-            start_time = df.iloc[0].name
-            # Check if there's a dz valley before the next mature stage
-            next_dz_valley = df[1:][df[1:]['dz_peaks_valleys'] == 'valley'].index.min()
-            next_mature = df[df['periods'] == 'mature'].index.min()
-            if next_dz_valley < next_mature:
-                time_range = start_time + 2 * (next_dz_valley - start_time) / 5
-                df.loc[start_time:time_range, 'periods'] = 'incipient'
-
-    return df
-
-import pandas as pd
 
 def post_process_periods(df):
     dt = df.index[1] - df.index[0]
@@ -353,76 +141,104 @@ def export_periods_to_csv(phases_dict, periods_outfile_path):
 
 def array_vorticity(
         zeta_df,
-        frequency=24.0,
+        use_filter='auto',
+        replace_endpoints_with_lowpass=24,
+        use_smoothing='auto',
+        use_smoothing_twice='auto', 
         savgol_polynomial=3,
-        window_length_savgol='default',
-        window_length_savgol_2nd='default',
-        window_length_lanczo='default'):
+        cutoff_low=168,
+        cutoff_high=48.0):
     """
-    Calculate derivatives of the vorticity and filter the resulting series
+    Calculate derivatives of vorticity and perform filtering and smoothing.
 
     Args:
-    df: pandas DataFrame
+        zeta_df (pandas.DataFrame): Input dataframe containing 'zeta' data.
+        use_filter (bool or str, optional): Apply Lanczos filter to vorticity. 'auto' for default window length or specify length. Default is 'auto'.
+        replace_endpoints_with_lowpass (float, optional): Replace endpoints with a lowpass filter and choose the window length. Default is 24.
+        use_smoothing (bool or str, optional): Apply Savgol smoothing to filtered vorticity. 'auto' for default window length or specify length. Default is 'auto'.
+        use_smoothing_twice (bool or str, optional): Apply Savgol smoothing twice to the first smoothed vorticity. 'auto' for default window length or specify length. Default is 'auto'.
+        savgol_polynomial (int, optional): Polynomial order for Savgol smoothing. Default is 3.
+        cutoff_low (float, optional): Low-frequency cutoff for Lanczos filter. Default is 168.
+        cutoff_high (float, optional): High-frequency cutoff for Lanczos filter. Default is 48.0.
+        filter_derivatives (bool, optional): Apply filtering to derivative results. Default is True.
 
     Returns:
-    xarray DataArray
+        xarray.DataArray: A DataArray containing various calculated variables and derivatives.
+
+    Note:
+        - The Lanczos filter and Savgol filter are applied using external functions 'lanfil.lanczos_bandpass_filter'
+          and 'savgol_filter', respectively.
+        - The 'window_length_savgol' and 'window_length_savgol_2nd' calculations depend on the input 'use_smoothing' and
+          'use_smoothing_twice' values or are determined automatically for 'auto'.
+        - The filtering of derivatives is controlled by the 'filter_derivatives' parameter.
+
+    Example:
+        >>> df = array_vorticity(zeta_df, cutoff_low=168, cutoff_high=24)
     """
 
     # Parameters
-    if window_length_lanczo == 'default':
+    if use_filter == 'auto':
         window_length_lanczo = len(zeta_df) // 2 
+    else:
+        window_length_lanczo = use_filter
 
-    if window_length_savgol == 'default':
+    # Calculate window lengths for Savgol smoothing
+    if use_smoothing == 'auto':
         window_length_savgol = len(zeta_df) | 1
         if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
             window_length_savgol_2nd = window_length_savgol // 2 | 1
         else:
             window_length_savgol_2nd = window_length_savgol // 4 | 1
-
+    else:
+        window_length_savgol = use_smoothing
+        # Savgol window can't be higher than the polynomial
+        window_length_savgol_2nd = use_smoothing_twice if use_smoothing_twice >= savgol_polynomial else savgol_polynomial
+    
     if window_length_savgol_2nd < savgol_polynomial:
         window_length_savgol_2nd = 3
-
-    cutoff_low = 1.0 / (7 * 24.0)
-    cutoff_high = 1.0 / 48.0  # 24 hours
     
     # Convert dataframe to xarray
     da = zeta_df.to_xarray()
 
-    # Apply Lanczos filter to vorticity 
-    zeta_filtred = lanfil.lanczos_bandpass_filter(da['zeta'].copy(), window_length_lanczo, cutoff_low, cutoff_high)
-    zeta_filtred_low_pass = lanfil.lanczos_filter(da.zeta.copy(), window_length_lanczo, frequency)
-    zeta_filtred = xr.DataArray(zeta_filtred, coords={'time':zeta_df.index})
-    da = da.assign(variables={'zeta_filt': zeta_filtred})
+    # Apply Lanczos filter to vorticity, if requested
+    if use_filter:
+        filtered_vorticity = lanfil.lanczos_bandpass_filter(da['zeta'].copy(), window_length_lanczo, 1 / cutoff_low, 1 / cutoff_high)
+        filtered_vorticity = xr.DataArray(filtered_vorticity, coords={'time':zeta_df.index})
+    else:
+        filtered_vorticity = da['zeta'].copy()
+    da = da.assign(variables={'filtered_vorticity': filtered_vorticity})
 
-    num_samples = len(zeta_filtred)
-    num_copy_samples = int(0.05 * num_samples)
-    zeta_filtred.data[:num_copy_samples] = zeta_filtred_low_pass.data[:num_copy_samples]
-    zeta_filtred.data[-num_copy_samples:] = zeta_filtred_low_pass.data[-num_copy_samples:]
-
-    if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
-        window_length_savgol = window_length_savgol // 2 | 1
+    # Use the first and last 5% of low pass vorticity to replace bandpass vorticity
+    if replace_endpoints_with_lowpass:
+        num_samples = len(filtered_vorticity)
+        num_copy_samples = int(0.05 * num_samples)
+        filtered_vorticity_low_pass = lanfil.lanczos_filter(da.zeta.copy(), window_length_lanczo, replace_endpoints_with_lowpass)
+        filtered_vorticity.data[:num_copy_samples] = filtered_vorticity_low_pass.data[:num_copy_samples]
+        filtered_vorticity.data[-num_copy_samples:] = filtered_vorticity_low_pass.data[-num_copy_samples:]
         
     # Smooth filtered vorticity with Savgol filter
-    zeta_smoothed = xr.DataArray(
-        savgol_filter(zeta_filtred, window_length_savgol//2|1, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-
-    zeta_smoothed2 = xr.DataArray(
-            savgol_filter(zeta_smoothed, window_length_savgol_2nd, savgol_polynomial, mode="nearest"),
-            coords={'time':zeta_df.index})
+    if use_smoothing:
+        vorticity_smoothed = xr.DataArray(
+            savgol_filter(filtered_vorticity, window_length_savgol // 2 | 1, savgol_polynomial, mode="nearest"),
+            coords={'time': zeta_df.index})
+        if use_smoothing_twice:
+            vorticity_smoothed2 = xr.DataArray(
+                savgol_filter(vorticity_smoothed, window_length_savgol_2nd, savgol_polynomial, mode="nearest"),
+                coords={'time': zeta_df.index})
+        else:
+            vorticity_smoothed2 = vorticity_smoothed
+    else:
+        vorticity_smoothed = filtered_vorticity
+        vorticity_smoothed2 = vorticity_smoothed
     
-    da = da.assign(variables={'zeta_smoothed': zeta_smoothed})
-    da = da.assign(variables={'zeta_smoothed2': zeta_smoothed2})
-
-    # Calculate vorticity derivatives
-    dz_dt = da.zeta.differentiate('time', datetime_unit='h')
-    dz_dt2 = dz_dt.differentiate('time', datetime_unit='h')
+    da = da.assign(variables={'vorticity_smoothed': vorticity_smoothed,
+                              'vorticity_smoothed2': vorticity_smoothed2})
     
-    # Calculate the smoothed vorticity derivatives 
-    dzfilt_dt = zeta_smoothed2.differentiate('time', datetime_unit='h')
+    # Calculate the derivatives from smoothed (or not) vorticity
+    dzfilt_dt = vorticity_smoothed2.differentiate('time', datetime_unit='h')
     dzfilt_dt2 = dzfilt_dt.differentiate('time', datetime_unit='h')
 
-    # Filter derivatives
+    # Filter derivatives: not an option because they are too noisy. Otherwise the results are too lame
     dz_dt_filt = xr.DataArray(
         savgol_filter(dzfilt_dt, window_length_savgol, savgol_polynomial, mode="nearest"),
         coords={'time':zeta_df.index})
@@ -438,9 +254,7 @@ def array_vorticity(
         coords={'time':zeta_df.index})
 
     # Assign variables to xarray
-    da = da.assign(variables={'dz_dt': dz_dt,
-                              'dz_dt2': dz_dt2,
-                              'dz_dt_filt': dz_dt_filt,
+    da = da.assign(variables={'dz_dt_filt': dz_dt_filt,
                               'dz_dt2_filt': dz_dt2_filt,
                               'dz_dt_smoothed2': dz_dt_smoothed2,
                               'dz_dt2_smoothed2': dz_dt2_smoothed2})
@@ -449,11 +263,11 @@ def array_vorticity(
 
 def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, output_directory='./'):
 
-    z = vorticity.zeta_smoothed2
+    z = vorticity.vorticity_smoothed2
     dz = vorticity.dz_dt_smoothed2
     dz2 = vorticity.dz_dt2_smoothed2
 
-    df = z.to_dataframe().rename(columns={'zeta_smoothed2':'z'})
+    df = z.to_dataframe().rename(columns={'vorticity_smoothed2':'z'})
     df['z_unfil'] = vorticity.zeta.to_dataframe()
     df['dz'] = dz.to_dataframe()
     df['dz2'] = dz2.to_dataframe()
@@ -499,17 +313,78 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, out
 
     return df
 
-def determine_periods(track_file,  plot=False, plot_steps=False, export_dict=False, output_directory='./'):
+def determine_periods(track_file,
+                      vorticity_column='min_zeta_850',
+                      plot=False,
+                      plot_steps=False,
+                      export_dict=False, 
+                      output_directory='./',
+                      array_vorticity_args=None):
+    """
+    Determine meteorological periods from vorticity data.
+
+    Args:
+        track_file (str): Path to the CSV file containing track data.
+        zeta_column (str, optional): Column name for the 'zeta' data in the CSV file. Default is 'min_zeta_850'.
+        plot (bool, optional): Whether to generate and save plots. Default is False.
+        plot_steps (bool, optional): Whether to generate didactic step-by-step plots. Default is False.
+        export_dict (bool, optional): Whether to export periods as a CSV dictionary. Default is False.
+        output_directory (str, optional): Directory for saving output files. Default is './'.
+        array_vorticity_args (dict, optional): Custom arguments for the array_vorticity function. Default is None.
+            Refer to the documentation of array_vorticity for details on available arguments.
+
+    Returns:
+        pandas.DataFrame: DataFrame containing determined periods and associated information.
+
+    Example:
+        >>> array_vorticity_args = {
+        ...     'cutoff_low': 168,
+        ...     'cutoff_high': 24,
+        ...     'use_filter': True,
+        ...     'replace_endpoints_with_lowpass': 24,
+        ...     'use_smoothing': True,
+        ...     'use_smoothing_twice': False,
+        ...     'savgol_polynomial': 3
+        ... }
+        >>> determine_periods('track_data.csv', vorticity_column='my_vorticity_column', plot=True, plot_steps=True, export_dict=False, array_vorticity_args=array_vorticity_args)
+        ...
+        # Make sure to check the documentation for array_vorticity to see how to pass custom arguments.
+    """
 
     args = [plot, plot_steps, export_dict, output_directory]
 
     # Read the track file and extract the vorticity data
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
-    zeta_df = pd.DataFrame(track['min_zeta_850'].rename('zeta'))        
-    vorticity = array_vorticity(zeta_df.copy())
+    zeta_df = pd.DataFrame(track[vorticity_column].rename('zeta'))
+
+    # Modify the array_vorticity_args if provided, otherwise use defaults
+    if array_vorticity_args is None:
+        array_vorticity_args = {}
+    vorticity = array_vorticity(zeta_df.copy(), **array_vorticity_args)
 
     # Determine the periods
     return get_periods(vorticity.copy(), *args)
 
 if __name__ == "__main__":
-    determine_periods('../tests/test.csv',  plot=True, plot_steps=True, export_dict=False, output_directory='./')
+    track_file = '../tests/test.csv'
+    output_directory = './'
+
+    # Specify options for the determine_periods function
+    options = {
+        "plot": True,
+        "plot_steps": True,
+        "export_dict": False,
+        "output_directory": output_directory,
+        "array_vorticity_args": {
+            "use_filter": 'auto',
+            "replace_endpoints_with_lowpass": 0.1,
+            "use_smoothing": 'auto',
+            "use_smoothing_twice": 'auto',
+            "savgol_polynomial": 3,
+            "cutoff_low": 200,
+            "cutoff_high": 48
+        }
+    }
+
+    # Call the determine_periods function with options
+    determine_periods(track_file, **options)

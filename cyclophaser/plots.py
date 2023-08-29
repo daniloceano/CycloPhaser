@@ -4,14 +4,14 @@ import matplotlib.dates as mdates
 
 import cmocean.cm as cmo
 
-from determine_periods import find_intensification_period, find_decay_period, find_mature_stage
+from find_stages import find_intensification_period, find_decay_period, find_mature_stage
 
 def plot_phase(df, phase, ax=None, show_title=True):
     # Create a copy of the DataFrame
     df_copy = df.copy()
 
     zeta = df_copy['z_unfil']
-    zeta_smoothed = df_copy['z']
+    vorticity_smoothed = df_copy['z']
 
     colors_phases = {'incipient': '#65a1e6', 'intensification': '#f7b538',
                      'mature': '#d62828', 'decay': '#9aa981', 'residual': 'gray'}
@@ -36,7 +36,7 @@ def plot_phase(df, phase, ax=None, show_title=True):
     ax.plot(df_copy.index, zeta, c='gray', lw=3, alpha=0.8)
     ax2 = ax.twinx()
     ax2.axis('off')
-    ax2.plot(df_copy.index, zeta_smoothed, c='k')
+    ax2.plot(df_copy.index, vorticity_smoothed, c='k')
 
     if show_title:
         title = ax.set_title(f'{phase}', fontweight='bold', horizontalalignment='center')
@@ -83,7 +83,7 @@ def plot_specific_peaks_valleys(df, ax, *kwargs):
 def plot_vorticity(ax, vorticity):
 
     zeta = vorticity.zeta
-    zeta_smoothed = vorticity.zeta_smoothed2
+    vorticity_smoothed = vorticity.vorticity_smoothed2
 
     ax.axhline(0, c='gray', linewidth=0.5)
     
@@ -91,7 +91,7 @@ def plot_vorticity(ax, vorticity):
 
     ax2 = ax.twinx()
     ax2.axis('off')
-    ax2.plot(vorticity.time, zeta_smoothed, c='k', linewidth=2, label=r"$ζ_{filt}$")
+    ax2.plot(vorticity.time, vorticity_smoothed, c='k', linewidth=2, label=r"$ζ_{filt}$")
 
     ax.ticklabel_format(axis='y', style='sci', scilimits=(-3, 3))
 
@@ -186,9 +186,9 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
 
         ax2 = ax.twinx()
         ax2.axis('off')
-        ax2.plot(vorticity.time, vorticity.zeta_filt, linewidth=2, c='#d68c45', label=r'$ζ_{f}$')
-        ax2.plot(vorticity.time, vorticity.zeta_smoothed, linewidth=2, c='#1d3557', label=r'$ζ_{fs}$')
-        ax2.plot(vorticity.time, vorticity.zeta_smoothed2, linewidth=2, c='#e63946', label=r'$ζ_{fs^{2}}$')
+        ax2.plot(vorticity.time, vorticity.filtered_vorticity, linewidth=2, c='#d68c45', label=r'$ζ_{f}$')
+        ax2.plot(vorticity.time, vorticity.vorticity_smoothed, linewidth=2, c='#1d3557', label=r'$ζ_{fs}$')
+        ax2.plot(vorticity.time, vorticity.vorticity_smoothed2, linewidth=2, c='#e63946', label=r'$ζ_{fs^{2}}$')
 
     else:
         ax.plot(df.time, df.z, linewidth=0.75, color='gray', label=r'ζ')
