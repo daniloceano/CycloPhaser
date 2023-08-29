@@ -23,5 +23,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Others
 
 - Separated plots and finding periods on distinct files
-
-
