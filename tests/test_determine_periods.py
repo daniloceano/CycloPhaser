@@ -8,9 +8,9 @@ def test_determine_periods_with_options():
     # Specify options for the determine_periods function
     options = {
         "vorticity_column":'min_zeta_850',
-        "plot": './',
-        "plot_steps": './',
-        "export_dict": './',
+        "plot": 'test',
+        "plot_steps": 'test_steps',
+        "export_dict": 'test',
         "array_vorticity_args": {
             "use_filter": 'auto',
             "replace_endpoints_with_lowpass": 24,

@@ -163,8 +163,8 @@ cython_debug/
 
 # Testing locally
 cyclophaser/.vscode/launch.json
-periods_didatic.png
-periods.png
+test*png
+test*csv
 
 .DS_Store
 Pipfile.lock

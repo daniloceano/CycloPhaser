@@ -6,7 +6,7 @@
 #    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/29 17:18:05 by Danilo           ###   ########.fr        #
+#    Updated: 2023/08/29 17:36:04 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -353,7 +353,7 @@ def determine_periods(track_file,
         # Make sure to check the documentation for array_vorticity to see how to pass custom arguments.
     """
 
-    args = [plot, plot_steps, export_dict, output_directory]
+    args = [plot, plot_steps, export_dict]
 
     # Read the track file and extract the vorticity data
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
