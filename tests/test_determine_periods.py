@@ -7,10 +7,10 @@ def test_determine_periods_with_options():
 
     # Specify options for the determine_periods function
     options = {
-        "plot": True,
-        "plot_steps": True,
-        "export_dict": False,
-        "output_directory": output_directory,
+        "vorticity_column":'min_zeta_850',
+        "plot": './',
+        "plot_steps": './',
+        "export_dict": './',
         "array_vorticity_args": {
             "use_filter": 'auto',
             "replace_endpoints_with_lowpass": 24,

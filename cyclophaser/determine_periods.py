@@ -6,7 +6,7 @@
 #    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/29 17:04:52 by Danilo           ###   ########.fr        #
+#    Updated: 2023/08/29 17:18:05 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -320,8 +320,7 @@ def determine_periods(track_file,
                       vorticity_column='min_zeta_850',
                       plot=False,
                       plot_steps=False,
-                      export_dict=False, 
-                      output_directory='./',
+                      export_dict=False,
                       array_vorticity_args=None):
     """
     Determine meteorological periods from vorticity data.
