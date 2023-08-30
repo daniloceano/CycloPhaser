@@ -6,7 +6,7 @@
 #    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/29 17:36:04 by Danilo           ###   ########.fr        #
+#    Updated: 2023/08/30 15:21:38 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,9 +20,9 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.signal import savgol_filter 
 
-from . import lanczos_filter as lanfil
-from .plots import plot_all_periods, plot_didactic
-from .find_stages import find_incipient_period, find_intensification_period, find_decay_period, find_mature_stage, find_residual_period
+from cyclophaser import lanczos_filter as lanfil
+from cyclophaser.plots import plot_all_periods, plot_didactic
+from cyclophaser.find_stages import find_incipient_period, find_intensification_period, find_decay_period, find_mature_stage, find_residual_period
 
 def check_create_folder(DirName, verbosity=False):
     if not os.path.exists(DirName):
@@ -216,7 +216,7 @@ def array_vorticity(
 
     # Use the first and last 5% of a lower pass filtered vorticity
     # to replace bandpass filtered vorticity
-    if replace_endpoints_with_lowpass:
+    if use_filter and replace_endpoints_with_lowpass:
         num_samples = len(filtered_vorticity)
         num_copy_samples = int(0.05 * num_samples)
         filtered_vorticity_low_pass = lanfil.lanczos_filter(da.zeta.copy(), window_length_lanczo, replace_endpoints_with_lowpass)
@@ -366,3 +366,17 @@ def determine_periods(track_file,
 
     # Determine the periods
     return get_periods(vorticity.copy(), *args)
+
+if __name__ == '__main__':
+    track_file = '../tests/test.csv'
+
+    options = {
+        "plot": 'test',
+        "plot_steps": 'test',
+        "export_dict": None,
+        "array_vorticity_args": {
+            "use_filter": False
+        }
+    }
+    
+    result = determine_periods(track_file, **options)

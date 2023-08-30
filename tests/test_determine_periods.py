@@ -27,4 +27,16 @@ def test_determine_periods_with_options():
 
     # Add assertions to verify the expected behavior
     assert isinstance(result, pd.DataFrame)
-    # Add more assertions here
+
+    options = {
+        "plot": False,
+        "plot_steps": False,
+        "export_dict": None,
+        "array_vorticity_args": {
+            "use_filter": False
+        }
+    }
+    
+    result = determine_periods(track_file, **options)
+    # Add assertions to verify the expected behavior
+    assert isinstance(result, pd.DataFrame)
