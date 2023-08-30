@@ -7,35 +7,35 @@ jobs:
       - checkout 
 
       - run:
-          name: Build
+          name: Build (build_test)
           command: python3 setup.py sdist bdist_wheel
         
       - run:
-          name: Add Universe
+          name: Add Universe (build_test)
           command: sudo add-apt-repository universe -y
 
       - run:
-          name: Update
+          name: Update (build_test)
           command: sudo apt-get update
 
       - run:
-          name: Install pip
+          name: Install pip (build_test)
           command: sudo apt install -y python3-pip
         
       - run:
-          name: Install pipenv
+          name: Install pipenv (build_test)
           command: sudo pip install pipenv
 
       - run:
-          name: Install package 
+          name: Install package (build_test)
           command: pipenv install dist/cyclophaser-1.3.13-py3-none-any.whl
 
       - run:
-          name: Install pytest
+          name: Install pytest (build_test)
           command: pipenv install pytest
 
       - run:
-          name: Run Tests
+          name: Run Tests (build_test)
           command: pipenv run pytest
 
       - store_test_results:
@@ -48,32 +48,32 @@ jobs:
       - checkout
 
       - run:
-          name: create whl
+          name: create whl (test_pypi_publish)
           command: python3 setup.py sdist bdist_wheel
 
       - run:
-          name: Add Universe
+          name: Add Universe (test_pypi_publish)
           command: sudo add-apt-repository universe -y
         
       - run:
-          name: Update
+          name: Update (test_pypi_publish)
           command: sudo apt-get update
 
       - run:
-          name: Install pip
+          name: Install pip (test_pypi_publish)
           command: sudo apt install -y python3-pip
 
       - run:
-          name: Install pipenv
+          name: Install pipenv (test_pypi_publish)
           command: sudo pip install pipenv
 
       - run:
-          name: Install twine
+          name: Install twine (test_pypi_publish)
           command: sudo pip install twine
         
       - run:
-          name: Publish
-          command: pipenv run twine upload --repository testpypi dist/*
+          name: Publish on TestPyPI
+          command: pipenv run twine upload --repository testpypi dist/* --verbose
 
   pypi_publish:
     docker:
@@ -82,32 +82,32 @@ jobs:
       - checkout # checkout source code to working directory
 
       - run:
-          name: create whl
+          name: create whl (pypi_publish)
           command: python3 setup.py sdist bdist_wheel
 
       - run:
-          name: Add Universe
+          name: Add Universe (pypi_publish)
           command: sudo add-apt-repository universe -y
         
       - run:
-          name: Update
+          name: Update (pypi_publish)
           command: sudo apt-get update
 
       - run:
-          name: Install pip
+          name: Install pip (pypi_publish)
           command: sudo apt install -y python3-pip
 
       - run:
-          name: Install pipenv
+          name: Install pipenv (pypi_publish)
           command: sudo pip install pipenv
 
       - run:
-          name: Install twine
+          name: Install twine (pypi_publish)
           command: sudo pip install twine
         
       - run:
-          name: Publish
-          command: pipenv run twine upload dist/*
+          name: Publish on PyPI
+          command: pipenv run twine upload dist/* --verbose
             
 workflows:
   build_test_publish:
