@@ -11,7 +11,7 @@ def test_determine_periods_with_options():
         "plot": 'test',
         "plot_steps": 'test_steps',
         "export_dict": 'test',
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": 'auto',
             "replace_endpoints_with_lowpass": 24,
             "use_smoothing": 'auto',
@@ -32,7 +32,7 @@ def test_determine_periods_with_options():
         "plot": False,
         "plot_steps": False,
         "export_dict": None,
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": False
         }
     }
