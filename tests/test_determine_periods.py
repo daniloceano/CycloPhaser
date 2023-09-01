@@ -10,7 +10,7 @@ def test_determine_periods_with_options():
         "plot": 'test_ERA5',
         "plot_steps": 'test_steps_ERA5',
         "export_dict": 'test_ERA5',
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": 'auto',
             "replace_endpoints_with_lowpass": 24,
             "use_smoothing": 'auto',
@@ -31,7 +31,7 @@ def test_determine_periods_with_options():
         "plot": False,
         "plot_steps": False,
         "export_dict": None,
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": False
         }
     }
@@ -45,7 +45,7 @@ def test_determine_periods_with_options():
         "plot": "test_TRACK",
         "plot_steps": "test_steps_TRACK",
         "export_dict": False,
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": False,
             "use_smoothing_twice": len(track)//4 | 1}
     }

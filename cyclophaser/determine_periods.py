@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    determine_periods.py                               :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
+#    By: Danilo  <danilo.oceano@gmail.com>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/08/30 15:21:38 by Danilo           ###   ########.fr        #
+#    Updated: 2023/09/01 11:29:16 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -139,7 +139,7 @@ def export_periods_to_csv(phases_dict, periods_outfile_path):
 
     print(f"{filepath} written.")
 
-def array_vorticity(
+def process_vorticity(
         zeta_df,
         use_filter='auto',
         replace_endpoints_with_lowpass=24,
@@ -173,7 +173,7 @@ def array_vorticity(
         - The filtering of derivatives is controlled by the 'filter_derivatives' parameter.
 
     Example:
-        >>> df = array_vorticity(zeta_df, cutoff_low=168, cutoff_high=24)
+        >>> df = process_vorticity(zeta_df, cutoff_low=168, cutoff_high=24)
     """
 
     # Parameters
@@ -321,7 +321,7 @@ def determine_periods(track_file,
                       plot=False,
                       plot_steps=False,
                       export_dict=False,
-                      array_vorticity_args=None):
+                      process_vorticity_args=None):
     """
     Determine meteorological periods from vorticity data.
 
@@ -332,14 +332,14 @@ def determine_periods(track_file,
         plot_steps (bool, optional): Whether to generate didactic step-by-step plots. Default is False.
         export_dict (bool, optional): Whether to export periods as a CSV dictionary. Default is False.
         output_directory (str, optional): Directory for saving output files. Default is './'.
-        array_vorticity_args (dict, optional): Custom arguments for the array_vorticity function. Default is None.
-            Refer to the documentation of array_vorticity for details on available arguments.
+        process_vorticity_args (dict, optional): Custom arguments for the process_vorticity function. Default is None.
+            Refer to the documentation of process_vorticity for details on available arguments.
 
     Returns:
         pandas.DataFrame: DataFrame containing determined periods and associated information.
 
     Example:
-        >>> array_vorticity_args = {
+        >>> process_vorticity_args = {
         ...     'cutoff_low': 168,
         ...     'cutoff_high': 24,
         ...     'use_filter': True,
@@ -348,9 +348,9 @@ def determine_periods(track_file,
         ...     'use_smoothing_twice': False,
         ...     'savgol_polynomial': 3
         ... }
-        >>> determine_periods('track_data.csv', vorticity_column='my_vorticity_column', plot=True, plot_steps=True, export_dict=False, array_vorticity_args=array_vorticity_args)
+        >>> determine_periods('track_data.csv', vorticity_column='my_vorticity_column', plot=True, plot_steps=True, export_dict=False, process_vorticity_args=process_vorticity_args)
         ...
-        # Make sure to check the documentation for array_vorticity to see how to pass custom arguments.
+        # Make sure to check the documentation for process_vorticity to see how to pass custom arguments.
     """
 
     args = [plot, plot_steps, export_dict]
@@ -359,10 +359,10 @@ def determine_periods(track_file,
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
     zeta_df = pd.DataFrame(track[vorticity_column].rename('zeta'))
 
-    # Modify the array_vorticity_args if provided, otherwise use defaults
-    if array_vorticity_args is None:
-        array_vorticity_args = {}
-    vorticity = array_vorticity(zeta_df.copy(), **array_vorticity_args)
+    # Modify the process_vorticity_args if provided, otherwise use defaults
+    if process_vorticity_args is None:
+        process_vorticity_args = {}
+    vorticity = process_vorticity(zeta_df.copy(), **process_vorticity_args)
 
     # Determine the periods
     return get_periods(vorticity.copy(), *args)
@@ -374,7 +374,7 @@ if __name__ == '__main__':
         "plot": 'test',
         "plot_steps": 'test',
         "export_dict": None,
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": False
         }
     }
