@@ -31,7 +31,7 @@ def test_determine_periods_with_options():
         "plot": False,
         "plot_steps": False,
         "export_dict": None,
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": False
         }
     }
