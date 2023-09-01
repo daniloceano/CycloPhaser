@@ -7,7 +7,6 @@ This package calculates extratropical cyclone life cycle phases from vorticity d
 1. Clone this repository:
 
    ```
-   sh
    git clone https://github.com/daniloceano/CycloPhaser
    cd CycloPhaser
 
@@ -33,7 +32,7 @@ This package calculates extratropical cyclone life cycle phases from vorticity d
 The package also provides the array_vorticity function in the determine_periods.py module that allows you to customize filtering parameters:
 
 ```
-from determine_periods import array_vorticity
+from cyclophaser import determine_periods
 
 # Load your zeta_df DataFrame
 track_file = 'tests/test.csv'  # Load your data here
@@ -50,7 +49,7 @@ array_vorticity_args = {
 }
 
 # Apply vorticity calculations and filtering
-vorticity_data = array_vorticity(track_file, **array_vorticity_args)
+vorticity_data = determine_periods(track_file, **array_vorticity_args)
 ```
 
 # Usage
@@ -58,7 +57,7 @@ vorticity_data = array_vorticity(track_file, **array_vorticity_args)
 The main script for determining meteorological periods is determine_periods.py. You can use it by passing your vorticity data as a CSV file and customizing the parameters as needed.
 
 ```
-from determine_periods import determine_periods
+from cyclophaser import determine_periods
 
 # Example: Processing vorticity data from ERA5
 options_era5 = {
