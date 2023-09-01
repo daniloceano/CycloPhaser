@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.3.13] - 2023-08-29
 
+### Added
+
+- Added README
+- Renamed array_vorticity to process_vorticity
+
+## [1.3.13] - 2023-08-29
+
 ### Bug fixes
 
 - Will only attempt to replace endpoints if use_filter is applied

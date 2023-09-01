@@ -3,15 +3,14 @@ import pandas as pd
 
 def test_determine_periods_with_options():
     track_file = 'tests/test.csv'
-    output_directory = './'
 
     # Specify options for the determine_periods function
     options = {
         "vorticity_column":'min_zeta_850',
-        "plot": 'test',
-        "plot_steps": 'test_steps',
-        "export_dict": 'test',
-        "array_vorticity_args": {
+        "plot": 'test_ERA5',
+        "plot_steps": 'test_steps_ERA5',
+        "export_dict": 'test_ERA5',
+        "process_vorticity_args": {
             "use_filter": 'auto',
             "replace_endpoints_with_lowpass": 24,
             "use_smoothing": 'auto',
@@ -32,11 +31,25 @@ def test_determine_periods_with_options():
         "plot": False,
         "plot_steps": False,
         "export_dict": None,
-        "array_vorticity_args": {
+        "process_vorticity_args": {
             "use_filter": False
         }
     }
     
+    result = determine_periods(track_file, **options)
+    # Add assertions to verify the expected behavior
+    assert isinstance(result, pd.DataFrame)
+
+    track = pd.read_csv(track_file)
+    options = {
+        "plot": "test_TRACK",
+        "plot_steps": "test_steps_TRACK",
+        "export_dict": False,
+        "process_vorticity_args": {
+            "use_filter": False,
+            "use_smoothing_twice": len(track)//4 | 1}
+    }
+
     result = determine_periods(track_file, **options)
     # Add assertions to verify the expected behavior
     assert isinstance(result, pd.DataFrame)
