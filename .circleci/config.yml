@@ -28,7 +28,7 @@ jobs:
 
       - run:
           name: Install package (build_test)
-          command: pipenv install dist/cyclophaser-1.3.14-py3-none-any.whl
+          command: pipenv install dist/cyclophaser-1.3.15-py3-none-any.whl
 
       - run:
           name: Install pytest (build_test)
@@ -73,7 +73,7 @@ jobs:
         
       - run:
           name: Publish on TestPyPI
-          command: pipenv run twine upload --repository testpypi dist/* --verbose -u ${TESTPY_LOGIN} -p ${TESPYPI_PASSWORD}
+          command: pipenv run twine upload -u ${TESTPY_LOGIN} -p ${TESTPY_PASSWORD} --repository testpypi dist/* --verbose 
 
   pypi_publish:
     docker:

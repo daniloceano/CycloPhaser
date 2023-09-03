@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def find_mature_stage(df):
     dz_peaks = df[df['dz_peaks_valleys'] == 'peak'].index
@@ -38,13 +39,14 @@ def find_mature_stage(df):
             # Fill the period between mature_start and mature_end with 'mature'
             df.loc[mature_start:mature_end, 'periods'] = 'mature'
 
-    # Check if all mature stages are preceeded by an intensification
+    # Check if all mature stages are preceded by an intensification and followed by decay
     mature_periods = df[df['periods'] == 'mature'].index
     if len(mature_periods) > 0:
         blocks = np.split(mature_periods, np.where(np.diff(mature_periods) != dt)[0] + 1)
         for block in blocks:
             block_start, block_end = block[0], block[-1]
-            if df.loc[block_start - dt, 'periods'] != 'intensification':
+            if df.loc[block_start - dt, 'periods'] != 'intensification' or \
+               df.loc[block_end + dt, 'periods'] != 'decay':
                 df.loc[block_start:block_end, 'periods'] = np.nan
 
     return df
@@ -125,12 +127,24 @@ def find_residual_period(df):
     unique_phases = [item for item in df['periods'].unique() if pd.notnull(item)]
     num_unique_phases = len(unique_phases)
 
+    # If there's only one phase, fills with 'residual' the NaNs after the last block of it.
     if num_unique_phases == 1:
         phase_to_fill = unique_phases[0]
 
-        last_phase_index = df[df['periods'] == phase_to_fill].index[-1]
+        # Find consecutive blocks of the same phase
+        phase_blocks = np.split(df[df['periods'] == phase_to_fill].index,
+                                np.where(np.diff(df['periods'] == phase_to_fill) != 0)[0] + 1)
+
+        # Find the last block of the same phase
+        last_phase_block = phase_blocks[-1]
+
+        # Find the index right after the last block
+        last_phase_block_end = last_phase_block[-1] if len(last_phase_block) > 0 else df.index[0]
         dt = df.index[1] - df.index[0]
-        df.loc[last_phase_index + dt:, 'periods'].fillna('residual', inplace=True)
+
+        # Fill NaNs after the last block with 'residual'
+        df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
+
     else:
         mature_periods = df[df['periods'] == 'mature'].index
         decay_periods = df[df['periods'] == 'decay'].index
@@ -213,4 +227,58 @@ def find_incipient_period(df):
 
     return df
 
-import pandas as pd
+if __name__ == '__main__':
+
+    import determine_periods as det
+
+    track_file = "../tests/test.csv"
+    track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
+
+    # Testing
+    options = {
+        "vorticity_column": 'min_zeta_850',
+        "plot": False,
+        "plot_steps": False,
+        "export_dict": False,
+        "process_vorticity_args": {
+            "use_filter": False,
+            "use_smoothing_twice": len(track)// 4 | 1}
+    }
+
+    args = [options["plot"], options["plot_steps"], options["export_dict"]]
+    
+    zeta_df = pd.DataFrame(track[options["vorticity_column"]].rename('zeta'))
+
+    # Modify the array_vorticity_args if provided, otherwise use defaults
+    vorticity = det.array_vorticity(zeta_df.copy(), **options["process_vorticity_args"])
+
+    z = vorticity.vorticity_smoothed2
+    dz = vorticity.dz_dt_smoothed2
+    dz2 = vorticity.dz_dt2_smoothed2
+
+    df = z.to_dataframe().rename(columns={'vorticity_smoothed2':'z'})
+    df['z_unfil'] = vorticity.zeta.to_dataframe()
+    df['dz'] = dz.to_dataframe()
+    df['dz2'] = dz2.to_dataframe()
+
+    df['z_peaks_valleys'] = det.find_peaks_valleys(df['z'])
+    df['dz_peaks_valleys'] = det.find_peaks_valleys(df['dz'])
+    df['dz2_peaks_valleys'] = det.find_peaks_valleys(df['dz2'])
+
+    df['periods'] = np.nan
+
+    df = find_intensification_period(df)
+
+    df = find_decay_period(df)
+
+    df = find_mature_stage(df)
+
+    df = find_residual_period(df)
+
+    # 1) Fill consecutive intensification or decay periods that have NaNs between them
+    # 2) Remove periods that are too short and fill with the previous period
+    # (or the next one if there is no previous period)
+    df = det.post_process_periods(df)
+
+    df = find_incipient_period(df)
+

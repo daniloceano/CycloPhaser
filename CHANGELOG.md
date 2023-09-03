@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.3.13] - 2023-08-29
+## [1.3.15] - 2023-09-03
+
+### Bug fixes
+
+- CircleCI authentication for Test-Pypi
+- Residual phases on the middle of the series
+
+## [1.3.14] - 2023-08-30
 
 ### Added
 
@@ -18,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Will only attempt to replace endpoints if use_filter is applied
 
-## [1.3.13] - 2023-08-29
+## [1.3.12] - 2023-08-29
 
 ### Bug fixes
 
