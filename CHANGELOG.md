@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0] - 2023-09-03
+
+### Modified
+
+- Incipient stage no longer fills decay when it's on the beginning of life cycle
+
 ## [1.3.15] - 2023-09-03
 
 ### Bug fixes
