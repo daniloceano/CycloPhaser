@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '1.3.15'
+VERSION = '1.4.0'
 DESCRIPTION = 'Determine phases from extratropical cyclone life cycle'
 LONG_DESCRIPTION = 'This script processes vorticity data, identifies different phases of the cyclone \
     and plots the identified periods on periods.png and periods_didatic.png'
