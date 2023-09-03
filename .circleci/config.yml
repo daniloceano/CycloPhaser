@@ -73,8 +73,7 @@ jobs:
         
       - run:
           name: Publish on TestPyPI
-          command: pipenv run twine upload --repository testpypi dist/* --verbose -u ${TESTPY_LOGIN} -p ${TESPYPI_PASSWORD}
-          command: echo "TestPyPI Login: ${TESTPY_LOGIN} Password: ${TESPYPI_PASSWORD}"
+          command: pipenv run twine upload -u ${TESTPY_LOGIN} -p ${TESPYPI_PASSWORD} --repository testpypi dist/* --verbose 
 
   pypi_publish:
     docker:
