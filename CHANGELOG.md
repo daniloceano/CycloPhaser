@@ -5,18 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.3.14] - 2023-08-29
-
-### Added
-
-- Added README
-- Renamed array_vorticity to process_vorticity
+## [1.3.15] - 2023-09-03
 
 ### Bug fixes
 
 - CircleCI authentication for Test-Pypi
 - Residual phases on the middle of the series
 
+## [1.3.14] - 2023-08-30
+
+### Added
+
+- Added README
+- Renamed array_vorticity to process_vorticity
 
 ## [1.3.13] - 2023-08-29
 
