@@ -181,32 +181,6 @@ def find_residual_period(df):
 def find_incipient_period(df):
 
     periods = df['periods']
-    mature_periods = df[periods == 'mature'].index
-    decay_periods = df[periods == 'decay'].index
-
-    dt = df.index[1] - df.index[0]
-
-    # if there's more than one period
-    if len([item for item in df['periods'].unique() if (pd.notnull(item) and item != 'residual')]) > 2:
-        # Find blocks of continuous indexes for 'decay' periods
-        blocks = np.split(decay_periods, np.where(np.diff(decay_periods) != dt)[0] + 1)
-
-        # Iterate over the blocks
-        for block in blocks:
-            if len(block) > 0:
-                first_index = block[0]
-
-                if first_index == df.index[0]:
-                    df.loc[block, 'periods'] = 'incipient'
-
-                else:
-                    prev_index = first_index - dt
-                    # Check if the previous index is incipient AND before mature stage
-                    if (df.loc[prev_index, 'periods'] == 'incipient' or pd.isna(df.loc[prev_index, 'periods'])) and \
-                    (len(mature_periods) > 0 and prev_index < mature_periods[-1]):
-                        # Set the first period of the block to incipient
-                        df.loc[block, 'periods'] = 'incipient'
-
     
     df['periods'].fillna('incipient', inplace=True)
 
@@ -223,6 +197,14 @@ def find_incipient_period(df):
             next_mature = df[df['periods'] == 'mature'].index.min()
             if next_dz_valley < next_mature:
                 time_range = start_time + 2 * (next_dz_valley - start_time) / 5
+                df.loc[start_time:time_range, 'periods'] = 'incipient'
+        elif phase_order[0] in ['incipient', 'decay'] or (phase_order[0] == 'incipient' and phase_order[1] == 'decay'):
+            start_time = df.iloc[0].name
+            # Check if there's a dz peak before the next mature stage
+            next_dz_peak = df[1:][df[1:]['dz_peaks_valleys'] == 'peak'].index.min()
+            next_mature = df[df['periods'] == 'mature'].index.min()
+            if next_dz_peak < next_mature:
+                time_range = start_time + 2 * (next_dz_peak - start_time) / 5
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
 
     return df

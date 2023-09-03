@@ -6,7 +6,7 @@
 #    By: Danilo  <danilo.oceano@gmail.com>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/09/01 11:29:16 by Danilo           ###   ########.fr        #
+#    Updated: 2023/09/03 19:59:04 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -372,7 +372,7 @@ if __name__ == '__main__':
 
     options = {
         "plot": 'test',
-        "plot_steps": 'test',
+        "plot_steps": 'test_steps',
         "export_dict": None,
         "process_vorticity_args": {
             "use_filter": False
