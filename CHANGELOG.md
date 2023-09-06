@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.1] - 2023-09-06
+
+### Modified
+
+- Incipient stage will fill consecutive intensification and decay when they are on the start of the series and they are followed by another instensification
+- Residual will not fill NaNs in the middle of the series
+- Decay stage minimum duration updated from 12% to 7.5% to match intensification
+
+
 ## [1.4.0] - 2023-09-03
 
 ### Modified

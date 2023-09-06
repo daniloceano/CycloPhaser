@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    determine_periods.py                               :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: Danilo  <danilo.oceano@gmail.com>          +#+  +:+       +#+         #
+#    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/09/03 19:59:04 by Danilo           ###   ########.fr        #
+#    Updated: 2023/09/06 19:05:17 by Danilo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -369,14 +369,18 @@ def determine_periods(track_file,
 
 if __name__ == '__main__':
     track_file = '../tests/test.csv'
-
+    track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
+    
+    # Testing
     options = {
+        "vorticity_column": 'min_zeta_850',
         "plot": 'test',
         "plot_steps": 'test_steps',
-        "export_dict": None,
+        "export_dict": False,
         "process_vorticity_args": {
-            "use_filter": False
-        }
+            "use_filter": False,
+            "use_smoothing_twice": "auto"}
     }
+
     
     result = determine_periods(track_file, **options)
