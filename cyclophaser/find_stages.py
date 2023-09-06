@@ -105,7 +105,7 @@ def find_decay_period(df):
             decay_end = df.index[-1]  # Last index of the DataFrame
 
         # Decay needs to be at least 12% of the total series length
-        if decay_end - decay_start > length*0.12:
+        if decay_end - decay_start > length*0.075:
             df.loc[decay_start:decay_end, 'periods'] = 'decay'
 
     # Check if there are multiple blocks of consecutive decay periods
@@ -127,6 +127,8 @@ def find_residual_period(df):
     unique_phases = [item for item in df['periods'].unique() if pd.notnull(item)]
     num_unique_phases = len(unique_phases)
 
+    dt = df.index[1] - df.index[0]
+
     # If there's only one phase, fills with 'residual' the NaNs after the last block of it.
     if num_unique_phases == 1:
         phase_to_fill = unique_phases[0]
@@ -139,22 +141,27 @@ def find_residual_period(df):
         last_phase_block = phase_blocks[-1]
 
         # Find the index right after the last block
-        last_phase_block_end = last_phase_block[-1] if len(last_phase_block) > 0 else df.index[0]
-        dt = df.index[1] - df.index[0]
-
-        # Fill NaNs after the last block with 'residual'
-        df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
+        if len(last_phase_block) > 0:
+            last_phase_block_end = last_phase_block[-1]
+            # Fill NaNs after the last block with 'residual'
+            df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
+        else:
+            last_phase_block_end = phase_blocks[-2][-1]
+            df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
 
     else:
         mature_periods = df[df['periods'] == 'mature'].index
         decay_periods = df[df['periods'] == 'decay'].index
         intensification_periods = df[df['periods'] == 'intensification'].index
 
+        # Check if 'mature' is the last stage before the end of the series
+        last_phase_end = df.index[-1]
+
         # Find residual periods where there is no decay stage after the mature stage
         for mature_period in mature_periods:
             if len(unique_phases) > 2:
                 next_decay_period = decay_periods[decay_periods > mature_period].min()
-                if next_decay_period is pd.NaT:
+                if next_decay_period is pd.NaT and mature_period != last_phase_end:
                     df.loc[mature_period:, 'periods'] = 'residual'
                     
         # Update mature periods
@@ -184,28 +191,49 @@ def find_incipient_period(df):
     
     df['periods'].fillna('incipient', inplace=True)
 
-    # If there's more than 2 unique phases other than residual and life cycle begins with
-    # incipient fill first 6 hours with incipient.
-    # If the life cycle begins with intensification, incipient phase will be from the
-    # beginning of it, until 2/5 to the next dz_valley
-    if len([item for item in df['periods'].unique() if (pd.notnull(item) and item != 'residual')]) > 2:
-        phase_order = [item for item in df['periods'].unique() if pd.notnull(item)]
-        if phase_order[0] in ['incipient', 'intensification'] or (phase_order[0] == 'incipient' and phase_order[1] == 'intensification'):
-            start_time = df.iloc[0].name
+    phases_order = []
+    current_phase = None
+
+    for phase in periods:
+        if pd.notnull(phase) and phase != 'residual':
+            if phase != current_phase:
+                phases_order.append(phase)
+                current_phase = phase
+
+    # If there's more than 2 unique phases other than residual, and the life cycle
+    # begins with intensification or decay, incipient phase will be from the beginning
+    # of it until 2/5 to the next dz_valley/dz_peak
+    # If there is a cycle of intensification and decay before the next mature stage it
+    #  will cganged to incipient
+    if len(phases_order) > 2:
+        if phases_order[:3] == ['intensification', 'decay', 'intensification']:
+            start_time = df[df['periods'] == "intensification"].index.min()
+            decay_blocks = np.split(df[df['periods'] == "decay"].index,
+                                np.where(np.diff(df['periods'] == "decay") != 0)[0] + 1)
+            end_time = decay_blocks[0].max()
+            if end_time is not pd.NaT:
+                time_range = start_time + 2 * (end_time - start_time) / 5
+                df.loc[start_time:time_range, 'periods'] = 'incipient'
+
+        elif phases_order[0] == 'intensification':
+            start_time = df[df['periods'] == 'intensification'].index.min()
             # Check if there's a dz valley before the next mature stage
             next_dz_valley = df[1:][df[1:]['dz_peaks_valleys'] == 'valley'].index.min()
-            next_mature = df[df['periods'] == 'mature'].index.min()
+            next_mature = df[periods == 'mature'].index.min()
             if next_dz_valley < next_mature:
                 time_range = start_time + 2 * (next_dz_valley - start_time) / 5
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
-        elif phase_order[0] in ['incipient', 'decay'] or (phase_order[0] == 'incipient' and phase_order[1] == 'decay'):
-            start_time = df.iloc[0].name
+
+        elif phases_order[0] == 'decay':
+            start_time = df[df['periods'] == 'decay'].index.min()
             # Check if there's a dz peak before the next mature stage
             next_dz_peak = df[1:][df[1:]['dz_peaks_valleys'] == 'peak'].index.min()
-            next_mature = df[df['periods'] == 'mature'].index.min()
+            next_mature = df[periods == 'mature'].index.min()
             if next_dz_peak < next_mature:
                 time_range = start_time + 2 * (next_dz_peak - start_time) / 5
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
+        
+            
 
     return df
 
@@ -232,7 +260,7 @@ if __name__ == '__main__':
     zeta_df = pd.DataFrame(track[options["vorticity_column"]].rename('zeta'))
 
     # Modify the array_vorticity_args if provided, otherwise use defaults
-    vorticity = det.array_vorticity(zeta_df.copy(), **options["process_vorticity_args"])
+    vorticity = det.process_vorticity(zeta_df.copy(), **options["process_vorticity_args"])
 
     z = vorticity.vorticity_smoothed2
     dz = vorticity.dz_dt_smoothed2
