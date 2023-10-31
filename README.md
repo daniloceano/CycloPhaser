@@ -1,6 +1,7 @@
-# CycloPhaser
 
-This package calculates extratropical cyclone life cycle phases from vorticity data using Python.
+![Glacial Indifference](https://github.com/daniloceano/CycloPhaser/assets/56005607/35597b83-26fb-41ba-838d-f414ae540317)
+
+The CycloPhaser calculates extratropical cyclone life cycle phases from vorticity data using Python.
 
 ## Installation
 
