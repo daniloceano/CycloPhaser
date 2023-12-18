@@ -244,9 +244,12 @@ if __name__ == '__main__':
     track_file = "../tests/test.csv"
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
 
+    # Extract the series of vorticity values and the temporal range
+    series = track['min_zeta_850'].tolist()
+    x = track.index.tolist()
+
     # Testing
     options = {
-        "vorticity_column": 'min_zeta_850',
         "plot": False,
         "plot_steps": False,
         "export_dict": False,
@@ -257,7 +260,7 @@ if __name__ == '__main__':
 
     args = [options["plot"], options["plot_steps"], options["export_dict"]]
     
-    zeta_df = pd.DataFrame(track[options["vorticity_column"]].rename('zeta'))
+    zeta_df = pd.DataFrame(track["min_zeta_850"].rename('zeta'))
 
     # Modify the array_vorticity_args if provided, otherwise use defaults
     vorticity = det.process_vorticity(zeta_df.copy(), **options["process_vorticity_args"])
@@ -276,6 +279,7 @@ if __name__ == '__main__':
     df['dz2_peaks_valleys'] = det.find_peaks_valleys(df['dz2'])
 
     df['periods'] = np.nan
+    df['periods'] = df['periods'].astype('object')
 
     df = find_intensification_period(df)
 

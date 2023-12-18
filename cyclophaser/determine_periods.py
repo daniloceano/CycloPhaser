@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    determine_periods.py                               :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: Danilo <danilo.oceano@gmail.com>           +#+  +:+       +#+         #
+#    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/09/06 19:05:17 by Danilo           ###   ########.fr        #
+#    Updated: 2023/12/18 11:22:58 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -284,6 +284,7 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False):
     df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'])
 
     df['periods'] = np.nan
+    df['periods'] = df['periods'].astype('object')
 
     df = find_intensification_period(df)
 
@@ -316,71 +317,71 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False):
 
     return df
 
-def determine_periods(track_file,
-                      vorticity_column='min_zeta_850',
+def determine_periods(series,
+                      x=None,
                       plot=False,
                       plot_steps=False,
                       export_dict=False,
                       process_vorticity_args=None):
     """
-    Determine meteorological periods from vorticity data.
+    Determine meteorological periods from a series of vorticity data.
 
     Args:
-        track_file (str): Path to the CSV file containing track data.
-        zeta_column (str, optional): Column name for the 'zeta' data in the CSV file. Default is 'min_zeta_850'.
-        plot (bool, optional): Whether to generate and save plots. Default is False.
-        plot_steps (bool, optional): Whether to generate didactic step-by-step plots. Default is False.
-        export_dict (bool, optional): Whether to export periods as a CSV dictionary. Default is False.
-        output_directory (str, optional): Directory for saving output files. Default is './'.
+        series (list): List of vorticity values.
+        x (list, optional): Temporal range or other labels for the series. Default is None.
+        vorticity_column (str, optional): Column name for the 'zeta' data in the DataFrame. Default is 'zeta'.
+        plot (str, optional): Whether to generate and save plots. Default is False. Input string is the path to save the plots.
+        plot_steps (str, optional): Whether to generate didactic step-by-step plots. Default is False. Input string is the path to save the plots.
+        export_dict (str, optional): Whether to export periods as a CSV dictionary. Default is False. Input string is the path to save the CSV file.
         process_vorticity_args (dict, optional): Custom arguments for the process_vorticity function. Default is None.
-            Refer to the documentation of process_vorticity for details on available arguments.
 
     Returns:
         pandas.DataFrame: DataFrame containing determined periods and associated information.
 
-    Example:
-        >>> process_vorticity_args = {
-        ...     'cutoff_low': 168,
-        ...     'cutoff_high': 24,
-        ...     'use_filter': True,
-        ...     'replace_endpoints_with_lowpass': 24,
-        ...     'use_smoothing': True,
-        ...     'use_smoothing_twice': False,
-        ...     'savgol_polynomial': 3
-        ... }
-        >>> determine_periods('track_data.csv', vorticity_column='my_vorticity_column', plot=True, plot_steps=True, export_dict=False, process_vorticity_args=process_vorticity_args)
-        ...
-        # Make sure to check the documentation for process_vorticity to see how to pass custom arguments.
+    Raises:
+        ValueError: If the input 'series' is not a list.
     """
 
-    args = [plot, plot_steps, export_dict]
+    if not isinstance(series, list):
+        raise ValueError("Input 'series' must be a list of values.")
 
-    # Read the track file and extract the vorticity data
-    track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
-    zeta_df = pd.DataFrame(track[vorticity_column].rename('zeta'))
+    # Create DataFrame from the series
+    if x is not None:
+        if len(x) != len(series):
+            raise ValueError("Length of 'x' and 'series' must be the same.")
+        zeta_df = pd.DataFrame({'zeta': series}, index=x)
+    else:
+        zeta_df = pd.DataFrame({'zeta': series})
 
-    # Modify the process_vorticity_args if provided, otherwise use defaults
+    # Rest of the function remains the same as before
     if process_vorticity_args is None:
         process_vorticity_args = {}
     vorticity = process_vorticity(zeta_df.copy(), **process_vorticity_args)
 
-    # Determine the periods
+    args = [plot, plot_steps, export_dict]
     return get_periods(vorticity.copy(), *args)
 
+
 if __name__ == '__main__':
+    # Read the data from the CSV file
     track_file = '../tests/test.csv'
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
-    
-    # Testing
+
+    # Extract the vorticity data as a list and the index as a temporal range
+    series = track['min_zeta_850'].tolist()
+    x = track.index.tolist()  # Using the DataFrame index as the temporal range
+
+    # Testing options
     options = {
-        "vorticity_column": 'min_zeta_850',
+        "x": x,
         "plot": 'test',
         "plot_steps": 'test_steps',
         "export_dict": False,
         "process_vorticity_args": {
             "use_filter": False,
-            "use_smoothing_twice": "auto"}
+            "use_smoothing_twice": "auto"
+        }
     }
 
-    
-    result = determine_periods(track_file, **options)
+    # Test the determine_periods function
+    result = determine_periods(series, **options)
