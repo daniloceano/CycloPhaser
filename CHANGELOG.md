@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5] - 2023-12-18
+
+### Modified
+
+- Updated the `determine_periods` function:
+  - Changed the main input to accept a series of vorticity data directly.
+  - Added an optional `x` parameter to handle time series or other types of indices.
+  - Removed the `vorticity_column` parameter, as it is no longer applicable with the new input method.
+
+## [1.4.2] - 2023-09-06
+
+- Fixing version numbers
+
 ## [1.4.1] - 2023-09-06
 
 ### Modified

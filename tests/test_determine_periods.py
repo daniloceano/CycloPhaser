@@ -2,11 +2,14 @@ from cyclophaser.determine_periods import determine_periods
 import pandas as pd
 
 def test_determine_periods_with_options():
+    # Read the data from the CSV file
     track_file = 'tests/test.csv'
+    track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
+    series = track['min_zeta_850'].tolist()
+    x = track.index.tolist()
 
     # Specify options for the determine_periods function
-    options = {
-        "vorticity_column":'min_zeta_850',
+    options_era5 = {
         "plot": 'test_ERA5',
         "plot_steps": 'test_steps_ERA5',
         "export_dict": 'test_ERA5',
@@ -21,13 +24,12 @@ def test_determine_periods_with_options():
         }
     }
 
-    # Call the determine_periods function with options
-    result = determine_periods(track_file, **options)
+    # Call the determine_periods function with options for ERA5
+    result_era5 = determine_periods(series, x=x, **options_era5)
+    assert isinstance(result_era5, pd.DataFrame)
 
-    # Add assertions to verify the expected behavior
-    assert isinstance(result, pd.DataFrame)
-
-    options = {
+    # Options for basic processing without filtering
+    options_basic = {
         "plot": False,
         "plot_steps": False,
         "export_dict": None,
@@ -36,20 +38,21 @@ def test_determine_periods_with_options():
         }
     }
     
-    result = determine_periods(track_file, **options)
-    # Add assertions to verify the expected behavior
-    assert isinstance(result, pd.DataFrame)
+    # Test basic processing
+    result_basic = determine_periods(series, x=x, **options_basic)
+    assert isinstance(result_basic, pd.DataFrame)
 
-    track = pd.read_csv(track_file)
-    options = {
+    # Options for processing with the TRACK algorithm
+    options_track = {
         "plot": "test_TRACK",
         "plot_steps": "test_steps_TRACK",
         "export_dict": False,
         "process_vorticity_args": {
             "use_filter": False,
-            "use_smoothing_twice": len(track)//4 | 1}
+            "use_smoothing_twice": len(track) // 4 | 1
+        }
     }
 
-    result = determine_periods(track_file, **options)
-    # Add assertions to verify the expected behavior
-    assert isinstance(result, pd.DataFrame)
+    # Test with TRACK algorithm options
+    result_track = determine_periods(series, x=x, **options_track)
+    assert isinstance(result_track, pd.DataFrame)
