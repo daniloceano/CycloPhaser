@@ -5,12 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.0] - 2023-12-18
+
+### Modified
+
+- **README.md**: Updated to focus on directing users to the Read the Docs for usage and documentation. Simplified to enhance readability and direct users to comprehensive documentation online.
+- **setup.py**: Included badges for download statistics and build status. The long description is now dynamically sourced from the README file to maintain consistency across platforms.
+- **api.rst**: Added detailed information about the package's API, providing users with a clear understanding of available functionalities and usage.
+- **installation.rst**: Updated to guide users for installation via pip, simplifying the installation process.
+- **usage.rst**: Expanded to include detailed examples and more comprehensive documentation, offering users practical guidance and improved understanding of the package's capabilities.
+
+These updates aim to enhance the user experience by providing clearer, more accessible documentation and a streamlined setup process.
+
 ## [1.5.6] - 2023-12-18
 
 ### Added
 
  - Documentation requirements text file
-
 
 ## [1.5.5] - 2023-12-18
 
