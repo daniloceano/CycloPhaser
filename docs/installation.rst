@@ -1,20 +1,10 @@
 Installation
 ============
 
-To install CycloPhaser, follow these steps:
+To install CycloPhaser, you can use pip. Run the following command:
 
-1. Clone the repository:
-   .. code-block:: bash
+.. code-block:: bash
 
-      git clone https://github.com/daniloceano/CycloPhaser
+   pip install cyclophaser
 
-2. Navigate to the project directory:
-   .. code-block:: bash
-
-      cd CycloPhaser
-
-3. Install the required dependencies:
-   .. code-block:: bash
-
-      pip install -r requirements.txt
-
+This will install the latest version of CycloPhaser and its required dependencies.
