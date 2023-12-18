@@ -54,7 +54,7 @@ x = [/* your time data */]
 vorticity_data = determine_periods(series, x=x, **process_vorticity_args)
 ```
 
-# Example: Processing vorticity data from TRACK algorithm Hodges (1994, 1995)
+## Example: Processing vorticity data from TRACK algorithm Hodges (1994, 1995)
 
 ```
 options_track = {

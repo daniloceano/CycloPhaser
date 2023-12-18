@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.1] - 2023-12-18
+
+### Added
+
+- Integrated documentation with Read the Docs.
+- Created and formatted Sphinx documentation files including `index.rst`, `installation.rst`, `usage.rst`, `api.rst`, `contribute.rst`, `changelog.rst`, and `license.rst`.
+
+### Modified
+
+- Updated project structure to support Sphinx documentation generation and hosting on Read the Docs.
+
+
 ## [1.5] - 2023-12-18
 
 ### Modified
