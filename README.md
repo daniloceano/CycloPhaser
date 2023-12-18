@@ -16,14 +16,16 @@ The CycloPhaser calculates extratropical cyclone life cycle phases from vorticit
    ```
    pip install -r requirements.txt
 
+Note: CycloPhaser is compatible with Python 3.x. Please ensure you have the correct version installed.
+
 
 # Arguments and Parameters for determine_periods:
 
-- track_file (str): Path to the CSV file containing track data.
-- vorticity_column (str, optional): Column name for the vorticity data in the CSV file. Default is 'min_zeta_850'.
-- plot (bool, optional): Whether to generate and save plots. Default is False.
-- plot_steps (bool, optional): Whether to generate step-by-step didactic plots. Default is False.
-- export_dict (bool, optional): Whether to export periods as a CSV dictionary. Default is False.
+- series (list): A list of vorticity values.
+- x (list, optional): Temporal range or other labels for the series. Default is None.
+- plot (str, optional): Whether to generate and save plots. Default is False. Input string is the path to save the plots.
+- plot_steps (str, optional): Whether to generate step-by-step didactic plots. Default is False. Input string is the path to save the plots.
+- export_dict (str, optional): Whether to export periods as a CSV dictionary. Default is False. Input string is the path to save the CSV file.
 - output_directory (str, optional): Directory for saving output files. Default is './'.
 - array_vorticity_args (dict, optional): Custom arguments for the array_vorticity function. Refer to documentation for details.
 
@@ -35,11 +37,8 @@ The package also provides the array_vorticity function in the determine_periods.
 ```
 from cyclophaser import determine_periods
 
-# Load your zeta_df DataFrame
-track_file = 'tests/test.csv'  # Load your data here
-
 # Define custom arguments
-array_vorticity_args = {
+process_vorticity_args = {
     'cutoff_low': 168,
     'cutoff_high': 24,
     'use_filter': True,
@@ -49,35 +48,15 @@ array_vorticity_args = {
     'savgol_polynomial': 3
 }
 
-# Apply vorticity calculations and filtering
-vorticity_data = determine_periods(track_file, **array_vorticity_args)
+# Example usage
+series = [/* your vorticity data */]
+x = [/* your time data */]
+vorticity_data = determine_periods(series, x=x, **process_vorticity_args)
 ```
-
-# Usage
-
-The main script for determining meteorological periods is determine_periods.py. You can use it by passing your vorticity data as a CSV file and customizing the parameters as needed.
-
-```
-from cyclophaser import determine_periods
-
-# Example: Processing vorticity data from ERA5
-options_era5 = {
-    "vorticity_column": 'min_zeta_850',
-    "plot": 'test',
-    "plot_steps": 'test_steps',
-    "export_dict": 'test',
-    "array_vorticity_args": {
-        "use_filter": 'auto',
-        "replace_endpoints_with_lowpass": 24,
-        "use_smoothing": 'auto',
-        "use_smoothing_twice": 'auto',
-        "savgol_polynomial": 3,
-        "cutoff_low": 168,
-        "cutoff_high": 48
-    }
-}
 
 # Example: Processing vorticity data from TRACK algorithm Hodges (1994, 1995)
+
+```
 options_track = {
     "vorticity_column": 'vor42',
     "plot": periods_outfile,
@@ -88,21 +67,48 @@ options_track = {
         "use_smoothing_twice": len(track) // 4 | 1
     }
 }
-
-# Determine meteorological periods using the above options
-result_era5 = determine_periods(track_file_era5, **options_era5)
-result_track = determine_periods(track_file_track, **options_track)
 ```
 
-Important:
+# Usage
 
-- The input file "track_data.csv" must contain dates in the first column, named "time"
-- The vorticity column name can be passed in the "vorticity_column" argument of the "determine_perdios" function (default is "min_zeta_850")
-- For the current version, only data from the southern hemisphere can be passed (negative vorticity)
+The main script for determining meteorological periods is determine_periods.py. You can use it by passing your vorticity data as a CSV file and customizing the parameters as needed.
+
+```
+from cyclophaser import determine_periods
+
+# Example options for ERA5 data
+options_era5 = {
+    "plot": 'test',
+    "plot_steps": 'test_steps',
+    "export_dict": 'test',
+    "process_vorticity_args": {
+        "use_filter": 'auto',
+        "replace_endpoints_with_lowpass": 24,
+        "use_smoothing": 'auto',
+        "use_smoothing_twice": 'auto',
+        "savgol_polynomial": 3,
+        "cutoff_low": 168,
+        "cutoff_high": 48
+    }
+}
+
+series_era5 = [/* your ERA5 data */]
+x_era5 = [/* your time data */]
+result_era5 = determine_periods(series_era5, x=x_era5, **options_era5)
+```
+
+# Note
+
+- The tool currently supports data from the southern hemisphere (negative vorticity) only.
+- Future updates may include support for northern hemisphere data.
 
 # Documentation
 
-For detailed documentation of the package's functions, modules, and parameters, refer to the in-code comments and docstrings.
+For detailed documentation, including function parameters and module descriptions, refer to the in-code comments and docstrings.
+
+# Support and Contact
+
+For support, feature requests, or any queries, please open an issue on the GitHub repository.
 
 # License
 
