@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 
 import cmocean.cm as cmo
 
-from .find_stages import find_intensification_period, find_decay_period, find_mature_stage
+from cyclophaser.find_stages import find_intensification_period, find_decay_period, find_mature_stage
 
 def plot_phase(df, phase, ax=None, show_title=True):
     # Create a copy of the DataFrame
@@ -251,7 +251,7 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
         print(f"{fname} created.")
 
 
-def plot_didactic(df, vorticity, output_directory):
+def plot_didactic(df, vorticity, output_directory, **periods_args):
     
     # First step: filter vorticity data
     fig = plt.figure(figsize=(10, 8.5))
@@ -272,19 +272,19 @@ def plot_didactic(df, vorticity, output_directory):
         )
     
     # Intensification phase
-    df_int = find_intensification_period(df.copy())
+    df_int = find_intensification_period(df.copy(), **periods_args)
     ax4 = fig.add_subplot(334)
     plot_phase(df_int, "intensification", ax4)
     plot_specific_peaks_valleys(df_int, ax4, "z_peaks", "z_valleys")
 
     # Decay phase
-    df_decay = find_decay_period(df.copy())
+    df_decay = find_decay_period(df.copy(), **periods_args)
     ax5 = fig.add_subplot(335)
     plot_phase(df_decay, "decay", ax5)
     plot_specific_peaks_valleys(df_decay, ax5, "z_peaks", "z_valleys")
 
     # Mature phase
-    df_mature = find_mature_stage(df.copy())
+    df_mature = find_mature_stage(df.copy(), **periods_args)
     ax6 = fig.add_subplot(336)
     plot_phase(df_mature, "mature", ax6)
     plot_specific_peaks_valleys(df_mature, ax6, "z_peaks", "z_valleys", "dz_valleys", "dz_peaks")

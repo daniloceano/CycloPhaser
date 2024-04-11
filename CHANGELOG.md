@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.0] - 2024-04-11
+
+### Modified
+
+- **determine_periods.py**: thresholds for phase determination can be passed as optional arguments by the user
+- **find_stages.py**: added arguments for passing the thresholds for phase determination
+-- **plots.py**: used custom arguments from phase determination for plotting
+
+### Bug fixes
+
+- Wrong imports on scripts
+
 ## [1.6.0] - 2023-12-18
 
 ### Modified
