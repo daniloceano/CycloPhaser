@@ -5,7 +5,7 @@ def test_determine_periods_with_options():
     # Read the data from the CSV file
     track_file = 'tests/test.csv'
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
-    series = track['min_zeta_850'].tolist()
+    series = track['min_max_zeta_850'].tolist()
     x = track.index.tolist()
 
     # Specify options for the determine_periods function

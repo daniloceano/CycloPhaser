@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2023/12/18 11:22:58 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/04/11 19:59:55 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,9 +20,13 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.signal import savgol_filter 
 
-from cyclophaser import lanczos_filter as lanfil
+import cyclophaser.lanczos_filter as lanfil
 from cyclophaser.plots import plot_all_periods, plot_didactic
-from cyclophaser.find_stages import find_incipient_period, find_intensification_period, find_decay_period, find_mature_stage, find_residual_period
+from cyclophaser.find_stages import find_incipient_period 
+from cyclophaser.find_stages import find_intensification_period
+from cyclophaser.find_stages import find_decay_period 
+from cyclophaser.find_stages import find_mature_stage
+from cyclophaser.find_stages import find_residual_period
 
 def check_create_folder(DirName, verbosity=False):
     if not os.path.exists(DirName):
@@ -268,7 +272,20 @@ def process_vorticity(
 
     return da 
 
-def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False):
+def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, periods_args=None):
+    default_args = {
+        'threshold_intensification_length': 0.125,
+        'threshold_intensification_gap': 0.075,
+        'threshold_mature_distance': 0.125,
+        'threshold_mature_length': 0.03,
+        'threshold_decay_length': 0.075,
+        'threshold_decay_gap': 0.075,
+        'threshold_incipient_length': 0.4
+    }
+
+    # Update the default arguments with any user-provided arguments
+    if periods_args is not None:
+        default_args.update(periods_args)
 
     z = vorticity.vorticity_smoothed2
     dz = vorticity.dz_dt_smoothed2
@@ -286,12 +303,9 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False):
     df['periods'] = np.nan
     df['periods'] = df['periods'].astype('object')
 
-    df = find_intensification_period(df)
-
-    df = find_decay_period(df)
-
-    df = find_mature_stage(df)
-
+    df = find_intensification_period(df, **default_args)
+    df = find_decay_period(df, **default_args)
+    df = find_mature_stage(df, **default_args)
     df = find_residual_period(df)
 
     # 1) Fill consecutive intensification or decay periods that have NaNs between them
@@ -299,7 +313,7 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False):
     # (or the next one if there is no previous period)
     df = post_process_periods(df)
 
-    df = find_incipient_period(df)
+    df = find_incipient_period(df, **default_args)
 
     # Pass the periods to a dictionary with each period's name as key
     #  and their corresponding start and end times as values.
@@ -310,7 +324,7 @@ def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False):
     if plot:
         plot_all_periods(periods_dict, df, ax=None, vorticity=vorticity, periods_outfile_path=plot)
     if plot_steps:
-        plot_didactic(df, vorticity, plot_steps)
+        plot_didactic(df, vorticity, plot_steps, **default_args)
     # Export csv, if requested
     if export_dict:
         export_periods_to_csv(periods_dict, export_dict)
@@ -322,7 +336,8 @@ def determine_periods(series,
                       plot=False,
                       plot_steps=False,
                       export_dict=False,
-                      process_vorticity_args=None):
+                      process_vorticity_args=None,
+                      periods_args=None):
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -359,7 +374,9 @@ def determine_periods(series,
     vorticity = process_vorticity(zeta_df.copy(), **process_vorticity_args)
 
     args = [plot, plot_steps, export_dict]
-    return get_periods(vorticity.copy(), *args)
+    if periods_args is None:
+        periods_args = {}
+    return get_periods(vorticity.copy(), *args, periods_args)
 
 
 if __name__ == '__main__':
@@ -368,20 +385,30 @@ if __name__ == '__main__':
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
 
     # Extract the vorticity data as a list and the index as a temporal range
-    series = track['min_zeta_850'].tolist()
+    series = track['min_max_zeta_850'].tolist()
     x = track.index.tolist()  # Using the DataFrame index as the temporal range
 
     # Testing options
-    options = {
-        "x": x,
-        "plot": 'test',
-        "plot_steps": 'test_steps',
-        "export_dict": False,
-        "process_vorticity_args": {
+    process_vorticity_args = {
             "use_filter": False,
-            "use_smoothing_twice": "auto"
+            "use_smoothing_twice": False
         }
-    }
+
+    periods_args= {
+        'threshold_intensification_length': 0.10,  # Decreased threshold
+        'threshold_intensification_gap': 0.05,
+        'threshold_mature_distance': 0.10,
+        'threshold_mature_length': 0.02,
+        'threshold_decay_length': 0.06,
+        'threshold_decay_gap': 0.06,
+        'threshold_incipient_length': 0.35
+        }
 
     # Test the determine_periods function
-    result = determine_periods(series, **options)
+    result = determine_periods(series,
+            x=x,
+            plot="test",
+            plot_steps="test_steps",
+            export_dict=False,
+            process_vorticity_args=process_vorticity_args,
+            periods_args=periods_args)

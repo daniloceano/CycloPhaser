@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 
-def find_mature_stage(df):
-    dz_peaks = df[df['dz_peaks_valleys'] == 'peak'].index
-    dz_valleys = df[df['dz_peaks_valleys'] == 'valley'].index
+def find_mature_stage(df, **args_periods):
+
+    threshold_mature_distance = args_periods['threshold_mature_distance']
+    threshold_mature_length = args_periods['threshold_mature_length']
+
     z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
 
@@ -12,6 +14,7 @@ def find_mature_stage(df):
 
     # Iterate over z valleys
     for z_valley in z_valleys:
+
         # Find the previous and next dz valleys relative to the current z valley
         next_z_peak = z_peaks[z_peaks > z_valley]
         previous_z_peak =  z_peaks[z_peaks < z_valley]
@@ -23,19 +26,25 @@ def find_mature_stage(df):
         previous_z_peak = previous_z_peak[-1]
         next_z_peak = next_z_peak[0]
 
+
         # Calculate the distances between z valley and the previous/next dz valleys
         distance_to_previous_z_peak = z_valley - previous_z_peak
         distance_to_next_z_peak = next_z_peak - z_valley
 
-        mature_distance_previous = 0.125 * distance_to_previous_z_peak
-        mature_distance_next = 0.125 * distance_to_next_z_peak
+        # Calculate the mature stage start and end 
+        mature_distance_previous = distance_to_previous_z_peak * threshold_mature_distance
+        mature_distance_next = distance_to_next_z_peak * threshold_mature_distance
 
         mature_start = z_valley - mature_distance_previous
         mature_end = z_valley + mature_distance_next
 
         # Mature stage needs to be at least 3% of total length
         mature_indexes = df.loc[mature_start:mature_end].index
-        if mature_indexes[-1] - mature_indexes[0] > 0.03 * series_length:
+
+        if len(mature_indexes) == 0:
+            continue
+
+        if mature_indexes[-1] - mature_indexes[0] > threshold_mature_length * series_length:
             # Fill the period between mature_start and mature_end with 'mature'
             df.loc[mature_start:mature_end, 'periods'] = 'mature'
 
@@ -51,8 +60,11 @@ def find_mature_stage(df):
 
     return df
 
+def find_intensification_period(df, **args_periods):
 
-def find_intensification_period(df):
+    threshold_intensification_length = args_periods['threshold_intensification_length']
+    threshold_intensification_gap = args_periods['threshold_decay_length']
+
     # Find z peaks and valleys
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
     z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
@@ -67,8 +79,8 @@ def find_intensification_period(df):
             intensification_start = z_peak
             intensification_end = next_z_valley
 
-            # Intensification needs to be at least 7.5% of the total series length
-            if intensification_end-intensification_start > length*0.12:
+            # Intensification needs to be at least 12.5% of the total series length
+            if intensification_end-intensification_start > length * threshold_intensification_length:
                 df.loc[intensification_start:intensification_end, 'periods'] = 'intensification'
     
     # Check if there are multiple blocks of consecutive intensification periods
@@ -81,12 +93,16 @@ def find_intensification_period(df):
         gap = next_block_start - block_end
 
         # If the gap between blocks is smaller than 7.5%, fill with intensification
-        if gap < length*0.075:
+        if gap < length * threshold_intensification_gap:
             df.loc[block_end:next_block_start, 'periods'] = 'intensification'
 
     return df
 
-def find_decay_period(df):
+def find_decay_period(df, **args_periods):
+
+    threshold_decay_length = args_periods['threshold_decay_length']
+    threshold_decay_gap = args_periods['threshold_decay_gap']
+
     # Find z peaks and valleys
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
     z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
@@ -104,8 +120,8 @@ def find_decay_period(df):
             decay_start = z_valley
             decay_end = df.index[-1]  # Last index of the DataFrame
 
-        # Decay needs to be at least 12% of the total series length
-        if decay_end - decay_start > length*0.075:
+        # Decay needs to be at least 7.5% of the total series length
+        if decay_end - decay_start > length * threshold_decay_length:
             df.loc[decay_start:decay_end, 'periods'] = 'decay'
 
     # Check if there are multiple blocks of consecutive decay periods
@@ -118,7 +134,7 @@ def find_decay_period(df):
         gap = next_block_start - block_end
 
         # If the gap between blocks is smaller than 7.5%, fill with decay
-        if gap < length*0.075:
+        if gap < length * threshold_decay_gap:
             df.loc[block_end:next_block_start, 'periods'] = 'decay'
 
     return df
@@ -185,7 +201,9 @@ def find_residual_period(df):
 
     return df
 
-def find_incipient_period(df):
+def find_incipient_period(df, **args_periods):
+
+    threshold_incipient_length = args_periods['threshold_incipient_length']
 
     periods = df['periods']
     
@@ -202,7 +220,7 @@ def find_incipient_period(df):
 
     # If there's more than 2 unique phases other than residual, and the life cycle
     # begins with intensification or decay, incipient phase will be from the beginning
-    # of it until 2/5 to the next dz_valley/dz_peak
+    # of it until 40% to the next dz_valley/dz_peak
     # If there is a cycle of intensification and decay before the next mature stage it
     #  will cganged to incipient
     if len(phases_order) > 2:
@@ -212,7 +230,7 @@ def find_incipient_period(df):
                                 np.where(np.diff(df['periods'] == "decay") != 0)[0] + 1)
             end_time = decay_blocks[0].max()
             if end_time is not pd.NaT:
-                time_range = start_time + 2 * (end_time - start_time) / 5
+                time_range = start_time + ((end_time - start_time) * threshold_incipient_length)
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
 
         elif phases_order[0] == 'intensification':
@@ -221,7 +239,7 @@ def find_incipient_period(df):
             next_dz_valley = df[1:][df[1:]['dz_peaks_valleys'] == 'valley'].index.min()
             next_mature = df[periods == 'mature'].index.min()
             if next_dz_valley < next_mature:
-                time_range = start_time + 2 * (next_dz_valley - start_time) / 5
+                time_range = start_time + ((next_dz_valley - start_time) * threshold_incipient_length)
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
 
         elif phases_order[0] == 'decay':
@@ -230,7 +248,7 @@ def find_incipient_period(df):
             next_dz_peak = df[1:][df[1:]['dz_peaks_valleys'] == 'peak'].index.min()
             next_mature = df[periods == 'mature'].index.min()
             if next_dz_peak < next_mature:
-                time_range = start_time + 2 * (next_dz_peak - start_time) / 5
+                time_range = start_time + ((next_dz_peak - start_time) * threshold_incipient_length)
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
         
             
