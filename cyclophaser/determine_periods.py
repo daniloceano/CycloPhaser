@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2024/04/11 19:59:55 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/04/13 17:37:13 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -395,14 +395,14 @@ if __name__ == '__main__':
         }
 
     periods_args= {
-        'threshold_intensification_length': 0.10,  # Decreased threshold
-        'threshold_intensification_gap': 0.05,
-        'threshold_mature_distance': 0.10,
-        'threshold_mature_length': 0.02,
-        'threshold_decay_length': 0.06,
-        'threshold_decay_gap': 0.06,
-        'threshold_incipient_length': 0.35
-        }
+        'threshold_intensification_length': 0.25,
+        'threshold_intensification_gap': 0.075,
+        'threshold_mature_distance': 0.125,
+        'threshold_mature_length': 0.03,
+        'threshold_decay_length': 0.075,
+        'threshold_decay_gap': 0.075,
+        'threshold_incipient_length': 0.4
+    }
 
     # Test the determine_periods function
     result = determine_periods(series,
