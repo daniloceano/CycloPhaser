@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [1.7.0] - 2024-04-11
+## [1.7.2] - 2024-04-13
+
+### Bug fixes 
+
+- **determine_periods.py**: fixed wrong imports
+- **find_stages.py**: fixed not finding residual period when the gap between stages is too large - was not really fixed on last update
+
+## [1.7.1] - 2024-04-12
 
 ### Bug fixes 
 

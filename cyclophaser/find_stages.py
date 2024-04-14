@@ -154,7 +154,11 @@ def find_residual_period(df):
                                 np.where(np.diff(df['periods'] == phase_to_fill) != 0)[0] + 1)
 
         # Find the last block of the same phase
-        last_phase_block = phase_blocks[-1]
+        # last_phase_block = phase_blocks[-1]
+
+        for index in reversed(phase_blocks):
+            if not index.empty:
+                last_phase_block = index
 
         # Find the index right after the last block
         if len(last_phase_block) > 0:

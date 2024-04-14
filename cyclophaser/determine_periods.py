@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2024/04/13 17:37:13 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/04/13 23:35:55 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,12 +21,12 @@ from scipy.signal import argrelextrema
 from scipy.signal import savgol_filter 
 
 import cyclophaser.lanczos_filter as lanfil
-from cyclophaser.plots import plot_all_periods, plot_didactic
-from cyclophaser.find_stages import find_incipient_period 
-from cyclophaser.find_stages import find_intensification_period
-from cyclophaser.find_stages import find_decay_period 
-from cyclophaser.find_stages import find_mature_stage
-from cyclophaser.find_stages import find_residual_period
+from .plots import plot_all_periods, plot_didactic
+from .find_stages import find_incipient_period 
+from .find_stages import find_intensification_period
+from .find_stages import find_decay_period 
+from .find_stages import find_mature_stage
+from .find_stages import find_residual_period
 
 def check_create_folder(DirName, verbosity=False):
     if not os.path.exists(DirName):
@@ -412,3 +412,4 @@ if __name__ == '__main__':
             export_dict=False,
             process_vorticity_args=process_vorticity_args,
             periods_args=periods_args)
+

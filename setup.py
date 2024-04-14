@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = '1.7.1'
+VERSION = '1.7.2'
 DESCRIPTION = 'Determine phases from extratropical cyclone life cycle'
 # LONG_DESCRIPTION = 'This script processes vorticity data, identifies different phases of the cyclone \
     # and plots the identified periods on periods.png and periods_didatic.png'
