@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2024/04/13 23:35:55 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/04/15 08:31:27 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -274,7 +274,7 @@ def process_vorticity(
 
 def get_periods(vorticity,  plot=False, plot_steps=False, export_dict=False, periods_args=None):
     default_args = {
-        'threshold_intensification_length': 0.125,
+        'threshold_intensification_length': 0.075,
         'threshold_intensification_gap': 0.075,
         'threshold_mature_distance': 0.125,
         'threshold_mature_length': 0.03,

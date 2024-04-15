@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.3] - 2024-04-15
+
+### Bug fixes 
+
+- **determine_periods.py**: reverted threshold_intensification_length back to 7.5%
+
 
 ## [1.7.2] - 2024-04-13
 
