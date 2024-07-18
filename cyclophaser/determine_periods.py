@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2024/04/15 08:31:27 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/07/18 10:20:56 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.signal import savgol_filter 
 
-import cyclophaser.lanczos_filter as lanfil
+from . import lanczos_filter as lanfil
 from .plots import plot_all_periods, plot_didactic
 from .find_stages import find_incipient_period 
 from .find_stages import find_intensification_period
@@ -379,9 +379,11 @@ def determine_periods(series,
     return get_periods(vorticity.copy(), *args, periods_args)
 
 
-if __name__ == '__main__':
+# This is purely for testing purposes
+def main():
     # Read the data from the CSV file
-    track_file = '../tests/test.csv'
+    track_file = 'tests/test.csv'
+    track_file = os.path.abspath(track_file)
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
 
     # Extract the vorticity data as a list and the index as a temporal range
@@ -412,4 +414,13 @@ if __name__ == '__main__':
             export_dict=False,
             process_vorticity_args=process_vorticity_args,
             periods_args=periods_args)
+    
+    # Test the determine_periods function with default values
+    result = determine_periods(series,
+            x=x,
+            plot="test",
+            plot_steps="test_steps",
+            export_dict=False)
 
+if __name__ == '__main__':
+    main()

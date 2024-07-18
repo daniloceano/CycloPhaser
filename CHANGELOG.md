@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.4] - 2024-07-18
+
+### Bug fixes 
+- **determine_periods.py**: Avoided the FutureWarning while filling NaN values in a DataFrame slice
+
+### Improved 
+- Modified relative imports to ensure compatibility when running the script as a module.
+
+### Updated
+- **requirements.txt**: Updated dependencies to the latest compatible versions.
+
 ## [1.7.3] - 2024-04-15
 
 ### Bug fixes 

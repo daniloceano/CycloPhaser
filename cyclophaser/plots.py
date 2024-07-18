@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 
 import cmocean.cm as cmo
 
-from cyclophaser.find_stages import find_intensification_period, find_decay_period, find_mature_stage
+from .find_stages import find_intensification_period, find_decay_period, find_mature_stage
 
 def plot_phase(df, phase, ax=None, show_title=True):
     # Create a copy of the DataFrame

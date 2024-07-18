@@ -164,7 +164,7 @@ def find_residual_period(df):
         if len(last_phase_block) > 0:
             last_phase_block_end = last_phase_block[-1]
             # Fill NaNs after the last block with 'residual'
-            df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
+            df.loc[last_phase_block_end + dt:, 'periods'] = df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual')
         else:
             last_phase_block_end = phase_blocks[-2][-1]
             df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
@@ -201,7 +201,7 @@ def find_residual_period(df):
         elif 'mature' in unique_phases:
             last_decay_index = df[df['periods'] == 'mature'].index[-1]
         dt = df.index[1] - df.index[0]
-        df.loc[last_decay_index + dt:, 'periods'].fillna('residual', inplace=True)
+        df.loc[last_decay_index + dt:, 'periods'] = df.loc[last_decay_index + dt:, 'periods'].fillna('residual')
 
     return df
 
