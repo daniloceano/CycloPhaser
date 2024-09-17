@@ -12,9 +12,9 @@ Contents:
 
    installation
    usage
+   testing
    api
    contribute
-   changelog
    license
 
 Indices and Tables
