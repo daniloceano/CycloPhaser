@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.1] - 2024-09-17
+
+### Bug fixes
+- Fixed inconsistency in README referencing MIT while `LICENSE` pointed to GPL v3.0. Resolved across all documentation.
+
 ## [1.8.0] - 2024-09-17
 
 ### Updated
