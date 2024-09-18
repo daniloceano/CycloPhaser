@@ -24,3 +24,4 @@ jobs:
           message: '(auto) Paper PDF Draft'
           add: 'paper/paper.pdf'
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'joss-submission' # Ensure the correct branch is used
