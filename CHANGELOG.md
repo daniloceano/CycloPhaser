@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.2] - 2024-09-26
+
+### Documentation Updated
+- Added an overview section in the documentation, explaining the CycloPhaser program and its main purpose, including its method for detecting cyclone life cycle phases by analyzing vorticity and derivative time series.
+- Inserted a figure illustrating the CycloPhaser methodology and included references to the original publication for further details.
+- Updated the procedure overview with a step-by-step explanation of the CycloPhaser methodology, detailing the filtering, phase detection, and residual stage processes.
+
 ## [1.8.1] - 2024-09-17
 
 ### Bug fixes
