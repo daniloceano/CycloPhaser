@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.3] - 2024-09-26
+
+### Bug Fixes
+- Fixed an issue where the image in the "Procedure Overview" section of the documentation was not rendering correctly. 
+  - Updated the image path in `overview.rst` to point to the correct location.
+  - Replaced the image format from `.pdf` to `.jpg` for better compatibility and ensured the image file is now located in the correct folder (`docs/_images`).
+
+
 ## [1.8.2] - 2024-09-26
 
 ### Documentation Updated
