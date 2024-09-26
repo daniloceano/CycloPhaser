@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.4] - 2024-09-26
+
+### Bug Fixes 
+  - Updated the image path in `overview.rst` to point to the correct location.
+
 ## [1.8.3] - 2024-09-26
 
 ### Bug Fixes
