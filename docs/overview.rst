@@ -15,7 +15,7 @@ The **CycloPhaser** program identifies distinct phases of cyclone life cycles by
 3. **Residual Stage**: This stage accounts for systems that re-intensify without progressing to maturity due to tracking limitations.
 
 
-.. figure:: cyclophaser_methodology.pdf
+.. figure:: cyclophaser_methodology.jpg
    :scale: 50%
    :align: center
 
