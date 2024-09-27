@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.5] - 2024-09-26
+
+### Documentation Improvement
+- Updated the figure caption for the **CycloPhaser Methodology** to provide a more detailed and clearer explanation of the methodology steps. 
+  - Each panel in the figure is now explained thoroughly, highlighting the key processes involved, including preprocessing with the Lanczos filter, smoothing with the Savitzky-Golay filter, and the detection of cyclone life cycle phases.
+  - The new caption ensures users can easily follow the steps represented in the figure, aligning with the phase detection process described in the documentation.
+
 ## [1.8.4] - 2024-09-26
 
 ### Bug Fixes 
