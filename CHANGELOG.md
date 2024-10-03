@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.8.5] - 2024-09-26
+## [1.8.6] - 2024-10-03
+
+### Documentation Improvement
+- Added example usage for the `determine_periods` function, including default options and a CSV export feature.
+- Included output examples with figures (`test_default.png`, `test_steps_default.png`) showcasing vorticity data with detected cyclone life cycle phases and step-by-step didactic plots.
+- Added a section on customizing filtering parameters, including options for `cutoff_low`, `cutoff_high`, and smoothing settings (`use_filter`, `use_smoothing`, `use_smoothing_twice`).
+- Introduced detailed explanations for key arguments like `series`, `x`, `plot`, `plot_steps`, and filtering options in the `usage.rst` file.
+- Modified the layout of output examples in `usage.rst`, making it more user-friendly and emphasizing the CSV output, figures, and filtering customization.
+- Added clarification in the "Important Notes" section explaining the processing of Northern Hemisphere (NH) data through multiplication of vorticity values by -1.
+
+## [1.8.5] - 2024-09-27
 
 ### Documentation Improvement
 - Updated the figure caption for the **CycloPhaser Methodology** to provide a more detailed and clearer explanation of the methodology steps. 
