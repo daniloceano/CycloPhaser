@@ -11,6 +11,7 @@ Contents:
    :maxdepth: 2
 
    overview
+   statement_of_need
    installation
    usage
    testing

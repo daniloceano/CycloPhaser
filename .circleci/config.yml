@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build_test:
     docker:
-      - image: cimg/python:3.11.0
+      - image: cimg/python:3.12.3
     steps:
       - checkout 
 
@@ -28,7 +28,7 @@ jobs:
 
       - run:
           name: Install package (build_test)
-          command: pipenv install dist/cyclophaser-1.8.6-py3-none-any.whl
+          command: pipenv install dist/cyclophaser-1.8.10-py3-none-any.whl
 
       - run:
           name: Install pytest (build_test)
@@ -43,7 +43,7 @@ jobs:
 
   test_pypi_publish:
     docker:
-      - image: cimg/python:3.11.0
+      - image: cimg/python:3.12.3
     steps:
       - checkout
 
