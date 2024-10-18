@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.7] - 2024-10-18
+
+### Bug Fixes and Improvements
+- **Resolved Legend Color Duplication Issue**: Updated the `plot_all_periods` function to handle multiple occurrences of the same phase (e.g., "intensification", "decay") and ensure that the phase is displayed only once in the legend, regardless of how many times it appears.
+  - Generalized the phase handling so that it can manage any number of phase repetitions (e.g., "intensification 2", "mature 3") without affecting the plot’s visual integrity.
+  - Fixed the issue with the residual phase showing the wrong color by ensuring that colors for phases are correctly mapped in all cases.
+  
+### Documentation Updates
+- **Added Statement of Need Section**: Incorporated the Statement of Need from the paper into the documentation, explaining the relevance and purpose of the CycloPhaser package, along with detailed references.
+  - Improved the introduction to the example in the `usage.rst` to clarify what data is loaded, providing background on the test data for users.
+  - Replaced the figures in the `usage.rst` for the ones with the corrected colors.
+  - Updated the example in the documentation to use the new structure for accessing the test data
+  
+### Package Management
+- **Added Dependencies to `setup.py`**: Ensured all necessary dependencies are included in the `setup.py` file, resolving the issue of missing dependencies when installing the package via `pip install cyclophaser`.
+  - Verified that all dependencies are correctly installed when the package is installed using pip.
+
+### Test Data Accessibility
+- **Made Test CSV File Accessible from the Package**: Moved the example test data (`example_file.csv`) to be accessible from the installed package under the `cyclophaser` directory, ensuring that users can run examples without needing to modify paths manually.
+  - Updated the usage examples to reflect the new accessible path for the test file.
+
+### Other Improvements
+- **Updated Column Names in Example**: Corrected the column name in the example provided in the `usage.rst` to `min_max_zeta_850` (previously `min_zeta_850`), ensuring that the example code runs successfully with the test data provided.
+
+
 ## [1.8.6] - 2024-10-03
 
 ### Documentation Improvement

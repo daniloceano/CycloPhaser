@@ -6,7 +6,12 @@ Usage Guide
 .. contents::
    :local:
    :depth: 2
-   
+
+Introduction
+------------
+
+The example provided in this guide demonstrates how to use the CycloPhaser package to analyze the life cycle phases of an extratropical cyclone. The data used in this example corresponds to the track file of a specific extratropical cyclone whose genesis occurred near the eastern coast of Argentina. This track file was produced using the LorenzCycleToolkit (https://github.com/daniloceano/LorenzCycleToolkit). The file contains the cyclone's position, as well as information regarding the minimum relative vorticity, geopotential height, and maximum wind speeds within a defined domain centered on the cyclone. CycloPhaser helps in dissecting this cyclone into distinct life cycle phases using the minimum vorticity time series.
+
 Arguments and Parameters for determine_periods
 ----------------------------------------------
 
@@ -23,7 +28,6 @@ Arguments and Parameters for determine_periods
 - **cutoff_low**: (float, optional) Low-frequency cutoff for the Lanczos filter. Default is 168.
 - **cutoff_high**: (float, optional) High-frequency cutoff for the Lanczos filter. Default is 48.
 
-
 Example Usage
 -------------
 
@@ -31,13 +35,12 @@ Below is an example of using the CycloPhaser package with default options. The f
 
 .. code-block:: python
 
-   from cyclophaser import determine_periods
+   from cyclophaser import determine_periods, example_file
    import pandas as pd
 
    # Load test data
-   track_file = 'tests/test.csv'
-   track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
-   series = track['min_zeta_850'].tolist()
+   track = pd.read_csv(example_file, parse_dates=[0], delimiter=';', index_col=[0])
+   series = track['min_max_zeta_850'].tolist()
    x = track.index.tolist()
 
    # Example options for using CycloPhaser with default settings
@@ -98,7 +101,7 @@ In the previous example, the phase positioning might not match expectations for 
 .. figure:: _images/test_custom.png
     :alt: Vorticity Data with Detected Periods and Custom Parameters
 
-    Cyclone phases poistining corrected using default parameters.
+    Cyclone phases positioning corrected using default parameters.
 
 Important Notes
 ---------------
