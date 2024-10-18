@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.8] - 2024-10-18
+
+### Bug Fixes
+- Fixed conflicting dependencies between `Pipfile` and `requirements.txt`, ensuring compatibility during installation via Pipenv and regular pip installs.
+
 ## [1.8.7] - 2024-10-18
 
 ### Bug Fixes and Improvements
