@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.10] - 2024-10-18
+
+### Environment and Dependencies
+
+- **Dependency Conflicts Resolved**: Fixed multiple dependency conflicts that were causing failures during installation.
+  - Updated `requirements.txt` and `Pipfile` to include all necessary packages and correct versions.
+  - Added missing packages like `virtualenv`, `pipenv`, and other dependencies from the `requirements.txt` file.
+  - Resolved issues with conflicting dependencies between different versions of `cmocean`, `scipy`, and `xarray`.
+ 
+
 ## [1.8.9] - 2024-10-18
 
 ### Bug Fixes

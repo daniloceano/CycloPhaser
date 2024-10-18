@@ -7,6 +7,10 @@ jobs:
       - checkout 
 
       - run:
+          name: Set Python Version for Pipenv
+          command: pipenv --python 3.12.3   # Ensure pipenv uses the correct Python version
+
+      - run:
           name: Build (build_test)
           command: python3 setup.py sdist bdist_wheel
         
@@ -48,6 +52,10 @@ jobs:
       - checkout
 
       - run:
+          name: Set Python Version for Pipenv
+          command: pipenv --python 3.12.3   # Ensure pipenv uses the correct Python version
+
+      - run:
           name: create whl (test_pypi_publish)
           command: python3 setup.py sdist bdist_wheel
 
@@ -80,6 +88,10 @@ jobs:
       - image: cimg/python:3.11.0
     steps:
       - checkout # checkout source code to working directory
+
+      - run:
+          name: Set Python Version for Pipenv
+          command: pipenv --python 3.11.0   # Ensure pipenv uses the correct Python version
 
       - run:
           name: create whl (pypi_publish)
