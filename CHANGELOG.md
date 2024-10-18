@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.9] - 2024-10-18
+
+### Bug Fixes
+- Fixed Python version on `config.yml`
+
 ## [1.8.8] - 2024-10-18
 
 ### Bug Fixes
