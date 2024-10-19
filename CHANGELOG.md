@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [1.8.11] - 2024-10-19
+
+### Documentation Update
+- Clarified in the **API documentation** and **Usage Guide** that the `series` argument in the `determine_periods` function does not need to be in a specific unit.
+
 ## [1.8.10] - 2024-10-18
 
 ### Environment and Dependencies

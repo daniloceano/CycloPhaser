@@ -32,7 +32,7 @@ jobs:
 
       - run:
           name: Install package (build_test)
-          command: pipenv install dist/cyclophaser-1.8.10-py3-none-any.whl
+          command: pipenv install dist/cyclophaser-1.8.11-py3-none-any.whl
 
       - run:
           name: Install pytest (build_test)

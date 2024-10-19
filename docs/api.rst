@@ -12,7 +12,7 @@ The ``determine_periods`` function is the core of CycloPhaser, allowing users to
 
 **Parameters**:
 
-- **series**: (list) A list of vorticity values to be analyzed.
+- **series**: (list) A list of vorticity values to be analyzed. **Note:** The series does not need to be in any specific units. The algorithm is designed to work with vorticity data, but other meteorological fields like sea level pressure (SLP) or geopotential height. However, these have not been fully tested yet, so care is advised when interpreting results from fields other than vorticity.
 - **x**: (list, optional) Temporal range or labels corresponding to the series. This list must be the same length as the vorticity `series`. Default is None.
 - **plot**: (str or bool, optional) Path for saving generated plots. Set to `False` to disable plotting. Default is False.
 - **plot_steps**: (str or bool, optional) Path for saving step-by-step didactic plots. Set to `False` to disable step-wise plotting. Default is False.
