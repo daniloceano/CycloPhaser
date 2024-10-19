@@ -5,6 +5,94 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [1.8.11] - 2024-10-19
+
+### Documentation Update
+- Clarified in the **API documentation** and **Usage Guide** that the `series` argument in the `determine_periods` function does not need to be in a specific unit.
+
+## [1.8.10] - 2024-10-18
+
+### Environment and Dependencies
+
+- **Dependency Conflicts Resolved**: Fixed multiple dependency conflicts that were causing failures during installation.
+  - Updated `requirements.txt` and `Pipfile` to include all necessary packages and correct versions.
+  - Added missing packages like `virtualenv`, `pipenv`, and other dependencies from the `requirements.txt` file.
+  - Resolved issues with conflicting dependencies between different versions of `cmocean`, `scipy`, and `xarray`.
+ 
+
+## [1.8.9] - 2024-10-18
+
+### Bug Fixes
+- Fixed Python version on `config.yml`
+
+## [1.8.8] - 2024-10-18
+
+### Bug Fixes
+- Fixed conflicting dependencies between `Pipfile` and `requirements.txt`, ensuring compatibility during installation via Pipenv and regular pip installs.
+
+## [1.8.7] - 2024-10-18
+
+### Bug Fixes and Improvements
+- **Resolved Legend Color Duplication Issue**: Updated the `plot_all_periods` function to handle multiple occurrences of the same phase (e.g., "intensification", "decay") and ensure that the phase is displayed only once in the legend, regardless of how many times it appears.
+  - Generalized the phase handling so that it can manage any number of phase repetitions (e.g., "intensification 2", "mature 3") without affecting the plot’s visual integrity.
+  - Fixed the issue with the residual phase showing the wrong color by ensuring that colors for phases are correctly mapped in all cases.
+  
+### Documentation Updates
+- **Added Statement of Need Section**: Incorporated the Statement of Need from the paper into the documentation, explaining the relevance and purpose of the CycloPhaser package, along with detailed references.
+  - Improved the introduction to the example in the `usage.rst` to clarify what data is loaded, providing background on the test data for users.
+  - Replaced the figures in the `usage.rst` for the ones with the corrected colors.
+  - Updated the example in the documentation to use the new structure for accessing the test data
+  
+### Package Management
+- **Added Dependencies to `setup.py`**: Ensured all necessary dependencies are included in the `setup.py` file, resolving the issue of missing dependencies when installing the package via `pip install cyclophaser`.
+  - Verified that all dependencies are correctly installed when the package is installed using pip.
+
+### Test Data Accessibility
+- **Made Test CSV File Accessible from the Package**: Moved the example test data (`example_file.csv`) to be accessible from the installed package under the `cyclophaser` directory, ensuring that users can run examples without needing to modify paths manually.
+  - Updated the usage examples to reflect the new accessible path for the test file.
+
+### Other Improvements
+- **Updated Column Names in Example**: Corrected the column name in the example provided in the `usage.rst` to `min_max_zeta_850` (previously `min_zeta_850`), ensuring that the example code runs successfully with the test data provided.
+
+
+## [1.8.6] - 2024-10-03
+
+### Documentation Improvement
+- Added example usage for the `determine_periods` function, including default options and a CSV export feature.
+- Included output examples with figures (`test_default.png`, `test_steps_default.png`) showcasing vorticity data with detected cyclone life cycle phases and step-by-step didactic plots.
+- Added a section on customizing filtering parameters, including options for `cutoff_low`, `cutoff_high`, and smoothing settings (`use_filter`, `use_smoothing`, `use_smoothing_twice`).
+- Introduced detailed explanations for key arguments like `series`, `x`, `plot`, `plot_steps`, and filtering options in the `usage.rst` file.
+- Modified the layout of output examples in `usage.rst`, making it more user-friendly and emphasizing the CSV output, figures, and filtering customization.
+- Added clarification in the "Important Notes" section explaining the processing of Northern Hemisphere (NH) data through multiplication of vorticity values by -1.
+
+## [1.8.5] - 2024-09-27
+
+### Documentation Improvement
+- Updated the figure caption for the **CycloPhaser Methodology** to provide a more detailed and clearer explanation of the methodology steps. 
+  - Each panel in the figure is now explained thoroughly, highlighting the key processes involved, including preprocessing with the Lanczos filter, smoothing with the Savitzky-Golay filter, and the detection of cyclone life cycle phases.
+  - The new caption ensures users can easily follow the steps represented in the figure, aligning with the phase detection process described in the documentation.
+
+## [1.8.4] - 2024-09-26
+
+### Bug Fixes 
+  - Updated the image path in `overview.rst` to point to the correct location.
+
+## [1.8.3] - 2024-09-26
+
+### Bug Fixes
+- Fixed an issue where the image in the "Procedure Overview" section of the documentation was not rendering correctly. 
+  - Updated the image path in `overview.rst` to point to the correct location.
+  - Replaced the image format from `.pdf` to `.jpg` for better compatibility and ensured the image file is now located in the correct folder (`docs/_images`).
+
+
+## [1.8.2] - 2024-09-26
+
+### Documentation Updated
+- Added an overview section in the documentation, explaining the CycloPhaser program and its main purpose, including its method for detecting cyclone life cycle phases by analyzing vorticity and derivative time series.
+- Inserted a figure illustrating the CycloPhaser methodology and included references to the original publication for further details.
+- Updated the procedure overview with a step-by-step explanation of the CycloPhaser methodology, detailing the filtering, phase detection, and residual stage processes.
+
 ## [1.8.1] - 2024-09-17
 
 ### Bug fixes

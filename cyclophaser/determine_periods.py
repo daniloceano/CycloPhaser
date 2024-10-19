@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2024/09/17 09:34:40 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/10/18 13:18:30 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -461,20 +461,25 @@ def determine_periods(series: list,
 # This is purely for testing purposes
 def main():
     # Read the data from the CSV file
-    track_file = 'tests/test.csv'
-    track_file = os.path.abspath(track_file)
-    track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
+    from cyclophaser import example_file
+    track = pd.read_csv(example_file, parse_dates=[0], delimiter=';', index_col=[0])
 
     # Extract the vorticity data as a list and the index as a temporal range
     series = track['min_max_zeta_850'].tolist()
     x = track.index.tolist()  # Using the DataFrame index as the temporal range
+    
+    # Example options for using CycloPhaser with default settings
+    result = determine_periods(series, x=x, plot="test_default", plot_steps="test_steps_default", export_dict="test_default")
 
-    # Testing options
+    # Example usage with custom parameters
+    result = determine_periods(series, x=x, plot='test_custom', cutoff_low=100, cutoff_high=20, use_filter=True, use_smoothing=10, use_smoothing_twice=False)
+
+    # Test the determine_periods function with custom thresholds
     result = determine_periods(
         series=series,
         x=x,
-        plot="test",
-        plot_steps="test_steps",
+        plot="test_bad_options",
+        plot_steps="test_steps_bad_options",
         export_dict=False,
         use_filter=False,                  
         use_smoothing_twice=False,         
@@ -485,16 +490,6 @@ def main():
         threshold_decay_length=0.075,           
         threshold_decay_gap=0.075,             
         threshold_incipient_length=0.4          
-    )
-
-    
-    # Test the determine_periods function with default values
-    result = determine_periods(
-        series=series,
-        x=x,
-        plot="test_default",
-        plot_steps="test_steps_default",
-        export_dict=False
     )
 
 if __name__ == '__main__':

@@ -171,11 +171,14 @@ def plot_peaks_valleys_series(series, ax, *peaks_valleys_series_list):
 
 
 def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_path=None):
-    colors_phases = {'incipient': '#65a1e6',
-                      'intensification': '#f7b538',
-                        'mature': '#d62828',
-                          'decay': '#9aa981',
-                          'residual': 'gray'}
+    # Define base colors for phases
+    colors_phases = {
+        'incipient': '#65a1e6',
+        'intensification': '#f7b538',
+        'mature': '#d62828',
+        'decay': '#9aa981',
+        'residual': 'gray'
+    }
 
     # Create a new figure if ax is not provided
     if ax is None:
@@ -193,30 +196,27 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
     else:
         ax.plot(df.time, df.z, linewidth=0.75, color='gray', label=r'ζ')
 
-    legend_labels = []
-    # Add legend labels for Vorticity and ζ
-    for label in [r'$ζ_{f}$', r'$ζ_{fs}$', r'$ζ_{fs^{2}}$']:
-        legend_labels.append(label)
-
-    ax2.legend(legend_labels, loc='lower right', bbox_to_anchor=(1.275, 0.42))
-
-    legend_labels = []  # To store unique legend labels
-    legend_labels.append(r'ζ')
+    # Initialize legend labels and tracked phases
+    legend_labels = [r'ζ']
+    added_phases = set()  # Track which phases have been added to the legend
 
     # Shade the areas between the beginning and end of each period
     for phase, (start, end) in phases_dict.items():
-        # Extract the base phase name (without suffix)
-        base_phase = phase.split()[0]
+        # Extract the base phase name (remove any numbers)
+        base_phase = phase.split()[0].strip()
 
         # Access the color based on the base phase name
-        color = colors_phases[base_phase]
+        color = colors_phases.get(base_phase, 'gray')  # Default to gray if phase not found
 
         # Fill between the start and end indices with the corresponding color
-        ax.fill_between(vorticity.time, vorticity.zeta.values, where=(vorticity.time >= start) & (vorticity.time <= end),
+        ax.fill_between(vorticity.time, vorticity.zeta.values,
+                        where=(vorticity.time >= start) & (vorticity.time <= end),
                         alpha=0.4, color=color, label=base_phase)
 
-        # Add the base phase name to the legend labels set
-        legend_labels.append(base_phase)
+        # Add the base phase name to the legend if it hasn't been added yet
+        if base_phase not in added_phases:
+            legend_labels.append(base_phase)
+            added_phases.add(base_phase)
 
     # Set the title
     ax.set_title('Vorticity Data with Periods')
@@ -224,20 +224,24 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
     # Remove duplicate labels from the legend
     handles, labels = ax.get_legend_handles_labels()
 
-    # Get handles and labels from ax2
-    handles2, labels2 = ax2.get_legend_handles_labels()
+    # Get handles and labels from ax2 if it exists
+    if 'ax2' in locals():
+        handles2, labels2 = ax2.get_legend_handles_labels()
+        handles += handles2
+        labels += labels2
 
-    # Combine handles and labels from both ax and ax2
-    handles += handles2
-    labels += labels2
-
+    # Create a unique list of labels
     unique_labels = []
-    for label in labels:
+    unique_handles = []
+    for handle, label in zip(handles, labels):
         if label not in unique_labels and label in legend_labels:
             unique_labels.append(label)
+            unique_handles.append(handle)
 
-    ax.legend(handles, unique_labels, loc='upper right', bbox_to_anchor=(1.5, 1))
+    # Set the legend
+    ax.legend(unique_handles, unique_labels, loc='upper right', bbox_to_anchor=(1.5, 1))
 
+    # Format the date axis
     ax.ticklabel_format(axis='y', style='sci', scilimits=(-3, 3))
     date_format = mdates.DateFormatter("%Y-%m-%d")
     ax.xaxis.set_major_formatter(date_format)
@@ -245,11 +249,11 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
 
     plt.tight_layout()
 
+    # Save the plot if an output file path is provided
     if periods_outfile_path is not None:
         fname = f"{periods_outfile_path}.png"
         plt.savefig(fname, dpi=500)
         print(f"{fname} created.")
-
 
 def plot_didactic(df, vorticity, output_directory, **periods_args):
     

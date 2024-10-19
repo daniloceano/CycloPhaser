@@ -2,9 +2,13 @@ version: 2.1
 jobs:
   build_test:
     docker:
-      - image: cimg/python:3.11.0
+      - image: cimg/python:3.12.3
     steps:
       - checkout 
+
+      - run:
+          name: Set Python Version for Pipenv
+          command: pipenv --python 3.12.3   # Ensure pipenv uses the correct Python version
 
       - run:
           name: Build (build_test)
@@ -28,7 +32,7 @@ jobs:
 
       - run:
           name: Install package (build_test)
-          command: pipenv install dist/cyclophaser-1.8.1-py3-none-any.whl
+          command: pipenv install dist/cyclophaser-1.8.11-py3-none-any.whl
 
       - run:
           name: Install pytest (build_test)
@@ -43,9 +47,13 @@ jobs:
 
   test_pypi_publish:
     docker:
-      - image: cimg/python:3.11.0
+      - image: cimg/python:3.12.3
     steps:
       - checkout
+
+      - run:
+          name: Set Python Version for Pipenv
+          command: pipenv --python 3.12.3   # Ensure pipenv uses the correct Python version
 
       - run:
           name: create whl (test_pypi_publish)
@@ -80,6 +88,10 @@ jobs:
       - image: cimg/python:3.11.0
     steps:
       - checkout # checkout source code to working directory
+
+      - run:
+          name: Set Python Version for Pipenv
+          command: pipenv --python 3.11.0   # Ensure pipenv uses the correct Python version
 
       - run:
           name: create whl (pypi_publish)
