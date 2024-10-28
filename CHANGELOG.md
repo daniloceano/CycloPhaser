@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.0] - 2024-10-28
+
+### New Features
+- **Hemisphere Support Argument**: Added `hemisphere` argument in `determine_periods` function. This enables users to specify `southern` or `northern` hemisphere data, with automatic sign inversion for the northern hemisphere. Improved compatibility with wind data by setting this option to "northern".
+
+### Documentation Improvements
+- **Detailed Argument Descriptions**: Updated the `determine_periods` and `process_vorticity` functions' documentation to include specific units, guidelines, and recommendations for each parameter, enhancing usability.
+- **Parameter Recommendations**:
+  - `use_filter`: Added usage guidelines based on data type and frequency. For example, recommended setting `use_filter='auto'` for ERA5 data.
+  - `replace_endpoints_with_lowpass`: Recommended setting a 24-hour window for hourly vorticity data.
+  - `use_smoothing` and `use_smoothing_twice`: Added detailed behavior of 'auto' settings and recommendations based on noise levels.
+  - `savgol_polynomial`: Explained ideal usage for smoothing based on noise level.
+  - `cutoff_low` and `cutoff_high`: Provided guidance for optimal values to filter out planetary and mesoscale influences in vorticity data.
+- **Additional Usage Recommendations**: Included cases for using alternative data types like SLP and wind speed and noted expected behavior with phase transitions.
+- **Error and Warning Details**: Updated documentation to clarify error conditions related to parameter constraints, particularly for `use_smoothing` and `savgol_polynomial`.
+
+### Code Adjustments
+- **Spurious Oscillations Warning**: Added functionality to check for spurious oscillations at the start and end of filtered data, with a warning suggesting adjustments to `use_filter`, `replace_endpoints_with_lowpass`, or `use_smoothing` if detected.
+- **`use_filter` Activation**: Clarified that passing an integer as the window length is necessary for activation.
+- **Optional Smoothing**: Adjusted `use_smoothing` and `use_smoothing_twice` logic to handle `False` as a deactivation option, bypassing the smoothing process when set to `False`.
+- **Savgol Parameter Warnings**: Implemented a check to raise an error if `savgol` window length is smaller than `savgol_polynomial`, ensuring valid parameter configurations.
+
+### Testing Enhancements
+- **Output Verification in Tests**: Enhanced test cases to check not only for successful execution but also for expected output consistency. Created expected results for different configurations (`use_filter`, smoothing parameters, and hemisphere adjustments) and verified test output matches these expected results.
+- **Suppression of Specific Warnings**: Suppressed spurious oscillation warnings in test cases to reduce unnecessary output during testing.
+
+### Bug Fixes
+- **Normalization Clarification**: Resolved confusion regarding normalization in plots by noting that visualization normalization does not impact the core data analysis.
+
 
 ## [1.8.11] - 2024-10-19
 
