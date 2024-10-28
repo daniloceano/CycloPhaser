@@ -3,6 +3,10 @@
 Welcome to CycloPhaser's Documentation!
 ========================================
 
+.. image:: _images/test_custom.png
+    :alt: CycloPhaser Canonical Example Plot
+    :align: center
+
 CycloPhaser is a Python-based tool for analyzing extratropical cyclone life cycle phases.
 
 Contents:
