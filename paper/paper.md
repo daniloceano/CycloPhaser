@@ -50,9 +50,8 @@ The program includes optional pre-processing steps, such as applying a Lanczos f
 
 Thresholds for phase detection were rigorously calibrated in @couto2024new using a representative set of cyclone tracks, ensuring accurate phase identification while filtering out noise. CycloPhaser also includes a residual phase to account for tracking anomalies, such as post-decay re-intensification without returning to maturity. A post-processing step further refines the phase boundaries by correcting gaps and isolating single time-step phases. Finally, the incipient stage is detected by missing labels in the series or by selecting the initial time steps. More details are discussed in @couto2024new.
 
-
 ![Representative example of a cyclone life cycle exhibiting an incipient-intensification-mature-decay configuration.](life-cycle.png)
 
-Although the package was initially devised for detecting life cycle phases using relative vorticity, it could potentially be applied to other time series used as proxies for cyclone detection, such as sea level pressure (SLP) or wind data. However, it has not yet been explicitly tested for these variables. Additionally, the program was designed for use in the Southern Hemisphere, but it can be applied to Northern Hemisphere vorticity series by multiplying the data by minus one, as the input data currently needs to be negative.
+Although the package was initially devised for detecting life cycle phases using relative vorticity, it could potentially be applied to other time series used as proxies for cyclone detection, such as sea level pressure (SLP) or wind data. However, it has not yet been explicitly tested for these variables. Additionally, the program includes a `hemisphere` option, which enables automatic adjustment for Northern Hemisphere data by multiplying the series by -1, making the package compatible with both hemispheres without requiring manual data adjustments. Since this option was devised with relative vorticity series in mind, using `hemisphere="northern"` is also suitable for detecting phases in wind speed data, while `hemisphere="southern"` is more appropriate for SLP.
 
 # References
