@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.1] - 2024-10-29
+
+### New Features and Improvements
+- **User Warnings for Data Quality**: 
+  - Added warnings to detect unexpected "residual" stages mid-series and gaps in detected periods. Warnings now indicate possible data quality issues and recommend adjusting pre-processing options.
+- **Enhanced Documentation**:
+  - Expanded on the `x` parameter in `determine_periods` to clarify behavior when integers are provided, as well as acceptable input formats.
+
+### Code Refinements
+  - Removed redundant commented imports in `determine_periods.py`.
+  - Updated `requirements.txt` to avoid highly specific version constraints, improving compatibility with other packages in shared environments.
+
 ## [1.9.0] - 2024-10-28
 
 ### New Features

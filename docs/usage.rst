@@ -17,7 +17,7 @@ Arguments and Parameters for determine_periods
 
 - **series**: (list, np.ndarray, pd.Series, xr.DataArray) A time series of vorticity values to be analyzed. **Note:** The algorithm is optimized for vorticity data, though it can potentially handle other meteorological fields like sea level pressure (SLP) or geopotential height. Use caution with these as they are untested for precise cyclone phase detection.
 
-- **x**: (list, pd.DatetimeIndex, optional) Temporal labels corresponding to the `series`. This list must match the length of the `series`. **Default**: None.
+- **x**: (list, pd.DatetimeIndex, optional) Temporal labels corresponding to the `series`. This parameter expects a list of labels with the same length as `series`. **Default**: None. When using a pandas Series or xarray DataArray for `series`, `x` is inferred from the index. For list or numpy array inputs in `series`, `x` must be explicitly provided. If `x` consists of integers, the function will detect phases based on the series' time steps rather than actual dates or times.
 
 - **hemisphere**: (str, optional) Hemisphere of the data. Set to `"southern"` (default) to apply Southern Hemisphere conventions, or `"northern"` to automatically multiply input values by -1 for Northern Hemisphere compatibility. **Note**: This setting is especially relevant for vorticity data, where conventions vary by hemisphere. When using **wind speed data**, set `"northern"` for detection maxima in both hemispheres. For **sea level pressure (SLP) data**, keep `"southern"` as the default.
 

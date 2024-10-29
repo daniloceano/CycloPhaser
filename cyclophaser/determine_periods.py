@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2024/10/28 15:57:06 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/10/29 17:24:27 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,14 +30,6 @@ from cyclophaser.find_stages import find_intensification_period
 from cyclophaser.find_stages import find_decay_period 
 from cyclophaser.find_stages import find_mature_stage
 from cyclophaser.find_stages import find_residual_period
-
-# from . import lanczos_filter as lanfil
-# from .plots import plot_all_periods, plot_didactic
-# from .find_stages import find_incipient_period 
-# from .find_stages import find_intensification_period
-# from .find_stages import find_decay_period 
-# from .find_stages import find_mature_stage
-# from .find_stages import find_residual_period
 
 def find_peaks_valleys(series):
     """
@@ -404,6 +396,22 @@ def get_periods(vorticity,
 
     # Detect incipient stages
     df = find_incipient_period(df, **args_periods)
+
+    # Check for gaps or unexpected residual stages
+    detected_periods = df['periods'].dropna().unique()
+    if 'residual' in detected_periods[:-1]:
+        warnings.warn(
+            "Residual period detected in the middle of the time series, which may indicate data quality issues. "
+            "Adjusting pre-processing options might help resolve this issue.", 
+            UserWarning
+        )
+    gaps = df['periods'].isna().sum()
+    if gaps > 0:
+        warnings.warn(
+            f"{gaps} time steps are unclassified, which may suggest data quality issues. "
+            "Consider adjusting pre-processing options to reduce these gaps.", 
+            UserWarning
+        )
 
     # Convert periods to dictionary with start and end times
     periods_dict = periods_to_dict(df)
