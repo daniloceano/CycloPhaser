@@ -1,5 +1,5 @@
 
-![Glacial Indifference](https://github.com/daniloceano/CycloPhaser/assets/56005607/35597b83-26fb-41ba-838d-f414ae540317)
+![CycloPhaser Example Plot](https://github.com/daniloceano/CycloPhaser/raw/master/docs/_images/test_custom.png)
 
 # CycloPhaser
 

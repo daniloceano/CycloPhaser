@@ -12,25 +12,25 @@ The ``determine_periods`` function is the core of CycloPhaser, allowing users to
 
 **Parameters**:
 
-- **series**: (list) A list of vorticity values to be analyzed. **Note:** The series does not need to be in any specific units. The algorithm is designed to work with vorticity data, but other meteorological fields like sea level pressure (SLP) or geopotential height. However, these have not been fully tested yet, so care is advised when interpreting results from fields other than vorticity.
-- **x**: (list, optional) Temporal range or labels corresponding to the series. This list must be the same length as the vorticity `series`. Default is None.
+- **series**: (list or np.ndarray, pd.Series, or xr.DataArray) The primary data to be analyzed, representing vorticity or other cyclone-related time series. **Note:** The series does not need to be in any specific units, but it should typically represent vorticity or other cyclone-related metrics. Use with caution for data types beyond vorticity, as these have not been fully tested yet.
+- **x**: (list or pd.DatetimeIndex, optional) Temporal labels for the `series`, expected to be in the same length as `series`. If `series` is provided as a pandas Series or xarray DataArray, `x` is inferred from the index. When using a list or numpy array for `series`, `x` must be provided explicitly.
 - **plot**: (str or bool, optional) Path for saving generated plots. Set to `False` to disable plotting. Default is False.
 - **plot_steps**: (str or bool, optional) Path for saving step-by-step didactic plots. Set to `False` to disable step-wise plotting. Default is False.
 - **export_dict**: (str or bool, optional) Path for exporting the detected periods as a CSV file. Set to `False` to skip exporting. Default is False.
-- **use_filter**: (str or bool, optional) Whether to apply a Lanczos filter to the vorticity data. Specify a window length as an integer, or set to 'auto' to automatically adapt based on the data. Default is 'auto'.
-- **replace_endpoints_with_lowpass**: (int, optional) Replace the endpoints of the series with a lowpass filter. Specify the window length. Default is 24.
-- **use_smoothing**: (str or bool, optional) Apply Savgol smoothing to the vorticity data. Specify the window length, or use 'auto' to adapt based on data length. Default is 'auto'.
-- **use_smoothing_twice**: (str or bool, optional) Apply Savgol smoothing twice for additional noise reduction. Same options as `use_smoothing`. Default is 'auto'.
-- **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing. Default is 3.
-- **cutoff_low**: (float, optional) Low-frequency cutoff for the Lanczos filter. Default is 168.
-- **cutoff_high**: (float, optional) High-frequency cutoff for the Lanczos filter. Default is 48.
-- **threshold_intensification_length**: (float, optional) Minimum length for the intensification period. Default is 0.075 (7.5% of total series length).
-- **threshold_intensification_gap**: (float, optional) Maximum gap allowed between intensification periods. Default is 0.075.
+- **hemisphere**: (str, optional) Hemisphere of the data. Set to `"southern"` (default) to apply Southern Hemisphere conventions, or `"northern"` to automatically multiply input values by -1 for Northern Hemisphere compatibility. **Note**: This setting is especially relevant for vorticity data, where conventions vary by hemisphere. When using **wind speed data**, set `"northern"` for detection maxima in both hemispheres. For **sea level pressure (SLP) data**, keep `"southern"` as the default.
+- **use_filter**: (str or int, optional) Apply a Lanczos filter to the vorticity data. Set to `'auto'` for a default window length or specify an integer. **Units:** Time steps. Default is 'auto'.
+- **replace_endpoints_with_lowpass**: (int, optional) Replace the endpoints of the series with a lowpass filter. **Units:** Time steps. Default is 24.
+- **use_smoothing**: (str or int, optional) Apply Savgol smoothing to the vorticity data. Set to `'auto'` for an automatically chosen window length or provide an integer value for a custom window length. **Units:** Time steps.
+- **use_smoothing_twice**: (str or int, optional) Apply Savgol smoothing twice for additional noise reduction. Same requirements as `use_smoothing`. Default is 'auto'.
+- **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing. **Note:** This must be less than or equal to the window length specified in `use_smoothing`. Default is 3.
+- **cutoff_low** and **cutoff_high**: (float, optional) Low and high-frequency cutoffs for the Lanczos filter, respectively. **Units:** Time steps. Default values are 168 and 48, respectively.
+- **threshold_intensification_length**: (float, optional) Minimum required length for intensification periods as a fraction of the series length. Default is 0.075.
+- **threshold_intensification_gap**: (float, optional) Maximum gap allowed in intensification periods. Default is 0.075.
 - **threshold_mature_distance**: (float, optional) Distance threshold for detecting the mature stage. Default is 0.125.
-- **threshold_mature_length**: (float, optional) Minimum length for the mature stage. Default is 0.03 (3% of total series length).
-- **threshold_decay_length**: (float, optional) Minimum length for the decay period. Default is 0.075.
-- **threshold_decay_gap**: (float, optional) Maximum gap allowed between decay periods. Default is 0.075.
-- **threshold_incipient_length**: (float, optional) Minimum length for the incipient stage. Default is 0.4 (40% of the total time step to the next transition).
+- **threshold_mature_length**: (float, optional) Minimum required length for mature periods as a fraction of the series length. Default is 0.03.
+- **threshold_decay_length**: (float, optional) Minimum required length for decay periods as a fraction of the series length. Default is 0.075.
+- **threshold_decay_gap**: (float, optional) Maximum gap allowed in decay periods. Default is 0.075.
+- **threshold_incipient_length**: (float, optional) Minimum required length for incipient periods as a fraction of the series length. Default is 0.4.
 
 **Returns**:
 
@@ -45,8 +45,7 @@ The ``determine_periods`` function is the core of CycloPhaser, allowing users to
 
     track_file = 'tests/test.csv'
     track = pd.read_csv(track_file, parse_dates=[0], delimiter=';', index_col=[0])
-    series = track['min_zeta_850'].tolist()
-    x = track.index.tolist()
+    series = track['min_zeta_850']
 
     options = {
         "plot": 'path/to/save/plots',
