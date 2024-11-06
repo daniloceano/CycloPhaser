@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.2] - 2024-11-06
+
+### Fixed
+- Corrected a typo in the `conf.py` file within the `docs` folder: changed "Cyclophaser" to "CycloPhaser" in the `project` variable.
+
+
 ## [1.9.1] - 2024-10-29
 
 ### New Features and Improvements

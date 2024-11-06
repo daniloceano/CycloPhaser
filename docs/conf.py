@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'CyloPhaser'
+project = 'CycloPhaser'
 copyright = '2023, Danilo Couto de Souza'
 author = 'Danilo Couto de Souza'
 release = '1.5'
