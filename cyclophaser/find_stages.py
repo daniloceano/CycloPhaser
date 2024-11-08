@@ -3,6 +3,24 @@ import pandas as pd
 
 def find_mature_stage(df, **args_periods):
 
+    """
+    Identifies and marks the mature stage in the cyclone life cycle based on the 
+    given thresholds for mature distance and length.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing vorticity data with columns for 
+            'z_peaks_valleys' and 'periods'.
+        **args_periods: Variable length argument list containing period-specific 
+            thresholds, including:
+            - 'threshold_mature_distance' (float): Factor to calculate mature 
+              start and end distances from z valleys.
+            - 'threshold_mature_length' (float): Minimum length for a mature 
+              stage as a fraction of the total series length.
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with 'mature' stages marked in the 
+        'periods' column where applicable.
+    """
     threshold_mature_distance = args_periods['threshold_mature_distance']
     threshold_mature_length = args_periods['threshold_mature_length']
 
@@ -62,6 +80,25 @@ def find_mature_stage(df, **args_periods):
 
 def find_intensification_period(df, **args_periods):
 
+    """
+    Identifies and marks the intensification period in the cyclone life cycle 
+    based on the given thresholds for intensification length and gap.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing vorticity data with columns 
+            for 'z_peaks_valleys' and 'periods'.
+        **args_periods: Variable length argument list containing period-specific 
+            thresholds, including:
+            - 'threshold_intensification_length' (float): Minimum length for an 
+              intensification stage as a fraction of the total series length.
+            - 'threshold_intensification_gap' (float): Maximum gap allowed between 
+              consecutive intensification periods as a fraction of the total 
+              series length.
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with 'intensification' stages marked in the 
+        'periods' column where applicable.
+    """
     threshold_intensification_length = args_periods['threshold_intensification_length']
     threshold_intensification_gap = args_periods['threshold_decay_length']
 
@@ -100,6 +137,24 @@ def find_intensification_period(df, **args_periods):
 
 def find_decay_period(df, **args_periods):
 
+    """
+    Identifies and marks the decay stage in the cyclone life cycle based on the 
+    given thresholds for decay length and gap.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing vorticity data with columns for 
+            'z_peaks_valleys' and 'periods'.
+        **args_periods: Variable length argument list containing period-specific 
+            thresholds, including:
+            - 'threshold_decay_length' (float): Minimum decay length as a fraction 
+              of the total series length.
+            - 'threshold_decay_gap' (float): Maximum gap in decay periods as a 
+              fraction of the total series length.
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with 'decay' stages marked in the 
+        'periods' column where applicable.
+    """    
     threshold_decay_length = args_periods['threshold_decay_length']
     threshold_decay_gap = args_periods['threshold_decay_gap']
 
@@ -140,6 +195,23 @@ def find_decay_period(df, **args_periods):
     return df
 
 def find_residual_period(df):
+    """
+    Identifies and fills the 'residual' period in the cyclone life cycle stages where applicable.
+
+    This function analyzes the 'periods' column in the provided DataFrame and marks
+    the NaN values with 'residual' in specific conditions. If there is only one unique
+    phase present, it fills NaNs after the last block of this phase with 'residual'.
+    For multiple phases, it checks the sequence of phases and determines where 'residual'
+    should be applied, particularly after mature and intensification stages if no subsequent
+    decay or mature stages are detected.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing vorticity data with a 'periods' column.
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with 'residual' stages marked in the 'periods'
+        column where applicable.
+    """
     unique_phases = [item for item in df['periods'].unique() if pd.notnull(item)]
     num_unique_phases = len(unique_phases)
 
@@ -207,6 +279,23 @@ def find_residual_period(df):
 
 def find_incipient_period(df, **args_periods):
 
+    """
+    Identifies and marks the incipient period in the cyclone life cycle based on 
+    the given threshold for incipient length.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing vorticity data with columns for 
+            'periods' and 'dz_peaks_valleys'.
+        **args_periods: Variable length argument list containing period-specific 
+            thresholds, including:
+            - 'threshold_incipient_length' (float): Fraction of the time range 
+              between the start of intensification or decay and the next dz 
+              valley/peak to be marked as incipient.
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with 'incipient' stages marked in the 
+        'periods' column where applicable.
+    """
     threshold_incipient_length = args_periods['threshold_incipient_length']
 
     periods = df['periods']
@@ -253,10 +342,8 @@ def find_incipient_period(df, **args_periods):
             next_mature = df[periods == 'mature'].index.min()
             if next_dz_peak < next_mature:
                 time_range = start_time + ((next_dz_peak - start_time) * threshold_incipient_length)
-                df.loc[start_time:time_range, 'periods'] = 'incipient'
-        
-            
-
+                df.loc[start_time:time_range, 'periods'] = 'incipient'  
+                
     return df
 
 if __name__ == '__main__':

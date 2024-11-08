@@ -6,7 +6,7 @@
 #    By: daniloceano <danilo.oceano@gmail.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/19 19:06:47 by danilocs          #+#    #+#              #
-#    Updated: 2024/10/29 17:24:27 by daniloceano      ###   ########.fr        #
+#    Updated: 2024/11/08 16:51:45 by daniloceano      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -60,9 +60,27 @@ def find_peaks_valleys(series):
 
     return result
 
-
-
 def post_process_periods(df):
+    """
+    Post-processing of periods DataFrame.
+
+    This function takes a periods DataFrame and perform the following post-processing steps:
+
+    1. Find consecutive blocks of intensification and decay periods.
+    2. Fill NaN periods between consecutive intensification or decay blocks with the previous phase.
+    3. Replace periods of length dt with previous or next phase.
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+        DataFrame containing the periods information.
+
+    Returns
+    -------
+    df : pandas DataFrame
+        Post-processed DataFrame.
+
+    """
     dt = df.index[1] - df.index[0]
     
     # Find consecutive blocks of intensification and decay
@@ -98,6 +116,20 @@ def post_process_periods(df):
     return df
 
 def periods_to_dict(df):
+    """
+    Convert periods DataFrame to a dictionary of periods.
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+        DataFrame containing the periods information.
+
+    Returns
+    -------
+    periods_dict : dict
+        Dictionary of periods, where the keys are the period names and the values are tuples of start and end indices.
+
+    """
     periods_dict = {}
 
     # Find the start and end indices of each period
@@ -120,7 +152,6 @@ def periods_to_dict(df):
             periods_dict[period_name] = (start, end)
         
     return periods_dict
-
 
 def export_periods_to_csv(phases_dict, periods_outfile_path):
 

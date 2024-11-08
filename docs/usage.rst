@@ -12,6 +12,35 @@ Introduction
 
 The example provided in this guide demonstrates how to use the CycloPhaser package to analyze the life cycle phases of an extratropical cyclone. The data used in this example corresponds to the track file of a specific extratropical cyclone whose genesis occurred near the eastern coast of Argentina. This track file was produced using the LorenzCycleToolkit (https://github.com/daniloceano/LorenzCycleToolkit). The file contains the cyclone's position, as well as information regarding the minimum relative vorticity, geopotential height, and maximum wind speeds within a defined domain centered on the cyclone. CycloPhaser helps in dissecting this cyclone into distinct life cycle phases using the minimum vorticity time series.
 
+The data used in CycloPhaser should be structured in a specific format for seamless processing. Below is an example of the required format for the track file, which includes columns for `time`, `Lat`, and `Lon`. The data is separated by semicolons (`;`), and the `Lat` and `Lon` values represent the cyclone's latitude and longitude, respectively.
+
+Example data format:
+
+.. code-block:: text
+
+    time;Lat;Lon
+    2008-08-15-2100;-45.66;-56.87
+    2008-08-16-0000;-45.42;-54.98
+    2008-08-16-0300;-45.15;-53.52
+    2008-08-16-0600;-44.94;-52.16
+    2008-08-16-0900;-44.61;-51.08
+    2008-08-16-1200;-44.82;-49.75
+    2008-08-16-1500;-45.1;-48.02
+    2008-08-16-1800;-45.07;-46.09
+    2008-08-16-2100;-45.63;-43.37
+    2008-08-17-0000;-46.07;-40.66
+    2008-08-17-0300;-47.04;-38.5
+    2008-08-17-0600;-50.11;-34.48
+    2008-08-17-0900;-51.64;-31.25
+    2008-08-17-1200;-53.52;-27.45
+    2008-08-17-1500;-55.41;-23.27
+    2008-08-17-1800;-57.23;-19.46
+    2008-08-17-2100;-58.79;-16.03
+    2008-08-18-0000;-60.05;-13.02
+    2008-08-18-0300;-61.65;-10.61
+    2008-08-18-0600;-63.02;-8.55
+    2008-08-18-0900;-64.47;-7.37
+
 Arguments and Parameters for determine_periods
 ----------------------------------------------
 
