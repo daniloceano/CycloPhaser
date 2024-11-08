@@ -8,6 +8,20 @@ from .find_stages import find_intensification_period, find_decay_period, find_ma
 
 def plot_phase(df, phase, ax=None, show_title=True):
     # Create a copy of the DataFrame
+    """
+    Plot a specific phase of the cyclone's lifecycle on a given axis.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing vorticity data and phase information.
+    phase (str): The phase to plot, e.g., 'incipient', 'intensification', etc.
+    ax (matplotlib.axes.Axes, optional): Matplotlib Axes object to plot on. 
+                                         If None, a new figure and axes are created.
+    show_title (bool, optional): Whether to display the phase name as a title on the plot.
+
+    The function fills the area corresponding to the specified phase with a color 
+    defined in the `colors_phases` dictionary, plots the unsmoothed vorticity series, 
+    and overlays the smoothed vorticity on a twin y-axis.
+    """
     df_copy = df.copy()
 
     zeta = df_copy['z_unfil']
@@ -47,6 +61,16 @@ def plot_phase(df, phase, ax=None, show_title=True):
         plt.show()
 
 def plot_specific_peaks_valleys(df, ax, *kwargs):
+    """
+    Plot peaks and valleys of specific series in a DataFrame.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing the series and their respective peaks and valleys.
+    ax (matplotlib.axes.Axes): Matplotlib Axes object to plot on.
+    *kwargs (str): Specify the series and whether to plot peaks or valleys, e.g., 'z_peaks', 'dz_valleys', etc.
+
+    The function plots the specified series and their corresponding peaks and valleys on the given axes. The color and marker size are determined by the series name ('z', 'dz', or 'dz2').
+    """
     # Define the series and colors for plotting
     series_colors = {'z': 'k', 'dz': '#d62828', 'dz2': '#f7b538'}
     marker_sizes = {'z': 190, 'dz': 120, 'dz2': 50}
@@ -81,8 +105,20 @@ def plot_specific_peaks_valleys(df, ax, *kwargs):
                    s=marker_size, linewidth=2, zorder=zorder)
 
 def plot_vorticity(ax, vorticity):
+    """
+    Plot vorticity and its second smoothed derivative.
 
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Matplotlib Axes object to plot on.
+    vorticity : Cyclophaser.vorticity.Vorticity
+        Vorticity object.
+
+    The function plots the vorticity and its second smoothed derivative on the given axes. The smoothed derivative is the second derivative of the vorticity, which is filtered twice to remove high-frequency noise.
+    """
     zeta = vorticity.zeta
+
     vorticity_smoothed = vorticity.vorticity_smoothed2
 
     ax.axhline(0, c='gray', linewidth=0.5)
@@ -100,7 +136,16 @@ def plot_vorticity(ax, vorticity):
     ax.set_title("filter ζ", fontweight='bold', horizontalalignment='center')
 
 def plot_series_with_peaks_valleys(df, ax):
+    """
+    Plot the vorticity and its first and second derivatives, along with their peaks and valleys.
 
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the vorticity and its derivatives, as well as the peaks and valleys.
+    ax : matplotlib.axes.Axes
+        Axes to plot on.
+    """
     ax.axhline(0, c='gray', linewidth=0.5)
 
     # Define the series and colors for plotting
@@ -133,7 +178,19 @@ def plot_series_with_peaks_valleys(df, ax):
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.5), ncol=4)
 
 def plot_peaks_valleys_series(series, ax, *peaks_valleys_series_list):
+    """
+    Plot a time series along with its identified peaks and valleys.
 
+    Parameters:
+    series (pd.Series): The main time series data to be plotted.
+    ax (matplotlib.axes.Axes): Matplotlib Axes object to plot on.
+    *peaks_valleys_series_list (pd.Series): Variable number of series indicating 
+                                            peaks and valleys for 'z', 'dz', and 'dz2'.
+
+    The function plots the main series and highlights the peaks and valleys
+    with different colors and markers. It also draws vertical lines at specific
+    valleys and peaks to indicate key stage changes in the series.
+    """
     # Plot the series
     ax.plot(series, color='k')
 
@@ -169,8 +226,35 @@ def plot_peaks_valleys_series(series, ax, *peaks_valleys_series_list):
     ax.set_title('stages centers', fontweight='bold', horizontalalignment='center')
     ax.title.set_position([0.5, 1.05])
 
+def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_path=None):    
+    """
+    Plot vorticity data with periods.
 
-def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_path=None):
+    Parameters
+    ----------
+    phases_dict : dict
+        A dictionary where the keys are the phase names and the values are tuples
+        containing the start and end times of each phase.
+    df : pandas.DataFrame
+        The DataFrame containing the vorticity data.
+    ax : matplotlib.axes.Axes, optional
+        The Axes object to plot on. If not provided, a new figure will be created.
+    vorticity : Cyclophaser.vorticity.Vorticity, optional
+        The Vorticity object containing the vorticity data. If not provided, the
+        DataFrame will be used instead.
+    periods_outfile_path : str, optional
+        The path to save the plot to. If not provided, the plot will not be saved.
+
+    Notes
+    -----
+    The plot will be saved to a PNG file with the same name as the provided path,
+    but with a '.png' extension added. The plot will be saved at a resolution of 500
+    dpi.
+
+    Returns
+    -------
+    None
+    """
     # Define base colors for phases
     colors_phases = {
         'incipient': '#65a1e6',
@@ -255,8 +339,27 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
         plt.savefig(fname, dpi=500)
         print(f"{fname} created.")
 
-def plot_didactic(df, vorticity, output_directory, **periods_args):
-    
+def plot_didactic(df, vorticity, output_directory, **periods_args):    
+    """
+    Plot vorticity data in a didactic way to illustrate the CycloPhaser methodology.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame containing the vorticity data.
+    vorticity : Cyclophaser.vorticity.Vorticity
+        The Vorticity object containing the vorticity data.
+    output_directory : str
+        The directory where the plot will be saved.
+    **periods_args : dict
+        Additional arguments to pass to the periods detection functions.
+
+    Notes
+    -----
+    This function plots the vorticity data in a step-by-step way to illustrate the
+    CycloPhaser methodology. The plot is saved to a PNG file in the specified
+    output directory.
+    """
     # First step: filter vorticity data
     fig = plt.figure(figsize=(10, 8.5))
     ax1 = fig.add_subplot(331)

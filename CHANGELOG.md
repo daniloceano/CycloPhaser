@@ -5,11 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.4] - 2024-11-08
+- Version fixes
+
+## [1.9.3] - 2024-11-08
+
+### Documentation Enhancements
+- **Expanded Installation Instructions**: Added comprehensive steps for installing the package, including guidance for setting up with `pip` and `conda` environments.
+- **Clarified Statement of Need**: Removed the "Statement of Need" section from the documentation, as it is now effectively covered in the accompanying publication. Updated both the README and documentation homepage to provide a clear explanation of the package's purpose, emphasizing that CycloPhaser requires a pre-existing vorticity series. Detailed guidance added on obtaining vorticity data from tracking packages and reanalysis sources.
+- **Added Citations**: Included references to the CycloPhaser paper (under review) and to *International Journal of Climatology* to give users additional context and use cases for the package.
+- **Example Track File**: Added an example input track file format to the documentation, illustrating the expected structure for time, latitude, and longitude columns.
+- **Functionality Documentation**: Extended docstrings for other accessible functions to improve understanding of each function's role and usage.
+
 ## [1.9.2] - 2024-11-06
 
 ### Fixed
 - Corrected a typo in the `conf.py` file within the `docs` folder: changed "Cyclophaser" to "CycloPhaser" in the `project` variable.
-
 
 ## [1.9.1] - 2024-10-29
 

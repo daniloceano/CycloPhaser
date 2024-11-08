@@ -27,6 +27,17 @@ def pass_weights(window, cutoff):
     return w[1:-1]
 
 def lanczos_filter(variable, window_length_lanczo, frequency):
+    """
+    Apply a low pass Lanczos filter to the input variable.
+
+    Args:
+        variable (array-like): The input data to be filtered.
+        window_length_lanczo (int): The length of the Lanczos filter window.
+        frequency (float): The cutoff frequency for the filter in time steps.
+
+    Returns:
+        array-like: The filtered variable with noise reduced.
+    """
     weights = pass_weights(window_length_lanczo, 1.0 / frequency)
     filtered_variable = convolve(variable, weights, mode="same")
     return filtered_variable
@@ -61,6 +72,18 @@ def pass_weights_bandpass(window, cutoff_low, cutoff_high):
     return w[1:-1]
 
 def lanczos_bandpass_filter(variable, window_length_lanczo, cutoff_low, cutoff_high):
+    """
+    Apply a bandpass Lanczos filter to the input variable.
+
+    Args:
+        variable (array-like): The input data to be filtered.
+        window_length_lanczo (int): The length of the Lanczos filter window.
+        cutoff_low (float): The low cutoff frequency for the filter in time steps.
+        cutoff_high (float): The high cutoff frequency for the filter in time steps.
+
+    Returns:
+        array-like: The filtered variable with the specified frequency range.
+    """
     weights = pass_weights_bandpass(window_length_lanczo, cutoff_low, cutoff_high)
     filtered_variable = convolve(variable, weights, mode="same")
     return filtered_variable
