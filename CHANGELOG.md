@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **Example Track File**: Added an example input track file format to the documentation, illustrating the expected structure for time, latitude, and longitude columns.
 - **Functionality Documentation**: Extended docstrings for other accessible functions to improve understanding of each function's role and usage.
 
+## [1.9.2] - 2024-11-06
+
+### Fixed
+- Corrected a typo in the `conf.py` file within the `docs` folder: changed "Cyclophaser" to "CycloPhaser" in the `project` variable.
+
 ## [1.9.1] - 2024-10-29
 
 ### New Features and Improvements
