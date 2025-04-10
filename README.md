@@ -7,6 +7,8 @@
 [![CircleCI](https://circleci.com/gh/daniloceano/CycloPhaser.svg?style=shield)](https://circleci.com/gh/daniloceano/CycloPhaser)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python Versions](https://img.shields.io/pypi/pyversions/cyclophaser)](https://pypi.org/project/cyclophaser/)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.07363/status.svg)](https://doi.org/10.21105/joss.07363)
+
 
 CycloPhaser is a package designed to automate and improve the accuracy of detecting and categorizing cyclone life cycle phases, including intensification, maturation, and decay. Understanding these phases is crucial for analyzing cyclone behavior and the dynamic processes that drive their development. This knowledge supports both operational forecasters and researchers focused on improving cyclone representation in numerical models, ultimately enhancing forecast accuracy. Traditionally, phase identification requires manual analysis, which introduces subjectivity and limits the feasibility of analyzing large datasets. CycloPhaser addresses these challenges by offering an efficient, objective approach, compatible with high-resolution reanalysis data and real-time observations alike. With CycloPhaser, users gain a powerful tool for cyclone life cycle classification, supporting both advanced meteorological research and practical forecasting applications.
 
