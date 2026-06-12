@@ -102,16 +102,21 @@ def post_process_periods(df):
                         if all(pd.isna(preiods_between.unique())):
                             df.loc[preiods_between.index, 'periods'] = phase
     
-    # Replace periods of length dt with previous or next phase
+    # Replace singleton periods (isolated single timestep) with the surrounding phase.
+    # The original condition `len(period) == dt` compared a string length to a Timedelta,
+    # which is always False — so this block never executed.
     for index in df.index:
         period = df.loc[index, 'periods']
-        if pd.notna(period) and len(period) == dt:
+        if pd.notna(period):
             prev_index = index - dt
             next_index = index + dt
-            if prev_index in df.index and prev_index != df.index[0]:
-                df.loc[index, 'periods'] = df.loc[prev_index, 'periods']
-            elif next_index in df.index:
-                df.loc[index, 'periods'] = df.loc[next_index, 'periods']
+            prev_same = prev_index in df.index and df.loc[prev_index, 'periods'] == period
+            next_same = next_index in df.index and df.loc[next_index, 'periods'] == period
+            if not prev_same and not next_same:
+                if prev_index in df.index and prev_index != df.index[0]:
+                    df.loc[index, 'periods'] = df.loc[prev_index, 'periods']
+                elif next_index in df.index:
+                    df.loc[index, 'periods'] = df.loc[next_index, 'periods']
     
     return df
 
