@@ -1,0 +1,2 @@
+# Ignore baseline figures — generated locally, not tracked in git.
+*.png
