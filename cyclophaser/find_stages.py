@@ -117,7 +117,7 @@ def find_intensification_period(df, **args_periods):
     # Find intensification periods between z peaks and valleys
     for z_peak in z_peaks:
         next_z_valley = z_valleys[z_valleys > z_peak].min()
-        if next_z_valley is not pd.NaT:
+        if not pd.isna(next_z_valley):
             intensification_start = z_peak
             intensification_end = next_z_valley
 
@@ -173,7 +173,7 @@ def find_decay_period(df, **args_periods):
     # Find decay periods between z valleys and peaks
     for z_valley in z_valleys:
         next_z_peak = z_peaks[z_peaks > z_valley].min()
-        if next_z_peak is not pd.NaT:
+        if not pd.isna(next_z_peak):
             decay_start = z_valley
             decay_end = next_z_peak
         else:
@@ -269,7 +269,7 @@ def find_residual_period(df):
         for mature_period in mature_periods:
             if len(unique_phases) > 2:
                 next_decay_period = decay_periods[decay_periods > mature_period].min()
-                if next_decay_period is pd.NaT and mature_period != last_phase_end:
+                if pd.isna(next_decay_period) and mature_period != last_phase_end:
                     df.loc[mature_period:, 'periods'] = 'residual'
                     
         # Update mature periods
@@ -280,7 +280,7 @@ def find_residual_period(df):
         if len(unique_phases) > 2:
             for intensification_period in intensification_periods:
                 next_mature_period = mature_periods[mature_periods > intensification_period].min()
-                if next_mature_period is pd.NaT:
+                if pd.isna(next_mature_period):
                     df.loc[intensification_period:, 'periods'] = 'residual'
 
         # Fill NaNs after decay with residual if there is a decay, else, fill the NaNs after mature.
@@ -344,7 +344,7 @@ def find_incipient_period(df, **args_periods):
             decay_blocks = np.split(df[df['periods'] == "decay"].index,
                                 np.where(np.diff(df['periods'] == "decay") != 0)[0] + 1)
             end_time = decay_blocks[0].max()
-            if end_time is not pd.NaT:
+            if not pd.isna(end_time):
                 time_range = start_time + ((end_time - start_time) * threshold_incipient_length)
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
 
