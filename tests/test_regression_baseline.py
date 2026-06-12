@@ -2,7 +2,7 @@
 #
 # Two cases are covered here:
 #   - baseline_default:   determine_periods with all-default parameters.
-#   - baseline_smoothing: use_filter=False, use_smoothing=10,
+#   - baseline_smoothing: use_filter=False, use_smoothing=11,
 #                         use_smoothing_twice=False.
 #
 # NOT covered here on purpose:
@@ -57,7 +57,7 @@ def test_baseline_smoothing(series_and_index):
     series, x = series_and_index
     result = _run_and_dict(series, x,
                            use_filter=False,
-                           use_smoothing=10,
+                           use_smoothing=11,
                            use_smoothing_twice=False)
     expected = _load_baseline("baseline_smoothing")
     pd.testing.assert_frame_equal(

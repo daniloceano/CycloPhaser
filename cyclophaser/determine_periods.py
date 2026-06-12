@@ -248,7 +248,20 @@ def process_vorticity(
             window_length_savgol = len(zeta_df) // 2 | 1
     else:
         window_length_savgol = use_smoothing
-    
+        if isinstance(use_smoothing, int) and not isinstance(use_smoothing, bool):
+            _orig = window_length_savgol
+            window_length_savgol = window_length_savgol | 1  # ensure odd (consistent with 'auto' branch)
+            _max_valid = len(zeta_df) if len(zeta_df) % 2 == 1 else len(zeta_df) - 1
+            if window_length_savgol > _max_valid:
+                window_length_savgol = _max_valid
+            if window_length_savgol != _orig:
+                warnings.warn(
+                    f"use_smoothing={_orig} adjusted to {window_length_savgol} "
+                    f"(savgol_filter requires an odd window length not exceeding "
+                    f"the series length of {len(zeta_df)}).",
+                    UserWarning
+                )
+
     if use_smoothing_twice == 'auto':
         if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
             window_length_savgol_2nd = window_length_savgol * 2  | 1
@@ -256,6 +269,19 @@ def process_vorticity(
             window_length_savgol_2nd = window_length_savgol | 1
     else:
         window_length_savgol_2nd = use_smoothing_twice
+        if isinstance(use_smoothing_twice, int) and not isinstance(use_smoothing_twice, bool):
+            _orig_2nd = window_length_savgol_2nd
+            window_length_savgol_2nd = window_length_savgol_2nd | 1  # ensure odd
+            _max_valid = len(zeta_df) if len(zeta_df) % 2 == 1 else len(zeta_df) - 1
+            if window_length_savgol_2nd > _max_valid:
+                window_length_savgol_2nd = _max_valid
+            if window_length_savgol_2nd != _orig_2nd:
+                warnings.warn(
+                    f"use_smoothing_twice={_orig_2nd} adjusted to {window_length_savgol_2nd} "
+                    f"(savgol_filter requires an odd window length not exceeding "
+                    f"the series length of {len(zeta_df)}).",
+                    UserWarning
+                )
     
     # Check Savgol window length only if smoothing is enabled
     if use_smoothing and window_length_savgol < savgol_polynomial:
