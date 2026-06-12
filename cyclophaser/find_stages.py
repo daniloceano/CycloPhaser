@@ -260,7 +260,12 @@ def find_residual_period(df):
         # Check if 'mature' is the last stage before the end of the series
         last_phase_end = df.index[-1]
 
-        # Find residual periods where there is no decay stage after the mature stage
+        # Find residual periods where there is no decay stage after the mature stage.
+        # The loop iterates over individual timesteps rather than over contiguous blocks,
+        # but the result is equivalent to a block-based check: all timesteps within the
+        # same mature block share the same next_decay_period, so either every timestep
+        # in that block fires the conversion or none does.  Writes from later timesteps
+        # in the same block are harmless redundant overwrites of 'residual'.
         for mature_period in mature_periods:
             if len(unique_phases) > 2:
                 next_decay_period = decay_periods[decay_periods > mature_period].min()
