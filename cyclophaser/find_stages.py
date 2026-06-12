@@ -105,7 +105,7 @@ def find_intensification_period(df, **args_periods):
         'periods' column where applicable.
     """
     threshold_intensification_length = args_periods['threshold_intensification_length']
-    threshold_intensification_gap = args_periods['threshold_decay_length']
+    threshold_intensification_gap = args_periods['threshold_intensification_gap']
 
     # Find z peaks and valleys
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
