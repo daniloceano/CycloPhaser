@@ -373,7 +373,35 @@ def get_periods(vorticity,
                 threshold_incipient_length: float = 0.4) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
-    
+
+    Detection pipeline and phase precedence
+    ----------------------------------------
+    The detection functions are called in the following fixed order:
+
+        1. find_intensification_period
+        2. find_decay_period
+        3. find_mature_stage
+        4. find_residual_period
+        5. post_process_periods   (gap-filling and singleton removal)
+        6. find_incipient_period  (fills any remaining NaN at the series start)
+
+    Each function writes to the 'periods' column of the DataFrame.  Functions
+    called later can **overwrite** regions already labelled by earlier functions.
+    The most significant consequence is that ``find_decay_period`` (step 2) may
+    overwrite timesteps that ``find_intensification_period`` (step 1) had already
+    marked, because both functions scan the same z-peaks/valleys and their
+    detected intervals can overlap.
+
+    Threshold calibration note
+    ---------------------------
+    Because of this precedence, the practical effect of a threshold may be
+    smaller than expected.  For example, ``threshold_intensification_gap``
+    controls the maximum gap that is bridged between two intensification blocks;
+    however, if ``find_decay_period`` subsequently marks those same timesteps as
+    decay, the gap-bridging has no visible effect on the final output.  When
+    calibrating thresholds, always inspect the final 'periods' column rather than
+    assuming each parameter acts in isolation.
+
     Args:
         vorticity (xarray.DataArray): Processed vorticity dataset.
         plot (Union[str, bool], optional): Path to save plots or False to disable plotting. Default is False.
@@ -386,7 +414,7 @@ def get_periods(vorticity,
         threshold_decay_length (float, optional): Minimum decay stage length. Default is 0.075.
         threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075.
         threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4.
-    
+
     Returns:
         pd.DataFrame: DataFrame containing detected periods and associated information.
     """
