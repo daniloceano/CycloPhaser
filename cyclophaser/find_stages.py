@@ -315,7 +315,9 @@ def find_incipient_period(df, **args_periods):
 
     periods = df['periods']
     
-    df['periods'].fillna('incipient', inplace=True)
+    # inplace=True on a column accessor is a no-op under pandas CoW (pandas 3.0+);
+    # use explicit assignment to guarantee the fill propagates back to the DataFrame.
+    df['periods'] = df['periods'].fillna('incipient')
 
     phases_order = []
     current_phase = None
