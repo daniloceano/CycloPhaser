@@ -226,25 +226,31 @@ def find_residual_period(df):
     if num_unique_phases == 1:
         phase_to_fill = unique_phases[0]
 
-        # Find consecutive blocks of the same phase
-        phase_blocks = np.split(df[df['periods'] == phase_to_fill].index,
-                                np.where(np.diff(df['periods'] == phase_to_fill) != 0)[0] + 1)
+        # Find consecutive blocks of the same phase.
+        # B5 fix: split on the phase index itself (np.diff of the DatetimeIndex), not on
+        # a boolean mask diff — the boolean-mask approach produced split positions relative
+        # to the full DataFrame length, causing misaligned blocks when the phase does not
+        # start at row 0.
+        phase_idx = df[df['periods'] == phase_to_fill].index
+        phase_blocks = np.split(phase_idx, np.where(np.diff(phase_idx) != dt)[0] + 1)
 
-        # Find the last block of the same phase
-        # last_phase_block = phase_blocks[-1]
-
+        # B3 fix: break on the first non-empty block encountered in reverse order, which is
+        # the last non-empty block in forward order.  Without break the loop continued
+        # overwriting last_phase_block and ended up with the *first* block instead.
         for index in reversed(phase_blocks):
             if not index.empty:
                 last_phase_block = index
+                break
 
         # Find the index right after the last block
         if len(last_phase_block) > 0:
             last_phase_block_end = last_phase_block[-1]
-            # Fill NaNs after the last block with 'residual'
             df.loc[last_phase_block_end + dt:, 'periods'] = df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual')
         else:
+            # B4 fix: fillna with inplace=True on a slice is a no-op in pandas; use
+            # assignment instead.
             last_phase_block_end = phase_blocks[-2][-1]
-            df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
+            df.loc[last_phase_block_end + dt:, 'periods'] = df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual')
 
     else:
         mature_periods = df[df['periods'] == 'mature'].index
