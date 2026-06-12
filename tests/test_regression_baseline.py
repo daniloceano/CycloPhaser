@@ -2,7 +2,7 @@
 #
 # Two cases are covered here:
 #   - baseline_default:   determine_periods with all-default parameters.
-#   - baseline_smoothing: use_filter=False, use_smoothing=11,
+#   - baseline_smoothing: use_filter=False, use_smoothing=10,
 #                         use_smoothing_twice=False.
 #
 # NOT covered here on purpose:
@@ -55,10 +55,18 @@ def test_baseline_default(series_and_index):
 
 def test_baseline_smoothing(series_and_index):
     series, x = series_and_index
-    result = _run_and_dict(series, x,
-                           use_filter=False,
-                           use_smoothing=11,
-                           use_smoothing_twice=False)
+    kwargs = dict(use_filter=False, use_smoothing=10, use_smoothing_twice=False)
+
+    # Verify that the window-coercion warning fires (use_smoothing=10 -> 11).
+    # Call determine_periods directly so warnings aren't swallowed by _run_and_dict's inner context.
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        from cyclophaser.determine_periods import determine_periods
+        determine_periods(series, x=x, **kwargs)
+    adjustment_warnings = [w for w in caught if "adjusted" in str(w.message)]
+    assert adjustment_warnings, "Expected UserWarning about window adjustment for use_smoothing=10"
+
+    result = _run_and_dict(series, x, **kwargs)
     expected = _load_baseline("baseline_smoothing")
     pd.testing.assert_frame_equal(
         result.reset_index(drop=True),
