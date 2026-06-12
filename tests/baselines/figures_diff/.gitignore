@@ -1,2 +1,0 @@
-# Ignore generated before/after comparison figures — produced locally during bugfix.
-*.png
