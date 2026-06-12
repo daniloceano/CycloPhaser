@@ -144,9 +144,9 @@ def periods_to_dict(df):
 
         # Check if the period name already exists in the dictionary
         if period_name in periods_dict.keys():
-            # Append a suffix to the period name
-            suffix = len(periods_dict[period_name]) + 1 if len(periods_dict[period_name]) > 2 else 2
-            new_period_name = f"{period_name} {suffix}"
+            # Count all existing entries for this phase (base name + any "name N" variants)
+            count = sum(1 for k in periods_dict if k == period_name or k.startswith(f"{period_name} "))
+            new_period_name = f"{period_name} {count + 1}"
             periods_dict[new_period_name] = (start, end)
         else:
             periods_dict[period_name] = (start, end)

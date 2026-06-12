@@ -72,8 +72,13 @@ def find_mature_stage(df, **args_periods):
         blocks = np.split(mature_periods, np.where(np.diff(mature_periods) != dt)[0] + 1)
         for block in blocks:
             block_start, block_end = block[0], block[-1]
-            if df.loc[block_start - dt, 'periods'] != 'intensification' or \
-               df.loc[block_end + dt, 'periods'] != 'decay':
+            prev_idx = block_start - dt
+            next_idx = block_end + dt
+            # A mature block at the series boundary cannot have required neighbours —
+            # treat missing neighbour as "condition not satisfied" and clear the block.
+            if prev_idx not in df.index or next_idx not in df.index or \
+               df.loc[prev_idx, 'periods'] != 'intensification' or \
+               df.loc[next_idx, 'periods'] != 'decay':
                 df.loc[block_start:block_end, 'periods'] = np.nan
 
     return df
@@ -267,11 +272,15 @@ def find_residual_period(df):
                 if next_mature_period is pd.NaT:
                     df.loc[intensification_period:, 'periods'] = 'residual'
 
-        # Fill NaNs after decay with residual if there is a decay, else, fill the NaNs after mature
+        # Fill NaNs after decay with residual if there is a decay, else, fill the NaNs after mature.
+        # If neither is present (e.g. only intensification detected), there is no anchor point
+        # from which to extend residual — skip to avoid NameError on last_decay_index.
         if 'decay' in unique_phases:
             last_decay_index = df[df['periods'] == 'decay'].index[-1]
         elif 'mature' in unique_phases:
             last_decay_index = df[df['periods'] == 'mature'].index[-1]
+        else:
+            return df
         dt = df.index[1] - df.index[0]
         df.loc[last_decay_index + dt:, 'periods'] = df.loc[last_decay_index + dt:, 'periods'].fillna('residual')
 
