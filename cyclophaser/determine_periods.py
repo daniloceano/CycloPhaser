@@ -601,6 +601,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         - **Savgol Smoothing**: Ensure `use_smoothing` and `use_smoothing_twice` are integers greater than or equal 
           to `savgol_polynomial`. To disable, set `use_smoothing` to `False`.
     """
+    # Require temporal labels when the caller passes raw data without an index.
+    if isinstance(series, (list, np.ndarray)) and x is None:
+        raise ValueError(
+            "x must be provided when series is a list or numpy array. "
+            "Pass a list of datetime values or a pd.DatetimeIndex as x."
+        )
+
     # Check hemisphere
     if hemisphere.lower() not in ["southern", "northern"]:
         raise ValueError("Hemisphere must be 'southern' or 'northern'.")
