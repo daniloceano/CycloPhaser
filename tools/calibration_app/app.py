@@ -21,28 +21,60 @@ st.set_page_config(
     layout="wide",
 )
 
+# ── Default parameter values ───────────────────────────────────────────────────
+_DEFAULTS = {
+    "use_filter":        True,
+    "cutoff_low":        168,
+    "cutoff_high":       48,
+    "sm_mode":           "auto",
+    "sm_val":            17,
+    "sm2_mode":          "auto",
+    "sm2_val":           17,
+    "replace_endpoints": 24,
+    "savgol_poly":       3,
+}
+
+def _reset():
+    for k in _DEFAULTS:
+        st.session_state.pop(k, None)
+
 # ── Page header ────────────────────────────────────────────────────────────────
 st.title("CycloPhaser — Calibração de Parâmetros")
 st.caption("Etapa 1 · Filtragem e Suavização · 1 ciclone")
 
-# ── Sidebar: parameters ────────────────────────────────────────────────────────
+# ── Sidebar: reset + parameters ───────────────────────────────────────────────
 with st.sidebar:
+    st.button("↺ Restaurar defaults", on_click=_reset, use_container_width=True)
+    st.divider()
+
     st.header("Filtro Lanczos")
-    use_filter = st.checkbox("Aplicar filtro Lanczos", value=True)
+    use_filter = st.checkbox(
+        "Aplicar filtro Lanczos", value=_DEFAULTS["use_filter"], key="use_filter"
+    )
     cutoff_low = st.slider(
-        "Cutoff baixo (horas)", min_value=48, max_value=336, step=24, value=168
+        "Cutoff baixo (horas)",
+        min_value=48, max_value=336, step=24,
+        value=_DEFAULTS["cutoff_low"], key="cutoff_low",
     )
     cutoff_high = st.slider(
-        "Cutoff alto (horas)", min_value=12, max_value=96, step=6, value=48
+        "Cutoff alto (horas)",
+        min_value=12, max_value=96, step=6,
+        value=_DEFAULTS["cutoff_high"], key="cutoff_high",
     )
 
     st.divider()
     st.header("Suavização Savgol")
 
-    _sm_mode = st.selectbox("use_smoothing", ["auto", "off", "manual"])
+    _SM_OPTS = ["auto", "off", "manual"]
+    _sm_mode = st.selectbox(
+        "use_smoothing", _SM_OPTS,
+        index=_SM_OPTS.index(_DEFAULTS["sm_mode"]), key="sm_mode",
+    )
     if _sm_mode == "manual":
         _sm_val = st.slider(
-            "Janela Savgol 1× (steps, ímpar)", min_value=3, max_value=61, step=2, value=17
+            "Janela Savgol 1× (steps, ímpar)",
+            min_value=3, max_value=61, step=2,
+            value=_DEFAULTS["sm_val"], key="sm_val",
         )
         use_smoothing = _sm_val
     elif _sm_mode == "off":
@@ -50,10 +82,15 @@ with st.sidebar:
     else:
         use_smoothing = "auto"
 
-    _sm2_mode = st.selectbox("use_smoothing_twice", ["auto", "off", "manual"])
+    _sm2_mode = st.selectbox(
+        "use_smoothing_twice", _SM_OPTS,
+        index=_SM_OPTS.index(_DEFAULTS["sm2_mode"]), key="sm2_mode",
+    )
     if _sm2_mode == "manual":
         _sm2_val = st.slider(
-            "Janela Savgol 2× (steps, ímpar)", min_value=3, max_value=61, step=2, value=17
+            "Janela Savgol 2× (steps, ímpar)",
+            min_value=3, max_value=61, step=2,
+            value=_DEFAULTS["sm2_val"], key="sm2_val",
         )
         use_smoothing_twice = _sm2_val
     elif _sm2_mode == "off":
@@ -64,10 +101,13 @@ with st.sidebar:
     with st.expander("Opções avançadas", expanded=False):
         replace_endpoints = st.slider(
             "Substituir bordas com lowpass (timesteps)",
-            min_value=0, max_value=48, step=1, value=24,
+            min_value=0, max_value=48, step=1,
+            value=_DEFAULTS["replace_endpoints"], key="replace_endpoints",
         )
         savgol_poly = st.slider(
-            "Grau do polinômio Savgol", min_value=2, max_value=5, step=1, value=3
+            "Grau do polinômio Savgol",
+            min_value=2, max_value=5, step=1,
+            value=_DEFAULTS["savgol_poly"], key="savgol_poly",
         )
 
 # ── Cached processing ──────────────────────────────────────────────────────────
@@ -170,11 +210,22 @@ if use_smoothing is not False:
 
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %HZ"))
 plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
-ax.legend(handles=handles, loc="upper right", fontsize=9)
 ax.set_title(
     "Vorticidade: original (esq.) · filtrada / suavizada (dir.)", fontweight="bold"
 )
+
+# Legend below both axes so it never occludes the data
+fig.legend(
+    handles=handles,
+    loc="lower center",
+    ncol=len(handles),
+    fontsize=9,
+    bbox_to_anchor=(0.5, -0.04),
+    frameon=True,
+    framealpha=0.9,
+)
 fig.tight_layout()
+fig.subplots_adjust(bottom=0.22)
 
 st.pyplot(fig)
 plt.close(fig)
