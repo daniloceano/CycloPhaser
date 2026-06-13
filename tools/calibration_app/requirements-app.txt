@@ -5,5 +5,6 @@ xarray==2026.1.0
 numpy==2.4.0
 scipy==1.17.1
 cmocean==4.0.3
+pyyaml==6.0.3
 # instala cyclophaser em modo editável (edite antes de rodar se não estiver no repo root)
 -e ../..
