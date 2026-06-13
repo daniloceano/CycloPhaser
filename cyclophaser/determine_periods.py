@@ -31,32 +31,72 @@ from cyclophaser.find_stages import find_decay_period
 from cyclophaser.find_stages import find_mature_stage
 from cyclophaser.find_stages import find_residual_period
 
-def find_peaks_valleys(series):
+def _collapse_plateaux(indices):
+    """Collapse runs of consecutive indices to their midpoint (floor for even runs).
+
+    argrelextrema with np.greater_equal / np.less_equal marks every member of a
+    flat plateau as an extremum.  This helper reduces each such run to a single
+    representative index so downstream phase-detection logic sees one extremum
+    per plateau rather than a burst of duplicates.
+
+    Example: [2, 3, 4] → [3]  (odd run, exact midpoint)
+             [2, 3]    → [2]  (even run, floor of mean)
     """
-    Find peaks, valleys, and zero locations in a pandas series
+    if len(indices) == 0:
+        return indices
+    collapsed = []
+    run = [indices[0]]
+    for idx in indices[1:]:
+        if idx == run[-1] + 1:
+            run.append(idx)
+        else:
+            collapsed.append(int(np.floor(np.mean(run))))
+            run = [idx]
+    collapsed.append(int(np.floor(np.mean(run))))
+    return np.array(collapsed, dtype=indices.dtype)
+
+
+def find_peaks_valleys(series):
+    """Find peaks, valleys, and zero locations in a pandas Series.
+
+    Uses argrelextrema with np.greater_equal / np.less_equal so that a flat
+    plateau at a local extremum is still detected (strict > / < would miss it).
+    Consecutive indices returned by argrelextrema (plateau members) are collapsed
+    to a single representative point — the floor-midpoint of the run — to avoid
+    duplicate markings and peak/valley overlap within plateaux.
 
     Args:
-    series: pandas Series
+        series: pandas Series (z, dz, or dz2 from the preprocessed vorticity)
 
     Returns:
-    result: pandas Series with nans, "peak", "valley", and 0 in their respective positions
+        result: pandas Series with NaN, 'peak', 'valley', or 0 at each position
     """
-    # Extract the values of the series
     data = series.values
 
-    # Find peaks, valleys, and zero locations
-    peaks = argrelextrema(data, np.greater_equal)[0]
+    # Detect raw extrema (>= / <= catches flat-top plateaux as multiple indices)
+    peaks   = argrelextrema(data, np.greater_equal)[0]
     valleys = argrelextrema(data, np.less_equal)[0]
-    zeros = np.where(data == 0)[0]
+    zeros   = np.where(data == 0)[0]
 
-    # Create a series of NaNs
+    # Collapse each run of consecutive plateau indices to a single midpoint
+    peaks   = _collapse_plateaux(peaks)
+    valleys = _collapse_plateaux(valleys)
+
+    # After collapsing, a shared midpoint can still appear in both arrays when a
+    # perfectly flat plateau sits at a true minimum (the plateau members satisfy
+    # both >= and <= relative to their identical neighbours).  Valleys take
+    # priority (assignment order below), so remove any overlap from peaks to keep
+    # the result unambiguous.
+    overlap = np.intersect1d(peaks, valleys)
+    if len(overlap):
+        peaks = peaks[~np.isin(peaks, overlap)]
+
+    # Build result series
     result = pd.Series(index=series.index, dtype=object)
     result[:] = np.nan
-
-    # Label the peaks, valleys, and zero locations
-    result.iloc[peaks] = 'peak'
+    result.iloc[peaks]   = 'peak'
     result.iloc[valleys] = 'valley'
-    result.iloc[zeros] = 0
+    result.iloc[zeros]   = 0
 
     return result
 
