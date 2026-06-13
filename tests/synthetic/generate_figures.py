@@ -71,12 +71,18 @@ def plot_case(case_id: str, case: dict) -> Path:
         mpatches.Patch(color=_color(ph), label=ph, alpha=0.6)
         for ph in d
     ]
-    ax_z.legend(handles=patches, loc="lower left", fontsize=8, ncol=3)
+    fig.legend(
+        handles=patches, loc="lower center",
+        ncol=len(patches), fontsize=9,
+        bbox_to_anchor=(0.5, 0.0),
+        frameon=True, framealpha=0.9,
+    )
 
     ax_z.set_ylabel("ζ (s⁻¹)")
     ax_dz.set_ylabel("dz")
     ax_dz.set_xlabel("Time")
     fig.tight_layout()
+    fig.subplots_adjust(bottom=0.12)
 
     out = FIGDIR / f"{case_id}.png"
     fig.savefig(out, dpi=120, bbox_inches="tight")
