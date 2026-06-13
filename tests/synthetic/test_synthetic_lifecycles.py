@@ -16,6 +16,33 @@ Test modes (set via CASES[id]['test_mode']):
   'observational' — run and log detected sequence only; no assertions.
                     Used for truncated or ambiguous series where no ground
                     truth can be defined.
+
+Tolerance and detection lag (item #15)
+---------------------------------------
+The per-case tolerance is set to 6 timesteps (18 h at 3-hourly resolution).
+This value is NOT arbitrary: it reflects an inherent phase-detection lag
+observed empirically across this synthetic suite.
+
+Across the 12 cases, 5 touched the tolerance boundary (diff ≥ tol−1 = 5):
+
+  Case                    Phase              Diff
+  ItMD_clean              decay              5
+  ItMD_noisy              intensification    6
+  IcItMD_residual_noisy   residual           6
+  DItMD_residual_noisy    residual           5
+  IcItMD_residual_clean   residual           6
+
+The 'residual' lag is the most systematic: in all three cases with a residual
+segment, the detected start was 15–18 h (5–6 steps) after the designed segment
+boundary.  This is caused by the Lanczos + Savgol filtering chain needing
+several timesteps to build up enough amplitude to identify the re-intensification.
+
+The remaining two cases (ItMD_clean/decay and ItMD_noisy/intensification) may
+reflect the same phenomenon or a separate boundary effect; root cause has not
+been investigated (see item #15 in project notes).
+
+Practical implication: when interpreting CycloPhaser output, apply a margin of
+at least 18 h around detected phase start times, especially for 'residual'.
 """
 
 import warnings

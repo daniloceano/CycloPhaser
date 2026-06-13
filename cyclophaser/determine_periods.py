@@ -478,6 +478,21 @@ def get_periods(vorticity,
     calibrating thresholds, always inspect the final 'periods' column rather than
     assuming each parameter acts in isolation.
 
+    Phase detection lag note
+    ------------------------
+    The detected *start* of a phase may lag the true onset of that phase in the
+    input vorticity series by up to approximately 15–18 h (5–6 timesteps at
+    3-hourly resolution).  This lag is an inherent consequence of the Lanczos +
+    Savgol filtering chain: the smoothed signal requires several timesteps to
+    build up enough amplitude for the algorithm to reliably identify a new
+    feature.  The lag is most pronounced for ``residual`` (re-intensification
+    after decay), where it was consistently observed to be 15–18 h across
+    controlled synthetic test cases.  Other transitions (e.g. the onset of
+    intensification when no explicit incipient segment precedes it) can show
+    similar lags.  When interpreting results or defining search windows for
+    event attribution, a margin of at least 18 h around detected phase
+    boundaries is recommended.
+
     Args:
         vorticity (xarray.DataArray): Processed vorticity dataset.
         plot (Union[str, bool], optional): Path to save plots or False to disable plotting. Default is False.
