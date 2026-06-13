@@ -211,7 +211,59 @@ def _normalize(name: str) -> str:
 
 
 # Figure sizes per column count (matplotlib inches)
-_FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4)}
+_FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4), 4: (5, 3), 5: (4, 2.8), 6: (3.5, 2.5)}
+
+# Phase colours (mirror of plot_all_periods — kept here for compact mode and legend)
+PHASE_COLORS = {
+    "incipient":       "#65a1e6",
+    "intensification": "#f7b538",
+    "mature":          "#d62828",
+    "decay":           "#9aa981",
+    "residual":        "gray",
+}
+
+
+def _render_global_legend() -> None:
+    """Render one HTML legend bar showing phase colours. Used in dense-grid modes."""
+    swatches = "&nbsp;&nbsp;".join(
+        f'<span style="display:inline-flex;align-items:center;gap:4px;">'
+        f'<span style="background:{c};display:inline-block;width:14px;height:14px;'
+        f'border-radius:3px;flex-shrink:0;"></span>{ph}</span>'
+        for ph, c in PHASE_COLORS.items()
+    )
+    st.markdown(
+        f'<div style="font-size:12px;padding:4px 0 8px 0;">{swatches}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _plot_compact(cyclone_name: str, periods_dict: dict, vort) -> plt.Figure:
+    """Minimal phase figure for dense grids (n_cols >= 4).
+
+    Shows only vorticity_smoothed2 overlaid on phase shading.
+    No twin-axis, no per-figure legend, minimal labels.
+    Gap fix applied (same as generate_figures.py).
+    """
+    fig, ax = plt.subplots(figsize=_FIGSIZES[n_cols])
+
+    # Phase shading with gap fix
+    phases_list = list(periods_dict.items())
+    for i, (ph, (st_, en)) in enumerate(phases_list):
+        right = phases_list[i + 1][1][0] if i + 1 < len(phases_list) else en
+        ax.axvspan(st_, right, alpha=0.35, color=PHASE_COLORS.get(_normalize(ph), "#cccccc"))
+
+    # Single smoothed series (always available; equals filtered_vorticity when smoothing off)
+    ax.plot(vort.time, vort["vorticity_smoothed2"], color="black", lw=0.9)
+
+    ax.set_title(cyclone_name, fontsize=8, fontweight="bold", pad=2)
+    ax.set_ylabel("ζ (s⁻¹)", fontsize=7)
+    ax.tick_params(axis="both", labelsize=6)
+    ax.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
+    ax.xaxis.set_visible(False)
+    ax.yaxis.offsetText.set_fontsize(6)
+
+    fig.tight_layout(pad=0.5)
+    return fig
 
 
 def _compute_diagnostics(name, periods_dict, df_result, all_warns):
@@ -300,9 +352,13 @@ with st.sidebar:
 
 # ── Grid layout control ────────────────────────────────────────────────────────
 n_cols: int = st.select_slider(
-    "Colunas na grade", options=[1, 2, 3],
+    "Colunas na grade", options=[1, 2, 3, 4, 5, 6],
     value=_DEFAULTS["n_cols"], key="n_cols",
 )
+
+# Dense-grid global legend (rendered once, above the grid)
+if n_cols >= 4:
+    _render_global_legend()
 
 # ── Main processing loop ───────────────────────────────────────────────────────
 grid = st.columns(n_cols)
@@ -345,15 +401,22 @@ for idx, (cyclone_name, file_bytes) in enumerate(files.items()):
 
         periods_dict = periods_to_dict(df_result)
 
-        # Step 3 — plot_all_periods with controlled figsize
-        fig, ax_pre = plt.subplots(figsize=_FIGSIZES[n_cols])
-        try:
-            plot_all_periods(periods_dict, df_result, ax=ax_pre, vorticity=vort)
-        except Exception as exc:
-            st.error(f"Erro na figura de fases: {exc}")
-            plt.close(fig)
-            continue
-        ax_pre.set_title(cyclone_name, fontweight="bold")
+        # Step 3 — figure: compact (n_cols >= 4) or full plot_all_periods (n_cols <= 3)
+        if n_cols >= 4:
+            try:
+                fig = _plot_compact(cyclone_name, periods_dict, vort)
+            except Exception as exc:
+                st.error(f"Erro na figura compacta: {exc}")
+                continue
+        else:
+            fig, ax_pre = plt.subplots(figsize=_FIGSIZES[n_cols])
+            try:
+                plot_all_periods(periods_dict, df_result, ax=ax_pre, vorticity=vort)
+            except Exception as exc:
+                st.error(f"Erro na figura de fases: {exc}")
+                plt.close(fig)
+                continue
+            ax_pre.set_title(cyclone_name, fontweight="bold")
         st.pyplot(fig)
         plt.close(fig)
 
