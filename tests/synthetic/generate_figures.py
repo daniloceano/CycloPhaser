@@ -51,10 +51,14 @@ def plot_case(case_id: str, case: dict) -> Path:
     )
     fig.suptitle(case_id, fontsize=13, fontweight="bold")
 
-    for ph, (st, en) in d.items():
+    # Extend each axvspan to the *start* of the next phase so adjacent fills share
+    # the same boundary and leave no white gap between them.
+    phases_list = list(d.items())
+    for i, (ph, (st, en)) in enumerate(phases_list):
+        right = phases_list[i + 1][1][0] if i + 1 < len(phases_list) else en
         c = _color(ph)
-        ax_z.axvspan(st, en, alpha=0.25, color=c)
-        ax_dz.axvspan(st, en, alpha=0.25, color=c)
+        ax_z.axvspan(st, right, alpha=0.25, color=c)
+        ax_dz.axvspan(st, right, alpha=0.25, color=c)
 
     ax_z.plot(series.index, series.values, "k-", lw=1.0, label="ζ raw")
 
