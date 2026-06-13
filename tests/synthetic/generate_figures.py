@@ -53,6 +53,8 @@ def plot_case(case_id: str, case: dict) -> Path:
 
     # Extend each axvspan to the *start* of the next phase so adjacent fills share
     # the same boundary and leave no white gap between them.
+    # NOTE: the equivalent gap fix lives in cyclophaser/plots.py (plot_all_periods) —
+    # if you change the logic here, mirror it there (and vice-versa).
     phases_list = list(d.items())
     for i, (ph, (st, en)) in enumerate(phases_list):
         right = phases_list[i + 1][1][0] if i + 1 < len(phases_list) else en

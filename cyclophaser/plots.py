@@ -296,6 +296,8 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
     # The next phase starts at end+dt.  Coloring only up to 'end' leaves a dt-wide
     # white strip at every phase boundary.  Fix: extend each fill rightward to the
     # start of the following phase so adjacent fills share the same boundary point.
+    # NOTE: the equivalent gap fix lives in tests/synthetic/generate_figures.py —
+    # if you change the logic here, mirror it there (and vice-versa).
     phases_list = list(phases_dict.items())
     for i, (phase, (start, end)) in enumerate(phases_list):
         base_phase = phase.split()[0].strip()
