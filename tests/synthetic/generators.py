@@ -96,7 +96,9 @@ def make_lifecycle_series(
 
         elif stype == "It":
             target  = float(seg.get("amp", peak))
-            arr     = _ramp_sine(n, current, target) if shape == "sine" else _constant(n, target)
+            arr     = (_ramp_sine(n, current, target) if shape == "sine"
+                       else np.linspace(current, target, n) if shape == "linear"
+                       else _constant(n, target))
             current = float(arr[-1])
 
         elif stype == "M":
@@ -111,13 +113,17 @@ def make_lifecycle_series(
 
         elif stype == "D":
             target  = float(seg.get("amp", baseline))
-            arr     = _ramp_sine(n, current, target) if shape == "sine" else _constant(n, target)
+            arr     = (_ramp_sine(n, current, target) if shape == "sine"
+                       else np.linspace(current, target, n) if shape == "linear"
+                       else _constant(n, target))
             current = float(arr[-1])
 
         elif stype == "residual":
             # Partial re-intensification: goes partway toward peak without completing a cycle.
             target = float(seg.get("amp", (baseline + peak) / 2.0))
-            arr    = _ramp_sine(n, current, target) if shape == "sine" else _constant(n, target)
+            arr    = (_ramp_sine(n, current, target) if shape == "sine"
+                      else np.linspace(current, target, n) if shape == "linear"
+                      else _constant(n, target))
             current = float(arr[-1])
 
         else:

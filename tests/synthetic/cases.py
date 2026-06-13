@@ -142,63 +142,57 @@ CASES["ItMD_noisy"] = {
     ),
 }
 
-# ── (2) DItMD_noisy ───────────────────────────────────────────────────────────
-# Series starts at PEAK intensity and decays first, then re-intensifies.
-# Uses start_value=_P so the D segment starts from peak, not baseline.
+# ── (2) IcDItMD_noisy ────────────────────────────────────────────────────────
+# Series starts at PEAK intensity; the slow cosine onset of D is detected by
+# CycloPhaser as a brief 'incipient' before the real decay begins.
+# Uses start_value=_P.  D initial ramp is a cosine (sine shape) — its near-zero
+# derivative at t=0 creates the apparent stability window.
 # Segments: D(18,sine) It(20,sine) M(4,plateau) D(24,sine) → 66 points
 # Segment boundaries:
-#   (D starts at idx 0 from peak)
+#   decay starts at idx 0 (from peak, GT=0; CycloPhaser detects at ~3)
 #   intensification  step 18  (It: 18-37)
 #   mature           step 38  (M:  38-41)
 #   decay 2          step 42  (D:  42-65)
-# CycloPhaser adds 'incipient' (idx 0-2) before the first detected 'decay'.
-_SEG_2 = [
+_SEG_IcD2 = [
     {"type": "D",  "n": 18, "shape": "sine"},
     {"type": "It", "n": 20, "shape": "sine"},
     {"type": "M",  "n": 4,  "shape": "plateau"},
     {"type": "D",  "n": 24, "shape": "sine"},
 ]
-CASES["DItMD_noisy"] = {
-    "segments": _SEG_2,
+CASES["IcDItMD_noisy"] = {
+    "segments": _SEG_IcD2,
     "kwargs":   {"noise_frac": 0.02, "seed": 1, "start_value": _P},
-    "series":   make_lifecycle_series(_SEG_2, noise_frac=0.02, seed=1, start_value=_P),
+    "series":   make_lifecycle_series(_SEG_IcD2, noise_frac=0.02, seed=1, start_value=_P),
     "expected_phases":     ["incipient", "decay", "intensification", "mature", "decay"],
     "expected_starts_idx": {
         "incipient":       0,
-        "decay":           0,   # D segment boundary; CycloPhaser detects ~3 steps later
+        "decay":           0,
         "intensification": 18,
         "mature":          38,
         "decay 2":         42,
     },
     "tolerance": 6,
     "notes": (
-        "Series starts at peak intensity (start_value=peak).  CycloPhaser prepends "
-        "a 3-step 'incipient' before recognising the initial decay.  Tests that "
-        "decay-first scenarios are handled correctly.  Second 'decay' timing uses "
-        "full phase name 'decay 2' to check second occurrence."
+        "Starts at peak intensity with a cosine D ramp.  The near-zero derivative "
+        "at the cosine start looks like 'incipient' to CycloPhaser (3-step window). "
+        "Retained as an example of Ic+D lifecycle onset (IcDItMD pattern)."
     ),
 }
 
-# ── (3) DItMD_residual_noisy ──────────────────────────────────────────────────
-# Starts at peak, decays, full ItMD cycle, then residual re-intensification.
-# Segments: D(16) It(16) M(4,plateau) D(16) residual(14) → 66 points
-# Segment boundaries:
-#   D starts at idx 0 (from peak)
-#   intensification  step 16
-#   mature           step 32
-#   decay 2          step 36
-#   residual         step 52
-_SEG_3 = [
+# ── (3) IcDItMD_residual_noisy ────────────────────────────────────────────────
+# Same as IcDItMD_noisy but with a residual re-intensification at the end.
+# Segments: D(16,sine) It(16) M(4) D(16) residual(14) → 66 points
+_SEG_IcD3 = [
     {"type": "D",        "n": 16, "shape": "sine"},
     {"type": "It",       "n": 16, "shape": "sine"},
     {"type": "M",        "n": 4,  "shape": "plateau"},
     {"type": "D",        "n": 16, "shape": "sine"},
     {"type": "residual", "n": 14, "shape": "sine"},
 ]
-CASES["DItMD_residual_noisy"] = {
-    "segments": _SEG_3,
+CASES["IcDItMD_residual_noisy"] = {
+    "segments": _SEG_IcD3,
     "kwargs":   {"noise_frac": 0.02, "seed": 2, "start_value": _P},
-    "series":   make_lifecycle_series(_SEG_3, noise_frac=0.02, seed=2, start_value=_P),
+    "series":   make_lifecycle_series(_SEG_IcD3, noise_frac=0.02, seed=2, start_value=_P),
     "expected_phases": [
         "incipient", "decay", "intensification", "mature", "decay", "residual"
     ],
@@ -212,8 +206,79 @@ CASES["DItMD_residual_noisy"] = {
     },
     "tolerance": 6,
     "notes": (
-        "Six-phase decay-first cycle with residual.  Starts at peak (start_value). "
-        "Tests that 'residual' is correctly detected after the second decay."
+        "Six-phase decay-first cycle with residual and cosine D onset.  Same "
+        "incipient artifact as IcDItMD_noisy.  Tests residual detection after a "
+        "second decay in a decay-first lifecycle."
+    ),
+}
+
+# ── (2b) DItMD_noisy ─────────────────────────────────────────────────────────
+# Series starts at PEAK intensity and decays abruptly (linear ramp) from step 0.
+# The linear D has constant dz from the first timestep — no stability window —
+# so CycloPhaser correctly starts with 'decay' and never detects 'incipient'.
+# Segments: D(10,linear) It(20,sine) M(4,plateau) D(32,sine) → 66 points
+# Segment boundaries:
+#   decay            step 0  (D: 0-9)
+#   intensification  step 10 (It: 10-29)
+#   mature           step 30 (M:  30-33)
+#   decay 2          step 34 (D:  34-65)
+_SEG_D2 = [
+    {"type": "D",  "n": 10, "shape": "linear"},
+    {"type": "It", "n": 20, "shape": "sine"},
+    {"type": "M",  "n": 4,  "shape": "plateau"},
+    {"type": "D",  "n": 32, "shape": "sine"},
+]
+CASES["DItMD_noisy"] = {
+    "segments": _SEG_D2,
+    "kwargs":   {"noise_frac": 0.02, "seed": 1, "start_value": _P},
+    "series":   make_lifecycle_series(_SEG_D2, noise_frac=0.02, seed=1, start_value=_P),
+    "expected_phases":     ["decay", "intensification", "mature", "decay"],
+    "expected_starts_idx": {
+        "decay":           0,
+        "intensification": 10,
+        "mature":          30,
+        "decay 2":         34,
+    },
+    "tolerance": 6,
+    "notes": (
+        "Abrupt-onset decay-first lifecycle.  Linear D ramp ensures dz > 0 from "
+        "step 0, preventing CycloPhaser from prepending an 'incipient' phase."
+    ),
+}
+
+# ── (3b) DItMD_residual_noisy ────────────────────────────────────────────────
+# Same as DItMD_noisy but with a residual re-intensification at the end.
+# Segments: D(10,linear) It(16,sine) M(4,plateau) D(16,sine) residual(20,sine)
+#           → 66 points
+# Segment boundaries:
+#   decay            step 0  (D: 0-9)
+#   intensification  step 10 (It: 10-25)
+#   mature           step 26 (M:  26-29)
+#   decay 2          step 30 (D:  30-45)
+#   residual         step 46 (residual: 46-65)
+_SEG_D3 = [
+    {"type": "D",        "n": 10, "shape": "linear"},
+    {"type": "It",       "n": 16, "shape": "sine"},
+    {"type": "M",        "n": 4,  "shape": "plateau"},
+    {"type": "D",        "n": 16, "shape": "sine"},
+    {"type": "residual", "n": 20, "shape": "sine"},
+]
+CASES["DItMD_residual_noisy"] = {
+    "segments": _SEG_D3,
+    "kwargs":   {"noise_frac": 0.02, "seed": 2, "start_value": _P},
+    "series":   make_lifecycle_series(_SEG_D3, noise_frac=0.02, seed=2, start_value=_P),
+    "expected_phases": ["decay", "intensification", "mature", "decay", "residual"],
+    "expected_starts_idx": {
+        "decay":           0,
+        "intensification": 10,
+        "mature":          26,
+        "decay 2":         30,
+        "residual":        46,
+    },
+    "tolerance": 6,
+    "notes": (
+        "Abrupt-onset decay-first lifecycle with residual.  Linear D ramp removes "
+        "the incipient artifact present in IcDItMD_residual_noisy."
     ),
 }
 
