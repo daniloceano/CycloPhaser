@@ -44,11 +44,18 @@ def make_lifecycle_series(
         Ordered lifecycle segments.  Each dict must contain:
           'type'  : 'Ic' | 'It' | 'M' | 'D' | 'residual'
           'n'     : int — number of timesteps
-          'shape' : 'sine' | 'plateau'
-                    (default: 'plateau' for M, 'sine' for everything else)
+          'shape' : 'sine' | 'plateau' | 'linear'
+                    Ramp shape for It, D, and residual segments:
+                      'sine'    — half-period cosine (smooth, zero derivative at
+                                  both endpoints); default for It/D/residual.
+                      'linear'  — constant-slope ramp (non-zero dz from the
+                                  first timestep; prevents CycloPhaser from
+                                  misidentifying the onset as 'incipient').
+                      'plateau' — constant value at the segment target;
+                                  default for M; produces an exact flat top.
         Optional per-segment override:
-          'amp'   : float — target end-value for sine ramps; level for plateau;
-                    partial-intensification target for 'residual'.
+          'amp'   : float — target end-value for sine/linear ramps; level for
+                    plateau; partial-intensification target for 'residual'.
 
     Segment semantics
     -----------------

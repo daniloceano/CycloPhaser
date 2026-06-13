@@ -387,27 +387,41 @@ CASES["IcIt_observational"] = {
     ),
 }
 
-# ── (7) quase_ItD_property ────────────────────────────────────────────────────
-# Sharp It→D transition with no M segment: peak is a single point.
-# After fix-#10, the consecutive identical points at peak are collapsed to one,
-# but the algorithm still detects a brief 'mature' phase at the cusp.
-# PROPERTY TEST: never fails.  Logs whether 'mature' appears in the sequence
-# (expected: it DOES appear, as CycloPhaser finds the cusp as mature).
+# ── (7) quase_ItD ────────────────────────────────────────────────────────────
+# It→D with no explicit M segment.
+#
+# THEORETICAL CONCLUSION (not a bug):
+#   For any smooth vorticity curve, a transition from intensification (dz < 0,
+#   vorticity becoming more negative) to decay (dz > 0) MUST pass through a
+#   local minimum — i.e., a point where dz = 0.  That minimum IS the mature
+#   phase by definition.  There is no smooth path from It directly to D that
+#   avoids a mature state; "ItD without M" is theoretically impossible for a
+#   continuous signal.  The Savgol-smoothed curve has exactly this minimum at
+#   the cusp, and CycloPhaser correctly identifies it as 'mature'.
+#
+#   The detection of 'mature' here is therefore the EXPECTED and CORRECT
+#   behaviour, not an artefact of the smoother or a limitation of the
+#   algorithm.  This case exists to document and assert that property.
+#
 # Segments: It(33,sine) D(33,sine) → 66 points
+# Peak at the It→D transition (idx 32–33); Savgol smoothes this into a brief
+# minimum window that CycloPhaser detects as 'mature' (idx ~29–37).
+# No expected_starts_idx: timing of the cusp is not a segment boundary.
 _SEG_7 = [
     {"type": "It", "n": 33, "shape": "sine"},
     {"type": "D",  "n": 33, "shape": "sine"},
 ]
-CASES["quase_ItD_property"] = {
+CASES["quase_ItD"] = {
     "segments": _SEG_7,
     "kwargs":   {"noise_frac": 0.0},
     "series":   make_lifecycle_series(_SEG_7, noise_frac=0.0),
-    "test_mode": "property_no_mature",
+    "expected_phases": ["incipient", "intensification", "mature", "decay"],
     "notes": (
-        "It followed immediately by D, no M plateau.  Two consecutive points reach "
-        "the same minimum (peak), which CycloPhaser's smoother rounds into a brief "
-        "'mature' window.  Property test: logs whether 'mature' appears (it does "
-        "as of this test run) — never fails.  Retained to document this behaviour."
+        "It→D with no explicit M segment.  Asserts that CycloPhaser detects "
+        "'mature' at the cusp — the correct theoretical outcome, since any smooth "
+        "It→D transition must pass through a local vorticity minimum (dz=0), which "
+        "is the mature phase by definition.  No timing check (the cusp has no "
+        "designed segment boundary)."
     ),
 }
 

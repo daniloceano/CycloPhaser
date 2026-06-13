@@ -11,9 +11,11 @@ frozen baseline).  They verify that CycloPhaser produces physically sensible
 phase sequences and approximately correct timing on controlled synthetic inputs.
 
 Test modes (set via CASES[id]['test_mode']):
-  'standard'          — assert sequence == expected AND timing within tolerance.
-  'observational'     — run and log detected sequence only; no assertions.
-  'property_no_mature'— log whether 'mature' appears; never fail.
+  'standard'      — assert sequence == expected AND timing within tolerance.
+                    This is the default.
+  'observational' — run and log detected sequence only; no assertions.
+                    Used for truncated or ambiguous series where no ground
+                    truth can be defined.
 """
 
 import warnings
@@ -80,15 +82,6 @@ def test_lifecycle_phase_sequence(case_id):
         print(f"\n[{case_id}] OBSERVATIONAL — detected sequence: {seq}")
         return  # no assertion
 
-    if test_mode == "property_no_mature":
-        if "mature" in seq:
-            print(f"\n[{case_id}] PROPERTY OBSERVATION: 'mature' was detected "
-                  f"despite no M segment — full sequence: {seq}")
-        else:
-            print(f"\n[{case_id}] PROPERTY OK: 'mature' correctly absent — "
-                  f"sequence: {seq}")
-        return  # never fail for property tests
-
     # standard
     exp_seq = case["expected_phases"]
     assert seq == exp_seq, (
@@ -104,8 +97,8 @@ def test_lifecycle_phase_timing(case_id):
     case      = CASES[case_id]
     test_mode = case.get("test_mode", "standard")
 
-    if test_mode in ("observational", "property_no_mature"):
-        pytest.skip(f"Timing not checked for test_mode='{test_mode}'")
+    if test_mode == "observational":
+        pytest.skip("Timing not checked for observational cases")
 
     series  = case["series"]
     exp_idx = case.get("expected_starts_idx", {})
