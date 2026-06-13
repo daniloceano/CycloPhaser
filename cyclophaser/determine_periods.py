@@ -65,6 +65,16 @@ def find_peaks_valleys(series):
     to a single representative point — the floor-midpoint of the run — to avoid
     duplicate markings and peak/valley overlap within plateaux.
 
+    NOTE (#14 — pending fix): argrelextrema uses mode='clip' by default, which
+    compares boundary indices against themselves as the "missing" neighbour.
+    This means index 0 is marked as a peak whenever data[0] >= data[1], and
+    index N-1 whenever data[-1] >= data[-2], regardless of whether the boundary
+    is a true extremum or merely a smoothing artefact (most visible in dz and
+    dz2, whose boundary values are distorted by savgol_filter mode='nearest').
+    Fixing this without incorrectly removing genuine boundary extrema in z
+    (which correspond to the start/end of the cyclone lifecycle at a vorticity
+    minimum) requires additional investigation and a dedicated visual checkpoint.
+
     Args:
         series: pandas Series (z, dz, or dz2 from the preprocessed vorticity)
 
