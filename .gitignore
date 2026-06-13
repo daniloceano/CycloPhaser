@@ -178,3 +178,6 @@ test*csv
 
 .DS_Store
 Pipfile.lock
+
+# Synthetic test figures (generated, not tracked)
+tests/synthetic/figures/*.png
