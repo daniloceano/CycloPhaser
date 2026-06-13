@@ -131,37 +131,48 @@ except Exception as exc:
 for msg in warns:
     st.warning(msg)
 
-# ── Figure: raw vs filtered vs smoothed ───────────────────────────────────────
+# ── Figure: raw (left axis) vs filtered/smoothed (right twin axis) ─────────────
 fig, ax = plt.subplots(figsize=(12, 4.5))
 
-ax.plot(
+h1, = ax.plot(
     vort.time, vort.zeta,
     color="gray", lw=0.8, alpha=0.7, label="ζ original",
 )
-ax.plot(
+ax.axhline(0, color="k", lw=0.4, ls="--")
+ax.set_ylabel("ζ original (s⁻¹)", color="gray")
+ax.tick_params(axis="y", labelcolor="gray")
+ax.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
+
+# Filtered and smoothed series on a separate y-axis (different scale due to noise)
+ax2 = ax.twinx()
+ax2.set_ylabel("ζ filtrada / suavizada (s⁻¹)")
+ax2.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
+
+handles = [h1]
+h2, = ax2.plot(
     vort.time, vort.filtered_vorticity,
     color="#d68c45", lw=1.5, label="ζ filtrada (Lanczos)",
 )
+handles.append(h2)
 
 if use_smoothing is not False:
-    ax.plot(
+    h3, = ax2.plot(
         vort.time, vort.vorticity_smoothed,
         color="#1d3557", lw=2.0, label="ζ suavizada 1×",
     )
+    handles.append(h3)
     if use_smoothing_twice is not False:
-        ax.plot(
+        h4, = ax2.plot(
             vort.time, vort.vorticity_smoothed2,
             color="#e63946", lw=2.0, label="ζ suavizada 2×",
         )
+        handles.append(h4)
 
-ax.axhline(0, color="k", lw=0.4, ls="--")
-ax.set_ylabel("ζ (s⁻¹)")
-ax.ticklabel_format(axis="y", style="sci", scilimits=(-3, 3))
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %HZ"))
 plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
-ax.legend(loc="upper right", fontsize=9)
+ax.legend(handles=handles, loc="upper right", fontsize=9)
 ax.set_title(
-    "Vorticidade: original · filtrada · suavizada", fontweight="bold"
+    "Vorticidade: original (esq.) · filtrada / suavizada (dir.)", fontweight="bold"
 )
 fig.tight_layout()
 
