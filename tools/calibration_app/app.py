@@ -7,6 +7,7 @@ parameters interactively, and inspect results across all cyclones at once.
 import hashlib
 import io
 import warnings
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -26,15 +27,14 @@ try:
 except Exception:
     _CP_VERSION = "unknown"
 
-# Methodology image (used in Documentation tab)
 _METHOD_IMG = (
     Path(__file__).parent.parent.parent / "docs" / "_images" / "cyclophaser_methodology.jpg"
 )
 
-# ── Page config ─────────────────────────────────────────────────────────────────
+# ── Page config ──────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="CycloPhaser Calibration", layout="wide")
 
-# ── Default parameter values ─────────────────────────────────────────────────────
+# ── Defaults ─────────────────────────────────────────────────────────────────────
 _DEFAULTS: dict = {
     "use_filter":        True,
     "cutoff_low":        168,
@@ -55,10 +55,274 @@ _DEFAULTS: dict = {
     "thr_inc_len":       0.400,
 }
 
+_SM_OPTS = ["auto", "off", "manual"]
+
+# YAML key → (session_state key, converter)
+_YAML_FILTER_MAP: dict = {
+    "use_filter":                    ("use_filter",        bool),
+    "cutoff_low":                    ("cutoff_low",        int),
+    "cutoff_high":                   ("cutoff_high",       int),
+    "replace_endpoints_with_lowpass": ("replace_endpoints", int),
+    "savgol_polynomial":             ("savgol_poly",       int),
+}
+_YAML_PHASE_MAP: dict = {
+    "threshold_intensification_length": ("thr_int_len",  float),
+    "threshold_intensification_gap":    ("thr_int_gap",  float),
+    "threshold_mature_distance":        ("thr_mat_dist", float),
+    "threshold_mature_length":          ("thr_mat_len",  float),
+    "threshold_decay_length":           ("thr_dec_len",  float),
+    "threshold_decay_gap":              ("thr_dec_gap",  float),
+    "threshold_incipient_length":       ("thr_inc_len",  float),
+}
+_KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
+_KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP)
+
+
+# ── Pure helper functions ─────────────────────────────────────────────────────────
+def _normalize(name: str) -> str:
+    return name.rstrip(" 0123456789").strip()
+
 
 def _reset() -> None:
     for k in _DEFAULTS:
         st.session_state.pop(k, None)
+    # Clear YAML import state so a still-loaded file can be re-imported after reset
+    st.session_state.pop("_yaml_import_hash", None)
+    st.session_state.pop("_yaml_import_result", None)
+
+
+def _load_yaml_config(yaml_bytes: bytes) -> dict:
+    """Parse an exported YAML and write values into session_state.
+
+    Returns {"error": str|None, "ignored": list, "missing": list, "count": int}.
+    """
+    try:
+        doc = yaml.safe_load(yaml_bytes)
+    except yaml.YAMLError as exc:
+        return {"error": f"Invalid YAML: {exc}", "ignored": [], "missing": [], "count": 0}
+
+    if not isinstance(doc, dict):
+        return {"error": "YAML root must be a mapping.", "ignored": [], "missing": [], "count": 0}
+
+    missing_secs = [s for s in ("filter_params", "phase_params") if s not in doc]
+    if missing_secs:
+        return {
+            "error": f"Missing required sections: {', '.join(missing_secs)}",
+            "ignored": [], "missing": [], "count": 0,
+        }
+
+    fp = doc["filter_params"]
+    pp = doc["phase_params"]
+
+    ignored = (
+        [f"filter_params.{k}" for k in fp if k not in _KNOWN_FILTER_YAML_KEYS]
+        + [f"phase_params.{k}" for k in pp if k not in _KNOWN_PHASE_YAML_KEYS]
+    )
+    missing = (
+        [f"filter_params.{k}" for k in _KNOWN_FILTER_YAML_KEYS if k not in fp]
+        + [f"phase_params.{k}" for k in _KNOWN_PHASE_YAML_KEYS  if k not in pp]
+    )
+
+    count = 0
+    for yaml_key, (ss_key, conv) in _YAML_FILTER_MAP.items():
+        if yaml_key in fp:
+            try:
+                st.session_state[ss_key] = conv(fp[yaml_key])
+                count += 1
+            except (ValueError, TypeError):
+                ignored.append(f"filter_params.{yaml_key} (conversion error)")
+
+    # use_smoothing / use_smoothing_twice need special handling (mode + optional value)
+    for yaml_key, mode_key, val_key in [
+        ("use_smoothing",       "sm_mode",  "sm_val"),
+        ("use_smoothing_twice", "sm2_mode", "sm2_val"),
+    ]:
+        if yaml_key in fp:
+            v = fp[yaml_key]
+            if v == "auto":
+                st.session_state[mode_key] = "auto"; count += 1
+            elif v is False or v == "off":
+                st.session_state[mode_key] = "off"; count += 1
+            elif isinstance(v, int):
+                st.session_state[mode_key] = "manual"
+                st.session_state[val_key]  = v
+                count += 1
+
+    for yaml_key, (ss_key, conv) in _YAML_PHASE_MAP.items():
+        if yaml_key in pp:
+            try:
+                st.session_state[ss_key] = conv(pp[yaml_key])
+                count += 1
+            except (ValueError, TypeError):
+                ignored.append(f"phase_params.{yaml_key} (conversion error)")
+
+    return {"error": None, "ignored": ignored, "missing": missing, "count": count}
+
+
+def _build_yaml(cyclone_names) -> str:
+    doc = {
+        "metadata": {
+            "timestamp":           datetime.now(timezone.utc).isoformat(),
+            "cyclophaser_version": _CP_VERSION,
+            "cyclones_used":       list(cyclone_names),
+        },
+        "filter_params": {
+            "use_filter":                    use_filter,
+            "cutoff_low":                    int(cutoff_low),
+            "cutoff_high":                   int(cutoff_high),
+            "replace_endpoints_with_lowpass": int(replace_endpoints),
+            "use_smoothing":                 use_smoothing,
+            "use_smoothing_twice":           use_smoothing_twice,
+            "savgol_polynomial":             int(savgol_poly),
+        },
+        "phase_params": {k: float(v) for k, v in _PHASE_PARAMS.items()},
+    }
+    return yaml.dump(doc, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+
+def _render_csv(periods_dict: dict) -> bytes:
+    rows = [
+        {"phase": ph, "start": str(s), "end": str(e)}
+        for ph, (s, e) in periods_dict.items()
+    ]
+    buf = io.StringIO()
+    pd.DataFrame(rows).to_csv(buf, index=False)
+    return buf.getvalue().encode("utf-8")
+
+
+@st.cache_data(
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+    show_spinner=False,
+)
+def _render_png_for_export(
+    file_bytes: bytes,
+    use_filter, cutoff_low, cutoff_high,
+    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    phase_params_tuple: tuple,
+    name: str,
+) -> bytes:
+    """Render a full-size plot_all_periods PNG. Cached per unique param combination."""
+    vort, _ = _run_process_vorticity(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    )
+    phase_params = dict(phase_params_tuple)
+    df_result = get_periods(vorticity=vort, plot=False, plot_steps=False, **phase_params)
+    periods_dict = periods_to_dict(df_result)
+    fig, ax = plt.subplots(figsize=(12, 5))
+    try:
+        plot_all_periods(periods_dict, df_result, ax=ax, vorticity=vort)
+    except Exception:
+        pass
+    ax.set_title(name, fontweight="bold")
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+def _build_zip(ok_results: dict, yaml_str: str) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("parameters.yaml", yaml_str)
+        for name, res in ok_results.items():
+            zf.writestr(f"{name}_periods.csv", res["csv_bytes"].decode("utf-8"))
+            zf.writestr(f"{name}_periods.png", res["png_bytes"])
+    buf.seek(0)
+    return buf.getvalue()
+
+
+# Figure sizes per column count (matplotlib inches)
+_FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4), 4: (5, 3), 5: (4, 2.8), 6: (3.5, 2.5)}
+
+PHASE_COLORS = {
+    "incipient":       "#65a1e6",
+    "intensification": "#f7b538",
+    "mature":          "#d62828",
+    "decay":           "#9aa981",
+    "residual":        "gray",
+}
+
+
+def _render_global_legend() -> None:
+    swatches = "&nbsp;&nbsp;".join(
+        f'<span style="display:inline-flex;align-items:center;gap:4px;">'
+        f'<span style="background:{c};display:inline-block;width:14px;height:14px;'
+        f'border-radius:3px;flex-shrink:0;"></span>{ph}</span>'
+        for ph, c in PHASE_COLORS.items()
+    )
+    st.markdown(
+        f'<div style="font-size:12px;padding:4px 0 8px 0;">{swatches}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _plot_compact(cyclone_name: str, periods_dict: dict, vort) -> plt.Figure:
+    """Dense-grid figure (n_cols >= 4): all vorticity series, no labels/titles."""
+    fig, ax = plt.subplots(figsize=_FIGSIZES[n_cols])
+    phases_list = list(periods_dict.items())
+    for i, (ph, (st_, en)) in enumerate(phases_list):
+        right = phases_list[i + 1][1][0] if i + 1 < len(phases_list) else en
+        ax.axvspan(st_, right, alpha=0.35, color=PHASE_COLORS.get(_normalize(ph), "#cccccc"))
+    ax.plot(vort.time, vort["zeta"], color="gray", lw=0.6, alpha=0.7)
+    ax2 = ax.twinx()
+    ax2.plot(vort.time, vort["filtered_vorticity"], color="#d68c45", lw=1.0)
+    ax2.plot(vort.time, vort["vorticity_smoothed"],  color="#1d3557", lw=1.2)
+    ax2.plot(vort.time, vort["vorticity_smoothed2"], color="#e63946", lw=1.2)
+    for a in (ax, ax2):
+        a.set_xlabel(""); a.set_ylabel(""); a.set_title("")
+        a.tick_params(left=False, right=False, bottom=False,
+                      labelleft=False, labelright=False, labelbottom=False)
+    fig.tight_layout(pad=0.3)
+    return fig
+
+
+def _compute_diagnostics(name, periods_dict, df_result, all_warns):
+    seen, seen_set = [], set()
+    for ph in periods_dict:
+        n = _normalize(ph)
+        if n not in seen_set:
+            seen.append(n); seen_set.add(n)
+    gaps = int(df_result["periods"].isna().sum()) if "periods" in df_result.columns else 0
+    phase_rows, short_phases = [], []
+    for ph, (start, end) in periods_dict.items():
+        dur_h = (end - start).total_seconds() / 3600
+        flag = "⚠️" if dur_h < 6 else ""
+        if flag:
+            short_phases.append(_normalize(ph))
+        phase_rows.append({
+            "Phase": ph, "Start": str(start), "End": str(end),
+            "Duration (h)": round(dur_h, 1), "": flag,
+        })
+    return {
+        "name": name, "phases": seen, "gaps": gaps, "warns": all_warns,
+        "short_phases": short_phases,
+        "residual": any(_normalize(ph) == "residual" for ph in periods_dict),
+        "phase_rows": phase_rows,
+    }
+
+
+# ── Cached vorticity processing ───────────────────────────────────────────────────
+@st.cache_data(
+    show_spinner="Processing vorticity…",
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+)
+def _run_process_vorticity(
+    file_bytes, use_filter, cutoff_low, cutoff_high,
+    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+):
+    df_raw = pd.read_csv(io.BytesIO(file_bytes), sep=";", index_col="time", parse_dates=True)
+    series = df_raw["min_max_zeta_850"]
+    zeta_df = pd.DataFrame({"zeta": series}); zeta_df.index = series.index
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        vort = process_vorticity(
+            zeta_df, use_filter=use_filter, cutoff_low=cutoff_low, cutoff_high=cutoff_high,
+            use_smoothing=use_smoothing, use_smoothing_twice=use_smoothing_twice,
+            replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
+        )
+    return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
 
 
 # ── Page header ──────────────────────────────────────────────────────────────────
@@ -66,9 +330,37 @@ st.title("CycloPhaser — Parameter Calibration")
 st.caption("Filtering · Smoothing · Phase Detection · Multi-cyclone")
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────────
-_SM_OPTS = ["auto", "off", "manual"]
-
 with st.sidebar:
+    # --- YAML import ---
+    st.subheader("Import configuration")
+    _yaml_file = st.file_uploader(
+        "Load previously exported YAML", type=["yaml", "yml"], key="yaml_import",
+        help="Upload a YAML file exported by this app to restore its filter and phase parameters.",
+    )
+    if _yaml_file is not None:
+        _fhash = hashlib.md5(_yaml_file.getvalue()).hexdigest()
+        if st.session_state.get("_yaml_import_hash") != _fhash:
+            _result = _load_yaml_config(_yaml_file.getvalue())
+            st.session_state["_yaml_import_hash"] = _fhash
+            st.session_state["_yaml_import_result"] = _result
+            if _result["error"] is None:
+                st.rerun()  # reflect new widget values immediately
+    else:
+        # File removed — clear hash so the same file can be re-imported if needed
+        st.session_state.pop("_yaml_import_hash", None)
+
+    if "_yaml_import_result" in st.session_state:
+        _r = st.session_state["_yaml_import_result"]
+        if _r["error"]:
+            st.error(f"Import failed: {_r['error']}")
+        else:
+            st.success(f"Loaded {_r['count']} parameters from YAML.")
+            if _r["ignored"]:
+                st.warning(f"Ignored unknown keys: {', '.join(_r['ignored'])}")
+            if _r["missing"]:
+                st.warning(f"Using defaults for missing keys: {', '.join(_r['missing'])}")
+
+    st.divider()
     st.button("↺ Reset to defaults", on_click=_reset, use_container_width=True)
     st.divider()
 
@@ -254,7 +546,7 @@ with st.sidebar:
             ),
         )
 
-# Bundle phase params for reuse throughout the script
+# Bundle phase params
 _PHASE_PARAMS = dict(
     threshold_intensification_length=thr_int_len,
     threshold_intensification_gap=thr_int_gap,
@@ -264,175 +556,13 @@ _PHASE_PARAMS = dict(
     threshold_decay_gap=thr_dec_gap,
     threshold_incipient_length=thr_inc_len,
 )
-
-# ── Cached: process_vorticity ────────────────────────────────────────────────────
-# Keyed on MD5 of file bytes + all filter/smoothing params.
-# Changing only phase thresholds does NOT trigger a re-run.
-@st.cache_data(
-    show_spinner="Processing vorticity…",
-    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
-)
-def _run_process_vorticity(
-    file_bytes: bytes,
-    use_filter: bool,
-    cutoff_low: int,
-    cutoff_high: int,
-    use_smoothing,
-    use_smoothing_twice,
-    replace_endpoints: int,
-    savgol_poly: int,
-):
-    df_raw = pd.read_csv(
-        io.BytesIO(file_bytes), sep=";", index_col="time", parse_dates=True
-    )
-    series = df_raw["min_max_zeta_850"]
-    zeta_df = pd.DataFrame({"zeta": series})
-    zeta_df.index = series.index
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        vort = process_vorticity(
-            zeta_df,
-            use_filter=use_filter,
-            cutoff_low=cutoff_low,
-            cutoff_high=cutoff_high,
-            use_smoothing=use_smoothing,
-            use_smoothing_twice=use_smoothing_twice,
-            replace_endpoints_with_lowpass=replace_endpoints,
-            savgol_polynomial=savgol_poly,
-        )
-    return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
-
-
-# ── Helpers ──────────────────────────────────────────────────────────────────────
-def _normalize(name: str) -> str:
-    return name.rstrip(" 0123456789").strip()
-
-
-# Figure sizes per column count (matplotlib inches)
-_FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4), 4: (5, 3), 5: (4, 2.8), 6: (3.5, 2.5)}
-
-# Phase colours (mirror of plot_all_periods — kept here for compact mode and legend)
-PHASE_COLORS = {
-    "incipient":       "#65a1e6",
-    "intensification": "#f7b538",
-    "mature":          "#d62828",
-    "decay":           "#9aa981",
-    "residual":        "gray",
-}
-
-
-def _render_global_legend() -> None:
-    """Render one HTML legend bar showing phase colours. Used in dense-grid modes."""
-    swatches = "&nbsp;&nbsp;".join(
-        f'<span style="display:inline-flex;align-items:center;gap:4px;">'
-        f'<span style="background:{c};display:inline-block;width:14px;height:14px;'
-        f'border-radius:3px;flex-shrink:0;"></span>{ph}</span>'
-        for ph, c in PHASE_COLORS.items()
-    )
-    st.markdown(
-        f'<div style="font-size:12px;padding:4px 0 8px 0;">{swatches}</div>',
-        unsafe_allow_html=True,
-    )
-
-
-def _plot_compact(cyclone_name: str, periods_dict: dict, vort) -> plt.Figure:
-    """Dense-grid figure (n_cols >= 4): all vorticity series, no labels or titles.
-
-    Same twin-axis layout as the full figure (left = zeta raw, right =
-    filtered/smoothed), with phase shading and gap fix.  All text stripped
-    so the figure is pure signal — the cyclone name comes from st.subheader.
-    """
-    fig, ax = plt.subplots(figsize=_FIGSIZES[n_cols])
-
-    # Phase shading with gap fix
-    phases_list = list(periods_dict.items())
-    for i, (ph, (st_, en)) in enumerate(phases_list):
-        right = phases_list[i + 1][1][0] if i + 1 < len(phases_list) else en
-        ax.axvspan(st_, right, alpha=0.35, color=PHASE_COLORS.get(_normalize(ph), "#cccccc"))
-
-    # Left axis: zeta original (raw)
-    ax.plot(vort.time, vort["zeta"], color="gray", lw=0.6, alpha=0.7)
-
-    # Right twin axis: filtered + smoothed (separate scale — same reason as full figure)
-    ax2 = ax.twinx()
-    ax2.plot(vort.time, vort["filtered_vorticity"], color="#d68c45", lw=1.0)
-    ax2.plot(vort.time, vort["vorticity_smoothed"],  color="#1d3557", lw=1.2)
-    ax2.plot(vort.time, vort["vorticity_smoothed2"], color="#e63946", lw=1.2)
-
-    # Strip ALL text — labels, ticks, title
-    for a in (ax, ax2):
-        a.set_xlabel(""); a.set_ylabel(""); a.set_title("")
-        a.tick_params(left=False, right=False, bottom=False,
-                      labelleft=False, labelright=False, labelbottom=False)
-
-    fig.tight_layout(pad=0.3)
-    return fig
-
-
-def _compute_diagnostics(name, periods_dict, df_result, all_warns):
-    seen, seen_set = [], set()
-    for ph in periods_dict:
-        n = _normalize(ph)
-        if n not in seen_set:
-            seen.append(n)
-            seen_set.add(n)
-
-    gaps = int(df_result["periods"].isna().sum()) if "periods" in df_result.columns else 0
-
-    phase_rows, short_phases = [], []
-    for ph, (start, end) in periods_dict.items():
-        dur_h = (end - start).total_seconds() / 3600
-        flag = "⚠️" if dur_h < 6 else ""
-        if flag:
-            short_phases.append(_normalize(ph))
-        phase_rows.append({
-            "Phase":       ph,
-            "Start":       str(start),
-            "End":         str(end),
-            "Duration (h)": round(dur_h, 1),
-            "":            flag,
-        })
-
-    return {
-        "name":         name,
-        "phases":       seen,
-        "gaps":         gaps,
-        "warns":        all_warns,
-        "short_phases": short_phases,
-        "residual":     any(_normalize(ph) == "residual" for ph in periods_dict),
-        "phase_rows":   phase_rows,
-    }
-
-
-def _build_yaml(cyclone_names) -> str:
-    doc = {
-        "metadata": {
-            "timestamp":           datetime.now(timezone.utc).isoformat(),
-            "cyclophaser_version": _CP_VERSION,
-            "cyclones_used":       list(cyclone_names),
-        },
-        "filter_params": {
-            "use_filter":                    use_filter,
-            "cutoff_low":                    int(cutoff_low),
-            "cutoff_high":                   int(cutoff_high),
-            "replace_endpoints_with_lowpass": int(replace_endpoints),
-            "use_smoothing":                 use_smoothing,
-            "use_smoothing_twice":           use_smoothing_twice,
-            "savgol_polynomial":             int(savgol_poly),
-        },
-        "phase_params": {k: float(v) for k, v in _PHASE_PARAMS.items()},
-    }
-    return yaml.dump(doc, default_flow_style=False, allow_unicode=True, sort_keys=False)
-
+_phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 
 # ── File upload ──────────────────────────────────────────────────────────────────
 uploaded = st.file_uploader(
-    "Upload cyclone CSV(s)"
-    " (format: ';'-delimited, column 'min_max_zeta_850')",
-    type=["csv"],
-    accept_multiple_files=True,
+    "Upload cyclone CSV(s) (format: ';'-delimited, column 'min_max_zeta_850')",
+    type=["csv"], accept_multiple_files=True,
 )
-
 _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
 if uploaded:
     files: dict[str, bytes] = {Path(f.name).stem: f.getvalue() for f in uploaded}
@@ -442,7 +572,7 @@ else:
 
 cyclone_names = list(files.keys())
 
-# ── Sidebar: YAML export (added after file names are known) ───────────────────
+# ── Sidebar: YAML export ─────────────────────────────────────────────────────────
 with st.sidebar:
     st.divider()
     st.download_button(
@@ -453,6 +583,61 @@ with st.sidebar:
         use_container_width=True,
     )
 
+# ── Pre-process all cyclones ─────────────────────────────────────────────────────
+# Done before rendering tabs so export data (CSV + PNG) is ready for the ZIP button.
+all_results: dict[str, dict] = {}
+
+for _cname, _fbytes in files.items():
+    _res: dict = {"ok": False, "name": _cname}
+
+    try:
+        _vort, _fwarns = _run_process_vorticity(
+            _fbytes, use_filter, cutoff_low, cutoff_high,
+            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        )
+    except Exception as _exc:
+        _res["error"] = f"Vorticity processing failed: {_exc}"
+        all_results[_cname] = _res
+        continue
+
+    with warnings.catch_warnings(record=True) as _wc:
+        warnings.simplefilter("always")
+        try:
+            _df = get_periods(vorticity=_vort, plot=False, plot_steps=False, **_PHASE_PARAMS)
+        except Exception as _exc:
+            _res["error"] = f"Phase detection failed: {_exc}"
+            _res["filter_warns"] = _fwarns
+            all_results[_cname] = _res
+            continue
+
+    _pwarns = [str(w.message) for w in _wc if issubclass(w.category, UserWarning)]
+    _pdict  = periods_to_dict(_df)
+
+    try:
+        _png = _render_png_for_export(
+            _fbytes, use_filter, cutoff_low, cutoff_high,
+            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+            _phase_params_tuple, _cname,
+        )
+    except Exception:
+        _png = b""
+
+    _res.update({
+        "ok":           True,
+        "vort":         _vort,
+        "df_result":    _df,
+        "periods_dict": _pdict,
+        "filter_warns": _fwarns,
+        "phase_warns":  _pwarns,
+        "diag":         _compute_diagnostics(_cname, _pdict, _df, _fwarns + _pwarns),
+        "csv_bytes":    _render_csv(_pdict),
+        "png_bytes":    _png,
+    })
+    all_results[_cname] = _res
+
+_ok_results = {n: r for n, r in all_results.items() if r["ok"]}
+_zip_bytes  = _build_zip(_ok_results, _build_yaml(cyclone_names))
+
 # ── Tabs ─────────────────────────────────────────────────────────────────────────
 tab_cal, tab_doc = st.tabs(["Calibration", "Documentation"])
 
@@ -460,68 +645,59 @@ tab_cal, tab_doc = st.tabs(["Calibration", "Documentation"])
 # TAB 1 — Calibration
 # ══════════════════════════════════════════════════════════════════════════════════
 with tab_cal:
-    # Grid layout control
-    n_cols: int = st.select_slider(
-        "Grid columns", options=[1, 2, 3, 4, 5, 6],
-        value=_DEFAULTS["n_cols"], key="n_cols",
-    )
+    # Top row: grid selector + ZIP export
+    _c1, _c2 = st.columns([4, 1])
+    with _c1:
+        n_cols: int = st.select_slider(
+            "Grid columns", options=[1, 2, 3, 4, 5, 6],
+            value=_DEFAULTS["n_cols"], key="n_cols",
+        )
+    with _c2:
+        st.download_button(
+            "📦 Export all (ZIP)",
+            data=_zip_bytes,
+            file_name="cyclophaser_results.zip",
+            mime="application/zip",
+            use_container_width=True,
+            disabled=not bool(_ok_results),
+            help=(
+                "Downloads a ZIP containing, for each cyclone: "
+                "<name>_periods.csv, <name>_periods.png, and parameters.yaml."
+            ),
+        )
 
-    # Dense-grid global legend (rendered once, above the grid)
     if n_cols >= 4:
         _render_global_legend()
 
-    # Main processing loop
+    # Display grid
     grid = st.columns(n_cols)
-    all_diag: list[dict] = []
-
-    for idx, (cyclone_name, file_bytes) in enumerate(files.items()):
+    for idx, (cyclone_name, res) in enumerate(all_results.items()):
         with grid[idx % n_cols]:
             st.subheader(cyclone_name)
 
-            # Step 1 — process_vorticity (CACHED: reruns only on filter/smoothing change)
-            try:
-                vort, filter_warns = _run_process_vorticity(
-                    file_bytes, use_filter, cutoff_low, cutoff_high,
-                    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-                )
-            except Exception as exc:
-                st.error(f"Error processing vorticity: {exc}")
+            if not res["ok"]:
+                st.error(res.get("error", "Unknown error"))
                 continue
 
-            for msg in filter_warns:
+            for msg in res["filter_warns"]:
+                st.warning(msg)
+            for msg in res["phase_warns"]:
                 st.warning(msg)
 
-            # Step 2 — get_periods (NOT cached: always reruns; fast enough for real-time UX)
-            with warnings.catch_warnings(record=True) as _phase_caught:
-                warnings.simplefilter("always")
-                try:
-                    df_result = get_periods(
-                        vorticity=vort, plot=False, plot_steps=False, **_PHASE_PARAMS
-                    )
-                except Exception as exc:
-                    st.error(f"Error in phase detection: {exc}")
-                    continue
-
-            phase_warns = [
-                str(w.message) for w in _phase_caught
-                if issubclass(w.category, UserWarning)
-            ]
-            for msg in phase_warns:
-                st.warning(msg)
-
-            periods_dict = periods_to_dict(df_result)
-
-            # Step 3 — figure: compact (n_cols >= 4) or full plot_all_periods (n_cols <= 3)
+            # Figure
             if n_cols >= 4:
                 try:
-                    fig = _plot_compact(cyclone_name, periods_dict, vort)
+                    fig = _plot_compact(cyclone_name, res["periods_dict"], res["vort"])
                 except Exception as exc:
                     st.error(f"Error in compact figure: {exc}")
                     continue
             else:
                 fig, ax_pre = plt.subplots(figsize=_FIGSIZES[n_cols])
                 try:
-                    plot_all_periods(periods_dict, df_result, ax=ax_pre, vorticity=vort)
+                    plot_all_periods(
+                        res["periods_dict"], res["df_result"],
+                        ax=ax_pre, vorticity=res["vort"],
+                    )
                 except Exception as exc:
                     st.error(f"Error in phase figure: {exc}")
                     plt.close(fig)
@@ -530,44 +706,54 @@ with tab_cal:
             st.pyplot(fig)
             plt.close(fig)
 
-            # Step 4 — plot_didactic (1-col mode only, inside expander)
+            # 1-col extras
             if n_cols == 1:
                 with st.expander("Step-by-step analysis"):
                     try:
                         fig_d = plot_didactic(
-                            df_result, vort, output_directory=None, **_PHASE_PARAMS
+                            res["df_result"], res["vort"],
+                            output_directory=None, **_PHASE_PARAMS,
                         )
-                        st.pyplot(fig_d)
-                        plt.close(fig_d)
+                        st.pyplot(fig_d); plt.close(fig_d)
                     except Exception as exc:
                         st.error(f"Error in didactic plot: {exc}")
 
-            # Diagnostics
-            diag = _compute_diagnostics(
-                cyclone_name, periods_dict, df_result, filter_warns + phase_warns
-            )
-            all_diag.append(diag)
-
-            # Detail table — 1-col mode
-            if n_cols == 1:
+                diag = res["diag"]
                 with st.expander("Detailed diagnostics", expanded=True):
                     if diag["gaps"] > 0:
                         st.warning(f"Unlabelled gaps: {diag['gaps']} timesteps")
                     if diag["short_phases"]:
-                        st.warning(
-                            f"Short phases (< 6 h): {', '.join(diag['short_phases'])}"
-                        )
+                        st.warning(f"Short phases (< 6 h): {', '.join(diag['short_phases'])}")
                     st.dataframe(
                         pd.DataFrame(diag["phase_rows"]).set_index("Phase"),
                         use_container_width=True,
                     )
+                    # Individual download buttons
+                    _dl1, _dl2 = st.columns(2)
+                    with _dl1:
+                        st.download_button(
+                            "⬇ Download CSV",
+                            data=res["csv_bytes"],
+                            file_name=f"{cyclone_name}_periods.csv",
+                            mime="text/csv",
+                            use_container_width=True,
+                        )
+                    with _dl2:
+                        st.download_button(
+                            "⬇ Download PNG",
+                            data=res["png_bytes"],
+                            file_name=f"{cyclone_name}_periods.png",
+                            mime="image/png",
+                            use_container_width=True,
+                            disabled=not bool(res["png_bytes"]),
+                        )
 
     # Consolidated diagnostics — 2+ col mode
-    if n_cols > 1 and all_diag:
+    if n_cols > 1 and _ok_results:
         st.divider()
         st.subheader("Consolidated diagnostics")
         rows = []
-        for d in all_diag:
+        for d in (r["diag"] for r in _ok_results.values()):
             rows.append({
                 "Cyclone":      d["name"],
                 "Phases":       " → ".join(d["phases"]),
@@ -577,10 +763,7 @@ with tab_cal:
                 "Short phases": ", ".join(d["short_phases"]) if d["short_phases"] else "—",
                 "Warnings":     f"{len(d['warns'])} ⚠️" if d["warns"] else "0",
             })
-        st.dataframe(
-            pd.DataFrame(rows).set_index("Cyclone"),
-            use_container_width=True,
-        )
+        st.dataframe(pd.DataFrame(rows).set_index("Cyclone"), use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 2 — Documentation
@@ -593,7 +776,6 @@ with tab_doc:
         "International Journal of Climatology."
     )
 
-    # ── 1. Method overview ──────────────────────────────────────────────────────
     with st.expander("1 · Method overview", expanded=True):
         if _METHOD_IMG.exists():
             st.image(
@@ -602,191 +784,111 @@ with tab_doc:
                     "Illustration of CycloPhaser methodology. "
                     "(A) Raw vorticity series. (B) After Lanczos band-pass filtering "
                     "(dashed circles: endpoint artifacts). (C) After first Savitzky-Golay pass. "
-                    "(D) After second Savitzky-Golay pass. (E) Identified peaks and valleys. "
+                    "(D) After second pass. (E) Identified peaks and valleys. "
                     "(F–J) Sequential detection of intensification, decay, mature, residual, "
                     "and incipient stages. (K) Full life cycle. From de Souza et al. (2024)."
                 ),
             )
-
         st.markdown("""
 CycloPhaser identifies distinct phases of cyclone life cycles by analyzing the relative
 vorticity time series at the cyclone centre and its first derivative.
 
-**Four main stages** are detected, plus an optional residual stage:
+**Five stages:**
 
 | Stage | Description |
 |---|---|
 | **Incipient** | Early development before any identifiable intensification. Detected last (fills unlabelled periods at the series start). |
-| **Intensification** | Vorticity intensity increases (more negative in the Southern Hemisphere) from one peak to a subsequent valley. |
-| **Mature** | Interval between a derivative valley and its following derivative peak — represents the cyclone's peak strength (minimum central vorticity, SH). |
+| **Intensification** | Vorticity intensity increases (more negative in SH) from one peak to a subsequent valley. |
+| **Mature** | Interval between a derivative valley and its following derivative peak — cyclone's peak strength. |
 | **Decay** | Decrease in vorticity after the mature phase until dissipation. |
 | **Residual** | Re-intensification episodes that do not progress to a full mature stage. |
 
-**Processing pipeline:**
-
-1. **Lanczos band-pass filter** — removes large-scale (low-frequency) trends and
-   high-frequency noise, isolating the synoptic-scale cyclone signal.
-   Endpoint artifacts (Gibbs effect) are optionally corrected by replacing the first
-   and last *N* timesteps with a simple low-pass estimate.
-
-2. **Savitzky-Golay smoothing** — applied once (or twice) to the filtered series,
-   ensuring a clean sinusoidal pattern in both the vorticity and its derivative.
-   This is critical for reliable peak/valley detection.
-
-3. **Phase detection** — peaks and valleys in the smoothed series and its derivative
-   are identified and matched against the threshold criteria (see sections 3 and 4).
+**Pipeline:** Lanczos band-pass filter → Savitzky-Golay smoothing (1× or 2×) → peak/valley detection → phase labelling.
 
 > **Southern Hemisphere convention**: vorticity is negative; more negative = more intense.
-> For Northern Hemisphere data, multiply the vorticity series by −1 before passing it
-> to CycloPhaser.
+> For Northern Hemisphere data, multiply the series by −1 before passing to CycloPhaser.
 """)
 
-    # ── 2. Filter and smoothing parameters ─────────────────────────────────────
     with st.expander("2 · Filter and smoothing parameters", expanded=False):
         st.markdown("""
-These parameters control the preprocessing chain that transforms the raw vorticity
-series into the smoothed signal used for phase detection.
-
----
-
-### `use_filter` — Apply Lanczos band-pass filter
-Activates the Lanczos spectral filter. When disabled, the raw vorticity series is
-passed directly to the smoothing step (or used as-is if smoothing is also off).
-Disabling typically produces very noisy phase detection.
+### `use_filter` — Lanczos band-pass filter
+Activates spectral filtering. Disabling leaves the raw series and typically yields very noisy detection.
 
 ### `cutoff_low` — Low-frequency cutoff (hours)
-Maximum period retained by the filter. Variability slower than this (e.g., seasonal
-trends, synoptic-scale background flow) is removed. **Default: 168 h (7 days).**
-Increasing this value removes more of the background state; decreasing it may retain
-slow drifts that interfere with phase detection.
+Maximum period retained. Variability slower than this is suppressed (e.g., seasonal trends).
+**Default: 168 h (7 days).**
 
 ### `cutoff_high` — High-frequency cutoff (hours)
-Minimum period retained. Variability faster than this (sub-synoptic noise) is suppressed.
-**Default: 48 h (2 days).** Decreasing allows finer-scale oscillations through;
-increasing produces a smoother but potentially over-smoothed signal.
+Minimum period retained. Variability faster than this is suppressed as noise.
+**Default: 48 h (2 days).**
 
-### `replace_endpoints_with_lowpass` — Endpoint correction (timesteps)
-The Lanczos filter introduces Gibbs-effect oscillations at the series edges. This
-parameter replaces the first and last *N* timesteps of the filtered output with a
-simple low-pass estimate. **Default: 24 timesteps.** Set to 0 to disable.
-The methodology figure panel (B) shows the endpoint artifacts that this parameter corrects.
+### `replace_endpoints_with_lowpass` — Endpoint correction
+Replaces the first/last *N* timesteps of the filtered output with a simple low-pass estimate,
+correcting Gibbs-effect artifacts at the series edges. **Default: 24 timesteps.** Set to 0 to disable.
 
----
+### `use_smoothing` / `use_smoothing_twice` — Savitzky-Golay
+- `'auto'`: window computed from series length (recommended).
+- `'off'`: skip smoothing.
+- `'manual'`: set window size explicitly (must be odd).
 
-### `use_smoothing` — Savitzky-Golay (1st pass)
-Controls the first smoothing pass:
-- `'auto'`: window length computed automatically from series length (recommended).
-- `'off'`: no smoothing; use the Lanczos output directly.
-- `'manual'`: specify the window via the slider (must be an odd integer).
-
-When set to `'manual'`, the **window size** controls the degree of smoothing:
-larger windows → smoother curves, but risk erasing details of short life cycles.
-
-### `use_smoothing_twice` — Savitzky-Golay (2nd pass)
-Applies a second Savitzky-Golay pass on the already-smoothed series. Useful for
-high-temporal-resolution data (e.g., hourly) where a single pass leaves residual
-oscillations. Same mode options as `use_smoothing`. Can distort short phases.
+A second pass (`use_smoothing_twice`) further smooths the already-smoothed curve — useful for hourly data.
+Can distort short phases.
 
 ### `savgol_polynomial` — Polynomial degree
-Degree of the polynomial fitted within each Savitzky-Golay window. **Default: 3.**
-Lower degrees (2–3) give more aggressive smoothing; higher degrees (4–5) better
-preserve local extrema but may be unstable with small windows.
+Degree of the polynomial fitted in each window. Lower (2–3) = more smoothing; higher (4–5) = better
+preservation of extrema. **Default: 3.**
 """)
 
-    # ── 3. Phase detection thresholds ──────────────────────────────────────────
     with st.expander("3 · Phase detection thresholds", expanded=False):
         st.markdown("""
-All thresholds below are expressed as **fractions of the total series length**
-(number of timesteps), unless noted otherwise. This makes them resolution-independent
-across datasets with different temporal coverages.
+All thresholds are **fractions of total series length**, making them resolution-independent.
 
----
-
-### `threshold_intensification_length`
-Minimum duration of an intensification segment. Segments shorter than this fraction
-are discarded or absorbed by adjacent phases. **Default: 0.075.**
-Increase to require more sustained intensification; decrease to allow brief episodes.
-
-### `threshold_decay_length`
-Minimum duration of a decay segment. Analogous to the intensification threshold.
-**Default: 0.075.**
-
-### `threshold_mature_length`
-Minimum duration of the mature stage (peak intensity interval). **Default: 0.030.**
-Very high values may eliminate the mature stage of rapidly evolving cyclones.
-
-### `threshold_mature_distance`
-Maximum distance between the vorticity minimum (true intensity peak) and the
-centre of the detected mature segment, as a fraction of total series length.
-**Default: 0.125.** Higher values allow greater offset; lower values are stricter
-about centering the mature stage on the true peak.
-
-### `threshold_intensification_gap`
-Maximum gap between two consecutive intensification segments that allows them to
-be merged into a single block. **Default: 0.075.**
-Gaps larger than this keep the segments separate.
-
-### `threshold_decay_gap`
-Maximum merging gap for consecutive decay segments. **Default: 0.075.**
-Useful when the cyclone shows brief recoveries during weakening.
-
-### `threshold_incipient_length`
-Minimum duration of the incipient phase (genesis and early development, before
-the first identifiable intensification). **Default: 0.400.**
-This is the largest threshold by default because the incipient stage often
-spans a significant portion of the early life cycle.
+| Parameter | Default | Description |
+|---|---|---|
+| `threshold_intensification_length` | 0.075 | Min. duration of an intensification segment. |
+| `threshold_decay_length` | 0.075 | Min. duration of a decay segment. |
+| `threshold_mature_length` | 0.030 | Min. duration of the mature stage. |
+| `threshold_mature_distance` | 0.125 | Max. distance between vorticity minimum and mature segment centre. |
+| `threshold_intensification_gap` | 0.075 | Max. gap between consecutive intensification segments for merging. |
+| `threshold_decay_gap` | 0.075 | Max. gap between consecutive decay segments for merging. |
+| `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. |
 """)
 
-    # ── 4. Known methodological notes ──────────────────────────────────────────
     with st.expander("4 · Known methodological notes", expanded=False):
         st.markdown("""
 ### Detection pipeline and phase precedence
 
-The detection functions are called in a **fixed sequential order**:
+Functions are called in a **fixed order**:
 
 1. `find_intensification_period`
 2. `find_decay_period`
 3. `find_mature_stage`
 4. `find_residual_period`
 5. `post_process_periods` — gap-filling and singleton removal
-6. `find_incipient_period` — fills unlabelled timesteps at the series start
+6. `find_incipient_period` — fills unlabelled timesteps at the start
 
-Each function writes to the `periods` column of the DataFrame.
-**Functions called later can overwrite regions already labelled by earlier functions.**
-The most significant consequence is that `find_decay_period` (step 2) may overwrite
-timesteps that `find_intensification_period` (step 1) had already marked, because
-both functions scan the same peaks/valleys and their detected intervals can overlap.
+**Later functions can overwrite earlier ones.** `find_decay_period` (step 2) may overwrite
+regions already labelled by `find_intensification_period` (step 1) because both scan the same
+peaks/valleys and their intervals can overlap.
 
----
+### Calibrating thresholds: inspect the final output
 
-### Threshold calibration: inspect the final output
+Because of this precedence, a threshold may have a smaller effect than expected.
+For example, `threshold_intensification_gap` bridges gaps between intensification blocks —
+but if `find_decay_period` subsequently relabels those timesteps as decay, the gap-bridging
+has no visible effect on the final output.
 
-Because of this precedence, the practical effect of a threshold may be smaller
-than expected. For example, `threshold_intensification_gap` controls the maximum
-gap bridged between two intensification blocks — but if `find_decay_period`
-subsequently marks those same timesteps as decay, the gap-bridging has no visible
-effect on the final output.
-
-> **When calibrating thresholds, always inspect the final `periods` column rather
-> than assuming each parameter acts in isolation.**
-> The Calibration tab's phase figures and diagnostics table reflect the actual
-> final output after all pipeline steps.
-
----
+> **Always inspect the final `periods` column, not the effect of each threshold in isolation.**
 
 ### Phase detection lag
 
-The detected *start* of a phase may lag the true onset by up to approximately
-**15–18 h (5–6 timesteps at 3-hourly resolution)**. This lag is an inherent
-consequence of the Lanczos + Savgol filtering chain: the smoothed signal requires
-several timesteps to build enough amplitude for the algorithm to reliably identify
-a new feature.
+The detected *start* of a phase may lag the true onset by up to **15–18 h
+(5–6 timesteps at 3-hourly resolution)**. This is an inherent consequence of the
+Lanczos + Savgol chain: the smoothed signal requires several timesteps to build
+enough amplitude for reliable detection. The lag is most pronounced for **residual**
+(re-intensification after decay), where it was consistently 15–18 h across synthetic
+test cases.
 
-The lag is most pronounced for the **residual** stage (re-intensification after
-decay), where it was consistently observed to be 15–18 h across controlled synthetic
-test cases. Other transitions (e.g., the onset of intensification when no explicit
-incipient segment precedes it) can show similar lags.
-
-> When interpreting results or defining search windows for event attribution,
-> a margin of at least **18 h** around detected phase boundaries is recommended.
+> When defining search windows for event attribution, allow a margin of at least **18 h**
+> around detected phase boundaries.
 """)
