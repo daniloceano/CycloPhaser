@@ -342,8 +342,13 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
             unique_labels.append(label)
             unique_handles.append(handle)
 
-    # Set the legend
-    ax.legend(unique_handles, unique_labels, loc='upper right', bbox_to_anchor=(1.5, 1))
+    # Legend below the axes — avoids whitespace on the right when bbox_inches="tight" is used
+    ncols = max(1, len(unique_labels))
+    ax.legend(
+        unique_handles, unique_labels,
+        loc='upper center', bbox_to_anchor=(0.5, -0.22),
+        ncol=ncols, frameon=False, fontsize=9,
+    )
 
     # Format the date axis
     ax.ticklabel_format(axis='y', style='sci', scilimits=(-3, 3))
@@ -351,7 +356,8 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
     ax.xaxis.set_major_formatter(date_format)
     plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
 
-    plt.tight_layout()
+    # Leave room at the bottom for the legend (tight_layout won't see it automatically)
+    plt.tight_layout(rect=[0, 0.12, 1, 1])
 
     # Save the plot if an output file path is provided
     if periods_outfile_path is not None:
