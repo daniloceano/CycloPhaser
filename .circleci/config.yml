@@ -25,26 +25,24 @@ jobs:
 
       - run:
           name: Run tests
-          command: python -m pytest
+          command: python -m pytest --junitxml=test-reports/results.xml
 
       - store_test_results:
           path: test-reports
-
-      - persist_to_workspace:
-          root: .
-          paths:
-            - dist
 
   test_pypi_publish:
     docker:
       - image: cimg/python:3.12.3
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
 
       - run:
-          name: Install twine
-          command: pip install twine
+          name: Install build and publish tools
+          command: pip install --upgrade pip build twine
+
+      - run:
+          name: Build sdist and wheel
+          command: python -m build
 
       - run:
           name: Check distribution
@@ -58,12 +56,15 @@ jobs:
     docker:
       - image: cimg/python:3.12.3
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
 
       - run:
-          name: Install twine
-          command: pip install twine
+          name: Install build and publish tools
+          command: pip install --upgrade pip build twine
+
+      - run:
+          name: Build sdist and wheel
+          command: python -m build
 
       - run:
           name: Check distribution
