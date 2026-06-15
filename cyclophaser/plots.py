@@ -226,7 +226,7 @@ def plot_peaks_valleys_series(series, ax, *peaks_valleys_series_list):
     ax.set_title('stages centers', fontweight='bold', horizontalalignment='center')
     ax.title.set_position([0.5, 1.05])
 
-def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_path=None):    
+def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_path=None):
     """
     Plot vorticity data with periods.
 
@@ -251,9 +251,14 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
     but with a '.png' extension added. The plot will be saved at a resolution of 500
     dpi.
 
+    Phase shading uses the start of the *next* phase (not the end of the current
+    one) as the right boundary of each fill, so that adjacent phases are
+    visually contiguous with no gap between them.
+
     Returns
     -------
-    None
+    matplotlib.figure.Figure
+        The Figure object containing the plot.
     """
     # Define base colors for phases
     colors_phases = {
@@ -264,9 +269,11 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
         'residual': 'gray'
     }
 
-    # Create a new figure if ax is not provided
+    # Create a new figure if ax is not provided; otherwise retrieve the parent figure.
     if ax is None:
         fig, ax = plt.subplots(figsize=(6.5, 5))
+    else:
+        fig = ax.get_figure()
 
     if vorticity is not None:
         ax.plot(vorticity.time, vorticity.zeta, linewidth=2.5, color='gray', label=r'ζ')
@@ -282,22 +289,35 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
 
     # Initialize legend labels and tracked phases
     legend_labels = [r'ζ']
-    added_phases = set()  # Track which phases have been added to the legend
+    added_phases = set()
 
-    # Shade the areas between the beginning and end of each period
-    for phase, (start, end) in phases_dict.items():
-        # Extract the base phase name (remove any numbers)
+    # Build phase list with extended right boundaries to eliminate inter-phase gaps.
+    # Root cause of gaps: periods_to_dict returns 'end' = last timestamp of a phase.
+    # The next phase starts at end+dt.  Coloring only up to 'end' leaves a dt-wide
+    # white strip at every phase boundary.  Fix: extend each fill rightward to the
+    # start of the following phase so adjacent fills share the same boundary point.
+    # NOTE: the equivalent gap fix lives in tests/synthetic/generate_figures.py —
+    # if you change the logic here, mirror it there (and vice-versa).
+    phases_list = list(phases_dict.items())
+    for i, (phase, (start, end)) in enumerate(phases_list):
         base_phase = phase.split()[0].strip()
+        color = colors_phases.get(base_phase, 'gray')
 
-        # Access the color based on the base phase name
-        color = colors_phases.get(base_phase, 'gray')  # Default to gray if phase not found
+        # Right boundary: start of next phase (contiguous), or own end for the last phase.
+        if i + 1 < len(phases_list):
+            right = phases_list[i + 1][1][0]
+        else:
+            right = end
 
-        # Fill between the start and end indices with the corresponding color
-        ax.fill_between(vorticity.time, vorticity.zeta.values,
-                        where=(vorticity.time >= start) & (vorticity.time <= end),
-                        alpha=0.4, color=color, label=base_phase)
+        if vorticity is not None:
+            ax.fill_between(
+                vorticity.time, vorticity.zeta.values,
+                where=(vorticity.time >= start) & (vorticity.time <= right),
+                alpha=0.4, color=color, label=base_phase,
+            )
+        else:
+            ax.axvspan(start, right, alpha=0.4, color=color, label=base_phase)
 
-        # Add the base phase name to the legend if it hasn't been added yet
         if base_phase not in added_phases:
             legend_labels.append(base_phase)
             added_phases.add(base_phase)
@@ -322,8 +342,13 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
             unique_labels.append(label)
             unique_handles.append(handle)
 
-    # Set the legend
-    ax.legend(unique_handles, unique_labels, loc='upper right', bbox_to_anchor=(1.5, 1))
+    # Legend below the axes — avoids whitespace on the right when bbox_inches="tight" is used
+    ncols = max(1, len(unique_labels))
+    ax.legend(
+        unique_handles, unique_labels,
+        loc='upper center', bbox_to_anchor=(0.5, -0.22),
+        ncol=ncols, frameon=False, fontsize=9,
+    )
 
     # Format the date axis
     ax.ticklabel_format(axis='y', style='sci', scilimits=(-3, 3))
@@ -331,7 +356,8 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
     ax.xaxis.set_major_formatter(date_format)
     plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
 
-    plt.tight_layout()
+    # Leave room at the bottom for the legend (tight_layout won't see it automatically)
+    plt.tight_layout(rect=[0, 0.12, 1, 1])
 
     # Save the plot if an output file path is provided
     if periods_outfile_path is not None:
@@ -339,7 +365,9 @@ def plot_all_periods(phases_dict, df, ax=None, vorticity=None, periods_outfile_p
         plt.savefig(fname, dpi=500)
         print(f"{fname} created.")
 
-def plot_didactic(df, vorticity, output_directory, **periods_args):    
+    return fig
+
+def plot_didactic(df, vorticity, output_directory=None, **periods_args):
     """
     Plot vorticity data in a didactic way to illustrate the CycloPhaser methodology.
 
@@ -349,16 +377,22 @@ def plot_didactic(df, vorticity, output_directory, **periods_args):
         The DataFrame containing the vorticity data.
     vorticity : Cyclophaser.vorticity.Vorticity
         The Vorticity object containing the vorticity data.
-    output_directory : str
-        The directory where the plot will be saved.
+    output_directory : str or None or False, optional
+        Path prefix for the output PNG file (saved as ``output_directory + '.png'``).
+        If None or False, the figure is not saved to disk.
     **periods_args : dict
         Additional arguments to pass to the periods detection functions.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The Figure object containing the didactic plot.
 
     Notes
     -----
     This function plots the vorticity data in a step-by-step way to illustrate the
     CycloPhaser methodology. The plot is saved to a PNG file in the specified
-    output directory.
+    output directory only when *output_directory* is provided.
     """
     # First step: filter vorticity data
     fig = plt.figure(figsize=(10, 8.5))
@@ -426,7 +460,10 @@ def plot_didactic(df, vorticity, output_directory, **periods_args):
         ax.xaxis.set_major_formatter(date_format)
         plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
     plt.subplots_adjust(hspace=0.6)
-    
-    outfile = f'{output_directory}.png'
-    plt.savefig(outfile, dpi=500)
-    print(f"{outfile} created.")
+
+    if output_directory:
+        outfile = f'{output_directory}.png'
+        plt.savefig(outfile, dpi=500)
+        print(f"{outfile} created.")
+
+    return fig

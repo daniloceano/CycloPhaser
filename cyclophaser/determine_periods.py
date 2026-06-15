@@ -31,32 +31,82 @@ from cyclophaser.find_stages import find_decay_period
 from cyclophaser.find_stages import find_mature_stage
 from cyclophaser.find_stages import find_residual_period
 
-def find_peaks_valleys(series):
+def _collapse_plateaux(indices):
+    """Collapse runs of consecutive indices to their midpoint (floor for even runs).
+
+    argrelextrema with np.greater_equal / np.less_equal marks every member of a
+    flat plateau as an extremum.  This helper reduces each such run to a single
+    representative index so downstream phase-detection logic sees one extremum
+    per plateau rather than a burst of duplicates.
+
+    Example: [2, 3, 4] → [3]  (odd run, exact midpoint)
+             [2, 3]    → [2]  (even run, floor of mean)
     """
-    Find peaks, valleys, and zero locations in a pandas series
+    if len(indices) == 0:
+        return indices
+    collapsed = []
+    run = [indices[0]]
+    for idx in indices[1:]:
+        if idx == run[-1] + 1:
+            run.append(idx)
+        else:
+            collapsed.append(int(np.floor(np.mean(run))))
+            run = [idx]
+    collapsed.append(int(np.floor(np.mean(run))))
+    return np.array(collapsed, dtype=indices.dtype)
+
+
+def find_peaks_valleys(series):
+    """Find peaks, valleys, and zero locations in a pandas Series.
+
+    Uses argrelextrema with np.greater_equal / np.less_equal so that a flat
+    plateau at a local extremum is still detected (strict > / < would miss it).
+    Consecutive indices returned by argrelextrema (plateau members) are collapsed
+    to a single representative point — the floor-midpoint of the run — to avoid
+    duplicate markings and peak/valley overlap within plateaux.
+
+    NOTE (#14 — pending fix): argrelextrema uses mode='clip' by default, which
+    compares boundary indices against themselves as the "missing" neighbour.
+    This means index 0 is marked as a peak whenever data[0] >= data[1], and
+    index N-1 whenever data[-1] >= data[-2], regardless of whether the boundary
+    is a true extremum or merely a smoothing artefact (most visible in dz and
+    dz2, whose boundary values are distorted by savgol_filter mode='nearest').
+    Fixing this without incorrectly removing genuine boundary extrema in z
+    (which correspond to the start/end of the cyclone lifecycle at a vorticity
+    minimum) requires additional investigation and a dedicated visual checkpoint.
 
     Args:
-    series: pandas Series
+        series: pandas Series (z, dz, or dz2 from the preprocessed vorticity)
 
     Returns:
-    result: pandas Series with nans, "peak", "valley", and 0 in their respective positions
+        result: pandas Series with NaN, 'peak', 'valley', or 0 at each position
     """
-    # Extract the values of the series
     data = series.values
 
-    # Find peaks, valleys, and zero locations
-    peaks = argrelextrema(data, np.greater_equal)[0]
+    # Detect raw extrema (>= / <= catches flat-top plateaux as multiple indices)
+    peaks   = argrelextrema(data, np.greater_equal)[0]
     valleys = argrelextrema(data, np.less_equal)[0]
-    zeros = np.where(data == 0)[0]
+    zeros   = np.where(data == 0)[0]
 
-    # Create a series of NaNs
+    # Collapse each run of consecutive plateau indices to a single midpoint
+    peaks   = _collapse_plateaux(peaks)
+    valleys = _collapse_plateaux(valleys)
+
+    # After collapsing, a shared midpoint can still appear in both arrays when a
+    # perfectly flat plateau sits at a true minimum (the plateau members satisfy
+    # both >= and <= relative to their identical neighbours).  Valleys take
+    # priority (assignment order below), so remove any overlap from peaks to keep
+    # the result unambiguous.
+    overlap = np.intersect1d(peaks, valleys)
+    if len(overlap):
+        peaks = peaks[~np.isin(peaks, overlap)]
+
+    # Build result series
     result = pd.Series(index=series.index, dtype=object)
     result[:] = np.nan
-
-    # Label the peaks, valleys, and zero locations
-    result.iloc[peaks] = 'peak'
+    result.iloc[peaks]   = 'peak'
     result.iloc[valleys] = 'valley'
-    result.iloc[zeros] = 0
+    result.iloc[zeros]   = 0
 
     return result
 
@@ -102,16 +152,21 @@ def post_process_periods(df):
                         if all(pd.isna(preiods_between.unique())):
                             df.loc[preiods_between.index, 'periods'] = phase
     
-    # Replace periods of length dt with previous or next phase
+    # Replace singleton periods (isolated single timestep) with the surrounding phase.
+    # The original condition `len(period) == dt` compared a string length to a Timedelta,
+    # which is always False — so this block never executed.
     for index in df.index:
         period = df.loc[index, 'periods']
-        if pd.notna(period) and len(period) == dt:
+        if pd.notna(period):
             prev_index = index - dt
             next_index = index + dt
-            if prev_index in df.index and prev_index != df.index[0]:
-                df.loc[index, 'periods'] = df.loc[prev_index, 'periods']
-            elif next_index in df.index:
-                df.loc[index, 'periods'] = df.loc[next_index, 'periods']
+            prev_same = prev_index in df.index and df.loc[prev_index, 'periods'] == period
+            next_same = next_index in df.index and df.loc[next_index, 'periods'] == period
+            if not prev_same and not next_same:
+                if prev_index in df.index and prev_index != df.index[0]:
+                    df.loc[index, 'periods'] = df.loc[prev_index, 'periods']
+                elif next_index in df.index:
+                    df.loc[index, 'periods'] = df.loc[next_index, 'periods']
     
     return df
 
@@ -144,9 +199,9 @@ def periods_to_dict(df):
 
         # Check if the period name already exists in the dictionary
         if period_name in periods_dict.keys():
-            # Append a suffix to the period name
-            suffix = len(periods_dict[period_name]) + 1 if len(periods_dict[period_name]) > 2 else 2
-            new_period_name = f"{period_name} {suffix}"
+            # Count all existing entries for this phase (base name + any "name N" variants)
+            count = sum(1 for k in periods_dict if k == period_name or k.startswith(f"{period_name} "))
+            new_period_name = f"{period_name} {count + 1}"
             periods_dict[new_period_name] = (start, end)
         else:
             periods_dict[period_name] = (start, end)
@@ -207,22 +262,18 @@ def process_vorticity(
         cutoff_high (float, optional): High-frequency cutoff for the Lanczos filter, used to remove high-frequency noise. 
             Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 48.0.
         
-        filter_derivatives (bool, optional): Apply filtering to the derivative results to further reduce noise. 
-            Default is True.
-
     Returns:
         xarray.DataArray: A DataArray containing calculated vorticity variables, smoothed values, and their derivatives.
 
     Note:
-        - Data Frequency and Parameters: If the data is not hourly, parameters such as `cutoff_low`, `cutoff_high`, 
+        - Data Frequency and Parameters: If the data is not hourly, parameters such as `cutoff_low`, `cutoff_high`,
           `replace_endpoints_with_lowpass`, and `use_smoothing` should be adjusted accordingly.
         - The Lanczos filter and Savgol filter are applied using external functions 'lanfil.lanczos_bandpass_filter'
           and 'savgol_filter', respectively.
         - The 'window_length_savgol' and 'window_length_savgol_2nd' calculations depend on the input 'use_smoothing' and
           'use_smoothing_twice' values or are determined automatically for 'auto'.
-        - The filtering of derivatives is controlled by the 'filter_derivatives' parameter.
-        - Savgol Window Requirements: Ensure `use_smoothing` and `use_smoothing_twice` are greater than or equal 
-          to `savgol_polynomial` to avoid errors. For example, if `savgol_polynomial=3`, then `use_smoothing` must be 
+        - Savgol Window Requirements: Ensure `use_smoothing` and `use_smoothing_twice` are greater than or equal
+          to `savgol_polynomial` to avoid errors. For example, if `savgol_polynomial=3`, then `use_smoothing` must be
           at least 3.
 
     Example:
@@ -243,7 +294,20 @@ def process_vorticity(
             window_length_savgol = len(zeta_df) // 2 | 1
     else:
         window_length_savgol = use_smoothing
-    
+        if isinstance(use_smoothing, int) and not isinstance(use_smoothing, bool):
+            _orig = window_length_savgol
+            window_length_savgol = window_length_savgol | 1  # ensure odd (consistent with 'auto' branch)
+            _max_valid = len(zeta_df) if len(zeta_df) % 2 == 1 else len(zeta_df) - 1
+            if window_length_savgol > _max_valid:
+                window_length_savgol = _max_valid
+            if window_length_savgol != _orig:
+                warnings.warn(
+                    f"use_smoothing={_orig} adjusted to {window_length_savgol} "
+                    f"(savgol_filter requires an odd window length not exceeding "
+                    f"the series length of {len(zeta_df)}).",
+                    UserWarning
+                )
+
     if use_smoothing_twice == 'auto':
         if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
             window_length_savgol_2nd = window_length_savgol * 2  | 1
@@ -251,6 +315,19 @@ def process_vorticity(
             window_length_savgol_2nd = window_length_savgol | 1
     else:
         window_length_savgol_2nd = use_smoothing_twice
+        if isinstance(use_smoothing_twice, int) and not isinstance(use_smoothing_twice, bool):
+            _orig_2nd = window_length_savgol_2nd
+            window_length_savgol_2nd = window_length_savgol_2nd | 1  # ensure odd
+            _max_valid = len(zeta_df) if len(zeta_df) % 2 == 1 else len(zeta_df) - 1
+            if window_length_savgol_2nd > _max_valid:
+                window_length_savgol_2nd = _max_valid
+            if window_length_savgol_2nd != _orig_2nd:
+                warnings.warn(
+                    f"use_smoothing_twice={_orig_2nd} adjusted to {window_length_savgol_2nd} "
+                    f"(savgol_filter requires an odd window length not exceeding "
+                    f"the series length of {len(zeta_df)}).",
+                    UserWarning
+                )
     
     # Check Savgol window length only if smoothing is enabled
     if use_smoothing and window_length_savgol < savgol_polynomial:
@@ -368,7 +445,50 @@ def get_periods(vorticity,
                 threshold_incipient_length: float = 0.4) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
-    
+
+    Detection pipeline and phase precedence
+    ----------------------------------------
+    The detection functions are called in the following fixed order:
+
+        1. find_intensification_period
+        2. find_decay_period
+        3. find_mature_stage
+        4. find_residual_period
+        5. post_process_periods   (gap-filling and singleton removal)
+        6. find_incipient_period  (fills any remaining NaN at the series start)
+
+    Each function writes to the 'periods' column of the DataFrame.  Functions
+    called later can **overwrite** regions already labelled by earlier functions.
+    The most significant consequence is that ``find_decay_period`` (step 2) may
+    overwrite timesteps that ``find_intensification_period`` (step 1) had already
+    marked, because both functions scan the same z-peaks/valleys and their
+    detected intervals can overlap.
+
+    Threshold calibration note
+    ---------------------------
+    Because of this precedence, the practical effect of a threshold may be
+    smaller than expected.  For example, ``threshold_intensification_gap``
+    controls the maximum gap that is bridged between two intensification blocks;
+    however, if ``find_decay_period`` subsequently marks those same timesteps as
+    decay, the gap-bridging has no visible effect on the final output.  When
+    calibrating thresholds, always inspect the final 'periods' column rather than
+    assuming each parameter acts in isolation.
+
+    Phase detection lag note
+    ------------------------
+    The detected *start* of a phase may lag the true onset of that phase in the
+    input vorticity series by up to approximately 15–18 h (5–6 timesteps at
+    3-hourly resolution).  This lag is an inherent consequence of the Lanczos +
+    Savgol filtering chain: the smoothed signal requires several timesteps to
+    build up enough amplitude for the algorithm to reliably identify a new
+    feature.  The lag is most pronounced for ``residual`` (re-intensification
+    after decay), where it was consistently observed to be 15–18 h across
+    controlled synthetic test cases.  Other transitions (e.g. the onset of
+    intensification when no explicit incipient segment precedes it) can show
+    similar lags.  When interpreting results or defining search windows for
+    event attribution, a margin of at least 18 h around detected phase
+    boundaries is recommended.
+
     Args:
         vorticity (xarray.DataArray): Processed vorticity dataset.
         plot (Union[str, bool], optional): Path to save plots or False to disable plotting. Default is False.
@@ -381,7 +501,7 @@ def get_periods(vorticity,
         threshold_decay_length (float, optional): Minimum decay stage length. Default is 0.075.
         threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075.
         threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4.
-    
+
     Returns:
         pd.DataFrame: DataFrame containing detected periods and associated information.
     """
@@ -568,6 +688,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         - **Savgol Smoothing**: Ensure `use_smoothing` and `use_smoothing_twice` are integers greater than or equal 
           to `savgol_polynomial`. To disable, set `use_smoothing` to `False`.
     """
+    # Require temporal labels when the caller passes raw data without an index.
+    if isinstance(series, (list, np.ndarray)) and x is None:
+        raise ValueError(
+            "x must be provided when series is a list or numpy array. "
+            "Pass a list of datetime values or a pd.DatetimeIndex as x."
+        )
+
     # Check hemisphere
     if hemisphere.lower() not in ["southern", "northern"]:
         raise ValueError("Hemisphere must be 'southern' or 'northern'.")

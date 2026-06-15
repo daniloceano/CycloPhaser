@@ -72,8 +72,13 @@ def find_mature_stage(df, **args_periods):
         blocks = np.split(mature_periods, np.where(np.diff(mature_periods) != dt)[0] + 1)
         for block in blocks:
             block_start, block_end = block[0], block[-1]
-            if df.loc[block_start - dt, 'periods'] != 'intensification' or \
-               df.loc[block_end + dt, 'periods'] != 'decay':
+            prev_idx = block_start - dt
+            next_idx = block_end + dt
+            # A mature block at the series boundary cannot have required neighbours —
+            # treat missing neighbour as "condition not satisfied" and clear the block.
+            if prev_idx not in df.index or next_idx not in df.index or \
+               df.loc[prev_idx, 'periods'] != 'intensification' or \
+               df.loc[next_idx, 'periods'] != 'decay':
                 df.loc[block_start:block_end, 'periods'] = np.nan
 
     return df
@@ -100,7 +105,7 @@ def find_intensification_period(df, **args_periods):
         'periods' column where applicable.
     """
     threshold_intensification_length = args_periods['threshold_intensification_length']
-    threshold_intensification_gap = args_periods['threshold_decay_length']
+    threshold_intensification_gap = args_periods['threshold_intensification_gap']
 
     # Find z peaks and valleys
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
@@ -112,11 +117,11 @@ def find_intensification_period(df, **args_periods):
     # Find intensification periods between z peaks and valleys
     for z_peak in z_peaks:
         next_z_valley = z_valleys[z_valleys > z_peak].min()
-        if next_z_valley is not pd.NaT:
+        if not pd.isna(next_z_valley):
             intensification_start = z_peak
             intensification_end = next_z_valley
 
-            # Intensification needs to be at least 12.5% of the total series length
+            # Intensification needs to meet the minimum length threshold (fraction of total series length)
             if intensification_end-intensification_start > length * threshold_intensification_length:
                 df.loc[intensification_start:intensification_end, 'periods'] = 'intensification'
     
@@ -168,7 +173,7 @@ def find_decay_period(df, **args_periods):
     # Find decay periods between z valleys and peaks
     for z_valley in z_valleys:
         next_z_peak = z_peaks[z_peaks > z_valley].min()
-        if next_z_peak is not pd.NaT:
+        if not pd.isna(next_z_peak):
             decay_start = z_valley
             decay_end = next_z_peak
         else:
@@ -221,25 +226,31 @@ def find_residual_period(df):
     if num_unique_phases == 1:
         phase_to_fill = unique_phases[0]
 
-        # Find consecutive blocks of the same phase
-        phase_blocks = np.split(df[df['periods'] == phase_to_fill].index,
-                                np.where(np.diff(df['periods'] == phase_to_fill) != 0)[0] + 1)
+        # Find consecutive blocks of the same phase.
+        # B5 fix: split on the phase index itself (np.diff of the DatetimeIndex), not on
+        # a boolean mask diff — the boolean-mask approach produced split positions relative
+        # to the full DataFrame length, causing misaligned blocks when the phase does not
+        # start at row 0.
+        phase_idx = df[df['periods'] == phase_to_fill].index
+        phase_blocks = np.split(phase_idx, np.where(np.diff(phase_idx) != dt)[0] + 1)
 
-        # Find the last block of the same phase
-        # last_phase_block = phase_blocks[-1]
-
+        # B3 fix: break on the first non-empty block encountered in reverse order, which is
+        # the last non-empty block in forward order.  Without break the loop continued
+        # overwriting last_phase_block and ended up with the *first* block instead.
         for index in reversed(phase_blocks):
             if not index.empty:
                 last_phase_block = index
+                break
 
         # Find the index right after the last block
         if len(last_phase_block) > 0:
             last_phase_block_end = last_phase_block[-1]
-            # Fill NaNs after the last block with 'residual'
             df.loc[last_phase_block_end + dt:, 'periods'] = df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual')
         else:
+            # B4 fix: fillna with inplace=True on a slice is a no-op in pandas; use
+            # assignment instead.
             last_phase_block_end = phase_blocks[-2][-1]
-            df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual', inplace=True)
+            df.loc[last_phase_block_end + dt:, 'periods'] = df.loc[last_phase_block_end + dt:, 'periods'].fillna('residual')
 
     else:
         mature_periods = df[df['periods'] == 'mature'].index
@@ -249,11 +260,16 @@ def find_residual_period(df):
         # Check if 'mature' is the last stage before the end of the series
         last_phase_end = df.index[-1]
 
-        # Find residual periods where there is no decay stage after the mature stage
+        # Find residual periods where there is no decay stage after the mature stage.
+        # The loop iterates over individual timesteps rather than over contiguous blocks,
+        # but the result is equivalent to a block-based check: all timesteps within the
+        # same mature block share the same next_decay_period, so either every timestep
+        # in that block fires the conversion or none does.  Writes from later timesteps
+        # in the same block are harmless redundant overwrites of 'residual'.
         for mature_period in mature_periods:
             if len(unique_phases) > 2:
                 next_decay_period = decay_periods[decay_periods > mature_period].min()
-                if next_decay_period is pd.NaT and mature_period != last_phase_end:
+                if pd.isna(next_decay_period) and mature_period != last_phase_end:
                     df.loc[mature_period:, 'periods'] = 'residual'
                     
         # Update mature periods
@@ -264,14 +280,18 @@ def find_residual_period(df):
         if len(unique_phases) > 2:
             for intensification_period in intensification_periods:
                 next_mature_period = mature_periods[mature_periods > intensification_period].min()
-                if next_mature_period is pd.NaT:
+                if pd.isna(next_mature_period):
                     df.loc[intensification_period:, 'periods'] = 'residual'
 
-        # Fill NaNs after decay with residual if there is a decay, else, fill the NaNs after mature
+        # Fill NaNs after decay with residual if there is a decay, else, fill the NaNs after mature.
+        # If neither is present (e.g. only intensification detected), there is no anchor point
+        # from which to extend residual — skip to avoid NameError on last_decay_index.
         if 'decay' in unique_phases:
             last_decay_index = df[df['periods'] == 'decay'].index[-1]
         elif 'mature' in unique_phases:
             last_decay_index = df[df['periods'] == 'mature'].index[-1]
+        else:
+            return df
         dt = df.index[1] - df.index[0]
         df.loc[last_decay_index + dt:, 'periods'] = df.loc[last_decay_index + dt:, 'periods'].fillna('residual')
 
@@ -300,7 +320,9 @@ def find_incipient_period(df, **args_periods):
 
     periods = df['periods']
     
-    df['periods'].fillna('incipient', inplace=True)
+    # inplace=True on a column accessor is a no-op under pandas CoW (pandas 3.0+);
+    # use explicit assignment to guarantee the fill propagates back to the DataFrame.
+    df['periods'] = df['periods'].fillna('incipient')
 
     phases_order = []
     current_phase = None
@@ -322,7 +344,7 @@ def find_incipient_period(df, **args_periods):
             decay_blocks = np.split(df[df['periods'] == "decay"].index,
                                 np.where(np.diff(df['periods'] == "decay") != 0)[0] + 1)
             end_time = decay_blocks[0].max()
-            if end_time is not pd.NaT:
+            if not pd.isna(end_time):
                 time_range = start_time + ((end_time - start_time) * threshold_incipient_length)
                 df.loc[start_time:time_range, 'periods'] = 'incipient'
 
