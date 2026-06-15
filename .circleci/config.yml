@@ -50,7 +50,7 @@ jobs:
 
       - run:
           name: Publish to TestPyPI
-          command: twine upload -u ${TESTPY_LOGIN} -p ${TESTPY_PASSWORD} --repository testpypi dist/* --verbose
+          command: twine upload --skip-existing -u ${TESTPY_LOGIN} -p ${TESTPY_PASSWORD} --repository testpypi dist/* --verbose
 
   pypi_publish:
     docker:
@@ -72,7 +72,7 @@ jobs:
 
       - run:
           name: Publish to PyPI
-          command: twine upload dist/* --verbose
+          command: twine upload --skip-existing dist/* --verbose
 
 workflows:
   build_test_publish:
