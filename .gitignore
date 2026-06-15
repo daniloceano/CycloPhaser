@@ -184,3 +184,4 @@ tests/synthetic/figures/*.png
 
 # Temporary validation outputs (not tracked)
 tests/_tmp_validation/
+.vscode/settings.json
