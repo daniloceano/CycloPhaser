@@ -23,6 +23,7 @@ Contents:
    overview
    installation
    usage
+   calibration_tool
    testing
    api
    contribute
