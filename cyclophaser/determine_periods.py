@@ -262,22 +262,18 @@ def process_vorticity(
         cutoff_high (float, optional): High-frequency cutoff for the Lanczos filter, used to remove high-frequency noise. 
             Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 48.0.
         
-        filter_derivatives (bool, optional): Apply filtering to the derivative results to further reduce noise. 
-            Default is True.
-
     Returns:
         xarray.DataArray: A DataArray containing calculated vorticity variables, smoothed values, and their derivatives.
 
     Note:
-        - Data Frequency and Parameters: If the data is not hourly, parameters such as `cutoff_low`, `cutoff_high`, 
+        - Data Frequency and Parameters: If the data is not hourly, parameters such as `cutoff_low`, `cutoff_high`,
           `replace_endpoints_with_lowpass`, and `use_smoothing` should be adjusted accordingly.
         - The Lanczos filter and Savgol filter are applied using external functions 'lanfil.lanczos_bandpass_filter'
           and 'savgol_filter', respectively.
         - The 'window_length_savgol' and 'window_length_savgol_2nd' calculations depend on the input 'use_smoothing' and
           'use_smoothing_twice' values or are determined automatically for 'auto'.
-        - The filtering of derivatives is controlled by the 'filter_derivatives' parameter.
-        - Savgol Window Requirements: Ensure `use_smoothing` and `use_smoothing_twice` are greater than or equal 
-          to `savgol_polynomial` to avoid errors. For example, if `savgol_polynomial=3`, then `use_smoothing` must be 
+        - Savgol Window Requirements: Ensure `use_smoothing` and `use_smoothing_twice` are greater than or equal
+          to `savgol_polynomial` to avoid errors. For example, if `savgol_polynomial=3`, then `use_smoothing` must be
           at least 3.
 
     Example:

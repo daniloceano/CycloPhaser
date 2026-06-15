@@ -121,7 +121,7 @@ def find_intensification_period(df, **args_periods):
             intensification_start = z_peak
             intensification_end = next_z_valley
 
-            # Intensification needs to be at least 12.5% of the total series length
+            # Intensification needs to meet the minimum length threshold (fraction of total series length)
             if intensification_end-intensification_start > length * threshold_intensification_length:
                 df.loc[intensification_start:intensification_end, 'periods'] = 'intensification'
     
