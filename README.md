@@ -31,6 +31,38 @@ CycloPhaser is described in detail in the paper by de Souza et al. (2025) and ha
 
 For detailed documentation, visit the [CycloPhaser Documentation](https://cyclophaser.readthedocs.io/en/latest/). This includes function parameters, module descriptions, and more.
 
+## Interactive Calibration Tool
+
+CycloPhaser includes a visual calibration app built with [Streamlit](https://streamlit.io) that lets you tune filtering and phase-detection parameters interactively, inspect results across multiple cyclones side-by-side, and export configurations as YAML for use in your own scripts.
+
+**This tool is not part of the PyPI package** — it is not installed by `pip install cyclophaser`. It lives in the repository under [`tools/calibration_app/`](tools/calibration_app/).
+
+**Hosted version** (no installation required):
+
+> <STREAMLIT_APP_URL>
+
+**Run locally:**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/daniloceano/CycloPhaser.git
+cd CycloPhaser
+
+# 2. Install app dependencies (pulls cyclophaser from PyPI)
+pip install -r tools/calibration_app/requirements.txt
+
+# 3. Launch
+streamlit run tools/calibration_app/app.py
+```
+
+For local development with an editable install of CycloPhaser (changes to the source take effect immediately):
+
+```bash
+pip install -e .
+pip install -r tools/calibration_app/requirements-app.txt
+streamlit run tools/calibration_app/app.py
+```
+
 # Support and Contact
 
 For support, feature requests, or any queries, please open an issue on the GitHub repository.
