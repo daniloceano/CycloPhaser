@@ -12,11 +12,11 @@
 
 CycloPhaser is a package designed to automate and improve the accuracy of detecting and categorizing cyclone life cycle phases, including intensification, maturation, and decay. Understanding these phases is crucial for analyzing cyclone behavior and the dynamic processes that drive their development. This knowledge supports both operational forecasters and researchers focused on improving cyclone representation in numerical models, ultimately enhancing forecast accuracy. Traditionally, phase identification requires manual analysis, which introduces subjectivity and limits the feasibility of analyzing large datasets. CycloPhaser addresses these challenges by offering an efficient, objective approach, compatible with high-resolution reanalysis data and real-time observations alike. With CycloPhaser, users gain a powerful tool for cyclone life cycle classification, supporting both advanced meteorological research and practical forecasting applications.
 
-CycloPhaser is described in detail in the paper by de Souza et al. (under review) and has been used to generate results presented by de Souza et al. (2024).
+CycloPhaser is described in detail in the paper by de Souza et al. (2025) and has been used to generate results presented by de Souza et al. (2024).
 
 ![CycloPhaser Example Plot](https://github.com/daniloceano/CycloPhaser/raw/master/docs/_images/test_custom.png)
 
-**Important Note**: CycloPhaser requires cyclone tracking data as input but does not perform cyclone tracking itself. There are various cyclone tracking algorithms available in the literature. Walker et al. (2020) provide a discussion on these methods, while open-source tracking tools, such as [CyTRACK](https://github.com/apalarcon/CyTRACK) by Pérez-Alarcón et al. (2024), are publicly accessible. Additionally, cyclone track databases, like the [Atlantic extratropical cyclone tracks database]((https://data.mendeley.com/datasets/kwcvfr52hp/4)) by Gramcianinov et al. (2020), are available for use.
+**Important Note**: CycloPhaser requires cyclone tracking data as input but does not perform cyclone tracking itself. There are various cyclone tracking algorithms available in the literature. Walker et al. (2020) provide a discussion on these methods, while open-source tracking tools, such as [CyTRACK](https://github.com/apalarcon/CyTRACK) by Pérez-Alarcón et al. (2024), are publicly accessible. Additionally, cyclone track databases, like the [Atlantic extratropical cyclone tracks database](https://data.mendeley.com/datasets/kwcvfr52hp/4) by Gramcianinov et al. (2020), are available for use.
 
 
 ## Installation
@@ -25,7 +25,7 @@ CycloPhaser is described in detail in the paper by de Souza et al. (under review
 
    ```
    pip install cyclophaser
-
+   ```
 
 ## Documentation
 
@@ -42,7 +42,7 @@ This project is licensed under the GNU General Public License v3.0. You may obta
 
 ### References
 
-- de Souza, D. C., da Silva Dias, P. L., Gramcianinov, C. B., & de Camargo, R. (under review). *CycloPhaser: A Python Package for Detecting Extratropical Cyclone Life Cycles*. Journal of Open Source Software.
+- de Souza, D. C., da Silva Dias, P. L., Gramcianinov, C. B., & de Camargo, R. (2025). CycloPhaser: A Python Package for Detecting Extratropical Cyclone Life Cycles. *Journal of Open Source Software*, 10(108), 7363. https://doi.org/10.21105/joss.07363
   
 - de Souza, D. C., da Silva Dias, P. L., Gramcianinov, C. B., da Silva, M. B. L., & de Camargo, R. (2024). New perspectives on South Atlantic storm track through an automatic method for detecting extratropical cyclones' lifecycle. *International Journal of Climatology*, 44(10), 3568-3588.
 

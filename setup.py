@@ -3,10 +3,8 @@ from setuptools import setup, find_packages
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = '1.9.4'
+VERSION = '2.0.0'
 DESCRIPTION = 'Determine phases from extratropical cyclone life cycle'
-# LONG_DESCRIPTION = 'This script processes vorticity data, identifies different phases of the cyclone \
-    # and plots the identified periods on periods.png and periods_didatic.png'
 
 setup(
     name="cyclophaser",
@@ -16,7 +14,7 @@ setup(
     long_description_content_type='text/markdown',
     author="Danilo Couto de Souza",
     author_email="danilo.oceano@gmail.com",
-    license='MIT',
+    license='GPL-3.0-or-later',
     packages=find_packages(),
     install_requires=[
         "cmocean>=4.0",
@@ -32,7 +30,6 @@ setup(
         "pillow>=10.4",
         "pluggy>=1.5",
         "pyparsing>=3.1",
-        "pytest>=8.3",
         "python-dateutil>=2.9",
         "pytz>=2024.2",
         "scipy>=1.14",
@@ -42,19 +39,21 @@ setup(
         "wheel>=0.44",
         "xarray>=2024.9"
     ],
+    extras_require={
+        'test': ['pytest>=8.3'],
+    },
     package_data={
         'cyclophaser': ['example_data/example_file.csv'],
     },
     keywords=['cyclone', 'vorticity', 'meteorology', 'atmospherical sciences'],
-    classifiers= [
+    classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
-        'License :: OSI Approved :: MIT License',
         "Programming Language :: Python :: 3",
     ],
     project_urls={
-        'Documentation': 'https://yourproject.readthedocs.io/en/latest/',
+        'Documentation': 'https://cyclophaser.readthedocs.io/en/latest/',
         'Source Code': 'https://github.com/daniloceano/CycloPhaser',
-        'Issue Tracker': 'https://readthedocs.org/projects/cyclophaser/',
+        'Issue Tracker': 'https://github.com/daniloceano/CycloPhaser/issues',
     },
 )
