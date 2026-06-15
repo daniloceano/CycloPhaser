@@ -16,6 +16,7 @@ setup(
     author_email="danilo.oceano@gmail.com",
     license='GPL-3.0-or-later',
     packages=find_packages(exclude=['tests', 'tests.*']),
+    license_files=[],
     install_requires=[
         "cmocean>=4.0",
         "contourpy>=1.3",

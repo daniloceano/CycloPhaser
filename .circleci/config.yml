@@ -38,7 +38,7 @@ jobs:
 
       - run:
           name: Install build and publish tools
-          command: pip install --upgrade pip build twine
+          command: pip install --upgrade pip build "twine>=6.0"
 
       - run:
           name: Build sdist and wheel
@@ -60,7 +60,7 @@ jobs:
 
       - run:
           name: Install build and publish tools
-          command: pip install --upgrade pip build twine
+          command: pip install --upgrade pip build "twine>=6.0"
 
       - run:
           name: Build sdist and wheel
