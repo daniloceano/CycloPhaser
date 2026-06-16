@@ -1,12 +1,19 @@
-# Requirements for Streamlit Cloud deployment.
+# Requirements for Streamlit Community Cloud deployment.
+#
 # cyclophaser is installed from PyPI (>=2.0.0).
 # For local development with an editable install, use requirements-app.txt instead.
-streamlit==1.58.0
-pandas==2.3.3
-matplotlib==3.9.2
-xarray==2026.1.0
-numpy==2.4.0
-scipy==1.17.1
-cmocean==4.0.3
-pyyaml==6.0.3
+#
+# Lower-bound (>=) pins are intentional: Streamlit Cloud uses `uv`, which
+# selects prebuilt wheels compatible with the running Python. Exact pins
+# forced source compilation (numpy/scipy) and ~45 min build times. The
+# floors below match cyclophaser's own dependency floors (see setup.py).
+# The Python version is pinned separately in .python-version (3.12).
+streamlit>=1.40
+pandas>=2.2
+matplotlib>=3.9
+xarray>=2024.9
+numpy>=2.1
+scipy>=1.14
+cmocean>=4.0
+pyyaml>=6.0
 cyclophaser>=2.0.0
