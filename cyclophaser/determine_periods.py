@@ -19,7 +19,8 @@ import pandas as pd
 import numpy as np
 
 from scipy.signal import argrelextrema
-from scipy.signal import savgol_filter 
+from scipy.signal import savgol_filter
+from scipy.signal import peak_prominences
 
 from typing import Union
 
@@ -56,7 +57,7 @@ def _collapse_plateaux(indices):
     return np.array(collapsed, dtype=indices.dtype)
 
 
-def find_peaks_valleys(series):
+def find_peaks_valleys(series, prominence=None, prominence_relative=None, distance=None):
     """Find peaks, valleys, and zero locations in a pandas Series.
 
     Uses argrelextrema with np.greater_equal / np.less_equal so that a flat
@@ -75,13 +76,47 @@ def find_peaks_valleys(series):
     (which correspond to the start/end of the cyclone lifecycle at a vorticity
     minimum) requires additional investigation and a dedicated visual checkpoint.
 
+    Prominence modes
+    ----------------
+    Two prominence-based filters are available and may be used independently or
+    together.  Both act only on *interior* extrema; boundary indices (0 and N-1)
+    are always preserved.
+
+    **Relative (recommended)**: ``prominence_relative`` — fraction of the
+    largest prominence among all interior candidates.  Adapts automatically to
+    each cyclone's intensity, making it robust across weak and strong systems.
+    Example: 0.10 keeps only extrema whose prominence is ≥ 10 % of the
+    dominant extremum's prominence.
+
+    **Absolute**: ``prominence`` — fixed threshold in the same units as the
+    signal.  Useful when the scale is known, but requires re-tuning for
+    datasets with different vorticity magnitudes.
+
+    When both are active, absolute is applied first; relative is then applied
+    to the surviving set (denominator = max prominence of that surviving set).
+
     Args:
-        series: pandas Series (z, dz, or dz2 from the preprocessed vorticity)
+        series:              pandas Series (z, dz, or dz2 from the preprocessed
+                             vorticity).
+        prominence:          float or None. Absolute minimum prominence threshold.
+                             Default None disables absolute filtering (no-op).
+        prominence_relative: float or None. Relative threshold as a fraction of
+                             the largest interior prominence.  Example: 0.10
+                             removes any interior extremum whose prominence is
+                             below 10 % of the most prominent one.  Default None
+                             disables relative filtering (no-op).
+        distance:            int or None. Minimum number of steps separating any
+                             two surviving same-type extrema.  When candidates
+                             are closer than this, the one with higher prominence
+                             is kept.  Boundary indices are always preserved and
+                             count toward the exclusion radius.  Default None
+                             disables distance filtering (no-op).
 
     Returns:
         result: pandas Series with NaN, 'peak', 'valley', or 0 at each position
     """
     data = series.values
+    N = len(data)
 
     # Detect raw extrema (>= / <= catches flat-top plateaux as multiple indices)
     peaks   = argrelextrema(data, np.greater_equal)[0]
@@ -101,6 +136,11 @@ def find_peaks_valleys(series):
     if len(overlap):
         peaks = peaks[~np.isin(peaks, overlap)]
 
+    # Optional prominence / distance refinement (no-op when all three are None)
+    if prominence is not None or prominence_relative is not None or distance is not None:
+        peaks   = _refine_extrema(data,  data, peaks,   prominence, prominence_relative, distance, N)
+        valleys = _refine_extrema(data, -data, valleys, prominence, prominence_relative, distance, N)
+
     # Build result series
     result = pd.Series(index=series.index, dtype=object)
     result[:] = np.nan
@@ -108,6 +148,79 @@ def find_peaks_valleys(series):
     result.iloc[valleys] = 'valley'
     result.iloc[zeros]   = 0
 
+    return result
+
+
+def _refine_extrema(data, signed_data, candidates, prominence, prominence_relative, distance, N):
+    """Filter *candidates* by prominence (absolute and/or relative) and/or distance.
+
+    Boundary indices (0 and N-1) are unconditionally preserved.  Interior
+    candidates are pruned in order: absolute prominence → relative prominence →
+    minimum distance (greedy, highest-prominence-first).  Prominences are
+    computed once on the initial interior set and kept in sync after each
+    filtering step.
+
+    Args:
+        data:                original data array (passed for API symmetry; not
+                             used directly — signed_data carries the sign).
+        signed_data:         data for the extremum type: ``data`` for peaks,
+                             ``-data`` for valleys.
+        candidates:          1-D integer array of candidate indices (collapsed).
+        prominence:          float absolute threshold, or None.
+        prominence_relative: float relative threshold (fraction of max interior
+                             prominence), or None.
+        distance:            int minimum separation in steps, or None.
+        N:                   total series length.
+
+    Returns:
+        numpy array of surviving candidate indices (sorted ascending).
+    """
+    if len(candidates) == 0:
+        return candidates
+
+    boundary = {i for i in (0, N - 1) if i in set(candidates)}
+    interior = np.array([i for i in candidates if i not in boundary])
+
+    # Compute prominence once for all interior candidates.
+    # Reused by all three filters; kept in sync after each filtering step.
+    if len(interior) > 0 and (prominence is not None or prominence_relative is not None or distance is not None):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            prom_vals = peak_prominences(signed_data, interior)[0]
+    else:
+        prom_vals = np.zeros(len(interior))
+
+    # --- Absolute prominence filtering ---
+    if prominence is not None and len(interior) > 0:
+        mask      = prom_vals >= prominence
+        interior  = interior[mask]
+        prom_vals = prom_vals[mask]
+
+    # --- Relative prominence filtering ---
+    # Threshold = prominence_relative × max(prom_vals of surviving interior).
+    # If absolute was applied first, the denominator is the max of the post-
+    # absolute set, so the relative fraction is applied consistently within
+    # the surviving population.
+    if prominence_relative is not None and len(interior) > 0:
+        max_prom = prom_vals.max() if len(prom_vals) > 0 else 0.0
+        if max_prom > 0.0:
+            mask      = prom_vals >= prominence_relative * max_prom
+            interior  = interior[mask]
+            prom_vals = prom_vals[mask]
+
+    # --- Distance filtering (greedy, highest prominence first) ---
+    if distance is not None:
+        order = np.argsort(-prom_vals) if len(interior) > 0 else np.array([], dtype=int)
+        kept  = list(boundary)
+        for rank in order:
+            idx = interior[rank]
+            if all(abs(idx - k) >= distance for k in kept):
+                kept.append(idx)
+        surviving_interior = np.array([i for i in interior if i in set(kept)])
+    else:
+        surviving_interior = interior
+
+    result = np.array(sorted(boundary | set(surviving_interior.tolist())), dtype=np.intp)
     return result
 
 def post_process_periods(df):
@@ -432,9 +545,9 @@ def process_vorticity(
 
     return da 
 
-def get_periods(vorticity, 
-                plot: Union[str, bool] = False, 
-                plot_steps: Union[str, bool] = False, 
+def get_periods(vorticity,
+                plot: Union[str, bool] = False,
+                plot_steps: Union[str, bool] = False,
                 export_dict: Union[str, bool] = False,
                 threshold_intensification_length: float = 0.075,
                 threshold_intensification_gap: float = 0.075,
@@ -442,7 +555,10 @@ def get_periods(vorticity,
                 threshold_mature_length: float = 0.03,
                 threshold_decay_length: float = 0.075,
                 threshold_decay_gap: float = 0.075,
-                threshold_incipient_length: float = 0.4) -> pd.DataFrame:
+                threshold_incipient_length: float = 0.4,
+                prominence: float = None,
+                prominence_relative: float = None,
+                distance: int = None) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -501,11 +617,22 @@ def get_periods(vorticity,
         threshold_decay_length (float, optional): Minimum decay stage length. Default is 0.075.
         threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075.
         threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4.
+        prominence (float, optional): Absolute minimum prominence threshold for
+            z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``
+            for the full description of prominence modes.
+        prominence_relative (float, optional): Relative prominence threshold as a
+            fraction of the most prominent interior z-extremum. **Recommended
+            mode**: adapts to each cyclone's intensity, generalising across weak
+            and strong systems without re-tuning. Example: 0.10 keeps only
+            z-extrema whose prominence is ≥ 10 % of the dominant extremum's
+            prominence. Default None (no-op).
+        distance (int, optional): Minimum separation in timesteps between two
+            same-type z-extrema. Default None (no-op).
 
     Returns:
         pd.DataFrame: DataFrame containing detected periods and associated information.
     """
-    
+
     # Extract smoothed vorticity and derivatives
     z = vorticity.vorticity_smoothed2
     dz = vorticity.dz_dt_smoothed2
@@ -517,9 +644,16 @@ def get_periods(vorticity,
     df['dz'] = dz.to_dataframe()
     df['dz2'] = dz2.to_dataframe()
 
-    # Find peaks, valleys, and zero locations for z, dz, and dz2
-    df['z_peaks_valleys'] = find_peaks_valleys(df['z'])
-    df['dz_peaks_valleys'] = find_peaks_valleys(df['dz'])
+    # Find peaks, valleys, and zero locations for z, dz, and dz2.
+    # prominence filters are applied only to z: they remove spurious vorticity
+    # bumps irrelevant to the life cycle.  Applying them to dz would discard the
+    # low-amplitude early dz valleys that find_incipient_period relies on to
+    # locate the incipient/intensification boundary.
+    df['z_peaks_valleys']   = find_peaks_valleys(df['z'],
+                                                  prominence=prominence,
+                                                  prominence_relative=prominence_relative,
+                                                  distance=distance)
+    df['dz_peaks_valleys']  = find_peaks_valleys(df['dz'])
     df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'])
 
     # Initialize periods column
@@ -605,7 +739,10 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       threshold_mature_length: float = 0.03,
                       threshold_decay_length: float = 0.075,
                       threshold_decay_gap: float = 0.075,
-                      threshold_incipient_length: float = 0.4) -> pd.DataFrame:
+                      threshold_incipient_length: float = 0.4,
+                      prominence: float = None,
+                      prominence_relative: float = None,
+                      distance: int = None) -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -744,17 +881,20 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
 
     # Call `get_periods` with the appropriate arguments
     df = get_periods(
-        vorticity=vorticity, 
-        plot=plot, 
-        plot_steps=plot_steps, 
-        export_dict=export_dict, 
+        vorticity=vorticity,
+        plot=plot,
+        plot_steps=plot_steps,
+        export_dict=export_dict,
         threshold_intensification_length=threshold_intensification_length,
         threshold_intensification_gap=threshold_intensification_gap,
         threshold_mature_distance=threshold_mature_distance,
         threshold_mature_length=threshold_mature_length,
         threshold_decay_length=threshold_decay_length,
         threshold_decay_gap=threshold_decay_gap,
-        threshold_incipient_length=threshold_incipient_length
+        threshold_incipient_length=threshold_incipient_length,
+        prominence=prominence,
+        prominence_relative=prominence_relative,
+        distance=distance,
     )
 
     return df

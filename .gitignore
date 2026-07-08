@@ -182,6 +182,9 @@ Pipfile.lock
 # Synthetic test figures (generated, not tracked)
 tests/synthetic/figures/*.png
 
+# Calibration validation figures (generated, not tracked)
+tests/calibration_data/figures/
+
 # Temporary validation outputs (not tracked)
 tests/_tmp_validation/
 .vscode/settings.json

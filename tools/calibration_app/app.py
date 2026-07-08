@@ -53,6 +53,12 @@ _DEFAULTS: dict = {
     "thr_int_gap":       0.075,
     "thr_dec_gap":       0.075,
     "thr_inc_len":       0.400,
+    "extrema_prominence_enabled":     False,
+    "extrema_prominence_mode":        "relative",   # 'relative' | 'absolute'
+    "extrema_prominence_rel_val":     0.10,         # fraction (relative mode)
+    "extrema_prominence_val":         1e-6,         # absolute threshold
+    "extrema_distance_enabled":       False,
+    "extrema_distance_val":           3,
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
@@ -175,7 +181,7 @@ def _build_yaml(cyclone_names) -> str:
             "use_smoothing_twice":           use_smoothing_twice,
             "savgol_polynomial":             int(savgol_poly),
         },
-        "phase_params": {k: float(v) for k, v in _PHASE_PARAMS.items()},
+        "phase_params": {k: float(v) for k, v in _PHASE_PARAMS.items() if v is not None},
     }
     return yaml.dump(doc, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
@@ -546,6 +552,89 @@ with st.sidebar:
             ),
         )
 
+    st.divider()
+    # --- Extrema filtering (optional) ---
+    st.header("Extrema Filtering")
+    with st.expander("Prominence & distance filtering (advanced)", expanded=False):
+        st.caption(
+            "Optional post-processing for the detected peaks/valleys. "
+            "Boundary extrema (first and last points) are always preserved. "
+            "Leave disabled to use the default CycloPhaser behaviour."
+        )
+        _prom_enabled = st.checkbox(
+            "Enable prominence filter", value=_DEFAULTS["extrema_prominence_enabled"],
+            key="extrema_prominence_enabled",
+            help=(
+                "Remove interior extrema that are not sufficiently prominent. "
+                "Boundary extrema are always preserved regardless of this setting."
+            ),
+        )
+        if _prom_enabled:
+            _prom_mode = st.radio(
+                "Prominence mode",
+                options=["relative", "absolute"],
+                index=0,
+                format_func=lambda x: (
+                    "Relativo (recomendado)" if x == "relative" else "Absoluto"
+                ),
+                key="extrema_prominence_mode",
+                horizontal=True,
+                help=(
+                    "Relative adapts to each cyclone's intensity — no re-tuning needed "
+                    "across weak and strong systems. Absolute uses a fixed threshold in "
+                    "the same units as the smoothed vorticity."
+                ),
+            )
+            if _prom_mode == "relative":
+                _rel_val = st.slider(
+                    "Fraction of dominant prominence",
+                    min_value=0.00, max_value=0.50, step=0.01,
+                    value=_DEFAULTS["extrema_prominence_rel_val"],
+                    key="extrema_prominence_rel_val",
+                    help=(
+                        "% da proeminência do extremo mais forte do ciclone; "
+                        "adapta-se à intensidade de cada ciclone (modo recomendado). "
+                        "Ex.: 0.10 mantém apenas extremos com proeminência ≥ 10 % "
+                        "do extremo dominante."
+                    ),
+                )
+                extrema_prominence          = None
+                extrema_prominence_relative = float(_rel_val)
+            else:
+                _abs_val = st.number_input(
+                    "Absolute prominence threshold", min_value=0.0,
+                    value=_DEFAULTS["extrema_prominence_val"],
+                    format="%.2e", key="extrema_prominence_val",
+                    help=(
+                        "Minimum prominence in the same units as the smoothed vorticity "
+                        "series. Requires re-tuning for datasets of different magnitudes."
+                    ),
+                )
+                extrema_prominence          = float(_abs_val)
+                extrema_prominence_relative = None
+        else:
+            extrema_prominence          = None
+            extrema_prominence_relative = None
+
+        _dist_enabled = st.checkbox(
+            "Enable distance filter", value=_DEFAULTS["extrema_distance_enabled"],
+            key="extrema_distance_enabled",
+            help=(
+                "If enabled, same-type extrema closer than this many timesteps are merged, "
+                "keeping the one with higher prominence. Boundary extrema always count toward "
+                "the exclusion radius."
+            ),
+        )
+        if _dist_enabled:
+            _dist_val = st.number_input(
+                "Minimum distance (timesteps)", min_value=2, step=1,
+                value=_DEFAULTS["extrema_distance_val"], key="extrema_distance_val",
+                help="Minimum separation (in timesteps) between two same-type extrema.",
+            )
+            extrema_distance = int(_dist_val)
+        else:
+            extrema_distance = None
+
 # Bundle phase params
 _PHASE_PARAMS = dict(
     threshold_intensification_length=thr_int_len,
@@ -555,8 +644,13 @@ _PHASE_PARAMS = dict(
     threshold_decay_length=thr_dec_len,
     threshold_decay_gap=thr_dec_gap,
     threshold_incipient_length=thr_inc_len,
+    prominence=extrema_prominence,
+    prominence_relative=extrema_prominence_relative,
+    distance=extrema_distance,
 )
-_phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
+_phase_params_tuple = tuple(sorted(
+    (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
+))
 
 # ── File upload ──────────────────────────────────────────────────────────────────
 uploaded = st.file_uploader(
