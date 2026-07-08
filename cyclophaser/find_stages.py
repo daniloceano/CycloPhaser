@@ -66,7 +66,32 @@ def find_mature_stage(df, **args_periods):
             # Fill the period between mature_start and mature_end with 'mature'
             df.loc[mature_start:mature_end, 'periods'] = 'mature'
 
-    # Check if all mature stages are preceded by an intensification and followed by decay
+    # Check if all mature stages are preceded by an intensification and followed by decay.
+    #
+    # Both neighbour requirements are intentionally strict, including requiring a
+    # literal 'decay' successor (not merely "not intensification"). This is a
+    # physical requirement, not an incidental implementation detail: a candidate
+    # mature window can only be *confirmed* as mature if the cyclone is
+    # subsequently observed to decay. Without that confirmation (e.g. the record
+    # ends right after the candidate window, or the following segment is
+    # unclassified/NaN), there is no basis to trust that the vorticity plateau was
+    # genuinely the storm's peak rather than a transient pause, a filtering
+    # artifact, or a life cycle still in progress.
+    #
+    # Investigated 2026-07 (research/adaptive-thresholds branch): a long
+    # intensification phase can inflate the *global* series length that
+    # threshold_decay_length is measured against (see find_decay_period), causing
+    # a legitimate following decay segment to fail its own threshold and never be
+    # labelled 'decay' — which in turn makes this check discard an otherwise
+    # locally-valid mature window. Relaxing this check to accept a non-'decay'
+    # (e.g. NaN) successor was tried and reverted: it does not actually recover
+    # the mature window end-to-end (find_residual_period has its own, separate
+    # "mature must be followed by decay" assumption a few steps later in the
+    # pipeline, and relaxing only one of the two produces worse output — it can
+    # erase the surrounding intensification block too). The correct fix for the
+    # underlying cause is to make threshold_decay_length (and the other
+    # global-fraction thresholds) scale to the local cycle instead of the total
+    # series length, not to loosen this confirmation requirement.
     mature_periods = df[df['periods'] == 'mature'].index
     if len(mature_periods) > 0:
         blocks = np.split(mature_periods, np.where(np.diff(mature_periods) != dt)[0] + 1)
