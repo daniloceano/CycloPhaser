@@ -1,6 +1,71 @@
 import numpy as np
 import pandas as pd
 
+# ---------------------------------------------------------------------------
+# length_scale: "global" (default) vs "local"
+# ---------------------------------------------------------------------------
+# Five of the seven detection thresholds (threshold_intensification_length,
+# threshold_intensification_gap, threshold_mature_length, threshold_decay_length,
+# threshold_decay_gap) are fractions multiplied by a *length* to get an absolute
+# minimum/maximum duration. Historically that length was always
+# `df.index[-1] - df.index[0]` — the GLOBAL span of the whole input series. The
+# other two thresholds (threshold_mature_distance, threshold_incipient_length)
+# were already fractions of a LOCAL span (the distance to the neighbouring
+# z-extrema, or to the next dz extremum) rather than the global series length.
+#
+# Investigation on the research/adaptive-thresholds branch found this
+# global/local inconsistency causes two related problems: (a) a long
+# intensification phase inflates the global denominator, so a legitimately-short
+# decay phase elsewhere in the *same* series can fail its own global-fraction
+# threshold; (b) in a series containing two life-cycle-sized-differently cycles,
+# every global threshold for the smaller cycle is checked against a denominator
+# dominated by the larger one, so the smaller cycle's segments are rejected
+# wholesale.
+#
+# `length_scale="local"` (opt-in; default remains "global" for exact backward
+# compatibility) makes the five global thresholds behave like the two that were
+# already local: each candidate segment is checked against the span of the
+# *local* oscillation it belongs to, not the whole series. See
+# `_local_cycle_scale` below for the precise definition used by
+# find_intensification_period / find_decay_period, and the inline comment in
+# find_mature_stage for the (slightly more specific, peak-to-peak) definition
+# used there.
+def _local_cycle_scale(df, seg_start, seg_end):
+    """Local-scale denominator for a candidate segment [seg_start, seg_end].
+
+    Defined as the distance between the nearest z-extremum (peak or valley)
+    strictly *before* seg_start and the nearest z-extremum strictly *after*
+    seg_end — i.e. the span of "one extremum out" on each side of the segment,
+    which brackets the local up/down oscillation the segment is part of. When
+    no such extremum exists on one side (segment touches a series boundary),
+    that side falls back to the series boundary itself
+    (df.index[0] / df.index[-1]).
+
+    This fallback has a useful property: for a series containing a single
+    cycle, there are no further extrema beyond the ones bounding that cycle,
+    so both sides fall back to the series boundaries and the local scale
+    reduces to the *global* series length — i.e. "local" and "global" modes
+    agree exactly on a single-cycle series, and only diverge once a series
+    contains more structure (multiple cycles, or a segment far from the series
+    edges) than the candidate segment itself.
+
+    Args:
+        df: DataFrame with a 'z_peaks_valleys' column ('peak'/'valley'/0/NaN).
+        seg_start: Start timestamp of the candidate segment (normally itself
+            a z-extremum, e.g. the z_peak that starts an intensification leg).
+        seg_end: End timestamp of the candidate segment.
+
+    Returns:
+        pd.Timedelta: the local cycle scale.
+    """
+    extrema = df[df['z_peaks_valleys'].isin(['peak', 'valley'])].index
+    before = extrema[extrema < seg_start]
+    after = extrema[extrema > seg_end]
+    left = before[-1] if len(before) else df.index[0]
+    right = after[0] if len(after) else df.index[-1]
+    return right - left
+
+
 def find_mature_stage(df, **args_periods):
 
     """
@@ -8,21 +73,33 @@ def find_mature_stage(df, **args_periods):
     given thresholds for mature distance and length.
 
     Args:
-        df (pd.DataFrame): DataFrame containing vorticity data with columns for 
+        df (pd.DataFrame): DataFrame containing vorticity data with columns for
             'z_peaks_valleys' and 'periods'.
-        **args_periods: Variable length argument list containing period-specific 
+        **args_periods: Variable length argument list containing period-specific
             thresholds, including:
-            - 'threshold_mature_distance' (float): Factor to calculate mature 
-              start and end distances from z valleys.
-            - 'threshold_mature_length' (float): Minimum length for a mature 
-              stage as a fraction of the total series length.
+            - 'threshold_mature_distance' (float): Factor to calculate mature
+              start and end distances from z valleys. Already a LOCAL fraction
+              (of the distance to the neighbouring z peaks); unaffected by
+              'length_scale'.
+            - 'threshold_mature_length' (float): Minimum length for a mature
+              stage, as a fraction of a length that depends on 'length_scale'.
+            - 'length_scale' (str, optional): 'global' (default) measures
+              threshold_mature_length against the whole series length
+              (df.index[-1]-df.index[0]), matching all versions prior to this
+              option. 'local' measures it against the span between the z_peak
+              immediately before and immediately after the candidate mature
+              z_valley — i.e. the same previous/next z_peak pair already used
+              to size the mature window via threshold_mature_distance, so the
+              length check and the window it is checking are evaluated on the
+              same local scale.
 
     Returns:
-        pd.DataFrame: Updated DataFrame with 'mature' stages marked in the 
+        pd.DataFrame: Updated DataFrame with 'mature' stages marked in the
         'periods' column where applicable.
     """
     threshold_mature_distance = args_periods['threshold_mature_distance']
     threshold_mature_length = args_periods['threshold_mature_length']
+    length_scale = args_periods.get('length_scale', 'global')
 
     z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
@@ -56,13 +133,16 @@ def find_mature_stage(df, **args_periods):
         mature_start = z_valley - mature_distance_previous
         mature_end = z_valley + mature_distance_next
 
-        # Mature stage needs to be at least 3% of total length
+        # Mature stage needs to be at least 3% of the length_scale
+        # ('global': whole series; 'local': this valley's own previous_z_peak ->
+        # next_z_peak span, i.e. the same pair used above to size the window).
         mature_indexes = df.loc[mature_start:mature_end].index
 
         if len(mature_indexes) == 0:
             continue
 
-        if mature_indexes[-1] - mature_indexes[0] > threshold_mature_length * series_length:
+        mature_length_scale = (next_z_peak - previous_z_peak) if length_scale == 'local' else series_length
+        if mature_indexes[-1] - mature_indexes[0] > threshold_mature_length * mature_length_scale:
             # Fill the period between mature_start and mature_end with 'mature'
             df.loc[mature_start:mature_end, 'periods'] = 'mature'
 
@@ -115,22 +195,31 @@ def find_intensification_period(df, **args_periods):
     based on the given thresholds for intensification length and gap.
 
     Args:
-        df (pd.DataFrame): DataFrame containing vorticity data with columns 
+        df (pd.DataFrame): DataFrame containing vorticity data with columns
             for 'z_peaks_valleys' and 'periods'.
-        **args_periods: Variable length argument list containing period-specific 
+        **args_periods: Variable length argument list containing period-specific
             thresholds, including:
-            - 'threshold_intensification_length' (float): Minimum length for an 
-              intensification stage as a fraction of the total series length.
-            - 'threshold_intensification_gap' (float): Maximum gap allowed between 
-              consecutive intensification periods as a fraction of the total 
-              series length.
+            - 'threshold_intensification_length' (float): Minimum length for an
+              intensification stage, as a fraction of a length that depends on
+              'length_scale'.
+            - 'threshold_intensification_gap' (float): Maximum gap allowed
+              between consecutive intensification periods, as a fraction of a
+              length that depends on 'length_scale'.
+            - 'length_scale' (str, optional): 'global' (default) measures both
+              thresholds above against the whole series length
+              (df.index[-1]-df.index[0]), matching all versions prior to this
+              option. 'local' measures each candidate segment/gap against
+              `_local_cycle_scale`: the span between the nearest z-extremum
+              before it and the nearest z-extremum after it (falling back to
+              the series boundary where no such extremum exists).
 
     Returns:
-        pd.DataFrame: Updated DataFrame with 'intensification' stages marked in the 
+        pd.DataFrame: Updated DataFrame with 'intensification' stages marked in the
         'periods' column where applicable.
     """
     threshold_intensification_length = args_periods['threshold_intensification_length']
     threshold_intensification_gap = args_periods['threshold_intensification_gap']
+    length_scale = args_periods.get('length_scale', 'global')
 
     # Find z peaks and valleys
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
@@ -146,10 +235,13 @@ def find_intensification_period(df, **args_periods):
             intensification_start = z_peak
             intensification_end = next_z_valley
 
-            # Intensification needs to meet the minimum length threshold (fraction of total series length)
-            if intensification_end-intensification_start > length * threshold_intensification_length:
+            # Intensification needs to meet the minimum length threshold
+            # (fraction of the series length, or of the local cycle scale).
+            scale = (_local_cycle_scale(df, intensification_start, intensification_end)
+                     if length_scale == 'local' else length)
+            if intensification_end-intensification_start > scale * threshold_intensification_length:
                 df.loc[intensification_start:intensification_end, 'periods'] = 'intensification'
-    
+
     # Check if there are multiple blocks of consecutive intensification periods
     intensefication_periods = df[df['periods'] == 'intensification'].index
     blocks = np.split(intensefication_periods, np.where(np.diff(intensefication_periods) != dt)[0] + 1)
@@ -159,8 +251,12 @@ def find_intensification_period(df, **args_periods):
         next_block_start = blocks[i+1][0]
         gap = next_block_start - block_end
 
-        # If the gap between blocks is smaller than 7.5%, fill with intensification
-        if gap < length * threshold_intensification_gap:
+        # If the gap between blocks is smaller than the threshold, fill with
+        # intensification (fraction of the series length, or of the local
+        # cycle scale spanning the gap itself).
+        gap_scale = (_local_cycle_scale(df, block_end, next_block_start)
+                     if length_scale == 'local' else length)
+        if gap < gap_scale * threshold_intensification_gap:
             df.loc[block_end:next_block_start, 'periods'] = 'intensification'
 
     return df
@@ -172,21 +268,29 @@ def find_decay_period(df, **args_periods):
     given thresholds for decay length and gap.
 
     Args:
-        df (pd.DataFrame): DataFrame containing vorticity data with columns for 
+        df (pd.DataFrame): DataFrame containing vorticity data with columns for
             'z_peaks_valleys' and 'periods'.
-        **args_periods: Variable length argument list containing period-specific 
+        **args_periods: Variable length argument list containing period-specific
             thresholds, including:
-            - 'threshold_decay_length' (float): Minimum decay length as a fraction 
-              of the total series length.
-            - 'threshold_decay_gap' (float): Maximum gap in decay periods as a 
-              fraction of the total series length.
+            - 'threshold_decay_length' (float): Minimum decay length, as a
+              fraction of a length that depends on 'length_scale'.
+            - 'threshold_decay_gap' (float): Maximum gap in decay periods, as a
+              fraction of a length that depends on 'length_scale'.
+            - 'length_scale' (str, optional): 'global' (default) measures both
+              thresholds above against the whole series length
+              (df.index[-1]-df.index[0]), matching all versions prior to this
+              option. 'local' measures each candidate segment/gap against
+              `_local_cycle_scale`: the span between the nearest z-extremum
+              before it and the nearest z-extremum after it (falling back to
+              the series boundary where no such extremum exists).
 
     Returns:
-        pd.DataFrame: Updated DataFrame with 'decay' stages marked in the 
+        pd.DataFrame: Updated DataFrame with 'decay' stages marked in the
         'periods' column where applicable.
-    """    
+    """
     threshold_decay_length = args_periods['threshold_decay_length']
     threshold_decay_gap = args_periods['threshold_decay_gap']
+    length_scale = args_periods.get('length_scale', 'global')
 
     # Find z peaks and valleys
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
@@ -205,8 +309,11 @@ def find_decay_period(df, **args_periods):
             decay_start = z_valley
             decay_end = df.index[-1]  # Last index of the DataFrame
 
-        # Decay needs to be at least 7.5% of the total series length
-        if decay_end - decay_start > length * threshold_decay_length:
+        # Decay needs to meet the minimum length threshold (fraction of the
+        # series length, or of the local cycle scale).
+        scale = (_local_cycle_scale(df, decay_start, decay_end)
+                 if length_scale == 'local' else length)
+        if decay_end - decay_start > scale * threshold_decay_length:
             df.loc[decay_start:decay_end, 'periods'] = 'decay'
 
     # Check if there are multiple blocks of consecutive decay periods
@@ -218,8 +325,12 @@ def find_decay_period(df, **args_periods):
         next_block_start = blocks[i+1][0]
         gap = next_block_start - block_end
 
-        # If the gap between blocks is smaller than 7.5%, fill with decay
-        if gap < length * threshold_decay_gap:
+        # If the gap between blocks is smaller than the threshold, fill with
+        # decay (fraction of the series length, or of the local cycle scale
+        # spanning the gap itself).
+        gap_scale = (_local_cycle_scale(df, block_end, next_block_start)
+                     if length_scale == 'local' else length)
+        if gap < gap_scale * threshold_decay_gap:
             df.loc[block_end:next_block_start, 'periods'] = 'decay'
 
     return df

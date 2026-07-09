@@ -558,7 +558,8 @@ def get_periods(vorticity,
                 threshold_incipient_length: float = 0.4,
                 prominence: float = None,
                 prominence_relative: float = None,
-                distance: int = None) -> pd.DataFrame:
+                distance: int = None,
+                length_scale: str = "global") -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -589,6 +590,25 @@ def get_periods(vorticity,
     decay, the gap-bridging has no visible effect on the final output.  When
     calibrating thresholds, always inspect the final 'periods' column rather than
     assuming each parameter acts in isolation.
+
+    length_scale note
+    ------------------
+    ``threshold_intensification_length``, ``threshold_intensification_gap``,
+    ``threshold_mature_length``, ``threshold_decay_length`` and
+    ``threshold_decay_gap`` are all fractions of a *length*.  With the default
+    ``length_scale="global"`` that length is the whole input series
+    (``df.index[-1] - df.index[0]``) — the historical behaviour, unchanged.
+    With ``length_scale="local"`` each candidate segment is instead checked
+    against the span of the local oscillation it belongs to (see
+    ``find_stages._local_cycle_scale``), so a threshold like 0.075 means
+    "7.5% of *this cycle*" rather than "7.5% of the whole track". This matters
+    for series where one segment (e.g. a long intensification) or one life
+    cycle dominates the total length: under "global", that segment inflates
+    the denominator for every other threshold check in the series, which can
+    reject legitimate short segments elsewhere (a short decay after a long
+    intensification, or an entire smaller second life cycle in a two-cycle
+    track). ``threshold_mature_distance`` and ``threshold_incipient_length``
+    are unaffected by this option — they were already local.
 
     Phase detection lag note
     ------------------------
@@ -628,10 +648,18 @@ def get_periods(vorticity,
             prominence. Default None (no-op).
         distance (int, optional): Minimum separation in timesteps between two
             same-type z-extrema. Default None (no-op).
+        length_scale (str, optional): "global" (default) or "local". See the
+            "length_scale note" above. Default "global" reproduces the exact
+            behaviour of all versions prior to this option.
 
     Returns:
         pd.DataFrame: DataFrame containing detected periods and associated information.
+
+    Raises:
+        ValueError: If ``length_scale`` is not "global" or "local".
     """
+    if length_scale not in ("global", "local"):
+        raise ValueError(f"length_scale must be 'global' or 'local', got {length_scale!r}.")
 
     # Extract smoothed vorticity and derivatives
     z = vorticity.vorticity_smoothed2
@@ -667,7 +695,8 @@ def get_periods(vorticity,
         "threshold_mature_length": threshold_mature_length,
         "threshold_decay_length": threshold_decay_length,
         "threshold_decay_gap": threshold_decay_gap,
-        "threshold_incipient_length": threshold_incipient_length
+        "threshold_incipient_length": threshold_incipient_length,
+        "length_scale": length_scale,
     }
 
     # Detect different stages of cyclone lifecycle
@@ -712,7 +741,8 @@ def get_periods(vorticity,
                       threshold_mature_length=threshold_mature_length,
                       threshold_decay_length=threshold_decay_length,
                       threshold_decay_gap=threshold_decay_gap,
-                      threshold_incipient_length=threshold_incipient_length)
+                      threshold_incipient_length=threshold_incipient_length,
+                      length_scale=length_scale)
     
     # Export to CSV if requested
     if export_dict:
@@ -742,7 +772,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       threshold_incipient_length: float = 0.4,
                       prominence: float = None,
                       prominence_relative: float = None,
-                      distance: int = None) -> pd.DataFrame:
+                      distance: int = None,
+                      length_scale: str = "global") -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -809,8 +840,19 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         
         threshold_decay_gap (float, optional): Maximum allowed gap in decay phase. Default is 0.075.
         
-        threshold_incipient_length (float, optional): Minimum required length of the incipient phase as a fraction of the 
+        threshold_incipient_length (float, optional): Minimum required length of the incipient phase as a fraction of the
             dataset. Default is 0.4.
+
+        length_scale (str, optional): "global" (default) or "local". Controls what
+            length ``threshold_intensification_length``, ``threshold_intensification_gap``,
+            ``threshold_mature_length``, ``threshold_decay_length`` and
+            ``threshold_decay_gap`` are fractions *of*. "global" (default) uses the
+            whole series length, reproducing the exact behaviour of all versions
+            prior to this option. "local" uses the span of the local cycle each
+            candidate segment belongs to instead — see ``get_periods`` for the
+            full rationale and ``find_stages._local_cycle_scale`` for the precise
+            definition. ``threshold_mature_distance`` and
+            ``threshold_incipient_length`` are unaffected; they were already local.
 
     Returns:
         pd.DataFrame: DataFrame containing detected cyclone life cycle phases and associated metadata.
@@ -895,6 +937,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         prominence=prominence,
         prominence_relative=prominence_relative,
         distance=distance,
+        length_scale=length_scale,
     )
 
     return df
