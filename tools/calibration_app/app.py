@@ -53,6 +53,7 @@ _DEFAULTS: dict = {
     "thr_int_gap":       0.075,
     "thr_dec_gap":       0.075,
     "thr_inc_len":       0.400,
+    "length_scale":      "global",
     "extrema_prominence_enabled":     False,
     "extrema_prominence_mode":        "relative",   # 'relative' | 'absolute'
     "extrema_prominence_rel_val":     0.10,         # fraction (relative mode)
@@ -71,6 +72,22 @@ _YAML_FILTER_MAP: dict = {
     "replace_endpoints_with_lowpass": ("replace_endpoints", int),
     "savgol_polynomial":             ("savgol_poly",       int),
 }
+def _parse_length_scale(v) -> str:
+    """Validating str converter for length_scale — rejects anything but the
+    two values cyclophaser accepts, so a hand-edited/corrupt YAML value is
+    treated as a conversion error (caught by the _load_yaml_config try/except
+    below) rather than silently written into session_state and crashing the
+    widget on next render."""
+    v = str(v)
+    if v not in ("global", "local"):
+        raise ValueError(f"length_scale must be 'global' or 'local', got {v!r}")
+    return v
+
+
+# length_scale is bundled into phase_params (it is a get_periods()/
+# determine_periods() phase-detection argument, not a filter/smoothing one),
+# but — unlike every other entry here — it is a string enum, not a numeric
+# threshold, hence the dedicated validating converter instead of `float`.
 _YAML_PHASE_MAP: dict = {
     "threshold_intensification_length": ("thr_int_len",  float),
     "threshold_intensification_gap":    ("thr_int_gap",  float),
@@ -79,6 +96,7 @@ _YAML_PHASE_MAP: dict = {
     "threshold_decay_length":           ("thr_dec_len",  float),
     "threshold_decay_gap":              ("thr_dec_gap",  float),
     "threshold_incipient_length":       ("thr_inc_len",  float),
+    "length_scale":                     ("length_scale", _parse_length_scale),
 }
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP)
@@ -181,7 +199,13 @@ def _build_yaml(cyclone_names) -> str:
             "use_smoothing_twice":           use_smoothing_twice,
             "savgol_polynomial":             int(savgol_poly),
         },
-        "phase_params": {k: float(v) for k, v in _PHASE_PARAMS.items() if v is not None},
+        # length_scale is a string enum ("global"/"local"), not a numeric
+        # threshold — exported as-is rather than coerced through float().
+        "phase_params": {
+            **{k: float(v) for k, v in _PHASE_PARAMS.items()
+               if v is not None and k != "length_scale"},
+            "length_scale": _PHASE_PARAMS["length_scale"],
+        },
     }
     return yaml.dump(doc, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
@@ -482,6 +506,29 @@ with st.sidebar:
     st.divider()
     # --- Phase detection thresholds ---
     st.header("Phase Detection")
+    length_scale = st.radio(
+        "Threshold scale",
+        options=["global", "local"],
+        index=["global", "local"].index(_DEFAULTS["length_scale"]),
+        format_func=lambda x: "Global (default, v2.0.0 behaviour)" if x == "global" else "Local (per-cycle)",
+        key="length_scale",
+        horizontal=True,
+        help=(
+            "Controls what length the five sliders below (and the two in "
+            "'Advanced thresholds') are fractions *of*. "
+            "**global** (default): thresholds are measured against the whole "
+            "series length — unchanged from v2.0.0. "
+            "**local**: thresholds are measured against each individual life "
+            "cycle's own span instead, which resolves tracks containing "
+            "multiple asymmetric cycles — a short second cycle would "
+            "otherwise have every one of its phases rejected by thresholds "
+            "sized for a much larger first cycle, collapsing it into a "
+            "single 'residual' block. Does not affect 'Mature distance' or "
+            "'Min. incipient length' below, which were already local. "
+            "Switching this does not re-run the Lanczos/Savgol filtering — "
+            "only phase detection is re-computed."
+        ),
+    )
     thr_int_len = st.slider(
         "Min. intensification length", 0.01, 0.30, step=0.005,
         value=_DEFAULTS["thr_int_len"], key="thr_int_len",
@@ -647,6 +694,7 @@ _PHASE_PARAMS = dict(
     prominence=extrema_prominence,
     prominence_relative=extrema_prominence_relative,
     distance=extrema_distance,
+    length_scale=length_scale,
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
@@ -935,17 +983,34 @@ preservation of extrema. **Default: 3.**
 
     with st.expander("3 · Phase detection thresholds", expanded=False):
         st.markdown("""
-All thresholds are **fractions of total series length**, making them resolution-independent.
+All thresholds are **fractions of a length**, making them resolution-independent.
+Which length depends on `length_scale` (see below): by default the whole series;
+optionally, each threshold's own local cycle.
 
 | Parameter | Default | Description |
 |---|---|---|
 | `threshold_intensification_length` | 0.075 | Min. duration of an intensification segment. |
 | `threshold_decay_length` | 0.075 | Min. duration of a decay segment. |
 | `threshold_mature_length` | 0.030 | Min. duration of the mature stage. |
-| `threshold_mature_distance` | 0.125 | Max. distance between vorticity minimum and mature segment centre. |
+| `threshold_mature_distance` | 0.125 | Max. distance between vorticity minimum and mature segment centre. Already local — unaffected by `length_scale`. |
 | `threshold_intensification_gap` | 0.075 | Max. gap between consecutive intensification segments for merging. |
 | `threshold_decay_gap` | 0.075 | Max. gap between consecutive decay segments for merging. |
-| `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. |
+| `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |
+
+### `length_scale` — global vs. local threshold denominator
+
+- **`global`** (default): the five thresholds above (excluding mature distance and
+  incipient length, which were always local) are measured against the whole input
+  series length. Matches all versions prior to this option.
+- **`local`**: each candidate segment is instead measured against the span of the
+  local life cycle it belongs to (the nearest vorticity extrema immediately before
+  and after it). Fixes tracks with multiple, differently-sized life cycles: under
+  `global`, a small second cycle's phases are checked against a denominator
+  dominated by a much larger first cycle and can all be rejected, collapsing the
+  whole second cycle into a single `residual` block.
+- Note: for a track containing only **one** life cycle, `local` and `global` are
+  mathematically identical (there is no other cycle to distinguish the local scale
+  from). `length_scale` only changes anything on tracks with more than one cycle.
 """)
 
     with st.expander("4 · Known methodological notes", expanded=False):
