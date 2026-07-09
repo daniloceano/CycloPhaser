@@ -37,21 +37,55 @@ corrected boundaries; avoids false-confidence in phase attribution near track st
 
 ---
 
-## 3. Locally-adaptive thresholds
+## 3. Locally-adaptive thresholds — **implemented (opt-in), 2026-07**
 
-All seven detection thresholds are currently expressed as fractions of total series
-length. This scales poorly for:
-- Long series with a brief intensification that exceeds the fractional threshold but
-  represents a physically real episode.
-- Multi-cycle series where the second cycle is detected out of phase because the
-  denominator (total series length) inflates all fractions.
+**Status: done as an opt-in on `research/adaptive-thresholds`.** Five of the seven
+detection thresholds (`threshold_intensification_length`,
+`threshold_intensification_gap`, `threshold_mature_length`,
+`threshold_decay_length`, `threshold_decay_gap`) were fractions of the *total series
+length*. `determine_periods(..., length_scale="local")` (default remains `"global"`,
+byte-identical to all prior versions) checks each candidate segment against
+`_local_cycle_scale` (`cyclophaser/find_stages.py`) — the span of the local
+oscillation it belongs to (nearest z-extremum before and after it, falling back to
+the series boundary) — instead of the whole track. `threshold_mature_distance` and
+`threshold_incipient_length` were already local and are unaffected.
 
-A locally-adaptive approach — e.g., fractions of the local cycle length, or absolute
-timestep counts derived from an estimated lifecycle duration — would generalise better
-across the climatological range of cyclone lifetimes.
+**Central finding — a real, load-bearing limit of this approach, not a bug:**
+local-scale normalization only resolves heterogeneity **between** life cycles in a
+multi-cycle track (a small second cycle no longer has its phases rejected by
+thresholds sized for a much larger first cycle). It does **not**, and *cannot by
+construction*, correct a disproportion **within** a single, isolated cycle (e.g. an
+unusually short decay right after an unusually long intensification): with only one
+cycle in the series there is no extremum beyond the ones already bounding it, so
+`_local_cycle_scale`'s neighbour-lookup falls back to the series boundary on both
+sides and numerically **equals** the global series length. Local and global are
+mathematically forced to agree whenever a series contains a single life cycle — the
+"local" mode only has something to correct once a series has more structure than the
+one segment being evaluated.
 
-**Expected benefit:** highest-impact change for cross-cyclone threshold generalization;
-likely to reduce the need for per-dataset manual calibration.
+This was checked against the real cyclone track database (TRACK/Gramcianinov): decays
+as abrupt as the synthetic stress case used to establish this limit (a intensification
+~20x longer than the following decay) do not occur in real tracks — real declines are
+always at least moderately gradual, and real asymmetric cyclones (decay shorter than
+intensification, or the reverse, within physically plausible ratios) are already
+detected correctly by the existing pipeline, in both modes. So this is a documented
+boundary of what threshold-rescaling alone can do, not an open problem to chase
+further — a genuinely disproportionate single-cycle decay would need a different kind
+of fix entirely (e.g. item 6 below, changepoint-based segmentation, which does not
+rely on a length threshold at all).
+
+Locked in as permanent regression tests in
+`tests/synthetic/test_length_scale_regression.py`: the multi-cycle case (local
+recovers the second cycle's phases; global still collapses them into `residual`) and
+the single-cycle sentinel case (global and local agree exactly; not a target for a
+future fix — see the test's docstring for the reasoning above in full, and the
+mature/decay neighbour-confirmation comment in `find_mature_stage`,
+`cyclophaser/find_stages.py`, for the related physical-confirmation invariant this
+interacts with).
+
+**Not yet done:** wiring `length_scale` into `tools/calibration_app/app.py` (defaults
+dict, YAML import/export map, UI control, `determine_periods` call) — left for a
+separate pass since it touches several non-trivial locations in that app.
 
 ---
 
