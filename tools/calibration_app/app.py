@@ -344,16 +344,20 @@ def _build_zip(ok_results: dict, yaml_str: str) -> bytes:
 # Figure sizes per column count (matplotlib inches)
 _FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4), 4: (5, 3), 5: (4, 2.8), 6: (3.5, 2.5)}
 
-# Compact-grid (n_cols >= 4) line widths. The raw/unfiltered series was
-# previously too thin (lw=0.6) to read once rendered at dense-grid size; all
-# four lines are thickened here, and thickened further still as n_cols grows
-# (smaller figure canvas -> proportionally thicker lines needed to stay
-# legible after Streamlit renders it at reduced size). Only used by
-# _plot_compact, which is only called for n_cols >= 4.
+# Compact-grid (n_cols >= 4) line widths. Only two series are plotted (see
+# _plot_compact): 'raw' (zeta, the actual input data) and 'smoothed2'
+# (vorticity_smoothed2, the series phase detection is actually run against).
+# filtered_vorticity and vorticity_smoothed — the two intermediate pipeline
+# stages between them — were dropped from this view (see _plot_compact's
+# docstring for why): with four thick lines in a 3.5x2.5in figure the result
+# was a blur, and the pair that actually answers "does this look right at a
+# glance" is raw-vs-what-the-algorithm-sees, not every intermediate stage.
+# Widths still scale up as n_cols grows (smaller canvas -> proportionally
+# thicker lines needed to stay legible after Streamlit renders it reduced).
 _COMPACT_LW = {
-    4: {"raw": 1.1, "filtered": 1.3, "smoothed": 1.5, "smoothed2": 1.5},
-    5: {"raw": 1.3, "filtered": 1.5, "smoothed": 1.7, "smoothed2": 1.7},
-    6: {"raw": 1.5, "filtered": 1.7, "smoothed": 1.9, "smoothed2": 1.9},
+    4: {"raw": 1.3, "smoothed2": 1.6},
+    5: {"raw": 1.5, "smoothed2": 1.8},
+    6: {"raw": 1.7, "smoothed2": 2.0},
 }
 
 PHASE_COLORS = {
@@ -379,18 +383,40 @@ def _render_global_legend() -> None:
 
 
 def _plot_compact(cyclone_name: str, periods_dict: dict, vort) -> plt.Figure:
-    """Dense-grid figure (n_cols >= 4): all vorticity series, no labels/titles."""
+    """Dense-grid figure (n_cols >= 4): raw vorticity + phase shading, no labels/titles.
+
+    Plots only 'zeta' (raw input data) and 'vorticity_smoothed2' (the series
+    phase detection actually runs against) — not the two intermediate
+    pipeline stages (filtered_vorticity, vorticity_smoothed) that the
+    non-compact/step-by-step views show. At n_cols>=4 figure sizes (down to
+    3.5x2.5in), four overlapping thick lines were unreadable; the raw-vs-
+    detection-input pair is what a quick "does this look right" glance over
+    dozens of cyclones actually needs.
+
+    zeta and vorticity_smoothed2 are plotted on separate y-axes (twinx) since
+    the raw series' noise inflates its range well beyond the smoothed one's
+    (checked empirically: ~2-3x wider on real tracks) — sharing one axis would
+    flatten the smoothed curve near-invisible. Because twinx's second axis
+    renders on top of the first by default, 'zeta' is explicitly promoted
+    in front of vorticity_smoothed2 (ax.patch hidden + ax's zorder raised
+    above ax2's): without this, the raw line was getting hidden underneath
+    the smoothed one wherever they nearly coincide (i.e. across most of a
+    well-behaved life cycle), which is what actually made the raw series
+    look absent even though it was technically being drawn.
+    """
     fig, ax = plt.subplots(figsize=_FIGSIZES[n_cols])
     lw = _COMPACT_LW.get(n_cols, _COMPACT_LW[4])
     phases_list = list(periods_dict.items())
     for i, (ph, (st_, en)) in enumerate(phases_list):
         right = phases_list[i + 1][1][0] if i + 1 < len(phases_list) else en
         ax.axvspan(st_, right, alpha=0.35, color=PHASE_COLORS.get(_normalize(ph), "#cccccc"))
-    ax.plot(vort.time, vort["zeta"], color="gray", lw=lw["raw"], alpha=0.85)
+
     ax2 = ax.twinx()
-    ax2.plot(vort.time, vort["filtered_vorticity"], color="#d68c45", lw=lw["filtered"])
-    ax2.plot(vort.time, vort["vorticity_smoothed"],  color="#1d3557", lw=lw["smoothed"])
     ax2.plot(vort.time, vort["vorticity_smoothed2"], color="#e63946", lw=lw["smoothed2"])
+    ax.plot(vort.time, vort["zeta"], color="dimgray", lw=lw["raw"], alpha=0.9)
+    ax.patch.set_visible(False)
+    ax.set_zorder(ax2.get_zorder() + 1)
+
     for a in (ax, ax2):
         a.set_xlabel(""); a.set_ylabel(""); a.set_title("")
         a.tick_params(left=False, right=False, bottom=False,
