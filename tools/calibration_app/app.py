@@ -11,6 +11,7 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
@@ -30,6 +31,11 @@ except Exception:
 _METHOD_IMG = (
     Path(__file__).parent.parent.parent / "docs" / "_images" / "cyclophaser_methodology.jpg"
 )
+
+# Resolved relative to this file (not the Streamlit process's CWD, which varies
+# depending on how `streamlit run` is invoked) so "Load all test cyclones" works
+# regardless of the working directory the app was launched from.
+_CALIBRATION_DATA_DIR = Path(__file__).parent.parent.parent / "tests" / "calibration_data"
 
 # ── Page config ──────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="CycloPhaser Calibration", layout="wide")
@@ -107,12 +113,57 @@ def _normalize(name: str) -> str:
     return name.rstrip(" 0123456789").strip()
 
 
+def _format_date_axis_mmdd(ax) -> None:
+    """Simplify a non-compact figure's x-axis to 'mm-dd' (drops the hour),
+    which is legible at the larger sizes used for n_cols <= 3. Applied via
+    the ax object plot_all_periods draws onto, so cyclophaser's own plotting
+    code (cyclophaser/plots.py) is not touched."""
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d"))
+
+
 def _reset() -> None:
     for k in _DEFAULTS:
         st.session_state.pop(k, None)
     # Clear YAML import state so a still-loaded file can be re-imported after reset
     st.session_state.pop("_yaml_import_hash", None)
     st.session_state.pop("_yaml_import_result", None)
+    # Deliberately does NOT touch bad-case marks (see _clear_bad_marks): resetting
+    # filter/threshold parameters to try a different calibration shouldn't wipe an
+    # evaluation in progress. Marks are cleared only via their own button.
+
+
+# Bad-case marks live directly in per-cyclone widget session_state keys
+# ("badcase__<cyclone_name>") rather than in a separate mirrored set/list, so the
+# checkbox widgets are the single source of truth and can't drift out of sync with
+# it. This prefix must not collide with any other session_state key used by the app.
+_BAD_CASE_KEY_PREFIX = "badcase__"
+
+
+def _clear_bad_marks() -> None:
+    for k in list(st.session_state.keys()):
+        if k.startswith(_BAD_CASE_KEY_PREFIX):
+            del st.session_state[k]
+
+
+def _compute_evaluation(cyclone_names) -> dict:
+    """Bad-case evaluation summary for the currently loaded cyclone set.
+
+    Percent is computed against `cyclone_names` (what's loaded *now*), matching
+    the footer's "N / total loaded" framing -- a mark left over from a
+    previously loaded cyclone that isn't in `cyclone_names` this run simply
+    doesn't count here (it still exists in session_state until cleared, so it
+    reappears in the count if that cyclone is loaded again).
+    """
+    names = list(cyclone_names)
+    bad = sorted(n for n in names if st.session_state.get(f"{_BAD_CASE_KEY_PREFIX}{n}", False))
+    total = len(names)
+    percent = round(100 * len(bad) / total, 1) if total else 0.0
+    return {
+        "total_cyclones": total,
+        "bad_cases_count": len(bad),
+        "bad_cases_percent": percent,
+        "bad_cases": bad,
+    }
 
 
 def _load_yaml_config(yaml_bytes: bytes) -> dict:
@@ -180,6 +231,31 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
             except (ValueError, TypeError):
                 ignored.append(f"phase_params.{yaml_key} (conversion error)")
 
+    # 'evaluation' is optional (older YAMLs, including ones exported before this
+    # feature existed, simply don't have it — importing those must not error; see
+    # the "missing required sections" check above, which only covers filter_params/
+    # phase_params, not this). When present, RESTORES the bad-case marks: clears
+    # every existing badcase__* key first, then sets the imported list, so the
+    # session's marks become an exact snapshot of what's in the file (matching how
+    # every other imported value in this function *replaces* the current one,
+    # rather than merging with it) -- useful for resuming a saved evaluation
+    # instead of leaving stale marks from whatever was in the current session.
+    if "evaluation" in doc:
+        ev = doc["evaluation"]
+        bad_list = ev.get("bad_cases") if isinstance(ev, dict) else None
+        if isinstance(bad_list, list):
+            try:
+                bad_names = [str(n) for n in bad_list]
+            except Exception:
+                ignored.append("evaluation.bad_cases (conversion error)")
+            else:
+                _clear_bad_marks()
+                for name in bad_names:
+                    st.session_state[f"{_BAD_CASE_KEY_PREFIX}{name}"] = True
+                count += len(bad_names)
+        elif bad_list is not None:
+            ignored.append("evaluation.bad_cases (not a list)")
+
     return {"error": None, "ignored": ignored, "missing": missing, "count": count}
 
 
@@ -206,6 +282,7 @@ def _build_yaml(cyclone_names) -> str:
                if v is not None and k != "length_scale"},
             "length_scale": _PHASE_PARAMS["length_scale"],
         },
+        "evaluation": _compute_evaluation(cyclone_names),
     }
     return yaml.dump(doc, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
@@ -242,6 +319,7 @@ def _render_png_for_export(
     fig, ax = plt.subplots(figsize=(12, 5))
     try:
         plot_all_periods(periods_dict, df_result, ax=ax, vorticity=vort)
+        _format_date_axis_mmdd(ax)
     except Exception:
         pass
     ax.set_title(name, fontweight="bold")
@@ -265,6 +343,18 @@ def _build_zip(ok_results: dict, yaml_str: str) -> bytes:
 
 # Figure sizes per column count (matplotlib inches)
 _FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4), 4: (5, 3), 5: (4, 2.8), 6: (3.5, 2.5)}
+
+# Compact-grid (n_cols >= 4) line widths. The raw/unfiltered series was
+# previously too thin (lw=0.6) to read once rendered at dense-grid size; all
+# four lines are thickened here, and thickened further still as n_cols grows
+# (smaller figure canvas -> proportionally thicker lines needed to stay
+# legible after Streamlit renders it at reduced size). Only used by
+# _plot_compact, which is only called for n_cols >= 4.
+_COMPACT_LW = {
+    4: {"raw": 1.1, "filtered": 1.3, "smoothed": 1.5, "smoothed2": 1.5},
+    5: {"raw": 1.3, "filtered": 1.5, "smoothed": 1.7, "smoothed2": 1.7},
+    6: {"raw": 1.5, "filtered": 1.7, "smoothed": 1.9, "smoothed2": 1.9},
+}
 
 PHASE_COLORS = {
     "incipient":       "#65a1e6",
@@ -291,15 +381,16 @@ def _render_global_legend() -> None:
 def _plot_compact(cyclone_name: str, periods_dict: dict, vort) -> plt.Figure:
     """Dense-grid figure (n_cols >= 4): all vorticity series, no labels/titles."""
     fig, ax = plt.subplots(figsize=_FIGSIZES[n_cols])
+    lw = _COMPACT_LW.get(n_cols, _COMPACT_LW[4])
     phases_list = list(periods_dict.items())
     for i, (ph, (st_, en)) in enumerate(phases_list):
         right = phases_list[i + 1][1][0] if i + 1 < len(phases_list) else en
         ax.axvspan(st_, right, alpha=0.35, color=PHASE_COLORS.get(_normalize(ph), "#cccccc"))
-    ax.plot(vort.time, vort["zeta"], color="gray", lw=0.6, alpha=0.7)
+    ax.plot(vort.time, vort["zeta"], color="gray", lw=lw["raw"], alpha=0.85)
     ax2 = ax.twinx()
-    ax2.plot(vort.time, vort["filtered_vorticity"], color="#d68c45", lw=1.0)
-    ax2.plot(vort.time, vort["vorticity_smoothed"],  color="#1d3557", lw=1.2)
-    ax2.plot(vort.time, vort["vorticity_smoothed2"], color="#e63946", lw=1.2)
+    ax2.plot(vort.time, vort["filtered_vorticity"], color="#d68c45", lw=lw["filtered"])
+    ax2.plot(vort.time, vort["vorticity_smoothed"],  color="#1d3557", lw=lw["smoothed"])
+    ax2.plot(vort.time, vort["vorticity_smoothed2"], color="#e63946", lw=lw["smoothed2"])
     for a in (ax, ax2):
         a.set_xlabel(""); a.set_ylabel(""); a.set_title("")
         a.tick_params(left=False, right=False, bottom=False,
@@ -392,6 +483,14 @@ with st.sidebar:
 
     st.divider()
     st.button("↺ Reset to defaults", on_click=_reset, use_container_width=True)
+    st.button(
+        "🗑 Clear bad-case marks", on_click=_clear_bad_marks, use_container_width=True,
+        help=(
+            "Unmarks every cyclone currently flagged as a bad detection result. "
+            "Kept separate from 'Reset to defaults' on purpose: trying different "
+            "filter/threshold values shouldn't wipe an evaluation in progress."
+        ),
+    )
     st.divider()
 
     # --- Lanczos filter ---
@@ -622,7 +721,7 @@ with st.sidebar:
                 options=["relative", "absolute"],
                 index=0,
                 format_func=lambda x: (
-                    "Relativo (recomendado)" if x == "relative" else "Absoluto"
+                    "Relative (recommended)" if x == "relative" else "Absolute"
                 ),
                 key="extrema_prominence_mode",
                 horizontal=True,
@@ -639,10 +738,10 @@ with st.sidebar:
                     value=_DEFAULTS["extrema_prominence_rel_val"],
                     key="extrema_prominence_rel_val",
                     help=(
-                        "% da proeminência do extremo mais forte do ciclone; "
-                        "adapta-se à intensidade de cada ciclone (modo recomendado). "
-                        "Ex.: 0.10 mantém apenas extremos com proeminência ≥ 10 % "
-                        "do extremo dominante."
+                        "Fraction of the cyclone's strongest extremum's prominence; "
+                        "adapts to each cyclone's intensity (recommended mode). "
+                        "E.g.: 0.10 keeps only extrema with prominence ≥ 10% "
+                        "of the dominant extremum."
                     ),
                 )
                 extrema_prominence          = None
@@ -705,12 +804,47 @@ uploaded = st.file_uploader(
     "Upload cyclone CSV(s) (format: ';'-delimited, column 'min_max_zeta_850')",
     type=["csv"], accept_multiple_files=True,
 )
+
+_calib_data_files = sorted(_CALIBRATION_DATA_DIR.glob("*.csv")) if _CALIBRATION_DATA_DIR.is_dir() else []
+load_all_test_cyclones = st.checkbox(
+    f"Load all test cyclones (tests/calibration_data — {len(_calib_data_files)} tracks)"
+    if _calib_data_files else
+    "Load all test cyclones (tests/calibration_data — unavailable in this environment)",
+    value=False,
+    key="load_all_test_cyclones",
+    disabled=not bool(_calib_data_files),
+    help=(
+        f"Loads all {len(_calib_data_files)} real cyclone tracks bundled in "
+        "tests/calibration_data for bulk calibration/validation. If you also "
+        "upload files above, both sets are combined; an uploaded file takes "
+        "precedence over a bundled one with the same cyclone ID."
+        if _calib_data_files else
+        "tests/calibration_data was not found next to this app (this checkout "
+        "may not include the full repository) — this option is unavailable."
+    ),
+)
+
 _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
+
+# Precedence when both an upload and "load all test cyclones" are active: the
+# two sets are combined (union), and an uploaded file wins on a cyclone-ID
+# collision with a bundled one -- chosen because a user re-uploading a track
+# under its bundled ID is more likely re-testing a specific variant of it than
+# asking for it to be silently dropped.
+files: dict[str, bytes] = {}
+if load_all_test_cyclones and _calib_data_files:
+    files.update({p.stem: p.read_bytes() for p in _calib_data_files})
 if uploaded:
-    files: dict[str, bytes] = {Path(f.name).stem: f.getvalue() for f in uploaded}
-else:
+    files.update({Path(f.name).stem: f.getvalue() for f in uploaded})
+if not files:
     files = {"example_file": _EXAMPLE.read_bytes()}
     st.caption(f"No file uploaded — using `{_EXAMPLE.name}` as default.")
+elif load_all_test_cyclones and uploaded:
+    st.caption(
+        f"Combined {len(_calib_data_files)} bundled test cyclone(s) with "
+        f"{len(uploaded)} uploaded file(s) — {len(files)} total (uploads take "
+        "precedence on ID collision)."
+    )
 
 cyclone_names = list(files.keys())
 
@@ -815,7 +949,9 @@ with tab_cal:
     grid = st.columns(n_cols)
     for idx, (cyclone_name, res) in enumerate(all_results.items()):
         with grid[idx % n_cols]:
-            st.subheader(cyclone_name)
+            _bad_key = f"{_BAD_CASE_KEY_PREFIX}{cyclone_name}"
+            _is_bad = st.session_state.get(_bad_key, False)
+            st.subheader(f"⚠️ {cyclone_name}" if _is_bad else cyclone_name)
 
             if not res["ok"]:
                 st.error(res.get("error", "Unknown error"))
@@ -840,6 +976,7 @@ with tab_cal:
                         res["periods_dict"], res["df_result"],
                         ax=ax_pre, vorticity=res["vort"],
                     )
+                    _format_date_axis_mmdd(ax_pre)
                 except Exception as exc:
                     st.error(f"Error in phase figure: {exc}")
                     plt.close(fig)
@@ -847,6 +984,17 @@ with tab_cal:
                 ax_pre.set_title(cyclone_name, fontweight="bold")
             st.pyplot(fig)
             plt.close(fig)
+
+            st.checkbox(
+                "⚠️ Mark as bad",
+                value=False, key=_bad_key,
+                help=(
+                    "Flags this cyclone's detection result as bad for the current "
+                    "parameter set. Persists across parameter changes within this "
+                    "session (use '🗑 Clear bad-case marks' in the sidebar to reset) "
+                    "and is included in the exported YAML's 'evaluation' section."
+                ),
+            )
 
             # 1-col extras
             if n_cols == 1:
@@ -906,6 +1054,27 @@ with tab_cal:
                 "Warnings":     f"{len(d['warns'])} ⚠️" if d["warns"] else "0",
             })
         st.dataframe(pd.DataFrame(rows).set_index("Cyclone"), use_container_width=True)
+
+    # Bad-case evaluation summary — always shown, regardless of n_cols.
+    st.divider()
+    st.subheader("Bad-case evaluation")
+    _eval = _compute_evaluation(cyclone_names)
+    st.metric(
+        "Bad cases",
+        f"{_eval['bad_cases_count']} / {_eval['total_cyclones']}",
+        f"{_eval['bad_cases_percent']}%",
+        delta_color="off",
+    )
+    if _eval["bad_cases"]:
+        st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
+    else:
+        st.caption("No cyclones marked as bad in this session.")
+    st.caption(
+        "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
+        "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
+        "is also written to the exported YAML's 'evaluation' section, so different "
+        "parameter sets can be compared by their bad-case rate."
+    )
 
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 2 — Documentation
