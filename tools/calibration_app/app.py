@@ -301,28 +301,39 @@ def _render_csv(periods_dict: dict) -> bytes:
     hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
     show_spinner=False,
 )
-def _render_png_for_export(
+def _render_periods_png(
     file_bytes: bytes,
     use_filter, cutoff_low, cutoff_high,
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
     phase_params_tuple: tuple,
     name: str,
+    figsize: tuple,
+    show_title: bool,
 ) -> bytes:
-    """Render a full-size plot_all_periods PNG. Cached per unique param combination."""
+    """Render a plot_all_periods PNG at the given figsize. Cached per unique
+    (file, filter params, phase params, name, figsize, show_title) combination
+    -- used both for the CSV/PNG/ZIP export (figsize=(12,5), show_title=True)
+    and for on-screen display at n_cols in {1, 2, 3} (figsize=_FIGSIZES[n_cols]),
+    via st.image() instead of st.pyplot() so a rerun that doesn't change filter
+    or phase params (e.g. a bad-case-mark checkbox click) is a cache hit instead
+    of a full re-render of every loaded cyclone's figure."""
+    df_result, periods_dict, _ = _run_get_periods(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        phase_params_tuple,
+    )
     vort, _ = _run_process_vorticity(
         file_bytes, use_filter, cutoff_low, cutoff_high,
         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
     )
-    phase_params = dict(phase_params_tuple)
-    df_result = get_periods(vorticity=vort, plot=False, plot_steps=False, **phase_params)
-    periods_dict = periods_to_dict(df_result)
-    fig, ax = plt.subplots(figsize=(12, 5))
+    fig, ax = plt.subplots(figsize=figsize)
     try:
         plot_all_periods(periods_dict, df_result, ax=ax, vorticity=vort)
         _format_date_axis_mmdd(ax)
     except Exception:
         pass
-    ax.set_title(name, fontweight="bold")
+    if show_title:
+        ax.set_title(name, fontweight="bold")
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
     plt.close(fig)
@@ -382,7 +393,7 @@ def _render_global_legend() -> None:
     )
 
 
-def _plot_compact(cyclone_name: str, periods_dict: dict, vort) -> plt.Figure:
+def _plot_compact(cyclone_name: str, periods_dict: dict, vort, n_cols: int) -> plt.Figure:
     """Dense-grid figure (n_cols >= 4): raw vorticity + phase shading, no labels/titles.
 
     Plots only 'zeta' (raw input data) and 'vorticity_smoothed2' (the series
@@ -425,6 +436,39 @@ def _plot_compact(cyclone_name: str, periods_dict: dict, vort) -> plt.Figure:
     return fig
 
 
+@st.cache_data(
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+    show_spinner=False,
+)
+def _render_compact_png(
+    file_bytes: bytes,
+    use_filter, cutoff_low, cutoff_high,
+    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    phase_params_tuple: tuple,
+    name: str,
+    n_cols: int,
+) -> bytes:
+    """Cached counterpart of _plot_compact, for the dense grid (n_cols >= 4).
+    Returned as PNG bytes and displayed via st.image() instead of st.pyplot()
+    for the same reason as _render_periods_png (avoid redrawing every loaded
+    cyclone's figure on every rerun, e.g. every bad-case-mark checkbox click)."""
+    df_result, periods_dict, _ = _run_get_periods(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        phase_params_tuple,
+    )
+    vort, _ = _run_process_vorticity(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    )
+    fig = _plot_compact(name, periods_dict, vort, n_cols)
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return buf.getvalue()
+
+
 def _compute_diagnostics(name, periods_dict, df_result, all_warns):
     seen, seen_set = [], set()
     for ph in periods_dict:
@@ -450,7 +494,16 @@ def _compute_diagnostics(name, periods_dict, df_result, all_warns):
     }
 
 
-# ── Cached vorticity processing ───────────────────────────────────────────────────
+# ── Cached vorticity processing + phase detection ─────────────────────────────────
+# Both steps are cached, split into two separate @st.cache_data functions so that a
+# rerun that doesn't change filter/smoothing params (e.g. clicking "Mark as bad", or
+# any other widget that isn't a filter/threshold slider) reuses the SAME cached
+# results for every loaded cyclone instead of recomputing Lanczos/Savgol filtering
+# and phase detection from scratch on every single interaction. Streamlit reruns the
+# whole script on any widget click regardless of what changed; without this caching,
+# that rerun redid this work for all ~51 test-bank cyclones every time, which is what
+# made marking cyclones as bad (or any other click) feel slow -- the mark itself, and
+# the evaluation summary it feeds, are cheap; the full-script rerun around them was not.
 @st.cache_data(
     show_spinner="Processing vorticity…",
     hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
@@ -470,6 +523,33 @@ def _run_process_vorticity(
             replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
         )
     return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
+
+
+@st.cache_data(
+    show_spinner=False,
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+)
+def _run_get_periods(
+    file_bytes, use_filter, cutoff_low, cutoff_high,
+    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    phase_params_tuple: tuple,
+):
+    """Cached phase detection. Warnings are captured and returned (not just caught by
+    an outer `with warnings.catch_warnings()` at the call site) because on a cache
+    HIT the function body -- including the warnings.warn() calls inside get_periods --
+    never actually runs again; they only fire once, when the result is first computed,
+    so they must be part of the cached return value to still be visible afterwards."""
+    vort, _ = _run_process_vorticity(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    )
+    phase_params = dict(phase_params_tuple)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        df_result = get_periods(vorticity=vort, plot=False, plot_steps=False, **phase_params)
+    phase_warns = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
+    periods_dict = periods_to_dict(df_result)
+    return df_result, periods_dict, phase_warns
 
 
 # ── Page header ──────────────────────────────────────────────────────────────────
@@ -902,24 +982,23 @@ for _cname, _fbytes in files.items():
         all_results[_cname] = _res
         continue
 
-    with warnings.catch_warnings(record=True) as _wc:
-        warnings.simplefilter("always")
-        try:
-            _df = get_periods(vorticity=_vort, plot=False, plot_steps=False, **_PHASE_PARAMS)
-        except Exception as _exc:
-            _res["error"] = f"Phase detection failed: {_exc}"
-            _res["filter_warns"] = _fwarns
-            all_results[_cname] = _res
-            continue
-
-    _pwarns = [str(w.message) for w in _wc if issubclass(w.category, UserWarning)]
-    _pdict  = periods_to_dict(_df)
-
     try:
-        _png = _render_png_for_export(
+        _df, _pdict, _pwarns = _run_get_periods(
             _fbytes, use_filter, cutoff_low, cutoff_high,
             use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-            _phase_params_tuple, _cname,
+            _phase_params_tuple,
+        )
+    except Exception as _exc:
+        _res["error"] = f"Phase detection failed: {_exc}"
+        _res["filter_warns"] = _fwarns
+        all_results[_cname] = _res
+        continue
+
+    try:
+        _png = _render_periods_png(
+            _fbytes, use_filter, cutoff_low, cutoff_high,
+            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+            _phase_params_tuple, _cname, figsize=(12, 5), show_title=True,
         )
     except Exception:
         _png = b""
@@ -988,28 +1067,29 @@ with tab_cal:
             for msg in res["phase_warns"]:
                 st.warning(msg)
 
-            # Figure
-            if n_cols >= 4:
-                try:
-                    fig = _plot_compact(cyclone_name, res["periods_dict"], res["vort"])
-                except Exception as exc:
-                    st.error(f"Error in compact figure: {exc}")
-                    continue
-            else:
-                fig, ax_pre = plt.subplots(figsize=_FIGSIZES[n_cols])
-                try:
-                    plot_all_periods(
-                        res["periods_dict"], res["df_result"],
-                        ax=ax_pre, vorticity=res["vort"],
+            # Figure — rendered to PNG bytes by a cached function and shown via
+            # st.image() rather than building a live Figure + st.pyplot() here,
+            # so a rerun that doesn't change filter/phase params (e.g. a
+            # bad-case-mark checkbox click) is a cache hit for every cyclone's
+            # figure instead of a full matplotlib re-render of the whole grid.
+            try:
+                if n_cols >= 4:
+                    _png_display = _render_compact_png(
+                        files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                        _phase_params_tuple, cyclone_name, n_cols,
                     )
-                    _format_date_axis_mmdd(ax_pre)
-                except Exception as exc:
-                    st.error(f"Error in phase figure: {exc}")
-                    plt.close(fig)
-                    continue
-                ax_pre.set_title(cyclone_name, fontweight="bold")
-            st.pyplot(fig)
-            plt.close(fig)
+                else:
+                    _png_display = _render_periods_png(
+                        files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                        _phase_params_tuple, cyclone_name,
+                        figsize=_FIGSIZES[n_cols], show_title=True,
+                    )
+            except Exception as exc:
+                st.error(f"Error in {'compact' if n_cols >= 4 else 'phase'} figure: {exc}")
+                continue
+            st.image(_png_display, use_container_width=True)
 
             st.checkbox(
                 "⚠️ Mark as bad",
