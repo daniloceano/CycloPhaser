@@ -68,6 +68,8 @@ _DEFAULTS: dict = {
     "extrema_prominence_val":         1e-6,         # absolute threshold
     "extrema_distance_enabled":       False,
     "extrema_distance_val":           3,
+    "decay_tail_enabled":             False,
+    "decay_tail_fraction_val":        0.05,   # author's validated reference value
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
@@ -103,6 +105,54 @@ def _parse_mature_method(v) -> str:
     return v
 
 
+def _parse_prominence_relative(v) -> float:
+    """Validating converter for prominence_relative — same rationale as
+    _parse_length_scale, but the bound that matters here is the *widget's*:
+    the sidebar exposes this as a slider over [0.00, 0.50], so a value outside
+    that range cannot be represented and would raise inside st.slider on the
+    next render (crashing the app) if written into session_state unchecked.
+    Treated as a conversion error instead, and reported to the user."""
+    v = float(v)
+    if not 0.0 <= v <= 0.50:
+        raise ValueError(f"prominence_relative must be within [0.00, 0.50], got {v!r}")
+    return v
+
+
+def _parse_prominence(v) -> float:
+    """Validating converter for absolute prominence — the sidebar number_input
+    declares min_value=0.0, so a negative value would raise on render. Same
+    rationale as _parse_prominence_relative."""
+    v = float(v)
+    if v < 0.0:
+        raise ValueError(f"prominence must be >= 0, got {v!r}")
+    return v
+
+
+def _parse_distance(v) -> int:
+    """Validating converter for distance (separation in timesteps).
+
+    int(float(...)) because _build_yaml historically coerced every numeric phase
+    param through float(), so files exported before that was fixed carry e.g.
+    `3.0`; int("3.0") would raise. The lower bound mirrors the sidebar
+    number_input's min_value=2 — same rationale as _parse_prominence_relative."""
+    v = int(float(v))
+    if v < 2:
+        raise ValueError(f"distance must be >= 2 timesteps, got {v!r}")
+    return v
+
+
+def _parse_decay_tail_amplitude_fraction(v) -> float:
+    """Validating converter for decay_tail_amplitude_fraction — same rationale
+    as _parse_prominence_relative: the sidebar slider is bounded to
+    [0.01, 0.50] (cyclophaser itself requires (0, 1], but the widget's own
+    range is the practical bound that matters here — a value outside it would
+    raise inside st.slider on the next render)."""
+    v = float(v)
+    if not 0.01 <= v <= 0.50:
+        raise ValueError(f"decay_tail_amplitude_fraction must be within [0.01, 0.50], got {v!r}")
+    return v
+
+
 # length_scale and mature_method are bundled into phase_params (they are
 # get_periods()/determine_periods() phase-detection arguments, not
 # filter/smoothing ones), but — unlike every other entry here — they are
@@ -120,8 +170,23 @@ _YAML_PHASE_MAP: dict = {
     "mature_method":                    ("mature_method", _parse_mature_method),
     "mature_amplitude_fraction":        ("mature_amplitude_fraction", float),
 }
+# The extrema-filtering parameters (prominence / prominence_relative / distance)
+# and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
+# *group* of session_state keys (enabled flag + mode/value), not to a single
+# widget, so they get the same dedicated handling that use_smoothing/
+# use_smoothing_twice already get below. They are also OPTIONAL on import:
+# _build_yaml only writes a key whose value is not None, so a YAML exported
+# with a given check disabled (or prominence filtering in relative mode)
+# legitimately lacks that key. Hence they are recognised for the "unknown key"
+# check (_KNOWN_PHASE_YAML_KEYS) but excluded from the "missing key" check
+# (_REQUIRED_PHASE_YAML_KEYS), which would otherwise warn about a mode that
+# simply wasn't in use.
+_OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
+                              "decay_tail_amplitude_fraction"}
+
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
-_KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP)
+_KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
+_REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP)
 
 
 # ── Pure helper functions ─────────────────────────────────────────────────────────
@@ -210,8 +275,8 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
         + [f"phase_params.{k}" for k in pp if k not in _KNOWN_PHASE_YAML_KEYS]
     )
     missing = (
-        [f"filter_params.{k}" for k in _KNOWN_FILTER_YAML_KEYS if k not in fp]
-        + [f"phase_params.{k}" for k in _KNOWN_PHASE_YAML_KEYS  if k not in pp]
+        [f"filter_params.{k}" for k in _KNOWN_FILTER_YAML_KEYS   if k not in fp]
+        + [f"phase_params.{k}" for k in _REQUIRED_PHASE_YAML_KEYS if k not in pp]
     )
 
     count = 0
@@ -246,6 +311,63 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
                 count += 1
             except (ValueError, TypeError):
                 ignored.append(f"phase_params.{yaml_key} (conversion error)")
+
+    # Extrema filtering (prominence / prominence_relative / distance) — each is a
+    # *group* of session_state keys (enabled + mode + value), so it cannot go
+    # through _YAML_PHASE_MAP's single-key mapping; see _EXTREMA_YAML_KEYS above.
+    #
+    # Absence is meaningful, not missing data: _build_yaml omits any parameter
+    # whose value is None, and the two prominence modes are mutually exclusive,
+    # so a file carrying neither key describes prominence filtering that was
+    # switched OFF. The enabled flags are therefore set from the file in BOTH
+    # directions rather than only being turned on — otherwise importing a
+    # "filtering off" YAML into a session that currently has filtering on would
+    # silently keep the session's filter and reproduce the wrong calibration.
+    # prominence_relative wins if a hand-edited file somehow carries both, matching
+    # the sidebar radio's single-mode model (relative is its default).
+    if "prominence_relative" in pp:
+        try:
+            st.session_state["extrema_prominence_rel_val"] = _parse_prominence_relative(
+                pp["prominence_relative"])
+            st.session_state["extrema_prominence_mode"]    = "relative"
+            st.session_state["extrema_prominence_enabled"] = True
+            count += 1
+        except (ValueError, TypeError):
+            ignored.append("phase_params.prominence_relative (conversion error)")
+    elif "prominence" in pp:
+        try:
+            st.session_state["extrema_prominence_val"]     = _parse_prominence(pp["prominence"])
+            st.session_state["extrema_prominence_mode"]    = "absolute"
+            st.session_state["extrema_prominence_enabled"] = True
+            count += 1
+        except (ValueError, TypeError):
+            ignored.append("phase_params.prominence (conversion error)")
+    else:
+        st.session_state["extrema_prominence_enabled"] = False
+
+    if "distance" in pp:
+        try:
+            st.session_state["extrema_distance_val"]     = _parse_distance(pp["distance"])
+            st.session_state["extrema_distance_enabled"] = True
+            count += 1
+        except (ValueError, TypeError):
+            ignored.append("phase_params.distance (conversion error)")
+    else:
+        st.session_state["extrema_distance_enabled"] = False
+
+    # decay_tail_amplitude_fraction — same enabled+value group pattern as the
+    # extrema block above, and same reasoning for setting `enabled` in BOTH
+    # directions (absence means the file describes this check switched OFF).
+    if "decay_tail_amplitude_fraction" in pp:
+        try:
+            st.session_state["decay_tail_fraction_val"] = _parse_decay_tail_amplitude_fraction(
+                pp["decay_tail_amplitude_fraction"])
+            st.session_state["decay_tail_enabled"] = True
+            count += 1
+        except (ValueError, TypeError):
+            ignored.append("phase_params.decay_tail_amplitude_fraction (conversion error)")
+    else:
+        st.session_state["decay_tail_enabled"] = False
 
     # 'evaluation' is optional (older YAMLs, including ones exported before this
     # feature existed, simply don't have it — importing those must not error; see
@@ -293,9 +415,15 @@ def _build_yaml(cyclone_names) -> str:
         },
         # length_scale and mature_method are string enums ("global"/"local",
         # "derivative"/"amplitude"), not numeric thresholds — exported as-is
-        # rather than coerced through float().
+        # rather than coerced through float(). `distance` is a count of
+        # timesteps and is exported as int so it round-trips as `3` rather than
+        # the `3.0` a blanket float() produced (the importer tolerates both).
+        # Note every key here is omitted when its value is None, so which
+        # extrema keys appear also encodes whether that filter was enabled —
+        # see the extrema-import block in _load_yaml_config.
         "phase_params": {
-            **{k: float(v) for k, v in _PHASE_PARAMS.items()
+            **{k: (int(v) if k == "distance" else float(v))
+               for k, v in _PHASE_PARAMS.items()
                if v is not None and k not in ("length_scale", "mature_method")},
             "length_scale": _PHASE_PARAMS["length_scale"],
             "mature_method": _PHASE_PARAMS["mature_method"],
@@ -949,6 +1077,52 @@ with st.sidebar:
         else:
             extrema_distance = None
 
+    st.divider()
+    # --- Decay-tail extension (optional) ---
+    st.header("Decay-Tail Handling")
+    with st.expander("Extend decay over a flat tail (advanced)", expanded=False):
+        st.caption(
+            "Compensates for an artifact of the prominence filter above: on a "
+            "single-cycle series, peaks and valleys are scored against SEPARATE "
+            "populations, so the largest interior peak always survives "
+            "prominence_relative filtering by construction — even when its "
+            "prominence is negligible — while the valley of the same ripple is "
+            "correctly rejected. This 'orphan' peak (no surviving valley after it) "
+            "truncates decay early; the flat tail left behind is then labelled "
+            "'residual' even though nothing in the vorticity indicates a genuine "
+            "re-intensification. Leave disabled to use the default CycloPhaser "
+            "behaviour."
+        )
+        _decay_tail_enabled = st.checkbox(
+            "Extend decay over a flat/plateau tail", value=_DEFAULTS["decay_tail_enabled"],
+            key="decay_tail_enabled",
+            help=(
+                "If the tail right after the last decay block contains no "
+                "re-deepening larger than the fraction below (relative to the "
+                "cycle's own peak-to-valley amplitude), it is labelled 'decay' "
+                "instead of 'residual'. Never touches z_peaks_valleys or any "
+                "detected extrema, so the mature window is unaffected."
+            ),
+        )
+        if _decay_tail_enabled:
+            _decay_tail_val = st.slider(
+                "Fraction of cycle amplitude",
+                min_value=0.01, max_value=0.50, step=0.01,
+                value=_DEFAULTS["decay_tail_fraction_val"],
+                key="decay_tail_fraction_val",
+                help=(
+                    "Author's validated reference value is 0.05, confirmed safe "
+                    "over (0.0356, 0.0651] on the 51-track calibration set: below "
+                    "that, some spurious tails aren't absorbed; above it, genuine "
+                    "re-intensifications start being swallowed. A re-deepening at "
+                    "or above this fraction is left for the catch-all rule to mark "
+                    "'residual', as before."
+                ),
+            )
+            decay_tail_amplitude_fraction = float(_decay_tail_val)
+        else:
+            decay_tail_amplitude_fraction = None
+
 # Bundle phase params
 _PHASE_PARAMS = dict(
     threshold_intensification_length=thr_int_len,
@@ -964,6 +1138,7 @@ _PHASE_PARAMS = dict(
     length_scale=length_scale,
     mature_method=mature_method,
     mature_amplitude_fraction=mature_amplitude_fraction,
+    decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
@@ -1374,6 +1549,34 @@ optionally, each threshold's own local cycle.
   only if calibration surfaces spurious, very short amplitude windows.
 - The mature-must-be-followed-by-decay physical confirmation check (see the
   Known methodological notes tab) applies identically in both modes.
+
+### `decay_tail_amplitude_fraction` — extending decay over a flat/plateau tail
+
+- **`None`** (default): disabled, matching all versions prior to this option.
+- **Opt-in** (e.g. `0.05`, the author's validated reference value): compensates for
+  an artifact of the prominence filter. On a single-cycle series, peaks and valleys
+  are scored against SEPARATE populations, so the largest interior peak always
+  survives `prominence_relative` filtering by construction — even when its
+  prominence is negligible — while the valley of the same ripple is correctly
+  rejected. This "orphan" peak (no surviving valley after it) makes
+  `find_decay_period` truncate decay early; the flat tail left behind is then
+  labelled `residual` by the catch-all rule in `find_residual_period` (step 4
+  below), even though nothing in the vorticity indicates a genuine
+  re-intensification.
+- With this set, `find_residual_period` checks — immediately before that catch-all
+  rule, and only when the tail directly follows an existing `decay` block —
+  whether the tail contains a genuine re-deepening: a drop below the tail's
+  running-maximum vorticity larger than this fraction of the cycle's own
+  peak-to-valley amplitude. If not, the tail is labelled `decay` instead of
+  `residual`.
+- **Never touches `z_peaks_valleys` or any detected extrema**, so it cannot shift
+  the mature window — unlike the discarded alternative of dropping the orphan peak
+  from the extrema themselves, which was found to inflate the mature window's
+  duration in every case it fixed (the decay-side amplitude reference in the
+  `amplitude` mature method shifts when the bounding peak changes).
+- Validated safe window on the 51-track calibration set: **`(0.0356, 0.0651]`**.
+  Below it, some spurious tails aren't absorbed; above it, genuine
+  re-intensifications start being swallowed too.
 """)
 
     with st.expander("4 · Known methodological notes", expanded=False):
