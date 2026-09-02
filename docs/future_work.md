@@ -170,6 +170,88 @@ track), not in CycloPhaser's phase detection itself. Those are a ceiling on what
 threshold/method tuning inside CycloPhaser can fix, not a defect of the method — worth
 keeping in mind before chasing further threshold changes on this specific subset.
 
+### Update 2026-09-02 — `decay_tail_amplitude_fraction` closes the gap to 0/51
+
+Root cause of the 20170409 / 20150561 failure family above: on a single-cycle
+series, `find_peaks_valleys`' prominence filter scores peaks and valleys as
+*separate* populations, so the largest interior z_peak always survives
+`prominence_relative` filtering by construction (it is the max of its own
+population), even when its prominence is negligible in absolute terms — while
+the valley of that same ripple is correctly rejected against the population
+containing the cycle's genuine main valley. The result is an "orphan" z_peak
+with no surviving valley after it, which makes `find_decay_period` truncate
+decay early; the remaining flat tail is then labelled `residual` by
+`find_residual_period`'s catch-all rule, even though nothing in the vorticity
+indicates a genuine re-intensification (20170409 was declared `residual` with
+89.5% of its peak intensity still present).
+
+`decay_tail_amplitude_fraction` (new, opt-in; `find_stages.find_residual_period`)
+fixes this **without touching `z_peaks_valleys` or any extrema detection** —
+unlike the discarded alternative of dropping the orphan peak from the extrema
+themselves, which was found to shift `_amplitude_mature_bounds`'s decay-side
+amplitude reference and inflate the mature window's duration in every case it
+fixed. Instead, immediately before the catch-all rule, and only when the NaN
+tail directly follows an existing `decay` block, it checks whether that tail
+contains a genuine re-deepening — a drop below the tail's running-maximum z
+larger than this fraction of the cycle's own peak-to-valley amplitude — and
+extends `decay` over the tail if not. See the function's docstring for the
+full mechanism and `tests/test_decay_tail_amplitude_fraction.py` for the
+locked-in regression cases.
+
+**Author's validated calibration on the 51-track set: 0% bad cases (0/51)**,
+down from 17.6% (9/51) at the start of this line of investigation:
+
+```
+mature_method: amplitude
+mature_amplitude_fraction: 0.95
+prominence_relative: 0.3
+distance: 3
+decay_tail_amplitude_fraction: 0.05
+length_scale: local
+use_smoothing: 31
+cutoff_high: 24
+cutoff_low: 168
+replace_endpoints_with_lowpass: 0
+savgol_polynomial: 3
+```
+
+Duration thresholds (`threshold_intensification_length`,
+`threshold_intensification_gap`, `threshold_decay_length`,
+`threshold_decay_gap`, `threshold_incipient_length`) are left at package
+defaults, except `threshold_mature_distance=0.18` and
+`threshold_mature_length=0.15` — the latter has no effect under
+`mature_method="amplitude"` (see above) and is carried over from the prior
+`"derivative"` calibration mainly for continuity/documentation, not because it
+does anything here.
+
+**NOTE — this calibration is specific to TRACK (Gramcianinov et al.)
+vorticity, not a general-purpose default.** TRACK output already carries
+built-in spatial smoothing; raw ERA5 vorticity series (no upstream smoothing)
+will very likely need a different calibration — most immediately different
+`cutoff_high`/`use_smoothing` values, and possibly different
+`prominence_relative`/`decay_tail_amplitude_fraction` since both are measured
+relative to the *smoothed* signal's own amplitude, which depends on how much
+noise reaches `find_peaks_valleys` in the first place.
+
+**Plan — named presets instead of changed defaults:** once the improvement
+fronts opened by this investigation (item 3 above, this item, and the two
+remaining known cases below) are closed, turn validated calibrations like this
+one into named presets (e.g. `"track_gramcianinov"`, `"era5_raw"`) exposed
+alongside the existing keyword arguments, rather than changing
+`determine_periods`'s own default values. This keeps a bare
+`determine_periods(series)` call byte-identical to v2.0.0 while giving users a
+one-line way to opt into a validated, dataset-appropriate parameter set. Not
+implemented yet — noted here for when this line of work is ready to close.
+
+**Known remaining cases (not counted as bad, but not fully understood
+either):**
+
+- **20206498** — a second mature phase, in a two-cycle track, is still not
+  detected. Unrelated to the orphan-peak mechanism above; not yet diagnosed.
+- **Incipient phase** — the current `find_incipient_period` heuristic (see
+  `cyclophaser/find_stages.py`) needs a redefinition pass; flagged here as a
+  future front, not addressed by this update.
+
 ---
 
 ## 4. Replace / improve derivative smoothing
