@@ -60,6 +60,8 @@ _DEFAULTS: dict = {
     "thr_dec_gap":       0.075,
     "thr_inc_len":       0.400,
     "length_scale":      "global",
+    "mature_method":              "derivative",
+    "mature_amplitude_fraction":  0.90,
     "extrema_prominence_enabled":     False,
     "extrema_prominence_mode":        "relative",   # 'relative' | 'absolute'
     "extrema_prominence_rel_val":     0.10,         # fraction (relative mode)
@@ -90,10 +92,22 @@ def _parse_length_scale(v) -> str:
     return v
 
 
-# length_scale is bundled into phase_params (it is a get_periods()/
-# determine_periods() phase-detection argument, not a filter/smoothing one),
-# but — unlike every other entry here — it is a string enum, not a numeric
-# threshold, hence the dedicated validating converter instead of `float`.
+def _parse_mature_method(v) -> str:
+    """Validating str converter for mature_method — same rationale as
+    _parse_length_scale above: rejects anything but the two values
+    cyclophaser accepts, so a hand-edited/corrupt YAML value is treated as a
+    conversion error rather than silently written into session_state."""
+    v = str(v)
+    if v not in ("derivative", "amplitude"):
+        raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {v!r}")
+    return v
+
+
+# length_scale and mature_method are bundled into phase_params (they are
+# get_periods()/determine_periods() phase-detection arguments, not
+# filter/smoothing ones), but — unlike every other entry here — they are
+# string enums, not numeric thresholds, hence the dedicated validating
+# converters instead of `float`.
 _YAML_PHASE_MAP: dict = {
     "threshold_intensification_length": ("thr_int_len",  float),
     "threshold_intensification_gap":    ("thr_int_gap",  float),
@@ -103,6 +117,8 @@ _YAML_PHASE_MAP: dict = {
     "threshold_decay_gap":              ("thr_dec_gap",  float),
     "threshold_incipient_length":       ("thr_inc_len",  float),
     "length_scale":                     ("length_scale", _parse_length_scale),
+    "mature_method":                    ("mature_method", _parse_mature_method),
+    "mature_amplitude_fraction":        ("mature_amplitude_fraction", float),
 }
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP)
@@ -275,12 +291,14 @@ def _build_yaml(cyclone_names) -> str:
             "use_smoothing_twice":           use_smoothing_twice,
             "savgol_polynomial":             int(savgol_poly),
         },
-        # length_scale is a string enum ("global"/"local"), not a numeric
-        # threshold — exported as-is rather than coerced through float().
+        # length_scale and mature_method are string enums ("global"/"local",
+        # "derivative"/"amplitude"), not numeric thresholds — exported as-is
+        # rather than coerced through float().
         "phase_params": {
             **{k: float(v) for k, v in _PHASE_PARAMS.items()
-               if v is not None and k != "length_scale"},
+               if v is not None and k not in ("length_scale", "mature_method")},
             "length_scale": _PHASE_PARAMS["length_scale"],
+            "mature_method": _PHASE_PARAMS["mature_method"],
         },
         "evaluation": _compute_evaluation(cyclone_names),
     }
@@ -753,26 +771,70 @@ with st.sidebar:
             "Higher values eliminate short decay episodes."
         ),
     )
+    mature_method = st.radio(
+        "Mature stage method",
+        options=["derivative", "amplitude"],
+        index=["derivative", "amplitude"].index(_DEFAULTS["mature_method"]),
+        format_func=lambda x: "Derivative (default, v2.0.0 behaviour)" if x == "derivative" else "Amplitude (opt-in)",
+        key="mature_method",
+        horizontal=True,
+        help=(
+            "Controls how the mature-stage window around each vorticity minimum is sized. "
+            "**derivative** (default): a fixed proportion ('Mature distance' below) of the "
+            "time distance to the neighbouring vorticity peaks — unchanged from v2.0.0. "
+            "**amplitude** (opt-in): the contiguous stretch of vorticity around the minimum "
+            "that stays within a fraction of the cycle's own peak-to-valley amplitude on each "
+            "side ('Mature amplitude fraction' below). Anchors directly on the vorticity value "
+            "rather than on smoothed-derivative extrema, which can lag the true minimum and "
+            "displace the 'derivative' window forward on some real cyclones. "
+            "'Min. mature length' and 'Mature distance' below have NO EFFECT when 'amplitude' "
+            "is selected — that minimum-duration floor was calibrated for 'derivative' and was "
+            "observed to discard well-centred amplitude windows for being narrow, which is a "
+            "physically meaningful outcome there, not a defect to filter out."
+        ),
+    )
+    _mature_is_derivative = mature_method == "derivative"
+
     thr_mat_len = st.slider(
         "Min. mature length", 0.005, 0.15, step=0.005,
         value=_DEFAULTS["thr_mat_len"], key="thr_mat_len",
+        disabled=not _mature_is_derivative,
         help=(
             "Minimum length of the mature phase (peak intensity period) as a fraction "
             "of total series length. The mature stage spans the period around the vorticity "
             "minimum. Very high values may eliminate the mature stage of rapidly evolving "
             "cyclones; very low values can generate spurious peaks."
+            + ("" if _mature_is_derivative else
+               " **Inactive**: has no effect when Mature stage method = 'amplitude'.")
         ),
     )
     thr_mat_dist = st.slider(
         "Mature distance", 0.05, 0.30, step=0.005,
         value=_DEFAULTS["thr_mat_dist"], key="thr_mat_dist",
+        disabled=not _mature_is_derivative,
         help=(
             "Maximum allowed distance between the intensity peak (vorticity minimum) and "
             "the centre of the mature segment, as a fraction of total length. "
             "Controls how close to the true intensity maximum the mature phase must be located. "
             "Higher values allow offset peaks; lower values are more strict."
+            + ("" if _mature_is_derivative else
+               " **Inactive**: only used when Mature stage method = 'derivative'.")
         ),
     )
+    if not _mature_is_derivative:
+        mature_amplitude_fraction = st.slider(
+            "Mature amplitude fraction", 0.05, 1.00, step=0.01,
+            value=_DEFAULTS["mature_amplitude_fraction"], key="mature_amplitude_fraction",
+            help=(
+                "Fraction of each side's peak-to-valley vorticity amplitude a timestep must "
+                "still reach to count as mature. Higher values (closer to 1) yield a narrower "
+                "window tightly centred on the vorticity minimum; lower values widen it toward "
+                "the neighbouring peaks. No minimum-duration floor applies in this mode — a "
+                "narrow window is accepted on its own terms rather than discarded."
+            ),
+        )
+    else:
+        mature_amplitude_fraction = _DEFAULTS["mature_amplitude_fraction"]
 
     with st.expander("Advanced thresholds", expanded=False):
         thr_int_gap = st.slider(
@@ -900,6 +962,8 @@ _PHASE_PARAMS = dict(
     prominence_relative=extrema_prominence_relative,
     distance=extrema_distance,
     length_scale=length_scale,
+    mature_method=mature_method,
+    mature_amplitude_fraction=mature_amplitude_fraction,
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
@@ -1266,8 +1330,8 @@ optionally, each threshold's own local cycle.
 |---|---|---|
 | `threshold_intensification_length` | 0.075 | Min. duration of an intensification segment. |
 | `threshold_decay_length` | 0.075 | Min. duration of a decay segment. |
-| `threshold_mature_length` | 0.030 | Min. duration of the mature stage. |
-| `threshold_mature_distance` | 0.125 | Max. distance between vorticity minimum and mature segment centre. Already local — unaffected by `length_scale`. |
+| `threshold_mature_length` | 0.030 | Min. duration of the mature stage. Only used when `mature_method="derivative"` — see below. |
+| `threshold_mature_distance` | 0.125 | Max. distance between vorticity minimum and mature segment centre. Already local — unaffected by `length_scale`. Only used when `mature_method="derivative"` — see below. |
 | `threshold_intensification_gap` | 0.075 | Max. gap between consecutive intensification segments for merging. |
 | `threshold_decay_gap` | 0.075 | Max. gap between consecutive decay segments for merging. |
 | `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |
@@ -1286,6 +1350,30 @@ optionally, each threshold's own local cycle.
 - Note: for a track containing only **one** life cycle, `local` and `global` are
   mathematically identical (there is no other cycle to distinguish the local scale
   from). `length_scale` only changes anything on tracks with more than one cycle.
+
+### `mature_method` — how the mature window is sized
+
+- **`derivative`** (default): the mature window around each vorticity minimum is a
+  fixed proportion (`threshold_mature_distance`) of the *time* distance to the
+  neighbouring vorticity peaks — unchanged from v2.0.0. `threshold_mature_length`
+  then applies as a minimum-duration floor on that window.
+- **`amplitude`** (opt-in): the mature window is instead the contiguous stretch of
+  vorticity around the minimum that stays within `mature_amplitude_fraction` of the
+  cycle's own peak-to-valley amplitude, evaluated independently on the
+  intensification side and the decay side. This anchors directly on the vorticity
+  value itself rather than on smoothed-derivative extrema, which can lag the true
+  minimum by a few timesteps and displace the `derivative` window forward of where
+  the cyclone was actually most intense on some real cyclones.
+- **`threshold_mature_length` and `threshold_mature_distance` have NO EFFECT when
+  `mature_method="amplitude"`.** That minimum-duration floor was calibrated for
+  `derivative`'s window; reusing it for `amplitude` was found (case 20160030) to
+  discard well-centred amplitude windows for being narrow, which is a physically
+  meaningful outcome of `mature_amplitude_fraction` there, not a defect to filter
+  out. No replacement minimum-duration safeguard exists for `amplitude` at this
+  time — this is deliberate, to evaluate the method unconstrained first; revisit
+  only if calibration surfaces spurious, very short amplitude windows.
+- The mature-must-be-followed-by-decay physical confirmation check (see the
+  Known methodological notes tab) applies identically in both modes.
 """)
 
     with st.expander("4 · Known methodological notes", expanded=False):
