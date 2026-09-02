@@ -559,7 +559,9 @@ def get_periods(vorticity,
                 prominence: float = None,
                 prominence_relative: float = None,
                 distance: int = None,
-                length_scale: str = "global") -> pd.DataFrame:
+                length_scale: str = "global",
+                mature_method: str = "derivative",
+                mature_amplitude_fraction: float = 0.90) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -610,6 +612,47 @@ def get_periods(vorticity,
     track). ``threshold_mature_distance`` and ``threshold_incipient_length``
     are unaffected by this option — they were already local.
 
+    mature_method note
+    -------------------
+    With the default ``mature_method="derivative"`` the mature window around
+    each z_valley is sized as a fixed proportion (``threshold_mature_distance``)
+    of the *time* distance to the neighbouring z_peak — the historical
+    behaviour, unchanged. With ``mature_method="amplitude"`` the window is
+    instead the contiguous stretch of z around the z_valley whose value stays
+    within ``mature_amplitude_fraction`` of the cycle's own peak-to-valley
+    amplitude on each side (see ``find_stages._amplitude_mature_bounds`` for
+    the full implementation). Concretely, for each side (previous_z_peak on
+    the intensification side, next_z_peak on the decay side) the amplitude is
+    measured as ``z[side_peak] - z[z_valley]`` — the peak-to-valley DROP, never
+    the extremum's absolute value (vorticity has a non-zero floor, so "90% of
+    the raw extreme" would not be a meaningful fraction on its own — same
+    reasoning as ``prominence_relative`` in ``find_peaks_valleys``). The level
+    a timestep's z must stay at or below to still count as mature is then
+    ``z[side_peak] - mature_amplitude_fraction * amplitude_side``, walked
+    outward from z_valley and stopped at the first violation on that side
+    (kept strictly contiguous). The two sides are evaluated independently,
+    mirroring the existing asymmetric treatment of ``threshold_mature_distance``.
+    This matters because "derivative" locates the window using the smoothed
+    *derivative*'s extrema, which can lag the true z minimum by a few
+    timesteps (see "Phase detection lag note" below) and so displace the
+    mature window forward of where the cyclone was actually most intense;
+    "amplitude" anchors directly on z's own value and carries no such lag.
+    Both methods are still subject to the same downstream physical
+    requirement — a candidate mature window is only confirmed if the cyclone
+    is subsequently observed to decay (see the neighbour-confirmation comment
+    in ``find_stages.find_mature_stage``) — this is unrelated to
+    ``threshold_mature_length`` and applies in both modes equally.
+
+    ``threshold_mature_length``/``length_scale``, however, apply ONLY to
+    ``mature_method="derivative"``. In "amplitude" mode they have NO effect:
+    that minimum-duration floor was calibrated for "derivative"'s
+    fixed-time-proportion window, and reusing it for "amplitude" was observed
+    to discard well-centred amplitude windows for being narrow — narrowness
+    that is an expected, physically meaningful outcome of
+    ``mature_amplitude_fraction`` there, not a defect to filter out. No
+    replacement minimum-duration safeguard exists for "amplitude" at this
+    time (deliberate, to evaluate the method unconstrained first).
+
     Phase detection lag note
     ------------------------
     The detected *start* of a phase may lag the true onset of that phase in the
@@ -651,15 +694,36 @@ def get_periods(vorticity,
         length_scale (str, optional): "global" (default) or "local". See the
             "length_scale note" above. Default "global" reproduces the exact
             behaviour of all versions prior to this option.
+        mature_method (str, optional): "derivative" (default) or "amplitude".
+            "derivative" is the original method: the mature window is a fixed
+            proportion (``threshold_mature_distance``) of the *time* distance
+            between the z_valley and each neighbouring z_peak. "amplitude"
+            (opt-in) instead defines the mature window as the contiguous
+            stretch of z around the z_valley that stays within
+            ``mature_amplitude_fraction`` of the cycle's own peak-to-valley
+            amplitude on each side — anchored on z's amplitude rather than on
+            dz extrema, so it does not inherit the smoothed-derivative phase
+            lag that can displace "derivative"'s window forward of the true z
+            minimum on some real cyclones. See
+            ``find_stages._amplitude_mature_bounds`` for the full definition.
+            Default "derivative" reproduces the exact behaviour of all
+            versions prior to this option.
+        mature_amplitude_fraction (float, optional): Fraction (0, 1] of each
+            side's peak-to-valley amplitude a timestep's z must still reach to
+            count as mature. Only used when ``mature_method="amplitude"``.
+            Default 0.90.
 
     Returns:
         pd.DataFrame: DataFrame containing detected periods and associated information.
 
     Raises:
-        ValueError: If ``length_scale`` is not "global" or "local".
+        ValueError: If ``length_scale`` is not "global" or "local", or if
+            ``mature_method`` is not "derivative" or "amplitude".
     """
     if length_scale not in ("global", "local"):
         raise ValueError(f"length_scale must be 'global' or 'local', got {length_scale!r}.")
+    if mature_method not in ("derivative", "amplitude"):
+        raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {mature_method!r}.")
 
     # Extract smoothed vorticity and derivatives
     z = vorticity.vorticity_smoothed2
@@ -697,6 +761,8 @@ def get_periods(vorticity,
         "threshold_decay_gap": threshold_decay_gap,
         "threshold_incipient_length": threshold_incipient_length,
         "length_scale": length_scale,
+        "mature_method": mature_method,
+        "mature_amplitude_fraction": mature_amplitude_fraction,
     }
 
     # Detect different stages of cyclone lifecycle
@@ -742,7 +808,9 @@ def get_periods(vorticity,
                       threshold_decay_length=threshold_decay_length,
                       threshold_decay_gap=threshold_decay_gap,
                       threshold_incipient_length=threshold_incipient_length,
-                      length_scale=length_scale)
+                      length_scale=length_scale,
+                      mature_method=mature_method,
+                      mature_amplitude_fraction=mature_amplitude_fraction)
     
     # Export to CSV if requested
     if export_dict:
@@ -773,7 +841,9 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       prominence: float = None,
                       prominence_relative: float = None,
                       distance: int = None,
-                      length_scale: str = "global") -> pd.DataFrame:
+                      length_scale: str = "global",
+                      mature_method: str = "derivative",
+                      mature_amplitude_fraction: float = 0.90) -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -853,6 +923,17 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             full rationale and ``find_stages._local_cycle_scale`` for the precise
             definition. ``threshold_mature_distance`` and
             ``threshold_incipient_length`` are unaffected; they were already local.
+
+        mature_method (str, optional): "derivative" (default) or "amplitude".
+            See ``get_periods`` for the full rationale and
+            ``find_stages._amplitude_mature_bounds`` for the precise definition
+            of the "amplitude" method. Default "derivative" reproduces the
+            exact behaviour of all versions prior to this option.
+
+        mature_amplitude_fraction (float, optional): Fraction (0, 1] of each
+            side's peak-to-valley amplitude a timestep's z must still reach to
+            count as mature. Only used when ``mature_method="amplitude"``.
+            Default 0.90.
 
     Returns:
         pd.DataFrame: DataFrame containing detected cyclone life cycle phases and associated metadata.
@@ -938,6 +1019,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         prominence_relative=prominence_relative,
         distance=distance,
         length_scale=length_scale,
+        mature_method=mature_method,
+        mature_amplitude_fraction=mature_amplitude_fraction,
     )
 
     return df

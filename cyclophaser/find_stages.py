@@ -66,32 +66,165 @@ def _local_cycle_scale(df, seg_start, seg_end):
     return right - left
 
 
+def _amplitude_mature_bounds(df, previous_z_peak, z_valley, next_z_peak, mature_amplitude_fraction):
+    """Amplitude-based mature window around a single z_valley (vorticity extremum).
+
+    Used by find_mature_stage when mature_method="amplitude". Defines the mature
+    window as the CONTIGUOUS stretch of z around z_valley that stays within
+    ``mature_amplitude_fraction`` of the cycle's amplitude — i.e. "still at least
+    X% as intense as the peak" — rather than a fixed proportion of the *time*
+    distance to the neighbouring z_peak (that's the "derivative"/default method,
+    which anchors on dz extrema and can drift off-centre when the smoothed
+    derivative lags the true z minimum; see the mature_method note in
+    get_periods).
+
+    Amplitude reference (IMPORTANT — do not use z_valley's absolute value):
+    vorticity has a non-zero floor, so "80% of the extreme value" is not a
+    meaningful fraction on its own (same reasoning as prominence_relative in
+    find_peaks_valleys). Instead the amplitude is measured relative to the
+    z_peak that bounds the cycle on each side — the peak-to-valley drop —
+    exactly like the previous/next z_peak pair the default method already uses
+    to size its window via threshold_mature_distance:
+
+        amplitude_prev = z[previous_z_peak] - z[z_valley]   (intensification side)
+        amplitude_next = z[next_z_peak]     - z[z_valley]   (decay side)
+
+    The two sides are treated independently (own amplitude, own level, own
+    contiguous walk) rather than pooled into one symmetric amplitude, matching
+    the existing per-side treatment of threshold_mature_distance and avoiding
+    a single lopsided reference when the two bounding peaks differ in height.
+
+    For each side, the level a timestep's z must stay at or below to still
+    count as "mature" is:
+
+        level_prev = z[previous_z_peak] - mature_amplitude_fraction * amplitude_prev
+        level_next = z[next_z_peak]     - mature_amplitude_fraction * amplitude_next
+
+    mature_amplitude_fraction -> 1 shrinks the level toward z[z_valley] itself
+    (narrow window, only the very peak of intensity); -> 0 widens it toward the
+    bounding peak's own value (the whole intensification/decay leg counts).
+    The window is walked outward from z_valley and stops at the first timestep
+    that violates the level on that side (kept CONTIGUOUS on purpose — a
+    momentary z excursion back above the level should not extend the window
+    past it), falling back to the bounding peak itself if the whole leg
+    qualifies.
+
+    Interaction with length_scale / threshold_mature_length: NONE — this window
+    is the final mature window as-is. threshold_mature_length (a MINIMUM
+    DURATION check, itself a fraction of length_scale) is a rule for the
+    "derivative" method's fixed-time-proportion window and does not apply
+    here; the caller (find_mature_stage) skips that check entirely for
+    mature_method="amplitude", by design (see the threshold_mature_length /
+    mature_method interaction note in find_mature_stage's docstring). The
+    window returned here is accepted purely on the strength of its own
+    amplitude-based definition — a narrow window is not evidence of a defect
+    to filter out, it is a direct, physically meaningful consequence of
+    mature_amplitude_fraction.
+
+    Args:
+        df: DataFrame with a 'z' column (smoothed vorticity).
+        previous_z_peak, next_z_peak: Timestamps of the z_peaks bounding this
+            z_valley (already located by the caller).
+        z_valley: Timestamp of the candidate mature z_valley.
+        mature_amplitude_fraction: float in (0, 1]. Fraction of each side's
+            peak-to-valley amplitude that must still be "covered" for a
+            timestep to count as mature.
+
+    Returns:
+        (mature_start, mature_end): Timestamps bounding the contiguous window.
+    """
+    z_at_valley = df.at[z_valley, 'z']
+    z_at_prev_peak = df.at[previous_z_peak, 'z']
+    z_at_next_peak = df.at[next_z_peak, 'z']
+
+    amplitude_prev = z_at_prev_peak - z_at_valley
+    amplitude_next = z_at_next_peak - z_at_valley
+
+    level_prev = z_at_prev_peak - mature_amplitude_fraction * amplitude_prev
+    level_next = z_at_next_peak - mature_amplitude_fraction * amplitude_next
+
+    # Backward extension (intensification side): walk from z_valley toward
+    # previous_z_peak; keep the contiguous run (ending at z_valley) whose z
+    # stays at or below level_prev.
+    seg_prev = df.loc[previous_z_peak:z_valley, 'z']
+    violations_prev = np.where(seg_prev.values > level_prev)[0]
+    mature_start = seg_prev.index[violations_prev[-1] + 1] if len(violations_prev) else previous_z_peak
+
+    # Forward extension (decay side): walk from z_valley toward next_z_peak;
+    # keep the contiguous run (starting at z_valley) whose z stays at or below
+    # level_next.
+    seg_next = df.loc[z_valley:next_z_peak, 'z']
+    violations_next = np.where(seg_next.values > level_next)[0]
+    mature_end = seg_next.index[violations_next[0] - 1] if len(violations_next) else next_z_peak
+
+    return mature_start, mature_end
+
+
 def find_mature_stage(df, **args_periods):
 
     """
-    Identifies and marks the mature stage in the cyclone life cycle based on the 
-    given thresholds for mature distance and length.
+    Identifies and marks the mature stage in the cyclone life cycle.
+
+    Two mutually exclusive detection methods are available via 'mature_method':
+
+    - "derivative" (default, unchanged behaviour): the mature window is a fixed
+      proportion (threshold_mature_distance) of the *time* distance between the
+      z_valley and each neighbouring z_peak. This is the original method.
+    - "amplitude" (opt-in): the mature window is the contiguous stretch of z
+      around the z_valley that stays within mature_amplitude_fraction of the
+      cycle's peak-to-valley amplitude on each side. See
+      _amplitude_mature_bounds for the full definition and rationale (fixes a
+      forward displacement of the mature window observed with "derivative" on
+      some real cyclones, caused by smoothed-derivative phase lag — this method
+      anchors on z's own amplitude instead, which does not lag).
 
     Args:
         df (pd.DataFrame): DataFrame containing vorticity data with columns for
             'z_peaks_valleys' and 'periods'.
         **args_periods: Variable length argument list containing period-specific
             thresholds, including:
+            - 'mature_method' (str, optional): "derivative" (default) or
+              "amplitude". See above.
             - 'threshold_mature_distance' (float): Factor to calculate mature
               start and end distances from z valleys. Already a LOCAL fraction
               (of the distance to the neighbouring z peaks); unaffected by
-              'length_scale'.
+              'length_scale'. Only used when mature_method="derivative".
+            - 'mature_amplitude_fraction' (float, optional): Fraction (0, 1] of
+              each side's peak-to-valley amplitude a timestep's z must still
+              reach to count as mature. Default 0.90. Only used when
+              mature_method="amplitude".
             - 'threshold_mature_length' (float): Minimum length for a mature
               stage, as a fraction of a length that depends on 'length_scale'.
-            - 'length_scale' (str, optional): 'global' (default) measures
-              threshold_mature_length against the whole series length
+              Only used when mature_method="derivative" — see the note below.
+            - 'length_scale' (str, optional): Only relevant when
+              mature_method="derivative" (see note below). 'global' (default)
+              measures threshold_mature_length against the whole series length
               (df.index[-1]-df.index[0]), matching all versions prior to this
               option. 'local' measures it against the span between the z_peak
               immediately before and immediately after the candidate mature
               z_valley — i.e. the same previous/next z_peak pair already used
-              to size the mature window via threshold_mature_distance, so the
-              length check and the window it is checking are evaluated on the
-              same local scale.
+              to size the mature window, so the length check and the window it
+              is checking are evaluated on the same local scale.
+
+    threshold_mature_length / mature_method interaction:
+        threshold_mature_length is applied ONLY when mature_method="derivative".
+        In "amplitude" mode it has NO effect whatsoever — deliberately, not an
+        oversight. threshold_mature_length is a minimum-DURATION rule
+        calibrated for "derivative"'s fixed time-proportion window; in
+        "amplitude" the window's duration is already a direct physical
+        consequence of mature_amplitude_fraction (how long z stays within that
+        fraction of the cycle's amplitude), so a narrow-but-well-centred window
+        is valid on its own terms, not a candidate to discard for being short.
+        Reusing a duration floor tuned for the other method was observed
+        (20160030, research/adaptive-thresholds branch) to discard a
+        well-centred amplitude window for being ~1h short of a
+        threshold_mature_length value tuned for "derivative". No replacement
+        minimum-duration safeguard (not even a small technical floor) has been
+        introduced for "amplitude" — this is intentional, to evaluate the
+        method "pure" first; revisit only if calibration surfaces spurious,
+        very short amplitude windows. The neighbour-confirmation invariant
+        below (mature must be bounded by intensification/decay) is unrelated
+        to threshold_mature_length and still applies in both modes.
 
     Returns:
         pd.DataFrame: Updated DataFrame with 'mature' stages marked in the
@@ -100,6 +233,15 @@ def find_mature_stage(df, **args_periods):
     threshold_mature_distance = args_periods['threshold_mature_distance']
     threshold_mature_length = args_periods['threshold_mature_length']
     length_scale = args_periods.get('length_scale', 'global')
+    mature_method = args_periods.get('mature_method', 'derivative')
+    mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction', 0.90)
+
+    if mature_method not in ('derivative', 'amplitude'):
+        raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {mature_method!r}.")
+    if mature_method == 'amplitude' and not (0 < mature_amplitude_fraction <= 1):
+        raise ValueError(
+            f"mature_amplitude_fraction must be in (0, 1], got {mature_amplitude_fraction!r}."
+        )
 
     z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
@@ -121,30 +263,52 @@ def find_mature_stage(df, **args_periods):
         previous_z_peak = previous_z_peak[-1]
         next_z_peak = next_z_peak[0]
 
+        if mature_method == 'amplitude':
+            mature_start, mature_end = _amplitude_mature_bounds(
+                df, previous_z_peak, z_valley, next_z_peak, mature_amplitude_fraction)
+        else:
+            # Calculate the distances between z valley and the previous/next dz valleys
+            distance_to_previous_z_peak = z_valley - previous_z_peak
+            distance_to_next_z_peak = next_z_peak - z_valley
 
-        # Calculate the distances between z valley and the previous/next dz valleys
-        distance_to_previous_z_peak = z_valley - previous_z_peak
-        distance_to_next_z_peak = next_z_peak - z_valley
+            # Calculate the mature stage start and end
+            mature_distance_previous = distance_to_previous_z_peak * threshold_mature_distance
+            mature_distance_next = distance_to_next_z_peak * threshold_mature_distance
 
-        # Calculate the mature stage start and end 
-        mature_distance_previous = distance_to_previous_z_peak * threshold_mature_distance
-        mature_distance_next = distance_to_next_z_peak * threshold_mature_distance
+            mature_start = z_valley - mature_distance_previous
+            mature_end = z_valley + mature_distance_next
 
-        mature_start = z_valley - mature_distance_previous
-        mature_end = z_valley + mature_distance_next
-
-        # Mature stage needs to be at least 3% of the length_scale
-        # ('global': whole series; 'local': this valley's own previous_z_peak ->
-        # next_z_peak span, i.e. the same pair used above to size the window).
         mature_indexes = df.loc[mature_start:mature_end].index
 
         if len(mature_indexes) == 0:
             continue
 
-        mature_length_scale = (next_z_peak - previous_z_peak) if length_scale == 'local' else series_length
-        if mature_indexes[-1] - mature_indexes[0] > threshold_mature_length * mature_length_scale:
-            # Fill the period between mature_start and mature_end with 'mature'
+        if mature_method == 'amplitude':
+            # threshold_mature_length is a minimum-DURATION rule that was
+            # calibrated for "derivative"'s time-proportion window. It does
+            # not apply here: in "amplitude", the window's extent is already
+            # a direct physical consequence of mature_amplitude_fraction (how
+            # long z stays within that fraction of the cycle's amplitude), so
+            # a narrow-but-well-centred window is a valid result on its own
+            # merits, not something to discard for being short. Applying a
+            # duration floor calibrated for a different window-sizing method
+            # was observed (20160030, research/adaptive-thresholds branch) to
+            # discard a well-centred amplitude window for being ~1h too short
+            # under threshold_mature_length values tuned for "derivative".
+            # Deliberately no replacement minimum here (not even a small
+            # technical floor) -- see the mature_method note in
+            # determine_periods.get_periods for why, and revisit only if
+            # calibration surfaces spurious very-short amplitude windows.
             df.loc[mature_start:mature_end, 'periods'] = 'mature'
+        else:
+            # Mature stage needs to be at least 3% of the length_scale
+            # ('global': whole series; 'local': this valley's own
+            # previous_z_peak -> next_z_peak span, i.e. the same pair used
+            # above to size the window).
+            mature_length_scale = (next_z_peak - previous_z_peak) if length_scale == 'local' else series_length
+            if mature_indexes[-1] - mature_indexes[0] > threshold_mature_length * mature_length_scale:
+                # Fill the period between mature_start and mature_end with 'mature'
+                df.loc[mature_start:mature_end, 'periods'] = 'mature'
 
     # Check if all mature stages are preceded by an intensification and followed by decay.
     #
