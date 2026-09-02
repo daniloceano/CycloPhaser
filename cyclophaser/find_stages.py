@@ -499,7 +499,7 @@ def find_decay_period(df, **args_periods):
 
     return df
 
-def find_residual_period(df):
+def find_residual_period(df, **args_periods):
     """
     Identifies and fills the 'residual' period in the cyclone life cycle stages where applicable.
 
@@ -510,13 +510,87 @@ def find_residual_period(df):
     should be applied, particularly after mature and intensification stages if no subsequent
     decay or mature stages are detected.
 
+    'decay_tail_amplitude_fraction' note (opt-in, default None: no effect)
+    ------------------------------------------------------------------------
+    The catch-all rule that fills the NaN tail after the last 'decay' block with
+    'residual' (below) can be triggered by an artifact rather than a genuine
+    re-intensification: on a single-cycle series, ``find_peaks_valleys``'
+    prominence filter computes peaks and valleys as two SEPARATE populations,
+    each normalised by its own maximum. The largest interior PEAK therefore
+    always scores a relative prominence of 1.0 BY CONSTRUCTION (it is the max
+    of its own population) and survives ``prominence_relative`` filtering no
+    matter how small its prominence is in absolute terms — while the VALLEY of
+    that same ripple, normalised against the population containing the
+    cycle's genuine, large main valley, is correctly rejected as
+    insignificant. The result is an "orphan" interior peak with no
+    surviving valley after it. ``find_decay_period`` marks decay only up to
+    the next surviving z_peak, so this orphan peak truncates an otherwise
+    continuous decay right there, and everything after it becomes a NaN tail
+    that the catch-all rule below then labels 'residual' — even though
+    nothing about the vorticity itself indicates a genuine re-intensification.
+    Observed concretely on 20170409 (research/adaptive-thresholds branch): the
+    catch-all declared the cyclone 'residual' with 89.5% of its peak intensity
+    still present, contradicting the published decay definition ("the decrease
+    in vorticity after the mature phase until the system dissipates").
+
+    When ``decay_tail_amplitude_fraction`` is not None, this function checks —
+    immediately before the catch-all rule, and ONLY when that NaN tail
+    directly follows an existing 'decay' block — whether the tail contains a
+    genuine re-deepening: the largest drop below the tail's running-maximum z
+    (i.e. the deepest dip below any level already reached while walking
+    forward through the tail), as a FRACTION OF THE CYCLE'S OWN
+    peak-to-valley AMPLITUDE (``z.max() - z.min()`` over the whole series —
+    same non-zero-floor reasoning as ``prominence_relative`` in
+    ``find_peaks_valleys`` and ``mature_amplitude_fraction`` in
+    ``_amplitude_mature_bounds``: an absolute threshold would not be
+    meaningful across cyclones of different intensity). If that drop is
+    SMALLER than ``decay_tail_amplitude_fraction`` (i.e. the tail is a flat
+    plateau or a ripple, not a real re-deepening), the tail is labelled
+    'decay' — extending the existing decay block to the end of that run —
+    instead of being left for the catch-all to mark 'residual'. If the drop
+    is at or above the fraction, nothing changes here and the catch-all rule
+    still applies exactly as before.
+
+    This only ever ADDS 'decay' to already-NaN timesteps; it never removes or
+    relabels any other phase, and it does not touch ``z_peaks_valleys`` or
+    any other extrema, so it cannot alter the mature window computed by
+    ``find_mature_stage`` (which has already run by the time this function is
+    called — see the fixed pipeline order in ``get_periods``). It also never
+    fires when the tail follows only a 'mature' block with no 'decay' at all
+    (the "else 'mature' in unique_phases" branch below): the mechanism is
+    specifically about a decay run truncated by an orphan peak, so there must
+    be an existing decay block to extend. A validated calibration
+    (research/adaptive-thresholds branch, 51-track calibration set) found
+    ``decay_tail_amplitude_fraction=0.05`` sits in the middle of a confirmed
+    safe window (0.0356, 0.0651]: correctly converts 20170409, 20150561,
+    20160030, 20180759, 20180654, 20203373, 20207822 from residual-tailed to
+    fully decayed, while leaving 20180628, 20190325, 20191014 (genuine
+    re-intensifications) — and every other one of the 51 tracks — untouched.
+
     Args:
-        df (pd.DataFrame): DataFrame containing vorticity data with a 'periods' column.
+        df (pd.DataFrame): DataFrame containing vorticity data with a 'periods'
+            column and a 'z' column (smoothed vorticity).
+        **args_periods: Variable length argument list containing period-specific
+            thresholds, including:
+            - 'decay_tail_amplitude_fraction' (float, optional): Fraction (0, 1]
+              of the cycle's peak-to-valley amplitude. See the note above.
+              Default None disables this check entirely, reproducing the exact
+              behaviour of all versions prior to this option.
 
     Returns:
         pd.DataFrame: Updated DataFrame with 'residual' stages marked in the 'periods'
         column where applicable.
+
+    Raises:
+        ValueError: If 'decay_tail_amplitude_fraction' is not None and not in (0, 1].
     """
+    decay_tail_amplitude_fraction = args_periods.get('decay_tail_amplitude_fraction', None)
+    if decay_tail_amplitude_fraction is not None and not (0 < decay_tail_amplitude_fraction <= 1):
+        raise ValueError(
+            "decay_tail_amplitude_fraction must be None or in (0, 1], "
+            f"got {decay_tail_amplitude_fraction!r}."
+        )
+
     unique_phases = [item for item in df['periods'].unique() if pd.notnull(item)]
     num_unique_phases = len(unique_phases)
 
@@ -588,6 +662,18 @@ def find_residual_period(df):
         # from which to extend residual — skip to avoid NameError on last_decay_index.
         if 'decay' in unique_phases:
             last_decay_index = df[df['periods'] == 'decay'].index[-1]
+
+            # decay_tail_amplitude_fraction (opt-in, see docstring above): if the NaN
+            # tail right after this decay block is not a genuine re-deepening, extend
+            # decay over it instead of letting the catch-all below mark it residual.
+            if decay_tail_amplitude_fraction is not None:
+                tail = df.loc[last_decay_index + dt:]
+                if len(tail) > 0 and tail['periods'].isna().all():
+                    tail_z = df.loc[last_decay_index:, 'z']
+                    drawdown = (tail_z.cummax() - tail_z).max()
+                    cycle_amplitude = df['z'].max() - df['z'].min()
+                    if drawdown < decay_tail_amplitude_fraction * cycle_amplitude:
+                        df.loc[last_decay_index + dt:, 'periods'] = 'decay'
         elif 'mature' in unique_phases:
             last_decay_index = df[df['periods'] == 'mature'].index[-1]
         else:

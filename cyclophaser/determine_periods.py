@@ -561,7 +561,8 @@ def get_periods(vorticity,
                 distance: int = None,
                 length_scale: str = "global",
                 mature_method: str = "derivative",
-                mature_amplitude_fraction: float = 0.90) -> pd.DataFrame:
+                mature_amplitude_fraction: float = 0.90,
+                decay_tail_amplitude_fraction: float = None) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -582,6 +583,28 @@ def get_periods(vorticity,
     overwrite timesteps that ``find_intensification_period`` (step 1) had already
     marked, because both functions scan the same z-peaks/valleys and their
     detected intervals can overlap.
+
+    decay_tail_amplitude_fraction note
+    ------------------------------------
+    ``find_residual_period`` (step 4) has a catch-all rule that labels the NaN
+    tail after the last 'decay' block 'residual'. On a single-cycle series this
+    can be triggered by an "orphan" interior z_peak — a peak with no surviving
+    z_valley after it, which can pass ``prominence_relative`` filtering purely
+    because relative prominence is computed separately for peaks and valleys
+    (the largest interior peak always scores 1.0 by construction) — which
+    truncates ``find_decay_period``'s decay block early, well before the
+    cyclone has actually dissipated. With ``decay_tail_amplitude_fraction`` set
+    (opt-in; default None reproduces prior behaviour exactly),
+    ``find_residual_period`` checks whether that NaN tail contains a genuine
+    re-deepening — a drop below the tail's running-maximum z larger than this
+    fraction of the cycle's own peak-to-valley amplitude — and, if not, extends
+    'decay' over the tail instead of leaving it for the catch-all to mark
+    'residual'. It only ever adds 'decay' to already-NaN timesteps and never
+    touches ``z_peaks_valleys`` or any other extrema, so it cannot affect the
+    mature window (already computed by step 3 at this point in the pipeline).
+    See ``find_stages.find_residual_period`` for the full mechanism, rationale,
+    and the validated calibration (0.05, confirmed safe over (0.0356, 0.0651]
+    on the research/adaptive-thresholds 51-track calibration set).
 
     Threshold calibration note
     ---------------------------
@@ -712,13 +735,19 @@ def get_periods(vorticity,
             side's peak-to-valley amplitude a timestep's z must still reach to
             count as mature. Only used when ``mature_method="amplitude"``.
             Default 0.90.
+        decay_tail_amplitude_fraction (float, optional): Fraction (0, 1] of the
+            cycle's peak-to-valley amplitude. See the "decay_tail_amplitude_fraction
+            note" above and ``find_stages.find_residual_period`` for the full
+            mechanism. Default None disables this check, reproducing the exact
+            behaviour of all versions prior to this option.
 
     Returns:
         pd.DataFrame: DataFrame containing detected periods and associated information.
 
     Raises:
-        ValueError: If ``length_scale`` is not "global" or "local", or if
-            ``mature_method`` is not "derivative" or "amplitude".
+        ValueError: If ``length_scale`` is not "global" or "local", if
+            ``mature_method`` is not "derivative" or "amplitude", or if
+            ``decay_tail_amplitude_fraction`` is not None and not in (0, 1].
     """
     if length_scale not in ("global", "local"):
         raise ValueError(f"length_scale must be 'global' or 'local', got {length_scale!r}.")
@@ -763,13 +792,14 @@ def get_periods(vorticity,
         "length_scale": length_scale,
         "mature_method": mature_method,
         "mature_amplitude_fraction": mature_amplitude_fraction,
+        "decay_tail_amplitude_fraction": decay_tail_amplitude_fraction,
     }
 
     # Detect different stages of cyclone lifecycle
     df = find_intensification_period(df, **args_periods)
     df = find_decay_period(df, **args_periods)
     df = find_mature_stage(df, **args_periods)
-    df = find_residual_period(df)
+    df = find_residual_period(df, **args_periods)
 
     # Fill gaps between consecutive periods and clean up too short periods
     df = post_process_periods(df)
@@ -843,7 +873,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       distance: int = None,
                       length_scale: str = "global",
                       mature_method: str = "derivative",
-                      mature_amplitude_fraction: float = 0.90) -> pd.DataFrame:
+                      mature_amplitude_fraction: float = 0.90,
+                      decay_tail_amplitude_fraction: float = None) -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -935,6 +966,16 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             count as mature. Only used when ``mature_method="amplitude"``.
             Default 0.90.
 
+        decay_tail_amplitude_fraction (float, optional): Fraction (0, 1] of the
+            cycle's peak-to-valley amplitude that the NaN tail after the last
+            decay block must dip below (relative to its own running maximum)
+            to be treated as a genuine re-intensification rather than extended
+            decay. See ``get_periods`` for the full rationale (an "orphan"
+            z_peak that can truncate decay early on single-cycle series) and
+            ``find_stages.find_residual_period`` for the precise mechanism.
+            Default None disables this check, reproducing the exact behaviour
+            of all versions prior to this option.
+
     Returns:
         pd.DataFrame: DataFrame containing detected cyclone life cycle phases and associated metadata.
 
@@ -1021,6 +1062,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         length_scale=length_scale,
         mature_method=mature_method,
         mature_amplitude_fraction=mature_amplitude_fraction,
+        decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
     )
 
     return df
