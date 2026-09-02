@@ -83,9 +83,92 @@ mature/decay neighbour-confirmation comment in `find_mature_stage`,
 `cyclophaser/find_stages.py`, for the related physical-confirmation invariant this
 interacts with).
 
-**Not yet done:** wiring `length_scale` into `tools/calibration_app/app.py` (defaults
-dict, YAML import/export map, UI control, `determine_periods` call) — left for a
-separate pass since it touches several non-trivial locations in that app.
+**Update 2026-09:** `length_scale` (and `mature_method`, see item 3b below) are now
+wired into `tools/calibration_app/app.py` (defaults dict, YAML import/export map, UI
+controls, `determine_periods` call).
+
+---
+
+## 3b. Amplitude-based mature-stage detection — **implemented (opt-in), 2026-09**
+
+**Status: done as an opt-in on `research/adaptive-thresholds`.** The mature stage was
+previously located only one way (now `mature_method="derivative"`, still the
+default): a fixed proportion (`threshold_mature_distance`) of the *time* distance
+from the vorticity minimum (z_valley) to each neighbouring z_peak. This locates the
+window using extrema of the smoothed *derivative*, which can lag the true z minimum
+by a few timesteps and displace the mature window forward of where the cyclone was
+actually most intense — observed concretely on case 20160030, where "derivative"
+placed the mature window's centre ~3h after the smoothed-z minimum.
+
+`mature_method="amplitude"` (new, opt-in; `find_stages._amplitude_mature_bounds`)
+instead defines the mature window as the contiguous stretch of z around the z_valley
+that stays within `mature_amplitude_fraction` (default 0.90) of the cycle's own
+peak-to-valley amplitude, evaluated independently on the intensification side and the
+decay side. Amplitude is always measured as a peak-to-valley *drop*
+(`z[side_peak] - z[z_valley]`), never the extremum's absolute value — vorticity has a
+non-zero floor, so an absolute fraction would not be physically meaningful (same
+reasoning as `prominence_relative` in `find_peaks_valleys`). Anchoring on z's own
+value rather than on the derivative removes the phase lag: on 20160030, with the
+author's calibrated thresholds, this took the mature window's centre offset from the
+smoothed z minimum from +3h ("derivative") down to +30min ("amplitude").
+
+`threshold_mature_length` and `threshold_mature_distance` are **mutually exclusive**
+with `mature_method="amplitude"` and have no effect in that mode. Both are
+minimum-duration/window-sizing rules calibrated for "derivative"'s
+fixed-time-proportion window; reusing `threshold_mature_length` as a floor on the
+amplitude window was tried first and found to discard well-centred amplitude windows
+for being narrow (20160030's ~19h window fell ~1h15 short of a `threshold_mature_length`
+value tuned for "derivative", and was discarded entirely rather than kept). Narrowness
+there is a physically meaningful outcome of `mature_amplitude_fraction`, not a defect.
+No replacement minimum-duration safeguard has been introduced for "amplitude" —
+deliberately, to evaluate the method unconstrained first (see below). The mature/decay
+neighbour-confirmation invariant (`find_mature_stage` / `find_residual_period`,
+see item 3 above) is unrelated to `threshold_mature_length` and still applies
+identically in both modes.
+
+### Empirical calibration on the 51-track set (`tests/calibration_data/`)
+
+Best configuration found by the author so far:
+
+```
+mature_method: amplitude
+mature_amplitude_fraction: 0.95
+prominence_relative: 0.3
+distance: 3
+length_scale: local
+use_smoothing: 31
+cutoff_high: 24
+replace_endpoints_with_lowpass: 0
+```
+
+Result: **7.8% bad cases (4/51)**, down from **17.6% (9/51)** with the previous
+`mature_method="derivative"` calibration (`length_scale=local`,
+`threshold_mature_distance=0.18`, `threshold_mature_length=0.15`, no prominence
+filtering — see the YAML exported 2026-07-16 for that baseline).
+
+**Finding — signal-significance criteria outperform duration thresholds here:**
+raising `prominence_relative` from 0.2 to 0.3 alone resolved 5 of the 9 bad cases.
+Separately adjusting `threshold_intensification_length` (a *duration* threshold) was
+tried and produced no improvement. This suggests that, at least for this track set,
+criteria based on how significant a feature is (prominence, amplitude) generalize
+better than criteria based on how long it lasts (duration fractions) — consistent
+with why `mature_method="amplitude"` itself outperforms `"derivative"` on the
+displacement problem it was built to fix.
+
+**Remaining bad cases (4/51) and diagnoses:**
+
+- **20206498** — a second mature phase (in a two-cycle track) is not detected.
+- **20170409**, **20191014** — small spurious "intensification" bumps during an
+  otherwise-continuous decay cause much of that decay to be reclassified as
+  `residual` instead.
+- **20150561** — a plateau during decay is misread as a renewed intensification
+  (same failure family as 20170409/20191014 above).
+
+**Note on ceiling, not failure:** part of these remaining cases appears to originate
+upstream, at the TRACK stage (spurious merging of two distinct cyclones into one
+track), not in CycloPhaser's phase detection itself. Those are a ceiling on what
+threshold/method tuning inside CycloPhaser can fix, not a defect of the method — worth
+keeping in mind before chasing further threshold changes on this specific subset.
 
 ---
 
