@@ -26,7 +26,7 @@ rejected and the whole tail collapses into a single 'residual' block. Under
 recovered.
 
 Case (a) -- long intensification, short decay, SINGLE cycle -- is NOT fixed by
-"local", and is NOT a target for correction at all
+"local", because "local" cannot differ from "global" there at all
 --------------------------------------------------------------------------------
 This was the original motivating scenario for "local" mode (see the
 research/adaptive-thresholds branch diagnostic history), but investigating it
@@ -41,26 +41,45 @@ single-cycle series, by construction -- "local" mode can only diverge from
 It is fundamentally a fix for problem (b)-shaped scenarios (heterogeneity
 *between* cycles), not for a disproportionate decay *within* a single cycle.
 
-Separately, and decisively: the author confirmed against the real cyclone
-track database (TRACK/Gramcianinov) that this input shape -- a decay this
-abrupt (D=14) immediately after an intensification this long (It=280) -- does
-not occur in real cyclones. Real declines are always at least moderately
-gradual; real asymmetric cyclones (decay shorter than intensification, or the
-reverse) are already detected correctly by the existing pipeline. So this
-case is not a data pattern the method needs to support, and the absent
-'mature' here is not a failure mode being tracked for a future fix -- with or
-without "local" mode.
+Separately: the author confirmed against the real cyclone track database
+(TRACK/Gramcianinov) that this input shape -- a decay this abrupt (D=14)
+immediately after an intensification this long (It=280) -- does not occur in
+real cyclones. Real declines are always at least moderately gradual; real
+asymmetric cyclones (decay shorter than intensification, or the reverse) are
+already detected correctly by the existing pipeline. So case (a) remains a
+synthetic stress probe for `_local_cycle_scale`'s mathematics, not a data
+pattern the method needs to support.
 
-This test is therefore a SENTINEL, not a target-behaviour check: it locks in
-that 'global' and 'local' currently agree exactly (mature absent, identical
-period sequence) on this non-physical input. If it starts failing -- either
-mode starts detecting 'mature', or the two modes diverge -- that signals an
-unrelated change to `_local_cycle_scale` (find_stages.py) or to the
-mature/decay neighbour-confirmation invariant (see the comment on that check
-in `find_mature_stage`, find_stages.py: mature is only ever confirmed once a
-'decay' is observed after it -- a physical requirement, not an incidental
-implementation detail) worth investigating on its own terms. It does not mean
-this test's assertions should simply be flipped to expect 'mature'.
+This test is therefore a SENTINEL for the global == local invariant, not a
+target-behaviour check on the phases themselves. If 'global' and 'local' ever
+diverge on this single-cycle input, `_local_cycle_scale`'s single-cycle
+fallback changed and needs investigation.
+
+UPDATE 2026-09 (branch research/boundary-artifacts) -- the 'mature' assertion
+was inverted, with cause
+--------------------------------------------------------------------------------
+Until then this sentinel also locked in that 'mature' is ABSENT in both modes,
+and read that absence as physical: the decay being too abrupt for the
+mature/decay neighbour-confirmation invariant in `find_stages.find_mature_stage`
+to confirm the mature window. That reading was wrong.
+
+The absence was an ARTEFACT of ``replace_endpoints_with_lowpass``, which
+overwrote the last 5 % of the series with a lowpass estimate. Here n=301, so
+5 % is **15 timesteps** -- longer than the entire **14-timestep** decay segment.
+The endpoint splice consumed the whole decay, and mature was then discarded for
+lack of a successor 'decay' that was present in the original signal all along.
+With ``replace_endpoints_with_lowpass=0`` (the new default; the parameter is
+deprecated) the decay survives and 'mature' is correctly detected. Attribution
+is unambiguous -- ``boundary_padding="zero"`` with
+``replace_endpoints_with_lowpass=0`` already produces the full
+incipient/intensification/mature/decay sequence, so ``boundary_padding`` is not
+what changed this.
+
+Detecting 'mature' here is NOT a claim that the D=14-after-It=280 shape is
+physical. It only means nothing in the pipeline is destroying its decay before
+the detection logic can see it. The mature/decay neighbour-confirmation
+invariant itself is unchanged, and the global == local invariant held in all
+four (boundary_padding x replace_endpoints_with_lowpass) combinations tested.
 """
 
 import warnings
@@ -81,6 +100,10 @@ def _run(series, length_scale):
 
 
 # ── Case (a): single-cycle long-intensification / short-decay -- NON-PHYSICAL ──
+# NOTE: the comment below predates the 2026-09 finding that
+# replace_endpoints_with_lowpass (5 % of n=301 = 15 steps) was consuming this
+# case's entire 14-step decay segment. 'mature' IS now detected here; see the
+# UPDATE block in the module docstring and in the test's own docstring.
 # Ic(3) It(280) M(4,plateau) D(14) -> 301 steps. Chosen (in an earlier diagnostic
 # pass) to be structurally "clean": exactly 2 z_peaks / 2 z_valleys under the
 # real default smoothing pipeline (no spurious extrema from the long-series
@@ -102,43 +125,65 @@ _SEG_CASE_A = [
 _series_case_a = make_lifecycle_series(_SEG_CASE_A, noise_frac=0.0)
 
 
-def test_case_a_single_cycle_local_does_not_fix_and_matches_global():
-    """SENTINEL, not a target-behaviour check -- see module docstring.
+def test_case_a_single_cycle_local_matches_global():
+    """SENTINEL for `_local_cycle_scale`'s single-cycle fallback -- see module
+    docstring.
 
-    This input (single life cycle, decay disproportionately short relative to
-    a very long intensification) is a non-physical shape that does not occur
-    in real cyclone tracks (confirmed against TRACK/Gramcianinov), so the
-    absent 'mature' here is not a bug and not something either length_scale
-    mode is expected to fix. 'local' cannot fix it in principle: with only one
-    life cycle in the series, `_local_cycle_scale` has no other extremum to
-    anchor to and falls back to the series boundary on both sides, so it
-    numerically equals the 'global' series length -- local and global are
-    mathematically forced to agree here.
+    What this test guards, and has always guarded, is that 'local' and 'global'
+    AGREE on a single-cycle series. 'local' cannot behave differently here in
+    principle: with only one life cycle in the series, `_local_cycle_scale` has
+    no other extremum to anchor to and falls back to the series boundary on both
+    sides, so it numerically equals the 'global' series length. If the two ever
+    diverge on this input, `_local_cycle_scale`'s single-cycle fallback changed
+    and needs investigation.
 
-    What this test guards is that mature stays absent (in both modes) *because
-    decay never gets confirmed*, per the intentional, physically-motivated
-    'decay must literally follow mature' check documented in
-    find_mature_stage (find_stages.py) -- not because of some accidental
-    global/local disagreement. If this test starts failing -- either mode
-    starts detecting 'mature', or 'global' and 'local' diverge on this
-    input -- treat it as a signal that `_local_cycle_scale`'s single-cycle
-    fallback or the mature/decay neighbour check changed, and go find out why.
-    Do not "fix" this test by just flipping the assertions to expect mature:
-    that would mean the method started accepting a decay shape that real
-    cyclones don't exhibit.
+    HISTORY -- why the 'mature' assertion was inverted (2026-09, branch
+    research/boundary-artifacts)
+    ---------------------------------------------------------------------------
+    This sentinel originally asserted that 'mature' is ABSENT in both modes, and
+    read that absence as a physical property: the D=14 decay is so abrupt after
+    an It=280 intensification that the 'decay must literally follow mature'
+    invariant in `find_stages.find_mature_stage` never confirms the mature
+    window. The docstring warned against simply flipping the assertion.
+
+    A later investigation showed the absence was an ARTEFACT of
+    ``replace_endpoints_with_lowpass``, not a physical property. That option
+    overwrote the last 5 % of the series with a lowpass estimate; for this case
+    n=301, so 5 % is **15 timesteps** -- longer than the entire **14-timestep**
+    decay segment. The endpoint splice therefore consumed the whole decay, and
+    the mature window was then discarded by the mature/decay neighbour invariant
+    for lack of a successor 'decay' that was present in the original signal all
+    along.
+
+    With ``replace_endpoints_with_lowpass=0`` (the new default; the parameter is
+    now deprecated) the decay survives and 'mature' is correctly detected.
+    Attribution is unambiguous: the change is driven by that option alone, not by
+    ``boundary_padding`` -- ``boundary_padding="zero"`` with
+    ``replace_endpoints_with_lowpass=0`` already yields the full
+    incipient/intensification/mature/decay sequence.
+
+    So the 'mature' assertion is inverted here deliberately and with cause. The
+    global == local invariant below is unchanged and still locked: it held in all
+    four (boundary_padding x replace_endpoints_with_lowpass) combinations tested,
+    and it remains the point of this sentinel.
+
+    NOTE on the module docstring's framing: the D=14-after-It=280 shape is still
+    a synthetic stress probe that does not occur in real TRACK/Gramcianinov
+    cyclones. Detecting 'mature' on it is not a claim that the shape is physical
+    -- only that nothing in the pipeline is now destroying its decay before the
+    detection logic can see it.
     """
     d_global = _run(_series_case_a, "global")
     d_local = _run(_series_case_a, "local")
 
-    assert not any(k.split()[0] == "mature" for k in d_global), (
-        f"'global' unexpectedly detected mature on a non-physical decay shape: "
-        f"{list(d_global.keys())}"
+    assert any(k.split()[0] == "mature" for k in d_global), (
+        "'global' no longer detects mature on case A. Since "
+        "replace_endpoints_with_lowpass went to 0 this segment's decay survives "
+        "and mature should be confirmed; if it is absent again, something is "
+        f"consuming the 14-step decay segment: {list(d_global.keys())}"
     )
-    assert not any(k.split()[0] == "mature" for k in d_local), (
-        f"'local' unexpectedly detected mature -- local-scale normalization "
-        f"cannot distinguish this from 'global' on a single-cycle series (see "
-        f"docstring); if this now passes, _local_cycle_scale's single-cycle "
-        f"fallback changed and needs investigation: {list(d_local.keys())}"
+    assert any(k.split()[0] == "mature" for k in d_local), (
+        f"'local' no longer detects mature on case A: {list(d_local.keys())}"
     )
     assert list(d_global.keys()) == list(d_local.keys()), (
         "global and local diverged on a single-cycle series, which should be "

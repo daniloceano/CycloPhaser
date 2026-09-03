@@ -30,8 +30,10 @@
 #
 # What this module locks in
 # -------------------------
-#   1. ZERO REGRESSION at the default: "zero" is byte-identical to omitting the
-#      parameter entirely, at the filter level and end-to-end.
+#   1. The DEFAULT IS "reflect": omitting the parameter is byte-identical to
+#      passing "reflect", at the filter level and end-to-end -- and "zero" is
+#      still reachable explicitly and still byte-identical to the pre-fix
+#      scipy convolve(mode="same") path.
 #   2. Output length is preserved in every mode, for odd and even kernels and
 #      for degenerate series lengths.
 #   3. The pad widths reproduce scipy's own "same" alignment exactly, so the
@@ -165,26 +167,43 @@ def test_zero_mode_is_byte_identical_to_scipy_same(n):
 
 
 @pytest.mark.parametrize("n", [30, 66, 113, 259])
-def test_default_argument_equals_explicit_zero(n):
-    """Omitting the parameter must equal passing 'zero' explicitly."""
+def test_default_argument_equals_explicit_reflect(n):
+    """Omitting the parameter must equal passing 'reflect' explicitly."""
     rng = np.random.default_rng(n + 1)
     x = rng.normal(-5e-5, 1e-5, n)
     window = n // 2
     np.testing.assert_array_equal(
         np.asarray(lanczos_bandpass_filter(x, window, 1 / 168, 1 / 24)),
-        np.asarray(lanczos_bandpass_filter(x, window, 1 / 168, 1 / 24, "zero")),
+        np.asarray(lanczos_bandpass_filter(x, window, 1 / 168, 1 / 24, "reflect")),
     )
     np.testing.assert_array_equal(
         np.asarray(lanczos_filter(x, window, 24.0)),
-        np.asarray(lanczos_filter(x, window, 24.0, "zero")),
+        np.asarray(lanczos_filter(x, window, 24.0, "reflect")),
+    )
+
+
+@pytest.mark.parametrize("n", [30, 66, 113, 259])
+def test_default_differs_from_explicit_zero(n):
+    """...and the default is genuinely no longer 'zero'.
+
+    Guards against a silent revert: if the default were flipped back, the test
+    above would still pass only if "reflect" and "zero" happened to agree, which
+    this asserts they do not.
+    """
+    rng = np.random.default_rng(n + 1)
+    x = rng.normal(-5e-5, 1e-5, n)
+    window = n // 2
+    assert not np.array_equal(
+        np.asarray(lanczos_bandpass_filter(x, window, 1 / 168, 1 / 24)),
+        np.asarray(lanczos_bandpass_filter(x, window, 1 / 168, 1 / 24, "zero")),
     )
 
 
 @pytest.mark.parametrize("filter_params", [_FILTER_PARAMS_INERT, _FILTER_PARAMS_ACTIVE],
                          ids=["inert", "active"])
 @pytest.mark.parametrize("cyclone_id", _ALL_TRACK_IDS)
-def test_process_vorticity_default_is_byte_identical(cyclone_id, filter_params):
-    """process_vorticity: default vs boundary_padding='zero', every array.
+def test_process_vorticity_default_is_reflect(cyclone_id, filter_params):
+    """process_vorticity: omitting the parameter == boundary_padding='reflect'.
 
     Checked on both the inert path (``use_filter=1``, a single-tap kernel) and
     the real one (``use_filter='auto'``), because only the latter runs an actual
@@ -196,7 +215,7 @@ def test_process_vorticity_default_is_byte_identical(cyclone_id, filter_params):
         warnings.simplefilter("ignore")
         base = process_vorticity(zeta_df.copy(), **filter_params)
         explicit = process_vorticity(
-            zeta_df.copy(), boundary_padding="zero", **filter_params
+            zeta_df.copy(), boundary_padding="reflect", **filter_params
         )
     for var in base.data_vars:
         np.testing.assert_array_equal(
@@ -205,29 +224,76 @@ def test_process_vorticity_default_is_byte_identical(cyclone_id, filter_params):
 
 
 @pytest.mark.parametrize("cyclone_id", _ALL_TRACK_IDS)
-def test_determine_periods_default_is_byte_identical(cyclone_id):
-    """End-to-end phases: default vs boundary_padding='zero'."""
+def test_process_vorticity_explicit_zero_still_reproduces_scipy_same(cyclone_id):
+    """The "zero" mode stays reachable and stays exactly the pre-fix path.
+
+    This is the coverage the old "default == zero" test used to provide: whatever
+    the default is, passing "zero" must still reproduce
+    ``scipy.signal.convolve(..., mode="same")`` byte-for-byte, so results from
+    before the default changed remain reproducible.
+    """
+    series = _load_track(cyclone_id)
+    zeta_df = pd.DataFrame({"zeta": series.rename("zeta")})
+    kw = dict(_FILTER_PARAMS_ACTIVE)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        got = process_vorticity(zeta_df.copy(), boundary_padding="zero", **kw)
+    n = len(series)
+    weights = pass_weights_bandpass(n // 2, 1 / kw["cutoff_low"], 1 / kw["cutoff_high"])
+    expected = np.asarray(convolve(series.values.astype(float), weights, mode="same"))
+    np.testing.assert_allclose(
+        got.filtered_vorticity.values, expected, rtol=0, atol=1e-20,
+        err_msg=f"{cyclone_id}: explicit 'zero' no longer matches scipy 'same'",
+    )
+
+
+@pytest.mark.parametrize("cyclone_id", _ALL_TRACK_IDS)
+def test_determine_periods_default_is_reflect(cyclone_id):
+    """End-to-end phases: omitting the parameter == boundary_padding='reflect'."""
     series = _load_track(cyclone_id)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         base = determine_periods(series, **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS)
         explicit = determine_periods(
-            series, boundary_padding="zero", **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS
+            series, boundary_padding="reflect", **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS
         )
     pd.testing.assert_frame_equal(base, explicit)
 
 
-def test_package_defaults_unchanged_end_to_end():
-    """A bare determine_periods() call on the shipped example is unchanged by
-    the presence of the new parameter (guards the all-defaults path, including
-    replace_endpoints_with_lowpass=24, which the calibration above disables)."""
+def test_package_defaults_use_reflect_end_to_end():
+    """A bare determine_periods() call on the shipped example must equal the same
+    call with boundary_padding="reflect" spelled out -- i.e. the package default
+    really is reflect on the all-defaults path, not just in the signature."""
     track = pd.read_csv(example_file, parse_dates=[0], delimiter=";", index_col=[0])
     series = track["min_max_zeta_850"]
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         base = determine_periods(series, x=track.index)
-        explicit = determine_periods(series, x=track.index, boundary_padding="zero")
+        explicit = determine_periods(series, x=track.index, boundary_padding="reflect")
     pd.testing.assert_frame_equal(base, explicit)
+
+
+def test_pre_fix_behaviour_is_still_reachable_end_to_end():
+    """The two defaults that moved together must be recoverable together.
+
+    Passing boundary_padding="zero" AND replace_endpoints_with_lowpass=24
+    reproduces the pre-2.0.0-fix pipeline; this pins that escape hatch, and pins
+    that it actually differs from the new defaults (otherwise the test would be
+    vacuous).
+    """
+    track = pd.read_csv(example_file, parse_dates=[0], delimiter=";", index_col=[0])
+    series = track["min_max_zeta_850"]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        new = determine_periods(series, x=track.index)
+        old = determine_periods(
+            series, x=track.index,
+            boundary_padding="zero", replace_endpoints_with_lowpass=24,
+        )
+    assert not new["periods"].equals(old["periods"]), (
+        "new defaults and the pre-fix configuration produced identical phases; "
+        "one of the two default changes is not taking effect"
+    )
 
 
 # ── 2. Output length is preserved in every mode ──────────────────────────────
@@ -329,7 +395,9 @@ def test_reflect_changes_the_signal_only_where_expected():
     zeta_df = pd.DataFrame({"zeta": series.rename("zeta")})
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        a = process_vorticity(zeta_df.copy(), **_FILTER_PARAMS_ACTIVE)
+        a = process_vorticity(
+            zeta_df.copy(), boundary_padding="zero", **_FILTER_PARAMS_ACTIVE
+        )
         b = process_vorticity(
             zeta_df.copy(), boundary_padding="reflect", **_FILTER_PARAMS_ACTIVE
         )
