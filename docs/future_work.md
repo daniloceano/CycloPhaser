@@ -254,6 +254,134 @@ either):**
 
 ---
 
+## 3c. Lanczos boundary artifact + `use_filter=True` bug — **implemented, 2026-09-03**
+
+Two changes, on the `research/boundary-artifacts` branch, that together alter what
+the filtering stage actually does.
+
+### `boundary_padding` (opt-in, default `"zero"`)
+
+`lanczos_filter` / `lanczos_bandpass_filter` convolve via
+`scipy.signal.convolve(..., mode="same")`, which implicitly **zero-pads** the input
+beyond its own ends. Vorticity has a non-zero floor (order −5e-5), so those
+"missing" samples are a jump to zero, not a neutral continuation — and two
+properties of this configuration amplify the damage:
+
+- the kernel is about **half the series length** (`window_length_lanczo =
+  len(zeta)//2`; measured kernel/series ratio median **0.494** over the 51-track
+  set), so the contaminated zone is **~24 % of the series at each end (~48 % in
+  total)**;
+- the "bandpass" kernel **does not reject DC** at these window lengths
+  (`sum(weights)` median **0.629**, `|H(DC)|/|H|max` median **0.79**), so most of
+  the large mean vorticity passes through and is what gets removed at the edges.
+
+Result: a step between the boundary value and the interior worth a median **74 % of
+the cyclone's own peak-to-peak amplitude** (q25 0.40, q75 1.29), spread as a ramp
+carrying the sign of a spurious *deepening*. That ramp alone accounts for **≥ 80 %
+of the slope measured at t₀ in 51/51 tracks**.
+
+Measured with the filter active, normalised `|dz|` at the first/last sample (median
+over 51 tracks): `"zero"` **0.95/0.98** → `"reflect"` **0.42/0.35** → `"edge"`
+**0.50/0.38**. Raw-signal reference: **0.29**.
+
+The kernels are untouched — the fix is purely a boundary condition, and the pad
+widths (`M//2`, `M-1-M//2`) reproduce scipy's own `"same"` alignment exactly, so no
+time shift is introduced.
+
+### `use_filter=True` was silently disabling the filter (bug fix, behaviour change)
+
+`bool` is a subclass of `int` in Python, so the previous
+`window_length_lanczo = use_filter` read `True` as the integer **1**. A 1-tap
+Lanczos kernel is a scalar multiply (0.0714 for `cutoff_low=168`/`cutoff_high=24`),
+not a convolution.
+
+**Every parameter set previously calibrated with `use_filter=True` — including the
+0/51 calibration recorded in section 3b above — was calibrated on an effectively
+UNFILTERED signal.** That is what the calibration app's "Apply Lanczos filter"
+checkbox sent. `use_filter=True` now means `'auto'` and warns; `use_filter=1` still
+means a literal 1-tap window and reproduces the old behaviour byte-identically
+(pinned in `tests/test_decay_tail_amplitude_fraction.py` as a historical record).
+
+The section-3b calibration does **not** survive activating the filter: 5 of its 7
+`decay_tail_amplitude_fraction` CONVERT cases stop converting, and the set of
+changed tracks becomes a *different* set, not a smaller one.
+
+**Interaction between the two changes.** Activating the filter with
+`boundary_padding="reflect"` is *less* disruptive than with `"zero"` — measured
+against the section-3b calibration as baseline:
+
+| configuration | `r(t₀)` | `r(t_final)` | phase sequences changed |
+|---|---|---|---|
+| filter inert (window 1), `zero` — baseline | 0.581 | 0.428 | — |
+| filter active, `zero` | **0.949** | **0.981** | **15/51** |
+| filter active, `reflect` | **0.415** | **0.346** | **9/51** |
+
+With `"zero"`, switching the filter on makes the boundary *worse*; with `"reflect"`
+it improves on the baseline. The two corrections are complementary, not independent.
+
+### Author's validated calibration with the Lanczos filter ACTIVE — 0/51 bad cases
+
+```
+use_filter: true                      # == 'auto'; window = len(series)//2
+cutoff_low: 168
+cutoff_high: 18
+replace_endpoints_with_lowpass: 0
+use_smoothing: false
+use_smoothing_twice: false
+savgol_polynomial: 3
+boundary_padding: reflect
+prominence_relative: 0.3
+distance: 3
+mature_method: amplitude
+mature_amplitude_fraction: 0.95
+decay_tail_amplitude_fraction: 0.05
+length_scale: local
+threshold_mature_distance: 0.18
+threshold_mature_length: 0.15         # no effect under mature_method="amplitude"
+```
+
+All other thresholds at package defaults. **0 % bad cases (0/51)** by the author's
+visual evaluation in the calibration app.
+
+**Finding — with the Lanczos filter finally doing its job, the Savitzky-Golay
+smoothing of `z` could be switched off entirely** (`use_smoothing=false`,
+`use_smoothing_twice=false`) while keeping 0/51. This is consistent with the
+attribution measured under the old (unfiltered) configuration, where **100 % of the
+edge-artifact excess came from the Savgol passes on the derivative** — `r(t₀)` went
+0.465 (raw) → 0.372 (after Savgol on z) → 0.524 (+Savgol #1 on dz) → 0.581
+(+Savgol #2 on dz). Two smoothing stages were doing the same job, and the one that
+was actually hurting the boundary was the redundant one. `cutoff_high` moved
+18 h (from 24 h), which is the high-frequency rejection the Savgol was standing in
+for.
+
+**Caveat on "Savgol off" — it is off for `z`, not for the derivatives.**
+`use_smoothing=false` skips both Savgol passes on `z` (verified:
+`vorticity_smoothed2 == filtered_vorticity`), but `process_vorticity` then hits
+`if not window_length_savgol: window_length_savgol_derivatives = len//4|1` (or
+`len//2|1`), so the **derivatives are still smoothed twice, with an *auto* window**
+— 29–67 timesteps on this track set, i.e. *larger* than the explicit 31 used
+before. This is why `r(t₀)` under the new calibration measures **0.571**, close to
+the old 0.581, rather than dropping toward the 0.42 that `"reflect"` reaches with
+Savgol on `z` active. Worth knowing before concluding that derivative smoothing is
+out of the picture; it connects directly to item 4 below.
+
+**Structural notes on the new calibration (measured, for the record — not a
+contradiction of the 0/51 visual evaluation, which is the author's own criterion):**
+47/51 tracks get an `incipient` phase, 14/51 a `residual`, 0 unclassified
+timesteps, median mature duration 9 h, median `|mature centre − argmin(z)|` 1.0 h
+(unchanged). Three tracks resolve to fewer than three distinct phases —
+`20170760` (n=59) → `intensification → decay`, `20206498` (n=133) →
+`decay → intensification`, `20181046` (n=30) → `intensification` only. `20181046`
+is the shortest series in the set and the least resolvable by a
+`len(series)//2`-tap kernel; `20206498` is the two-cycle track already listed as a
+known open case in section 3b.
+
+**Presets.** This calibration and the section-3b one are the two concrete
+candidates for the named-preset plan described in section 3b — with the caveat
+that the section-3b set is only reproducible via `use_filter=1`.
+
+---
+
 ## 4. Replace / improve derivative smoothing
 
 The Savitzky-Golay filter has documented boundary artifacts that are most pronounced

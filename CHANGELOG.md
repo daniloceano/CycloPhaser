@@ -71,6 +71,17 @@ artifact and itself calls `lanczos_filter`, i.e. it replaces zero-padded bandpas
 endpoints with zero-padded lowpass endpoints. It is unchanged here and is a
 candidate for future deprecation.
 
+### Notes
+
+**New validated calibration with the Lanczos filter active.** With the two changes
+above in place, the author re-validated the 51-track calibration set and reached
+0/51 bad cases with `use_filter=true`, `cutoff_high=18`, `boundary_padding=reflect`
+and **Savitzky-Golay smoothing of `z` switched off entirely**
+(`use_smoothing=false`, `use_smoothing_twice=false`). See
+`docs/future_work.md` § 3c for the full parameter set, the measurements, and the
+caveat that `use_smoothing=false` disables Savgol on `z` but leaves the
+*derivative* smoothing running with an auto window.
+
 ---
 
 ## [2.0.0] - 2026-06-14
