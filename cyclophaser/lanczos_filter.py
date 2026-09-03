@@ -38,19 +38,23 @@ from scipy.signal import convolve
 #
 # ``boundary_padding`` selects the padding used instead:
 #
-#   "zero"    -- default; byte-for-byte the historical behaviour.
-#   "reflect" -- RECOMMENDED.  Pads with the reflection of the series about its
-#                edge samples.  Measured effect on the calibration set: the
-#                normalised |dz| at t0 drops from a median 0.95 to 0.42, and at
-#                the last sample from 0.98 to 0.35.
-#   "edge"    -- Pads with the edge sample repeated.  More conservative than
-#                "reflect" (median 0.50 at t0) and changes slightly fewer
-#                detected phase sequences; offered for calibration work where
-#                the smallest departure from the current output is preferred.
+#   "reflect" -- DEFAULT since the boundary-artifact fix.  Pads with the
+#                reflection of the series about its edge samples.  Measured
+#                effect on the calibration set: the normalised |dz| at t0 drops
+#                from a median 0.95 to 0.42, and at the last sample from 0.98 to
+#                0.35 (raw-signal reference: 0.29).
+#   "zero"     -- The pre-fix behaviour, kept so it can be reproduced exactly.
+#                Pass it explicitly to reproduce results from versions before
+#                the default changed.
+#   "edge"     -- Pads with the edge sample repeated.  Between the two on the
+#                boundary metric (median 0.50 at t0) and marginally less
+#                disruptive to detected phase sequences; useful for calibration
+#                work where the smallest departure from "zero" is preferred.
 #
-# The DEFAULT REMAINS "zero" for backward compatibility: a bare
-# ``determine_periods(series)`` call is unchanged.  "reflect" is the
-# recommended value once a parameter set has been re-validated against it.
+# The DEFAULT IS NOW "reflect".  This is a deliberate behaviour change: leaving
+# a documented, quantified artefact on by default was the larger cost.  Anyone
+# who needs the old output must now pass ``boundary_padding="zero"``
+# explicitly.
 #
 # Note on ``replace_endpoints_with_lowpass`` (in ``process_vorticity``): that
 # option was introduced as a palliative for this same artefact, and it calls
@@ -73,13 +77,13 @@ def _validate_padding(boundary_padding):
         )
 
 
-def _convolve_same(variable, weights, boundary_padding="zero"):
+def _convolve_same(variable, weights, boundary_padding="reflect"):
     """Convolve *variable* with *weights*, returning an array of the same length.
 
-    With ``boundary_padding="zero"`` this delegates to
-    ``scipy.signal.convolve(..., mode="same")`` unchanged, so the historical
-    output is reproduced exactly.  With "reflect"/"edge" the input is padded
-    explicitly with ``np.pad`` and convolved in "valid" mode.
+    With "reflect" (the default) or "edge" the input is padded explicitly with
+    ``np.pad`` and convolved in "valid" mode.  With ``boundary_padding="zero"``
+    this delegates to ``scipy.signal.convolve(..., mode="same")`` unchanged, so
+    the pre-fix output is reproduced exactly.
 
     The pad widths (``M//2`` on the left, ``M-1-M//2`` on the right) reproduce
     scipy's own "same" alignment exactly, so the ONLY difference between the
@@ -152,7 +156,7 @@ def pass_weights(window, cutoff):
     w[n + 1 : -1] = firstfactor * sigma
     return w[1:-1]
 
-def lanczos_filter(variable, window_length_lanczo, frequency, boundary_padding="zero"):
+def lanczos_filter(variable, window_length_lanczo, frequency, boundary_padding="reflect"):
     """
     Apply a low pass Lanczos filter to the input variable.
 
@@ -161,12 +165,12 @@ def lanczos_filter(variable, window_length_lanczo, frequency, boundary_padding="
         window_length_lanczo (int): The length of the Lanczos filter window.
         frequency (float): The cutoff frequency for the filter in time steps.
         boundary_padding (str, optional): How the series is extended beyond its
-            own ends before convolution. ``"zero"`` (default) reproduces the
-            exact behaviour of all versions prior to this option;
-            ``"reflect"`` (recommended) and ``"edge"`` remove most of the
-            zero-padding boundary artefact. See the module-level comment in
-            ``cyclophaser/lanczos_filter.py`` for the mechanism and the
-            measured effect. The kernel itself is unaffected.
+            own ends before convolution. ``"reflect"`` (default) and ``"edge"``
+            remove most of the zero-padding boundary artefact; ``"zero"``
+            reproduces the behaviour of versions before this default changed.
+            See the module-level comment in ``cyclophaser/lanczos_filter.py``
+            for the mechanism and the measured effect. The kernel itself is
+            unaffected.
 
     Returns:
         numpy.ndarray: The filtered variable with noise reduced, same length as
@@ -209,7 +213,7 @@ def pass_weights_bandpass(window, cutoff_low, cutoff_high):
     return w[1:-1]
 
 def lanczos_bandpass_filter(variable, window_length_lanczo, cutoff_low, cutoff_high,
-                            boundary_padding="zero"):
+                            boundary_padding="reflect"):
     """
     Apply a bandpass Lanczos filter to the input variable.
 
@@ -219,12 +223,12 @@ def lanczos_bandpass_filter(variable, window_length_lanczo, cutoff_low, cutoff_h
         cutoff_low (float): The low cutoff frequency for the filter in time steps.
         cutoff_high (float): The high cutoff frequency for the filter in time steps.
         boundary_padding (str, optional): How the series is extended beyond its
-            own ends before convolution. ``"zero"`` (default) reproduces the
-            exact behaviour of all versions prior to this option;
-            ``"reflect"`` (recommended) and ``"edge"`` remove most of the
-            zero-padding boundary artefact. See the module-level comment in
-            ``cyclophaser/lanczos_filter.py`` for the mechanism and the
-            measured effect. The kernel itself is unaffected.
+            own ends before convolution. ``"reflect"`` (default) and ``"edge"``
+            remove most of the zero-padding boundary artefact; ``"zero"``
+            reproduces the behaviour of versions before this default changed.
+            See the module-level comment in ``cyclophaser/lanczos_filter.py``
+            for the mechanism and the measured effect. The kernel itself is
+            unaffected.
 
     Returns:
         numpy.ndarray: The filtered variable with the specified frequency range,

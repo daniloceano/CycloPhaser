@@ -49,9 +49,9 @@ _DEFAULTS: dict = {
     "sm_val":            17,
     "sm2_mode":          "auto",
     "sm2_val":           17,
-    "replace_endpoints": 24,
+    "replace_endpoints": 0,
     "savgol_poly":       3,
-    "boundary_padding":  "zero",
+    "boundary_padding":  "reflect",
     "n_cols":            2,
     "thr_int_len":       0.075,
     "thr_dec_len":       0.075,
@@ -820,14 +820,15 @@ with st.sidebar:
         help=(
             "How the series is extended beyond its own ends before the Lanczos "
             "convolution.\n\n"
-            "**zero** (default) — the historical behaviour: the kernel sees zeros "
-            "outside the series. Vorticity has a non-zero floor, so this injects a "
-            "spurious deepening ramp worth a median 74% of the cyclone's amplitude "
-            "over roughly 48% of every series (the kernel is ~half the series long).\n\n"
-            "**reflect** (recommended) — pads with the reflection of the series. "
+            "**reflect** (default) — pads with the reflection of the series. "
             "Takes the normalised |dz| at the first sample from a median 0.95 down "
             "to 0.42 on the 51-track set.\n\n"
-            "**edge** — pads with the edge value repeated. More conservative "
+            "**zero** — the pre-fix behaviour: the kernel sees zeros "
+            "outside the series. Vorticity has a non-zero floor, so this injects a "
+            "spurious deepening ramp worth a median 74% of the cyclone's amplitude "
+            "over roughly 48% of every series (the kernel is ~half the series long). "
+            "Pass it to reproduce results from before this default changed.\n\n"
+            "**edge** — pads with the edge value repeated. Between the two "
             "(median 0.50), changes marginally fewer phase sequences.\n\n"
             "Changing this alters the smoothed signal near the boundaries, so a "
             "calibrated parameter set must be re-validated before it is trusted "
@@ -892,13 +893,18 @@ with st.sidebar:
 
     with st.expander("Advanced options", expanded=False):
         replace_endpoints = st.slider(
-            "Replace endpoints with lowpass (timesteps)", 0, 48, step=1,
+            "Replace endpoints with lowpass (timesteps) — DEPRECATED", 0, 48, step=1,
             value=_DEFAULTS["replace_endpoints"], key="replace_endpoints",
             help=(
-                "Replaces the first and last N timesteps of the filtered series with values "
-                "from a simple low-pass filter. Reduces Gibbs-effect artifacts at the "
-                "series boundaries introduced by the Lanczos filter. "
-                "Set to 0 to disable. Default: 24 timesteps."
+                "**Deprecated — leave at 0.** Replaces the first and last 5% of the filtered "
+                "series with a simple low-pass estimate. It was a palliative for the Lanczos "
+                "zero-padding boundary artifact, which `boundary_padding` now fixes at its "
+                "source — and it applies the same zero-padded convolution internally.\n\n"
+                "Combined with `boundary_padding=reflect` it is actively harmful: both filters "
+                "carry full amplitude at the edge, so the 5% splice becomes a visible step. "
+                "Measured: **28 of 51** calibration tracks opened with a spurious `decay` phase "
+                "with this at 24, against **0/51** with it at 0.\n\n"
+                "Default: 0 (was 24 up to v2.0.0)."
             ),
         )
         savgol_poly = st.slider(
@@ -1544,26 +1550,30 @@ Minimum period retained. Variability faster than this is suppressed as noise.
 ### `boundary_padding` — Lanczos boundary condition
 How the series is extended beyond its own ends before the convolution.
 
-- `zero` (**default**) — the historical behaviour (`scipy.signal.convolve(..., mode="same")`).
+- `reflect` (**default**) — pads with the reflection of the series. Normalised `|dz|` at the
+  first sample drops from a median **0.95 → 0.42** (last sample 0.98 → 0.35).
+- `zero` — the pre-fix behaviour (`scipy.signal.convolve(..., mode="same")`).
   The kernel sees zeros outside the series; since vorticity has a non-zero floor, this injects a
   spurious *deepening* ramp worth a median **74 % of the cyclone's own amplitude**, spread over the
   boundary zone — which is ~**24 % of the series at each end** because the kernel is about half the
   series long. Measured on the 51-track set, this ramp alone accounts for ≥ 80 % of the slope at the
-  first sample in **51/51** tracks.
-- `reflect` (**recommended**) — pads with the reflection of the series. Normalised `|dz|` at the
-  first sample drops from a median **0.95 → 0.42** (last sample 0.98 → 0.35).
-- `edge` — pads with the edge value repeated. More conservative (median 0.50) and changes marginally
+  first sample in **51/51** tracks. Pass it explicitly to reproduce results from before this
+  default changed.
+- `edge` — pads with the edge value repeated. Between the two (median 0.50) and changes marginally
   fewer phase sequences (13/51 vs 14/51 for `reflect`).
 
 Changing this alters the smoothed signal near the boundaries, so **a calibrated parameter set must be
 re-validated before it is trusted in a new mode**. Only has an effect when the Lanczos filter is on.
 
-### `replace_endpoints_with_lowpass` — Endpoint correction
-Replaces the first/last *N* timesteps of the filtered output with a simple low-pass estimate,
-correcting Gibbs-effect artifacts at the series edges. **Default: 24 timesteps.** Set to 0 to disable.
-Note this option was introduced as a palliative for the same zero-padding artifact described under
-`boundary_padding`, and it applies the *same* zero-padded convolution — with `boundary_padding="reflect"`
-it loses its reason to exist.
+### `replace_endpoints_with_lowpass` — Endpoint correction (**DEPRECATED**)
+Replaces the first/last 5 % of the filtered output with a simple low-pass estimate.
+**Default: 0 (disabled)** — it was 24 up to v2.0.0.
+
+It was introduced as a palliative for the same zero-padding artifact described under `boundary_padding`,
+and it applies the *same* zero-padded convolution internally, so it never fixed the cause. Combined with
+`boundary_padding=reflect` it is **harmful**: both filters carry full amplitude at the edge, so the 5 %
+splice becomes a visible step. Measured over the 51 tracks, the number opening with a spurious `decay`
+phase goes **4/51 → 28/51** under `reflect` with this at 24, and **0/51** with it at 0. Leave it at 0.
 
 ### `use_smoothing` / `use_smoothing_twice` — Savitzky-Golay
 - `'auto'`: window computed from series length (recommended).

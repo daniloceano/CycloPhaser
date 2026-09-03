@@ -339,13 +339,13 @@ def export_periods_to_csv(phases_dict, periods_outfile_path):
 def process_vorticity(
         zeta_df,
         use_filter='auto',
-        replace_endpoints_with_lowpass=24,
+        replace_endpoints_with_lowpass=0,
         use_smoothing='auto',
         use_smoothing_twice='auto', 
         savgol_polynomial=3,
         cutoff_low=168,
         cutoff_high=48.0,
-        boundary_padding='zero'):
+        boundary_padding='reflect'):
     """
     Calculate derivatives of vorticity and perform filtering and smoothing.
 
@@ -357,8 +357,11 @@ def process_vorticity(
             length of `len(series)//2`, `False` to skip filtering entirely, or an integer to specify the
             window length explicitly in time steps. **Units**: Time steps. Default is `'auto'`.
         
-        replace_endpoints_with_lowpass (int, optional): If set, replaces the endpoints of the series with a lowpass 
-            filter using a specified window length, helping to stabilize edge effects. **Units**: Time steps. Default is 24.
+        replace_endpoints_with_lowpass (int, optional): **DEPRECATED.** If non-zero, replaces the first and
+            last 5 % of the filtered series with a lowpass-filtered estimate. **Units**: Time steps.
+            Default is 0 (disabled) — it was 24 in versions up to and including 2.0.0. Passing a non-zero
+            value emits a ``DeprecationWarning``. See the "replace_endpoints_with_lowpass deprecation note"
+            below.
         
         use_smoothing (str or int, optional): Apply Savgol smoothing to the filtered vorticity. Set to `'auto'` for a 
             default window length or specify an integer value as the desired window length. Must be greater than or equal 
@@ -378,11 +381,11 @@ def process_vorticity(
             Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 48.0.
 
         boundary_padding (str, optional): How the series is extended beyond its own
-            ends before the Lanczos convolution. ``"zero"`` (default) reproduces the
-            exact behaviour of all versions prior to this option; ``"reflect"``
-            (recommended) and ``"edge"`` remove most of the zero-padding boundary
-            artefact. See the "boundary_padding note" below. Only meaningful when
-            ``use_filter`` is truthy. Default is ``"zero"``.
+            ends before the Lanczos convolution. ``"reflect"`` (default) and ``"edge"``
+            remove most of the zero-padding boundary artefact; ``"zero"`` reproduces
+            the behaviour of versions before this default changed. See the
+            "boundary_padding note" below. Only meaningful when ``use_filter`` is
+            truthy. Default is ``"reflect"``.
 
     use_filter=True note (behaviour change)
     ----------------------------------------
@@ -440,22 +443,52 @@ def process_vorticity(
     (For scale: a lightly-smoothed finite difference of the RAW series gives a
     median of 0.29 at t0, so "reflect" lands close to the uncontaminated signal.)
 
-    ``"reflect"`` is the RECOMMENDED value; the default stays ``"zero"`` so that
-    every existing call and every calibrated parameter set is reproduced exactly.
-    Switching modes changes the smoothed signal in the boundary zone and
-    therefore requires re-validating any calibrated thresholds -- it is not a
-    drop-in swap.
-
-    ``replace_endpoints_with_lowpass`` was introduced as a palliative for this
-    same artefact and itself calls ``lanczos_filter``, i.e. it replaces
-    zero-padded bandpass endpoints with zero-padded lowpass endpoints. With
-    ``boundary_padding="reflect"`` it loses its reason to exist and is a
-    candidate for future deprecation; it is deliberately left unchanged here and
-    still defaults to 24.
+    ``"reflect"`` is now the DEFAULT (behaviour change): leaving a quantified
+    artefact switched on by default was judged the larger cost. To reproduce
+    results from a version before the default changed, pass
+    ``boundary_padding="zero"`` explicitly. Note that switching modes changes
+    the smoothed signal in the boundary zone, so a parameter set calibrated
+    under one mode must be re-validated under another -- it is not a drop-in
+    swap in either direction.
 
     The Lanczos kernels themselves (``pass_weights``, ``pass_weights_bandpass``)
     and the Savitzky-Golay stages are NOT affected by this option: the correction
     is purely a boundary condition on the convolution.
+
+    replace_endpoints_with_lowpass deprecation note
+    ------------------------------------------------
+    ``replace_endpoints_with_lowpass`` is **DEPRECATED** and its default changed
+    from 24 to **0** together with the ``boundary_padding`` default above. Passing
+    a non-zero value emits a ``DeprecationWarning``. The parameter is kept, not
+    removed, so existing calls keep working.
+
+    It was introduced as a palliative for exactly the artefact ``boundary_padding``
+    now fixes at its source: it splices the first and last 5 % of the bandpass
+    output with a *lowpass* estimate. But that lowpass is produced by
+    ``lanczos_filter``, which uses the same convolution — so it was replacing
+    zero-padded bandpass endpoints with zero-padded lowpass endpoints. Measured on
+    the 51-track calibration set, it reduced the normalised ``|dz|`` at t0 only
+    from a median 0.95 to 0.71, at the cost of 14 % of z's amplitude.
+
+    With ``boundary_padding="reflect"`` it is worse than redundant, it is
+    **harmful**. Under reflect padding both the bandpass and the lowpass carry
+    full amplitude at the edge instead of both being suppressed toward zero, so
+    the difference in their gains no longer cancels and the 5 % splice becomes a
+    visible STEP. Measured over the 51 tracks with the package defaults, the
+    number of tracks whose detected life cycle OPENS with a spurious ``decay``
+    phase goes:
+
+    ============================================  ========  ===========
+    configuration                                 "zero"    "reflect"
+    ============================================  ========  ===========
+    defaults with replace_endpoints_with_lowpass=24   4/51      28/51
+    defaults with replace_endpoints_with_lowpass=0    0/51       0/51
+    ============================================  ========  ===========
+
+    A cyclone track essentially never begins by weakening, so 28/51 is an
+    artefact, not a finding. Hence the two defaults had to move together: a
+    non-zero ``replace_endpoints_with_lowpass`` combined with
+    ``boundary_padding="reflect"`` trades one boundary artefact for another.
 
     Returns:
         xarray.DataArray: A DataArray containing calculated vorticity variables, smoothed values, and their derivatives.
@@ -476,6 +509,21 @@ def process_vorticity(
     """
 
     lanfil._validate_padding(boundary_padding)
+
+    if replace_endpoints_with_lowpass:
+        warnings.warn(
+            "replace_endpoints_with_lowpass is deprecated and its default changed "
+            "from 24 to 0. It was a palliative for the Lanczos zero-padding "
+            "boundary artefact, which boundary_padding now fixes at its source, "
+            "and it applies the same zero-padded convolution internally. "
+            "Combined with boundary_padding='reflect' it is actively harmful: "
+            "the 5% endpoint splice becomes a visible step, which made 28 of the "
+            "51 calibration tracks open with a spurious 'decay' phase (0/51 with "
+            "replace_endpoints_with_lowpass=0). Pass 0, or omit it, to silence "
+            "this warning.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     # Parameters
     #
@@ -968,13 +1016,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       export_dict: Union[str, bool] = False,
                       hemisphere: str = "southern",
                       use_filter: Union[str, bool, int] = 'auto',
-                      replace_endpoints_with_lowpass: int = 24,
+                      replace_endpoints_with_lowpass: int = 0,
                       use_smoothing: Union[bool, str, int] = 'auto',
                       use_smoothing_twice: Union[bool, str, int] = 'auto',
                       savgol_polynomial: int = 3,
                       cutoff_low: float = 168,
                       cutoff_high: float = 48.0,
-                      boundary_padding: str = "zero",
+                      boundary_padding: str = "reflect",
                       threshold_intensification_length: float = 0.075,
                       threshold_intensification_gap: float = 0.075,
                       threshold_mature_distance: float = 0.125,
@@ -1024,8 +1072,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             versions were UNFILTERED. See the "use_filter=True note" in `process_vorticity`. **Units:** Time steps.
             Default is `'auto'`.
         
-        replace_endpoints_with_lowpass (int, optional): Use a lowpass filter to replace the endpoints of the series, 
-            stabilizing edge effects. Specify the window length. **Units:** Time steps. Default is 24.
+        replace_endpoints_with_lowpass (int, optional): **DEPRECATED.** Replaces the first and last 5 % of the
+            filtered series with a lowpass estimate. **Units:** Time steps. Default is 0 (disabled) — it was 24
+            up to and including 2.0.0. A non-zero value emits a `DeprecationWarning`: the parameter was a
+            palliative for the Lanczos zero-padding artefact that `boundary_padding` now fixes at its source,
+            and combined with `boundary_padding="reflect"` it is harmful (the endpoint splice becomes a step;
+            28/51 calibration tracks opened with a spurious `decay` phase, against 0/51 with this set to 0).
+            See the "replace_endpoints_with_lowpass deprecation note" in `process_vorticity`.
         
         use_smoothing (Union[bool, str, int], optional): Apply Savitzky-Golay smoothing to the vorticity series. Choose 
             `True` to use a default window, specify an integer window length, or use `'auto'` to adapt the length based 
@@ -1044,13 +1097,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             for hourly data. **Units:** Time steps. Default is 48.0.
 
         boundary_padding (str, optional): How the series is extended beyond its own ends
-            before the Lanczos convolution: `"zero"` (default), `"reflect"` (recommended)
-            or `"edge"`. The historical `"zero"` behaviour comes from
+            before the Lanczos convolution: `"reflect"` (default), `"edge"` or `"zero"`.
+            The pre-fix `"zero"` behaviour comes from
             `scipy.signal.convolve(..., mode="same")` and injects a spurious deepening
             ramp worth a median of 74 % of the cyclone's amplitude over roughly 48 % of
             every series; `"reflect"` takes the normalised |dz| at t0 from a median 0.95
-            down to 0.42 on the 51-track calibration set. The default remains `"zero"`
-            so existing calls and calibrated parameter sets reproduce exactly — see the
+            down to 0.42 on the 51-track calibration set. Pass `"zero"` explicitly to
+            reproduce results from a version before this default changed — see the
             "boundary_padding note" in `process_vorticity` for the full mechanism,
             the measured numbers, and the consequences for `replace_endpoints_with_lowpass`.
         
