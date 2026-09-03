@@ -344,7 +344,8 @@ def process_vorticity(
         use_smoothing_twice='auto', 
         savgol_polynomial=3,
         cutoff_low=168,
-        cutoff_high=48.0):
+        cutoff_high=48.0,
+        boundary_padding='zero'):
     """
     Calculate derivatives of vorticity and perform filtering and smoothing.
 
@@ -374,7 +375,65 @@ def process_vorticity(
         
         cutoff_high (float, optional): High-frequency cutoff for the Lanczos filter, used to remove high-frequency noise. 
             Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 48.0.
-        
+
+        boundary_padding (str, optional): How the series is extended beyond its own
+            ends before the Lanczos convolution. ``"zero"`` (default) reproduces the
+            exact behaviour of all versions prior to this option; ``"reflect"``
+            (recommended) and ``"edge"`` remove most of the zero-padding boundary
+            artefact. See the "boundary_padding note" below. Only meaningful when
+            ``use_filter`` is truthy. Default is ``"zero"``.
+
+    boundary_padding note
+    ----------------------
+    ``lanczos_bandpass_filter`` and ``lanczos_filter`` have always convolved via
+    ``scipy.signal.convolve(..., mode="same")``, which implicitly ZERO-PADS the
+    input beyond its own ends. Vorticity has a non-zero floor (order -5e-5 s^-1),
+    so those "missing" samples are a jump to zero rather than a neutral
+    continuation, and two properties of this configuration amplify the damage:
+    the kernel is about HALF the series length (``window_length_lanczo =
+    len(zeta) // 2`` under ``use_filter='auto'``; measured kernel/series length
+    ratio has a median of 0.494 over the 51-track calibration set), and the
+    bandpass kernel does not actually reject DC at these window lengths
+    (``sum(weights)`` median 0.629; ``|H(DC)|/|H|max`` median 0.79).
+
+    The consequence is a step between the boundary value and the interior worth a
+    median of **74 % of the cyclone's own peak-to-peak amplitude**, spread as a
+    ramp over the boundary zone -- which is ``M//2`` ~ **24 % of the series at
+    each end, about 48 % of every series**. The ramp carries the sign of a
+    spurious DEEPENING, and on the calibration set it alone accounts for >= 80 %
+    of the slope measured at t0 in **51/51 tracks**.
+
+    Measured effect of the option on that set (normalised ``|dz|`` at the first
+    and last sample, median over 51 tracks):
+
+    ==========  ==========  =============  ================================
+    mode        t0          last sample    detected phase sequences changed
+    ==========  ==========  =============  ================================
+    "zero"      0.95        0.98           -- (reference)
+    "reflect"   0.42        0.35           14/51
+    "edge"      0.50        0.38           13/51
+    ==========  ==========  =============  ================================
+
+    (For scale: a lightly-smoothed finite difference of the RAW series gives a
+    median of 0.29 at t0, so "reflect" lands close to the uncontaminated signal.)
+
+    ``"reflect"`` is the RECOMMENDED value; the default stays ``"zero"`` so that
+    every existing call and every calibrated parameter set is reproduced exactly.
+    Switching modes changes the smoothed signal in the boundary zone and
+    therefore requires re-validating any calibrated thresholds -- it is not a
+    drop-in swap.
+
+    ``replace_endpoints_with_lowpass`` was introduced as a palliative for this
+    same artefact and itself calls ``lanczos_filter``, i.e. it replaces
+    zero-padded bandpass endpoints with zero-padded lowpass endpoints. With
+    ``boundary_padding="reflect"`` it loses its reason to exist and is a
+    candidate for future deprecation; it is deliberately left unchanged here and
+    still defaults to 24.
+
+    The Lanczos kernels themselves (``pass_weights``, ``pass_weights_bandpass``)
+    and the Savitzky-Golay stages are NOT affected by this option: the correction
+    is purely a boundary condition on the convolution.
+
     Returns:
         xarray.DataArray: A DataArray containing calculated vorticity variables, smoothed values, and their derivatives.
 
@@ -392,6 +451,8 @@ def process_vorticity(
     Example:
         >>> df = process_vorticity(zeta_df, cutoff_low=168, cutoff_high=24)
     """
+
+    lanfil._validate_padding(boundary_padding)
 
     # Parameters
     if use_filter == 'auto':
@@ -454,7 +515,9 @@ def process_vorticity(
 
     # Apply Lanczos filter to vorticity, if requested
     if use_filter:
-        filtered_vorticity = lanfil.lanczos_bandpass_filter(da['zeta'].copy(), window_length_lanczo, 1 / cutoff_low, 1 / cutoff_high)
+        filtered_vorticity = lanfil.lanczos_bandpass_filter(
+            da['zeta'].copy(), window_length_lanczo, 1 / cutoff_low, 1 / cutoff_high,
+            boundary_padding=boundary_padding)
         filtered_vorticity = xr.DataArray(filtered_vorticity, coords={'time':zeta_df.index})
     else:
         filtered_vorticity = da['zeta'].copy()
@@ -465,7 +528,9 @@ def process_vorticity(
     if use_filter and replace_endpoints_with_lowpass:
         num_samples = len(filtered_vorticity)
         num_copy_samples = int(0.05 * num_samples)
-        filtered_vorticity_low_pass = lanfil.lanczos_filter(da.zeta.copy(), window_length_lanczo, replace_endpoints_with_lowpass)
+        filtered_vorticity_low_pass = lanfil.lanczos_filter(
+            da.zeta.copy(), window_length_lanczo, replace_endpoints_with_lowpass,
+            boundary_padding=boundary_padding)
         filtered_vorticity.data[:num_copy_samples] = filtered_vorticity_low_pass.data[:num_copy_samples]
         filtered_vorticity.data[-num_copy_samples:] = filtered_vorticity_low_pass.data[-num_copy_samples:]  
 
@@ -861,6 +926,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       savgol_polynomial: int = 3,
                       cutoff_low: float = 168,
                       cutoff_high: float = 48.0,
+                      boundary_padding: str = "zero",
                       threshold_intensification_length: float = 0.075,
                       threshold_intensification_gap: float = 0.075,
                       threshold_mature_distance: float = 0.125,
@@ -924,6 +990,17 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         
         cutoff_high (float, optional): High-frequency cutoff for the Lanczos filter to reduce high-frequency noise. Suitable 
             for hourly data. **Units:** Time steps. Default is 48.0.
+
+        boundary_padding (str, optional): How the series is extended beyond its own ends
+            before the Lanczos convolution: `"zero"` (default), `"reflect"` (recommended)
+            or `"edge"`. The historical `"zero"` behaviour comes from
+            `scipy.signal.convolve(..., mode="same")` and injects a spurious deepening
+            ramp worth a median of 74 % of the cyclone's amplitude over roughly 48 % of
+            every series; `"reflect"` takes the normalised |dz| at t0 from a median 0.95
+            down to 0.42 on the 51-track calibration set. The default remains `"zero"`
+            so existing calls and calibrated parameter sets reproduce exactly — see the
+            "boundary_padding note" in `process_vorticity` for the full mechanism,
+            the measured numbers, and the consequences for `replace_endpoints_with_lowpass`.
         
         threshold_intensification_length (float, optional): Minimum required length of intensification phase as a fraction 
             of the dataset. Default is 0.075.
@@ -1040,7 +1117,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         use_smoothing_twice=use_smoothing_twice,
         savgol_polynomial=savgol_polynomial,
         cutoff_low=cutoff_low,
-        cutoff_high=cutoff_high
+        cutoff_high=cutoff_high,
+        boundary_padding=boundary_padding
     )
 
     # Call `get_periods` with the appropriate arguments

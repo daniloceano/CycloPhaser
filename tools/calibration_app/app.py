@@ -51,6 +51,7 @@ _DEFAULTS: dict = {
     "sm2_val":           17,
     "replace_endpoints": 24,
     "savgol_poly":       3,
+    "boundary_padding":  "zero",
     "n_cols":            2,
     "thr_int_len":       0.075,
     "thr_dec_len":       0.075,
@@ -73,14 +74,29 @@ _DEFAULTS: dict = {
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
+_BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
+def _parse_boundary_padding(v) -> str:
+    """Validating str converter for boundary_padding — same rationale as
+    _parse_length_scale below: rejects anything but the three values
+    cyclophaser accepts, so a hand-edited/corrupt YAML value is treated as a
+    conversion error rather than silently written into session_state and
+    crashing the selectbox on next render."""
+    v = str(v)
+    if v not in _BOUNDARY_PADDING_OPTS:
+        raise ValueError(
+            f"boundary_padding must be one of {_BOUNDARY_PADDING_OPTS}, got {v!r}")
+    return v
+
+
 _YAML_FILTER_MAP: dict = {
     "use_filter":                    ("use_filter",        bool),
     "cutoff_low":                    ("cutoff_low",        int),
     "cutoff_high":                   ("cutoff_high",       int),
     "replace_endpoints_with_lowpass": ("replace_endpoints", int),
     "savgol_polynomial":             ("savgol_poly",       int),
+    "boundary_padding":              ("boundary_padding",  _parse_boundary_padding),
 }
 def _parse_length_scale(v) -> str:
     """Validating str converter for length_scale — rejects anything but the
@@ -184,7 +200,16 @@ _YAML_PHASE_MAP: dict = {
 _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
                               "decay_tail_amplitude_fraction"}
 
+# boundary_padding is OPTIONAL on import for the same reason as the optional
+# phase keys above, but for a backward-compatibility reason rather than a
+# "mode wasn't in use" one: every YAML exported before the option existed
+# legitimately lacks the key, and such a file must import cleanly and fall back
+# to the default ("zero") without a spurious "missing key" warning. It is still
+# recognised for the "unknown key" check.
+_OPTIONAL_FILTER_YAML_KEYS = {"boundary_padding"}
+
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
+_REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
 _REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP)
 
@@ -275,7 +300,7 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
         + [f"phase_params.{k}" for k in pp if k not in _KNOWN_PHASE_YAML_KEYS]
     )
     missing = (
-        [f"filter_params.{k}" for k in _KNOWN_FILTER_YAML_KEYS   if k not in fp]
+        [f"filter_params.{k}" for k in _REQUIRED_FILTER_YAML_KEYS if k not in fp]
         + [f"phase_params.{k}" for k in _REQUIRED_PHASE_YAML_KEYS if k not in pp]
     )
 
@@ -412,6 +437,7 @@ def _build_yaml(cyclone_names) -> str:
             "use_smoothing":                 use_smoothing,
             "use_smoothing_twice":           use_smoothing_twice,
             "savgol_polynomial":             int(savgol_poly),
+            "boundary_padding":              str(boundary_padding),
         },
         # length_scale and mature_method are string enums ("global"/"local",
         # "derivative"/"amplitude"), not numeric thresholds — exported as-is
@@ -451,6 +477,7 @@ def _render_periods_png(
     file_bytes: bytes,
     use_filter, cutoff_low, cutoff_high,
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    boundary_padding,
     phase_params_tuple: tuple,
     name: str,
     figsize: tuple,
@@ -466,11 +493,13 @@ def _render_periods_png(
     df_result, periods_dict, _ = _run_get_periods(
         file_bytes, use_filter, cutoff_low, cutoff_high,
         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
         phase_params_tuple,
     )
     vort, _ = _run_process_vorticity(
         file_bytes, use_filter, cutoff_low, cutoff_high,
         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
     )
     fig, ax = plt.subplots(figsize=figsize)
     try:
@@ -590,6 +619,7 @@ def _render_compact_png(
     file_bytes: bytes,
     use_filter, cutoff_low, cutoff_high,
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    boundary_padding,
     phase_params_tuple: tuple,
     name: str,
     n_cols: int,
@@ -601,11 +631,13 @@ def _render_compact_png(
     df_result, periods_dict, _ = _run_get_periods(
         file_bytes, use_filter, cutoff_low, cutoff_high,
         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
         phase_params_tuple,
     )
     vort, _ = _run_process_vorticity(
         file_bytes, use_filter, cutoff_low, cutoff_high,
         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
     )
     fig = _plot_compact(name, periods_dict, vort, n_cols)
     buf = io.BytesIO()
@@ -657,6 +689,7 @@ def _compute_diagnostics(name, periods_dict, df_result, all_warns):
 def _run_process_vorticity(
     file_bytes, use_filter, cutoff_low, cutoff_high,
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    boundary_padding,
 ):
     df_raw = pd.read_csv(io.BytesIO(file_bytes), sep=";", index_col="time", parse_dates=True)
     series = df_raw["min_max_zeta_850"]
@@ -667,6 +700,7 @@ def _run_process_vorticity(
             zeta_df, use_filter=use_filter, cutoff_low=cutoff_low, cutoff_high=cutoff_high,
             use_smoothing=use_smoothing, use_smoothing_twice=use_smoothing_twice,
             replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
+            boundary_padding=boundary_padding,
         )
     return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
 
@@ -678,6 +712,7 @@ def _run_process_vorticity(
 def _run_get_periods(
     file_bytes, use_filter, cutoff_low, cutoff_high,
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    boundary_padding,
     phase_params_tuple: tuple,
 ):
     """Cached phase detection. Warnings are captured and returned (not just caught by
@@ -688,6 +723,7 @@ def _run_get_periods(
     vort, _ = _run_process_vorticity(
         file_bytes, use_filter, cutoff_low, cutoff_high,
         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
     )
     phase_params = dict(phase_params_tuple)
     with warnings.catch_warnings(record=True) as caught:
@@ -774,6 +810,28 @@ with st.sidebar:
             "Components with periods shorter than this value are suppressed as noise. "
             "Lower values allow more high-frequency variability; higher values produce "
             "a smoother curve. Default: 48 h (2 days)."
+        ),
+    )
+    boundary_padding = st.selectbox(
+        "Boundary padding",
+        options=_BOUNDARY_PADDING_OPTS,
+        index=_BOUNDARY_PADDING_OPTS.index(_DEFAULTS["boundary_padding"]),
+        key="boundary_padding",
+        help=(
+            "How the series is extended beyond its own ends before the Lanczos "
+            "convolution.\n\n"
+            "**zero** (default) — the historical behaviour: the kernel sees zeros "
+            "outside the series. Vorticity has a non-zero floor, so this injects a "
+            "spurious deepening ramp worth a median 74% of the cyclone's amplitude "
+            "over roughly 48% of every series (the kernel is ~half the series long).\n\n"
+            "**reflect** (recommended) — pads with the reflection of the series. "
+            "Takes the normalised |dz| at the first sample from a median 0.95 down "
+            "to 0.42 on the 51-track set.\n\n"
+            "**edge** — pads with the edge value repeated. More conservative "
+            "(median 0.50), changes marginally fewer phase sequences.\n\n"
+            "Changing this alters the smoothed signal near the boundaries, so a "
+            "calibrated parameter set must be re-validated before it is trusted "
+            "in a new mode. Only has an effect when the Lanczos filter is on."
         ),
     )
 
@@ -1215,6 +1273,7 @@ for _cname, _fbytes in files.items():
         _vort, _fwarns = _run_process_vorticity(
             _fbytes, use_filter, cutoff_low, cutoff_high,
             use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+            boundary_padding,
         )
     except Exception as _exc:
         _res["error"] = f"Vorticity processing failed: {_exc}"
@@ -1225,6 +1284,7 @@ for _cname, _fbytes in files.items():
         _df, _pdict, _pwarns = _run_get_periods(
             _fbytes, use_filter, cutoff_low, cutoff_high,
             use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+            boundary_padding,
             _phase_params_tuple,
         )
     except Exception as _exc:
@@ -1237,6 +1297,7 @@ for _cname, _fbytes in files.items():
         _png = _render_periods_png(
             _fbytes, use_filter, cutoff_low, cutoff_high,
             use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+            boundary_padding,
             _phase_params_tuple, _cname, figsize=(12, 5), show_title=True,
         )
     except Exception:
@@ -1316,12 +1377,14 @@ with tab_cal:
                     _png_display = _render_compact_png(
                         files[cyclone_name], use_filter, cutoff_low, cutoff_high,
                         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                        boundary_padding,
                         _phase_params_tuple, cyclone_name, n_cols,
                     )
                 else:
                     _png_display = _render_periods_png(
                         files[cyclone_name], use_filter, cutoff_low, cutoff_high,
                         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                        boundary_padding,
                         _phase_params_tuple, cyclone_name,
                         figsize=_FIGSIZES[n_cols], show_title=True,
                     )
@@ -1478,9 +1541,29 @@ Maximum period retained. Variability slower than this is suppressed (e.g., seaso
 Minimum period retained. Variability faster than this is suppressed as noise.
 **Default: 48 h (2 days).**
 
+### `boundary_padding` — Lanczos boundary condition
+How the series is extended beyond its own ends before the convolution.
+
+- `zero` (**default**) — the historical behaviour (`scipy.signal.convolve(..., mode="same")`).
+  The kernel sees zeros outside the series; since vorticity has a non-zero floor, this injects a
+  spurious *deepening* ramp worth a median **74 % of the cyclone's own amplitude**, spread over the
+  boundary zone — which is ~**24 % of the series at each end** because the kernel is about half the
+  series long. Measured on the 51-track set, this ramp alone accounts for ≥ 80 % of the slope at the
+  first sample in **51/51** tracks.
+- `reflect` (**recommended**) — pads with the reflection of the series. Normalised `|dz|` at the
+  first sample drops from a median **0.95 → 0.42** (last sample 0.98 → 0.35).
+- `edge` — pads with the edge value repeated. More conservative (median 0.50) and changes marginally
+  fewer phase sequences (13/51 vs 14/51 for `reflect`).
+
+Changing this alters the smoothed signal near the boundaries, so **a calibrated parameter set must be
+re-validated before it is trusted in a new mode**. Only has an effect when the Lanczos filter is on.
+
 ### `replace_endpoints_with_lowpass` — Endpoint correction
 Replaces the first/last *N* timesteps of the filtered output with a simple low-pass estimate,
 correcting Gibbs-effect artifacts at the series edges. **Default: 24 timesteps.** Set to 0 to disable.
+Note this option was introduced as a palliative for the same zero-padding artifact described under
+`boundary_padding`, and it applies the *same* zero-padded convolution — with `boundary_padding="reflect"`
+it loses its reason to exist.
 
 ### `use_smoothing` / `use_smoothing_twice` — Savitzky-Golay
 - `'auto'`: window computed from series length (recommended).
