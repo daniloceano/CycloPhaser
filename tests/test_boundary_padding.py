@@ -66,29 +66,22 @@ from cyclophaser.lanczos_filter import (
 
 _CALIBRATION_DATA_DIR = os.path.join(os.path.dirname(__file__), "calibration_data")
 
-# IMPORTANT -- two filter configurations are used below, and the difference
-# between them is not cosmetic.
+# Two filter configurations are used below.
 #
-# ``use_filter`` is documented as "'auto', or an integer window length".  Python
-# bools ARE ints, so ``use_filter=True`` is read as **window length 1**, not as
-# "filtering enabled".  A 1-tap Lanczos kernel is a scalar multiply (0.0714 for
-# cutoff_low=168 / cutoff_high=24), so with ``use_filter=True`` the Lanczos
-# filter performs no convolution at all, there is no boundary zone, and
-# ``boundary_padding`` is a NO-OP.
+# _FILTER_PARAMS_ACTIVE is the one that matters for this option: the Lanczos
+# window is ``len(series)//2``, so the filter genuinely convolves and the
+# zero-padding artefact is present and measurable.  ``use_filter=True`` and
+# ``use_filter='auto'`` are equivalent and both land here.
 #
-# The author's validated 51-track calibration uses ``use_filter=True`` (it is
-# what tools/calibration_app/app.py's "Apply Lanczos filter" checkbox sends, and
-# what tests/test_decay_tail_amplitude_fraction.py records).  The artefact this
-# option corrects therefore lives on the ``use_filter='auto'`` path -- the
-# PACKAGE DEFAULT, i.e. what a bare ``determine_periods(series)`` call does --
-# where the kernel is ``len(series)//2`` taps.
-#
-# So: _FILTER_PARAMS_CALIB pins the author's calibration (where the option must
-# be a verified no-op), and _FILTER_PARAMS_ACTIVE pins the path where the
-# Lanczos filter genuinely runs (where the artefact and its reduction are
-# measured).
-_FILTER_PARAMS_CALIB = dict(
-    use_filter=True,
+# _FILTER_PARAMS_INERT pins ``use_filter=1`` -- a single-tap kernel, i.e. a
+# scalar multiply with no convolution and therefore no boundary zone, where all
+# three padding modes must be byte-identical.  This is not a recommended value;
+# it reproduces the HISTORICAL behaviour of ``use_filter=True`` before that bug
+# was fixed (bool being a subclass of int made True read as the integer 1).  See
+# test_option_is_a_noop_when_the_lanczos_kernel_is_a_single_tap below and the
+# "HISTORICAL RECORD" block in tests/test_decay_tail_amplitude_fraction.py.
+_FILTER_PARAMS_ACTIVE = dict(
+    use_filter="auto",
     cutoff_low=168,
     cutoff_high=24,
     replace_endpoints_with_lowpass=0,
@@ -96,7 +89,7 @@ _FILTER_PARAMS_CALIB = dict(
     use_smoothing_twice=False,
     savgol_polynomial=3,
 )
-_FILTER_PARAMS_ACTIVE = dict(_FILTER_PARAMS_CALIB, use_filter="auto")
+_FILTER_PARAMS_INERT = dict(_FILTER_PARAMS_ACTIVE, use_filter=1)
 
 _PHASE_PARAMS = dict(
     threshold_mature_distance=0.18,
@@ -187,15 +180,15 @@ def test_default_argument_equals_explicit_zero(n):
     )
 
 
-@pytest.mark.parametrize("filter_params", [_FILTER_PARAMS_CALIB, _FILTER_PARAMS_ACTIVE],
-                         ids=["calib", "active"])
+@pytest.mark.parametrize("filter_params", [_FILTER_PARAMS_INERT, _FILTER_PARAMS_ACTIVE],
+                         ids=["inert", "active"])
 @pytest.mark.parametrize("cyclone_id", _ALL_TRACK_IDS)
 def test_process_vorticity_default_is_byte_identical(cyclone_id, filter_params):
     """process_vorticity: default vs boundary_padding='zero', every array.
 
-    Checked on both the author's calibration (``use_filter=True``) and the
-    package-default path (``use_filter='auto'``), because only the latter runs
-    a real convolution.
+    Checked on both the inert path (``use_filter=1``, a single-tap kernel) and
+    the real one (``use_filter='auto'``), because only the latter runs an actual
+    convolution.
     """
     series = _load_track(cyclone_id)
     zeta_df = pd.DataFrame({"zeta": series.rename("zeta")})
@@ -217,9 +210,9 @@ def test_determine_periods_default_is_byte_identical(cyclone_id):
     series = _load_track(cyclone_id)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        base = determine_periods(series, **_FILTER_PARAMS_CALIB, **_PHASE_PARAMS)
+        base = determine_periods(series, **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS)
         explicit = determine_periods(
-            series, boundary_padding="zero", **_FILTER_PARAMS_CALIB, **_PHASE_PARAMS
+            series, boundary_padding="zero", **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS
         )
     pd.testing.assert_frame_equal(base, explicit)
 
@@ -351,27 +344,36 @@ def test_reflect_changes_the_signal_only_where_expected():
     assert edge_err > 0.05, edge_err
 
 
-def test_option_is_a_noop_under_the_authors_calibration():
-    """``use_filter=True`` means window length 1 (bools are ints in Python), so
-    the Lanczos "filter" is a scalar multiply with no convolution and therefore
-    no boundary zone.  Every padding mode must produce byte-identical output
-    there.
+def test_option_is_a_noop_when_the_lanczos_kernel_is_a_single_tap():
+    """With a 1-tap Lanczos kernel there is no convolution, hence no boundary
+    zone, so all three padding modes must be byte-identical.
 
-    This is locked in deliberately: the author's validated 51-track calibration
-    uses ``use_filter=True``, so ``boundary_padding`` cannot change those
-    results, and the artefact it corrects only exists on the ``use_filter='auto'``
-    (package-default) path.  If this test ever starts failing, ``use_filter``'s
-    bool handling has changed and the calibration's meaning has changed with it.
+    ``use_filter=1`` is not a recommended value -- it is pinned here because it
+    reproduces the HISTORICAL behaviour of ``use_filter=True`` before that was
+    fixed.  ``bool`` is a subclass of ``int`` in Python, so the old
+    ``window_length_lanczo = use_filter`` read True as the integer 1: a single
+    scalar multiply (0.0714 for cutoff_low=168 / cutoff_high=24) instead of a
+    filter.  Every parameter set calibrated under ``use_filter=True`` on an
+    earlier version -- including the 51-track calibration recorded in
+    tests/test_decay_tail_amplitude_fraction.py -- was therefore calibrated on
+    an UNFILTERED signal, where this option could not possibly have had an
+    effect.
+
+    ``use_filter=True`` now routes to ``'auto'`` and genuinely filters, so
+    ``boundary_padding`` does matter there; that path is covered by
+    test_process_vorticity_default_is_byte_identical[active] and by
+    test_reflect_reduces_edge_dz_artifact_across_calibration_set.
     """
+    inert = _FILTER_PARAMS_INERT
     for cyclone_id in _ALL_TRACK_IDS[:8]:
         series = _load_track(cyclone_id)
         zeta_df = pd.DataFrame({"zeta": series.rename("zeta")})
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            ref = process_vorticity(zeta_df.copy(), **_FILTER_PARAMS_CALIB)
+            ref = process_vorticity(zeta_df.copy(), **inert)
             for mode in PADDING_MODES:
                 got = process_vorticity(
-                    zeta_df.copy(), boundary_padding=mode, **_FILTER_PARAMS_CALIB
+                    zeta_df.copy(), boundary_padding=mode, **inert
                 )
                 for var in ref.data_vars:
                     np.testing.assert_array_equal(

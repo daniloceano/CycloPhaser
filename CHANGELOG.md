@@ -7,6 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+**`use_filter=True` silently disabled the Lanczos filter (behaviour change)**
+
+`process_vorticity` selected the Lanczos window with
+`if use_filter == 'auto': window = len(zeta)//2 else: window = use_filter`.
+Because `bool` is a subclass of `int` in Python, `use_filter=True` fell into the
+`else` branch and was read as the integer **1**. A 1-tap Lanczos kernel is a
+single scalar multiply (0.0714 for `cutoff_low=168` / `cutoff_high=24`), not a
+convolution — so a caller asking for filtering received **none**, and the output
+differed from `use_filter=False` only by a constant factor that every downstream
+(difference-based) criterion cancels out.
+
+`use_filter=True` is now equivalent to `use_filter='auto'` (window
+`len(series)//2`) and emits a `UserWarning` naming the resulting window.
+`use_filter=False` still disables filtering; an explicit integer is still a
+literal window length, and `use_filter=1` is no longer conflated with `True`
+(the bool check runs before the int check).
+
+> **Impact — read this before reusing old results.** Any series processed with
+> `use_filter=True` on version 2.0.0 or earlier was effectively **unfiltered**.
+> This includes the calibration app's "Apply Lanczos filter" checkbox, which
+> sends a bool. Parameter sets calibrated under that setting were calibrated on
+> an unfiltered signal and **must be re-validated** — the filter now actually
+> runs, which changes the smoothed series, its derivatives, and the detected
+> phases.
+
+### Added
+
+**`boundary_padding` — opt-in fix for the Lanczos zero-padding edge artifact**
+
+`lanczos_filter` and `lanczos_bandpass_filter` convolve via
+`scipy.signal.convolve(..., mode="same")`, which implicitly zero-pads the input
+beyond its own ends. Vorticity has a non-zero floor (order -5e-5), so those
+"missing" samples are a jump to zero rather than a neutral continuation, and two
+properties of this configuration amplify the damage: the kernel is about half the
+series length (measured kernel/series ratio median 0.494 over the 51-track
+calibration set), and the bandpass kernel does not actually reject DC at these
+window lengths (`sum(weights)` median 0.629).
+
+The result is a step between the boundary value and the interior worth a median
+**74 % of the cyclone's own peak-to-peak amplitude**, spread as a ramp over ~24 %
+of the series at each end and carrying the sign of a spurious *deepening*. On the
+calibration set that ramp alone accounts for **≥ 80 % of the slope measured at t0
+in 51/51 tracks**.
+
+`boundary_padding` accepts `"zero"` (default, byte-for-byte the historical
+behaviour), `"reflect"` (recommended) and `"edge"`. Measured on the 51 tracks
+with `use_filter='auto'` (normalised `|dz|` at the first/last sample, median):
+`"zero"` 0.95/0.98, `"reflect"` 0.42/0.35, `"edge"` 0.50/0.38 — against a
+raw-signal reference of 0.29.
+
+The Lanczos kernels themselves are unchanged; the correction is purely a boundary
+condition, and the pad widths reproduce scipy's `"same"` alignment exactly, so no
+time shift is introduced. Exposed in the calibration app (selectbox + YAML
+import/export; pre-existing YAMLs fall back to the default without warning).
+
+`replace_endpoints_with_lowpass` was introduced as a palliative for this same
+artifact and itself calls `lanczos_filter`, i.e. it replaces zero-padded bandpass
+endpoints with zero-padded lowpass endpoints. It is unchanged here and is a
+candidate for future deprecation.
+
+---
+
 ## [2.0.0] - 2026-06-14
 
 This release consolidates a comprehensive bug-fix and hardening pass on the core

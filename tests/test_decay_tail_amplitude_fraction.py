@@ -45,6 +45,38 @@
 # A future change to the smoothing pipeline, the prominence filter, or the
 # residual/decay logic that shifts any of these results should fail this
 # suite -- that is the point of locking them in here.
+#
+# ============================================================================
+# HISTORICAL RECORD -- why this module pins use_filter=1
+# ============================================================================
+# The calibration locked in below (decay_tail_amplitude_fraction=0.05, safe
+# window (0.0356, 0.0651], 0/51 bad cases) was validated by the author under
+# ``use_filter=True``.
+#
+# At that time, ``use_filter=True`` did NOT enable the Lanczos filter. Because
+# ``bool`` is a subclass of ``int`` in Python, ``process_vorticity`` read True
+# as the integer 1, i.e. a Lanczos window of length 1 -- a single-tap kernel,
+# which is a scalar multiply (0.0714 for cutoff_low=168 / cutoff_high=24)
+# rather than a convolution. So the whole calibration was, in fact, performed
+# on an UNFILTERED signal, differing from ``use_filter=False`` only by a
+# constant factor that every downstream difference-based criterion cancels out.
+#
+# That has since been fixed: ``use_filter=True`` now means ``'auto'`` (window
+# ``len(series)//2``) and actually filters. With the filter genuinely active,
+# this calibration no longer holds -- 5 of the 7 CONVERT cases below stop
+# converting, and the set of tracks that change becomes a DIFFERENT set, not
+# merely a smaller one.
+#
+# This module therefore pins ``use_filter=1``, which reproduces the historical
+# configuration EXACTLY (verified byte-identical to the pre-fix
+# ``use_filter=True`` output). Its purpose is to preserve the audit trail for
+# the ``decay_tail_amplitude_fraction`` mechanism as it was validated -- NOT to
+# describe a recommended configuration.
+#
+# For the author's current validated calibration -- which reaches 0/51 WITH the
+# Lanczos filter active -- see docs/future_work.md. Do not copy the parameter
+# set below into new work.
+# ============================================================================
 
 import glob
 import os
@@ -59,8 +91,12 @@ _CALIBRATION_DATA_DIR = os.path.join(os.path.dirname(__file__), "calibration_dat
 
 # Author's calibration (docs/future_work.md, "Amplitude-based mature-stage
 # detection", 2026-09 entry): 7.8% bad cases (4/51) before this fix.
+#
+# use_filter=1 -- NOT a recommended value. It pins the exact historical
+# behaviour of the pre-fix ``use_filter=True`` (a 1-tap Lanczos kernel, i.e. no
+# convolution). See the "HISTORICAL RECORD" block at the top of this module.
 _FILTER_PARAMS = dict(
-    use_filter=True,
+    use_filter=1,
     cutoff_low=168,
     cutoff_high=24,
     replace_endpoints_with_lowpass=0,

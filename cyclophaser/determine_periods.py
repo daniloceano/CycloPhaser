@@ -352,9 +352,10 @@ def process_vorticity(
     Args:
         zeta_df (pandas.DataFrame): Input DataFrame containing 'zeta' data (vorticity time series).
         
-        use_filter (str or int, optional): Apply a Lanczos filter to vorticity data. Set to `'auto'` for default window 
-            length or provide an integer specifying the desired window length in time steps. **Units**: Time steps.
-            Default is `'auto'`.
+        use_filter (str or bool or int, optional): Apply a Lanczos filter to vorticity data. Set to `'auto'`
+            (or `True`, which is equivalent — see the "use_filter=True note" below) for the default window
+            length of `len(series)//2`, `False` to skip filtering entirely, or an integer to specify the
+            window length explicitly in time steps. **Units**: Time steps. Default is `'auto'`.
         
         replace_endpoints_with_lowpass (int, optional): If set, replaces the endpoints of the series with a lowpass 
             filter using a specified window length, helping to stabilize edge effects. **Units**: Time steps. Default is 24.
@@ -382,6 +383,28 @@ def process_vorticity(
             (recommended) and ``"edge"`` remove most of the zero-padding boundary
             artefact. See the "boundary_padding note" below. Only meaningful when
             ``use_filter`` is truthy. Default is ``"zero"``.
+
+    use_filter=True note (behaviour change)
+    ----------------------------------------
+    ``use_filter=True`` now means the same as ``use_filter='auto'``: filtering on,
+    window length ``len(series)//2``. It emits a ``UserWarning`` saying so.
+
+    This is a BUG FIX WITH A BEHAVIOUR CHANGE. ``bool`` is a subclass of ``int``
+    in Python, so the previous ``if use_filter == 'auto': ... else:
+    window_length_lanczo = use_filter`` read ``True`` as the integer **1**. A
+    1-tap Lanczos kernel is a single scalar multiply (0.0714 for
+    ``cutoff_low=168``/``cutoff_high=24``), i.e. no convolution at all — so a
+    caller asking for filtering silently received NONE, and the result differed
+    from ``use_filter=False`` only by a constant factor that every downstream
+    (difference-based) criterion cancels out.
+
+    **Any series processed with ``use_filter=True`` on an earlier version was
+    effectively unfiltered.** Parameter sets calibrated under that setting were
+    therefore calibrated on an unfiltered signal and must be re-validated.
+
+    ``use_filter=1`` still means a literal window length of 1 — the bool check
+    runs before the int check, so ``True`` and ``1`` are no longer conflated.
+    ``use_filter=False`` still disables filtering.
 
     boundary_padding note
     ----------------------
@@ -455,8 +478,33 @@ def process_vorticity(
     lanfil._validate_padding(boundary_padding)
 
     # Parameters
-    if use_filter == 'auto':
-        window_length_lanczo = len(zeta_df) // 2 
+    #
+    # use_filter accepts 'auto', a bool, or an explicit integer window length.
+    # The bool branch MUST be tested before the int branch: bool is a subclass of
+    # int in Python, so `isinstance(True, int)` is True and a bare int check would
+    # silently read True as "window length 1". A 1-tap Lanczos kernel is a scalar
+    # multiply -- no convolution at all -- so before this was fixed, asking for
+    # filtering with use_filter=True disabled it instead (see the "use_filter=True
+    # note" in the docstring above).
+    if isinstance(use_filter, bool):
+        # True means "filter on, pick the window for me" -- i.e. 'auto'.
+        # False falls through to the `if use_filter:` guard below and skips
+        # filtering entirely; the value assigned here is never used in that case.
+        window_length_lanczo = len(zeta_df) // 2
+        if use_filter:
+            warnings.warn(
+                "use_filter=True is interpreted as 'auto' (Lanczos window = "
+                f"len(series)//2 = {window_length_lanczo} timesteps). Prior to "
+                "this fix, True was read as the integer 1, which reduced the "
+                "Lanczos filter to a single tap (a scalar multiply) and "
+                "effectively disabled it -- results obtained with use_filter=True "
+                "on earlier versions were UNFILTERED. Pass use_filter='auto' to "
+                "silence this warning, or an explicit integer to set the window "
+                "length yourself.",
+                UserWarning,
+            )
+    elif use_filter == 'auto':
+        window_length_lanczo = len(zeta_df) // 2
     else:
         window_length_lanczo = use_filter
 
@@ -919,7 +967,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       plot_steps: Union[str, bool] = False,
                       export_dict: Union[str, bool] = False,
                       hemisphere: str = "southern",
-                      use_filter: Union[str, int] = 'auto',
+                      use_filter: Union[str, bool, int] = 'auto',
                       replace_endpoints_with_lowpass: int = 24,
                       use_smoothing: Union[bool, str, int] = 'auto',
                       use_smoothing_twice: Union[bool, str, int] = 'auto',
@@ -968,9 +1016,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             When working with **wind speed data**, use `"northern"` to detect maxima in both hemispheres. For **sea level 
             pressure (SLP) data**, set to `"southern"` as the default convention.
         
-        use_filter (Union[str, int], optional): Apply a Lanczos filter to the vorticity data. Choose `'auto'` to adapt 
-            the window length based on the data size (half of dataset length) or specify an integer to set a specific window 
-            length. **Units:** Time steps. Default is `'auto'`.
+        use_filter (Union[str, bool, int], optional): Apply a Lanczos filter to the vorticity data. Choose `'auto'`
+            — or `True`, which is equivalent — to adapt the window length based on the data size (half of dataset
+            length); `False` to skip filtering; or an integer to set a specific window length. `True` emits a
+            `UserWarning` naming the resulting window: it used to be read as the integer 1, i.e. a single-tap
+            kernel that disabled filtering altogether, so results obtained with `use_filter=True` on earlier
+            versions were UNFILTERED. See the "use_filter=True note" in `process_vorticity`. **Units:** Time steps.
+            Default is `'auto'`.
         
         replace_endpoints_with_lowpass (int, optional): Use a lowpass filter to replace the endpoints of the series, 
             stabilizing edge effects. Specify the window length. **Units:** Time steps. Default is 24.
