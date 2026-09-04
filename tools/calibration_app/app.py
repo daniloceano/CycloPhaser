@@ -46,7 +46,7 @@ _REPO_ROOT = Path(__file__).parent.parent.parent
 def _load_synthetic_cases():
     """Materialise tests/synthetic/cases.py in the app's own file format.
 
-    Returns (files, ground_truth, preset, error):
+    Returns (files, ground_truth, groups, error):
       files        {name: csv_bytes}  — ';'-delimited, column 'min_max_zeta_850',
                    identical in shape to the real calibration CSVs, so every
                    downstream code path (process_vorticity, get_periods, the
@@ -54,7 +54,10 @@ def _load_synthetic_cases():
       ground_truth {name: int|None}   — index of the designed incipient boundary
                    (the length of a leading 'Ic' segment), or None when the case
                    has no designed Ic.
-      preset       dict               — SYNTHETIC_VALIDATION_PRESET.
+      groups       {"clean": {...}, "noisy": {...}} — each holds "ids" (tuple of
+                   case names) and "preset" (the pre-processing appropriate to
+                   that population). The two populations need DIFFERENT
+                   pre-processing, which is why they load separately.
       error        str|None           — import failure message, if any.
 
     The modules are loaded BY FILE PATH under a private package name rather
@@ -96,7 +99,12 @@ def _load_synthetic_cases():
         spec.loader.exec_module(mod)
 
         CASES = mod.CASES
-        SYNTHETIC_VALIDATION_PRESET = mod.SYNTHETIC_VALIDATION_PRESET
+        groups = {
+            "clean": {"ids": tuple(mod.CLEAN_CASE_IDS),
+                      "preset": dict(mod.SYNTHETIC_CLEAN_PRESET)},
+            "noisy": {"ids": tuple(mod.NOISY_CASE_IDS),
+                      "preset": dict(mod.SYNTHETIC_NOISY_PRESET)},
+        }
     except Exception as exc:  # missing file, syntax error, anything at import
         return {}, {}, {}, f"{type(exc).__name__}: {exc}"
 
@@ -109,7 +117,7 @@ def _load_synthetic_cases():
         segs = case.get("segments") or []
         types = [x["type"] for x in segs]
         gt[name] = segs[0]["n"] if (types and types[0] == "Ic") else None
-    return files, gt, dict(SYNTHETIC_VALIDATION_PRESET), None
+    return files, gt, groups, None
 
 # ── Page config ──────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="CycloPhaser Calibration", layout="wide")
@@ -869,30 +877,60 @@ def _run_get_periods(
 
 # ── Synthetic-preset application ─────────────────────────────────────────────────
 # Must run BEFORE the sidebar widgets are constructed: Streamlit reads a widget's
-# session_state value at construction time, so writing the preset after the
-# sidebar has rendered would only take effect one rerun later (and would then
-# fight the user's own edits). The checkbox that flips this lives further down
-# the page, but its value is already in session_state by the time this reruns.
+# session_state value at construction time, so writing a preset after the sidebar
+# has rendered would only take effect one rerun later (and would then fight the
+# user's own edits). The checkboxes that drive this live further down the page,
+# but their values are already in session_state by the time this reruns.
 #
-# The preset is applied ONLY on the False->True transition, so the pre-processing
-# controls stay fully editable afterwards -- it is a starting point for the
-# synthetic validation, not a lock.
-_SYNTH_PRESET_WIDGETS = {
-    "use_filter":        False,
-    "sm_mode":           "off",
-    "sm2_mode":          "off",
-    "replace_endpoints": 0,
-    "savgol_poly":       3,
-    "boundary_padding":  "reflect",
-    "cutoff_low":        168,
-    "cutoff_high":       48,
-}
-_synth_loaded = bool(st.session_state.get("load_synthetic_cases", False))
-if _synth_loaded and not st.session_state.get("_synth_preset_applied", False):
-    for _k, _v in _SYNTH_PRESET_WIDGETS.items():
-        st.session_state[_k] = _v
-    st.session_state["_synth_preset_applied"] = True
-elif not _synth_loaded:
+# The clean and noisy populations need DIFFERENT pre-processing (see the block
+# comment on the presets in tests/synthetic/cases.py), so which preset is applied
+# depends on which boxes are ticked. With both ticked, the noisy preset wins:
+# it is the one that suppresses noise, and it is also correct on all four clean
+# cases, whereas the clean preset is not usable on the noisy ones.
+#
+# A preset is applied ONLY when the selection actually CHANGES, so the
+# pre-processing controls stay fully editable afterwards -- it is a starting
+# point, not a lock.
+_synth_clean_on = bool(st.session_state.get("load_synthetic_clean", False))
+_synth_noisy_on = bool(st.session_state.get("load_synthetic_noisy", False))
+_synth_sel = ("noisy" if _synth_noisy_on else "clean") if (_synth_clean_on or _synth_noisy_on) else None
+
+
+def _preset_to_widgets(preset: dict) -> dict:
+    """Translate a cases.py preset into this app's widget keys.
+
+    use_smoothing / use_smoothing_twice are a (mode, value) pair of widgets here
+    rather than the single polymorphic argument cyclophaser takes, so False maps
+    to mode 'off', 'auto' to mode 'auto', and an int to mode 'manual' + value.
+    """
+    out = {
+        "use_filter":        bool(preset.get("use_filter", False)),
+        "replace_endpoints": int(preset.get("replace_endpoints_with_lowpass", 0)),
+        "savgol_poly":       int(preset.get("savgol_polynomial", 3)),
+        "boundary_padding":  str(preset.get("boundary_padding", "reflect")),
+        "cutoff_low":        int(preset.get("cutoff_low", 168)),
+        "cutoff_high":       int(preset.get("cutoff_high", 48)),
+    }
+    for src, mode_key, val_key in (("use_smoothing", "sm_mode", "sm_val"),
+                                   ("use_smoothing_twice", "sm2_mode", "sm2_val")):
+        v = preset.get(src, "auto")
+        if v is False:
+            out[mode_key] = "off"
+        elif isinstance(v, int) and not isinstance(v, bool):
+            out[mode_key] = "manual"
+            out[val_key] = int(v)
+        else:
+            out[mode_key] = "auto"
+    return out
+
+
+if _synth_sel is not None and st.session_state.get("_synth_preset_applied") != _synth_sel:
+    _g, _, _pre_groups, _pre_err = _load_synthetic_cases()
+    if _pre_groups:
+        for _k, _v in _preset_to_widgets(_pre_groups[_synth_sel]["preset"]).items():
+            st.session_state[_k] = _v
+        st.session_state["_synth_preset_applied"] = _synth_sel
+elif _synth_sel is None:
     st.session_state.pop("_synth_preset_applied", None)
 
 
@@ -1484,41 +1522,75 @@ load_all_test_cyclones = st.checkbox(
     ),
 )
 
-_synth_files, _synth_gt, _synth_preset, _synth_err = _load_synthetic_cases()
-load_synthetic_cases = st.checkbox(
-    f"Load synthetic cases (tests/synthetic — {len(_synth_files)} cases)"
-    if _synth_files else
-    "Load synthetic cases (tests/synthetic — unavailable in this environment)",
-    value=False,
-    key="load_synthetic_cases",
-    disabled=not bool(_synth_files),
-    help=(
-        "Loads the synthetic life-cycle cases from tests/synthetic/cases.py. "
-        "These are the only series with a KNOWN incipient boundary, so they are "
-        "the ground truth for validating incipient_method. Checking this also "
-        "switches the pre-processing controls to SYNTHETIC_VALIDATION_PRESET "
-        "(they remain editable)."
-        if _synth_files else
-        f"tests/synthetic could not be imported ({_synth_err}) — this option is "
-        "unavailable."
-    ),
-)
+_synth_files, _synth_gt, _synth_groups, _synth_err = _load_synthetic_cases()
+_clean_ids = _synth_groups.get("clean", {}).get("ids", ())
+_noisy_ids = _synth_groups.get("noisy", {}).get("ids", ())
+
+# Two separate options rather than one: the clean and noisy populations need
+# DIFFERENT pre-processing, so loading them together would force a single preset
+# onto both. See the presets' block comment in tests/synthetic/cases.py.
+_sc1, _sc2 = st.columns(2)
+with _sc1:
+    load_synthetic_clean = st.checkbox(
+        f"Load synthetic — clean ({len(_clean_ids)} cases, no noise)"
+        if _clean_ids else "Load synthetic — clean (unavailable)",
+        value=False, key="load_synthetic_clean", disabled=not bool(_clean_ids),
+        help=(
+            "The noise-free synthetic cases: "
+            + ", ".join(_clean_ids) + ".\n\n"
+            "Pre-processing is set to SYNTHETIC_CLEAN_PRESET — Lanczos off, one "
+            "Savgol pass. These series have nothing to denoise, so the band-pass "
+            "is dropped; the single smoothing pass is the minimum that survives "
+            "the kink at each segment join. Measured: sequence 3/3, no timing "
+            "failures."
+            if _clean_ids else
+            f"tests/synthetic could not be imported ({_synth_err})."
+        ),
+    )
+with _sc2:
+    load_synthetic_noisy = st.checkbox(
+        f"Load synthetic — noisy ({len(_noisy_ids)} cases, 2 % noise)"
+        if _noisy_ids else "Load synthetic — noisy (unavailable)",
+        value=False, key="load_synthetic_noisy", disabled=not bool(_noisy_ids),
+        help=(
+            "The synthetic cases carrying 2 % Gaussian noise.\n\n"
+            "Pre-processing is set to SYNTHETIC_NOISY_PRESET — Lanczos ACTIVE "
+            "(cutoff_high=18), Savgol off, mirroring the author's validated "
+            "section-3c calibration. These series genuinely need the noise "
+            "suppressed, and it is the band-pass that does it here. Measured: "
+            "sequence 6/8, no timing failures; DItMD_noisy and "
+            "DItMD_residual_noisy are the two that miss."
+            if _noisy_ids else
+            f"tests/synthetic could not be imported ({_synth_err})."
+        ),
+    )
+
+load_synthetic_cases = bool(load_synthetic_clean or load_synthetic_noisy)
+
 if _synth_err and not _synth_files:
     st.caption(f"⚠ tests/synthetic unavailable: {_synth_err}")
 
-if load_synthetic_cases and _synth_files:
+if load_synthetic_cases:
+    _active = "noisy" if load_synthetic_noisy else "clean"
+    _both = load_synthetic_clean and load_synthetic_noisy
     st.caption(
-        "**Synthetic mode.** Pre-processing has been set to "
-        "`SYNTHETIC_VALIDATION_PRESET` (Lanczos off, Savgol off). These series are "
-        "clean by construction, so the real-track pre-processing would smooth what "
-        "is already smooth and round off the very segment boundaries under test — "
-        "it would measure the filter rather than the phase logic. "
+        f"**Synthetic mode — {_active} preset applied.** "
+        "These series are analytic, so the real-track Lanczos band-pass would "
+        "round off the very segment boundaries under test. "
         "**Pre-processing conclusions do not transfer from synthetic to real "
-        "tracks; phase-detection conclusions do.** "
-        "Measured caveat: with BOTH the filter and the smoothing off, the detected "
-        "*sequence* degrades on several cases (the unsmoothed derivative has a kink "
-        "at each segment join) — read the incipient boundary here, not the full "
-        "sequence. The phase controls are unaffected and remain fully editable."
+        "tracks; phase-detection conclusions do.** The phase controls are "
+        "unaffected and remain fully editable; so is the pre-processing, which "
+        "the preset only seeds."
+        + (" Both groups are loaded, so the *noisy* preset is applied — it is "
+           "also correct on all four clean cases, whereas the clean preset is "
+           "not usable on the noisy ones." if _both else "")
+        + ("\n\nKnown limitation of the noisy preset: it keeps the incipient "
+           "plateau measurable (Savgol off keeps r(t₀) low) at the cost of 2/8 "
+           "sequences — `DItMD_noisy` and `DItMD_residual_noisy`, which also "
+           "pick up a 1-step spurious incipient. The alternative (two Savgol "
+           "passes) gets 8/8 sequences but puts the edge artifact back at t₀, "
+           "collapsing the plateau rule to 'no incipient phase' on 4 of the 5 "
+           "designed-Ic cases." if load_synthetic_noisy else "")
     )
 
 _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
@@ -1531,8 +1603,10 @@ _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" 
 files: dict[str, bytes] = {}
 if load_all_test_cyclones and _calib_data_files:
     files.update({p.stem: p.read_bytes() for p in _calib_data_files})
-if load_synthetic_cases and _synth_files:
-    files.update(_synth_files)
+if _synth_files:
+    _wanted = ((set(_clean_ids) if load_synthetic_clean else set())
+               | (set(_noisy_ids) if load_synthetic_noisy else set()))
+    files.update({k: v for k, v in _synth_files.items() if k in _wanted})
 if uploaded:
     files.update({Path(f.name).stem: f.getvalue() for f in uploaded})
 if not files:

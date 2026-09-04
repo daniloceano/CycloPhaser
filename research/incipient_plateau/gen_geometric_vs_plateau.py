@@ -22,7 +22,10 @@ Configurations
                   0.068). Under package defaults the first sample already
                   exceeds every usable tau on most tracks — see section 4 of
                   REPORT_incipient_characterisation.md.
-    synthetic   : tests/synthetic SYNTHETIC_VALIDATION_PRESET.
+    synthetic   : the preset appropriate to each case — SYNTHETIC_CLEAN_PRESET
+                  for the four noise-free cases, SYNTHETIC_NOISY_PRESET for the
+                  eight 2 %-noise ones (they need different pre-processing; see
+                  the presets' block comment in tests/synthetic/cases.py).
 
 Run from the repo root:
     python research/incipient_plateau/gen_geometric_vs_plateau.py
@@ -54,7 +57,7 @@ from cyclophaser.determine_periods import (
     find_peaks_valleys, get_periods, periods_to_dict, process_vorticity,
 )
 from cyclophaser.find_stages import _incipient_plateau_rel
-from tests.synthetic.cases import CASES, SYNTHETIC_VALIDATION_PRESET
+from tests.synthetic.cases import CASES, NOISY_CASE_IDS, preset_for
 
 OUT = Path(__file__).resolve().parent / "figures" / "geometric_vs_plateau"
 CALIB = REPO_ROOT / "tests" / "calibration_data"
@@ -80,7 +83,6 @@ AUTHOR_GP = dict(prominence_relative=0.3, distance=3, mature_method="amplitude",
                  decay_tail_amplitude_fraction=0.05, length_scale="local",
                  threshold_mature_distance=0.18)
 
-PRESET_PV = {k: v for k, v in SYNTHETIC_VALIDATION_PRESET.items()}
 PRESET_GP: dict = {}
 
 PHASE_COLORS = {"incipient": "#65a1e6", "intensification": "#f7b538",
@@ -250,15 +252,16 @@ def main():
                      "plateau": _lead(plat), "gt": None})
         print(f"  {tid}: geometric={_lead(geo)} plateau={_lead(plat)}")
 
-    print("--- synthetic (SYNTHETIC_VALIDATION_PRESET) ---")
+    print("--- synthetic (per-case clean/noisy preset) ---")
     for name, case in CASES.items():
         s = case["series"]
         segs = case["segments"]
         gt = segs[0]["n"] if segs and segs[0]["type"] == "Ic" else None
-        vort, geo, plat = run_one(s, PRESET_PV, PRESET_GP, tau)
+        grp = "noisy" if name in NOISY_CASE_IDS else "clean"
+        vort, geo, plat = run_one(s, preset_for(name), PRESET_GP, tau)
         make_figure(name, s, vort, geo, plat, tau,
                     OUT / "synthetic" / f"{name}.png", gt=gt,
-                    config_label="SYNTHETIC_VALIDATION_PRESET")
+                    config_label=f"SYNTHETIC_{grp.upper()}_PRESET")
         rows.append({"set": "synthetic", "name": name, "geo": _lead(geo),
                      "plateau": _lead(plat), "gt": gt})
         err = (f" err={_lead(plat) - gt:+d}" if gt is not None else "")

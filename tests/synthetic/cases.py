@@ -459,35 +459,100 @@ CASES["IcItMD_residual_clean"] = {
 }
 
 
-# ── Synthetic validation preset ───────────────────────────────────────────────
-# Pre-processing configuration to use when validating PHASE DETECTION on these
-# synthetic series.
+# ── Clean / noisy split ───────────────────────────────────────────────────────
+# The suite contains two populations that need DIFFERENT pre-processing, and
+# lumping them together is what made the first version of this preset wrong.
+CLEAN_CASE_IDS = tuple(
+    k for k, v in CASES.items() if not v.get("kwargs", {}).get("noise_frac", 0.0))
+NOISY_CASE_IDS = tuple(
+    k for k, v in CASES.items() if v.get("kwargs", {}).get("noise_frac", 0.0))
+
+
+# ── Synthetic validation presets ──────────────────────────────────────────────
+# Pre-processing to use when validating PHASE DETECTION on these synthetic
+# series. Both presets were chosen by measurement (2026-09-04), scoring every
+# candidate with the suite's own criteria — exact `expected_phases` match and
+# `expected_starts_idx` within `tolerance` — separately on the clean and noisy
+# populations.
 #
-# Rationale: the synthetic series are clean by construction — they are built
-# from analytic ramps/sines with at most a few percent of Gaussian noise, with
-# the segment boundaries placed exactly where the ground truth says they are.
-# Applying the real-track calibration's pre-processing on top of that (Lanczos
-# band-pass with a len//2 kernel, plus one or two Savitzky-Golay passes) smooths
-# what is already smooth: it rounds off the very segment boundaries the test is
-# trying to locate, and it re-introduces the filter edge artifact at t0 that the
-# incipient measurement showed dominates the first few samples. The result is a
-# test that measures the FILTER rather than the phase logic.
+# Why not simply reuse the real-track calibration: these series are analytic
+# ramps/sines with segment boundaries placed exactly where the ground truth says
+# they are. The real-track Lanczos band-pass (a len//2 kernel) rounds off the
+# very boundaries under test. So both presets drop it where they can.
 #
-# This preset therefore turns the pre-processing off, so a synthetic assertion
-# isolates the stage-detection logic. It is deliberately NOT a recommendation
-# for real tracks, where the filtering is doing necessary work.
+# Why not "no pre-processing at all", which is what the first version of this
+# preset did (use_filter=False AND use_smoothing=False): measured, that fails
+# on BOTH populations, not just the noisy one —
 #
-# Note that `boundary_padding`, `cutoff_low` and `cutoff_high` are inert while
-# `use_filter=False`; they are listed at their package defaults so the preset
-# can be splatted straight into `determine_periods`/`process_vorticity` without
-# leaving those parameters implicit.
-SYNTHETIC_VALIDATION_PRESET: dict = {
+#     variant                        clean seq   noisy seq
+#     both off (the old preset)          1/3        0/8
+#     no filter, 1 smoothing pass        3/3        6/8
+#     no filter, 2 smoothing passes      3/3        8/8
+#     filter on, no smoothing            3/3        6/8
+#
+# With no pre-processing the derivative of a piecewise-analytic series has a
+# kink at every segment join, and the extra extrema fragment the phases.
+#
+# ── The tension that decides the noisy preset ────────────────────────────────
+# For the noisy cases the two goals cannot both be maximised:
+#
+#   * "no filter, 2 smoothing passes" gets the SEQUENCE right 8/8, but the two
+#     Savitzky-Golay passes on the derivative put the edge artifact back at t0
+#     (docs/future_work.md item 4: derivative smoothing multiplies r(t0) by ~8),
+#     so rel(0) >= tau and the PLATEAU incipient rule collapses to "no incipient
+#     phase" on 4 of the 5 designed-Ic cases. Useless for validating
+#     incipient_method.
+#   * "filter on, no smoothing" keeps r(t0) low, so the plateau boundary is
+#     definable and lands within tolerance, at the cost of 2/8 sequences
+#     (DItMD_noisy, DItMD_residual_noisy).
+#
+# SYNTHETIC_NOISY_PRESET takes the second, because these presets exist to
+# validate phase *detection* — and it mirrors the author's validated section-3c
+# calibration (Lanczos active, Savgol off, cutoff_high=18), which is the regime
+# where the plateau rule is definable on real tracks too. The 2/8 sequence cost
+# is documented below, not hidden.
+
+# Clean cases: no noise to suppress, so the Lanczos is dropped entirely and a
+# single Savgol pass is kept — the minimum that survives the segment-join kinks.
+# Measured on the 4 clean cases: sequence 3/3, 0 timing failures.
+SYNTHETIC_CLEAN_PRESET: dict = {
     "use_filter": False,
-    "use_smoothing": False,
+    "use_smoothing": "auto",
     "use_smoothing_twice": False,
     "replace_endpoints_with_lowpass": 0,
     "savgol_polynomial": 3,
+    # Inert while use_filter=False; listed so the preset can be splatted
+    # straight into determine_periods/process_vorticity.
     "boundary_padding": "reflect",
     "cutoff_low": 168,
     "cutoff_high": 48,
 }
+
+# Noisy cases: the noise DOES need suppressing, and it is the Lanczos that does
+# it here — mirroring the author's section-3c calibration.
+# Measured on the 8 noisy cases: sequence 6/8, 0 timing failures.
+# KNOWN LIMITATION: DItMD_noisy and DItMD_residual_noisy are the 2/8 whose
+# sequence is wrong under this preset, and they are also the two cases designed
+# WITHOUT an incipient phase that nevertheless pick up a 1-timestep spurious one.
+SYNTHETIC_NOISY_PRESET: dict = {
+    "use_filter": "auto",
+    "cutoff_low": 168,
+    "cutoff_high": 18,
+    "boundary_padding": "reflect",
+    "use_smoothing": False,
+    "use_smoothing_twice": False,
+    "replace_endpoints_with_lowpass": 0,
+    "savgol_polynomial": 3,
+}
+
+
+def preset_for(case_id: str) -> dict:
+    """Pre-processing preset appropriate to one synthetic case.
+
+    Raises KeyError for an unknown case id, rather than silently returning a
+    default that would be wrong for half the suite.
+    """
+    if case_id not in CASES:
+        raise KeyError(f"unknown synthetic case: {case_id!r}")
+    return dict(SYNTHETIC_NOISY_PRESET if case_id in NOISY_CASE_IDS
+                else SYNTHETIC_CLEAN_PRESET)
