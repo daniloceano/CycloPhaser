@@ -57,15 +57,47 @@ def _load_synthetic_cases():
       preset       dict               — SYNTHETIC_VALIDATION_PRESET.
       error        str|None           — import failure message, if any.
 
-    The repo root is put on sys.path here rather than relying on the working
-    directory, because `streamlit run` may be invoked from anywhere.
+    The modules are loaded BY FILE PATH under a private package name rather
+    than with `import tests.synthetic.cases`, because a plain import of a
+    top-level name as generic as `tests` is not safe:
+
+      - `pip install -e .` puts the repo root on sys.path via a .pth file,
+        which is processed *inside* site-packages handling, so the repo root
+        lands AFTER site-packages;
+      - any other project that leaked a top-level `tests` package into the
+        same environment then wins the name, and `tests.synthetic` raises
+        ModuleNotFoundError even though the repo's own tests/ is right there.
+
+    That is not hypothetical — it is what this loader was first reported
+    failing on. Resolving the two files directly removes the dependency on
+    sys.path ordering (and on `tests` being importable at all), and leaves
+    sys.path untouched for everything else in the process.
     """
+    import importlib.util
     import sys
-    if str(_REPO_ROOT) not in sys.path:
-        sys.path.insert(0, str(_REPO_ROOT))
+    import types
+
+    cases_py = _SYNTHETIC_DIR / "cases.py"
+    if not cases_py.is_file():
+        return {}, {}, {}, f"not found: {cases_py}"
+
     try:
-        from tests.synthetic.cases import CASES, SYNTHETIC_VALIDATION_PRESET
-    except Exception as exc:  # ImportError, or anything raised at module import
+        # A private package whose __path__ is tests/synthetic, so that
+        # cases.py's `from .generators import ...` resolves next to it.
+        pkg_name = "_cyclophaser_app_synthetic"
+        pkg = types.ModuleType(pkg_name)
+        pkg.__path__ = [str(_SYNTHETIC_DIR)]
+        sys.modules[pkg_name] = pkg
+
+        spec = importlib.util.spec_from_file_location(
+            f"{pkg_name}.cases", cases_py)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = mod
+        spec.loader.exec_module(mod)
+
+        CASES = mod.CASES
+        SYNTHETIC_VALIDATION_PRESET = mod.SYNTHETIC_VALIDATION_PRESET
+    except Exception as exc:  # missing file, syntax error, anything at import
         return {}, {}, {}, f"{type(exc).__name__}: {exc}"
 
     files, gt = {}, {}
