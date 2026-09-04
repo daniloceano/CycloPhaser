@@ -457,3 +457,37 @@ CASES["IcItMD_residual_clean"] = {
         "*** FLAG: residual diff=6 at tolerance boundary."
     ),
 }
+
+
+# ── Synthetic validation preset ───────────────────────────────────────────────
+# Pre-processing configuration to use when validating PHASE DETECTION on these
+# synthetic series.
+#
+# Rationale: the synthetic series are clean by construction — they are built
+# from analytic ramps/sines with at most a few percent of Gaussian noise, with
+# the segment boundaries placed exactly where the ground truth says they are.
+# Applying the real-track calibration's pre-processing on top of that (Lanczos
+# band-pass with a len//2 kernel, plus one or two Savitzky-Golay passes) smooths
+# what is already smooth: it rounds off the very segment boundaries the test is
+# trying to locate, and it re-introduces the filter edge artifact at t0 that the
+# incipient measurement showed dominates the first few samples. The result is a
+# test that measures the FILTER rather than the phase logic.
+#
+# This preset therefore turns the pre-processing off, so a synthetic assertion
+# isolates the stage-detection logic. It is deliberately NOT a recommendation
+# for real tracks, where the filtering is doing necessary work.
+#
+# Note that `boundary_padding`, `cutoff_low` and `cutoff_high` are inert while
+# `use_filter=False`; they are listed at their package defaults so the preset
+# can be splatted straight into `determine_periods`/`process_vorticity` without
+# leaving those parameters implicit.
+SYNTHETIC_VALIDATION_PRESET: dict = {
+    "use_filter": False,
+    "use_smoothing": False,
+    "use_smoothing_twice": False,
+    "replace_endpoints_with_lowpass": 0,
+    "savgol_polynomial": 3,
+    "boundary_padding": "reflect",
+    "cutoff_low": 168,
+    "cutoff_high": 48,
+}

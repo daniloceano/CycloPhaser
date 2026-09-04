@@ -36,6 +36,48 @@ _METHOD_IMG = (
 # depending on how `streamlit run` is invoked) so "Load all test cyclones" works
 # regardless of the working directory the app was launched from.
 _CALIBRATION_DATA_DIR = Path(__file__).parent.parent.parent / "tests" / "calibration_data"
+# Same resolution strategy for the synthetic suite, which the app can load as an
+# alternative track set for validating PHASE DETECTION against known ground truth.
+_SYNTHETIC_DIR = Path(__file__).parent.parent.parent / "tests" / "synthetic"
+_REPO_ROOT = Path(__file__).parent.parent.parent
+
+
+@st.cache_data(show_spinner=False)
+def _load_synthetic_cases():
+    """Materialise tests/synthetic/cases.py in the app's own file format.
+
+    Returns (files, ground_truth, preset, error):
+      files        {name: csv_bytes}  — ';'-delimited, column 'min_max_zeta_850',
+                   identical in shape to the real calibration CSVs, so every
+                   downstream code path (process_vorticity, get_periods, the
+                   figure renderers, the ZIP export) works unchanged.
+      ground_truth {name: int|None}   — index of the designed incipient boundary
+                   (the length of a leading 'Ic' segment), or None when the case
+                   has no designed Ic.
+      preset       dict               — SYNTHETIC_VALIDATION_PRESET.
+      error        str|None           — import failure message, if any.
+
+    The repo root is put on sys.path here rather than relying on the working
+    directory, because `streamlit run` may be invoked from anywhere.
+    """
+    import sys
+    if str(_REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(_REPO_ROOT))
+    try:
+        from tests.synthetic.cases import CASES, SYNTHETIC_VALIDATION_PRESET
+    except Exception as exc:  # ImportError, or anything raised at module import
+        return {}, {}, {}, f"{type(exc).__name__}: {exc}"
+
+    files, gt = {}, {}
+    for name, case in CASES.items():
+        series = case["series"]
+        files[name] = series.to_csv(
+            sep=";", header=["min_max_zeta_850"], index_label="time"
+        ).encode("utf-8")
+        segs = case.get("segments") or []
+        types = [x["type"] for x in segs]
+        gt[name] = segs[0]["n"] if (types and types[0] == "Ic") else None
+    return files, gt, dict(SYNTHETIC_VALIDATION_PRESET), None
 
 # ── Page config ──────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="CycloPhaser Calibration", layout="wide")
@@ -69,6 +111,11 @@ _DEFAULTS: dict = {
     "extrema_prominence_val":         1e-6,         # absolute threshold
     "extrema_distance_enabled":       False,
     "extrema_distance_val":           3,
+    "incipient_method":               "geometric",
+    "incipient_plateau_tau":          0.20,
+    "incipient_plateau_signal":       "derivative",
+    "incipient_plateau_crossing":     "single",
+    "incipient_plateau_k":            3,
     "decay_tail_enabled":             False,
     "decay_tail_fraction_val":        0.05,   # author's validated reference value
 }
@@ -118,6 +165,33 @@ def _parse_mature_method(v) -> str:
     v = str(v)
     if v not in ("derivative", "amplitude"):
         raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {v!r}")
+    return v
+
+
+def _parse_incipient_method(v) -> str:
+    """Validating str converter for incipient_method — same rationale as
+    _parse_mature_method above."""
+    v = str(v)
+    if v not in ("geometric", "plateau"):
+        raise ValueError(f"incipient_method must be 'geometric' or 'plateau', got {v!r}")
+    return v
+
+
+def _parse_incipient_signal(v) -> str:
+    """Validating str converter for incipient_plateau_signal."""
+    v = str(v)
+    if v not in ("derivative", "vorticity"):
+        raise ValueError(
+            f"incipient_plateau_signal must be 'derivative' or 'vorticity', got {v!r}")
+    return v
+
+
+def _parse_incipient_crossing(v) -> str:
+    """Validating str converter for incipient_plateau_crossing."""
+    v = str(v)
+    if v not in ("single", "sustained"):
+        raise ValueError(
+            f"incipient_plateau_crossing must be 'single' or 'sustained', got {v!r}")
     return v
 
 
@@ -185,6 +259,11 @@ _YAML_PHASE_MAP: dict = {
     "length_scale":                     ("length_scale", _parse_length_scale),
     "mature_method":                    ("mature_method", _parse_mature_method),
     "mature_amplitude_fraction":        ("mature_amplitude_fraction", float),
+    "incipient_method":                 ("incipient_method", _parse_incipient_method),
+    "incipient_plateau_tau":            ("incipient_plateau_tau", float),
+    "incipient_plateau_signal":         ("incipient_plateau_signal", _parse_incipient_signal),
+    "incipient_plateau_crossing":       ("incipient_plateau_crossing", _parse_incipient_crossing),
+    "incipient_plateau_k":              ("incipient_plateau_k", lambda v: int(float(v))),
 }
 # The extrema-filtering parameters (prominence / prominence_relative / distance)
 # and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
@@ -198,7 +277,18 @@ _YAML_PHASE_MAP: dict = {
 # (_REQUIRED_PHASE_YAML_KEYS), which would otherwise warn about a mode that
 # simply wasn't in use.
 _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
-                              "decay_tail_amplitude_fraction"}
+                              "decay_tail_amplitude_fraction",
+                              # The incipient_* keys are optional for the same
+                              # backward-compatibility reason as boundary_padding
+                              # below: every YAML exported before the plateau
+                              # method existed legitimately lacks them and must
+                              # import cleanly, falling back to the
+                              # "geometric" defaults without a spurious
+                              # "missing key" warning.
+                              "incipient_method", "incipient_plateau_tau",
+                              "incipient_plateau_signal",
+                              "incipient_plateau_crossing",
+                              "incipient_plateau_k"}
 
 # boundary_padding is OPTIONAL on import for the same reason as the optional
 # phase keys above, but for a backward-compatibility reason rather than a
@@ -207,6 +297,11 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
 # to the default ("zero") without a spurious "missing key" warning. It is still
 # recognised for the "unknown key" check.
 _OPTIONAL_FILTER_YAML_KEYS = {"boundary_padding"}
+
+# phase_params entries that are string enums, not numbers: exported as-is
+# rather than coerced through float().
+_PHASE_ENUM_KEYS = ("length_scale", "mature_method", "incipient_method",
+                    "incipient_plateau_signal", "incipient_plateau_crossing")
 
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
 _REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
@@ -448,11 +543,10 @@ def _build_yaml(cyclone_names) -> str:
         # extrema keys appear also encodes whether that filter was enabled —
         # see the extrema-import block in _load_yaml_config.
         "phase_params": {
-            **{k: (int(v) if k == "distance" else float(v))
+            **{k: (int(v) if k in ("distance", "incipient_plateau_k") else float(v))
                for k, v in _PHASE_PARAMS.items()
-               if v is not None and k not in ("length_scale", "mature_method")},
-            "length_scale": _PHASE_PARAMS["length_scale"],
-            "mature_method": _PHASE_PARAMS["mature_method"],
+               if v is not None and k not in _PHASE_ENUM_KEYS},
+            **{k: _PHASE_PARAMS[k] for k in _PHASE_ENUM_KEYS},
         },
         "evaluation": _compute_evaluation(cyclone_names),
     }
@@ -482,6 +576,7 @@ def _render_periods_png(
     name: str,
     figsize: tuple,
     show_title: bool,
+    gt_boundary_iso: str | None = None,
 ) -> bytes:
     """Render a plot_all_periods PNG at the given figsize. Cached per unique
     (file, filter params, phase params, name, figsize, show_title) combination
@@ -504,6 +599,12 @@ def _render_periods_png(
     fig, ax = plt.subplots(figsize=figsize)
     try:
         plot_all_periods(periods_dict, df_result, ax=ax, vorticity=vort)
+        # Ground-truth incipient boundary (synthetic cases only): the designed
+        # end of the leading 'Ic' segment. Same green dashed convention as the
+        # measurement figures in research/incipient_plateau/.
+        if gt_boundary_iso:
+            ax.axvline(pd.Timestamp(gt_boundary_iso), color="#00a000",
+                       lw=2.0, ls=":", zorder=6, label="ground truth Ic")
         _format_date_axis_mmdd(ax)
     except Exception:
         pass
@@ -732,6 +833,35 @@ def _run_get_periods(
     phase_warns = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
     periods_dict = periods_to_dict(df_result)
     return df_result, periods_dict, phase_warns
+
+
+# ── Synthetic-preset application ─────────────────────────────────────────────────
+# Must run BEFORE the sidebar widgets are constructed: Streamlit reads a widget's
+# session_state value at construction time, so writing the preset after the
+# sidebar has rendered would only take effect one rerun later (and would then
+# fight the user's own edits). The checkbox that flips this lives further down
+# the page, but its value is already in session_state by the time this reruns.
+#
+# The preset is applied ONLY on the False->True transition, so the pre-processing
+# controls stay fully editable afterwards -- it is a starting point for the
+# synthetic validation, not a lock.
+_SYNTH_PRESET_WIDGETS = {
+    "use_filter":        False,
+    "sm_mode":           "off",
+    "sm2_mode":          "off",
+    "replace_endpoints": 0,
+    "savgol_poly":       3,
+    "boundary_padding":  "reflect",
+    "cutoff_low":        168,
+    "cutoff_high":       48,
+}
+_synth_loaded = bool(st.session_state.get("load_synthetic_cases", False))
+if _synth_loaded and not st.session_state.get("_synth_preset_applied", False):
+    for _k, _v in _SYNTH_PRESET_WIDGETS.items():
+        st.session_state[_k] = _v
+    st.session_state["_synth_preset_applied"] = True
+elif not _synth_loaded:
+    st.session_state.pop("_synth_preset_applied", None)
 
 
 # ── Page header ──────────────────────────────────────────────────────────────────
@@ -1047,16 +1177,100 @@ with st.sidebar:
                 "recoveries during decay that should not fragment the phase."
             ),
         )
-        thr_inc_len = st.slider(
-            "Min. incipient length", 0.1, 0.6, step=0.01,
-            value=_DEFAULTS["thr_inc_len"], key="thr_inc_len",
+        incipient_method = st.radio(
+            "incipient_method",
+            options=["geometric", "plateau"],
+            index=["geometric", "plateau"].index(_DEFAULTS["incipient_method"]),
+            key="incipient_method",
+            horizontal=True,
+            format_func=lambda x: (
+                "Geometric (default)" if x == "geometric" else "Plateau (opt-in)"
+            ),
             help=(
-                "Minimum length of the incipient phase (pre-intensification period) as a "
-                "fraction of total series length. The incipient stage covers genesis and "
-                "early development before any identifiable intensification. "
-                "Lower values allow shorter incipient phases."
+                "'geometric' is the historical rule: the incipient phase ends "
+                "`Min. incipient length` of the way to the next dz extremum. "
+                "'plateau' instead ends it where the normalised slope first "
+                "reaches tau — the end of the initial low-slope plateau.\n\n"
+                "**Caveat (measured on the 51-track set):** the plateau rule is only "
+                "meaningful once the t0 boundary artifact is controlled. With the "
+                "Lanczos filter off, or with derivative smoothing active, the first "
+                "sample already exceeds any usable tau on most tracks and the rule "
+                "degenerates to 'no incipient phase'."
             ),
         )
+        if incipient_method == "geometric":
+            thr_inc_len = st.slider(
+                "Min. incipient length", 0.1, 0.6, step=0.01,
+                value=_DEFAULTS["thr_inc_len"], key="thr_inc_len",
+                help=(
+                    "Minimum length of the incipient phase (pre-intensification period) as a "
+                    "fraction of total series length. The incipient stage covers genesis and "
+                    "early development before any identifiable intensification. "
+                    "Lower values allow shorter incipient phases."
+                ),
+            )
+        else:
+            # Kept out of the widget tree (not just disabled) under 'plateau' for
+            # the same reason threshold_mature_length is hidden under
+            # mature_method='amplitude': the parameter is genuinely ignored, and
+            # a live slider that does nothing reads as a bug during calibration.
+            thr_inc_len = st.session_state.get("thr_inc_len", _DEFAULTS["thr_inc_len"])
+            st.caption(
+                "`Min. incipient length` is ignored under `incipient_method='plateau'` "
+                "(as `Min. mature length` is under `mature_method='amplitude'`)."
+            )
+
+        incipient_plateau_tau = st.slider(
+            "Plateau tau (normalised slope)", 0.01, 0.60, step=0.01,
+            value=_DEFAULTS["incipient_plateau_tau"], key="incipient_plateau_tau",
+            disabled=incipient_method != "plateau",
+            help=(
+                "The incipient phase is the leading stretch where the normalised "
+                "slope stays below this value. Measured reference points on the "
+                "51-track set under the author's calibration: tau=0.15 is the "
+                "smallest value that yields a non-empty plateau on all 51 tracks; "
+                "the resulting plateau is short (median 1-3 timesteps)."
+            ),
+        )
+        incipient_plateau_signal = st.radio(
+            "Plateau signal",
+            options=["derivative", "vorticity"],
+            index=["derivative", "vorticity"].index(_DEFAULTS["incipient_plateau_signal"]),
+            key="incipient_plateau_signal", horizontal=True,
+            disabled=incipient_method != "plateau",
+            help=(
+                "'derivative': |dz/dt| of the smoothed series — the exact array the "
+                "stage detection consumes, so the criterion sees what the detector "
+                "sees, but it inherits the filter's edge artifact. "
+                "'vorticity': |d(zeta)/dt| computed on the UNFILTERED input, immune "
+                "to filter edge artifacts but noisier."
+            ),
+        )
+        incipient_plateau_crossing = st.radio(
+            "Plateau crossing",
+            options=["single", "sustained"],
+            index=["single", "sustained"].index(_DEFAULTS["incipient_plateau_crossing"]),
+            key="incipient_plateau_crossing", horizontal=True,
+            disabled=incipient_method != "plateau",
+            help=(
+                "'single': the plateau ends at the first sample reaching tau. "
+                "'sustained': it ends at the start of the first run of k consecutive "
+                "samples at or above tau, so an isolated noise spike inside the "
+                "plateau does not cut it short. If no such run exists anywhere in the "
+                "series, no incipient phase is created."
+            ),
+        )
+        if incipient_plateau_crossing == "sustained":
+            incipient_plateau_k = st.number_input(
+                "Plateau k (consecutive steps)", min_value=1, max_value=25, step=1,
+                value=_DEFAULTS["incipient_plateau_k"], key="incipient_plateau_k",
+                disabled=incipient_method != "plateau",
+                help="Number of consecutive samples at or above tau required by "
+                     "'sustained'. Ignored for 'single'.",
+            )
+        else:
+            incipient_plateau_k = st.session_state.get(
+                "incipient_plateau_k", _DEFAULTS["incipient_plateau_k"])
 
     st.divider()
     # --- Extrema filtering (optional) ---
@@ -1203,6 +1417,11 @@ _PHASE_PARAMS = dict(
     mature_method=mature_method,
     mature_amplitude_fraction=mature_amplitude_fraction,
     decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
+    incipient_method=incipient_method,
+    incipient_plateau_tau=incipient_plateau_tau,
+    incipient_plateau_signal=incipient_plateau_signal,
+    incipient_plateau_crossing=incipient_plateau_crossing,
+    incipient_plateau_k=incipient_plateau_k,
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
@@ -1233,6 +1452,43 @@ load_all_test_cyclones = st.checkbox(
     ),
 )
 
+_synth_files, _synth_gt, _synth_preset, _synth_err = _load_synthetic_cases()
+load_synthetic_cases = st.checkbox(
+    f"Load synthetic cases (tests/synthetic — {len(_synth_files)} cases)"
+    if _synth_files else
+    "Load synthetic cases (tests/synthetic — unavailable in this environment)",
+    value=False,
+    key="load_synthetic_cases",
+    disabled=not bool(_synth_files),
+    help=(
+        "Loads the synthetic life-cycle cases from tests/synthetic/cases.py. "
+        "These are the only series with a KNOWN incipient boundary, so they are "
+        "the ground truth for validating incipient_method. Checking this also "
+        "switches the pre-processing controls to SYNTHETIC_VALIDATION_PRESET "
+        "(they remain editable)."
+        if _synth_files else
+        f"tests/synthetic could not be imported ({_synth_err}) — this option is "
+        "unavailable."
+    ),
+)
+if _synth_err and not _synth_files:
+    st.caption(f"⚠ tests/synthetic unavailable: {_synth_err}")
+
+if load_synthetic_cases and _synth_files:
+    st.caption(
+        "**Synthetic mode.** Pre-processing has been set to "
+        "`SYNTHETIC_VALIDATION_PRESET` (Lanczos off, Savgol off). These series are "
+        "clean by construction, so the real-track pre-processing would smooth what "
+        "is already smooth and round off the very segment boundaries under test — "
+        "it would measure the filter rather than the phase logic. "
+        "**Pre-processing conclusions do not transfer from synthetic to real "
+        "tracks; phase-detection conclusions do.** "
+        "Measured caveat: with BOTH the filter and the smoothing off, the detected "
+        "*sequence* degrades on several cases (the unsmoothed derivative has a kink "
+        "at each segment join) — read the incipient boundary here, not the full "
+        "sequence. The phase controls are unaffected and remain fully editable."
+    )
+
 _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
 
 # Precedence when both an upload and "load all test cyclones" are active: the
@@ -1243,6 +1499,8 @@ _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" 
 files: dict[str, bytes] = {}
 if load_all_test_cyclones and _calib_data_files:
     files.update({p.stem: p.read_bytes() for p in _calib_data_files})
+if load_synthetic_cases and _synth_files:
+    files.update(_synth_files)
 if uploaded:
     files.update({Path(f.name).stem: f.getvalue() for f in uploaded})
 if not files:
@@ -1267,6 +1525,26 @@ with st.sidebar:
         mime="text/yaml",
         use_container_width=True,
     )
+
+def _gt_boundary_iso(name: str, file_bytes: bytes) -> str | None:
+    """ISO timestamp of the designed incipient boundary, for synthetic cases.
+
+    Returns None for real tracks and for synthetic cases with no designed Ic
+    segment (those have no checkable boundary — see section 5 of
+    research/incipient_plateau/REPORT_incipient_characterisation.md).
+    """
+    if not (load_synthetic_cases and _synth_files):
+        return None
+    idx = _synth_gt.get(name)
+    if idx is None:
+        return None
+    try:
+        d = pd.read_csv(io.BytesIO(file_bytes), sep=";", index_col="time",
+                        parse_dates=True)
+        return d.index[int(idx)].isoformat()
+    except Exception:
+        return None
+
 
 # ── Pre-process all cyclones ─────────────────────────────────────────────────────
 # Done before rendering tabs so export data (CSV + PNG) is ready for the ZIP button.
@@ -1305,6 +1583,7 @@ for _cname, _fbytes in files.items():
             use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
             boundary_padding,
             _phase_params_tuple, _cname, figsize=(12, 5), show_title=True,
+            gt_boundary_iso=_gt_boundary_iso(_cname, _fbytes),
         )
     except Exception:
         _png = b""
@@ -1393,6 +1672,8 @@ with tab_cal:
                         boundary_padding,
                         _phase_params_tuple, cyclone_name,
                         figsize=_FIGSIZES[n_cols], show_title=True,
+                        gt_boundary_iso=_gt_boundary_iso(
+                            cyclone_name, files[cyclone_name]),
                     )
             except Exception as exc:
                 st.error(f"Error in {'compact' if n_cols >= 4 else 'phase'} figure: {exc}")

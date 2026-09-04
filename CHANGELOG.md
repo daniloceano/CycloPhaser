@@ -9,6 +9,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+**Opt-in `incipient_method="plateau"` — a slope-based incipient boundary (behaviour
+unchanged by default)**
+
+`determine_periods(..., incipient_method="plateau")` places the incipient/next-phase
+boundary at the end of the initial low-slope *plateau* — the leading stretch over
+which the normalised slope `|dz|/max|dz|` stays below `incipient_plateau_tau`
+(default 0.20) — instead of at `threshold_incipient_length` (0.4) of the distance to
+the next dz extremum. The default remains `"geometric"`, which is byte-identical to
+every prior version; verified over all 51 calibration tracks against `develop-v2.1`
+and pinned in `tests/baselines/baseline_defaults_multitrack.csv`.
+
+Motivation, measured at 01c4492 (see
+`research/incipient_plateau/REPORT_incipient_characterisation.md`): at the point
+where the geometric rule ends the incipient phase, `|dz|` has already reached a
+median **58 %** (author's calibration) / **77 %** (package defaults) of its own
+maximum — the rule is measuring a distance, not a slope. Two further findings scope
+it: the `It → D → It` re-cut branch never fires (0/51, and it is structurally
+unreachable — a smooth It→D transition must pass through a minimum, which is
+detected as `mature`), and the catch-all `fillna` produces no incipient phase at all
+on real data.
+
+Unlike the geometric rule the plateau rule is **self-contained**: it scans from t₀
+and does not use the case A/B/C dispatch. It declines to create an incipient phase
+exactly when the plateau has zero length (`rel(0) >= tau`), which is what replaces
+the case gating as the false-positive guard. `threshold_incipient_length` is ignored
+under `"plateau"`, as `threshold_mature_length` is under `mature_method="amplitude"`.
+
+Two structural options are exposed for validation: `incipient_plateau_signal`
+(`"derivative"`, default, on `dz_dt_smoothed2`; or `"vorticity"`, on `np.gradient`
+of the **unfiltered** input, immune to filter edge artifacts) and
+`incipient_plateau_crossing` (`"single"`, default; or `"sustained"` requiring
+`incipient_plateau_k` consecutive samples, robust to a spike inside the plateau).
+
+Measured effect at `tau=0.20` over the 51 tracks:
+
+| configuration | tracks with `incipient` | boundary Δ (median) | sequences changed |
+|---|---|---|---|
+| author's §3c calibration | 48/51 → **51/51** | −2 steps | 4/51 |
+| package defaults | 49/51 → **7/51** | −5 steps | 43/51 |
+
+**The plateau criterion is only definable once the t₀ boundary artifact is
+controlled.** Under package defaults (`r(t₀)` median 0.526) the first sample already
+exceeds any usable tau on most tracks, so the rule collapses to "no incipient phase"
+on 44 of 51. It is intended for use with a calibration that keeps `r(t₀)` low. `tau`
+and the two structural options are **not yet calibrated** — they await the author's
+visual validation.
+
+Also added: `SYNTHETIC_VALIDATION_PRESET` in `tests/synthetic/cases.py`, and a
+"Load synthetic cases" mode in the calibration app that materialises the synthetic
+suite alongside the real tracks and overlays the designed ground-truth incipient
+boundary.
+
 ### Changed
 
 **`use_smoothing=False` now disables the derivative smoothing too (behaviour change)**
