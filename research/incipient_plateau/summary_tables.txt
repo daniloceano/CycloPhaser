@@ -1,0 +1,142 @@
+
+==============================================================================
+TABLE 1 — pinned edge metrics, 51 real tracks (median [q25-q75])
+==============================================================================
+config      r(t0)                   r(t_final)              
+author      0.068 [0.044-0.108]   0.060 [0.034-0.095]
+defaults    0.526 [0.260-0.678]   0.319 [0.165-0.415]
+
+==============================================================================
+TABLE 2 — which of the four paths of find_incipient_period fires (51 real)
+==============================================================================
+via_fired                    False  True 
+config   via                             
+author   i_catch_all_only        2      0
+         iii_caseB_startsIt      0     44
+         iv_caseC_startsD        1      4
+defaults i_catch_all_only        1      0
+         iii_caseB_startsIt      1     49
+
+tracks with len(phases_order) <= 2: {'author': 2, 'defaults': 1}
+tracks with an incipient phase: {'author': 48, 'defaults': 49}
+
+==============================================================================
+TABLE 3 — current incipient boundary (51 real)
+==============================================================================
+config      n_with_inc  idx med   frac med   hours med  rel@bound med 
+author      48          4.0       0.043      4.0        0.584         
+defaults    49          8.0       0.089      8.0        0.772         
+
+==============================================================================
+TABLE 4 — tau sweep vs the current boundary (51 real), in timesteps
+==============================================================================
+
+-- config author --  (current boundary median idx = 4.0)
+tau     idx med   frac med   hours med  delta vs current (med)  n reached 
+0.05    0.0       0.000      0.0        -4.0                    51        
+0.10    1.0       0.012      1.0        -3.0                    51        
+0.15    2.0       0.017      2.0        -2.0                    51        
+0.20    2.0       0.022      2.0        -2.0                    51        
+0.30    3.0       0.033      3.0        -1.0                    51        
+
+-- config defaults --  (current boundary median idx = 8.0)
+tau     idx med   frac med   hours med  delta vs current (med)  n reached 
+0.05    0.0       0.000      0.0        -8.0                    51        
+0.10    0.0       0.000      0.0        -8.0                    51        
+0.15    0.0       0.000      0.0        -8.0                    51        
+0.20    0.0       0.000      0.0        -8.0                    51        
+0.30    0.0       0.000      0.0        -8.0                    51        
+
+==============================================================================
+TABLE 5 — does an initial low-slope plateau exist at all? (51 real)
+==============================================================================
+A 'plateau' of length L at tau means rel(t) < tau for the first L steps,
+i.e. L == the tau-crossing index.  L == 0 means the very first sample
+already exceeds tau: no plateau exists and no tau-based criterion can
+place a boundary there.
+config      tau     n L==0    n L>=1    n L>=3    n L>=6    L med   L q75   
+author      0.05    32        19        4         1         0.0     1.0     
+author      0.10    15        36        8         5         1.0     2.0     
+author      0.15    1         50        11        7         2.0     2.0     
+author      0.20    0         51        19        8         2.0     3.0     
+author      0.30    0         51        29        10        3.0     4.0     
+defaults    0.05    50        1         1         1         0.0     0.0     
+defaults    0.10    48        3         2         2         0.0     0.0     
+defaults    0.15    44        7         7         5         0.0     0.0     
+defaults    0.20    44        7         7         7         0.0     0.0     
+defaults    0.30    35        16        12        8         0.0     2.0     
+
+==============================================================================
+TABLE 6 — pure catch-all incipient (no via fired) (51 real)
+==============================================================================
+config      no via fired     of which WITH incipient   via fired   
+author      3              0                           48          
+defaults    2              0                           49          
+
+What the catch-all fillna could contribute on its own — the leading run
+of NaN in the periods column BEFORE the fillna (post_process_periods has
+already run at this point):
+config      n leading_nan>0   leading_nan med   n any NaN   
+author      0                 0.0               0           
+defaults    1                 0.0               1           
+
+per-track detail for the tracks where no via fired:
+   track   config                via  n_phases_order                                                        phases_order  has_incipient  boundary_idx                        phase_seq
+20170760   author   i_catch_all_only               2                                             intensification > decay          False            -1          intensification > decay
+20180733 defaults iii_caseB_startsIt               6 intensification > mature > decay > intensification > mature > decay          False            -1 intensification > mature > decay
+20181046   author   i_catch_all_only               1                                                     intensification          False            -1                  intensification
+20181046 defaults   i_catch_all_only               1                                                     intensification          False            -1                  intensification
+20206498   author   iv_caseC_startsD               3                                     decay > intensification > decay          False            -1          decay > intensification
+
+==============================================================================
+TABLE 7 — synthetic ground truth
+==============================================================================
+                 track   config     gt_kind  gt_boundary  boundary_idx  boundary_err  tau0.05_idx  tau0.10_idx  tau0.15_idx  tau0.20_idx  tau0.30_idx                                               phase_seq                via  via_fired
+            ItMD_clean   author designed_Ic          3.0             6           3.0            1            2            3            4            5            incipient > intensification > mature > decay iii_caseB_startsIt       True
+            ItMD_clean defaults designed_Ic          3.0             6           3.0            0            0            0            0            0            incipient > intensification > mature > decay iii_caseB_startsIt       True
+ IcItMD_residual_noisy   author designed_Ic          3.0             5           2.0            1            2            2            3            4 incipient > intensification > mature > decay > residual iii_caseB_startsIt       True
+ IcItMD_residual_noisy defaults designed_Ic          3.0             5           2.0            0            0            0            0            0 incipient > intensification > mature > decay > residual iii_caseB_startsIt       True
+            ItMD_noisy   author expected_Ic          NaN             5           NaN            0            1            2            2            3            incipient > intensification > mature > decay iii_caseB_startsIt       True
+            ItMD_noisy defaults expected_Ic          NaN             6           NaN            0            0            0            0            0            incipient > intensification > mature > decay iii_caseB_startsIt       True
+         IcDItMD_noisy   author expected_Ic          NaN             4           NaN            0            1            1            2            2            incipient > decay > intensification > mature   iv_caseC_startsD       True
+         IcDItMD_noisy defaults expected_Ic          NaN             4           NaN            0            0            0            0            0            incipient > decay > intensification > mature   iv_caseC_startsD       True
+IcDItMD_residual_noisy   author expected_Ic          NaN             3           NaN            0            0            1            1            2 incipient > decay > intensification > mature > residual   iv_caseC_startsD       True
+IcDItMD_residual_noisy defaults expected_Ic          NaN             3           NaN            0            0            0            0            0 incipient > decay > intensification > mature > residual   iv_caseC_startsD       True
+           DItMD_noisy   author       no_Ic          NaN             3           NaN            0            0            1            1            2            incipient > decay > intensification > mature   iv_caseC_startsD       True
+           DItMD_noisy defaults       no_Ic          NaN            -1           NaN            0            0            0            0            0                        decay > intensification > mature   iv_caseC_startsD      False
+  DItMD_residual_noisy   author       no_Ic          NaN             3           NaN            0            0            0            1            2 incipient > decay > intensification > mature > residual   iv_caseC_startsD       True
+  DItMD_residual_noisy defaults       no_Ic          NaN            -1           NaN            0            0            0            0           12             decay > intensification > mature > residual   iv_caseC_startsD      False
+     IcItMD_ItMD_noisy   author designed_Ic          3.0             4           1.0            0            1            2            2            3            incipient > intensification > mature > decay iii_caseB_startsIt       True
+     IcItMD_ItMD_noisy defaults designed_Ic          3.0             4           1.0            0            0            0            0            0            incipient > intensification > mature > decay iii_caseB_startsIt       True
+       ItMD_ItMD_noisy   author expected_Ic          NaN             3           NaN            0            0            1            1            2            incipient > intensification > mature > decay iii_caseB_startsIt       True
+       ItMD_ItMD_noisy defaults expected_Ic          NaN             3           NaN            0            0            0            0            0            incipient > intensification > mature > decay iii_caseB_startsIt       True
+    IcIt_observational   author designed_Ic          6.0             4          -2.0            7            8           10           11           13                             incipient > intensification   i_catch_all_only      False
+    IcIt_observational defaults designed_Ic          6.0            -1           NaN            1            5            7            8           11                                         intensification   i_catch_all_only      False
+             quase_ItD   author expected_Ic          NaN             7           NaN            1            2            2            3            4            incipient > intensification > mature > decay iii_caseB_startsIt       True
+             quase_ItD defaults expected_Ic          NaN             7           NaN            0            0            0            0            2            incipient > intensification > mature > decay iii_caseB_startsIt       True
+ IcItMD_residual_clean   author designed_Ic          3.0             5           2.0            1            2            2            3            4 incipient > intensification > mature > decay > residual iii_caseB_startsIt       True
+ IcItMD_residual_clean defaults designed_Ic          3.0             5           2.0            0            0            0            0            0 incipient > intensification > mature > decay > residual iii_caseB_startsIt       True
+
+==============================================================================
+TABLE 8 — synthetic accuracy vs the known Ic boundary (designed_Ic only)
+==============================================================================
+config      criterion     n scored  MAE (steps)   signed med   misses  
+author      current 0.4x  5         2.00          2.0          0       
+author      tau=0.05      5         2.00          -2.0         0       
+author      tau=0.10      5         1.40          -1.0         0       
+author      tau=0.15      5         1.40          -1.0         0       
+author      tau=0.20      5         1.40          0.0          0       
+author      tau=0.30      5         2.20          1.0          0       
+defaults    current 0.4x  4         2.00          2.0          1       
+defaults    tau=0.05      5         3.40          -3.0         0       
+defaults    tau=0.10      5         2.60          -3.0         0       
+defaults    tau=0.15      5         2.60          -3.0         0       
+defaults    tau=0.20      5         2.80          -3.0         0       
+defaults    tau=0.30      5         3.40          -3.0         0       
+
+spurious incipient on cases that designed NO incipient (gt_kind=no_Ic):
+               track   config  has_incipient  boundary_idx              via  via_fired                                               phase_seq
+         DItMD_noisy   author           True             3 iv_caseC_startsD       True            incipient > decay > intensification > mature
+         DItMD_noisy defaults          False            -1 iv_caseC_startsD      False                        decay > intensification > mature
+DItMD_residual_noisy   author           True             3 iv_caseC_startsD       True incipient > decay > intensification > mature > residual
+DItMD_residual_noisy defaults          False            -1 iv_caseC_startsD      False             decay > intensification > mature > residual

@@ -188,3 +188,7 @@ tests/calibration_data/figures/
 # Temporary validation outputs (not tracked)
 tests/_tmp_validation/
 .vscode/settings.json
+
+# Incipient-plateau research figures and run logs (generated, not tracked)
+research/incipient_plateau/figures/
+research/incipient_plateau/run_log.txt
