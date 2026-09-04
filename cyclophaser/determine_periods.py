@@ -366,7 +366,8 @@ def process_vorticity(
         use_smoothing (str or int, optional): Apply Savgol smoothing to the filtered vorticity. Set to `'auto'` for a 
             default window length or specify an integer value as the desired window length. Must be greater than or equal 
             to `savgol_polynomial`. **Units**: Time steps. Default is `'auto'`. **To deactivate**, set `use_smoothing` 
-            to `False`.
+            to `False`, which skips both Savgol passes on the vorticity *and* the Savgol passes applied to its
+            first and second derivatives. Only the literal `False` does this; other falsy values are unaffected.
         
         use_smoothing_twice (str or int, optional): Apply Savgol smoothing a second time for additional noise reduction. 
             Same requirements as `use_smoothing`. Default is `'auto'`.
@@ -670,33 +671,53 @@ def process_vorticity(
     dzfilt_dt = vorticity_smoothed2.differentiate('time', datetime_unit='h')
     dzfilt_dt2 = dzfilt_dt.differentiate('time', datetime_unit='h')
 
-    # Filter derivatives: not an option because they are too noisy. Otherwise the results are too lame
-    # Use the same window length as 'auto'
-    if not window_length_savgol:
-        if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
-            window_length_savgol_derivatives = len(zeta_df) // 4 | 1
-        else:
-            window_length_savgol_derivatives = len(zeta_df) // 2 | 1
+    # Smooth the derivatives with the same Savgol window as the vorticity ('auto'
+    # when no explicit window was given).
+    #
+    # NOTE: this block used to be unconditional, justified by "filtering the
+    # derivatives is not an option because they are too noisy". That justification
+    # did not hold up when measured on TRACK (Gramcianinov) vorticity, which already
+    # carries upstream spatial smoothing: switching the derivative smoothing off
+    # changes 1/51 phase sequences and produces no fragmentation, while cutting the
+    # boundary artifact by ~8x (r(t0) 0.545 -> 0.068 under the author's calibration).
+    # See docs/future_work.md, item 4, "Measurement 2026-09-03".
+    #
+    # `use_smoothing is False` is deliberately an identity check, not a truthiness
+    # test: other falsy values (0, '') keep their previous behaviour, which the
+    # `not window_length_savgol` test below still covers.
+    if use_smoothing is False:
+        # Smoothing explicitly disabled: leave the derivatives untouched, as the
+        # parameter name promises.
+        dz_dt_filt = dzfilt_dt
+        dz_dt2_filt = dzfilt_dt2
+        dz_dt_smoothed2 = dz_dt_filt
+        dz_dt2_smoothed2 = dz_dt2_filt
     else:
-        window_length_savgol_derivatives = window_length_savgol
-        
-    # Savgol window length must be >= savgol_polynomial
-    if window_length_savgol_derivatives < savgol_polynomial:
-        window_length_savgol_derivatives = savgol_polynomial
+        if not window_length_savgol:
+            if pd.Timedelta(zeta_df.index[-1] - zeta_df.index[0]) > pd.Timedelta('8D'):
+                window_length_savgol_derivatives = len(zeta_df) // 4 | 1
+            else:
+                window_length_savgol_derivatives = len(zeta_df) // 2 | 1
+        else:
+            window_length_savgol_derivatives = window_length_savgol
 
-    dz_dt_filt = xr.DataArray(
-        savgol_filter(dzfilt_dt, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-    dz_dt2_filt = xr.DataArray(
-        savgol_filter(dzfilt_dt2, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-    
-    dz_dt_smoothed2 = xr.DataArray(
-        savgol_filter(dz_dt_filt, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
-    dz_dt2_smoothed2 = xr.DataArray(
-        savgol_filter(dz_dt2_filt, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
-        coords={'time':zeta_df.index})
+        # Savgol window length must be >= savgol_polynomial
+        if window_length_savgol_derivatives < savgol_polynomial:
+            window_length_savgol_derivatives = savgol_polynomial
+
+        dz_dt_filt = xr.DataArray(
+            savgol_filter(dzfilt_dt, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
+            coords={'time':zeta_df.index})
+        dz_dt2_filt = xr.DataArray(
+            savgol_filter(dzfilt_dt2, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
+            coords={'time':zeta_df.index})
+
+        dz_dt_smoothed2 = xr.DataArray(
+            savgol_filter(dz_dt_filt, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
+            coords={'time':zeta_df.index})
+        dz_dt2_smoothed2 = xr.DataArray(
+            savgol_filter(dz_dt2_filt, window_length_savgol_derivatives, savgol_polynomial, mode="nearest"),
+            coords={'time':zeta_df.index})
 
     # Assign variables to xarray
     da = da.assign(variables={'dz_dt_filt': dz_dt_filt,

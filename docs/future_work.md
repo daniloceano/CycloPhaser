@@ -485,6 +485,43 @@ that actually disables the derivative passes too. Both are behaviour changes and
 author's visual re-validation on the 51 tracks before adoption — the numbers above say the
 re-validation should be nearly a no-op, but 0/51 is the author's criterion, not a metric.
 
+### Author's decision, 2026-09-04 — `use_smoothing=False` now disables the derivative smoothing
+
+**Decided and implemented** (branch `research/smooth-derivatives`): of the two
+corrections proposed just above, only the second was adopted. `use_smoothing=False`
+now skips the four derivative Savgol passes as well, so `find_stages` consumes the
+unfiltered `d(z)/dt` and `d²(z)/dt²`. This is exactly the `off` variant measured in
+the tables above, re-confirmed against the package code after the change:
+`r(t₀) = 0.068` (q25–q75 0.04–0.11), `r(t_final) = 0.060` under the author's
+calibration; 1/51 phase sequences change; no fragmentation.
+
+**Explicitly NOT adopted:** the fixed cap (a window of 5–15) and the
+cycle-length-fraction window. Both were measured (windows 5/9/15 in the tables
+above) and both remain unimplemented — the parameter-name honesty fix was judged to
+cover the case that mattered, without introducing a new tuning knob.
+
+**Scope of the decision — and what it does not cover.** The check is `use_smoothing
+is False` by identity, so `use_smoothing='auto'` and explicit integer windows are
+untouched, as are the two Savgol passes on `z`. Note that the `off` row under
+*package defaults* in table (b) above (`r(t₀) = 0.282`) is **not** reachable through
+this change: those defaults use `use_smoothing='auto'`, and that path is unchanged
+(`r(t₀) = 0.526`, as measured). That row remains a measurement-only variant.
+
+**This is validated on TRACK (Gramcianinov) vorticity only.** That data already
+carries built-in spatial smoothing from the upstream tracking, which is very
+plausibly why removing a second, redundant smoothing stage costs so little here.
+**It has NOT been validated on raw ERA5 vorticity**, which reaches
+`process_vorticity` with no upstream smoothing at all and therefore carries
+high-frequency content the TRACK series never had.
+
+**When raw ERA5 is taken up, the order of investigation is:** first establish
+whether the now-corrected Lanczos stage (`boundary_padding="reflect"` plus the
+`use_filter=True` fix, item 3c) handles that noise on its own — with an appropriate
+`cutoff_high`, which is the knob the derivative Savgol was standing in for on TRACK
+data. Only if it does not should re-enabling derivative smoothing be reconsidered,
+and in that case the capped-window variants above become live options again rather
+than the unbounded `auto` window this change removed.
+
 
 ---
 
