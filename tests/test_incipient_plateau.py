@@ -41,8 +41,9 @@ import pytest
 from cyclophaser import determine_periods
 from cyclophaser.determine_periods import periods_to_dict
 from tests.synthetic.cases import (
-    CASES, CLEAN_CASE_IDS, NOISY_CASE_IDS, SYNTHETIC_CLEAN_PRESET,
-    SYNTHETIC_NOISY_PRESET, preset_for,
+    CASES, CLEAN_CASE_IDS, NOISY_CASE_IDS, PLATEAU_START_CASE_IDS,
+    STEEP_START_CASE_IDS, SYNTHETIC_CLEAN_PRESET, SYNTHETIC_NOISY_PRESET,
+    preset_for,
 )
 from tests.synthetic.generators import make_lifecycle_series
 
@@ -65,8 +66,18 @@ DESIGNED_IC = {
     "IcItMD_residual_clean": 3,
     "IcIt_observational":    6,
 }
-# Cases whose expected_phases contain no 'incipient' at all.
-NO_IC = ["DItMD_noisy", "DItMD_residual_noisy"]
+# True negatives for the incipient phase.
+#
+# NOT "cases with no designed Ic segment" — that is the wrong ground truth, and
+# visual inspection in the calibration app is what exposed it. The generator's
+# `sine` ramp is a half-period cosine with zero derivative at its endpoints, so
+# ANY series opening with a sine It/D segment starts flat and genuinely has an
+# initial plateau; the suite's own expected_phases already contains 'incipient'
+# in 9 of the 12 cases, five of them with no designed Ic segment. The only true
+# negatives are the two cases built with a `linear` opening ramp — the shape the
+# generator documents as existing to prevent exactly this. See the
+# classification block in tests/synthetic/cases.py.
+NO_IC = list(STEEP_START_CASE_IDS)
 
 
 def _run(series, **kwargs):
@@ -222,19 +233,16 @@ def test_plateau_vorticity_signal_is_defeated_by_noise(case_id):
 # ── 3. guards and structural invariants ──────────────────────────────────────
 @pytest.mark.parametrize("variant", sorted(_VARIANTS))
 @pytest.mark.parametrize("case_id", NO_IC)
-def test_plateau_creates_no_incipient_on_no_ic_cases(case_id, variant):
-    """Cases designed without an incipient must not gain a substantial one.
+def test_plateau_creates_no_incipient_on_steep_start_cases(case_id, variant):
+    """Steep-start cases must not gain a substantial incipient phase.
 
-    MEASURED LIMITATION, not a slack assertion. Both no_Ic cases are *noisy*
-    cases, so they run under SYNTHETIC_NOISY_PRESET, whose whole point is to
-    keep r(t0) low enough for the plateau to be measurable (Lanczos on, Savgol
-    off). In that regime these two pick up a **1-timestep** spurious incipient
-    (3 h at this resolution, against a suite tolerance of 6 steps); under the
-    clean preset they get none at all. The bound below is therefore set at what
-    is actually measured, so that any regression making the false positive
-    materially worse still fails. See the presets' block comment in
-    tests/synthetic/cases.py — these are also the 2/8 whose sequence this preset
-    gets wrong.
+    MEASURED LIMITATION, not a slack bound. These two are noisy cases, so they
+    run under SYNTHETIC_NOISY_PRESET, whose Lanczos pass smooths their
+    deliberately abrupt onset: normalised |dz| at the first sample falls from
+    **0.94 / 0.66 on the raw series** to **0.147 / 0.150 after filtering** —
+    below tau, so a 1-timestep incipient appears. That plateau is invented by
+    the filter, not present in the data. The bound is set at what is measured,
+    so a regression making it materially worse still fails.
     """
     df = _run(CASES[case_id]["series"], **preset_for(case_id),
               incipient_method="plateau", incipient_plateau_tau=0.20,
@@ -246,15 +254,34 @@ def test_plateau_creates_no_incipient_on_no_ic_cases(case_id, variant):
 
 
 @pytest.mark.parametrize("case_id", NO_IC)
-def test_no_ic_cases_get_no_incipient_under_the_clean_preset(case_id):
-    """Under the clean preset the same two cases get no incipient at all.
+def test_vorticity_signal_rejects_filter_invented_plateaus(case_id):
+    """signal="vorticity" gets the steep-start cases exactly right.
 
-    Pins the contrast that identifies the 1-step false positive above as a
-    property of the noisy preset's filtering, not of the plateau rule itself.
+    The other half of the ``incipient_plateau_signal`` trade-off, and the one
+    that argues FOR "vorticity": reading the unfiltered series means the
+    deliberately steep onset is still steep, so no incipient phase is created —
+    whereas "derivative", measured after the Lanczos, sees the filter's own
+    smoothing of that onset and emits a 1-step phase.
     """
-    df = _run(CASES[case_id]["series"], **SYNTHETIC_CLEAN_PRESET,
-              incipient_method="plateau", incipient_plateau_tau=0.20)
+    df = _run(CASES[case_id]["series"], **preset_for(case_id),
+              incipient_method="plateau", incipient_plateau_tau=0.20,
+              incipient_plateau_signal="vorticity")
     assert _leading_incipient_len(df) == 0
+
+
+@pytest.mark.parametrize("case_id", sorted(PLATEAU_START_CASE_IDS))
+def test_plateau_start_cases_do_get_an_incipient_phase(case_id):
+    """Every flat-opening case gets an incipient phase — the positive control.
+
+    Pins the observation that motivated the reclassification: an initial plateau
+    is present in 10 of the 12 cases, designed Ic segment or not, so the plateau
+    rule finding one there is correct behaviour, not over-detection.
+    """
+    df = _run(CASES[case_id]["series"], **preset_for(case_id),
+              incipient_method="plateau", incipient_plateau_tau=0.20)
+    assert _leading_incipient_len(df) > 0, (
+        f"{case_id} opens with a flat ramp but got no incipient phase")
+
 
 
 def test_plateau_boundary_helper_contract():

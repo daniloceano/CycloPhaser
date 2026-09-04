@@ -468,6 +468,46 @@ NOISY_CASE_IDS = tuple(
     k for k, v in CASES.items() if v.get("kwargs", {}).get("noise_frac", 0.0))
 
 
+# ── Initial-plateau classification ────────────────────────────────────────────
+# Observed by visual inspection in the calibration app and confirmed by
+# measurement (2026-09-04): almost every case in this suite opens with a
+# low-slope plateau, whether or not it was designed with an explicit 'Ic'
+# segment. It is a property of the GENERATOR, not of the life cycle:
+#
+#   * `_ramp_sine` is a half-period cosine, which has **zero derivative at both
+#     endpoints** (generators.py says so in its own docstring). So any series
+#     opening with a `sine` It or D segment starts flat, exactly like an Ic
+#     segment would.
+#   * `shape="linear"` is the deliberate exception. The generator documents it
+#     as "constant-slope ramp (non-zero dz from the first timestep; prevents
+#     CycloPhaser from misidentifying the onset as 'incipient')".
+#
+# Measured: 10 of the 12 cases have a genuine initial plateau, and the suite's
+# own `expected_phases` already contains 'incipient' in 9 of 12 — including five
+# cases with no designed Ic segment at all. The only two cases claiming no
+# incipient, DItMD_noisy and DItMD_residual_noisy, are precisely the two opening
+# with `D/linear`, whose normalised |dz| on the RAW series is 0.94 and 0.66 at
+# the first sample.
+#
+# Consequence for validating incipient_method: "was an Ic segment designed" is
+# NOT the right ground truth for "should there be an incipient phase". The right
+# question is whether the series starts flat, which is what these two sets
+# record. Only STEEP_START_CASE_IDS are true negatives.
+def _opening_shape(case: dict) -> str:
+    """Ramp shape of the first segment, applying the generator's own defaults."""
+    seg0 = case["segments"][0]
+    return seg0.get(
+        "shape", "sine" if seg0["type"] in ("It", "D", "residual") else "plateau")
+
+
+# Cases that begin flat, so an incipient phase is CORRECT, not a false positive.
+PLATEAU_START_CASE_IDS = tuple(
+    k for k, v in CASES.items() if _opening_shape(v) != "linear")
+# Cases deliberately built with a non-zero initial slope: a true negative.
+STEEP_START_CASE_IDS = tuple(
+    k for k, v in CASES.items() if _opening_shape(v) == "linear")
+
+
 # ── Synthetic validation presets ──────────────────────────────────────────────
 # Pre-processing to use when validating PHASE DETECTION on these synthetic
 # series. Both presets were chosen by measurement (2026-09-04), scoring every

@@ -104,6 +104,12 @@ def _load_synthetic_cases():
                       "preset": dict(mod.SYNTHETIC_CLEAN_PRESET)},
             "noisy": {"ids": tuple(mod.NOISY_CASE_IDS),
                       "preset": dict(mod.SYNTHETIC_NOISY_PRESET)},
+            # Which cases genuinely start flat. Not the same as "has a designed
+            # Ic segment": the generator's sine ramp is a half-period cosine with
+            # zero derivative at its endpoints, so a sine It/D opening starts
+            # flat too. 10 of 12; only the `linear` openings are true negatives.
+            "plateau_start": tuple(mod.PLATEAU_START_CASE_IDS),
+            "steep_start": tuple(mod.STEEP_START_CASE_IDS),
         }
     except Exception as exc:  # missing file, syntax error, anything at import
         return {}, {}, {}, f"{type(exc).__name__}: {exc}"
@@ -1525,6 +1531,8 @@ load_all_test_cyclones = st.checkbox(
 _synth_files, _synth_gt, _synth_groups, _synth_err = _load_synthetic_cases()
 _clean_ids = _synth_groups.get("clean", {}).get("ids", ())
 _noisy_ids = _synth_groups.get("noisy", {}).get("ids", ())
+_plateau_start_ids = set(_synth_groups.get("plateau_start", ()))
+_steep_start_ids = set(_synth_groups.get("steep_start", ()))
 
 # Two separate options rather than one: the clean and noisy populations need
 # DIFFERENT pre-processing, so loading them together would force a single preset
@@ -1584,6 +1592,11 @@ if load_synthetic_cases:
         + (" Both groups are loaded, so the *noisy* preset is applied — it is "
            "also correct on all four clean cases, whereas the clean preset is "
            "not usable on the noisy ones." if _both else "")
+        + ("\n\n**Combined with the real tracks above.** This is a coherent "
+           "pairing, not an accident: SYNTHETIC_NOISY_PRESET *is* the author's "
+           "section-3c calibration (Lanczos on, cutoff_high=18, Savgol off), so "
+           "both sets are being processed identically and can be judged side by "
+           "side." if (load_synthetic_noisy and load_all_test_cyclones) else "")
         + ("\n\nKnown limitation of the noisy preset: it keeps the incipient "
            "plateau measurable (Savgol off keeps r(t₀) low) at the cost of 2/8 "
            "sequences — `DItMD_noisy` and `DItMD_residual_noisy`, which also "
@@ -1591,6 +1604,34 @@ if load_synthetic_cases:
            "passes) gets 8/8 sequences but puts the edge artifact back at t₀, "
            "collapsing the plateau rule to 'no incipient phase' on 4 of the 5 "
            "designed-Ic cases." if load_synthetic_noisy else "")
+    )
+    # Derived from the checkbox state, not from `files` — that dict is built
+    # further down the page, after this caption renders.
+    _sel_ids = ((set(_clean_ids) if load_synthetic_clean else set())
+                | (set(_noisy_ids) if load_synthetic_noisy else set()))
+    _loaded_syn = [k for k in _synth_files if k in _sel_ids]
+    _flat = [k for k in _loaded_syn if k in _plateau_start_ids]
+    _steep = [k for k in _loaded_syn if k in _steep_start_ids]
+    st.caption(
+        f"**Initial plateau: {len(_flat)} of {len(_loaded_syn)} loaded cases "
+        "start flat.** An initial plateau is a property of the generator, not "
+        "of the designed life cycle: `_ramp_sine` is a half-period cosine with "
+        "zero derivative at its endpoints, so a series opening with a sine "
+        "It/D segment starts flat just as an `Ic` segment would. An incipient "
+        "phase on these is CORRECT, not over-detection — the suite's own "
+        "`expected_phases` already contains `incipient` in 9 of the 12 cases, "
+        "five of them with no designed `Ic` segment."
+        + (f"\n\nTrue negatives (built with a `linear` opening ramp, non-zero "
+           f"slope from the first sample): **{', '.join(_steep)}**. Note these "
+           "still pick up a 1-step incipient under `signal='derivative'`, "
+           "because the Lanczos smooths their abrupt onset (normalised |dz| at "
+           "t₀ goes 0.94/0.66 raw → 0.147/0.150 filtered); "
+           "`signal='vorticity'` reads the unfiltered series and rejects them "
+           "correctly." if _steep else "")
+        + ("\n\nGreen dotted line = designed `Ic` boundary, drawn only for the "
+           "cases that have an explicit `Ic` segment; the other flat-opening "
+           "cases have a real plateau but no designed boundary index to check "
+           "against." if _flat else "")
     )
 
 _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
