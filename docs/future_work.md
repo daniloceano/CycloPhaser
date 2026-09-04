@@ -395,6 +395,134 @@ when computing derivatives (`deriv=1`). Alternatives to evaluate:
 **Expected benefit:** cleaner derivative signal near series edges; less dependence on
 `replace_endpoints_with_lowpass` as a compensatory measure.
 
+### Measurement 2026-09-03 — derivative smoothing is the dominant remaining edge artifact, and removing it barely moves the phases
+
+**Commit measured: `50a624480b02817dac6f2987ff260616435312a8`** (`develop-v2.1`, i.e.
+with `boundary_padding="reflect"` as default and the `use_filter=True` bug fixed).
+Branch of the investigation: `research/smooth-derivatives`.
+Environment: scipy 1.17.1, numpy 2.1.2, pandas 2.3.3.
+Track set: the 51 tracks in `tests/calibration_data/`.
+
+**What was varied.** Only the four `savgol_filter` calls applied to the derivatives in
+`process_vorticity` (`cyclophaser/determine_periods.py`, the block after
+`dzfilt_dt = vorticity_smoothed2.differentiate(...)`). The two Savgol passes on `z`
+were left exactly as the configuration specifies. `current` is the unmodified code;
+`off` and `w5/w9/w15` required a temporary monkeypatch of `savgol_filter` in the module
+namespace **for measurement only** — no package code was changed on this branch.
+
+- `current` — untouched. With `use_smoothing=false` the code falls into
+  `if not window_length_savgol:` and picks the *auto* window
+  `len//4|1` or `len//2|1`; measured range over the set **15–91 timesteps**.
+- `off` — derivative Savgol calls replaced by identity (no smoothing of `dz`, `dz2`).
+- `w5` / `w9` / `w15` — window forced to 5 / 9 / 15, `savgol_polynomial=3` unchanged.
+
+**Metrics.** `r(t₀) = |dz_dt_smoothed2[0]| / max|dz_dt_smoothed2|`, `r(t_final)` the
+same at the last sample; median over the 51 tracks. `dz_dt_smoothed2` is the array
+`find_stages` actually consumes. "seq" counts tracks whose *phase sequence* changes;
+"labels" counts tracks where **any** timestep is relabelled; "relabelled" is the mean
+fraction of timesteps that change label. All comparisons are against `current` **of the
+same parameter set**.
+
+#### (a) Author's validated calibration (section 3c: `use_filter=true`, `cutoff_low=168`, `cutoff_high=18`, `use_smoothing=false`, `length_scale=local`, `mature_method=amplitude`, …)
+
+| derivative smoothing | `r(t₀)` (q25–q75) | `r(t_final)` | seq changed | labels changed | relabelled |
+|---|---|---|---|---|---|
+| `current` (auto, 15–91) | **0.545** (0.29–0.70) | 0.403 | — | — | — |
+| off | **0.068** (0.04–0.11) | 0.060 | 1/51 | 39/51 | 3.5 % |
+| window 5 | 0.082 (0.05–0.13) | 0.072 | 1/51 | 39/51 | 3.5 % |
+| window 9 | 0.122 (0.08–0.20) | 0.108 | 1/51 | 40/51 | 3.3 % |
+| window 15 | 0.192 (0.12–0.31) | 0.179 | 1/51 | 41/51 | 3.2 % |
+
+#### (b) Package defaults (bare `determine_periods(series)`: `use_filter='auto'`, `cutoff_high=48`, `use_smoothing='auto'`, `length_scale=global`, `mature_method=derivative`)
+
+| derivative smoothing | `r(t₀)` (q25–q75) | `r(t_final)` | seq changed | labels changed | relabelled |
+|---|---|---|---|---|---|
+| `current` (auto, 15–91) | **0.526** (0.26–0.68) | 0.319 | — | — | — |
+| off | **0.282** (0.16–0.37) | 0.182 | 1/51 | 27/51 | 0.7 % |
+| window 5 | 0.285 (0.16–0.37) | 0.186 | 1/51 | 27/51 | 0.7 % |
+| window 9 | 0.301 (0.18–0.38) | 0.196 | 1/51 | 27/51 | 0.7 % |
+| window 15 | 0.334 (0.21–0.40) | 0.208 | 1/51 | 27/51 | 0.7 % |
+
+The single track whose sequence changes is `20180170` under the author's calibration and
+`20180733` under the defaults — the same track in every mode, in both cases.
+
+**Findings.**
+
+1. **With the Lanczos boundary fixed, the derivative Savgol is now the dominant source
+   of the edge artifact.** Under the author's calibration it multiplies `r(t₀)` by ~8
+   (0.068 → 0.545) and `r(t_final)` by ~7. Under package defaults the factor is smaller
+   (~1.9) because the wider `cutoff_high=48` leaves more genuine high-frequency slope in
+   the signal for the Savgol to preserve.
+2. **The auto window is the problem, not smoothing per se.** `r(t₀)` scales smoothly
+   with window length — 0.068 (off) → 0.082 (5) → 0.122 (9) → 0.192 (15) → 0.545
+   (auto, 15–91). Any fixed short window recovers most of the benefit.
+3. **The phase output is nearly insensitive to this.** 1/51 sequences change in every
+   mode and both parameter sets; per-timestep relabelling is 3.5 % (author) / 0.7 %
+   (defaults); no fragmentation appears — total phase segments over the set go 248 → 249
+   (author) and 218 → 219 (defaults), tracks with fewer than three distinct phases stay
+   at 3 and 1, `residual` counts are unchanged, and `incipient` gains one track. The
+   label at `t₀` changes in 1/51 and at `t_final` in 0/51; the median shift of the first
+   phase boundary is −2 h (author) / 0 h (defaults), with a worst case of 31 h / 44 h on
+   a single track.
+4. **`use_smoothing=false` does not mean "no Savgol".** Confirmed again here: with
+   `use_smoothing=false` the derivatives are still smoothed twice with a window of
+   15–91 timesteps — *larger* than the explicit windows used by any calibration. This is
+   the caveat recorded in section 3c, now quantified.
+
+**Reconciliation with the earlier note.** Section 3c records `r(t₀) = 0.571` for this
+calibration; re-measured here at `50a6244` it is **0.545**. The earlier note did not pin
+the measurement script, so the small gap is a metric-definition difference, not a
+behaviour change — `cyclophaser/` is byte-identical between `b5441aa` and `50a6244`
+apart from the two default values. The definition used above (`dz_dt_smoothed2`,
+normalised by its own maximum, median over tracks) is the one to reuse from now on.
+For reference, the same quantity on `dz_dt_filt` (one Savgol pass instead of two) is
+0.353 (author) / 0.438 (defaults).
+
+**Implication for the item below.** The cheapest correction is not a new smoother: it is
+to stop deriving the derivative window from `window_length_savgol` and to cap it (a fixed
+5–15, or a physically-motivated fraction of the cycle length), plus a `use_smoothing=false`
+that actually disables the derivative passes too. Both are behaviour changes and need the
+author's visual re-validation on the 51 tracks before adoption — the numbers above say the
+re-validation should be nearly a no-op, but 0/51 is the author's criterion, not a metric.
+
+### Author's decision, 2026-09-04 — `use_smoothing=False` now disables the derivative smoothing
+
+**Decided and implemented** (branch `research/smooth-derivatives`): of the two
+corrections proposed just above, only the second was adopted. `use_smoothing=False`
+now skips the four derivative Savgol passes as well, so `find_stages` consumes the
+unfiltered `d(z)/dt` and `d²(z)/dt²`. This is exactly the `off` variant measured in
+the tables above, re-confirmed against the package code after the change:
+`r(t₀) = 0.068` (q25–q75 0.04–0.11), `r(t_final) = 0.060` under the author's
+calibration; 1/51 phase sequences change; no fragmentation.
+
+**Explicitly NOT adopted:** the fixed cap (a window of 5–15) and the
+cycle-length-fraction window. Both were measured (windows 5/9/15 in the tables
+above) and both remain unimplemented — the parameter-name honesty fix was judged to
+cover the case that mattered, without introducing a new tuning knob.
+
+**Scope of the decision — and what it does not cover.** The check is `use_smoothing
+is False` by identity, so `use_smoothing='auto'` and explicit integer windows are
+untouched, as are the two Savgol passes on `z`. Note that the `off` row under
+*package defaults* in table (b) above (`r(t₀) = 0.282`) is **not** reachable through
+this change: those defaults use `use_smoothing='auto'`, and that path is unchanged
+(`r(t₀) = 0.526`, as measured). That row remains a measurement-only variant.
+
+**This is validated on TRACK (Gramcianinov) vorticity only.** That data already
+carries built-in spatial smoothing from the upstream tracking, which is very
+plausibly why removing a second, redundant smoothing stage costs so little here.
+**It has NOT been validated on raw ERA5 vorticity**, which reaches
+`process_vorticity` with no upstream smoothing at all and therefore carries
+high-frequency content the TRACK series never had.
+
+**When raw ERA5 is taken up, the order of investigation is:** first establish
+whether the now-corrected Lanczos stage (`boundary_padding="reflect"` plus the
+`use_filter=True` fix, item 3c) handles that noise on its own — with an appropriate
+`cutoff_high`, which is the knob the derivative Savgol was standing in for on TRACK
+data. Only if it does not should re-enabling derivative smoothing be reconsidered,
+and in that case the capped-window variants above become live options again rather
+than the unbounded `auto` window this change removed.
+
+
 ---
 
 ## 5. Review the bandpass low-frequency cutoff

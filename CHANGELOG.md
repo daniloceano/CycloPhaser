@@ -11,6 +11,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+**`use_smoothing=False` now disables the derivative smoothing too (behaviour change)**
+
+`use_smoothing=False` skipped both Savitzky-Golay passes on the vorticity `z`, but
+`process_vorticity` then fell into `if not window_length_savgol:` and picked an
+*auto* window for the four Savgol passes applied to the first and second
+derivatives — **15-91 timesteps** over the 51-track calibration set, i.e. *larger*
+than any window a calibration had ever asked for explicitly. A caller switching
+smoothing off still got the derivatives smoothed twice, with a window they never
+requested. `use_smoothing=False` now means what its name says: the derivatives
+`find_stages` consumes are the unfiltered `d(z)/dt` and `d²(z)/dt²`.
+
+This is the change the derivative-Savgol block had been justifying with "not an
+option because they are too noisy". Measured on the 51-track set (TRACK /
+Gramcianinov vorticity) under the author's validated calibration
+(`use_filter=true`, `cutoff_high=18`, `use_smoothing=false`, `length_scale=local`,
+`mature_method=amplitude`):
+
+| | `r(t₀)` | `r(t_final)` | phase sequences changed |
+|---|---|---|---|
+| before (auto window, 15-91) | 0.545 | 0.403 | — |
+| after (derivatives untouched) | **0.068** | **0.060** | **1/51** |
+
+`r(t₀) = |dz_dt_smoothed2[0]| / max|dz_dt_smoothed2|`, median over the set. The
+edge artifact drops by ~8x while the phase output barely moves: 1/51 sequences
+change, 39/51 tracks see at least one timestep relabelled, 3.5 % of timesteps
+relabelled on average, and **no fragmentation** — total phase segments over the set
+go 248 → 249. With the Lanczos boundary condition fixed
+(`boundary_padding="reflect"`, see below), the derivative Savgol had become the
+dominant remaining source of the boundary artifact.
+
+Only the explicit `use_smoothing is False` case changes. `use_smoothing='auto'` and
+an explicit integer window are untouched, and so are the two Savgol passes on `z`
+itself. Other falsy values (`0`, `''`) keep their previous behaviour. A bare
+`determine_periods(series)` call is unaffected — `r(t₀)` under package defaults
+stays at its measured 0.526.
+
+> **Scope of validation:** measured and validated on TRACK (Gramcianinov)
+> vorticity, which already carries upstream spatial smoothing. **Not validated on
+> raw ERA5 vorticity.** See `docs/future_work.md`, item 4.
+
+> **How to reproduce earlier results:** pass an explicit window instead of `False`
+> — e.g. `use_smoothing=len(series)//4 | 1` for series longer than 8 days, or
+> `len(series)//2 | 1` otherwise, which is the window the old code chose. Note that
+> this also re-enables the Savgol passes on `z`, which `use_smoothing=False` still
+> skips; the two were never separable through this single parameter.
+
 **Two filtering defaults moved together (behaviour change)**
 
 | parameter | was | now |
