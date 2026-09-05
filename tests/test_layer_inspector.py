@@ -26,7 +26,7 @@ entirely fidelity tests against the package itself:
 4. **The diagnostics are actually correct** (the ``|d2z|`` knee, the normalised
    ``rel`` profile), on series whose answer is known by construction.
 
-5. **"Grade" mode is untouched.** The phase figure and the ZIP's PNG must be
+5. **"Grid" mode is untouched.** The phase figure and the ZIP's PNG must be
    BYTE-IDENTICAL to the research/incipient-plateau baseline — the inspector is
    an addition, not a change.
 """
@@ -321,8 +321,9 @@ def test_discarded_mature_windows_carry_a_reason(vort_cache, track_id):
     args = li.build_args_periods()
     after_decay = find_decay_period(
         find_intensification_period(df.copy(deep=True), **args), **args)
-    allowed = {"sem intensificação anterior", "sem decay posterior",
-               "bloco começa no início da série", "bloco termina no fim da série"}
+    allowed = {"no preceding intensification", "no following decay",
+               "block starts at the beginning of the series",
+               "block ends at the end of the series"}
     for rec in records_written(li.mature_ledger(after_decay, **args)):
         if rec["confirmed"]:
             assert rec["reason"] == ""
@@ -489,14 +490,14 @@ def test_build_args_periods_rejects_a_non_parameter():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 5. "Grade" mode is byte-identical to the research/incipient-plateau baseline
+# 5. "Grid" mode is byte-identical to the research/incipient-plateau baseline
 # ══════════════════════════════════════════════════════════════════════════════
 
 GRID_TRACKS = ["20150069", "20190325", "20206498"]
 
 
 def _phase_png(track_id, figsize=(12, 5), show_title=True) -> bytes:
-    """The Grade mode's phase figure, produced exactly as _render_periods_png does.
+    """The Grid mode's phase figure, produced exactly as _render_periods_png does.
 
     Transcribed from the app rather than imported because importing app.py
     executes a Streamlit script; the point here is the matplotlib call chain,
@@ -524,8 +525,8 @@ def _phase_png(track_id, figsize=(12, 5), show_title=True) -> bytes:
 
 
 @pytest.mark.parametrize("track_id", GRID_TRACKS)
-def test_grade_phase_figure_is_unchanged_by_the_inspector(track_id):
-    """Rendering the inspector's layers must leave the Grade figure identical.
+def test_grid_phase_figure_is_unchanged_by_the_inspector(track_id):
+    """Rendering the inspector's layers must leave the Grid figure identical.
 
     The realistic regression is a helper mutating the shared frame (a column
     overwritten, an index re-sorted), which would silently change the figure
@@ -556,7 +557,7 @@ def test_grade_phase_figure_is_unchanged_by_the_inspector(track_id):
     pd.testing.assert_frame_equal(df_result, snapshot)
 
 
-def test_grade_zip_png_is_the_same_figure_as_the_export():
+def test_grid_zip_png_is_the_same_figure_as_the_export():
     """The ZIP entry is the phase PNG at the export size, unchanged.
 
     Guards the export path specifically: the inspector added a second renderer,
@@ -576,12 +577,16 @@ def test_grade_zip_png_is_the_same_figure_as_the_export():
 # 6. The renderers consume the helpers without touching detection
 # ══════════════════════════════════════════════════════════════════════════════
 
-def test_plotly_inspector_default_layers_reproduce_the_phase_figure(vort_cache):
-    """Opening the inspector must lose nothing: the layers visible by default
-    are exactly vorticity_smoothed2 plus the phase shading, which is what the
-    Grade mode's phase figure shows. Everything else is present but
-    'legendonly' — one client-side click away, no rerun."""
-    plotly = pytest.importorskip("plotly")           # noqa: F841
+def test_plotly_inspector_starts_with_every_layer_on(vort_cache):
+    """The inspector opens with everything visible, and nothing is missing.
+
+    Every pipeline series and every extrema column is a trace, all of them
+    visible; phase shading is present as shapes with a client-side on/off
+    button (a full-height band cannot be a legend item in Plotly). Switching a
+    layer off is a legend click, which leaves it in the figure as
+    'legendonly' — that is what makes the toggle free.
+    """
+    pytest.importorskip("plotly")
     from inspector_plotly import build_inspector_figure
 
     vort = _vorticity("20190325")
@@ -591,14 +596,65 @@ def test_plotly_inspector_default_layers_reproduce_the_phase_figure(vort_cache):
     fig = build_inspector_figure("20190325", vort, df_result,
                                  periods_to_dict(df_result))
 
-    visible = [t.name for t in fig.data if t.visible is True]
-    assert visible == ["vorticity_smoothed2 (o que a detecção lê)"]
-    # Every other series is a LAYER, not an omission.
-    hidden = {t.name for t in fig.data if t.visible == "legendonly"}
-    for expected in ("zeta (entrada crua)", "filtered_vorticity (Lanczos)",
-                     "vorticity_smoothed (Savgol 1)", "dz_dt_filt",
+    visible = {t.name for t in fig.data if t.visible is True}
+    for expected in ("zeta (raw input)", "filtered_vorticity (Lanczos)",
+                     "vorticity_smoothed (Savgol 1)",
+                     "vorticity_smoothed2 (what detection reads)",
+                     "dz_dt_filt", "dz_dt_smoothed2 (what detection reads)",
+                     "dz_dt2_filt", "dz_dt2_smoothed2 (what detection reads)",
                      "z_peaks_valleys", "dz_peaks_valleys", "dz2_peaks_valleys"):
-        assert expected in hidden
-    # Phase shading is present (as shapes, with a client-side on/off button).
+        assert expected in visible, expected
+    assert not [t for t in fig.data if t.visible == "legendonly"]
     assert len(fig.layout.shapes) > 0
     assert len(fig.layout.updatemenus) == 1
+
+
+def test_plotly_inspector_shared_scale_puts_every_curve_in_one_range(vort_cache):
+    """Normalisation is what lets one axis hold curves of different magnitude.
+
+    With it on, every plotted curve lies within [-1, 1] and the hover still
+    carries the RAW value (customdata) — the normalisation is a display
+    device, never a loss of the number. With it off, the plotted values are
+    the raw ones.
+    """
+    pytest.importorskip("plotly")
+    from inspector_plotly import build_inspector_figure
+
+    vort = _vorticity("20190325")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort)
+    common = ("20190325", vort, df_result, periods_to_dict(df_result))
+
+    normed = build_inspector_figure(*common, normalize=True)
+    series = [t for t in normed.data
+              if t.name and t.name.startswith(("zeta", "filtered", "vorticity",
+                                               "dz_dt"))]
+    assert series
+    for t in series:
+        y = np.asarray(t.y, dtype=float)
+        assert np.nanmax(np.abs(y)) <= 1.0 + 1e-12, t.name
+        # The raw value survives in customdata, so nothing is lost.
+        raw = np.asarray([c[0] for c in t.customdata], dtype=float)
+        assert np.nanmax(np.abs(raw)) > 0
+        np.testing.assert_allclose(y * np.nanmax(np.abs(raw)), raw, rtol=1e-9)
+
+    plain = build_inspector_figure(*common, normalize=False)
+    raw_trace = next(t for t in plain.data if t.name == "zeta (raw input)")
+    np.testing.assert_allclose(np.asarray(raw_trace.y, dtype=float),
+                               np.asarray(vort["zeta"].values, dtype=float))
+
+
+def test_normalise_series_preserves_sign_and_zero():
+    """max|y| scaling, not min-max: a curve's shape and its zero crossings
+    have to survive, or two genuinely different series would look coincident."""
+    y = np.array([-4.0, -2.0, 0.0, 1.0, 2.0])
+    out, divisor = li.normalise_series(y)
+    assert divisor == 4.0
+    np.testing.assert_allclose(out, y / 4.0)
+    assert out[2] == 0.0
+    assert np.all(np.sign(out) == np.sign(y))
+    # A flat series has no scale to divide by and is returned untouched.
+    flat, div_flat = li.normalise_series(np.zeros(5))
+    assert div_flat == 1.0
+    np.testing.assert_array_equal(flat, np.zeros(5))

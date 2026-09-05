@@ -133,11 +133,11 @@ def main() -> None:
         # Step 6 of the ribbon IS get_periods' own result -- assert it here too,
         # so a figure can never be produced from a frame that drifted.
         assert ribbon[-1][1].equals(df_result["periods"]), track_id
-        written.append((path, f"intensificação {n_acc} aceitos / {n_rej} rejeitados · "
-                              f"{n_disc} janela(s) madura(s) descartada(s) · "
-                              f"fronteira incipiente = {incipient['boundary']}"))
+        written.append((path, f"intensification {n_acc} accepted / {n_rej} rejected · "
+                              f"{n_disc} mature window(s) discarded · "
+                              f"incipient boundary = {incipient['boundary']}"))
 
-    print(f"{len(written)} figuras em {OUT}")
+    print(f"{len(written)} figures in {OUT}")
     for path, note in written:
         print(f"  {path.name:<44} {note}")
 

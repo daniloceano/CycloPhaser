@@ -347,6 +347,35 @@ def phase_spans_for_shading(periods_dict: dict, index: pd.DatetimeIndex) -> list
     return spans
 
 
+def normalise_series(y):
+    """Scale a series by its own ``max|y|`` so every curve fits one axis.
+
+    The panels stack series of genuinely different magnitude — raw ``zeta``
+    against the smoothed curve the detector reads, or the pipeline derivative
+    against the incipient probe's own derivative. A twinx was ruled out (it
+    already produced a zorder bug in the app's ``_plot_compact``), so the
+    alternative is this: ONE axis, every curve divided by its own peak
+    magnitude, and the normalisation stated on the axis and in every hover
+    rather than left for the reader to infer.
+
+    Dividing by ``max|y|`` (rather than min-max rescaling to [0, 1]) is what
+    keeps the picture honest for vorticity: it preserves sign and the position
+    of zero, so a curve's shape and where it crosses zero survive intact —
+    min-max would slide each series onto its own baseline and make two curves
+    that genuinely differ look coincident.
+
+    Returns:
+        (normalised array, divisor). A flat or all-zero series is returned
+        unchanged with a divisor of 1.0 — dividing it by zero would be worse
+        than showing it flat.
+    """
+    a = np.asarray(y, dtype=float)
+    peak = np.nanmax(np.abs(a)) if a.size else 0.0
+    if not np.isfinite(peak) or peak <= 0:
+        return a, 1.0
+    return a / peak, float(peak)
+
+
 def phase_at_step(periods: pd.Series) -> np.ndarray:
     """Per-timestep phase label as strings ('—' for unclassified), for hover."""
     return np.array(["—" if pd.isna(v) else str(v) for v in periods.to_numpy(dtype=object)])
@@ -683,7 +712,7 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
             records.append({
                 "z_valley": z_valley, "start": z_valley, "end": z_valley,
                 "written": False, "confirmed": False,
-                "reason": "sem z_peak dos dois lados",
+                "reason": "no z_peak on both sides",
                 "prev_label": None, "next_label": None,
             })
             continue
@@ -703,7 +732,7 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
             records.append({
                 "z_valley": z_valley, "start": mature_start, "end": mature_end,
                 "written": False, "confirmed": False,
-                "reason": "janela vazia (nenhum passo dentro dela)",
+                "reason": "empty window (no timestep inside it)",
                 "prev_label": None, "next_label": None,
             })
             continue
@@ -717,8 +746,8 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
             floor = threshold_mature_length * mature_length_scale
             written = bool(mature_indexes[-1] - mature_indexes[0] > floor)
             reason = "" if written else (
-                f"janela curta: {mature_indexes[-1] - mature_indexes[0]} <= "
-                f"threshold_mature_length x escala = {floor}")
+                f"window too short: {mature_indexes[-1] - mature_indexes[0]} <= "
+                f"threshold_mature_length x scale = {floor}")
 
         if written:
             written_mask[sl] = True
@@ -740,13 +769,13 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
         next_ok = next_idx in periods.index and next_label == 'decay'
         why = []
         if not prev_ok:
-            why.append("sem intensificação anterior"
+            why.append("no preceding intensification"
                        if prev_idx in periods.index else
-                       "bloco começa no início da série")
+                       "block starts at the beginning of the series")
         if not next_ok:
-            why.append("sem decay posterior"
+            why.append("no following decay"
                        if next_idx in periods.index else
-                       "bloco termina no fim da série")
+                       "block ends at the end of the series")
         for rec in records:
             if not rec["written"]:
                 continue

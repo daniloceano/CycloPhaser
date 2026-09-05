@@ -160,12 +160,18 @@ _DEFAULTS: dict = {
     # overlays are computed. Listed here so "Reset to defaults" clears it, like
     # n_cols; deliberately NOT part of the YAML export/import, which carries
     # only parameters that change detection.
-    "view_mode":            "Grade",
+    "view_mode":            "Grid",
     "inspector_track":      None,
-    "inspector_ribbon":     False,
-    "inspector_ledger":     False,
-    "inspector_mature":     False,
-    "inspector_incipient":  False,
+    # Every overlay starts ON: the inspector is opened to see the whole picture
+    # at once, and the work is per-TRACK (one selected cyclone), not per-grid,
+    # so computing all four up front is cheap. Untick one to drop its cost.
+    "inspector_ribbon":     True,
+    "inspector_ledger":     True,
+    "inspector_mature":     True,
+    "inspector_incipient":  True,
+    # Shared y scale: divide every curve in a panel by its own max|y| so they
+    # fit one axis (a twinx is not an option -- see _plot_compact's zorder bug).
+    "inspector_normalize":  True,
     "thr_int_len":       0.075,
     "thr_dec_len":       0.075,
     "thr_mat_len":       0.030,
@@ -194,7 +200,7 @@ _DEFAULTS: dict = {
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
-_VIEW_MODES = ["Grade", "Inspetor"]
+_VIEW_MODES = ["Grid", "Inspector"]
 _BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
@@ -732,32 +738,32 @@ def _render_probe_png(file_bytes: bytes,
     t = np.arange(z_raw.size)
 
     fig, axes = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
-    axes[0].plot(t, z_raw, color="#999999", lw=1.1, label="zeta cru")
+    axes[0].plot(t, z_raw, color="#999999", lw=1.1, label="raw zeta")
     if window > 0:
         axes[0].plot(t, z_s, color="#1d3557", lw=1.9,
-                     label=f"sondagem suavizada (w={window})")
+                     label=f"smoothed probe (w={window})")
     axes[0].set_ylabel("zeta", fontsize=8)
     axes[0].legend(fontsize=7, loc="lower right")
 
-    axes[1].plot(t, rel_off, color="#999999", lw=1.1, label="rel(t) sem suavizacao")
+    axes[1].plot(t, rel_off, color="#999999", lw=1.1, label="rel(t), smoothing off")
     if window > 0:
         axes[1].plot(t, rel_on, color="#e63946", lw=1.9,
-                     label=f"rel(t) com w={window}")
+                     label=f"rel(t), w={window}")
     axes[1].axhline(tau, color="#8856a7", lw=1.2, ls="--", label=f"tau={tau:.2f}")
-    for b, c, lbl in ((b_off, "#999999", "fronteira sem suavizacao"),
-                      (b_on, "#d000d0", "fronteira com suavizacao")):
+    for b, c, lbl in ((b_off, "#999999", "boundary, smoothing off"),
+                      (b_on, "#d000d0", "boundary, smoothing on")):
         if b > 0:
             axes[1].axvline(b, color=c, lw=1.8)
     axes[1].set_ylim(0, 1.02)
     axes[1].set_ylabel("rel(t) = |dz|/max|dz|", fontsize=8)
-    axes[1].set_xlabel("passo", fontsize=8)
+    axes[1].set_xlabel("step", fontsize=8)
     axes[1].legend(fontsize=7, loc="upper right")
     for a in axes:
         a.tick_params(labelsize=7)
         a.set_xlim(-0.5, z_raw.size - 0.5)
     fig.suptitle(
-        f"sondagem da incipiente · signal={signal} · w={window} · "
-        f"fronteira {b_off} (sem) -> {b_on} (com)", fontsize=9, fontweight="bold")
+        f"incipient probe · signal={signal} · w={window} · "
+        f"boundary {b_off} (off) -> {b_on} (on)", fontsize=9, fontweight="bold")
     fig.tight_layout()
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")
@@ -824,7 +830,7 @@ def _fmt_td(value) -> str:
 def _ledger_table(ledgers: dict, ribbon) -> pd.DataFrame:
     """Ledger rows for both stage functions, ordered in time.
 
-    'Rótulo final' crosses the ledger with the pipeline ribbon: an accepted
+    'Final label' crosses the ledger with the pipeline ribbon: an accepted
     candidate can still lose its stretch to a later step, which is invisible in
     the final figure and is the single most confusing thing about calibrating
     these thresholds. Left blank when the ribbon overlay is off (it is what
@@ -835,36 +841,36 @@ def _ledger_table(ledgers: dict, ribbon) -> pd.DataFrame:
         for rec in ledger["candidates"] + ledger["gaps"]:
             is_gap = rec["type"] == "gap"
             row = {
-                "Etapa": kind,
-                "Tipo": "gap" if is_gap else ("candidato → fim da série"
-                                              if rec["to_series_end"] else "candidato"),
-                "Início": rec["start"].strftime("%d/%m %Hh"),
-                "Fim": rec["end"].strftime("%d/%m %Hh"),
-                "Duração": _fmt_td(rec["duration"]),
-                "Escala": _fmt_td(rec["scale"]),
-                ("Máx. permitido" if is_gap else "Mín. exigido"): _fmt_td(rec["minimum"]),
-                "Veredito": ("preenchido" if rec["accepted"] else "mantido aberto") if is_gap
-                            else ("ACEITO" if rec["accepted"] else "rejeitado"),
-                "Rótulo final": "",
+                "Step": kind,
+                "Type": "gap" if is_gap else ("candidate → end of series"
+                                              if rec["to_series_end"] else "candidate"),
+                "Start": rec["start"].strftime("%d/%m %Hh"),
+                "End": rec["end"].strftime("%d/%m %Hh"),
+                "Duration": _fmt_td(rec["duration"]),
+                "Scale": _fmt_td(rec["scale"]),
+                ("Max. allowed" if is_gap else "Min. required"): _fmt_td(rec["minimum"]),
+                "Verdict": ("filled" if rec["accepted"] else "left open") if is_gap
+                           else ("ACCEPTED" if rec["accepted"] else "rejected"),
+                "Final label": "",
                 "_sort": rec["start"],
             }
             if ribbon is not None and rec["accepted"]:
                 fate = li.fate_of_segment(ribbon, rec["start"], rec["end"])
-                row["Rótulo final"] = ", ".join(
+                row["Final label"] = ", ".join(
                     f"{lbl} ({n}/{fate['n']})"
                     for lbl, n in sorted(fate["final"].items(), key=lambda kv: -kv[1])
                 )
             rows.append(row)
     if not rows:
         return pd.DataFrame()
-    out = pd.DataFrame(rows).sort_values(["_sort", "Etapa"]).drop(columns="_sort")
+    out = pd.DataFrame(rows).sort_values(["_sort", "Step"]).drop(columns="_sort")
     # The two stage functions use opposite comparisons, so the threshold column
     # is named differently per row type; merge them for display.
-    if "Máx. permitido" in out.columns and "Mín. exigido" in out.columns:
-        out["Limiar"] = out["Mín. exigido"].fillna("") + out["Máx. permitido"].fillna("")
-        out = out.drop(columns=["Mín. exigido", "Máx. permitido"])
+    if "Max. allowed" in out.columns and "Min. required" in out.columns:
+        out["Threshold"] = out["Min. required"].fillna("") + out["Max. allowed"].fillna("")
+        out = out.drop(columns=["Min. required", "Max. allowed"])
         cols = list(out.columns)
-        cols.insert(cols.index("Veredito"), cols.pop(cols.index("Limiar")))
+        cols.insert(cols.index("Verdict"), cols.pop(cols.index("Threshold")))
         out = out[cols]
     return out.reset_index(drop=True)
 
@@ -874,14 +880,14 @@ def _mature_table(records: list) -> pd.DataFrame:
     rows = []
     for rec in records:
         rows.append({
-            "Vale de z": rec["z_valley"].strftime("%d/%m %Hh"),
-            "Janela": (f"{pd.Timestamp(rec['start']):%d/%m %Hh} → "
+            "z valley": rec["z_valley"].strftime("%d/%m %Hh"),
+            "Window": (f"{pd.Timestamp(rec['start']):%d/%m %Hh} → "
                        f"{pd.Timestamp(rec['end']):%d/%m %Hh}"),
-            "Escrita": "sim" if rec["written"] else "não",
-            "Confirmada": "sim" if rec["confirmed"] else "não",
-            "Vizinho anterior": rec.get("prev_label") or "—",
-            "Vizinho posterior": rec.get("next_label") or "—",
-            "Motivo do descarte": rec["reason"] or "—",
+            "Written": "yes" if rec["written"] else "no",
+            "Confirmed": "yes" if rec["confirmed"] else "no",
+            "Previous neighbour": rec.get("prev_label") or "—",
+            "Next neighbour": rec.get("next_label") or "—",
+            "Discard reason": rec["reason"] or "—",
         })
     return pd.DataFrame(rows)
 
@@ -2042,28 +2048,28 @@ tab_cal, tab_doc = st.tabs(["Calibration", "Documentation"])
 with tab_cal:
     # Top row: display mode + ZIP export.
     #
-    # "Grade" is the historical view and renders exactly what it rendered
+    # "Grid" is the historical view and renders exactly what it rendered
     # before the inspector existed -- same matplotlib functions, same figures,
     # same ZIP bytes; only the widget it shares this row with changed.
-    # "Inspetor" answers a different question -- one track, with every pipeline
+    # "Inspector" answers a different question -- one track, with every pipeline
     # series and every decision overlay switchable one by one -- so it gets its
     # own renderer (Plotly, for client-side legend toggling) instead of being
     # squeezed into the grid. See the module docstring of inspector_plotly.py.
     _c1, _c2 = st.columns([4, 1])
     with _c1:
         view_mode: str = st.radio(
-            "Modo de exibição", options=_VIEW_MODES,
+            "Display mode", options=_VIEW_MODES,
             index=_VIEW_MODES.index(_DEFAULTS["view_mode"]),
             key="view_mode", horizontal=True,
             help=(
-                "**Grade** (padrão) — a grade multi-ciclone, inalterada: "
-                "figuras matplotlib, o mesmo PNG no ZIP, todos os tracks "
-                "carregados de uma vez.\n\n"
-                "**Inspetor** — um track por vez, em Plotly, com cada série do "
-                "pipeline e cada sobreposição de decisão ligando e desligando "
-                "individualmente (clique na legenda; não recarrega a página). "
-                "PURA VISUALIZAÇÃO: nenhum controle do inspetor altera a "
-                "detecção, e nada dele entra no YAML exportado."
+                "**Grid** (default) — the multi-cyclone grid, unchanged: "
+                "matplotlib figures, the same PNG in the ZIP, every loaded "
+                "track at once.\n\n"
+                "**Inspector** — one track at a time, in Plotly, with every "
+                "pipeline series and every decision overlay switching on and "
+                "off individually (click the legend; no page reload). "
+                "PURE VISUALISATION: no inspector control changes detection, "
+                "and none of its state reaches the exported YAML."
             ),
         )
     with _c2:
@@ -2081,9 +2087,9 @@ with tab_cal:
         )
 
     # ══════════════════════════════════════════════════════════════════════════
-    # MODE "Grade" — unchanged multi-cyclone grid (matplotlib, cached PNGs)
+    # MODE "Grid" — unchanged multi-cyclone grid (matplotlib, cached PNGs)
     # ══════════════════════════════════════════════════════════════════════════
-    if view_mode == "Grade":
+    if view_mode == "Grid":
         n_cols: int = st.select_slider(
             "Grid columns", options=[1, 2, 3, 4, 5, 6],
             value=_DEFAULTS["n_cols"], key="n_cols",
@@ -2138,7 +2144,7 @@ with tab_cal:
                 st.image(_png_display, use_container_width=True)
 
                 if show_incipient_probe and incipient_method == "plateau":
-                    with st.expander("Sondagem da incipiente (crua vs suavizada)",
+                    with st.expander("Incipient probe (raw vs smoothed)",
                                      expanded=False):
                         try:
                             st.image(_render_probe_png(
@@ -2224,7 +2230,7 @@ with tab_cal:
             st.dataframe(pd.DataFrame(rows).set_index("Cyclone"), use_container_width=True)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # MODE "Inspetor" — one track, every layer switchable (Plotly)
+    # MODE "Inspector" — one track, every layer switchable (Plotly)
     # ══════════════════════════════════════════════════════════════════════════
     # PURE VISUALISATION. Nothing below changes detection: every array drawn is
     # either read back from the run (`res["df_result"]`, `res["vort"]`) or
@@ -2234,9 +2240,9 @@ with tab_cal:
     else:
         _inspectable = [n for n, r in all_results.items() if r["ok"]]
         if not _inspectable:
-            st.warning("Nenhum ciclone processado com sucesso para inspecionar.")
+            st.warning("No cyclone was processed successfully — nothing to inspect.")
         else:
-            _isel, _ihelp = st.columns([2, 3])
+            _isel, _inorm, _ihelp = st.columns([2, 1, 3])
             with _isel:
                 # Seeded before the widget is built rather than via `index=`:
                 # passing a default AND a key that session_state already holds
@@ -2245,69 +2251,87 @@ with tab_cal:
                 if st.session_state.get("inspector_track") not in _inspectable:
                     st.session_state["inspector_track"] = _inspectable[0]
                 _track = st.selectbox(
-                    "Track a inspecionar", options=_inspectable,
+                    "Track to inspect", options=_inspectable,
                     key="inspector_track",
+                )
+            with _inorm:
+                _normalize = st.checkbox(
+                    "Shared y scale", key="inspector_normalize",
+                    help=(
+                        "Divides every curve in a panel by its own **max|y|**, "
+                        "so series of different magnitude (raw `zeta` runs "
+                        "2–3× wider than the smoothed curve detection reads) "
+                        "fit one axis and can be compared directly. A second "
+                        "y-axis was ruled out: it already caused a z-order bug "
+                        "in the grid's compact figure. Dividing by max|y| "
+                        "keeps sign and the position of zero, so shapes and "
+                        "zero crossings survive. Every hover still carries the "
+                        "**raw** value and the divisor. Untick to read the "
+                        "series in their own units."
+                    ),
                 )
             with _ihelp:
                 st.caption(
-                    "**Camadas de série** (zeta, filtered_vorticity, "
-                    "vorticity_smoothed, vorticity_smoothed2, dz/dz2 e os três "
-                    "`*_peaks_valleys`) já estão todas no gráfico — clique na "
-                    "legenda para ligá-las e desligá-las, sem recarregar. O "
-                    "estado inicial reproduz a figura de fases da Grade: "
-                    "`vorticity_smoothed2` mais o sombreado de fases (botão "
-                    "*fases* acima do gráfico).\n\n"
-                    "**Sobreposições de decisão** abaixo exigem cálculo no "
-                    "servidor, então são caixas de seleção: só são computadas "
-                    "quando marcadas."
+                    "**Series layers** (zeta, filtered_vorticity, "
+                    "vorticity_smoothed, vorticity_smoothed2, dz/dz2 and the "
+                    "three `*_peaks_valleys`) are all in the chart and all ON. "
+                    "Click a legend entry to switch one off — it stays in the "
+                    "figure, client-side, with no rerun. Phase shading has its "
+                    "own button above the chart (a full-height band is a "
+                    "layout shape, which Plotly cannot put in the legend).\n\n"
+                    "**Decision overlays** below need server-side computation, "
+                    "so they are checkboxes. They start ON too; untick one to "
+                    "drop its cost."
                 )
 
             _o1, _o2, _o3, _o4 = st.columns(4)
             with _o1:
                 _show_ribbon = st.checkbox(
-                    "Fita do pipeline", key="inspector_ribbon",
+                    "Pipeline ribbon", key="inspector_ribbon",
                     help=(
-                        "Seis faixas, uma por etapa, coloridas pelas fases "
-                        "vigentes DEPOIS daquela etapa. As seis funções rodam "
-                        "em ordem fixa e sobrescrevem umas às outras; ler uma "
-                        "coluna de cima para baixo mostra um trecho mudando de "
-                        "dono. As próprias funções do pacote são chamadas em "
-                        "sequência sobre uma cópia do df — nada é "
-                        "reimplementado, e a linha 6 é, por construção, o "
-                        "resultado que `get_periods` devolve."
+                        "Six lanes, one per step, coloured by the phases in "
+                        "force AFTER that step. The six functions run in a "
+                        "fixed order and overwrite one another; reading a "
+                        "column top to bottom shows a stretch changing hands. "
+                        "The package's own functions are called in sequence on "
+                        "a copy of the frame — nothing is re-implemented, and "
+                        "lane 6 is, by construction, the result `get_periods` "
+                        "returns."
                     ),
                 )
             with _o2:
                 _show_ledger = st.checkbox(
-                    "Ledger de candidatos", key="inspector_ledger",
+                    "Candidate ledger", key="inspector_ledger",
                     help=(
-                        "Cada segmento candidato de `find_intensification_period` "
-                        "(pico de z → próximo vale) e de `find_decay_period` "
-                        "(vale → próximo pico, mais o último vale até o fim), "
-                        "desenhado sobre o painel z com a cor do veredito atual, "
-                        "mais os gaps entre blocos e o teste de preenchimento. "
-                        "Mover os sliders de limiar reclassifica ao vivo."
+                        "Every candidate segment of `find_intensification_period` "
+                        "(z peak → next z valley) and `find_decay_period` "
+                        "(valley → next peak, plus the last valley running to "
+                        "the end), drawn on the z panel in the colour of its "
+                        "current verdict, plus the gaps between blocks and the "
+                        "fill test. Moving a threshold slider reclassifies "
+                        "them live."
                     ),
                 )
             with _o3:
                 _show_mature = st.checkbox(
-                    "Camadas mature", key="inspector_mature",
+                    "Mature layers", key="inspector_mature",
                     help=(
-                        "Picos/vales de z aceitos e rejeitados sob o limiar de "
-                        "proeminência efetivo, e as janelas maduras — inclusive "
-                        "as que a confirmação estrita descartou, que hoje somem "
-                        "sem deixar rastro no resultado."
+                        "The z peaks/valleys accepted and rejected under the "
+                        "effective prominence threshold, and the mature "
+                        "windows — including the ones the strict confirmation "
+                        "discarded, which today vanish from the result without "
+                        "leaving a trace."
                     ),
                 )
             with _o4:
                 _show_incipient = st.checkbox(
-                    "Camadas incipiente", key="inspector_incipient",
+                    "Incipient layers", key="inspector_incipient",
                     help=(
-                        "Sondagem suavizada, perfil rel = |dz|/max|dz| contra τ, "
-                        "joelho de |dz2| e a fronteira incipiente que o run "
-                        "produziu (lida de `df['periods']`, não recomputada). "
-                        "Fora de `incipient_method=\"plateau\"` as camadas de "
-                        "rel/τ/sondagem não existem; dz e dz2 continuam."
+                        "Smoothed probe, the rel = |dz|/max|dz| profile "
+                        "against τ, the |dz2| knee, and the incipient boundary "
+                        "the run produced (read from `df['periods']`, never "
+                        "recomputed). Outside `incipient_method=\"plateau\"` "
+                        "the rel/τ/probe layers do not exist; dz and dz2 stay."
                     ),
                 )
 
@@ -2315,11 +2339,10 @@ with tab_cal:
             _plateau_active = incipient_method == "plateau"
             if _show_incipient and not _plateau_active:
                 st.caption(
-                    "⚠ `incipient_method` está em **geometric**: as camadas de "
-                    "rel/τ/sondagem só existem no modo `plateau` e foram "
-                    "omitidas. O joelho de |dz2| e a fronteira incipiente "
-                    "produzida pelo run continuam desenhados; dz e dz2 crus, "
-                    "também."
+                    "⚠ `incipient_method` is **geometric**: the rel/τ/probe "
+                    "layers only exist in `plateau` mode and were omitted. The "
+                    "|dz2| knee and the incipient boundary the run produced are "
+                    "still drawn, and so are the raw dz / dz2 panels."
                 )
 
             try:
@@ -2374,39 +2397,39 @@ with tab_cal:
                     _track, _res["vort"], _res["df_result"], _res["periods_dict"],
                     gt_boundary_iso=_gt_boundary_iso(_track, files[_track]),
                     ribbon=_ribbon, ledgers=_ledgers, mature=_mature,
-                    incipient=_incipient,
+                    incipient=_incipient, normalize=bool(_normalize),
                 )
                 st.plotly_chart(_fig, use_container_width=True,
                                 key=f"inspector_chart_{_track}")
             except Exception as exc:
-                st.error(f"Erro no inspetor: {exc}")
+                st.error(f"Inspector error: {exc}")
                 _ribbon = _ledgers = _mature_records = None
 
             if _ledgers:
-                st.subheader("Ledger de candidatos")
+                st.subheader("Candidate ledger")
                 st.caption(
-                    "Duração > mínimo (escala × limiar) → aceito. Para os gaps a "
-                    "regra é a oposta: um gap MENOR que o máximo é preenchido. "
-                    "‘Sobrescrito por’ cruza com a fita: um candidato pode ser "
-                    "aceito pela própria função e depois perder o trecho para "
-                    "uma etapa posterior."
+                    "Duration > minimum (scale × threshold) → accepted. For "
+                    "gaps the rule is the opposite: a gap SHORTER than the "
+                    "maximum is filled. 'Final label' crosses this with the "
+                    "ribbon: a candidate can be accepted by its own function "
+                    "and then lose the stretch to a later step."
                 )
                 st.dataframe(_ledger_table(_ledgers, _ribbon),
                              use_container_width=True, hide_index=True)
                 if _ribbon is None:
                     st.caption(
-                        "Marque **Fita do pipeline** para preencher a coluna "
-                        "‘Rótulo final’ — ela é lida da etapa 6 da fita."
+                        "Tick **Pipeline ribbon** to fill the 'Final label' "
+                        "column — it is read from step 6 of the ribbon."
                     )
 
             if _mature_records:
-                st.subheader("Janelas maduras e a confirmação estrita")
+                st.subheader("Mature windows and the strict confirmation")
                 st.caption(
-                    "`find_mature_stage` só confirma uma janela madura se o "
-                    "passo anterior for `intensification` E o posterior for "
-                    "`decay` — uma janela sem essa confirmação é apagada e "
-                    "desaparece sem rastro do resultado. Esta tabela é esse "
-                    "rastro."
+                    "`find_mature_stage` only confirms a mature window if the "
+                    "preceding timestep is `intensification` AND the following "
+                    "one is `decay` — a window without that confirmation is "
+                    "erased and disappears from the result without a trace. "
+                    "This table is that trace."
                 )
                 st.dataframe(_mature_table(_mature_records),
                              use_container_width=True, hide_index=True)
