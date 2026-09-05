@@ -32,6 +32,7 @@ from layer_inspector import (
     label_runs,
     normalise_series,
     phase_spans_for_shading,
+    rescaler,
 )
 
 C_INT = "#f7b538"
@@ -50,13 +51,22 @@ LW_SERIES = 2.0
 LW_OVERLAY = 9.0
 LW_MARK = 2.6
 
+# Palette taken from the package itself (cyclophaser/plots.py, plot_didactic):
+# grey raw zeta, amber filtered_vorticity, navy vorticity_smoothed, red
+# vorticity_smoothed2 -- so a curve looks the same here as in cyclophaser's own
+# figures. The derivative panels follow the same file's per-quantity colours
+# (dz red, dz2 amber), with the intermediate *_filt stage in a light tint.
 _SERIES_Z = [
-    ("zeta", "zeta (raw input)", "#8d8d8d", LW_SERIES),
-    ("filtered_vorticity", "filtered_vorticity (Lanczos)", "#7fb3d5", LW_SERIES),
-    ("vorticity_smoothed", "vorticity_smoothed (Savgol 1)", "#2e86c1", LW_SERIES),
+    ("zeta", "zeta (raw input)", "gray", LW_SERIES),
+    ("filtered_vorticity", "filtered_vorticity (Lanczos)", "#d68c45", LW_SERIES),
+    ("vorticity_smoothed", "vorticity_smoothed (Savgol 1)", "#1d3557", LW_SERIES),
     ("vorticity_smoothed2", "vorticity_smoothed2 (what detection reads)",
-     "#1d3557", LW_PRIMARY),
+     "#e63946", LW_PRIMARY),
 ]
+_SERIES_D = {
+    "dz":  {"filt": "#eba0a0", "smoothed": "#d62828"},
+    "dz2": {"filt": "#f6dcaa", "smoothed": "#f7b538"},
+}
 
 
 def _shade(ax, periods_dict) -> None:
@@ -72,32 +82,33 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
     """One page per track: z / dz / dz2 (+ rel) panels, plus the pipeline ribbon.
 
     Args mirror ``inspector_plotly.build_inspector_figure`` exactly — including
-    ``normalize``, which divides every curve in a panel by its own ``max|y|``
-    so they share one axis. See there for what each overlay dict must carry.
+    ``normalize``, which rescales every curve in a panel to [0, 1] by its own
+    min and max so they share one axis. See there for what each overlay dict
+    must carry.
     """
     index = df_result.index
     want_rel = bool(incipient and incipient.get("plateau_active"))
     n_rows = 3 + int(want_rel) + int(bool(ribbon))
     ratios = [2.6, 1.3, 1.3] + ([1.1] if want_rel else []) + ([1.5] if ribbon else [])
 
-    def div(series) -> float:
-        return normalise_series(series)[1] if normalize else 1.0
+    def scale_for(series):
+        return rescaler(series, normalize)
 
     fig, axes = plt.subplots(n_rows, 1, figsize=(17, 3.0 * n_rows), sharex=True,
                              gridspec_kw={"height_ratios": ratios})
     ax_z, ax_dz, ax_dz2 = axes[0], axes[1], axes[2]
     ax_rel = axes[3] if want_rel else None
     ax_rib = axes[-1] if ribbon else None
-    suffix = " / max|·|" if normalize else ""
+    suffix = " (rescaled 0-1)" if normalize else ""
 
     # ── panel z: every pipeline series + the extrema the detector consumes ──
     _shade(ax_z, periods_dict)
     for var, label, colour, lw in _SERIES_Z:
         values = np.asarray(vort[var].values, dtype=float)
-        ax_z.plot(index, values / div(values), color=colour, lw=lw, label=label,
-                  zorder=3)
-    z_div = div(df_result["z"])
-    _extrema(ax_z, index, df_result["z"], df_result["z_peaks_valleys"], z_div)
+        ax_z.plot(index, scale_for(values)(values), color=colour, lw=lw,
+                  label=label, zorder=3)
+    z_scale = scale_for(df_result["z"])
+    _extrema(ax_z, index, df_result["z"], df_result["z_peaks_valleys"], z_scale)
     ax_z.set_ylabel(f"z{suffix}", fontsize=F_AXIS)
 
     if gt_boundary_iso:
@@ -108,28 +119,33 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
                   label="ground-truth Ic boundary")
 
     if ledgers:
-        _draw_ledger(ax_z, index, df_result["z"], z_div, ledgers)
+        _draw_ledger(ax_z, index, df_result["z"], z_scale, ledgers)
     if mature:
-        _draw_mature(ax_z, index, df_result["z"], z_div, mature)
+        _draw_mature(ax_z, index, df_result["z"], z_scale, mature)
 
     # ── panels dz / dz2 ─────────────────────────────────────────────────────
-    dz_div = div(df_result["dz"])
-    for ax, base, filt, smooth, lbl, sm_div in (
-            (ax_dz, "dz", "dz_dt_filt", "dz_dt_smoothed2", "dz", dz_div),
-            (ax_dz2, "dz2", "dz_dt2_filt", "dz_dt2_smoothed2", "dz2",
-             div(df_result["dz2"]))):
+    dz_scale = scale_for(df_result["dz"])
+    for ax, base, filt, smooth, sm_scale in (
+            (ax_dz, "dz", "dz_dt_filt", "dz_dt_smoothed2", dz_scale),
+            (ax_dz2, "dz2", "dz_dt2_filt", "dz_dt2_smoothed2",
+             scale_for(df_result["dz2"]))):
         raw = np.asarray(vort[filt].values, dtype=float)
-        ax.plot(index, raw / div(raw), color="#b8b8b8", lw=LW_SERIES, label=filt)
-        ax.plot(index, np.asarray(vort[smooth].values, dtype=float) / sm_div,
-                color="#457b9d", lw=LW_PRIMARY,
-                label=f"{smooth} (what detection reads)")
+        ax.plot(index, scale_for(raw)(raw), color=_SERIES_D[base]["filt"],
+                lw=LW_SERIES, label=filt)
+        smoothed = np.asarray(vort[smooth].values, dtype=float)
+        ax.plot(index, sm_scale(smoothed), color=_SERIES_D[base]["smoothed"],
+                lw=LW_PRIMARY, label=f"{smooth} (what detection reads)")
         _extrema(ax, index, df_result[base], df_result[f"{base}_peaks_valleys"],
-                 sm_div)
-        ax.set_ylabel(f"{lbl}{suffix}", fontsize=F_AXIS)
-        ax.axhline(0.0, color="#888888", lw=0.9)
+                 sm_scale)
+        ax.set_ylabel(f"{base}{suffix}", fontsize=F_AXIS)
+        # Only meaningful in true units: once each series is rescaled by its
+        # own min/max, zero sits at a different height for each of them, so a
+        # single zero line would be a line through nothing.
+        if not normalize:
+            ax.axhline(0.0, color="#888888", lw=0.9)
 
     if incipient:
-        _draw_incipient(ax_dz, ax_dz2, ax_rel, index, dz_div,
+        _draw_incipient(ax_dz, ax_dz2, ax_rel, index, dz_scale, normalize,
                         np.asarray(df_result["dz"], dtype=float), incipient)
 
     for ax in (axes[:-1] if ribbon else axes):
@@ -145,8 +161,8 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
     return fig
 
 
-def _extrema(ax, index, values, labels, divisor) -> None:
-    values = np.asarray(values, dtype=float) / divisor
+def _extrema(ax, index, values, labels, scale) -> None:
+    values = scale(values)
     lab = np.asarray(labels, dtype=object)
     for kind, marker, colour in (("peak", "^", C_ACCEPT_PEAK),
                                  ("valley", "v", C_ACCEPT_VALLEY)):
@@ -156,10 +172,10 @@ def _extrema(ax, index, values, labels, divisor) -> None:
                        color=colour, zorder=7, label=f"{kind}s")
 
 
-def _draw_ledger(ax, index, z, divisor, ledgers) -> None:
+def _draw_ledger(ax, index, z, scale, ledgers) -> None:
     """Candidate segments over z, coloured by the verdict under the current
     threshold; gaps drawn as the dash-dot bridges they either are or are not."""
-    z = np.asarray(z, dtype=float) / divisor
+    z = scale(z)
     pos = {ts: i for i, ts in enumerate(index)}
     for kind, colour, label in (("intensification", C_INT, "intensification"),
                                 ("decay", C_DEC, "decay")):
@@ -190,11 +206,11 @@ def _draw_ledger(ax, index, z, divisor, ledgers) -> None:
             first = False
 
 
-def _draw_mature(ax, index, z, divisor, mature) -> None:
+def _draw_mature(ax, index, z, scale, mature) -> None:
     """Accepted vs rejected z extrema under the effective prominence cut, and
     the mature windows — including the ones the strict confirmation erased."""
     lens = mature["lens"]
-    z = np.asarray(z, dtype=float) / divisor
+    z = scale(z)
     x = np.asarray(index)
     for kind, colour, marker in (("peak", C_ACCEPT_PEAK, "^"),
                                  ("valley", C_ACCEPT_VALLEY, "v")):
@@ -228,24 +244,29 @@ def _draw_mature(ax, index, z, divisor, mature) -> None:
             first = False
 
 
-def _draw_incipient(ax_dz, ax_dz2, ax_rel, index, dz_divisor, dz, incipient) -> None:
+def _draw_incipient(ax_dz, ax_dz2, ax_rel, index, dz_scale, normalize, dz,
+                    incipient) -> None:
     lens = incipient["lens"]
     x = np.asarray(index)
     plateau = incipient["plateau_active"]
 
     if plateau and lens["smoothing_applies"]:
-        # Explicitly rescaled onto dz's own scale and labelled with the factor:
-        # the probe is d/dt of the smoothed RAW vorticity, a different quantity
-        # in different units. No twinx (that is what produced the zorder bug in
-        # the app's _plot_compact) -- one axis, one stated normalisation.
+        # The probe is d/dt of the smoothed RAW vorticity: a different quantity
+        # in different units from the pipeline's dz. No twinx (that is what
+        # produced the zorder bug in the app's _plot_compact) -- when the panel
+        # is rescaled the probe gets the same treatment as everything in it;
+        # when it is not, it is put on dz's own peak so the two are comparable.
         dz_peak = np.nanmax(np.abs(dz)) or 1.0
         for key, lw, ls, tag in (("probe_raw", LW_SERIES, ":", "raw"),
                                  ("probe_smoothed", LW_PRIMARY, "-", "smoothed")):
             probe = np.gradient(np.asarray(lens[key], dtype=float))
-            peak = np.nanmax(np.abs(probe))
-            factor = (dz_peak / peak if peak > 0 else 1.0) / dz_divisor
-            ax_dz.plot(x, probe * factor, color=C_SMOOTH, lw=lw, ls=ls,
-                       label=f"{tag} probe d/dt (×{factor:.3g})")
+            if normalize:
+                plotted = normalise_series(probe)[0]
+            else:
+                peak = np.nanmax(np.abs(probe))
+                plotted = probe * (dz_peak / peak if peak > 0 else 1.0)
+            ax_dz.plot(x, plotted, color=C_SMOOTH, lw=lw, ls=ls,
+                       label=f"{tag} probe d/dt (rescaled)")
 
     knee = int(lens["knee"])
     if 0 <= knee < len(index):

@@ -348,32 +348,52 @@ def phase_spans_for_shading(periods_dict: dict, index: pd.DatetimeIndex) -> list
 
 
 def normalise_series(y):
-    """Scale a series by its own ``max|y|`` so every curve fits one axis.
+    """Rescale a series to [0, 1] using its own minimum and maximum.
 
     The panels stack series of genuinely different magnitude — raw ``zeta``
-    against the smoothed curve the detector reads, or the pipeline derivative
-    against the incipient probe's own derivative. A twinx was ruled out (it
-    already produced a zorder bug in the app's ``_plot_compact``), so the
-    alternative is this: ONE axis, every curve divided by its own peak
-    magnitude, and the normalisation stated on the axis and in every hover
-    rather than left for the reader to infer.
+    runs 2-3x wider than the smoothed curve the detector reads. A twinx was
+    ruled out (it already produced a zorder bug in the app's
+    ``_plot_compact``), so instead every curve is rescaled to fill the same
+    band and the panel is read for SHAPE: where each series turns, and when.
+    That is what the phase rules act on — the y magnitude is not what is being
+    judged here, so spending the axis on it buys nothing.
 
-    Dividing by ``max|y|`` (rather than min-max rescaling to [0, 1]) is what
-    keeps the picture honest for vorticity: it preserves sign and the position
-    of zero, so a curve's shape and where it crosses zero survive intact —
-    min-max would slide each series onto its own baseline and make two curves
-    that genuinely differ look coincident.
+    Consequence worth knowing: after this, zero is at a different height for
+    each series, so the dz/dz2 panels' zero line is no longer common and is
+    not drawn. Switch the rescaling off (the app's "Shared y scale" checkbox)
+    to read true units and a real zero.
 
     Returns:
-        (normalised array, divisor). A flat or all-zero series is returned
-        unchanged with a divisor of 1.0 — dividing it by zero would be worse
-        than showing it flat.
+        (scaled, lo, hi). A flat series (lo == hi) has no range to spread over
+        and is returned as a constant 0.5, centred in the band, rather than
+        dividing by zero.
     """
     a = np.asarray(y, dtype=float)
-    peak = np.nanmax(np.abs(a)) if a.size else 0.0
-    if not np.isfinite(peak) or peak <= 0:
-        return a, 1.0
-    return a / peak, float(peak)
+    if a.size == 0:
+        return a, 0.0, 1.0
+    lo = float(np.nanmin(a))
+    hi = float(np.nanmax(a))
+    if not np.isfinite(lo) or not np.isfinite(hi) or hi <= lo:
+        return np.full_like(a, 0.5), lo, lo
+    return (a - lo) / (hi - lo), lo, hi
+
+
+def rescaler(reference, normalize: bool):
+    """A transform mapping values onto ``reference``'s rescaled band.
+
+    Overlays have to land on the curve they annotate: a ledger segment drawn
+    over ``z`` must use the SAME transform the ``z`` line used, or it would
+    float above or below it. Handing both the one function returned here is
+    what guarantees that — and it is shared by the Plotly and matplotlib
+    renderers, so the two cannot disagree about where a layer sits.
+
+    ``normalize=False`` returns the identity: the series in its own units.
+    """
+    if not normalize:
+        return lambda v: np.asarray(v, dtype=float)
+    _, lo, hi = normalise_series(reference)
+    span = (hi - lo) or 1.0
+    return lambda v: (np.asarray(v, dtype=float) - lo) / span
 
 
 def phase_at_step(periods: pd.Series) -> np.ndarray:

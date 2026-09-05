@@ -2062,14 +2062,15 @@ with tab_cal:
             index=_VIEW_MODES.index(_DEFAULTS["view_mode"]),
             key="view_mode", horizontal=True,
             help=(
-                "**Grid** (default) — the multi-cyclone grid, unchanged: "
-                "matplotlib figures, the same PNG in the ZIP, every loaded "
-                "track at once.\n\n"
-                "**Inspector** — one track at a time, in Plotly, with every "
-                "pipeline series and every decision overlay switching on and "
-                "off individually (click the legend; no page reload). "
-                "PURE VISUALISATION: no inspector control changes detection, "
-                "and none of its state reaches the exported YAML."
+                "**Grid** — every loaded track at once, one small phase "
+                "figure each. Use it to scan a whole parameter set for "
+                "outliers. Unchanged from before the inspector existed.\n\n"
+                "**Inspector** — one track, every pipeline series and every "
+                "decision the algorithm made, each on its own switchable "
+                "layer. Use it when a track in the grid looks wrong and you "
+                "need to know *why*.\n\n"
+                "Neither mode changes detection, and no inspector setting "
+                "reaches the exported YAML."
             ),
         )
     with _c2:
@@ -2258,30 +2259,34 @@ with tab_cal:
                 _normalize = st.checkbox(
                     "Shared y scale", key="inspector_normalize",
                     help=(
-                        "Divides every curve in a panel by its own **max|y|**, "
-                        "so series of different magnitude (raw `zeta` runs "
-                        "2–3× wider than the smoothed curve detection reads) "
-                        "fit one axis and can be compared directly. A second "
-                        "y-axis was ruled out: it already caused a z-order bug "
-                        "in the grid's compact figure. Dividing by max|y| "
-                        "keeps sign and the position of zero, so shapes and "
-                        "zero crossings survive. Every hover still carries the "
-                        "**raw** value and the divisor. Untick to read the "
-                        "series in their own units."
+                        "Rescales every curve in a panel to the same 0–1 band, "
+                        "each by its own minimum and maximum.\n\n"
+                        "That makes curves of very different size sit on top "
+                        "of each other — raw `zeta` spans 2–3× more than the "
+                        "smoothed curve detection reads, and without this it "
+                        "flattens the others against the axis.\n\n"
+                        "Which means you read the panel for **shape**: where "
+                        "each series turns and when — the only thing the phase "
+                        "rules act on. Magnitude leaves the axis, but every "
+                        "hover still shows the raw value.\n\n"
+                        "Side effect: zero ends up at a different height per "
+                        "series, so the dz/dz2 zero line is not drawn. Untick "
+                        "for true units and a real zero."
                     ),
                 )
             with _ihelp:
                 st.caption(
-                    "**Series layers** (zeta, filtered_vorticity, "
-                    "vorticity_smoothed, vorticity_smoothed2, dz/dz2 and the "
-                    "three `*_peaks_valleys`) are all in the chart and all ON. "
-                    "Click a legend entry to switch one off — it stays in the "
-                    "figure, client-side, with no rerun. Phase shading has its "
-                    "own button above the chart (a full-height band is a "
-                    "layout shape, which Plotly cannot put in the legend).\n\n"
-                    "**Decision overlays** below need server-side computation, "
-                    "so they are checkboxes. They start ON too; untick one to "
-                    "drop its cost."
+                    "**Series layers** — every pipeline stage (zeta, "
+                    "filtered_vorticity, vorticity_smoothed, "
+                    "vorticity_smoothed2, dz/dz2) and the three "
+                    "`*_peaks_valleys` are already in the chart, all on. "
+                    "Click a legend entry to switch one off; it happens in the "
+                    "browser, with no reload. Phase shading is always on — it "
+                    "is the background the rest is read against.\n\n"
+                    "**Decision overlays** — the four boxes below need "
+                    "server-side computation, so they are checkboxes rather "
+                    "than legend entries. They start on; untick one to drop "
+                    "its cost."
                 )
 
             _o1, _o2, _o3, _o4 = st.columns(4)
@@ -2289,49 +2294,71 @@ with tab_cal:
                 _show_ribbon = st.checkbox(
                     "Pipeline ribbon", key="inspector_ribbon",
                     help=(
-                        "Six lanes, one per step, coloured by the phases in "
-                        "force AFTER that step. The six functions run in a "
-                        "fixed order and overwrite one another; reading a "
-                        "column top to bottom shows a stretch changing hands. "
-                        "The package's own functions are called in sequence on "
-                        "a copy of the frame — nothing is re-implemented, and "
-                        "lane 6 is, by construction, the result `get_periods` "
-                        "returns."
+                        "Shows the phase labels as they stood after each of "
+                        "the 6 detection steps — one lane per step, top to "
+                        "bottom, lane 6 being the final result.\n\n"
+                        "A stretch whose colour changes from one lane to the "
+                        "next was **overwritten by that step**: the steps run "
+                        "in a fixed order and later ones write over earlier "
+                        "ones.\n\n"
+                        "Which means a threshold can look like it did nothing "
+                        "when it actually worked and a later step took the "
+                        "result away. The lane where a stretch changes hands "
+                        "tells you which knob to turn."
                     ),
                 )
             with _o2:
                 _show_ledger = st.checkbox(
                     "Candidate ledger", key="inspector_ledger",
                     help=(
-                        "Every candidate segment of `find_intensification_period` "
-                        "(z peak → next z valley) and `find_decay_period` "
-                        "(valley → next peak, plus the last valley running to "
-                        "the end), drawn on the z panel in the colour of its "
-                        "current verdict, plus the gaps between blocks and the "
-                        "fill test. Moving a threshold slider reclassifies "
-                        "them live."
+                        "Shows every segment the two length tests looked at: "
+                        "each z peak → next z valley (intensification) and "
+                        "each z valley → next z peak (decay), drawn on the z "
+                        "panel — solid if it passed, dotted grey if not.\n\n"
+                        "A segment fails when it is shorter than "
+                        "`scale × threshold`; the table below gives all three "
+                        "numbers for every segment.\n\n"
+                        "Which means you can watch a length slider add and "
+                        "drop segments as you move it, instead of inferring "
+                        "it from a phase figure that only shows what "
+                        "survived."
                     ),
                 )
             with _o3:
                 _show_mature = st.checkbox(
                     "Mature layers", key="inspector_mature",
                     help=(
-                        "The z peaks/valleys accepted and rejected under the "
-                        "effective prominence threshold, and the mature "
-                        "windows — including the ones the strict confirmation "
-                        "discarded, which today vanish from the result without "
-                        "leaving a trace."
+                        "Shows which z peaks and valleys the prominence "
+                        "filter kept (filled markers) and which it dropped "
+                        "(hollow), plus every mature window that was built "
+                        "around a surviving valley.\n\n"
+                        "A window drawn dotted was built and then **erased**: "
+                        "`find_mature_stage` only keeps a window whose "
+                        "previous timestep is `intensification` and whose next "
+                        "one is `decay`.\n\n"
+                        "Which means a missing mature phase gets an answer "
+                        "instead of a shrug — either no window was ever built, "
+                        "or one was built and discarded, and the table below "
+                        "names the reason."
                     ),
                 )
             with _o4:
                 _show_incipient = st.checkbox(
                     "Incipient layers", key="inspector_incipient",
                     help=(
-                        "Smoothed probe, the rel = |dz|/max|dz| profile "
-                        "against τ, the |dz2| knee, and the incipient boundary "
-                        "the run produced (read from `df['periods']`, never "
-                        "recomputed). Outside `incipient_method=\"plateau\"` "
-                        "the rel/τ/probe layers do not exist; dz and dz2 stay."
+                        "Shows the normalised slope `rel = |dz|/max|dz|` "
+                        "against the τ line, the |dz2| knee, and the incipient "
+                        "boundary the run actually produced.\n\n"
+                        "The plateau rule ends the incipient phase at the "
+                        "first point where `rel` reaches τ; the knee marks "
+                        "where the series genuinely stops being flat.\n\n"
+                        "Which means you can see whether τ is firing on the "
+                        "real start of deepening or somewhere on the flat "
+                        "before or after it — and, when the produced boundary "
+                        "sits later than the τ crossing, how much of the "
+                        "incipient phase τ did not decide.\n\n"
+                        "Outside `incipient_method=\"plateau\"` there is no "
+                        "rel/τ/probe to show; dz and dz2 stay."
                     ),
                 )
 
@@ -2408,11 +2435,13 @@ with tab_cal:
             if _ledgers:
                 st.subheader("Candidate ledger")
                 st.caption(
-                    "Duration > minimum (scale × threshold) → accepted. For "
-                    "gaps the rule is the opposite: a gap SHORTER than the "
-                    "maximum is filled. 'Final label' crosses this with the "
-                    "ribbon: a candidate can be accepted by its own function "
-                    "and then lose the stretch to a later step."
+                    "One row per segment the stage function tested. It is "
+                    "accepted when **duration > minimum**, where the minimum "
+                    "is `scale × threshold`. Gaps run the other way: a gap "
+                    "**shorter** than its maximum gets filled in. "
+                    "'Final label' says what that stretch ended up labelled "
+                    "as — when it is not the phase this step assigned, a "
+                    "later step overwrote it (see the ribbon)."
                 )
                 st.dataframe(_ledger_table(_ledgers, _ribbon),
                              use_container_width=True, hide_index=True)
@@ -2425,11 +2454,14 @@ with tab_cal:
             if _mature_records:
                 st.subheader("Mature windows and the strict confirmation")
                 st.caption(
-                    "`find_mature_stage` only confirms a mature window if the "
-                    "preceding timestep is `intensification` AND the following "
-                    "one is `decay` — a window without that confirmation is "
-                    "erased and disappears from the result without a trace. "
-                    "This table is that trace."
+                    "A mature window is confirmed only if the timestep before "
+                    "it is `intensification` and the one after it is `decay` — "
+                    "the cyclone has to be seen to decay before a plateau "
+                    "counts as its peak. A window that fails is erased, and "
+                    "then looks exactly like a window that was never found. "
+                    "This table is the difference: 'Written' says one was "
+                    "built, 'Confirmed' says it survived, and 'Discard reason' "
+                    "says which half of the rule it failed."
                 )
                 st.dataframe(_mature_table(_mature_records),
                              use_container_width=True, hide_index=True)

@@ -605,17 +605,19 @@ def test_plotly_inspector_starts_with_every_layer_on(vort_cache):
                      "z_peaks_valleys", "dz_peaks_valleys", "dz2_peaks_valleys"):
         assert expected in visible, expected
     assert not [t for t in fig.data if t.visible == "legendonly"]
+    # Phase shading is always present and has no toggle: it is the background
+    # every other layer is read against.
     assert len(fig.layout.shapes) > 0
-    assert len(fig.layout.updatemenus) == 1
+    assert len(fig.layout.updatemenus) == 0
 
 
-def test_plotly_inspector_shared_scale_puts_every_curve_in_one_range(vort_cache):
-    """Normalisation is what lets one axis hold curves of different magnitude.
+def test_plotly_inspector_shared_scale_spreads_every_curve_over_the_panel(vort_cache):
+    """Rescaling is what lets one axis hold curves of different magnitude.
 
-    With it on, every plotted curve lies within [-1, 1] and the hover still
-    carries the RAW value (customdata) — the normalisation is a display
-    device, never a loss of the number. With it off, the plotted values are
-    the raw ones.
+    With it on every plotted curve spans exactly [0, 1] — the panel is then
+    read for shape, which is what the phase rules act on — and the hover still
+    carries the RAW value, so the number is never lost. With it off the
+    plotted values ARE the raw ones.
     """
     pytest.importorskip("plotly")
     from inspector_plotly import build_inspector_figure
@@ -630,14 +632,14 @@ def test_plotly_inspector_shared_scale_puts_every_curve_in_one_range(vort_cache)
     series = [t for t in normed.data
               if t.name and t.name.startswith(("zeta", "filtered", "vorticity",
                                                "dz_dt"))]
-    assert series
+    assert len(series) == 8
     for t in series:
         y = np.asarray(t.y, dtype=float)
-        assert np.nanmax(np.abs(y)) <= 1.0 + 1e-12, t.name
-        # The raw value survives in customdata, so nothing is lost.
+        assert np.isclose(np.nanmin(y), 0.0), t.name
+        assert np.isclose(np.nanmax(y), 1.0), t.name
         raw = np.asarray([c[0] for c in t.customdata], dtype=float)
-        assert np.nanmax(np.abs(raw)) > 0
-        np.testing.assert_allclose(y * np.nanmax(np.abs(raw)), raw, rtol=1e-9)
+        lo, hi = np.nanmin(raw), np.nanmax(raw)
+        np.testing.assert_allclose(y * (hi - lo) + lo, raw, rtol=1e-9)
 
     plain = build_inspector_figure(*common, normalize=False)
     raw_trace = next(t for t in plain.data if t.name == "zeta (raw input)")
@@ -645,16 +647,26 @@ def test_plotly_inspector_shared_scale_puts_every_curve_in_one_range(vort_cache)
                                np.asarray(vort["zeta"].values, dtype=float))
 
 
-def test_normalise_series_preserves_sign_and_zero():
-    """max|y| scaling, not min-max: a curve's shape and its zero crossings
-    have to survive, or two genuinely different series would look coincident."""
+def test_normalise_series_spreads_over_zero_to_one():
     y = np.array([-4.0, -2.0, 0.0, 1.0, 2.0])
-    out, divisor = li.normalise_series(y)
-    assert divisor == 4.0
-    np.testing.assert_allclose(out, y / 4.0)
-    assert out[2] == 0.0
-    assert np.all(np.sign(out) == np.sign(y))
-    # A flat series has no scale to divide by and is returned untouched.
-    flat, div_flat = li.normalise_series(np.zeros(5))
-    assert div_flat == 1.0
-    np.testing.assert_array_equal(flat, np.zeros(5))
+    out, lo, hi = li.normalise_series(y)
+    assert (lo, hi) == (-4.0, 2.0)
+    np.testing.assert_allclose(out, (y + 4.0) / 6.0)
+    assert out[0] == 0.0 and out[-1] == 1.0
+    # A flat series has no range to spread over: centre it instead of dividing
+    # by zero.
+    flat, flo, fhi = li.normalise_series(np.zeros(5))
+    np.testing.assert_array_equal(flat, np.full(5, 0.5))
+    assert flo == fhi
+
+
+def test_rescaler_puts_an_overlay_on_the_curve_it_annotates():
+    """An overlay must use the SAME transform as the curve it is drawn over,
+    or a ledger segment would float above or below the z line it describes."""
+    z = np.array([-4.0, -2.0, 0.0, 2.0])
+    f = li.rescaler(z, normalize=True)
+    np.testing.assert_allclose(f(z), [0.0, 1 / 3, 0.5 + 1 / 6, 1.0])
+    # A subset of the same curve lands exactly on the full curve's rendering.
+    np.testing.assert_allclose(f(z[1:3]), f(z)[1:3])
+    # Off, the transform is the identity.
+    np.testing.assert_array_equal(li.rescaler(z, normalize=False)(z), z)

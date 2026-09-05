@@ -64,9 +64,17 @@ Há dois tipos de controle, e a diferença é deliberada:
   `dz_dt2_smoothed2`, os três `*_peaks_valleys` e a fronteira `Ic` de ground
   truth dos casos sintéticos. Estão **sempre** no gráfico: desligar uma é um
   clique na legenda (ela vira `legendonly` e continua na figura), de graça. O
-  sombreado de fases é a única exceção (uma faixa de altura total é uma
-  *shape* do layout, que o Plotly não coloca na legenda) e ganhou um botão
-  próprio acima do gráfico, que também é client-side.
+  sombreado de fases é a única exceção — uma faixa de altura total é uma
+  *shape* do layout, que o Plotly não coloca na legenda — e fica **sempre
+  ligado**: é o fundo contra o qual todas as outras camadas são lidas.
+
+  As cores seguem o padrão do próprio pacote (`cyclophaser/plots.py`,
+  `plot_didactic`): ζ cru em cinza, `filtered_vorticity` em âmbar,
+  `vorticity_smoothed` em azul-marinho e `vorticity_smoothed2` em vermelho.
+  Nos painéis de derivada vale a cor por *quantidade* do mesmo arquivo
+  (`series_colors`: dz vermelho, dz2 âmbar), com o estágio intermediário
+  `*_filt` num tom claro e o estágio que a detecção lê na cor cheia e no
+  traço mais grosso.
 - **Sobreposições de decisão** — exigem cálculo no servidor, então são
   `st.checkbox`:
   - **Pipeline ribbon** — seis faixas, uma por etapa, coloridas pelas fases
@@ -90,15 +98,15 @@ Há dois tipos de controle, e a diferença é deliberada:
 
 **Escala compartilhada (`Shared y scale`, ligada por padrão).** Com tudo
 ligado, um painel carrega séries de magnitudes bem diferentes (o `zeta` cru é
-2–3× mais largo que a curva suavizada que a detecção lê). Um segundo eixo
-(`twinx`) está descartado — foi o que causou o bug de zorder na figura compacta
-da grade —, então cada curva é dividida pelo **próprio `max|y|`** e todas
-cabem em um eixo só. Divide-se por `max|y|` (e não min–max) para preservar
-sinal e a posição do zero: min–max deslocaria cada série para a própria
-linha de base e faria curvas genuinamente diferentes parecerem coincidentes.
-A normalização está escrita no título do eixo, e **cada hover carrega o valor
-bruto e o divisor** — nada dela é implícito. Desmarque para ler as séries nas
-unidades próprias.
+2–3× mais largo que a curva suavizada que a detecção lê, e achataria as outras
+contra o eixo). Um segundo eixo (`twinx`) está descartado — foi o que causou o
+bug de zorder na figura compacta da grade —, então cada curva é reescalada
+para a mesma faixa **0–1 pelo próprio mínimo e máximo**, e o painel passa a
+ser lido pela **forma**: onde cada série vira, e quando — que é a única coisa
+sobre a qual as regras de fase agem. A magnitude sai do eixo, mas **cada hover
+continua mostrando o valor bruto**. Efeito colateral: o zero fica numa altura
+diferente para cada série, então a linha de zero dos painéis dz/dz2 não é
+desenhada nesse modo. Desmarque para ler unidades verdadeiras e um zero real.
 
 **Fidelidade.** Toda a conta vive em funções puras
 (`layer_inspector.py`, sem Streamlit e sem biblioteca de plot), que só

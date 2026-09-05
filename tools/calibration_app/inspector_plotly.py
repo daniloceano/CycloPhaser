@@ -21,22 +21,30 @@ Layer discipline (the distinction the whole view is built on)
   need computation, so the app gates them behind ``st.checkbox`` and only
   passes them in when they are asked for. They are traces too once computed.
 
-Phase shading is the one exception to "everything is a trace": a shaded band
-spanning a subplot's full height is a layout SHAPE, and shapes cannot be legend
-items in Plotly. It is drawn with ``add_vrect`` (the app's ``PHASE_COLORS``) and
-made toggleable by an ``updatemenus`` button, which relayouts client-side — the
-same no-rerun property as a legend click.
+Phase shading is the one thing here that is not a trace: a band spanning a
+subplot's full height is a layout SHAPE. It is drawn with ``add_vrect`` (the
+app's ``PHASE_COLORS``) and is always on — it is the background every other
+layer is read against, so there is nothing to gain from switching it off.
 
 Shared y scale
 --------------
 With every layer on, a panel holds series of genuinely different magnitude
 (raw ``zeta`` runs 2-3x wider than the smoothed curve the detector reads). A
 twinx is not an option — it already caused a zorder bug in the app's
-``_plot_compact`` — so the panels default to ONE axis with every curve divided
-by its own peak magnitude (``layer_inspector.normalise_series``). The
-normalisation is stated on the axis title and each hover carries the raw value
-and the divisor, so nothing about it is implicit. It can be switched off from
-the app to read the series in their own units.
+``_plot_compact`` — so the panels default to ONE axis with every curve
+rescaled to [0, 1] by its own min and max (``layer_inspector.normalise_series``).
+The panel is then read for SHAPE — where each series turns, and when — which
+is what the phase rules act on. Every hover still carries the raw value, and
+the app can switch the rescaling off to read true units.
+
+Colours
+-------
+The vorticity panel follows the package's own palette (``cyclophaser/plots.py``,
+``plot_didactic``): grey raw ζ, amber ζ_f, navy ζ_fs, red ζ_fs². The derivative
+panels follow the package's per-quantity colours from the same file
+(``series_colors``: dz red, dz2 amber), with the intermediate ``*_filt`` stage
+in a light tint of its panel's colour and the stage detection actually reads in
+the full colour at full weight.
 
 Nothing here computes anything about detection: every array it draws comes from
 ``layer_inspector``.
@@ -64,19 +72,27 @@ from layer_inspector import (
     normalise_series,
     phase_at_step,
     phase_spans_for_shading,
+    rescaler,
 )
 
-# Series-layer palette. Deliberately distinct from the phase palette so a
-# pipeline stage can never be mistaken for a phase.
+# Series-layer palette, taken from the package itself so a curve looks the same
+# here as it does in cyclophaser's own figures.
+#
+# Vorticity panel — cyclophaser/plots.py, plot_didactic: raw zeta is grey,
+# filtered_vorticity amber, vorticity_smoothed navy, vorticity_smoothed2 red.
+# Derivative panels — the same file's `series_colors` gives each QUANTITY a
+# colour (dz red, dz2 amber); within a panel the pipeline STAGE is carried by
+# weight instead, with the intermediate *_filt in a light tint and the stage
+# detection actually reads in the full colour at full weight.
 SERIES_COLORS = {
-    "zeta":                 "#8d8d8d",
-    "filtered_vorticity":   "#7fb3d5",
-    "vorticity_smoothed":   "#2e86c1",
-    "vorticity_smoothed2":  "#1d3557",
-    "dz_dt_filt":           "#b8b8b8",
-    "dz_dt_smoothed2":      "#457b9d",
-    "dz_dt2_filt":          "#c3b5e0",
-    "dz_dt2_smoothed2":     "#6a51a3",
+    "zeta":                 "gray",
+    "filtered_vorticity":   "#d68c45",
+    "vorticity_smoothed":   "#1d3557",
+    "vorticity_smoothed2":  "#e63946",
+    "dz_dt_filt":           "#eba0a0",
+    "dz_dt_smoothed2":      "#d62828",
+    "dz_dt2_filt":          "#f6dcaa",
+    "dz_dt2_smoothed2":     "#f7b538",
 }
 
 C_INT = "#f7b538"
@@ -102,14 +118,13 @@ LW_MARK = 3.0
 MARKER_SIZE = 13
 
 
-def _hover(unit: str, divisor: float) -> str:
-    """Hover text: raw value first, then the plotted value when they differ."""
-    if divisor == 1.0:
-        return ("%{x|%d/%m %Hh}<br>" + unit + " = %{customdata[0]:.4g}"
-                "<br>phase: %{customdata[1]}<extra>%{fullData.name}</extra>")
-    return ("%{x|%d/%m %Hh}<br>" + unit + " = %{customdata[0]:.4g}"
-            f"<br>normalised = %{{y:.3f}}  (÷ {divisor:.4g})"
-            "<br>phase: %{customdata[1]}<extra>%{fullData.name}</extra>")
+def _hover(unit: str, normalize: bool) -> str:
+    """Hover text. The RAW value is always first: rescaling is a display
+    device for reading shape, never a loss of the number."""
+    head = "%{x|%d/%m %Hh}<br>" + unit + " = %{customdata[0]:.4g}"
+    if normalize:
+        head += "<br>rescaled = %{y:.3f}"
+    return head + "<br>phase: %{customdata[1]}<extra>%{fullData.name}</extra>"
 
 
 def _custom(raw, phases) -> np.ndarray:
@@ -117,16 +132,16 @@ def _custom(raw, phases) -> np.ndarray:
                      np.asarray(phases, dtype=object)], axis=-1)
 
 
-def _series_trace(fig, row, x, y, name, colour, phases, unit, divisor,
+def _series_trace(fig, row, x, y, name, colour, phases, unit, scale, normalize,
                   visible=True, width=LW_SERIES, dash=None):
     """One series LAYER: always added, hidden as 'legendonly' when off."""
     raw = np.asarray(y, dtype=float)
     fig.add_trace(
         go.Scatter(
-            x=x, y=raw / divisor, name=name, mode="lines",
+            x=x, y=scale(raw), name=name, mode="lines",
             line=dict(color=colour, width=width, dash=dash),
             customdata=_custom(raw, phases),
-            hovertemplate=_hover(unit, divisor),
+            hovertemplate=_hover(unit, normalize),
             visible=True if visible else "legendonly",
             legendgroup=name,
         ),
@@ -134,7 +149,7 @@ def _series_trace(fig, row, x, y, name, colour, phases, unit, divisor,
     )
 
 
-def _extrema_trace(fig, row, x, y, labels, name, phases, unit, divisor):
+def _extrema_trace(fig, row, x, y, labels, name, phases, unit, scale, normalize):
     """A ``*_peaks_valleys`` column as its own layer (peaks ^, valleys v)."""
     raw = np.asarray(y, dtype=float)
     lab = np.asarray(labels, dtype=object)
@@ -145,11 +160,11 @@ def _extrema_trace(fig, row, x, y, labels, name, phases, unit, divisor):
     colours = [C_ACCEPT_PEAK if lab[i] == "peak" else C_ACCEPT_VALLEY for i in sel]
     fig.add_trace(
         go.Scatter(
-            x=np.asarray(x)[sel], y=raw[sel] / divisor, name=name, mode="markers",
+            x=np.asarray(x)[sel], y=scale(raw)[sel], name=name, mode="markers",
             marker=dict(symbol=symbols, color=colours, size=MARKER_SIZE,
                         line=dict(width=1.2, color="white")),
             customdata=_custom(raw[sel], np.asarray(phases)[sel]),
-            hovertemplate=_hover(unit, divisor),
+            hovertemplate=_hover(unit, normalize),
             visible=True, legendgroup=name,
         ),
         row=row, col=1,
@@ -185,10 +200,16 @@ def _range(*arrays) -> tuple[float, float]:
     return lo - pad, hi + pad
 
 
-def _add_phase_shading(fig, periods_dict) -> list[dict]:
-    """Phase bands via ``add_vrect``, returned so a button can toggle them."""
+def _add_phase_shading(fig, periods_dict) -> None:
+    """Phase bands via ``add_vrect``, always on.
+
+    This is the background every other layer is read against — "which phase
+    was this stretch given" is the question the whole view serves — so there
+    is nothing to gain from switching it off, and the button that used to do
+    it sat on top of the figure title.
+    """
     if not periods_dict:
-        return []
+        return
     for span in phase_spans_for_shading(periods_dict, None):
         fig.add_vrect(
             x0=span["start"], x1=span["end"],
@@ -196,10 +217,9 @@ def _add_phase_shading(fig, periods_dict) -> list[dict]:
             opacity=0.28, line_width=0, layer="below",
             row="all", col=1,
         )
-    return list(fig.layout.shapes)
 
 
-def _ledger_traces(fig, row, index, z, divisor, ledger, colour, label):
+def _ledger_traces(fig, row, index, z, scale, ledger, colour, label):
     """Candidate segments of one stage function, accepted vs rejected.
 
     Both verdicts are drawn on the z panel over the z curve itself, because the
@@ -208,7 +228,7 @@ def _ledger_traces(fig, row, index, z, divisor, ledger, colour, label):
     segment's hover carries the arithmetic that produced the verdict.
     """
     pos = {ts: i for i, ts in enumerate(index)}
-    z = np.asarray(z, dtype=float) / divisor
+    z = scale(z)
     for accepted, dash, width, opacity in ((True, None, LW_OVERLAY, 0.5),
                                            (False, "dot", 4.5, 0.9)):
         xs, ys, texts = [], [], []
@@ -272,11 +292,11 @@ def _td(value) -> str:
     return f"{int(days)}d {hours:04.1f}h" if days else f"{hours:.1f}h"
 
 
-def _mature_traces(fig, row, index, z, divisor, mature):
+def _mature_traces(fig, row, index, z, scale, mature):
     """Mature as LAYERS: the extrema the filter keeps/drops, and the windows
     the strict confirmation threw away without leaving a trace in the output."""
     lens = mature["lens"]
-    z = np.asarray(z, dtype=float) / divisor
+    z = scale(z)
     x = np.asarray(index)
 
     for kind, accept_colour, symbol in (("peak", C_ACCEPT_PEAK, "triangle-up"),
@@ -337,7 +357,7 @@ def _mature_traces(fig, row, index, z, divisor, mature):
     # floor) have no stretch to draw; they are listed in the table instead.
 
 
-def _incipient_traces(fig, rows, index, dz, dz_divisor, incipient):
+def _incipient_traces(fig, rows, index, dz, dz_scale, normalize, incipient):
     """Incipient as LAYERS over dz / dz2 (+ the rel panel when it exists)."""
     lens = incipient["lens"]
     row_dz, row_dz2, row_rel = rows
@@ -347,23 +367,27 @@ def _incipient_traces(fig, rows, index, dz, dz_divisor, incipient):
 
     # The probe's own derivative is d/dt of the SMOOTHED RAW vorticity — a
     # different quantity in different units from the pipeline's dz. No twinx
-    # (the app already has one zorder bug from that): it is put on dz's scale
-    # and the factor is stated in the hover.
+    # (the app already has one zorder bug from that): when the panel is
+    # rescaled it gets the same [0, 1] treatment as everything else in it;
+    # when it is not, it is scaled onto dz's own peak so the two are
+    # comparable, and the raw value stays in the hover either way.
     if plateau and lens["smoothing_applies"]:
         dz_peak = np.nanmax(np.abs(dz)) or 1.0
         for key, width, dash, tag in (("probe_raw", LW_SERIES, "dot", "raw"),
                                       ("probe_smoothed", LW_PRIMARY, None, "smoothed")):
             probe = np.gradient(np.asarray(lens[key], dtype=float))
-            peak = np.nanmax(np.abs(probe))
-            factor = (dz_peak / peak if peak > 0 else 1.0) / dz_divisor
+            if normalize:
+                plotted = normalise_series(probe)[0]
+            else:
+                peak = np.nanmax(np.abs(probe))
+                plotted = probe * (dz_peak / peak if peak > 0 else 1.0)
             fig.add_trace(
-                go.Scatter(x=x, y=probe * factor, mode="lines",
+                go.Scatter(x=x, y=plotted, mode="lines",
                            name=f"incipient: {tag} probe d/dt (rescaled)",
                            line=dict(color=C_SMOOTH, width=width, dash=dash),
                            customdata=np.asarray(probe, dtype=object),
                            hovertemplate="%{x|%d/%m %Hh}<br>probe d/dt = "
                                          "%{customdata:.4g}"
-                                         f"<br>plotted ×{factor:.4g}"
                                          "<extra>%{fullData.name}</extra>",
                            visible=True),
                 row=row_dz, col=1)
@@ -421,9 +445,10 @@ def build_inspector_figure(
         mature: {'lens': ..., 'records': ...}, or None (PIECE 4).
         incipient: {'lens': ..., 'boundary': int, 'tau': float,
                     'plateau_active': bool}, or None (PIECE 4).
-        normalize: divide every curve in a panel by its own ``max|y|`` so they
-            share one axis (default). The scheme is stated on the axis title
-            and each hover carries the raw value and the divisor.
+        normalize: rescale every curve in a panel to [0, 1] by its own min and
+            max so they share one axis and can be compared by SHAPE, which is
+            what the phase rules act on. Each hover still carries the raw
+            value.
 
     Returns:
         A ``go.Figure`` with every layer visible; a layer switched off from the
@@ -432,10 +457,11 @@ def build_inspector_figure(
     index = df_result.index
     phases = phase_at_step(df_result["periods"])
 
-    def divisor(series) -> float:
-        return normalise_series(series)[1] if normalize else 1.0
+    def scale_for(series):
+        """Transform mapping onto `series`' own rescaled band (identity when off)."""
+        return rescaler(series, normalize)
 
-    unit_note = " — normalised: v / max|v|" if normalize else ""
+    unit_note = " — rescaled 0-1 per series" if normalize else ""
     want_rel = bool(incipient and incipient.get("plateau_active"))
     titles = [f"z — vorticity through the pipeline{unit_note}",
               f"dz — first derivative{unit_note}",
@@ -466,43 +492,41 @@ def build_inspector_figure(
         ("vorticity_smoothed2", "vorticity_smoothed2 (what detection reads)", True),
     ]
     for var, label, primary in z_series:
-        _series_trace(fig, 1, index, vort[var].values, label,
-                      SERIES_COLORS[var], phases, "z", divisor(vort[var].values),
+        values = vort[var].values
+        _series_trace(fig, 1, index, values, label, SERIES_COLORS[var], phases,
+                      "z", scale_for(values), normalize,
                       width=LW_PRIMARY if primary else LW_SERIES)
-    for var, label, primary in (("dz_dt_filt", "dz_dt_filt", False),
-                                ("dz_dt_smoothed2",
-                                 "dz_dt_smoothed2 (what detection reads)", True)):
-        _series_trace(fig, 2, index, vort[var].values, label,
-                      SERIES_COLORS[var], phases, "dz", divisor(vort[var].values),
-                      width=LW_PRIMARY if primary else LW_SERIES)
-    for var, label, primary in (("dz_dt2_filt", "dz_dt2_filt", False),
-                                ("dz_dt2_smoothed2",
-                                 "dz_dt2_smoothed2 (what detection reads)", True)):
-        _series_trace(fig, 3, index, vort[var].values, label,
-                      SERIES_COLORS[var], phases, "dz2", divisor(vort[var].values),
-                      width=LW_PRIMARY if primary else LW_SERIES)
+    for row, panel, unit in ((2, (("dz_dt_filt", "dz_dt_filt", False),
+                                  ("dz_dt_smoothed2",
+                                   "dz_dt_smoothed2 (what detection reads)", True)), "dz"),
+                             (3, (("dz_dt2_filt", "dz_dt2_filt", False),
+                                  ("dz_dt2_smoothed2",
+                                   "dz_dt2_smoothed2 (what detection reads)", True)), "dz2")):
+        for var, label, primary in panel:
+            values = vort[var].values
+            _series_trace(fig, row, index, values, label, SERIES_COLORS[var],
+                          phases, unit, scale_for(values), normalize,
+                          width=LW_PRIMARY if primary else LW_SERIES)
 
-    z_div = divisor(df_result["z"])
-    dz_div = divisor(df_result["dz"])
-    dz2_div = divisor(df_result["dz2"])
+    z_scale = scale_for(df_result["z"])
+    dz_scale = scale_for(df_result["dz"])
+    dz2_scale = scale_for(df_result["dz2"])
     _extrema_trace(fig, 1, index, df_result["z"], df_result["z_peaks_valleys"],
-                   "z_peaks_valleys", phases, "z", z_div)
+                   "z_peaks_valleys", phases, "z", z_scale, normalize)
     _extrema_trace(fig, 2, index, df_result["dz"], df_result["dz_peaks_valleys"],
-                   "dz_peaks_valleys", phases, "dz", dz_div)
+                   "dz_peaks_valleys", phases, "dz", dz_scale, normalize)
     _extrema_trace(fig, 3, index, df_result["dz2"], df_result["dz2_peaks_valleys"],
-                   "dz2_peaks_valleys", phases, "dz2", dz2_div)
+                   "dz2_peaks_valleys", phases, "dz2", dz2_scale, normalize)
 
-    z_lo, z_hi = _range(np.asarray(vort["vorticity_smoothed2"].values, float)
-                        / divisor(vort["vorticity_smoothed2"].values),
-                        np.asarray(vort["zeta"].values, float)
-                        / divisor(vort["zeta"].values))
-    dz_lo, dz_hi = _range(np.asarray(vort["dz_dt_smoothed2"].values, float) / dz_div,
-                          np.asarray(vort["dz_dt_filt"].values, float)
-                          / divisor(vort["dz_dt_filt"].values))
-    dz2_lo, dz2_hi = _range(np.asarray(vort["dz_dt2_smoothed2"].values, float) / dz2_div,
-                            np.asarray(vort["dz_dt2_filt"].values, float)
-                            / divisor(vort["dz_dt2_filt"].values))
-    span_rows = [(1, z_lo, z_hi), (2, dz_lo, dz_hi), (3, dz2_lo, dz2_hi)]
+    # Vertical markers need each panel's plotted extent, which depends on the
+    # rescaling, so it is measured from the plotted arrays rather than assumed.
+    def _panel_range(*variables):
+        return _range(*[scale_for(vort[v].values)(vort[v].values)
+                        for v in variables])
+
+    span_rows = [(1, *_panel_range("vorticity_smoothed2", "zeta")),
+                 (2, *_panel_range("dz_dt_smoothed2", "dz_dt_filt")),
+                 (3, *_panel_range("dz_dt2_smoothed2", "dz_dt2_filt"))]
     if row_rel:
         span_rows.append((row_rel, 0.0, 1.0))
 
@@ -513,18 +537,18 @@ def build_inspector_figure(
     # ── PIECE 3: the candidate ledger ────────────────────────────────────────
     if ledgers:
         if "intensification" in ledgers:
-            _ledger_traces(fig, 1, index, df_result["z"], z_div,
+            _ledger_traces(fig, 1, index, df_result["z"], z_scale,
                            ledgers["intensification"], C_INT, "intensification")
         if "decay" in ledgers:
-            _ledger_traces(fig, 1, index, df_result["z"], z_div,
+            _ledger_traces(fig, 1, index, df_result["z"], z_scale,
                            ledgers["decay"], C_DEC, "decay")
 
     # ── PIECE 4: mature and incipient as layers ──────────────────────────────
     if mature:
-        _mature_traces(fig, 1, index, df_result["z"], z_div, mature)
+        _mature_traces(fig, 1, index, df_result["z"], z_scale, mature)
     if incipient:
-        _incipient_traces(fig, (2, 3, row_rel), index, df_result["dz"], dz_div,
-                          incipient)
+        _incipient_traces(fig, (2, 3, row_rel), index, df_result["dz"], dz_scale,
+                          normalize, incipient)
         knee = int(incipient["lens"]["knee"])
         if 0 <= knee < len(index):
             _vline(fig, span_rows, index[knee],
@@ -547,8 +571,8 @@ def build_inspector_figure(
     if ribbon and row_ribbon:
         _add_ribbon(fig, row_ribbon, ribbon)
 
-    # ── phase shading (shapes + a client-side toggle button) ─────────────────
-    shapes = _add_phase_shading(fig, periods_dict)
+    # ── phase shading (always on: it is the background, not a layer) ─────────
+    _add_phase_shading(fig, periods_dict)
 
     fig.update_layout(
         title=dict(text=f"Layer inspector — {name}", x=0.01,
@@ -561,24 +585,13 @@ def build_inspector_figure(
                     groupclick="toggleitem",
                     title=dict(text="Layers — click to toggle",
                                font=dict(size=F_LEGEND + 2))),
-        margin=dict(l=80, r=400, t=110, b=50),
+        margin=dict(l=80, r=400, t=90, b=50),
         template="plotly_white",
-        updatemenus=[dict(
-            type="buttons", direction="right", x=0.0, y=1.045,
-            xanchor="left", yanchor="bottom", showactive=False,
-            font=dict(size=F_LEGEND),
-            buttons=[
-                dict(label="phase shading: on", method="relayout",
-                     args=[{"shapes": shapes}]),
-                dict(label="phase shading: off", method="relayout",
-                     args=[{"shapes": []}]),
-            ],
-        )] if shapes else [],
     )
-    y_title = "z / max|z|" if normalize else "z"
-    fig.update_yaxes(title_text=y_title, row=1, col=1)
-    fig.update_yaxes(title_text="dz / max|dz|" if normalize else "dz", row=2, col=1)
-    fig.update_yaxes(title_text="dz2 / max|dz2|" if normalize else "dz2", row=3, col=1)
+    axis_note = " (rescaled 0-1)" if normalize else ""
+    fig.update_yaxes(title_text=f"z{axis_note}", row=1, col=1)
+    fig.update_yaxes(title_text=f"dz{axis_note}", row=2, col=1)
+    fig.update_yaxes(title_text=f"dz2{axis_note}", row=3, col=1)
     if row_rel:
         fig.update_yaxes(title_text="rel", range=[0, 1.02], row=row_rel, col=1)
     if row_ribbon:
