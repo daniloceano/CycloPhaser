@@ -192,3 +192,6 @@ tests/_tmp_validation/
 # Incipient-plateau research figures and run logs (generated, not tracked)
 research/incipient_plateau/figures/
 research/incipient_plateau/run_log.txt
+
+# App layer-inspector check figures (generated, not tracked)
+research/app_layer_inspector/figures/
