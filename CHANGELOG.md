@@ -63,6 +63,31 @@ Also added: `SYNTHETIC_VALIDATION_PRESET` in `tests/synthetic/cases.py`, and a
 suite alongside the real tracks and overlays the designed ground-truth incipient
 boundary.
 
+### Evaluated and rejected
+
+**`incipient_method="amplitude"` — discarded by construction, not by calibration**
+
+A third incipient rule was implemented and then removed: the incipient phase would
+last until the cyclone had completed a given fraction of its first deepening,
+`|z(t) - z(t0)| >= fraction * |z(first extremum) - z(t0)|` — the level-based
+analogue of `mature_method="amplitude"`.
+
+It fails for a structural reason rather than a tunable one. Amplitude measures an
+*accumulated* quantity: `|z(t) - z(t0)|` is exactly 0 at t0 and the threshold can
+only be met strictly after it, so **some prefix always qualifies as incipient**.
+The rule can never return "no incipient phase" — not for a cyclone that is already
+intensifying at the first sample, and not for one built with a deliberately steep
+onset. Measured before removal, on the 51 calibration tracks it produced a boundary
+on **51/51** (declining on none, against 48/51 for the geometric rule), and on the
+two synthetic cases designed with a `linear` opening ramp — the shape whose whole
+purpose is to have non-zero dz from the first timestep — it still emitted a 3-step
+incipient phase.
+
+No choice of `fraction` repairs this, because the defect is in the quantity being
+thresholded, not in the threshold. The slope-based `"plateau"` rule keeps its
+rejection mechanism (`rel(0) >= tau` is a zero-length plateau) and remains the
+opt-in route under evaluation.
+
 ### Changed
 
 **`use_smoothing=False` now disables the derivative smoothing too (behaviour change)**

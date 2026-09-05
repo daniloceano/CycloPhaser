@@ -749,8 +749,7 @@ def get_periods(vorticity,
                 incipient_plateau_tau: float = 0.20,
                 incipient_plateau_signal: str = "derivative",
                 incipient_plateau_crossing: str = "single",
-                incipient_plateau_k: int = 3,
-                incipient_amplitude_fraction: float = 0.15) -> pd.DataFrame:
+                incipient_plateau_k: int = 3) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -930,16 +929,6 @@ def get_periods(vorticity,
         incipient_plateau_k (int, optional): Number of consecutive samples required by
             ``incipient_plateau_crossing="sustained"``. Default is 3. Ignored for
             ``"single"``.
-        incipient_amplitude_fraction (float, optional): Fraction of the cyclone's FIRST
-            deepening that must be completed before the incipient phase ends. The
-            amplitude reference is |z(first z extremum after t0) - z(t0)|, so a track
-            that opens in decay is handled identically (its first extremum is a peak).
-            **LARGER -> LONGER incipient phase** — note this is the opposite sense to
-            ``mature_amplitude_fraction``, which shrinks its window as it grows; the two
-            measure different things (progress made from the start, versus intensity
-            retained around the peak). Only used when ``incipient_method="amplitude"``,
-            which also ignores ``threshold_incipient_length`` and all four
-            ``incipient_plateau_*`` parameters. Default is 0.15.
         prominence (float, optional): Absolute minimum prominence threshold for
             z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``
             for the full description of prominence modes.
@@ -990,10 +979,9 @@ def get_periods(vorticity,
         raise ValueError(f"length_scale must be 'global' or 'local', got {length_scale!r}.")
     if mature_method not in ("derivative", "amplitude"):
         raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {mature_method!r}.")
-    if incipient_method not in ("geometric", "plateau", "amplitude"):
+    if incipient_method not in ("geometric", "plateau"):
         raise ValueError(
-            "incipient_method must be 'geometric', 'plateau' or 'amplitude', got "
-            f"{incipient_method!r}.")
+            f"incipient_method must be 'geometric' or 'plateau', got {incipient_method!r}.")
     if incipient_plateau_signal not in ("derivative", "vorticity"):
         raise ValueError(
             "incipient_plateau_signal must be 'derivative' or 'vorticity', got "
@@ -1008,10 +996,6 @@ def get_periods(vorticity,
     if int(incipient_plateau_k) < 1:
         raise ValueError(
             f"incipient_plateau_k must be >= 1, got {incipient_plateau_k!r}.")
-    if not 0 < incipient_amplitude_fraction <= 1:
-        raise ValueError(
-            "incipient_amplitude_fraction must be in (0, 1], got "
-            f"{incipient_amplitude_fraction!r}.")
 
     # Extract smoothed vorticity and derivatives
     z = vorticity.vorticity_smoothed2
@@ -1057,7 +1041,6 @@ def get_periods(vorticity,
         "incipient_plateau_signal": incipient_plateau_signal,
         "incipient_plateau_crossing": incipient_plateau_crossing,
         "incipient_plateau_k": incipient_plateau_k,
-        "incipient_amplitude_fraction": incipient_amplitude_fraction,
     }
 
     # Detect different stages of cyclone lifecycle
@@ -1145,8 +1128,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       incipient_plateau_tau: float = 0.20,
                       incipient_plateau_signal: str = "derivative",
                       incipient_plateau_crossing: str = "single",
-                      incipient_plateau_k: int = 3,
-                      incipient_amplitude_fraction: float = 0.15) -> pd.DataFrame:
+                      incipient_plateau_k: int = 3) -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -1275,16 +1257,6 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         incipient_plateau_k (int, optional): Number of consecutive samples required by
             ``incipient_plateau_crossing="sustained"``. Default is 3. Ignored for
             ``"single"``.
-        incipient_amplitude_fraction (float, optional): Fraction of the cyclone's FIRST
-            deepening that must be completed before the incipient phase ends. The
-            amplitude reference is |z(first z extremum after t0) - z(t0)|, so a track
-            that opens in decay is handled identically (its first extremum is a peak).
-            **LARGER -> LONGER incipient phase** — note this is the opposite sense to
-            ``mature_amplitude_fraction``, which shrinks its window as it grows; the two
-            measure different things (progress made from the start, versus intensity
-            retained around the peak). Only used when ``incipient_method="amplitude"``,
-            which also ignores ``threshold_incipient_length`` and all four
-            ``incipient_plateau_*`` parameters. Default is 0.15.
         length_scale (str, optional): "global" (default) or "local". Controls what
             length ``threshold_intensification_length``, ``threshold_intensification_gap``,
             ``threshold_mature_length``, ``threshold_decay_length`` and
@@ -1410,7 +1382,6 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         incipient_plateau_signal=incipient_plateau_signal,
         incipient_plateau_crossing=incipient_plateau_crossing,
         incipient_plateau_k=incipient_plateau_k,
-        incipient_amplitude_fraction=incipient_amplitude_fraction,
     )
 
     return df

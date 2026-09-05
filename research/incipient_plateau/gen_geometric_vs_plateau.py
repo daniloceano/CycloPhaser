@@ -7,9 +7,8 @@ tests/synthetic/gen_extrema_before_after.py): a 3-row x 2-column grid with
 phase shading, the raw series on a secondary axis, and marker conventions
 unchanged.
 
-Column 1 = geometric (the current, default rule).
-Column 2 = plateau   (opt-in, slope criterion).
-Column 3 = amplitude (opt-in, level criterion) — only when --with-amplitude.
+Left column  = geometric (the current, default rule).
+Right column = plateau   (the opt-in rule under test).
 
 Overlays
     black solid   the incipient boundary the column's own method produced
@@ -70,11 +69,6 @@ CALIB = REPO_ROOT / "tests" / "calibration_data"
 # r(t0) under defaults, so they show the regime where the plateau collapses.
 REAL_TRACKS = ["20150377", "20190325", "20190639", "20203373", "20203947", "20206498"]
 
-# Tracks for the three-way geometric | plateau | amplitude checkpoint. Same set
-# as above minus 20203947, plus the author's two current bad cases.
-THREE_WAY_TRACKS = ["20190325", "20206498", "20150377", "20190639", "20203373",
-                    "20170225", "20204655"]
-
 TAUS = [0.05, 0.10, 0.15, 0.20, 0.30]
 TAU_COLORS = {0.05: "#4d004b", 0.10: "#810f7c", 0.15: "#8856a7",
               0.20: "#8c96c6", 0.30: "#b3cde3"}
@@ -97,7 +91,6 @@ ALL_PHASES = ["incipient", "intensification", "mature", "decay", "residual"]
 C_Z, C_DZ, C_REL = "#1d3557", "#457b9d", "#e63946"
 _BLUE, _RED = "#2171b5", "#cb181d"
 C_PLATEAU = "#d000d0"
-C_AMPLITUDE = "#0080a0"
 MK_PEAK = dict(marker="^", s=60, zorder=5, clip_on=False)
 MK_VALLEY = dict(marker="v", s=60, zorder=5, clip_on=False)
 
@@ -119,134 +112,6 @@ def _lead(df):
     if not inc.any() or not inc[0]:
         return 0
     return int(np.argmin(inc)) if not inc.all() else len(inc)
-
-
-def run_three(series, pv, gp, tau, fraction):
-    """geometric / plateau / amplitude on one shared pre-processing."""
-    zeta_df = pd.DataFrame({"zeta": series})
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        vort = process_vorticity(zeta_df.copy(), **pv)
-        geo = get_periods(vort, **gp)
-        plat = get_periods(vort, **gp, incipient_method="plateau",
-                           incipient_plateau_tau=tau)
-        amp = get_periods(vort, **gp, incipient_method="amplitude",
-                          incipient_amplitude_fraction=fraction)
-    return vort, geo, plat, amp
-
-
-def make_figure3(name, series, vort, geo, plat, amp, tau, fraction, out_path,
-                 gt=None, config_label=""):
-    """Three-column geometric | plateau | amplitude comparison.
-
-    Same style as make_figure below: 3 rows (z, dz, rel), phase shading, raw
-    series on a secondary axis, black line = the column's own boundary, and the
-    other two methods' boundaries drawn thin in every column so the three are
-    directly comparable.
-    """
-    n = len(series)
-    times = list(series.index)
-    t = np.arange(n)
-    ts_to_idx = {x: i for i, x in enumerate(times)}
-
-    z = pd.Series(vort["vorticity_smoothed2"].values, index=series.index)
-    dz = pd.Series(vort["dz_dt_smoothed2"].values, index=series.index)
-    z_raw = pd.Series(vort["zeta"].values, index=series.index)
-    rel = _incipient_plateau_rel(geo, "derivative")
-
-    b_geo, b_plat, b_amp = _lead(geo), _lead(plat), _lead(amp)
-    seq = lambda d: " > ".join(dict.fromkeys(
-        _normalize(k) for k in periods_to_dict(d)))
-
-    dur = (series.index[-1] - series.index[0]).total_seconds() / 86400
-    fig = plt.figure(figsize=(23, 13))
-    fig.suptitle(
-        f"{name}  ·  {n} pts  ·  {dur:.1f} dias  ·  {config_label}\n"
-        f"incipient_method: geometric | plateau (tau={tau:.2f}) | "
-        f"amplitude (fraction={fraction:.2f})  ·  "
-        f"fronteira {b_geo} / {b_plat} / {b_amp} passos"
-        + (f"  ·  ground truth Ic = {gt}" if gt is not None else ""),
-        fontsize=11, fontweight="bold", y=0.99)
-    gs = gridspec.GridSpec(3, 3, figure=fig, hspace=0.52, wspace=0.16,
-                           top=0.90, bottom=0.15)
-
-    cols = [("geometric", geo, b_geo, "black"),
-            (f"plateau (tau={tau:.2f})", plat, b_plat, C_PLATEAU),
-            (f"amplitude (fraction={fraction:.2f})", amp, b_amp, C_AMPLITUDE)]
-
-    for ci, (label, dfc, bnd, bcolor) in enumerate(cols):
-        panels = [
-            ("z", z, C_Z, "z  (vorticidade suavizada)", find_peaks_valleys(z)),
-            ("dz", dz, C_DZ, "dz/dt  (1a derivada)", find_peaks_valleys(dz)),
-            ("rel", pd.Series(rel, index=series.index), C_REL,
-             "|dz| / max|dz|  (perfil de slope)", None),
-        ]
-        for ri, (key, ser, color, ylab, extr) in enumerate(panels):
-            ax = fig.add_subplot(gs[ri, ci])
-            _draw_phases(ax, periods_to_dict(dfc), ts_to_idx, n)
-
-            ax2 = ax.twinx()
-            ax2.plot(t, z_raw.values, color="#888888", lw=1.4, alpha=0.65, zorder=1)
-            ax2.tick_params(axis="y", labelsize=6, colors="#888888", length=3)
-            ax2.set_ylabel("original", fontsize=6, color="#888888")
-            ax2.set_xlim(-0.5, n - 0.5)
-
-            ax.set_zorder(ax2.get_zorder() + 1)
-            ax.patch.set_visible(False)
-            ax.axhline(0, color="gray", lw=0.5, ls="--")
-            ax.plot(t, ser.values, color=color, lw=1.8, zorder=3)
-
-            npk = nvl = 0
-            if extr is not None:
-                pk = [i for i, x in enumerate(times) if extr[x] == "peak"]
-                vl = [i for i, x in enumerate(times) if extr[x] == "valley"]
-                npk, nvl = len(pk), len(vl)
-                if pk:
-                    ax.scatter(pk, [ser.values[i] for i in pk], color=_BLUE, **MK_PEAK)
-                if vl:
-                    ax.scatter(vl, [ser.values[i] for i in vl], color=_RED, **MK_VALLEY)
-
-            # every method's boundary in every column; this column's own is thick
-            for bb, cc in ((b_geo, "black"), (b_plat, C_PLATEAU), (b_amp, C_AMPLITUDE)):
-                if bb > 0:
-                    thick = (cc == bcolor)
-                    ax.axvline(bb, color=cc, lw=2.4 if thick else 1.1,
-                               alpha=1.0 if thick else 0.75,
-                               zorder=7 if thick else 5)
-            if gt is not None:
-                ax.axvline(gt, color="#00a000", lw=2.0, ls=":", zorder=6)
-            if key == "rel":
-                ax.axhline(tau, color=C_PLATEAU, lw=1.4, ls="-", alpha=0.9)
-                ax.set_ylim(0, 1.02)
-
-            if ri == 0:
-                ax.set_title(f"{label}\n{seq(dfc)}\nfronteira = {bnd} passos",
-                             fontsize=8.5, pad=6)
-            ax.set_ylabel(ylab + (f"\n({npk}p / {nvl}v)" if extr is not None else ""),
-                          fontsize=7.5)
-            ax.tick_params(labelsize=7)
-            ax.set_xlim(-0.5, n - 0.5)
-            step = max(1, n // 8)
-            tp = list(range(0, n, step))
-            ax.set_xticks(tp)
-            ax.set_xticklabels([times[i].strftime("%m/%d\n%Hh") for i in tp], fontsize=6)
-            if ri == 2:
-                ax.set_xlabel("Data/hora", fontsize=8)
-
-    handles = [mpatches.Patch(color=PHASE_COLORS[p], alpha=0.6, label=p.capitalize())
-               for p in ALL_PHASES]
-    handles += [
-        mlines.Line2D([], [], color="#888888", lw=1.4, label="serie original (eixo dir.)"),
-        mlines.Line2D([], [], color="black", lw=2.4, label="fronteira geometric"),
-        mlines.Line2D([], [], color=C_PLATEAU, lw=2.4, label="fronteira plateau"),
-        mlines.Line2D([], [], color=C_AMPLITUDE, lw=2.4, label="fronteira amplitude"),
-        mlines.Line2D([], [], color="#00a000", lw=2.0, ls=":", label="ground truth Ic"),
-    ]
-    fig.legend(handles=handles, loc="lower center", ncol=5, fontsize=9,
-               frameon=False, bbox_to_anchor=(0.5, 0.02))
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=100, bbox_inches="tight")
-    plt.close(fig)
 
 
 def run_one(series, pv, gp, tau, **plateau_kw):
@@ -371,36 +236,8 @@ def make_figure(name, series, vort, geo, plat, tau, out_path, gt=None,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tau", type=float, default=0.20)
-    ap.add_argument("--fraction", type=float, default=0.15,
-                    help="incipient_amplitude_fraction for the three-way figures")
-    ap.add_argument("--three-way-only", action="store_true")
     args = ap.parse_args()
     tau = args.tau
-
-    # ── three-column checkpoint: geometric | plateau | amplitude ─────────────
-    print(f"\n--- three-way (tau={tau}, fraction={args.fraction}), "
-          f"author's 3c calibration ---")
-    three = []
-    for tid in THREE_WAY_TRACKS:
-        d = pd.read_csv(CALIB / f"{tid}.csv", sep=";", index_col="time",
-                        parse_dates=True)
-        s3 = d["min_max_zeta_850"].rename("zeta")
-        vort, geo, plat, amp = run_three(s3, AUTHOR_PV, AUTHOR_GP, tau, args.fraction)
-        make_figure3(tid, s3, vort, geo, plat, amp, tau, args.fraction,
-                     OUT / "three_way" / f"{tid}.png",
-                     config_label="calibracao do autor (3c)")
-        sq = lambda d_: " > ".join(dict.fromkeys(
-            _normalize(k) for k in periods_to_dict(d_)))
-        three.append({"track": tid, "geometric": _lead(geo), "plateau": _lead(plat),
-                      "amplitude": _lead(amp), "seq_geo": sq(geo), "seq_amp": sq(amp)})
-        print(f"  {tid}: geometric={_lead(geo)} plateau={_lead(plat)} "
-              f"amplitude={_lead(amp)}"
-              + ("" if sq(geo) == sq(amp) else f"  SEQ {sq(geo)} -> {sq(amp)}"))
-    t3 = pd.DataFrame(three)
-    t3.to_csv(Path(__file__).resolve().parent / "three_way_comparison.csv", index=False)
-    print(t3.to_string(index=False))
-    if args.three_way_only:
-        return
 
     rows = []
     print(f"tau = {tau}\n--- real tracks (author's 3c calibration) ---")

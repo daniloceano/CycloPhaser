@@ -723,8 +723,7 @@ def find_residual_period(df, **args_periods):
 #
 # `threshold_incipient_length` is IGNORED when incipient_method="plateau", in
 # the same way `threshold_mature_length` is ignored under
-# mature_method="amplitude". Conversely the four plateau parameters below are
-# ignored under incipient_method="amplitude".
+# mature_method="amplitude".
 
 
 def _incipient_plateau_rel(df, signal):
@@ -804,128 +803,6 @@ def _incipient_plateau_boundary(rel, tau, crossing, k):
     return int(hits[0]) if hits.size else 0
 
 
-# ---------------------------------------------------------------------------
-# incipient_method: "amplitude"
-# ---------------------------------------------------------------------------
-# Third option, the direct analogue of mature_method="amplitude" for the start
-# of the series: the incipient phase is the leading stretch over which the
-# cyclone has not yet completed `incipient_amplitude_fraction` of its FIRST
-# deepening (or first weakening, for a track that opens in decay).
-#
-# Why a LEVEL criterion and not a slope one. The plateau method measures
-# `incipient_plateau_signal`, and that toggle turned out to have a two-sided
-# trade-off with no dominant option (both sides measured on the synthetic
-# suite, see tests/test_incipient_plateau.py):
-#
-#   * "derivative" is robust to noise but is read AFTER the Lanczos, so it
-#     inherits plateaux the filter itself invents — on the two synthetic cases
-#     built with a deliberately steep `linear` onset, normalised |dz| at t0
-#     falls from 0.94/0.66 on the raw series to 0.147/0.150 once filtered,
-#     under any usable tau, and a spurious incipient phase appears;
-#   * "vorticity" is read on the unfiltered series so it rejects those
-#     correctly, but it is defeated by noise: on the 2 %-noise cases the
-#     normalised raw gradient at t0 is already 0.25-0.57.
-#
-# Integrating z instead of differentiating it dissolves that trade-off: a level
-# difference does not amplify high-frequency noise the way a derivative does, so
-# the criterion neither needs the filter's help nor inherits its artifacts. It
-# also states the physical claim directly — "the cyclone has not yet deepened
-# appreciably" — rather than through the slope as a proxy.
-#
-# `incipient_amplitude_fraction` -> LARGER means a LONGER incipient phase (more
-# of the first deepening must already be completed before the phase is allowed
-# to end). This is the OPPOSITE sense to `mature_amplitude_fraction`, where
-# larger shrinks the mature window; the two are different quantities (progress
-# made from the start, versus intensity retained around the peak) and the
-# direction is stated here explicitly so it does not get inverted by analogy.
-#
-# `threshold_incipient_length` and all four plateau parameters
-# (`incipient_plateau_tau` / `_signal` / `_crossing` / `_k`) are IGNORED under
-# incipient_method="amplitude", in the same way `threshold_mature_length` is
-# ignored under mature_method="amplitude".
-
-
-# Minimum size, as a fraction of the series' own z range, for a z extremum to be
-# usable as the amplitude reference in _incipient_amplitude_boundary. This is a
-# degeneracy filter, not a tuning knob: it rejects the numerically negligible
-# extrema that find_peaks_valleys' >=/<= comparisons mark inside a flat opening
-# plateau (see the comment at its use site). 1 % of the range is far below any
-# physically meaningful first deepening and far above the 1e-4..1e-3 wiggles
-# measured on the synthetic suite.
-_MIN_AMPLITUDE_REFERENCE_FRACTION = 0.01
-
-
-def _incipient_amplitude_boundary(df, fraction):
-    """First index at which the first deepening is `fraction` complete.
-
-    The incipient phase is the half-open range ``[0, boundary)``; a boundary of
-    0 means no incipient phase is created.
-
-    The amplitude reference is the first z extremum AFTER t0 — a valley for a
-    track that opens by intensifying, a peak for one that opens in decay, which
-    is why the case-C ("starts in decay") shape needs no special handling here:
-    the criterion is an absolute level difference from z[t0], so it is
-    direction-agnostic.
-
-    Extrema come from the ``'z_peaks_valleys'`` column, i.e. exactly the
-    machinery the mature stage uses (``find_peaks_valleys`` on z, with whatever
-    prominence/distance filtering the caller configured). Index 0 is skipped
-    deliberately: ``find_peaks_valleys`` marks boundary indices unconditionally
-    (see its NOTE on issue #14), so t0 is frequently flagged as an extremum
-    without being one, and using it would make the amplitude reference zero.
-
-    Args:
-        df: DataFrame carrying 'z' (the smoothed vorticity find_stages
-            consumes) and 'z_peaks_valleys'.
-        fraction: float in (0, 1]. Fraction of the first deepening's amplitude
-            that must be completed for the incipient phase to end. Larger ->
-            longer incipient phase.
-
-    Returns:
-        int: the boundary index; 0 when the criterion is undefined (no usable
-        extremum after t0, or a non-finite / non-positive amplitude or series
-        range), which declines to create an incipient phase rather than
-        guessing.
-    """
-    z = np.asarray(df['z'], dtype=float)
-    n = z.size
-    if n < 2:
-        return 0
-
-    z_range = np.nanmax(z) - np.nanmin(z)
-    if not np.isfinite(z_range) or z_range <= 0:
-        return 0
-
-    marks = df['z_peaks_valleys'].to_numpy()
-    amplitude = 0.0
-    for i in range(1, n):
-        if marks[i] not in ('peak', 'valley'):
-            continue
-        candidate = abs(z[i] - z[0])
-        # Skip degenerate references. find_peaks_valleys uses np.greater_equal /
-        # np.less_equal so that flat plateaux are still detected, which means a
-        # numerically negligible wiggle inside the initial plateau is marked as
-        # an extremum: measured on the synthetic suite, ItMD_clean carries a
-        # 'peak' at index 1 whose |z - z[t0]| is 9.4e-08, i.e. 1e-4 of the
-        # series' own range, and IcIt_observational one at index 4 at 1e-3 of
-        # it. Taking either as the amplitude reference pins the boundary a step
-        # or two after t0 no matter what fraction is asked for. The guard is
-        # RELATIVE to the series range for the same reason prominence_relative
-        # and mature_amplitude_fraction are relative — vorticity has a non-zero
-        # floor, so no absolute threshold is meaningful across cyclones.
-        if candidate >= _MIN_AMPLITUDE_REFERENCE_FRACTION * z_range:
-            amplitude = candidate
-            break
-    if not np.isfinite(amplitude) or amplitude <= 0:
-        return 0
-
-    progress = np.abs(z - z[0])
-    hits = np.flatnonzero(progress >= fraction * amplitude)
-    # progress[first_extremum] == amplitude, so for fraction <= 1 a hit always
-    # exists; the guard covers NaN in z and any caller-supplied fraction > 1.
-    return int(hits[0]) if hits.size else 0
-
-
 def find_incipient_period(df, **args_periods):
 
     """
@@ -946,13 +823,6 @@ def find_incipient_period(df, **args_periods):
         ``threshold_incipient_length``. See the block comment above
         ``_incipient_plateau_rel`` for the rationale and the measured caveats.
 
-    ``"amplitude"`` (opt-in)
-        The incipient phase lasts until the cyclone has completed
-        ``incipient_amplitude_fraction`` of its first deepening, measured as a
-        LEVEL difference on z rather than a slope. Self-contained like
-        ``"plateau"``, and it additionally ignores all four plateau parameters.
-        See the block comment above ``_incipient_amplitude_boundary``.
-
     Args:
         df (pd.DataFrame): DataFrame containing vorticity data with columns for
             'periods', 'dz_peaks_valleys', and — for the plateau method — 'dz'
@@ -965,8 +835,7 @@ def find_incipient_period(df, **args_periods):
               ``incipient_method="plateau"``, in the same way
               ``threshold_mature_length`` is ignored under
               ``mature_method="amplitude"``.
-            - 'incipient_method' (str): "geometric" (default), "plateau" or
-              "amplitude".
+            - 'incipient_method' (str): "geometric" (default) or "plateau".
             - 'incipient_plateau_tau' (float): plateau threshold on the
               normalised slope. Default 0.20. Only used when method="plateau".
             - 'incipient_plateau_signal' (str): "derivative" (default) or
@@ -975,11 +844,6 @@ def find_incipient_period(df, **args_periods):
               "sustained". Only used when method="plateau".
             - 'incipient_plateau_k' (int): consecutive steps required by
               "sustained". Default 3. Only used when crossing="sustained".
-            - 'incipient_amplitude_fraction' (float): fraction of the first
-              deepening that must be completed for the incipient phase to end.
-              Default 0.15. LARGER -> LONGER incipient phase. Only used when
-              method="amplitude"; the four plateau parameters above are
-              ignored in that mode, as is 'threshold_incipient_length'.
 
     Returns:
         pd.DataFrame: Updated DataFrame with 'incipient' stages marked in the
@@ -989,10 +853,9 @@ def find_incipient_period(df, **args_periods):
     # .get() with defaults: keeps the function callable with the partial
     # args dict that predates these parameters (and that the tests use).
     incipient_method = args_periods.get('incipient_method', 'geometric')
-    if incipient_method not in ('geometric', 'plateau', 'amplitude'):
+    if incipient_method not in ('geometric', 'plateau'):
         raise ValueError(
-            "incipient_method must be 'geometric', 'plateau' or 'amplitude', got "
-            f"{incipient_method!r}.")
+            f"incipient_method must be 'geometric' or 'plateau', got {incipient_method!r}.")
 
     periods = df['periods']
     
@@ -1028,20 +891,6 @@ def find_incipient_period(df, **args_periods):
         if boundary > 0:
             # [t0, boundary) — half-open, hence .iloc and not the label-based
             # (inclusive) .loc slicing the geometric branches use.
-            df.iloc[:boundary, df.columns.get_loc('periods')] = 'incipient'
-        return df
-
-    if incipient_method == 'amplitude':
-        # Self-contained level rule, the analogue of mature_method="amplitude":
-        # the incipient phase lasts until the first deepening is
-        # incipient_amplitude_fraction complete. Like the plateau branch it
-        # ignores phases_order, the next dz extremum and
-        # threshold_incipient_length; unlike it, it also ignores all four
-        # plateau parameters. A boundary of 0 declines to create the phase, and
-        # the catch-all fillna above still applies.
-        boundary = _incipient_amplitude_boundary(
-            df, args_periods.get('incipient_amplitude_fraction', 0.15))
-        if boundary > 0:
             df.iloc[:boundary, df.columns.get_loc('periods')] = 'incipient'
         return df
 
