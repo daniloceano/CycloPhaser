@@ -162,6 +162,8 @@ _DEFAULTS: dict = {
     "incipient_plateau_signal":       "derivative",
     "incipient_plateau_crossing":     "single",
     "incipient_plateau_k":            3,
+    "incipient_smooth_window":        0,
+    "incipient_smooth_polyorder":     3,
     "decay_tail_enabled":             False,
     "decay_tail_fraction_val":        0.05,   # author's validated reference value
 }
@@ -310,6 +312,8 @@ _YAML_PHASE_MAP: dict = {
     "incipient_plateau_signal":         ("incipient_plateau_signal", _parse_incipient_signal),
     "incipient_plateau_crossing":       ("incipient_plateau_crossing", _parse_incipient_crossing),
     "incipient_plateau_k":              ("incipient_plateau_k", lambda v: int(float(v))),
+    "incipient_smooth_window":          ("incipient_smooth_window", lambda v: int(float(v))),
+    "incipient_smooth_polyorder":       ("incipient_smooth_polyorder", lambda v: int(float(v))),
 }
 # The extrema-filtering parameters (prominence / prominence_relative / distance)
 # and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
@@ -334,7 +338,9 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
                               "incipient_method", "incipient_plateau_tau",
                               "incipient_plateau_signal",
                               "incipient_plateau_crossing",
-                              "incipient_plateau_k"}
+                              "incipient_plateau_k",
+                              "incipient_smooth_window",
+                              "incipient_smooth_polyorder"}
 
 # boundary_padding is OPTIONAL on import for the same reason as the optional
 # phase keys above, but for a backward-compatibility reason rather than a
@@ -658,6 +664,77 @@ def _render_periods_png(
         ax.set_title(name, fontweight="bold")
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+@st.cache_data(
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+    show_spinner=False,
+)
+def _render_probe_png(file_bytes: bytes,
+                      use_filter, cutoff_low, cutoff_high,
+                      use_smoothing, use_smoothing_twice, replace_endpoints,
+                      savgol_poly, boundary_padding,
+                      signal: str, window: int, polyorder: int,
+                      tau: float, crossing: str, k: int) -> bytes:
+    """Incipient-probe overlay: raw vs smoothed probe, and the rate with tau.
+
+    Kept out of the main phase figure on purpose -- it answers a different
+    question ("what does the smoothing window do to the curve the incipient
+    criterion reads") and only matters while that criterion is being tuned.
+    """
+    from cyclophaser.find_stages import (
+        _incipient_plateau_boundary, _incipient_plateau_rel,
+        _smooth_incipient_probe,
+    )
+    vort, _ = _run_process_vorticity(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
+    )
+    z_raw = np.asarray(vort["zeta"].values, dtype=float)
+    dz_pipe = np.asarray(vort["dz_dt_smoothed2"].values, dtype=float)
+    df_probe = pd.DataFrame({"z_unfil": z_raw, "dz": dz_pipe})
+
+    rel_off = _incipient_plateau_rel(df_probe, signal, 0, polyorder)
+    rel_on = _incipient_plateau_rel(df_probe, signal, window, polyorder)
+    b_off = _incipient_plateau_boundary(rel_off, tau, crossing, k)
+    b_on = _incipient_plateau_boundary(rel_on, tau, crossing, k)
+    z_s = _smooth_incipient_probe(z_raw, window, polyorder)
+    t = np.arange(z_raw.size)
+
+    fig, axes = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
+    axes[0].plot(t, z_raw, color="#999999", lw=1.1, label="zeta cru")
+    if window > 0:
+        axes[0].plot(t, z_s, color="#1d3557", lw=1.9,
+                     label=f"sondagem suavizada (w={window})")
+    axes[0].set_ylabel("zeta", fontsize=8)
+    axes[0].legend(fontsize=7, loc="lower right")
+
+    axes[1].plot(t, rel_off, color="#999999", lw=1.1, label="rel(t) sem suavizacao")
+    if window > 0:
+        axes[1].plot(t, rel_on, color="#e63946", lw=1.9,
+                     label=f"rel(t) com w={window}")
+    axes[1].axhline(tau, color="#8856a7", lw=1.2, ls="--", label=f"tau={tau:.2f}")
+    for b, c, lbl in ((b_off, "#999999", "fronteira sem suavizacao"),
+                      (b_on, "#d000d0", "fronteira com suavizacao")):
+        if b > 0:
+            axes[1].axvline(b, color=c, lw=1.8)
+    axes[1].set_ylim(0, 1.02)
+    axes[1].set_ylabel("rel(t) = |dz|/max|dz|", fontsize=8)
+    axes[1].set_xlabel("passo", fontsize=8)
+    axes[1].legend(fontsize=7, loc="upper right")
+    for a in axes:
+        a.tick_params(labelsize=7)
+        a.set_xlim(-0.5, z_raw.size - 0.5)
+    fig.suptitle(
+        f"sondagem da incipiente · signal={signal} · w={window} · "
+        f"fronteira {b_off} (sem) -> {b_on} (com)", fontsize=9, fontweight="bold")
+    fig.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")
     plt.close(fig)
     buf.seek(0)
     return buf.getvalue()
@@ -1348,6 +1425,63 @@ with st.sidebar:
             incipient_plateau_k = st.session_state.get(
                 "incipient_plateau_k", _DEFAULTS["incipient_plateau_k"])
 
+        show_incipient_probe = st.checkbox(
+            "Show incipient probe overlay",
+            value=False, key="show_incipient_probe",
+            disabled=incipient_method != "plateau",
+            help=("Adds a per-cyclone panel showing the raw vs smoothed probe "
+                  "curve and the rate rel(t) with tau, so the effect of the "
+                  "smoothing window is visible directly."),
+        )
+
+        # --- dedicated smoothing for the incipient probe -------------------
+        # Only meaningful for signal="vorticity": the "derivative" path already
+        # reads a curve the pipeline filtered, so smoothing it here would be a
+        # second, hidden pass over the same signal.
+        if incipient_plateau_signal == "vorticity":
+            incipient_smooth_window = st.slider(
+                "Probe smoothing window (0 = off)", 0, 21, step=1,
+                value=_DEFAULTS["incipient_smooth_window"],
+                key="incipient_smooth_window",
+                disabled=incipient_method != "plateau",
+                help=(
+                    "Savitzky-Golay window applied to the RAW vorticity before the "
+                    "incipient probe differentiates it. Affects the incipient "
+                    "probe only — `z` and `dz` used by every other phase are "
+                    "untouched, and the pipeline stays Savgol-off.\n\n"
+                    "0 disables it (default, previous behaviour). Even values are "
+                    "rounded up to odd.\n\n"
+                    "Measured on the synthetic suite: w≥5 removes the spurious "
+                    "noise trip that leaves the noisy designed-Ic cases with no "
+                    "incipient phase at all, and makes `sustained k` unnecessary. "
+                    "**Goldilocks:** too wide flattens the rise and displaces the "
+                    "knee — and on real tracks rel(t₀) is NOT monotone in the "
+                    "window (20170225: 0.44 → 0.66 at w=5 → 0.38 at w=7), so a "
+                    "bigger window is not reliably safer."
+                ),
+            )
+            incipient_smooth_polyorder = st.number_input(
+                "Probe smoothing polyorder", min_value=1, max_value=7, step=1,
+                value=_DEFAULTS["incipient_smooth_polyorder"],
+                key="incipient_smooth_polyorder",
+                disabled=incipient_method != "plateau",
+                help=("Polynomial order of that Savitzky-Golay pass. Savgol rather "
+                      "than a moving average because it preserves the position and "
+                      "shape of the turn being measured. A window at or below this "
+                      "order cannot define the fit and is skipped."),
+            )
+        else:
+            incipient_smooth_window = st.session_state.get(
+                "incipient_smooth_window", _DEFAULTS["incipient_smooth_window"])
+            incipient_smooth_polyorder = st.session_state.get(
+                "incipient_smooth_polyorder", _DEFAULTS["incipient_smooth_polyorder"])
+            if incipient_method == "plateau":
+                st.caption(
+                    "Probe smoothing applies only to "
+                    "`incipient_plateau_signal='vorticity'` — the 'derivative' "
+                    "path already reads a pipeline-filtered curve."
+                )
+
     st.divider()
     # --- Extrema filtering (optional) ---
     st.header("Extrema Filtering")
@@ -1498,6 +1632,8 @@ _PHASE_PARAMS = dict(
     incipient_plateau_signal=incipient_plateau_signal,
     incipient_plateau_crossing=incipient_plateau_crossing,
     incipient_plateau_k=incipient_plateau_k,
+    incipient_smooth_window=incipient_smooth_window,
+    incipient_smooth_polyorder=incipient_smooth_polyorder,
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
@@ -1826,6 +1962,22 @@ with tab_cal:
                 st.error(f"Error in {'compact' if n_cols >= 4 else 'phase'} figure: {exc}")
                 continue
             st.image(_png_display, use_container_width=True)
+
+            if show_incipient_probe and incipient_method == "plateau":
+                with st.expander("Sondagem da incipiente (crua vs suavizada)",
+                                 expanded=False):
+                    try:
+                        st.image(_render_probe_png(
+                            files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                            use_smoothing, use_smoothing_twice, replace_endpoints,
+                            savgol_poly, boundary_padding,
+                            incipient_plateau_signal, int(incipient_smooth_window),
+                            int(incipient_smooth_polyorder),
+                            float(incipient_plateau_tau), incipient_plateau_crossing,
+                            int(incipient_plateau_k),
+                        ), use_container_width=True)
+                    except Exception as exc:
+                        st.warning(f"Probe overlay unavailable: {exc}")
 
             st.checkbox(
                 "⚠️ Mark as bad",

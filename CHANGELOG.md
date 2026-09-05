@@ -63,6 +63,43 @@ Also added: `SYNTHETIC_VALIDATION_PRESET` in `tests/synthetic/cases.py`, and a
 suite alongside the real tracks and overlays the designed ground-truth incipient
 boundary.
 
+### Added
+
+**`incipient_smooth_window` / `incipient_smooth_polyorder` — dedicated denoising
+for the incipient probe (opt-in, default off)**
+
+`incipient_plateau_signal="vorticity"` reads the rate on `d(zeta_raw)/dt`, which
+is immune to the pipeline's edge artifacts and, for the same reason, exposed to
+raw noise: on the 2 %-noise synthetic cases the normalised raw gradient at t₀ is
+already 0.25–0.57, above any usable tau, so the criterion trips at the first
+sample and yields no incipient phase at all.
+
+A Savitzky-Golay pass is now applied to the raw vorticity **before** the probe
+differentiates it, controlled by `incipient_smooth_window` (default `0`,
+disabled — previous behaviour byte for byte) and `incipient_smooth_polyorder`
+(default 3). It touches the incipient probe **only**: `df['z']` and `df['dz']`
+are unchanged, so every other phase is unaffected and `use_smoothing` stays off
+as decided in `docs/future_work.md` §4. Both parameters are ignored outside
+`incipient_method="plateau"` with `incipient_plateau_signal="vorticity"`.
+
+Savitzky-Golay rather than a moving average: a boxcar attenuates a sinusoid's
+amplitude and smears its curvature, and curvature is what the probe reads.
+
+Measured on the synthetic suite (`measure_incipient_smoothing.py`,
+`REPORT_incipient_smoothing.md`): a window of 5–9 takes the designed-Ic cases
+left with no phase from 1–2 down to 0, and makes `incipient_plateau_crossing=
+"sustained"` unnecessary — single-crossing catches up with `k=3` once the rate is
+reliable. **Goldilocks caveat, measured:** on real tracks `rel(t₀)` is *not*
+monotone in the window (20170225: 0.44 → 0.66 at w=5 → 0.38 at w=7), so a wider
+window is not reliably safer. No window is chosen here; it awaits visual
+validation.
+
+A curvature-based **knee** candidate (`argmax |d²z|`) was measured alongside and
+deliberately **not** added to the package: like the rejected amplitude rule it
+cannot decline (2/2 false positives on the linear-onset true negatives at every
+window), and smoothing degrades it (worst error 2 → 23 timesteps). It lives in
+the measurement script as a recorded negative result.
+
 ### Evaluated and rejected
 
 **`incipient_method="amplitude"` — discarded by construction, not by calibration**

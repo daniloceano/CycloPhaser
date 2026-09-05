@@ -749,7 +749,9 @@ def get_periods(vorticity,
                 incipient_plateau_tau: float = 0.20,
                 incipient_plateau_signal: str = "derivative",
                 incipient_plateau_crossing: str = "single",
-                incipient_plateau_k: int = 3) -> pd.DataFrame:
+                incipient_plateau_k: int = 3,
+                incipient_smooth_window: int = 0,
+                incipient_smooth_polyorder: int = 3) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -929,6 +931,21 @@ def get_periods(vorticity,
         incipient_plateau_k (int, optional): Number of consecutive samples required by
             ``incipient_plateau_crossing="sustained"``. Default is 3. Ignored for
             ``"single"``.
+        incipient_smooth_window (int, optional): Width of a Savitzky-Golay pass applied
+            to the raw vorticity **before** the incipient probe differentiates it, to
+            make the measured rate reliable without re-enabling any pipeline smoothing.
+            It affects ONLY the incipient probe — ``df['z']`` and ``df['dz']``, and
+            therefore every other phase, are untouched. 0 (default) disables it and
+            reproduces the previous behaviour exactly. Only used when
+            ``incipient_method="plateau"`` **and**
+            ``incipient_plateau_signal="vorticity"``; the ``"derivative"`` path already
+            reads a filtered curve. An even value is rounded up to odd and a value
+            longer than the series is clamped, both silently. Keep it light: too wide a
+            window flattens the rise being measured and displaces the knee.
+
+        incipient_smooth_polyorder (int, optional): Polynomial order of that
+            Savitzky-Golay pass. Default is 3. A window at or below this order cannot
+            define the fit and is skipped (no smoothing).
         prominence (float, optional): Absolute minimum prominence threshold for
             z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``
             for the full description of prominence modes.
@@ -996,6 +1013,14 @@ def get_periods(vorticity,
     if int(incipient_plateau_k) < 1:
         raise ValueError(
             f"incipient_plateau_k must be >= 1, got {incipient_plateau_k!r}.")
+    if int(incipient_smooth_window) < 0:
+        raise ValueError(
+            "incipient_smooth_window must be >= 0 (0 disables), got "
+            f"{incipient_smooth_window!r}.")
+    if int(incipient_smooth_polyorder) < 1:
+        raise ValueError(
+            "incipient_smooth_polyorder must be >= 1, got "
+            f"{incipient_smooth_polyorder!r}.")
 
     # Extract smoothed vorticity and derivatives
     z = vorticity.vorticity_smoothed2
@@ -1041,6 +1066,8 @@ def get_periods(vorticity,
         "incipient_plateau_signal": incipient_plateau_signal,
         "incipient_plateau_crossing": incipient_plateau_crossing,
         "incipient_plateau_k": incipient_plateau_k,
+        "incipient_smooth_window": incipient_smooth_window,
+        "incipient_smooth_polyorder": incipient_smooth_polyorder,
     }
 
     # Detect different stages of cyclone lifecycle
@@ -1128,7 +1155,9 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       incipient_plateau_tau: float = 0.20,
                       incipient_plateau_signal: str = "derivative",
                       incipient_plateau_crossing: str = "single",
-                      incipient_plateau_k: int = 3) -> pd.DataFrame:
+                      incipient_plateau_k: int = 3,
+                      incipient_smooth_window: int = 0,
+                      incipient_smooth_polyorder: int = 3) -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -1257,6 +1286,21 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         incipient_plateau_k (int, optional): Number of consecutive samples required by
             ``incipient_plateau_crossing="sustained"``. Default is 3. Ignored for
             ``"single"``.
+        incipient_smooth_window (int, optional): Width of a Savitzky-Golay pass applied
+            to the raw vorticity **before** the incipient probe differentiates it, to
+            make the measured rate reliable without re-enabling any pipeline smoothing.
+            It affects ONLY the incipient probe — ``df['z']`` and ``df['dz']``, and
+            therefore every other phase, are untouched. 0 (default) disables it and
+            reproduces the previous behaviour exactly. Only used when
+            ``incipient_method="plateau"`` **and**
+            ``incipient_plateau_signal="vorticity"``; the ``"derivative"`` path already
+            reads a filtered curve. An even value is rounded up to odd and a value
+            longer than the series is clamped, both silently. Keep it light: too wide a
+            window flattens the rise being measured and displaces the knee.
+
+        incipient_smooth_polyorder (int, optional): Polynomial order of that
+            Savitzky-Golay pass. Default is 3. A window at or below this order cannot
+            define the fit and is skipped (no smoothing).
         length_scale (str, optional): "global" (default) or "local". Controls what
             length ``threshold_intensification_length``, ``threshold_intensification_gap``,
             ``threshold_mature_length``, ``threshold_decay_length`` and
@@ -1382,6 +1426,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         incipient_plateau_signal=incipient_plateau_signal,
         incipient_plateau_crossing=incipient_plateau_crossing,
         incipient_plateau_k=incipient_plateau_k,
+        incipient_smooth_window=incipient_smooth_window,
+        incipient_smooth_polyorder=incipient_smooth_polyorder,
     )
 
     return df

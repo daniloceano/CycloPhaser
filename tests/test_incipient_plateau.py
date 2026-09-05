@@ -140,7 +140,8 @@ def test_defaults_unaffected_by_new_parameters_being_present():
                     incipient_plateau_tau=0.20,
                     incipient_plateau_signal="derivative",
                     incipient_plateau_crossing="single",
-                    incipient_plateau_k=3)
+                    incipient_plateau_k=3,
+                    incipient_smooth_window=0, incipient_smooth_polyorder=3)
     pd.testing.assert_frame_equal(bare, explicit)
 
 
@@ -386,7 +387,158 @@ def test_plateau_does_not_break_the_it_d_it_pattern():
     dict(incipient_method="plateau", incipient_plateau_tau=1.5),
     dict(incipient_method="plateau", incipient_plateau_crossing="sustained",
          incipient_plateau_k=0),
+    dict(incipient_method="plateau", incipient_smooth_window=-1),
+    dict(incipient_method="plateau", incipient_smooth_polyorder=0),
 ])
 def test_invalid_parameters_raise(kwargs):
     with pytest.raises(ValueError):
         _run(CASES["ItMD_clean"]["series"], **kwargs)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 5. incipient_smooth_window — dedicated denoising of the incipient probe
+# ═════════════════════════════════════════════════════════════════════════════
+# Applies only to incipient_method="plateau" with
+# incipient_plateau_signal="vorticity", which reads d(zeta_raw)/dt on the
+# UNFILTERED input. See research/incipient_plateau/REPORT_incipient_smoothing.md.
+_NOISY_DESIGNED_IC = sorted(set(DESIGNED_IC) & set(NOISY_CASE_IDS))
+_CLEAN_DESIGNED_IC = sorted(set(DESIGNED_IC) & set(CLEAN_CASE_IDS))
+
+
+def _vort_boundary(case_id, window, tau=0.20, **kw):
+    df = _run(CASES[case_id]["series"], **preset_for(case_id),
+              incipient_method="plateau", incipient_plateau_signal="vorticity",
+              incipient_plateau_tau=tau, incipient_smooth_window=window, **kw)
+    return _leading_incipient_len(df)
+
+
+def test_smooth_window_zero_is_a_no_op():
+    """window=0 must reproduce the un-smoothed probe exactly."""
+    for case_id in sorted(DESIGNED_IC):
+        a = _run(CASES[case_id]["series"], **preset_for(case_id),
+                 incipient_method="plateau",
+                 incipient_plateau_signal="vorticity")
+        b = _run(CASES[case_id]["series"], **preset_for(case_id),
+                 incipient_method="plateau",
+                 incipient_plateau_signal="vorticity",
+                 incipient_smooth_window=0, incipient_smooth_polyorder=3)
+        pd.testing.assert_frame_equal(a, b, obj=case_id)
+
+
+@pytest.mark.parametrize("case_id", _NOISY_DESIGNED_IC)
+def test_smoothing_removes_the_noise_trip_on_noisy_cases(case_id):
+    """Without smoothing the noisy probe trips at t0 and yields NO phase.
+
+    This is the defect the window was added for: on the 2 %-noise cases the raw
+    gradient at t0 is already above tau, so the plateau has zero length and no
+    incipient phase is produced at all. A light window restores it.
+    """
+    assert _vort_boundary(case_id, 0) == 0, (
+        f"{case_id}: expected the un-smoothed vorticity probe to trip at t0; "
+        "if this no longer holds the premise of the smoothing needs re-measuring")
+    for window in (5, 7, 9):
+        got = _vort_boundary(case_id, window)
+        assert got > 0, f"{case_id} [w={window}]: still no incipient phase"
+        assert abs(got - DESIGNED_IC[case_id]) <= TOLERANCE, (
+            f"{case_id} [w={window}]: boundary {got} vs ground truth "
+            f"{DESIGNED_IC[case_id]}")
+
+
+@pytest.mark.parametrize("window", [3, 5, 7, 9])
+@pytest.mark.parametrize("case_id", _CLEAN_DESIGNED_IC)
+def test_smoothing_does_not_displace_clean_cases(case_id, window):
+    """On clean series the window must not move the boundary out of tolerance."""
+    got = _vort_boundary(case_id, window)
+    if got == 0:
+        pytest.skip(f"{case_id}: probe declines at w={window}; covered elsewhere")
+    assert abs(got - DESIGNED_IC[case_id]) <= TOLERANCE, (
+        f"{case_id} [w={window}]: boundary {got} vs ground truth "
+        f"{DESIGNED_IC[case_id]}")
+
+
+@pytest.mark.parametrize("window", [0, 3, 5, 7, 9])
+@pytest.mark.parametrize("case_id", NO_IC)
+def test_smoothing_preserves_the_steep_start_guard(case_id, window):
+    """The two true negatives must keep getting no incipient at every window.
+
+    The rejection mechanism (rel(0) >= tau is a zero-length plateau) is what the
+    knee candidate lacks; this pins that smoothing does not erode it.
+    """
+    assert _vort_boundary(case_id, window) == 0, (
+        f"{case_id} [w={window}]: smoothing created a false-positive incipient")
+
+
+def test_smoothing_makes_sustained_k_unnecessary():
+    """Denoising restores the rate, so single-crossing catches up with k=3.
+
+    Measured claim from the report: without smoothing, single-crossing leaves
+    noisy designed-Ic cases with no phase while sustained k=3 masks that by
+    demanding the rate stay tripped. With a light window the two agree.
+    """
+    misses_single_w0 = sum(_vort_boundary(c, 0) == 0
+                           for c in _NOISY_DESIGNED_IC)
+    assert misses_single_w0 > 0, "premise gone: un-smoothed single no longer misses"
+
+    for case_id in _NOISY_DESIGNED_IC:
+        single = _vort_boundary(case_id, 7)
+        sustained = _vort_boundary(case_id, 7,
+                                   incipient_plateau_crossing="sustained",
+                                   incipient_plateau_k=3)
+        assert single > 0 and sustained > 0
+        assert abs(single - sustained) <= 2, (
+            f"{case_id}: single={single} sustained={sustained} still diverge "
+            "after smoothing")
+
+
+def test_smooth_probe_helper_clamping():
+    """The probe smoother degrades to a no-op rather than raising."""
+    from cyclophaser.find_stages import _smooth_incipient_probe as f
+    x = np.sin(np.linspace(0, 3, 40))
+    assert np.allclose(f(x, 0, 3), x)          # disabled
+    assert np.allclose(f(x, 3, 3), x)          # window <= polyorder -> skipped
+    assert f(x, 4, 3).shape == x.shape         # even window rounded up
+    assert f(x, 999, 3).shape == x.shape       # longer than series -> clamped
+    assert not np.allclose(f(x, 9, 3), x)      # a valid window does something
+    assert np.allclose(f(np.array([1.0, 2.0]), 5, 3), np.array([1.0, 2.0]))
+
+
+def test_smoothing_is_confined_to_the_incipient_probe():
+    """The window must not change anything outside the incipient phase."""
+    case_id = _NOISY_DESIGNED_IC[0]
+    off = _run(CASES[case_id]["series"], **preset_for(case_id),
+               incipient_method="plateau", incipient_plateau_signal="vorticity",
+               incipient_smooth_window=0)
+    on = _run(CASES[case_id]["series"], **preset_for(case_id),
+              incipient_method="plateau", incipient_plateau_signal="vorticity",
+              incipient_smooth_window=7)
+    # the z / dz columns every other phase reads must be identical
+    for col in ("z", "dz", "dz2", "z_unfil"):
+        np.testing.assert_array_equal(off[col].to_numpy(), on[col].to_numpy(),
+                                      err_msg=f"column {col} was modified")
+    # and only incipient labels may differ
+    diff = [(a, b) for a, b in zip(off["periods"], on["periods"]) if a != b]
+    assert all("incipient" in (a, b) for a, b in diff), (
+        f"smoothing changed non-incipient labels: {set(diff)}")
+
+
+def test_smoothing_is_ignored_for_the_derivative_signal():
+    """signal="derivative" already reads a filtered curve; the window is inert."""
+    case_id = _NOISY_DESIGNED_IC[0]
+    a = _run(CASES[case_id]["series"], **preset_for(case_id),
+             incipient_method="plateau", incipient_plateau_signal="derivative",
+             incipient_smooth_window=0)
+    b = _run(CASES[case_id]["series"], **preset_for(case_id),
+             incipient_method="plateau", incipient_plateau_signal="derivative",
+             incipient_smooth_window=9)
+    pd.testing.assert_frame_equal(a, b)
+
+
+def test_no_amplitude_method_remains():
+    """incipient_method="amplitude" was discarded by construction; keep it gone."""
+    with pytest.raises(ValueError):
+        _run(CASES["ItMD_clean"]["series"], incipient_method="amplitude")
+    import cyclophaser.find_stages as fs
+    assert not hasattr(fs, "_incipient_amplitude_boundary")
+    import inspect
+    from cyclophaser import determine_periods as dp
+    assert "incipient_amplitude_fraction" not in inspect.signature(dp).parameters
