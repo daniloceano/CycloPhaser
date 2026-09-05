@@ -6,6 +6,7 @@ parameters interactively, and inspect results across all cyclones at once.
 
 import hashlib
 import io
+import sys
 import warnings
 import zipfile
 from datetime import datetime, timezone
@@ -13,12 +14,22 @@ from pathlib import Path
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import streamlit as st
 import yaml
 
 from cyclophaser.determine_periods import get_periods, periods_to_dict, process_vorticity
 from cyclophaser.plots import plot_all_periods, plot_didactic
+
+# `streamlit run` puts this file's directory on sys.path, but other launchers
+# do not; make the sibling module importable either way (same __file__-relative
+# strategy the data paths below use, and for the same reason).
+if str(Path(__file__).parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent))
+from phase_focus import (  # noqa: E402
+    draw_incipient_lens, draw_mature_lens, incipient_lens, mature_lens,
+)
 
 # CycloPhaser version (read from setup.py at import time)
 try:
@@ -141,6 +152,11 @@ _DEFAULTS: dict = {
     "savgol_poly":       3,
     "boundary_padding":  "reflect",
     "n_cols":            2,
+    # Phase-focus lens: pure UI state (which signal the figures show).
+    # Listed here so "Reset to defaults" clears it, like n_cols; it is
+    # deliberately NOT part of the YAML export/import, which carries only
+    # parameters that change detection.
+    "phase_focus":       "Overview",
     "thr_int_len":       0.075,
     "thr_dec_len":       0.075,
     "thr_mat_len":       0.030,
@@ -169,6 +185,7 @@ _DEFAULTS: dict = {
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
+_FOCUS_OPTIONS = ["Overview", "Mature", "Incipient"]
 _BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
@@ -740,6 +757,113 @@ def _render_probe_png(file_bytes: bytes,
     return buf.getvalue()
 
 
+def _incipient_lead(df_result) -> int:
+    """Length of the LEADING run of 'incipient' in a detection result.
+
+    This is the boundary the run actually produced (the lens draws it as the
+    black vertical line), read back from the result rather than recomputed, so
+    it stays correct under BOTH incipient methods.
+
+    It can sit LATER than the plateau rule's own tau crossing, and that is not
+    a discrepancy: find_incipient_period fills any leading NaN periods with
+    'incipient' (the catch-all) before the plateau branch runs, so the produced
+    phase may extend past the crossing. Showing both lines is the point --
+    the gap between them is exactly the part of the incipient phase that tau
+    did not decide.
+    """
+    inc = (df_result["periods"] == "incipient").to_numpy()
+    if inc.size == 0 or not inc[0]:
+        return 0
+    return int(inc.size) if inc.all() else int(np.argmin(inc))
+
+
+@st.cache_data(
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+    show_spinner=False,
+)
+def _render_mature_lens_png(
+    file_bytes: bytes,
+    use_filter, cutoff_low, cutoff_high,
+    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    boundary_padding,
+    phase_params_tuple: tuple,
+    name: str,
+    prominence, prominence_relative, distance,
+    figsize: tuple,
+) -> bytes:
+    """Mature lens: the z extrema the detector uses, and the prominence cut.
+
+    prominence / prominence_relative / distance are passed explicitly even
+    though they are already inside phase_params_tuple, because that tuple drops
+    None values -- so "filter disabled" would otherwise be indistinguishable
+    from "key absent" in this function's cache key.
+    """
+    df_result, periods_dict, _ = _run_get_periods(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding, phase_params_tuple,
+    )
+    lens = mature_lens(df_result["z"], prominence=prominence,
+                       prominence_relative=prominence_relative,
+                       distance=distance)
+    fig, axes = plt.subplots(2, 1, figsize=figsize, sharex=True,
+                             gridspec_kw={"height_ratios": [2.0, 1.0]})
+    draw_mature_lens(axes, df_result["z"], lens, periods_dict=periods_dict,
+                     title=name)
+    fig.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+@st.cache_data(
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+    show_spinner=False,
+)
+def _render_incipient_lens_png(
+    file_bytes: bytes,
+    use_filter, cutoff_low, cutoff_high,
+    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    boundary_padding,
+    phase_params_tuple: tuple,
+    name: str,
+    incipient_method: str, signal: str, tau: float, crossing: str, k: int,
+    window: int, polyorder: int,
+    figsize: tuple,
+) -> bytes:
+    """Incipient lens: dz / d2z at the start, the probe overlay, rel vs tau."""
+    df_result, _, _ = _run_get_periods(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding, phase_params_tuple,
+    )
+    plateau_active = incipient_method == "plateau"
+    lens = incipient_lens(
+        df_result["z_unfil"], df_result["dz"], df_result["dz2"],
+        signal=signal, tau=tau, crossing=crossing, k=k,
+        smooth_window=window, smooth_polyorder=polyorder,
+    )
+    # Outside "plateau" the rel/tau panel has nothing to show, so it is not
+    # drawn at all rather than reserved as an empty third of the figure -- the
+    # caption below the image carries the explanation instead.
+    _nrows = 3 if plateau_active else 2
+    fig, axes = plt.subplots(_nrows, 1, sharex=True,
+                             figsize=(figsize[0], figsize[1] * _nrows / 3.0))
+    draw_incipient_lens(
+        axes, lens, df_result["dz"], df_result["dz2"], tau,
+        boundary=_incipient_lead(df_result), plateau_active=plateau_active,
+        title=name,
+    )
+    fig.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return buf.getvalue()
+
+
 def _build_zip(ok_results: dict, yaml_str: str) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -753,6 +877,9 @@ def _build_zip(ok_results: dict, yaml_str: str) -> bytes:
 
 # Figure sizes per column count (matplotlib inches)
 _FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4), 4: (5, 3), 5: (4, 2.8), 6: (3.5, 2.5)}
+# Focus lenses stack 2-3 panels, so they need proportionally more height
+# than the single-axes phase figure at the same width.
+_LENS_FIGSIZES = {1: (12, 8), 2: (9, 7), 3: (7, 6)}
 
 # Compact-grid (n_cols >= 4) line widths. Only two series are plotted (see
 # _plot_compact): 'raw' (zeta, the actual input data) and 'smoothed2'
@@ -1894,8 +2021,30 @@ tab_cal, tab_doc = st.tabs(["Calibration", "Documentation"])
 # TAB 1 — Calibration
 # ══════════════════════════════════════════════════════════════════════════════════
 with tab_cal:
-    # Top row: grid selector + ZIP export
-    _c1, _c2 = st.columns([4, 1])
+    # Top row: focus lens + grid selector + ZIP export
+    _c0, _c1, _c2 = st.columns([2, 3, 1])
+    with _c0:
+        # PURE VISUALISATION: this only changes what the figures SHOW. It is
+        # UI state (session_state), never a detection parameter, and never
+        # reaches the YAML export -- see the note on "phase_focus" in _DEFAULTS.
+        focus: str = st.radio(
+            "Focus", options=_FOCUS_OPTIONS,
+            index=_FOCUS_OPTIONS.index(_DEFAULTS["phase_focus"]),
+            key="phase_focus", horizontal=True,
+            help=(
+                "Switches the signal the figures show, so the parameter being "
+                "tuned and the curve that governs it are on screen together. "
+                "Purely a view: no option here changes phase detection, and the "
+                "focus is not exported to YAML.\n\n"
+                "**Overview** — the phase figure (unchanged).\n\n"
+                "**Mature** — z with the peaks/valleys the detector actually "
+                "consumes, plus each candidate's prominence against the "
+                "effective threshold, so the prominence slider can be watched "
+                "accepting and rejecting extrema live.\n\n"
+                "**Incipient** — dz and d2z at the start of the series, the "
+                "probe-smoothing overlay, and rel(t) against tau."
+            ),
+        )
     with _c1:
         n_cols: int = st.select_slider(
             "Grid columns", options=[1, 2, 3, 4, 5, 6],
@@ -1915,13 +2064,28 @@ with tab_cal:
             ),
         )
 
-    if n_cols >= 4:
+    # A lens replaces the phase figure with 2-3 stacked diagnostic panels, which
+    # are illegible below the 3-column figure size -- and rendering them for the
+    # whole track set at once is the expensive path (Overview never draws them,
+    # which is the point of gating them behind the focus). So the lens views cap
+    # the layout at 3 columns; the compact grid and its legend stay an Overview
+    # affordance.
+    _grid_cols = n_cols if focus == "Overview" else min(n_cols, 3)
+
+    if focus == "Overview" and n_cols >= 4:
         _render_global_legend()
+    elif focus != "Overview":
+        st.caption(
+            f"Focus **{focus}** — visualisation only; detection is unchanged. "
+            "Panels are drawn for every loaded track at up to 3 columns "
+            "(first render of a new parameter set is the slow one; afterwards "
+            "it is cached)."
+        )
 
     # Display grid
-    grid = st.columns(n_cols)
+    grid = st.columns(_grid_cols)
     for idx, (cyclone_name, res) in enumerate(all_results.items()):
-        with grid[idx % n_cols]:
+        with grid[idx % _grid_cols]:
             _bad_key = f"{_BAD_CASE_KEY_PREFIX}{cyclone_name}"
             _is_bad = st.session_state.get(_bad_key, False)
             st.subheader(f"⚠️ {cyclone_name}" if _is_bad else cyclone_name)
@@ -1941,7 +2105,28 @@ with tab_cal:
             # bad-case-mark checkbox click) is a cache hit for every cyclone's
             # figure instead of a full matplotlib re-render of the whole grid.
             try:
-                if n_cols >= 4:
+                if focus == "Mature":
+                    _png_display = _render_mature_lens_png(
+                        files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                        boundary_padding,
+                        _phase_params_tuple, cyclone_name,
+                        extrema_prominence, extrema_prominence_relative, extrema_distance,
+                        figsize=_LENS_FIGSIZES[_grid_cols],
+                    )
+                elif focus == "Incipient":
+                    _png_display = _render_incipient_lens_png(
+                        files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                        boundary_padding,
+                        _phase_params_tuple, cyclone_name,
+                        incipient_method, incipient_plateau_signal,
+                        float(incipient_plateau_tau), incipient_plateau_crossing,
+                        int(incipient_plateau_k), int(incipient_smooth_window),
+                        int(incipient_smooth_polyorder),
+                        figsize=_LENS_FIGSIZES[_grid_cols],
+                    )
+                elif n_cols >= 4:
                     _png_display = _render_compact_png(
                         files[cyclone_name], use_filter, cutoff_low, cutoff_high,
                         use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
@@ -1959,9 +2144,19 @@ with tab_cal:
                             cyclone_name, files[cyclone_name]),
                     )
             except Exception as exc:
-                st.error(f"Error in {'compact' if n_cols >= 4 else 'phase'} figure: {exc}")
+                _what = ({"Mature": "mature lens", "Incipient": "incipient lens"}
+                         .get(focus, "compact" if n_cols >= 4 else "phase"))
+                st.error(f"Error in {_what} figure: {exc}")
                 continue
             st.image(_png_display, use_container_width=True)
+
+            if focus == "Incipient" and incipient_method != "plateau":
+                st.caption(
+                    "`incipient_method` is **geometric**: tau and the probe "
+                    "curve do not apply, so only the raw dz / d2z panels are "
+                    "drawn. The black line is the boundary the geometric rule "
+                    "produced; the knee is a diagnostic, not a rule."
+                )
 
             if show_incipient_probe and incipient_method == "plateau":
                 with st.expander("Sondagem da incipiente (crua vs suavizada)",
