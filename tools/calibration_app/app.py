@@ -162,6 +162,7 @@ _DEFAULTS: dict = {
     "incipient_plateau_signal":       "derivative",
     "incipient_plateau_crossing":     "single",
     "incipient_plateau_k":            3,
+    "incipient_amplitude_fraction":   0.15,
     "decay_tail_enabled":             False,
     "decay_tail_fraction_val":        0.05,   # author's validated reference value
 }
@@ -218,8 +219,9 @@ def _parse_incipient_method(v) -> str:
     """Validating str converter for incipient_method — same rationale as
     _parse_mature_method above."""
     v = str(v)
-    if v not in ("geometric", "plateau"):
-        raise ValueError(f"incipient_method must be 'geometric' or 'plateau', got {v!r}")
+    if v not in ("geometric", "plateau", "amplitude"):
+        raise ValueError(
+            f"incipient_method must be 'geometric', 'plateau' or 'amplitude', got {v!r}")
     return v
 
 
@@ -310,6 +312,7 @@ _YAML_PHASE_MAP: dict = {
     "incipient_plateau_signal":         ("incipient_plateau_signal", _parse_incipient_signal),
     "incipient_plateau_crossing":       ("incipient_plateau_crossing", _parse_incipient_crossing),
     "incipient_plateau_k":              ("incipient_plateau_k", lambda v: int(float(v))),
+    "incipient_amplitude_fraction":     ("incipient_amplitude_fraction", float),
 }
 # The extrema-filtering parameters (prominence / prominence_relative / distance)
 # and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
@@ -334,7 +337,8 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
                               "incipient_method", "incipient_plateau_tau",
                               "incipient_plateau_signal",
                               "incipient_plateau_crossing",
-                              "incipient_plateau_k"}
+                              "incipient_plateau_k",
+                              "incipient_amplitude_fraction"}
 
 # boundary_padding is OPTIONAL on import for the same reason as the optional
 # phase keys above, but for a backward-compatibility reason rather than a
@@ -1253,20 +1257,27 @@ with st.sidebar:
                 "recoveries during decay that should not fragment the phase."
             ),
         )
+        _INC_METHODS = ["geometric", "plateau", "amplitude"]
         incipient_method = st.radio(
             "incipient_method",
-            options=["geometric", "plateau"],
-            index=["geometric", "plateau"].index(_DEFAULTS["incipient_method"]),
+            options=_INC_METHODS,
+            index=_INC_METHODS.index(_DEFAULTS["incipient_method"]),
             key="incipient_method",
             horizontal=True,
-            format_func=lambda x: (
-                "Geometric (default)" if x == "geometric" else "Plateau (opt-in)"
-            ),
+            format_func=lambda x: {
+                "geometric": "Geometric (default)",
+                "plateau":   "Plateau (opt-in)",
+                "amplitude": "Amplitude (opt-in)",
+            }[x],
             help=(
                 "'geometric' is the historical rule: the incipient phase ends "
                 "`Min. incipient length` of the way to the next dz extremum. "
                 "'plateau' instead ends it where the normalised slope first "
-                "reaches tau — the end of the initial low-slope plateau.\n\n"
+                "reaches tau — the end of the initial low-slope plateau. "
+                "'amplitude' ends it once the cyclone has completed a given "
+                "FRACTION of its first deepening, measured as a level "
+                "difference on z rather than a slope — the direct analogue of "
+                "mature_method='amplitude'.\n\n"
                 "**Caveat (measured on the 51-track set):** the plateau rule is only "
                 "meaningful once the t0 boundary artifact is controlled. With the "
                 "Lanczos filter off, or with derivative smoothing active, the first "
@@ -1292,61 +1303,113 @@ with st.sidebar:
             # a live slider that does nothing reads as a bug during calibration.
             thr_inc_len = st.session_state.get("thr_inc_len", _DEFAULTS["thr_inc_len"])
             st.caption(
-                "`Min. incipient length` is ignored under `incipient_method='plateau'` "
+                f"`Min. incipient length` is ignored under "
+                f"`incipient_method='{incipient_method}'` "
                 "(as `Min. mature length` is under `mature_method='amplitude'`)."
             )
 
-        incipient_plateau_tau = st.slider(
-            "Plateau tau (normalised slope)", 0.01, 0.60, step=0.01,
-            value=_DEFAULTS["incipient_plateau_tau"], key="incipient_plateau_tau",
-            disabled=incipient_method != "plateau",
-            help=(
-                "The incipient phase is the leading stretch where the normalised "
-                "slope stays below this value. Measured reference points on the "
-                "51-track set under the author's calibration: tau=0.15 is the "
-                "smallest value that yields a non-empty plateau on all 51 tracks; "
-                "the resulting plateau is short (median 1-3 timesteps)."
-            ),
-        )
-        incipient_plateau_signal = st.radio(
-            "Plateau signal",
-            options=["derivative", "vorticity"],
-            index=["derivative", "vorticity"].index(_DEFAULTS["incipient_plateau_signal"]),
-            key="incipient_plateau_signal", horizontal=True,
-            disabled=incipient_method != "plateau",
-            help=(
-                "'derivative': |dz/dt| of the smoothed series — the exact array the "
-                "stage detection consumes, so the criterion sees what the detector "
-                "sees, but it inherits the filter's edge artifact. "
-                "'vorticity': |d(zeta)/dt| computed on the UNFILTERED input, immune "
-                "to filter edge artifacts but noisier."
-            ),
-        )
-        incipient_plateau_crossing = st.radio(
-            "Plateau crossing",
-            options=["single", "sustained"],
-            index=["single", "sustained"].index(_DEFAULTS["incipient_plateau_crossing"]),
-            key="incipient_plateau_crossing", horizontal=True,
-            disabled=incipient_method != "plateau",
-            help=(
-                "'single': the plateau ends at the first sample reaching tau. "
-                "'sustained': it ends at the start of the first run of k consecutive "
-                "samples at or above tau, so an isolated noise spike inside the "
-                "plateau does not cut it short. If no such run exists anywhere in the "
-                "series, no incipient phase is created."
-            ),
-        )
-        if incipient_plateau_crossing == "sustained":
-            incipient_plateau_k = st.number_input(
-                "Plateau k (consecutive steps)", min_value=1, max_value=25, step=1,
-                value=_DEFAULTS["incipient_plateau_k"], key="incipient_plateau_k",
-                disabled=incipient_method != "plateau",
-                help="Number of consecutive samples at or above tau required by "
-                     "'sustained'. Ignored for 'single'.",
+        _is_plateau = incipient_method == "plateau"
+        _is_amplitude = incipient_method == "amplitude"
+
+        if _is_amplitude:
+            incipient_amplitude_fraction = st.slider(
+                "Amplitude fraction of the first deepening", 0.01, 0.60, step=0.01,
+                value=_DEFAULTS["incipient_amplitude_fraction"],
+                key="incipient_amplitude_fraction",
+                help=(
+                    "Fraction of the cyclone's FIRST deepening that must be "
+                    "completed before the incipient phase ends. The reference is "
+                    "|z(first z extremum after t₀) − z(t₀)|, so a track that "
+                    "opens in decay is handled identically.\n\n"
+                    "**Larger = LONGER incipient phase** — note this is the "
+                    "opposite sense to `mature_amplitude_fraction`, which "
+                    "shrinks its window as it grows.\n\n"
+                    "Reference points measured on the synthetic ground truth: "
+                    "the designed Ic boundary sits at a covered fraction of "
+                    "0.009–0.063 on the four full life cycles, and at 0.000 on "
+                    "the truncated IcIt case, whose first leg is the whole "
+                    "series. On the 51 real tracks the 0.15 default gives a "
+                    "median boundary of 7 steps, against 4 for geometric and 2 "
+                    "for plateau."
+                ),
             )
         else:
+            incipient_amplitude_fraction = st.session_state.get(
+                "incipient_amplitude_fraction",
+                _DEFAULTS["incipient_amplitude_fraction"])
+            if _is_plateau:
+                st.caption(
+                    "`Amplitude fraction` is ignored under "
+                    "`incipient_method='plateau'`."
+                )
+
+        if _is_amplitude:
+            # Hidden rather than merely disabled, for the same reason
+            # `Min. incipient length` is hidden under 'plateau': these
+            # parameters are genuinely ignored in this mode, and a live-looking
+            # control that does nothing reads as a bug during calibration.
+            incipient_plateau_tau = st.session_state.get(
+                "incipient_plateau_tau", _DEFAULTS["incipient_plateau_tau"])
+            incipient_plateau_signal = st.session_state.get(
+                "incipient_plateau_signal", _DEFAULTS["incipient_plateau_signal"])
+            incipient_plateau_crossing = st.session_state.get(
+                "incipient_plateau_crossing",
+                _DEFAULTS["incipient_plateau_crossing"])
             incipient_plateau_k = st.session_state.get(
                 "incipient_plateau_k", _DEFAULTS["incipient_plateau_k"])
+            st.caption(
+                "Plateau controls (tau, signal, crossing, k) are ignored under "
+                "`incipient_method='amplitude'` — it is a level criterion, not "
+                "a slope one."
+            )
+        else:
+            incipient_plateau_tau = st.slider(
+                "Plateau tau (normalised slope)", 0.01, 0.60, step=0.01,
+                value=_DEFAULTS["incipient_plateau_tau"], key="incipient_plateau_tau",
+                help=(
+                    "The incipient phase is the leading stretch where the normalised "
+                    "slope stays below this value. Measured reference points on the "
+                    "51-track set under the author's calibration: tau=0.15 is the "
+                    "smallest value that yields a non-empty plateau on all 51 tracks; "
+                    "the resulting plateau is short (median 1-3 timesteps)."
+                ),
+            )
+            incipient_plateau_signal = st.radio(
+                "Plateau signal",
+                options=["derivative", "vorticity"],
+                index=["derivative", "vorticity"].index(_DEFAULTS["incipient_plateau_signal"]),
+                key="incipient_plateau_signal", horizontal=True,
+                help=(
+                    "'derivative': |dz/dt| of the smoothed series — the exact array the "
+                    "stage detection consumes, so the criterion sees what the detector "
+                    "sees, but it inherits the filter's edge artifact. "
+                    "'vorticity': |d(zeta)/dt| computed on the UNFILTERED input, immune "
+                    "to filter edge artifacts but noisier."
+                ),
+            )
+            incipient_plateau_crossing = st.radio(
+                "Plateau crossing",
+                options=["single", "sustained"],
+                index=["single", "sustained"].index(_DEFAULTS["incipient_plateau_crossing"]),
+                key="incipient_plateau_crossing", horizontal=True,
+                help=(
+                    "'single': the plateau ends at the first sample reaching tau. "
+                    "'sustained': it ends at the start of the first run of k consecutive "
+                    "samples at or above tau, so an isolated noise spike inside the "
+                    "plateau does not cut it short. If no such run exists anywhere in the "
+                    "series, no incipient phase is created."
+                ),
+            )
+            if incipient_plateau_crossing == "sustained":
+                incipient_plateau_k = st.number_input(
+                    "Plateau k (consecutive steps)", min_value=1, max_value=25, step=1,
+                    value=_DEFAULTS["incipient_plateau_k"], key="incipient_plateau_k",
+                    help="Number of consecutive samples at or above tau required by "
+                         "'sustained'. Ignored for 'single'.",
+                )
+            else:
+                incipient_plateau_k = st.session_state.get(
+                    "incipient_plateau_k", _DEFAULTS["incipient_plateau_k"])
 
     st.divider()
     # --- Extrema filtering (optional) ---
@@ -1498,6 +1561,7 @@ _PHASE_PARAMS = dict(
     incipient_plateau_signal=incipient_plateau_signal,
     incipient_plateau_crossing=incipient_plateau_crossing,
     incipient_plateau_k=incipient_plateau_k,
+    incipient_amplitude_fraction=incipient_amplitude_fraction,
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
