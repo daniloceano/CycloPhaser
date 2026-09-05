@@ -30,12 +30,22 @@ Shared y scale
 --------------
 With every layer on, a panel holds series of genuinely different magnitude
 (raw ``zeta`` runs 2-3x wider than the smoothed curve the detector reads). A
-twinx is not an option — it already caused a zorder bug in the app's
-``_plot_compact`` — so the panels default to ONE axis with every curve
-rescaled to [0, 1] by its own min and max (``layer_inspector.normalise_series``).
-The panel is then read for SHAPE — where each series turns, and when — which
-is what the phase rules act on. Every hover still carries the raw value, and
-the app can switch the rescaling off to read true units.
+twinx is not an option here — it already caused a zorder bug in the app's
+``_plot_compact`` — so the panels default to ONE axis with the curves rescaled
+to [0, 1] (``layer_inspector.rescaler``). The panel is then read for SHAPE —
+where each series turns, and when — which is what the phase rules act on.
+
+The GROUPING is what the package's own ``plot_all_periods`` already gets
+right and is reproduced here: raw ``zeta`` is rescaled on its own, while
+``filtered_vorticity`` / ``vorticity_smoothed`` / ``vorticity_smoothed2``
+share one band (they are one axis of the package's twinx). The raw series
+therefore overlays the filtered one — the readable "same track, cleaned up"
+picture — while the three pipeline stages stay comparable to EACH OTHER, so
+the amplitude every smoothing pass removes is still visible. The derivative
+panels follow the same rule: ``*_filt`` and ``*_smoothed2`` share a band.
+
+Every hover still carries the raw value, and the app can switch the rescaling
+off to read true units.
 
 Colours
 -------
@@ -69,7 +79,6 @@ from layer_inspector import (
     PHASE_COLORS,
     STEP_NAMES,
     label_runs,
-    normalise_series,
     phase_at_step,
     phase_spans_for_shading,
     rescaler,
@@ -377,7 +386,9 @@ def _incipient_traces(fig, rows, index, dz, dz_scale, normalize, incipient):
                                       ("probe_smoothed", LW_PRIMARY, None, "smoothed")):
             probe = np.gradient(np.asarray(lens[key], dtype=float))
             if normalize:
-                plotted = normalise_series(probe)[0]
+                # A different quantity from dz, so its own band -- the same
+                # reasoning that gives raw zeta its own band on the z panel.
+                plotted = rescaler([probe], True)(probe)
             else:
                 peak = np.nanmax(np.abs(probe))
                 plotted = probe * (dz_peak / peak if peak > 0 else 1.0)
@@ -457,11 +468,21 @@ def build_inspector_figure(
     index = df_result.index
     phases = phase_at_step(df_result["periods"])
 
-    def scale_for(series):
-        """Transform mapping onto `series`' own rescaled band (identity when off)."""
-        return rescaler(series, normalize)
+    # Bands, grouped the way plots.plot_all_periods groups its two twinx axes:
+    # the raw series alone (so it overlays rather than squashes), the pipeline
+    # stages together (so the amplitude each pass removes stays visible). See
+    # layer_inspector.rescaler.
+    raw_scale = rescaler([vort["zeta"].values], normalize)
+    z_scale = rescaler([vort["filtered_vorticity"].values,
+                        vort["vorticity_smoothed"].values,
+                        vort["vorticity_smoothed2"].values], normalize)
+    dz_scale = rescaler([vort["dz_dt_filt"].values,
+                         vort["dz_dt_smoothed2"].values], normalize)
+    dz2_scale = rescaler([vort["dz_dt2_filt"].values,
+                          vort["dz_dt2_smoothed2"].values], normalize)
+    panel_scale = {"zeta": raw_scale}
 
-    unit_note = " — rescaled 0-1 per series" if normalize else ""
+    unit_note = " — rescaled 0-1" if normalize else ""
     want_rel = bool(incipient and incipient.get("plateau_active"))
     titles = [f"z — vorticity through the pipeline{unit_note}",
               f"dz — first derivative{unit_note}",
@@ -485,32 +506,26 @@ def build_inspector_figure(
                         subplot_titles=titles)
 
     # ── PIECE 1: the series layers (all ON by default) ───────────────────────
-    z_series = [
-        ("zeta", "zeta (raw input)", False),
-        ("filtered_vorticity", "filtered_vorticity (Lanczos)", False),
-        ("vorticity_smoothed", "vorticity_smoothed (Savgol 1)", False),
-        ("vorticity_smoothed2", "vorticity_smoothed2 (what detection reads)", True),
-    ]
-    for var, label, primary in z_series:
-        values = vort[var].values
-        _series_trace(fig, 1, index, values, label, SERIES_COLORS[var], phases,
-                      "z", scale_for(values), normalize,
-                      width=LW_PRIMARY if primary else LW_SERIES)
-    for row, panel, unit in ((2, (("dz_dt_filt", "dz_dt_filt", False),
-                                  ("dz_dt_smoothed2",
-                                   "dz_dt_smoothed2 (what detection reads)", True)), "dz"),
-                             (3, (("dz_dt2_filt", "dz_dt2_filt", False),
-                                  ("dz_dt2_smoothed2",
-                                   "dz_dt2_smoothed2 (what detection reads)", True)), "dz2")):
-        for var, label, primary in panel:
-            values = vort[var].values
-            _series_trace(fig, row, index, values, label, SERIES_COLORS[var],
-                          phases, unit, scale_for(values), normalize,
+    panels = (
+        (1, "z", (("zeta", "zeta (raw input)", False),
+                  ("filtered_vorticity", "filtered_vorticity (Lanczos)", False),
+                  ("vorticity_smoothed", "vorticity_smoothed (Savgol 1)", False),
+                  ("vorticity_smoothed2",
+                   "vorticity_smoothed2 (what detection reads)", True)), z_scale),
+        (2, "dz", (("dz_dt_filt", "dz_dt_filt", False),
+                   ("dz_dt_smoothed2",
+                    "dz_dt_smoothed2 (what detection reads)", True)), dz_scale),
+        (3, "dz2", (("dz_dt2_filt", "dz_dt2_filt", False),
+                    ("dz_dt2_smoothed2",
+                     "dz_dt2_smoothed2 (what detection reads)", True)), dz2_scale),
+    )
+    for row, unit, series, default_scale in panels:
+        for var, label, primary in series:
+            _series_trace(fig, row, index, vort[var].values, label,
+                          SERIES_COLORS[var], phases, unit,
+                          panel_scale.get(var, default_scale), normalize,
                           width=LW_PRIMARY if primary else LW_SERIES)
 
-    z_scale = scale_for(df_result["z"])
-    dz_scale = scale_for(df_result["dz"])
-    dz2_scale = scale_for(df_result["dz2"])
     _extrema_trace(fig, 1, index, df_result["z"], df_result["z_peaks_valleys"],
                    "z_peaks_valleys", phases, "z", z_scale, normalize)
     _extrema_trace(fig, 2, index, df_result["dz"], df_result["dz_peaks_valleys"],
@@ -520,13 +535,14 @@ def build_inspector_figure(
 
     # Vertical markers need each panel's plotted extent, which depends on the
     # rescaling, so it is measured from the plotted arrays rather than assumed.
-    def _panel_range(*variables):
-        return _range(*[scale_for(vort[v].values)(vort[v].values)
-                        for v in variables])
-
-    span_rows = [(1, *_panel_range("vorticity_smoothed2", "zeta")),
-                 (2, *_panel_range("dz_dt_smoothed2", "dz_dt_filt")),
-                 (3, *_panel_range("dz_dt2_smoothed2", "dz_dt2_filt"))]
+    span_rows = [
+        (1, *_range(z_scale(vort["vorticity_smoothed2"].values),
+                    raw_scale(vort["zeta"].values))),
+        (2, *_range(dz_scale(vort["dz_dt_smoothed2"].values),
+                    dz_scale(vort["dz_dt_filt"].values))),
+        (3, *_range(dz2_scale(vort["dz_dt2_smoothed2"].values),
+                    dz2_scale(vort["dz_dt2_filt"].values))),
+    ]
     if row_rel:
         span_rows.append((row_rel, 0.0, 1.0))
 

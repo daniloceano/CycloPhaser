@@ -352,7 +352,7 @@ def normalise_series(y):
 
     The panels stack series of genuinely different magnitude — raw ``zeta``
     runs 2-3x wider than the smoothed curve the detector reads. A twinx was
-    ruled out (it already produced a zorder bug in the app's
+    ruled out for the inspector (it already produced a zorder bug in the app's
     ``_plot_compact``), so instead every curve is rescaled to fill the same
     band and the panel is read for SHAPE: where each series turns, and when.
     That is what the phase rules act on — the y magnitude is not what is being
@@ -368,30 +368,60 @@ def normalise_series(y):
         and is returned as a constant 0.5, centred in the band, rather than
         dividing by zero.
     """
-    a = np.asarray(y, dtype=float)
-    if a.size == 0:
-        return a, 0.0, 1.0
-    lo = float(np.nanmin(a))
-    hi = float(np.nanmax(a))
-    if not np.isfinite(lo) or not np.isfinite(hi) or hi <= lo:
-        return np.full_like(a, 0.5), lo, lo
+    return _rescale(np.asarray(y, dtype=float), *_span([y]))
+
+
+def _span(reference) -> tuple[float, float]:
+    """(lo, hi) over one series or over a GROUP of them, pooled.
+
+    A bare array/Series is accepted as a group of one, so a caller that does
+    not care about grouping cannot silently get a per-element band.
+    """
+    if isinstance(reference, (np.ndarray, pd.Series)) or not isinstance(reference, (list, tuple)):
+        reference = [reference]
+    values = np.concatenate([np.asarray(r, dtype=float).ravel() for r in reference])
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return 0.0, 1.0
+    return float(values.min()), float(values.max())
+
+
+def _rescale(a, lo, hi):
+    if hi <= lo:
+        return np.full_like(a, 0.5), lo, hi
     return (a - lo) / (hi - lo), lo, hi
 
 
 def rescaler(reference, normalize: bool):
     """A transform mapping values onto ``reference``'s rescaled band.
 
-    Overlays have to land on the curve they annotate: a ledger segment drawn
-    over ``z`` must use the SAME transform the ``z`` line used, or it would
-    float above or below it. Handing both the one function returned here is
-    what guarantees that — and it is shared by the Plotly and matplotlib
-    renderers, so the two cannot disagree about where a layer sits.
+    ``reference`` is a LIST of series that share one band — which is the whole
+    point, and the thing the package's own figures already get right. In
+    ``plots.plot_all_periods`` the raw ``zeta`` is drawn on one axis and
+    ``filtered_vorticity`` / ``vorticity_smoothed`` / ``vorticity_smoothed2``
+    together on a second (``twinx``, autoscaled over all three at once). That
+    grouping is not incidental:
 
-    ``normalize=False`` returns the identity: the series in its own units.
+      * the raw series has 2-3x the amplitude of the filtered ones, so giving
+        it its own band is what makes it overlay the filtered curve instead of
+        squashing it — the readable "same track, cleaned up" picture;
+      * the three pipeline stages share ONE band, so the amplitude each
+        smoothing pass removes stays visible. Scaling them separately would
+        force every stage to span the full height and make them look
+        identical, which is exactly the information the panel exists to show
+        (measured on 20190325 under package defaults: filtered_vorticity spans
+        1.25x vorticity_smoothed2 — a difference a per-series scaling erases).
+
+    Overlays get the scaler of the series they annotate, so a ledger segment
+    drawn over ``z`` lands on the ``z`` line rather than floating above it.
+    The same function is used by the Plotly and matplotlib renderers, so the
+    two cannot disagree about where a layer sits.
+
+    ``normalize=False`` returns the identity: the series in their own units.
     """
     if not normalize:
         return lambda v: np.asarray(v, dtype=float)
-    _, lo, hi = normalise_series(reference)
+    lo, hi = _span(reference)
     span = (hi - lo) or 1.0
     return lambda v: (np.asarray(v, dtype=float) - lo) / span
 

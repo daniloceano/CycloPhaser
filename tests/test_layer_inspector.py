@@ -611,14 +611,60 @@ def test_plotly_inspector_starts_with_every_layer_on(vort_cache):
     assert len(fig.layout.updatemenus) == 0
 
 
-def test_plotly_inspector_shared_scale_spreads_every_curve_over_the_panel(vort_cache):
-    """Rescaling is what lets one axis hold curves of different magnitude.
+def test_plotly_inspector_rescales_in_the_package_s_own_groups(vort_cache):
+    """Rescaling reproduces how ``plots.plot_all_periods`` splits its twinx axes.
 
-    With it on every plotted curve spans exactly [0, 1] — the panel is then
-    read for shape, which is what the phase rules act on — and the hover still
-    carries the RAW value, so the number is never lost. With it off the
-    plotted values ARE the raw ones.
+    That figure draws raw ``zeta`` on one axis and filtered/smoothed/smoothed2
+    together on a second. Both halves of that matter:
+
+      * the raw series gets its own band, so it OVERLAYS the filtered curve
+        instead of squashing it — the readable "same track, cleaned up" view;
+      * the three pipeline stages share ONE band, so the amplitude each
+        smoothing pass removes is still visible. Scaling them separately would
+        force each to span the full height and make every stage look the same,
+        which is exactly what the panel exists to show.
+
+    Run with smoothing ON (package defaults), since with it off the three
+    stages are identical and the grouping cannot be told apart.
     """
+    pytest.importorskip("plotly")
+    from inspector_plotly import build_inspector_figure
+
+    vort = _vorticity("20190325", use_smoothing="auto", use_smoothing_twice="auto")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort)
+    fig = build_inspector_figure("20190325", vort, df_result,
+                                 periods_to_dict(df_result), normalize=True)
+
+    def plotted(name):
+        return np.asarray(next(t for t in fig.data if t.name == name).y, dtype=float)
+
+    raw = plotted("zeta (raw input)")
+    filt = plotted("filtered_vorticity (Lanczos)")
+    sm = plotted("vorticity_smoothed (Savgol 1)")
+    sm2 = plotted("vorticity_smoothed2 (what detection reads)")
+
+    # The raw series has a band of its own and uses all of it.
+    assert np.isclose(raw.min(), 0.0) and np.isclose(raw.max(), 1.0)
+    # The three pipeline stages pool into one band: together they fill it,
+    # individually they do not.
+    pooled = np.concatenate([filt, sm, sm2])
+    assert np.isclose(pooled.min(), 0.0) and np.isclose(pooled.max(), 1.0)
+    assert (sm2.max() - sm2.min()) < (filt.max() - filt.min())
+
+    # The ratio of amplitudes between stages is preserved exactly — that ratio
+    # IS the effect of the smoothing pass, and it is what per-series scaling
+    # destroyed (it forces every ratio to 1).
+    true = {n: np.asarray(vort[n].values, dtype=float)
+            for n in ("filtered_vorticity", "vorticity_smoothed2")}
+    true_ratio = (np.ptp(true["filtered_vorticity"])
+                  / np.ptp(true["vorticity_smoothed2"]))
+    assert true_ratio > 1.05, "this track must actually be smoothed for the test to bite"
+    np.testing.assert_allclose(np.ptp(filt) / np.ptp(sm2), true_ratio, rtol=1e-9)
+
+
+def test_plotly_inspector_without_rescaling_plots_true_units(vort_cache):
     pytest.importorskip("plotly")
     from inspector_plotly import build_inspector_figure
 
@@ -626,25 +672,18 @@ def test_plotly_inspector_shared_scale_spreads_every_curve_over_the_panel(vort_c
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         df_result = get_periods(vort)
-    common = ("20190325", vort, df_result, periods_to_dict(df_result))
-
-    normed = build_inspector_figure(*common, normalize=True)
-    series = [t for t in normed.data
-              if t.name and t.name.startswith(("zeta", "filtered", "vorticity",
-                                               "dz_dt"))]
-    assert len(series) == 8
-    for t in series:
-        y = np.asarray(t.y, dtype=float)
-        assert np.isclose(np.nanmin(y), 0.0), t.name
-        assert np.isclose(np.nanmax(y), 1.0), t.name
-        raw = np.asarray([c[0] for c in t.customdata], dtype=float)
-        lo, hi = np.nanmin(raw), np.nanmax(raw)
-        np.testing.assert_allclose(y * (hi - lo) + lo, raw, rtol=1e-9)
-
-    plain = build_inspector_figure(*common, normalize=False)
+    plain = build_inspector_figure("20190325", vort, df_result,
+                                   periods_to_dict(df_result), normalize=False)
     raw_trace = next(t for t in plain.data if t.name == "zeta (raw input)")
     np.testing.assert_allclose(np.asarray(raw_trace.y, dtype=float),
                                np.asarray(vort["zeta"].values, dtype=float))
+    # The raw value is in the hover either way, so rescaling never loses it.
+    normed = build_inspector_figure("20190325", vort, df_result,
+                                    periods_to_dict(df_result), normalize=True)
+    hov = next(t for t in normed.data if t.name == "zeta (raw input)")
+    np.testing.assert_allclose(
+        np.asarray([c[0] for c in hov.customdata], dtype=float),
+        np.asarray(vort["zeta"].values, dtype=float))
 
 
 def test_normalise_series_spreads_over_zero_to_one():
@@ -664,9 +703,21 @@ def test_rescaler_puts_an_overlay_on_the_curve_it_annotates():
     """An overlay must use the SAME transform as the curve it is drawn over,
     or a ledger segment would float above or below the z line it describes."""
     z = np.array([-4.0, -2.0, 0.0, 2.0])
-    f = li.rescaler(z, normalize=True)
+    f = li.rescaler([z], normalize=True)
     np.testing.assert_allclose(f(z), [0.0, 1 / 3, 0.5 + 1 / 6, 1.0])
     # A subset of the same curve lands exactly on the full curve's rendering.
     np.testing.assert_allclose(f(z[1:3]), f(z)[1:3])
     # Off, the transform is the identity.
-    np.testing.assert_array_equal(li.rescaler(z, normalize=False)(z), z)
+    np.testing.assert_array_equal(li.rescaler([z], normalize=False)(z), z)
+    # A bare array is a group of one, not a band per element.
+    np.testing.assert_allclose(li.rescaler(z, normalize=True)(z), f(z))
+
+
+def test_rescaler_pools_a_group_into_one_band():
+    """Series handed in together share a band, so their relative amplitudes
+    survive — that is what keeps a smoothing pass visible in the z panel."""
+    wide = np.array([0.0, 10.0])
+    narrow = np.array([2.0, 4.0])
+    f = li.rescaler([wide, narrow], normalize=True)
+    np.testing.assert_allclose(f(wide), [0.0, 1.0])
+    np.testing.assert_allclose(f(narrow), [0.2, 0.4])   # keeps its 1/5 amplitude

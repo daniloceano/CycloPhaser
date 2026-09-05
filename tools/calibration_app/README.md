@@ -96,17 +96,34 @@ Há dois tipos de controle, e a diferença é deliberada:
     `incipient_method="plateau"` as camadas de rel/τ/sondagem não existem e
     são omitidas com um aviso; `dz` e `dz2` crus continuam.
 
-**Escala compartilhada (`Shared y scale`, ligada por padrão).** Com tudo
-ligado, um painel carrega séries de magnitudes bem diferentes (o `zeta` cru é
-2–3× mais largo que a curva suavizada que a detecção lê, e achataria as outras
-contra o eixo). Um segundo eixo (`twinx`) está descartado — foi o que causou o
-bug de zorder na figura compacta da grade —, então cada curva é reescalada
-para a mesma faixa **0–1 pelo próprio mínimo e máximo**, e o painel passa a
-ser lido pela **forma**: onde cada série vira, e quando — que é a única coisa
-sobre a qual as regras de fase agem. A magnitude sai do eixo, mas **cada hover
-continua mostrando o valor bruto**. Efeito colateral: o zero fica numa altura
-diferente para cada série, então a linha de zero dos painéis dz/dz2 não é
-desenhada nesse modo. Desmarque para ler unidades verdadeiras e um zero real.
+**Escala compartilhada (`Shared y scale`, ligada por padrão).** As curvas são
+reescaladas para uma faixa **0–1**, nos **mesmos grupos** que a figura do modo
+Grid coloca nos seus dois eixos (`plots.plot_all_periods` usa `twinx`: o `zeta`
+cru num eixo, `filtered_vorticity` + `vorticity_smoothed` +
+`vorticity_smoothed2` juntos no outro). Os painéis de derivada seguem a mesma
+regra: `*_filt` e `*_smoothed2` dividem uma faixa.
+
+As duas metades do agrupamento importam:
+
+- dar ao **cru uma faixa própria** é o que faz ele **se sobrepor** à filtrada
+  em vez de esmagá-la — ele tem 2–3× mais amplitude, e numa escala comum
+  achataria as outras contra o eixo;
+- manter os **estágios do pipeline juntos** é o que preserva a amplitude que
+  cada passada de suavização tirou. Escalando cada um por conta própria, todo
+  estágio passa a ocupar a altura inteira e todos ficam idênticos — medido em
+  20190325 com os defaults do pacote, `filtered_vorticity` tem 1,25× a
+  amplitude de `vorticity_smoothed2`, e a escala por série apagava isso.
+
+O painel passa então a ser lido pela **forma** — onde cada série vira, e quando
+—, que é a única coisa sobre a qual as regras de fase agem. A magnitude sai do
+eixo, mas **cada hover continua mostrando o valor bruto**. Efeito colateral: o
+zero fica numa altura diferente para cada faixa, então a linha de zero dos
+painéis dz/dz2 não é desenhada nesse modo. Desmarque para ler unidades
+verdadeiras e um zero real.
+
+(Um `twinx` de verdade continua descartado no inspetor: foi ele que causou o
+bug de zorder na figura compacta da grade. O que se reproduz aqui é o
+*agrupamento* que o `twinx` do pacote produz, num eixo só.)
 
 **Fidelidade.** Toda a conta vive em funções puras
 (`layer_inspector.py`, sem Streamlit e sem biblioteca de plot), que só

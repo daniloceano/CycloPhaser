@@ -30,7 +30,6 @@ from layer_inspector import (
     PHASE_COLORS,
     STEP_NAMES,
     label_runs,
-    normalise_series,
     phase_spans_for_shading,
     rescaler,
 )
@@ -82,17 +81,26 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
     """One page per track: z / dz / dz2 (+ rel) panels, plus the pipeline ribbon.
 
     Args mirror ``inspector_plotly.build_inspector_figure`` exactly — including
-    ``normalize``, which rescales every curve in a panel to [0, 1] by its own
-    min and max so they share one axis. See there for what each overlay dict
-    must carry.
+    ``normalize``, which rescales the curves to [0, 1] in the same groups
+    ``plots.plot_all_periods`` puts on its two twinx axes. See there for what
+    each overlay dict must carry.
     """
     index = df_result.index
     want_rel = bool(incipient and incipient.get("plateau_active"))
     n_rows = 3 + int(want_rel) + int(bool(ribbon))
     ratios = [2.6, 1.3, 1.3] + ([1.1] if want_rel else []) + ([1.5] if ribbon else [])
 
-    def scale_for(series):
-        return rescaler(series, normalize)
+    # Bands grouped the way plots.plot_all_periods groups its two twinx axes:
+    # the raw series alone, the pipeline stages together. See
+    # layer_inspector.rescaler for why.
+    raw_scale = rescaler([vort["zeta"].values], normalize)
+    z_scale = rescaler([vort["filtered_vorticity"].values,
+                        vort["vorticity_smoothed"].values,
+                        vort["vorticity_smoothed2"].values], normalize)
+    dz_scale = rescaler([vort["dz_dt_filt"].values,
+                         vort["dz_dt_smoothed2"].values], normalize)
+    dz2_scale = rescaler([vort["dz_dt2_filt"].values,
+                          vort["dz_dt2_smoothed2"].values], normalize)
 
     fig, axes = plt.subplots(n_rows, 1, figsize=(17, 3.0 * n_rows), sharex=True,
                              gridspec_kw={"height_ratios": ratios})
@@ -105,9 +113,9 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
     _shade(ax_z, periods_dict)
     for var, label, colour, lw in _SERIES_Z:
         values = np.asarray(vort[var].values, dtype=float)
-        ax_z.plot(index, scale_for(values)(values), color=colour, lw=lw,
-                  label=label, zorder=3)
-    z_scale = scale_for(df_result["z"])
+        scale = raw_scale if var == "zeta" else z_scale
+        ax_z.plot(index, scale(values), color=colour, lw=lw, label=label,
+                  zorder=3)
     _extrema(ax_z, index, df_result["z"], df_result["z_peaks_valleys"], z_scale)
     ax_z.set_ylabel(f"z{suffix}", fontsize=F_AXIS)
 
@@ -124,13 +132,11 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
         _draw_mature(ax_z, index, df_result["z"], z_scale, mature)
 
     # ── panels dz / dz2 ─────────────────────────────────────────────────────
-    dz_scale = scale_for(df_result["dz"])
     for ax, base, filt, smooth, sm_scale in (
             (ax_dz, "dz", "dz_dt_filt", "dz_dt_smoothed2", dz_scale),
-            (ax_dz2, "dz2", "dz_dt2_filt", "dz_dt2_smoothed2",
-             scale_for(df_result["dz2"]))):
+            (ax_dz2, "dz2", "dz_dt2_filt", "dz_dt2_smoothed2", dz2_scale)):
         raw = np.asarray(vort[filt].values, dtype=float)
-        ax.plot(index, scale_for(raw)(raw), color=_SERIES_D[base]["filt"],
+        ax.plot(index, sm_scale(raw), color=_SERIES_D[base]["filt"],
                 lw=LW_SERIES, label=filt)
         smoothed = np.asarray(vort[smooth].values, dtype=float)
         ax.plot(index, sm_scale(smoothed), color=_SERIES_D[base]["smoothed"],
@@ -261,7 +267,9 @@ def _draw_incipient(ax_dz, ax_dz2, ax_rel, index, dz_scale, normalize, dz,
                                  ("probe_smoothed", LW_PRIMARY, "-", "smoothed")):
             probe = np.gradient(np.asarray(lens[key], dtype=float))
             if normalize:
-                plotted = normalise_series(probe)[0]
+                # A different quantity from dz, so its own band -- the same
+                # reasoning that gives raw zeta its own band on the z panel.
+                plotted = rescaler([probe], True)(probe)
             else:
                 peak = np.nanmax(np.abs(probe))
                 plotted = probe * (dz_peak / peak if peak > 0 else 1.0)
