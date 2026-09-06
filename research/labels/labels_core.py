@@ -51,12 +51,20 @@ LABELS_PATH = LABELS_DIR / "manual_labels.yaml"
 SPLIT_SEED = 20260905
 QUEUE_SEED = 20260905
 
-# Bumped from 1 when a label stopped being a single incipient boundary and
-# became the cyclone's whole phase sequence. The artefact was still empty at the
-# bump, so there is nothing to migrate — but a working copy can hold schema-1
-# records from a session that predates it, and those are excluded loudly rather
-# than silently skipped (see `is_legacy_record`).
-LABELS_SCHEMA = 2
+# 1 -> 2 when a label stopped being a single incipient boundary and became the
+# cyclone's whole phase sequence. 2 -> 3 when "I cannot decide" stopped being a
+# property of the SERIES and became a property of each BOUNDARY: with the whole
+# sequence being labelled, one unreadable mature->decay roll used to void the
+# incipient knee sitting four phases away from it, which throws away the good
+# evidence to register the bad.
+#
+# Both bumps were free: manual_labels.yaml was still empty (n_labels: 0) each
+# time, so there was nothing to migrate. It will not be free again — after the
+# queue is labelled, a third bump costs 63 re-labellings. A working copy can
+# still hold schema-1 or schema-2 records from a session that predates a bump,
+# and those are excluded loudly rather than silently skipped
+# (see `is_legacy_record`).
+LABELS_SCHEMA = 3
 
 VERDICT_KINDS = ("boundary", "none", "ambiguous")
 
@@ -282,6 +290,12 @@ def validate_phases(phases, n_steps: int | None = None) -> list[dict]:
         real life cycle), and the phase's POSITION carries the repetition rather
         than a number in its name.
 
+    Each phase also carries `unsure`: the labeller could not decide where THIS
+    boundary goes. It is normalised to a bool here and always present in the
+    output, which is what tells a schema-3 record apart from a schema-2 one
+    (see `is_legacy_record`). The first phase's flag is forced False — its start
+    is 0 by construction, so there is nothing there to be unsure about.
+
     Checked eagerly, because a malformed sequence would not fail until evaluation
     — long after the series has left the screen and the labeller could still say
     what they meant.
@@ -304,7 +318,8 @@ def validate_phases(phases, n_steps: int | None = None) -> list[dict]:
         tol = int(ph.get("tolerance_idx", 0))
         if tol < 0:
             raise ValueError("tolerance_idx must be >= 0")
-        out.append({"phase": name, "start_idx": idx, "tolerance_idx": tol})
+        out.append({"phase": name, "start_idx": idx, "tolerance_idx": tol,
+                    "unsure": bool(ph.get("unsure", False)) and i > 0})
         prev = idx
     return out
 
@@ -319,6 +334,11 @@ def incipient_verdict_from_phases(phases, n_steps: int) -> tuple[dict, int]:
 
     Returns (verdict, tolerance_idx). The margin is the one attached to the
     boundary that actually ends the incipient phase, not a series-wide number.
+
+    If THAT boundary is marked `unsure`, the verdict is `ambiguous` — the same
+    answer the series-wide ambiguity flag gives, reached per boundary. The rest
+    of the sequence keeps its own verdicts: being unable to read the incipient
+    knee says nothing about the mature->decay roll.
     """
     if not phases or phases[0]["phase"] != "incipient":
         return {"kind": "none"}, 0
@@ -326,8 +346,11 @@ def incipient_verdict_from_phases(phases, n_steps: int) -> tuple[dict, int]:
         # the whole series is incipient; the boundary is its end
         return {"kind": "boundary", "incipient_end_idx": int(n_steps)}, \
             int(phases[0]["tolerance_idx"])
-    return ({"kind": "boundary", "incipient_end_idx": int(phases[1]["start_idx"])},
-            int(phases[1]["tolerance_idx"]))
+    boundary = phases[1]
+    if boundary.get("unsure"):
+        return {"kind": "ambiguous"}, int(boundary["tolerance_idx"])
+    return ({"kind": "boundary", "incipient_end_idx": int(boundary["start_idx"])},
+            int(boundary["tolerance_idx"]))
 
 
 def make_label_record(series_id: str, source: str, values, phases,
@@ -380,13 +403,29 @@ def read_labels(path: Path | None = None) -> dict[str, dict]:
 
 
 def is_legacy_record(rec: dict) -> bool:
-    """True for a schema-1 record — one incipient boundary, no phase sequence.
+    """True for a record written against an older schema.
 
-    Such a record cannot be upgraded automatically: the phases it never recorded
-    are not recoverable from the boundary it did. It is excluded from scoring and
-    named, so the series simply goes back in the queue.
+    Two shapes are refused, for the same reason and by the same rule:
+
+      * **schema 1** — one incipient boundary, no `phases` at all. The phases it
+        never recorded cannot be recovered from the boundary it did.
+      * **schema 2** — a phase sequence whose boundaries carry no `unsure` flag.
+        Defaulting the missing flag to False would be a guess put in the
+        labeller's mouth: "they were confident" is a claim the record does not
+        make, and it is exactly the claim that decides whether a boundary counts
+        against the detector.
+
+    Detected structurally rather than from a version number, because the number
+    lives on the DOCUMENT and the exclusion has to work per record — a working
+    copy can hold a mix. `validate_phases` always writes `unsure`, so every
+    record this codebase produces passes.
+
+    Excluded from scoring and named, so the series simply goes back in the queue.
     """
-    return "phases" not in rec
+    phases = rec.get("phases")
+    if not isinstance(phases, list) or not phases:
+        return True
+    return any(not isinstance(p, dict) or "unsure" not in p for p in phases)
 
 
 def labels_document(records: dict[str, dict]) -> dict:
@@ -576,9 +615,15 @@ def score_phase_sequences(records, detected: dict[str, list[tuple[str, int]]]) -
 
     The first phase's start is excluded throughout: it is 0 by construction on
     both sides and would pad every hit rate with free agreement.
+
+    Boundaries the labeller marked `unsure` are excluded too, and counted
+    separately. A boundary nobody could place is not evidence about the detector
+    in either direction — scoring it would charge the detector for the label's
+    own uncertainty — but how MANY there were is worth knowing, because a phase
+    that is routinely unreadable is a finding about the phase.
     """
     per_phase: dict[str, dict] = {}
-    n_series = n_match = n_mismatch = n_unscored = 0
+    n_series = n_match = n_mismatch = n_unscored = n_unsure = 0
 
     for rec in records:
         sid = rec["id"]
@@ -593,6 +638,9 @@ def score_phase_sequences(records, detected: dict[str, list[tuple[str, int]]]) -
             continue
         n_match += 1
         for k in range(1, len(lab)):
+            if rec["phases"][k].get("unsure"):
+                n_unsure += 1
+                continue
             phase, lidx = lab[k]
             didx = det[k][1]
             tol = int(rec["phases"][k]["tolerance_idx"])
@@ -622,4 +670,6 @@ def score_phase_sequences(records, detected: dict[str, list[tuple[str, int]]]) -
         "n_boundaries": all_n,
         "n_boundaries_hit": all_hit,
         "boundary_hit_rate": (all_hit / all_n) if all_n else None,
+        # excluded from every rate above, reported so the exclusion is visible
+        "n_boundaries_unsure": n_unsure,
     }

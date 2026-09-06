@@ -192,18 +192,37 @@ def test_label_tab_names_no_detector_output():
 
 
 def test_label_tab_plots_exactly_one_series():
-    """Exactly one trace is added to the figure, and it is the raw input.
+    """One series reaches the screen, and it is the raw input.
 
-    A second trace is how the blindness would realistically erode — someone adds
-    "just the filtered series for context" — so the count itself is pinned.
+    This used to count `add_trace` calls on the Plotly fallback. That fallback
+    has been deleted — it drew a plausible NON-INTERACTIVE picture whenever the
+    component failed, which is how a component that had never once mounted
+    looked like a working screen for three rounds. With it gone, the payload is
+    the only channel from the app to the drawing surface, so the count is pinned
+    there instead: `chart_payload` carries exactly one array of numbers, `y`.
+
+    A second series is how the blindness would realistically erode — someone
+    adds "just the filtered series for context" — so the count is what is pinned,
+    not the mechanism.
     """
+    payload_keys = {"sid", "n", "y", "phases", "colors",
+                    "w", "h", "ml", "mr", "mt", "mb"}
     tree = _tab_ast()
-    add_trace = [n for n in ast.walk(tree)
-                 if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
-                 and n.func.attr == "add_trace"]
-    assert len(add_trace) == 1, (
-        f"the Label figure adds {len(add_trace)} traces; it must show the raw "
-        "input series and nothing else")
+    fn = next(n for n in ast.walk(tree)
+              if isinstance(n, ast.FunctionDef) and n.name == "chart_payload")
+    returned = next(n for n in ast.walk(fn) if isinstance(n, ast.Return))
+    assert isinstance(returned.value, ast.Dict)
+    keys = {k.value for k in returned.value.keys}
+    assert keys == payload_keys, keys
+    # exactly one of those keys is a series of values; the rest are scalars,
+    # the labeller's own marks, or the palette
+    assert len([k for k in keys if k == "y"]) == 1
+
+    assert not [n for n in ast.walk(tree)
+                if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                and n.func.attr in ("add_trace", "add_vrect", "add_vline")], (
+        "the Label tab is drawing with a plotting library again; the whole "
+        "point of the hand-drawn chart is that only clientX is ever read")
 
 
 def test_label_tab_does_not_read_app_detection_parameters():
@@ -229,7 +248,16 @@ def toy_series():
 
 
 def _phases(*triples):
-    return [{"phase": p, "start_idx": i, "tolerance_idx": t} for p, i, t in triples]
+    """(phase, start_idx, tolerance_idx[, unsure]) -> the schema-3 phase dicts.
+
+    `unsure` is part of every phase since schema 3 — "I cannot place THIS
+    boundary", as opposed to the old per-series ambiguity flag that voided a
+    whole cyclone. It is written explicitly rather than defaulted in, because a
+    record that merely OMITS it is a schema-2 record and is refused
+    (see test_a_record_from_an_earlier_schema_is_flagged_not_crashed_on).
+    """
+    return [{"phase": t[0], "start_idx": t[1], "tolerance_idx": t[2],
+             "unsure": bool(t[3]) if len(t) > 3 else False} for t in triples]
 
 
 FOUR = _phases(("incipient", 0, 0), ("intensification", 7, 3),
@@ -657,15 +685,93 @@ def test_numbered_detected_phases_still_match_a_label():
     assert m["per_phase"]["intensification"]["n"] == 2
 
 
-def test_a_legacy_schema_1_record_is_flagged_not_crashed_on():
-    """A working copy can hold single-boundary records from before the format
-    changed; the phases they never recorded are not recoverable from the
-    boundary they did, so they must be excluded loudly."""
-    legacy = {"id": "a", "source": "real", "series_sha256": "h", "labeled_at": "t",
-              "verdict": {"kind": "boundary", "incipient_end_idx": 7},
-              "tolerance_idx": 3}
-    assert lc.is_legacy_record(legacy)
-    assert not lc.is_legacy_record(_seq_rec("b", FOUR))
+def test_a_record_from_an_earlier_schema_is_flagged_not_crashed_on():
+    """A working copy can hold records from before either format change, and
+    neither is upgradable, so both are excluded loudly.
+
+    schema 1: one incipient boundary, no phases at all — the phases it never
+    recorded are not recoverable from the boundary it did.
+
+    schema 2: a phase sequence whose boundaries carry no `unsure` flag. Filling
+    it in as False would put a claim in the labeller's mouth — "they were
+    confident" — and that claim is precisely what decides whether the boundary
+    counts against the detector.
+    """
+    schema_1 = {"id": "a", "source": "real", "series_sha256": "h", "labeled_at": "t",
+                "verdict": {"kind": "boundary", "incipient_end_idx": 7},
+                "tolerance_idx": 3}
+    assert lc.is_legacy_record(schema_1)
+
+    schema_2 = _seq_rec("b", [{"phase": p["phase"], "start_idx": p["start_idx"],
+                               "tolerance_idx": p["tolerance_idx"]} for p in FOUR])
+    assert lc.is_legacy_record(schema_2), (
+        "a schema-2 record was accepted; its missing `unsure` would be silently "
+        "read as confidence the labeller never expressed")
+
+    assert not lc.is_legacy_record(_seq_rec("c", FOUR))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5b-bis. "Not sure", per boundary (schema 3)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_unsure_is_carried_per_boundary_and_never_on_the_first_phase():
+    """The first phase's start is 0 by construction, so there is no boundary
+    there to be unsure about; a flag set on it is dropped rather than stored."""
+    got = lc.validate_phases(_phases(("incipient", 0, 0, True),
+                                     ("mature", 5, 2, True),
+                                     ("decay", 9, 1, False)), n_steps=20)
+    assert [p["unsure"] for p in got] == [False, True, False]
+
+
+def test_an_unsure_incipient_boundary_reads_as_ambiguous():
+    """The per-series ambiguity flag and a per-boundary one must agree on the
+    incipient question — the evaluation speaks only `verdict`, so an unsure
+    incipient boundary has to arrive there as `ambiguous` rather than as a
+    boundary index nobody stands behind."""
+    ph = lc.validate_phases(_phases(("incipient", 0, 0), ("mature", 6, 2, True)),
+                            n_steps=30)
+    verdict, tol = lc.incipient_verdict_from_phases(ph, 30)
+    assert verdict == {"kind": "ambiguous"}
+    assert tol == 2
+    # ...and a confident one still reads as a boundary
+    ph2 = lc.validate_phases(_phases(("incipient", 0, 0), ("mature", 6, 2)), n_steps=30)
+    assert lc.incipient_verdict_from_phases(ph2, 30)[0] == {
+        "kind": "boundary", "incipient_end_idx": 6}
+
+
+def test_one_unsure_boundary_does_not_void_the_rest_of_the_series():
+    """The point of moving ambiguity from the series to the boundary.
+
+    Before, "I cannot read the mature->decay roll" threw away the incipient knee
+    four phases away from it — discarding the good evidence in order to register
+    the bad one.
+    """
+    lab = _phases(("incipient", 0, 0), ("intensification", 10, 1),
+                  ("mature", 20, 1), ("decay", 30, 1, True))
+    rec = _seq_rec("s", lab)
+    detected = {"s": [("incipient", 0), ("intensification", 10),
+                      ("mature", 20), ("decay", 44)]}     # decay is wildly off
+    m = lc.score_phase_sequences([rec], detected)
+    assert m["n_sequence_match"] == 1
+    assert m["n_boundaries_unsure"] == 1
+    assert m["n_boundaries"] == 2                          # the two confident ones
+    assert m["boundary_hit_rate"] == 1.0, (
+        "the unsure decay boundary was scored; it must be set aside, and the two "
+        "boundaries the labeller could read must still count")
+    assert "decay" not in m["per_phase"]
+
+
+def test_an_unsure_boundary_is_excluded_even_when_the_detector_agrees():
+    """Excluded in BOTH directions. A boundary nobody could place is not
+    evidence about the detector even when the detector happens to land on it —
+    counting the agreement would inflate the hit rate with a coin flip."""
+    lab = _phases(("incipient", 0, 0), ("mature", 20, 0, True))
+    m = lc.score_phase_sequences([_seq_rec("s", lab)],
+                                 {"s": [("incipient", 0), ("mature", 20)]})
+    assert m["n_boundaries"] == 0
+    assert m["n_boundaries_unsure"] == 1
+    assert m["boundary_hit_rate"] is None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -706,31 +812,6 @@ def test_each_phase_is_drawn_in_its_own_standard_colour():
     for ph in FOUR:
         assert colours[ph["phase"]] == lc.PHASE_COLORS[ph["phase"]]
     assert colours["incipient"] == "#65a1e6"              # blue, as asked
-
-
-def test_the_fallback_chart_shows_the_margin_as_bar_thickness_too():
-    """The fallback speaks the same visual language as the real chart, so falling
-    back does not silently change what a bar means."""
-    pytest.importorskip("plotly")
-    lt = _label_tab()
-    s_ = pd.Series(range(60), dtype="float64",
-                   index=pd.date_range("2020-01-01", periods=60, freq="3h"))
-    import plotly.graph_objects as go
-    made = {}
-    real_chart = lt.st.plotly_chart
-    lt.st.plotly_chart = lambda fig, **kw: made.setdefault("fig", fig)
-    lt.st.caption = lambda *a, **k: None
-    try:
-        lt._fallback_chart("x", s_, FOUR)
-    finally:
-        lt.st.plotly_chart = real_chart
-    fig = made["fig"]
-    assert isinstance(fig, go.Figure)
-    assert len(fig.data) == 1                       # still one trace: the raw input
-    assert (fig.data[0].y == s_.to_numpy()).all()
-    widths = [sh.x1 - sh.x0 for sh in fig.layout.shapes
-              if sh.type == "rect" and sh.fillcolor == lc.PHASE_COLORS["mature"]]
-    assert 10 in widths, widths                     # the ±5 margin, drawn 10 steps wide
 
 
 def test_the_opening_scaffold_is_a_valid_partition():
@@ -853,53 +934,147 @@ def test_the_same_drag_result_is_only_acted_on_once():
     assert not lt.is_new_edit({}, None)
 
 
-def test_the_fallback_chart_exists_for_when_the_component_cannot_run():
-    """Drawing the chart ourselves means an unavailable component leaves nothing
-    on screen, so there has to be a static picture to fall back to. Labelling is
-    degraded there, never blocked: the table still saves."""
+def test_a_chart_that_cannot_mount_says_so_instead_of_drawing_something_else():
+    """No silent fallback. This is the whole lesson of the three failed rounds.
+
+    There WAS a fallback: when the component raised, the tab quietly drew a
+    static Plotly picture of the same data. It looked right. It could not be
+    dragged. And because the component raised on EVERY render — the mount key
+    contained `__`, which Streamlit reserves inside a bidirectional component's
+    id — that fallback was the only thing anyone ever saw, for three rounds,
+    while every check passed.
+
+    A plausible picture in place of a broken feature is worse than no picture:
+    it converts a total failure into a puzzling one. So the handler now renders
+    an error naming the exception, and the numeric table below it — which is the
+    canonical way to write a label anyway — carries on working.
+    """
     lt = _label_tab()
-    assert callable(lt._fallback_chart)
+    assert not hasattr(lt, "_fallback_chart"), (
+        "the silent fallback is back; a chart that cannot mount must say so")
     src = ast.parse(LABEL_TAB.read_text())
     fn = next(n for n in ast.walk(src)
               if isinstance(n, ast.FunctionDef) and n.name == "render")
     handlers = [h for n in ast.walk(fn) if isinstance(n, ast.Try) for h in n.handlers]
-    assert any("_fallback_chart" in ast.dump(h) for h in handlers), \
-        "the chart call is not guarded by the fallback"
+    assert handlers, "the chart call is not guarded at all"
+    dumped = " ".join(ast.dump(h) for h in handlers)
+    assert "error" in dumped, "the mount failure is not reported to the labeller"
+    assert "could not be mounted" in LABEL_TAB.read_text()
+
+    # ...and the table is built outside that try, so a mount failure cannot take
+    # it down with the chart.
+    table_calls = [n for n in ast.walk(fn) if isinstance(n, ast.Call)
+                   and isinstance(n.func, ast.Name) and n.func.id == "_phase_table"]
+    assert len(table_calls) == 1
+    in_try = [n for t in ast.walk(fn) if isinstance(t, ast.Try)
+              for n in ast.walk(t) if n is table_calls[0]]
+    assert not in_try, "the table is inside the chart's try block"
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 5e. The chart component, exercised headlessly under Node
-# ══════════════════════════════════════════════════════════════════════════════
+def test_the_component_key_can_never_contain_the_reserved_delimiter():
+    """The one-line bug, pinned as a property rather than as a string.
 
-def test_the_chart_js_drags_horizontally_and_only_horizontally(tmp_path):
-    """Run the shipped component JS against a stubbed DOM.
-
-    The chart is hand-drawn JavaScript precisely because Plotly could not keep a
-    drag on the time axis: it has no axis constraint for shapes or annotations,
-    and Streamlit does not expose window.Plotly to correct one. Drawn by hand,
-    the drag handler reads clientX and nothing else — so the guarantee is
-    structural. The stub's pointer events THROW if clientY is read, which is what
-    turns that from a claim into a check.
-
-    The spec also covers what the redesign was asked for: the bar's thickness is
-    the margin, the shading follows the bars, and a bar cannot cross a neighbour.
+    `key=f"lab_chart__{sid}"` raised BidiComponentInvalidIdError on every mount.
+    `chart_key` folds everything outside [A-Za-z0-9-] to `-`, so a doubled
+    underscore is unrepresentable rather than merely absent from today's ids.
     """
-    node = shutil.which("node")
-    if not node:
-        pytest.skip("node is not installed")
-
-    js_dir = REPO_ROOT / "tests" / "js"
     lt = _label_tab()
-    # Written from the Python module, so the spec can never drift from the JS
-    # that actually ships.
-    (js_dir / "chart.mjs").write_text(lt._CHART_JS)
-    try:
-        proc = subprocess.run([node, str(js_dir / "chart_drag_spec.mjs")],
-                              capture_output=True, text=True, timeout=120)
-    finally:
-        (js_dir / "chart.mjs").unlink(missing_ok=True)
-    assert proc.returncode == 0, proc.stdout + proc.stderr
-    assert "0 failed" in proc.stdout, proc.stdout
+    for sid in ("20160735", "s1a2b3c4d", "a__b", "weird id_ 9", "__", "a_b_c"):
+        key = lt.chart_key(sid)
+        assert "__" not in key, (sid, key)
+        assert "_" not in key, (sid, key)
+    # distinct series still get distinct keys, or two charts would share state
+    ids = ["20160735", "20160736", "s1a2b3c4d"]
+    assert len({lt.chart_key(i) for i in ids}) == len(ids)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5e. The chart component is exercised IN A BROWSER, not here
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# There used to be a Node spec here that ran `_CHART_JS` against a hand-written
+# DOM stub (tests/js/). It passed. The feature it covered did not work in any
+# browser, in three consecutive deliveries, because the fault was in the Python
+# that MOUNTS the component and the stub never executed a mount. Keeping both a
+# simulated-DOM spec and a real-browser one would duplicate the maintenance and,
+# far worse, restore the false confidence: a green Node run is exactly what made
+# three unverified deliveries feel finished.
+#
+# So tests/js/ is deleted and tests/test_label_browser.py replaces it: real
+# Chromium, real `streamlit run`, real pointer events, and every assertion read
+# back from the values that reached Python.
+#
+# What survives here is what can be checked without a browser at all: the shape
+# of the JS the app ships, and the fact that it reads no vertical coordinate.
+
+
+def test_the_shipped_chart_js_never_reads_a_vertical_coordinate():
+    """The load-bearing property of drawing the chart by hand.
+
+    Plotly could not keep a drag on the time axis — it has no axis constraint for
+    shapes, and Streamlit does not expose window.Plotly to correct one — so the
+    chart is hand-drawn and the handler reads clientX and NOTHING else. There is
+    no vertical coordinate in the code path, which is why a boundary cannot leave
+    the time axis: not because it is pushed back, but because nothing moves it
+    there.
+
+    Checked on the source text, which is cheap and total, rather than on a
+    stubbed DOM that has to be believed.
+    """
+    lt = _label_tab()
+    js = lt._CHART_JS
+    for banned in ("clientY", "offsetY", "pageY", "screenY", "movementY"):
+        assert banned not in js, (
+            f"the chart JS reads {banned}; a boundary must not be able to leave "
+            "the time axis")
+    assert "clientX" in js
+
+
+def test_the_shipped_chart_js_listens_on_window_not_on_the_svg():
+    """`pointerup` on the <svg> only fires while the pointer is over it.
+
+    Release the pointer anywhere else — past the plot edge, over the sidebar, off
+    the window — and the drag never finished, `setTriggerValue` was never called,
+    and the edit vanished with no error anywhere. `setPointerCapture` was meant
+    to cover that but sat inside a silent try/catch, so its failure said nothing.
+
+    tests/test_label_browser.py proves the gesture works; this pins the mechanism
+    so it cannot quietly regress to the <svg> in a refactor.
+    """
+    lt = _label_tab()
+    js = lt._CHART_JS
+    for ev in ("pointermove", "pointerup", "pointercancel"):
+        assert f"window.addEventListener('{ev}'" in js, ev
+        assert f"svg.addEventListener('{ev}'" not in js, (
+            f"{ev} is bound to the svg again — a release outside the plot will "
+            "be lost in silence")
+    # the CALL, not the word: the comment above the window listeners explains
+    # why pointer capture is gone, and has to be able to name it
+    assert ".setPointerCapture(" not in js, (
+        "pointer capture is back; with window listeners it is unnecessary, and "
+        "it was the silent try/catch around it that hid the original failure")
+
+
+def test_the_shipped_chart_js_reports_a_failure_to_reach_python():
+    """Silent failure is the bug this whole round is about. If the component
+    cannot send its edit, it must draw a warning where the labeller is looking,
+    not log to a console nobody has open."""
+    lt = _label_tab()
+    js = lt._CHART_JS
+    assert "setTriggerValue is not available" in js
+    assert "did not reach the app" in js
+
+
+def test_the_shipped_chart_js_supports_the_keyboard():
+    """On a 259-step series one index is under four pixels wide, so the last few
+    steps of a boundary cannot be placed with a pointer at all. The keyboard is
+    also the path that still works when the pointer path does not."""
+    lt = _label_tab()
+    js = lt._CHART_JS
+    for key in ("ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"):
+        assert key in js, key
+    assert "shiftKey" in js, "shift must move in bigger steps"
+    assert "keydown" in js
 
 
 # ══════════════════════════════════════════════════════════════════════════════

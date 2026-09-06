@@ -196,5 +196,3 @@ research/incipient_plateau/run_log.txt
 # App layer-inspector check figures (generated, not tracked)
 research/app_layer_inspector/figures/
 
-# Written by tests/test_manual_labels.py from label_tab._CHART_JS
-tests/js/chart.mjs

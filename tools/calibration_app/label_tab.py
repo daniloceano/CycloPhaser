@@ -39,6 +39,43 @@ as every other phase figure in the repo — but it is painting the human's answe
 never the algorithm's.
 
 
+The table is the label. The chart is a convenience.
+---------------------------------------------------
+That ordering is the load-bearing decision in this module, and it was learned
+the expensive way: the drag interaction was delivered three times and worked
+zero times in a browser, while every check that had been run on it passed.
+
+The reason it never worked was not in the JavaScript, which was correct
+throughout. It was one line of Python:
+
+    key=f"lab_chart__{sid}"
+
+`__` is the delimiter Streamlit reserves inside a bidirectional component's
+element id, so mounting raised BidiComponentInvalidIdError every single time.
+The call sat inside `except Exception:` with a static Plotly picture as the
+fallback, so the app quietly drew a chart that could not be dragged and said
+nothing. Nobody was ever dragging a broken bar; there was never a bar to drag.
+
+Three things in here follow from that, and none of them is decoration:
+
+1. **The numeric table is the canonical path.** Every field is editable and a
+   complete label can be produced without touching the chart at all. When the
+   chart fails — and it is a hand-written component talking to a shadow DOM
+   across a websocket, so it will fail again — labelling continues.
+2. **There is no silent fallback.** A chart that cannot mount says so, in red,
+   naming the exception. The old fallback drew a plausible non-interactive
+   picture, which is worse than drawing nothing: it made a total failure of the
+   component look like a working screen, and that is precisely what hid this bug
+   for three rounds.
+3. **Nothing here is believed until a real browser has done it.** The checks
+   that passed while the feature was broken ran the component's JS against a
+   simulated DOM in Node. That harness could not have caught this: the bug was
+   in the Python mount call, which it never executed. It has been deleted and
+   replaced by tests/test_label_browser.py, which drives Chromium against the
+   actual Streamlit app with real pointer events and reads back the values that
+   reached Python.
+
+
 Why the chart is hand-drawn instead of a Plotly figure
 ------------------------------------------------------
 It was a Plotly figure, twice, and both attempts failed on the same wall.
@@ -67,6 +104,7 @@ from the bar positions on every frame, so the shading follows for free.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -93,6 +131,7 @@ _ML, _MR, _MT, _MB = 74, 22, 26, 44
 # Reads clientX and nothing else. See the module docstring for why that is the
 # whole point rather than an implementation detail.
 _CHART_JS = """
+
 export default function (component) {
   const { data, setTriggerValue, parentElement } = component;
   if (!data || !data.n) return;
@@ -103,6 +142,32 @@ export default function (component) {
     for (const k in a) e.setAttribute(k, a[k]);
     return e;
   };
+
+  // ── reuse before rebuild ───────────────────────────────────────────────────
+  // This function runs again on EVERY Streamlit rerender, and a rerender can
+  // land in the middle of a gesture (any sidebar widget triggers one). Tearing
+  // the SVG down and building a new one would take the listeners and the
+  // in-flight drag with it, so the node is kept and its attributes updated
+  // whenever the series and the number of phases are unchanged. Only a genuinely
+  // different chart is rebuilt.
+  const host0 = parentElement.querySelector('#cp-label-chart');
+  const S0 = host0 && host0.__cp;
+  if (S0 && S0.sid === data.sid && S0.n === data.n &&
+      S0.PH.length === data.phases.length) {
+    S0.setTrigger = setTriggerValue;   // a fresh closure arrives each rerender
+    if (!S0.drag) {                    // never overwrite what is being dragged
+      for (let k = 0; k < data.phases.length; k++) {
+        S0.PH[k].start_idx = data.phases[k].start_idx;
+        S0.PH[k].tolerance_idx = data.phases[k].tolerance_idx;
+        S0.PH[k].unsure = !!data.phases[k].unsure;
+        S0.PH[k].phase = data.phases[k].phase;
+      }
+      S0.update();
+    }
+    return;
+  }
+  if (S0) S0.teardown();
+  if (host0) host0.remove();
 
   const N = data.n;
   const Y = data.y;
@@ -122,18 +187,19 @@ export default function (component) {
   const sy = (v) => MT + (1 - (v - y0) / (y1 - y0)) * PH_;
   const ix = (px) => Math.round(((px - ML) / PW) * (N - 1));
 
-  // Replace rather than append: this runs again on every rerender, and
-  // appending would stack a new chart under the old one each time.
-  const prev = parentElement.querySelector('#cp-label-chart');
-  if (prev) prev.remove();
   const host = document.createElement('div');
   host.id = 'cp-label-chart';
+  host.dataset.sid = data.sid;
   parentElement.appendChild(host);
 
   const svg = el('svg', {
     viewBox: `0 0 ${W} ${H}`, width: '100%',
     preserveAspectRatio: 'xMidYMid meet',
-    style: 'touch-action:none;user-select:none;display:block;cursor:default',
+    tabindex: '0',
+    // The browser test maps a step index to a viewport pixel through this
+    // element's own screen CTM, and needs the step count to do it.
+    'data-n': String(N), 'data-sid': data.sid,
+    style: 'touch-action:none;user-select:none;display:block;cursor:default;outline:none',
   });
   host.appendChild(svg);
   svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: '#ffffff' }));
@@ -143,11 +209,10 @@ export default function (component) {
     svg.appendChild(el('rect', {
       y: MT, height: PH_, fill: COL[p.phase] || '#cccccc', 'fill-opacity': 0.30,
     })));
-  const bandText = PH.map((p) =>
+  const bandText = PH.map(() =>
     svg.appendChild(el('text', {
       y: MT + 15, 'font-size': 12, fill: '#33414f', 'font-family': 'sans-serif',
     })));
-  bandText.forEach((t, k) => { t.textContent = PH[k].phase; });
 
   // 2. axes
   const axis = el('g', {});
@@ -202,15 +267,26 @@ export default function (component) {
     // Transparent hit areas, appended after the visuals so they receive the
     // pointer. The edge grips come last so they win where they overlap the body.
     grip[k] = svg.appendChild(el('rect', {
-      y: MT, height: PH_, fill: 'transparent', cursor: 'ew-resize' }));
+      y: MT, height: PH_, fill: 'transparent', cursor: 'ew-resize',
+      'data-grip': String(k) }));
     hL[k] = svg.appendChild(el('rect', {
-      y: MT, height: PH_, fill: 'transparent', cursor: 'col-resize' }));
+      y: MT, height: PH_, fill: 'transparent', cursor: 'col-resize',
+      'data-edge': String(k) }));
     hR[k] = svg.appendChild(el('rect', {
-      y: MT, height: PH_, fill: 'transparent', cursor: 'col-resize' }));
+      y: MT, height: PH_, fill: 'transparent', cursor: 'col-resize',
+      'data-edge': String(k) }));
     tag[k] = svg.appendChild(el('text', {
       y: MT - 8, 'text-anchor': 'middle', 'font-size': 13, fill: c,
       'font-weight': '600', 'font-family': 'sans-serif' }));
   }
+
+  // A failure to reach Python must be VISIBLE. Drawing it inside the chart puts
+  // it where the labeller is already looking, at the moment the gesture that
+  // failed was made — a console message would be silence.
+  const alert = svg.appendChild(el('text', {
+    x: ML, y: H - 26, 'font-size': 13, fill: '#c1121f', 'font-weight': '600',
+    'font-family': 'sans-serif' }));
+  const warn = (msg) => { alert.textContent = msg || ''; };
 
   function update() {
     for (let k = 0; k < PH.length; k++) {
@@ -218,15 +294,28 @@ export default function (component) {
       const b = k + 1 < PH.length ? sx(PH[k + 1].start_idx) : sx(N - 1);
       bands[k].setAttribute('x', a);
       bands[k].setAttribute('width', Math.max(0, b - a));
+      bands[k].setAttribute('fill', COL[PH[k].phase] || '#cccccc');
       bandText[k].setAttribute('x', a + 6);
+      bandText[k].textContent = PH[k].phase;
     }
     for (let k = 1; k < PH.length; k++) {
+      const c = COL[PH[k].phase] || '#666666';
       const cx = sx(PH[k].start_idx);
       const half = PH[k].tolerance_idx * step;
+      const sel = S.sel === k;
       bar[k].setAttribute('x', cx - half);
       bar[k].setAttribute('width', Math.max(0.8, 2 * half));
+      bar[k].setAttribute('fill', c);
+      bar[k].setAttribute('stroke', c);
+      // An unsure boundary is drawn hollow and dashed: it is a mark the labeller
+      // made and then declined to stand behind, and evaluation skips it.
+      bar[k].setAttribute('fill-opacity', PH[k].unsure ? 0.10 : 0.38);
+      bar[k].setAttribute('stroke-dasharray', PH[k].unsure ? '5 4' : 'none');
       line[k].setAttribute('x1', cx);
       line[k].setAttribute('x2', cx);
+      line[k].setAttribute('stroke', c);
+      line[k].setAttribute('stroke-width', sel ? 4.5 : 2.5);
+      line[k].setAttribute('stroke-dasharray', PH[k].unsure ? '6 4' : 'none');
       const inner = Math.max(7, half - 7);
       grip[k].setAttribute('x', cx - inner);
       grip[k].setAttribute('width', 2 * inner);
@@ -236,14 +325,38 @@ export default function (component) {
       hR[k].setAttribute('x', cx + edge - 6);
       hR[k].setAttribute('width', 12);
       tag[k].setAttribute('x', cx);
-      tag[k].textContent = PH[k].start_idx + ' \\u00b1' + PH[k].tolerance_idx;
+      tag[k].setAttribute('fill', c);
+      tag[k].setAttribute('font-weight', sel ? '800' : '600');
+      tag[k].textContent = PH[k].start_idx + ' ±' + PH[k].tolerance_idx +
+        (PH[k].unsure ? ' ?' : '') + (sel ? ' ◂▸' : '');
     }
   }
-  update();
 
-  // 5. dragging. ONLY clientX is ever read: there is no vertical coordinate in
-  //    this code path, so a boundary cannot leave the time axis.
-  let drag = null;
+  // ── the message back to Python ─────────────────────────────────────────────
+  // `seq` is a monotonic counter rather than a hash of the positions. Two
+  // identical gestures — drag a bar away and back, then away again — describe
+  // the same numbers, and a signature over the numbers alone cannot tell the
+  // second from a stale replay of the first. The app dedups on the counter, so
+  // a repeat is delivered and a replay still is not.
+  function emit() {
+    const payload = {
+      sid: S.sid,
+      seq: ++S.seq,
+      phases: S.PH.map((p) => ({
+        start_idx: p.start_idx, tolerance_idx: p.tolerance_idx })),
+    };
+    try {
+      if (typeof S.setTrigger !== 'function') {
+        throw new Error('setTriggerValue is not available');
+      }
+      S.setTrigger('edit', JSON.stringify(payload));
+      warn('');
+    } catch (err) {
+      warn('⚠ this edit did not reach the app (' + (err && err.message) +
+           ') — type it in the table below');
+    }
+  }
+
   const at = (e) => {
     const m = svg.getScreenCTM();
     if (!m) return null;
@@ -252,45 +365,123 @@ export default function (component) {
     p.y = 0;
     return p.matrixTransform(m.inverse()).x;
   };
-  const begin = (k, mode) => (e) => {
+
+  const setStart = (k, i) => {
+    const min = S.PH[k - 1].start_idx + 1;
+    const max = k + 1 < S.PH.length ? S.PH[k + 1].start_idx - 1 : N - 1;
+    if (min > max) return false;
+    const v = Math.max(min, Math.min(i, max));
+    if (v === S.PH[k].start_idx) return false;
+    S.PH[k].start_idx = v;
+    return true;
+  };
+  const setTol = (k, t) => {
+    const v = Math.max(0, Math.min(t, N - 1));
+    if (v === S.PH[k].tolerance_idx) return false;
+    S.PH[k].tolerance_idx = v;
+    return true;
+  };
+
+  const onDown = (k, mode) => (e) => {
     e.preventDefault();
-    drag = { k: k, mode: mode };
-    try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+    S.drag = { k: k, mode: mode };
+    S.sel = k;
+    try { svg.focus({ preventScroll: true }); } catch (_) { /* not focusable */ }
+    update();
   };
   for (let k = 1; k < PH.length; k++) {
-    grip[k].addEventListener('pointerdown', begin(k, 'move'));
-    hL[k].addEventListener('pointerdown', begin(k, 'tol'));
-    hR[k].addEventListener('pointerdown', begin(k, 'tol'));
+    grip[k].addEventListener('pointerdown', onDown(k, 'move'));
+    hL[k].addEventListener('pointerdown', onDown(k, 'tol'));
+    hR[k].addEventListener('pointerdown', onDown(k, 'tol'));
   }
-  svg.addEventListener('pointermove', (e) => {
-    if (!drag) return;
+
+  // ── move/up/cancel live on WINDOW, not on the <svg> ────────────────────────
+  // On the SVG they only fire while the pointer is over it. A pointer released
+  // outside the plot — past the right edge, over the sidebar, off the window —
+  // never delivered pointerup, so the drag never finished and the edit was never
+  // sent: the bar snapped back on the next rerender with no error anywhere.
+  // setPointerCapture was supposed to cover that, but it was wrapped in a silent
+  // try/catch, so when it failed nothing said so. On window the events arrive
+  // regardless of where the pointer is, and no capture is needed at all.
+  const onMove = (e) => {
+    if (!S.drag) return;
     const x = at(e);
     if (x === null) return;
     const i = Math.max(0, Math.min(ix(x), N - 1));
-    const k = drag.k;
-    if (drag.mode === 'move') {
-      const min = PH[k - 1].start_idx + 1;
-      const max = k + 1 < PH.length ? PH[k + 1].start_idx - 1 : N - 1;
-      if (min <= max) PH[k].start_idx = Math.max(min, Math.min(i, max));
-    } else {
-      PH[k].tolerance_idx = Math.max(0, Math.min(Math.abs(i - PH[k].start_idx), N - 1));
-    }
+    const k = S.drag.k;
+    if (S.drag.mode === 'move') setStart(k, i);
+    else setTol(k, Math.abs(i - S.PH[k].start_idx));
     update();
-  });
-  const finish = (e) => {
-    if (!drag) return;
-    drag = null;
-    try { svg.releasePointerCapture(e.pointerId); } catch (_) {}
-    setTriggerValue('edit', JSON.stringify({
-      sid: data.sid,
-      phases: PH.map((p) => ({
-        start_idx: p.start_idx, tolerance_idx: p.tolerance_idx })),
-    }));
   };
-  svg.addEventListener('pointerup', finish);
-  svg.addEventListener('pointercancel', finish);
+  const onUp = () => {
+    if (!S.drag) return;
+    S.drag = null;
+    update();
+    emit();
+  };
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+
+  // ── keyboard ───────────────────────────────────────────────────────────────
+  // Not an accessibility afterthought. On a 259-step series one index is under
+  // four pixels wide, so the last few steps of any boundary cannot be placed
+  // with a pointer at all; and when the pointer path fails for any reason, this
+  // is the one that still works. Left/right move the boundary, up/down widen and
+  // narrow the margin, shift multiplies by five.
+  const onKey = (e) => {
+    if (S.PH.length < 2) return;
+    const big = e.shiftKey ? 5 : 1;
+    let k = S.sel;
+    if (k < 1 || k >= S.PH.length) k = S.sel = 1;
+    let touched = false;
+    switch (e.key) {
+      case 'ArrowLeft':  touched = setStart(k, S.PH[k].start_idx - big); break;
+      case 'ArrowRight': touched = setStart(k, S.PH[k].start_idx + big); break;
+      case 'ArrowUp':    touched = setTol(k, S.PH[k].tolerance_idx + big); break;
+      case 'ArrowDown':  touched = setTol(k, S.PH[k].tolerance_idx - big); break;
+      case 'Tab': {
+        e.preventDefault();
+        S.sel = e.shiftKey
+          ? (k <= 1 ? S.PH.length - 1 : k - 1)
+          : (k >= S.PH.length - 1 ? 1 : k + 1);
+        update();
+        return;
+      }
+      default: return;
+    }
+    e.preventDefault();
+    if (touched) { update(); emit(); }
+  };
+  svg.addEventListener('keydown', onKey);
+
+  const S = {
+    sid: data.sid, n: N, PH: PH, drag: null, seq: 0, sel: 1,
+    setTrigger: setTriggerValue, update: update,
+    teardown: () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    },
+  };
+  host.__cp = S;
+  update();
 }
 """
+
+
+# A bidirectional component's element id must not contain `__`: Streamlit uses
+# that sequence as its own delimiter and raises BidiComponentInvalidIdError on
+# mount. The old key was f"lab_chart__{sid}", so the component NEVER mounted, in
+# any browser, from the day it was written — and the exception was swallowed by
+# the fallback. Every character outside [A-Za-z0-9-] is folded to `-`, which
+# makes a doubled underscore unrepresentable rather than merely absent today.
+_KEY_SAFE = re.compile(r"[^A-Za-z0-9-]+")
+
+
+def chart_key(sid: str) -> str:
+    """The component key for one series. Never contains `__`; see above."""
+    return "labchart-" + _KEY_SAFE.sub("-", str(sid))
 
 
 @st.cache_resource(show_spinner=False)
@@ -312,14 +503,15 @@ def chart_payload(sid: str, values: pd.Series, phases: list[dict]) -> dict:
         "n": int(len(values)),
         "y": [float(v) for v in values.to_numpy()],
         "phases": [{"phase": p["phase"], "start_idx": int(p["start_idx"]),
-                    "tolerance_idx": int(p["tolerance_idx"])} for p in phases],
+                    "tolerance_idx": int(p["tolerance_idx"]),
+                    "unsure": bool(p.get("unsure", False))} for p in phases],
         "colors": dict(lc.PHASE_COLORS),
         "w": _W, "h": _H, "ml": _ML, "mr": _MR, "mt": _MT, "mb": _MB,
     }
 
 
 def apply_edit(payload: dict, phases: list[dict], n: int) -> bool:
-    """Fold one drag result back into the phases. True if anything changed.
+    """Fold one drag or keystroke result back into the phases. True if changed.
 
     PURE, and that is the point: whether a browser delivers the gesture is the
     one thing that cannot be tested from here, so everything downstream of the
@@ -328,6 +520,9 @@ def apply_edit(payload: dict, phases: list[dict], n: int) -> bool:
     The browser clamps as it drags, but the result is re-clamped here anyway. A
     message that arrived stale — from a chart drawn before the table was edited —
     could otherwise write a sequence that is no longer a partition of [0, n).
+
+    `unsure` is NOT read from the message. It is a judgement the chart cannot
+    make and does not send; the table owns it, and a drag must never clear it.
     """
     incoming = (payload or {}).get("phases")
     if not isinstance(incoming, list) or len(incoming) != len(phases):
@@ -358,8 +553,24 @@ def apply_edit(payload: dict, phases: list[dict], n: int) -> bool:
 
 
 def edit_signature(payload: dict) -> str:
-    """A stable identity for one drag result, for the replay guard."""
-    return json.dumps(payload, sort_keys=True)
+    """A stable identity for one message from the chart, for the replay guard.
+
+    Keyed on the component's own monotonic `seq` rather than on the positions it
+    reports. Hashing the positions cannot tell two identical gestures apart from
+    one gesture replayed: drag a bar to 40, back to 30, out to 40 again and the
+    third message is byte-identical to the first, so it was DISCARDED and the bar
+    appeared to spring back on its own. A counter distinguishes them, and still
+    identifies a trigger value that merely outlived its rerun.
+
+    Falls back to the whole payload when there is no counter, so a message from
+    an older component build is still deduplicated rather than looping.
+    """
+    if not isinstance(payload, dict) or not payload:
+        return ""
+    seq = payload.get("seq")
+    if seq is None:
+        return json.dumps(payload, sort_keys=True)
+    return f"{payload.get('sid')}#{seq}"
 
 
 def is_new_edit(payload: dict, last_signature: str | None) -> bool:
@@ -367,65 +578,26 @@ def is_new_edit(payload: dict, last_signature: str | None) -> bool:
 
     A trigger value that outlived its rerun would otherwise be re-applied on
     every pass, and each pass reruns — a loop that takes the app down in the
-    middle of a labelling session. Re-sending an identical result is a no-op
-    anyway, since it describes the same positions.
+    middle of a labelling session.
     """
     return bool(payload) and edit_signature(payload) != last_signature
 
 
 def _draw(sid: str, values: pd.Series, phases: list[dict]) -> dict | None:
-    """Render the chart and return the last drag result, if any.
+    """Mount the chart and return its last message, if any.
 
-    Returns None when the component is unavailable, which the caller treats as
-    "draw the fallback instead" rather than as an error.
+    Raises rather than returning None on a mount failure: the caller has to be
+    able to tell "the labeller has not touched it yet" from "the chart is not
+    there", because those two need opposite things on screen.
     """
     result = _chart_component()(
         data=chart_payload(sid, values, phases),
-        key=f"lab_chart__{sid}",
+        key=chart_key(sid),
         on_edit_change=lambda: None,
         height=_H + 20,
     )
     raw = getattr(result, "edit", None)
     return json.loads(raw) if raw else None
-
-
-def _fallback_chart(sid: str, values: pd.Series, phases: list[dict]) -> None:
-    """A static picture of the same thing, for when the component cannot run.
-
-    Not interactive — no drag, no click. It exists so that an older Streamlit,
-    or a browser where the component fails, still shows the series and leaves
-    the table usable. Labelling is degraded, never blocked.
-    """
-    import plotly.graph_objects as go
-
-    n = len(values)
-    fig = go.Figure()
-    for k, ph in enumerate(phases):
-        x1 = phases[k + 1]["start_idx"] if k + 1 < len(phases) else n - 1
-        fig.add_vrect(x0=ph["start_idx"], x1=x1, layer="below", line_width=0,
-                      fillcolor=lc.PHASE_COLORS.get(ph["phase"], "#cccccc"),
-                      opacity=0.30, annotation_text=ph["phase"],
-                      annotation_position="top left")
-    fig.add_trace(go.Scatter(x=list(range(n)), y=values.to_numpy(), mode="lines",
-                             line=dict(color="#1f2d3d", width=2), name="series"))
-    for k, ph in enumerate(phases):
-        if k == 0:
-            continue
-        colour = lc.PHASE_COLORS.get(ph["phase"], "#666666")
-        tol = int(ph["tolerance_idx"])
-        if tol > 0:
-            fig.add_vrect(x0=ph["start_idx"] - tol, x1=ph["start_idx"] + tol,
-                          layer="below", line_width=0, fillcolor=colour,
-                          opacity=0.38)
-        fig.add_vline(x=ph["start_idx"], line=dict(color=colour, width=2.5))
-    fig.update_layout(height=_H, margin=dict(l=60, r=20, t=30, b=45),
-                      showlegend=False, plot_bgcolor="white", dragmode=False,
-                      title=dict(text=f"series {sid}", font=dict(size=15)),
-                      xaxis=dict(title="step index", range=[-1, n]),
-                      yaxis=dict(title="raw input value"))
-    st.plotly_chart(fig, key=f"lab_fallback__{sid}",
-                    config={"displayModeBar": False})
-    st.caption("Interactive chart unavailable — the table below is fully usable.")
 
 
 @st.cache_data(show_spinner=False)
@@ -454,8 +626,68 @@ def default_phases(n: int, tolerance: int) -> list[dict]:
     span = max(1, n // 4)
     rows = [("incipient", 0), ("intensification", span),
             ("mature", 2 * span), ("decay", 3 * span)]
-    return [{"phase": p, "start_idx": min(i, n - 1), "tolerance_idx": int(tolerance)}
-            for p, i in rows]
+    return [{"phase": p, "start_idx": min(i, n - 1), "tolerance_idx": int(tolerance),
+             "unsure": False} for p, i in rows]
+
+
+# phase · start · margin · not-sure
+_TABLE_COLS = [2.2, 1.6, 1.6, 1.4]
+
+
+def _phase_table(sid: str, phases: list[dict], n: int, rev: int) -> list[dict]:
+    """The numeric table: one row per phase, every field editable.
+
+    THE CANONICAL PATH, not a read-out of the chart. A complete label can be
+    produced here without the chart existing at all, which is what makes a
+    component failure a degraded session rather than a stopped one. Chart and
+    table are two views of ONE list in session state — neither keeps a copy —
+    so a drag moves these numbers and a number typed here moves the bar.
+
+    Built from individual widgets rather than st.data_editor for two reasons.
+    The editor renders to a canvas, so nothing in it can be read or driven by
+    the browser test that now has to prove this works; and its state is a diff
+    of user edits rather than the table, which made the round trip with the
+    chart awkward in exactly the place it must not be.
+
+    `rev` is bumped whenever the chart changes the list, so the widgets are
+    rebuilt: a keyed Streamlit widget keeps its own value and ignores a changed
+    `value=` argument, so without it a dragged bar would not move the number.
+    """
+    head = st.columns(_TABLE_COLS)
+    head[0].caption("Phase")
+    head[1].caption("Starts at step")
+    head[2].caption("± margin")
+    head[3].caption("Not sure")
+
+    proposed = []
+    for k, ph in enumerate(phases):
+        c = st.columns(_TABLE_COLS)
+        name = c[0].selectbox(
+            f"phase, row {k}", options=list(lc.PHASE_ORDER),
+            index=(list(lc.PHASE_ORDER).index(ph["phase"])
+                   if ph["phase"] in lc.PHASE_ORDER else 0),
+            key=f"labphase-{sid}-{k}-{rev}", label_visibility="collapsed")
+        # Row 0 is not a boundary: a partition of [0, n) begins at 0, so there is
+        # nothing there to move and nothing to be unsure about.
+        start = c[1].number_input(
+            f"start_idx, row {k}", min_value=0, max_value=max(0, n - 1),
+            value=int(ph["start_idx"]), step=1, disabled=(k == 0),
+            key=f"labstart-{sid}-{k}-{rev}", label_visibility="collapsed")
+        tol = c[2].number_input(
+            f"tolerance_idx, row {k}", min_value=0, max_value=max(1, n - 1),
+            value=int(ph["tolerance_idx"]), step=1,
+            key=f"labtol-{sid}-{k}-{rev}", label_visibility="collapsed")
+        unsure = c[3].checkbox(
+            f"unsure, row {k}", value=bool(ph.get("unsure", False)),
+            disabled=(k == 0), key=f"labunsure-{sid}-{k}-{rev}",
+            label_visibility="collapsed")
+        proposed.append({"phase": str(name), "start_idx": int(start),
+                         "tolerance_idx": int(tol),
+                         "unsure": bool(unsure) and k > 0})
+    if proposed:
+        proposed[0]["start_idx"] = 0
+        proposed[0]["unsure"] = False
+    return proposed
 
 
 def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
@@ -494,20 +726,25 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
 
     existing = records.get(sid)
     stale = bool(existing) and existing.get("series_sha256") != lc.series_sha256(values)
-    if existing and not stale:
+    legacy = bool(existing) and lc.is_legacy_record(existing)
+    if existing and not stale and not legacy:
         seq = " → ".join(f"{p['phase']}@{p['start_idx']}" for p in existing["phases"])
         st.info(f"Already labelled — {seq}. Saving again overwrites it.")
     elif stale:
         st.warning("A label exists for this series but was written against "
                    "DIFFERENT data (series_sha256 mismatch). Treat it as void "
                    "and re-label.")
+    elif legacy:
+        st.warning("A label exists for this series but predates the current "
+                   "format and cannot be upgraded — the per-boundary 'not sure' "
+                   "marks it never recorded are not recoverable. Re-label it.")
 
     # The authoritative phase list lives in session state, not in a widget: the
-    # chart has to be able to change it before the editor is constructed, and a
-    # data_editor's own state is a diff of user edits rather than the table.
+    # chart has to be able to change it before the table is constructed, and the
+    # two must read and write ONE list rather than keeping copies that drift.
     key_ph, key_rev = f"_lab_phases__{sid}", f"_lab_rev__{sid}"
     if key_ph not in st.session_state:
-        if existing and not stale:
+        if existing and not stale and not legacy:
             st.session_state[key_ph] = [dict(p) for p in existing["phases"]]
         else:
             st.session_state[key_ph] = default_phases(n, default_tolerance)
@@ -517,18 +754,27 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
     st.caption(
         "**Drag a bar** along the time axis to move that phase boundary — the "
         "shading follows it. **Drag a bar's edge** to widen or narrow its "
-        "margin: the bar's own thickness *is* the uncertainty. Bars cannot "
-        "leave the time axis, because vertical position means nothing here. "
-        "The table below is the exact path and always works."
+        "margin: the bar's own thickness *is* the uncertainty. Click a bar and "
+        "use **← →** to nudge it one step (**shift** for five) and **↑ ↓** to "
+        "change its margin — on a long series one step is under four pixels, so "
+        "the keyboard is the only way to place the last few. **The table below "
+        "is the label**: every field is editable and a whole cyclone can be "
+        "marked there without touching the chart."
     )
 
     try:
         edit = _draw(sid, values, phases)
-    except Exception:
-        # No components.v2, a changed component API, malformed JSON — none of
-        # which should cost the labeller their session.
+    except Exception as exc:
+        # Loudly, and naming the exception. The previous version swallowed this
+        # and drew a static picture instead, which is how a component that had
+        # NEVER mounted looked like a working screen for three rounds.
         edit = None
-        _fallback_chart(sid, values, phases)
+        st.error(
+            f"**The interactive chart could not be mounted** — "
+            f"`{type(exc).__name__}: {exc}`. Nothing is lost: the table below is "
+            "the label, and every field in it is editable. Please report this "
+            "message — a chart that fails silently is the bug this replaced."
+        )
 
     if is_new_edit(edit, st.session_state.get(f"_lab_lastedit__{sid}")):
         st.session_state[f"_lab_lastedit__{sid}"] = edit_signature(edit)
@@ -536,37 +782,7 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
             st.session_state[key_rev] += 1
             st.rerun()
 
-    edited = st.data_editor(
-        pd.DataFrame(phases, columns=["phase", "start_idx", "tolerance_idx"]),
-        key=f"lab_tbl__{sid}__{st.session_state[key_rev]}",
-        num_rows="dynamic", use_container_width=True, hide_index=True,
-        column_config={
-            "phase": st.column_config.SelectboxColumn(
-                "Phase", options=list(lc.PHASE_ORDER), required=True, width="medium"),
-            "start_idx": st.column_config.NumberColumn(
-                "Starts at step", min_value=0, max_value=max(0, n - 1), step=1,
-                required=True, width="small"),
-            "tolerance_idx": st.column_config.NumberColumn(
-                "± steps", min_value=0, max_value=max(1, n - 1), step=1,
-                required=True, width="small",
-                help="The margin evaluation will allow on THIS boundary, drawn "
-                     "as the bar's thickness. Per boundary, not per cyclone: an "
-                     "unmistakable incipient knee and a long gentle mature→decay "
-                     "roll do not deserve the same forgiveness."),
-        },
-    )
-
-    proposed = []
-    for row in edited.to_dict("records"):
-        if row.get("phase") is None or pd.isna(row.get("start_idx")):
-            continue
-        proposed.append({"phase": str(row["phase"]),
-                         "start_idx": int(row["start_idx"]),
-                         "tolerance_idx": int(row.get("tolerance_idx") or 0)})
-    # The first phase starts at 0 structurally — a partition of [0, n) has to
-    # begin at 0 — so it is coerced rather than reported as the labeller's error.
-    if proposed:
-        proposed[0]["start_idx"] = 0
+    proposed = _phase_table(sid, phases, n, st.session_state[key_rev])
     if proposed != phases:
         st.session_state[key_ph] = proposed
         st.rerun()
@@ -578,6 +794,15 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
         problem = str(exc)
     if problem:
         st.error(f"Not saveable yet — {problem}")
+
+    n_unsure = sum(1 for p in phases[1:] if p.get("unsure"))
+    if n_unsure:
+        st.caption(
+            f"{n_unsure} boundary/boundaries marked **not sure** — those are "
+            "kept out of the hit rate and the MAE, and the rest of this series "
+            "still counts. That is the point of marking them one at a time: one "
+            "unreadable transition no longer voids the boundaries you could read."
+        )
 
     first = phases[0]["phase"] if phases else None
     inc_end = phases[1]["start_idx"] if (first == "incipient" and len(phases) > 1) else None
@@ -598,26 +823,46 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
         lc.upsert_label(rec)
         st.session_state["lab_pos"] = (pos + 1) % n_total
 
+    r1, r2 = st.columns(2)
+    if r1.button("＋ Add a phase", use_container_width=True,
+                 disabled=bool(phases) and phases[-1]["start_idx"] >= n - 1,
+                 help="Appends one more phase after the last, starting one step "
+                      "later. The table decides what it is."):
+        last = phases[-1]["start_idx"] if phases else -1
+        phases.append({"phase": "residual", "start_idx": min(last + 1, n - 1),
+                       "tolerance_idx": int(default_tolerance), "unsure": False})
+        st.session_state[key_rev] += 1
+        st.rerun()
+    if r2.button("－ Remove the last phase", use_container_width=True,
+                 disabled=len(phases) <= 1,
+                 help="Drops the final phase; the one before it runs to the end."):
+        phases.pop()
+        st.session_state[key_rev] += 1
+        st.rerun()
+
     b1, b2, b3, b4 = st.columns(4)
     if b1.button("💾 Save & next", type="primary", use_container_width=True,
                  disabled=bool(problem)):
         _save(ambiguous=False)
         st.rerun()
     if b2.button("No incipient phase", use_container_width=True,
-                 disabled=not (phases and phases[0]["phase"] == "incipient"),
+                 disabled=not (phases and phases[0]["phase"] == "incipient"
+                               and len(phases) > 1),
                  help="Drops the leading incipient phase — this series is "
                       "already changing at step 0. The rest of the sequence is kept."):
         rest = [dict(p) for p in phases[1:]]
         if rest:
             rest[0]["start_idx"] = 0
+            rest[0]["unsure"] = False
             st.session_state[key_ph] = rest
             st.session_state[key_rev] += 1
         st.rerun()
     if b3.button("Save as ambiguous", use_container_width=True,
                  disabled=bool(problem),
-                 help="You cannot decide the incipient boundary. The phases you "
+                 help="You cannot decide this cyclone AT ALL. The phases you "
                       "marked are still saved; the incipient verdict is recorded "
-                      "as ambiguous and kept out of the hit rate and the MAE."):
+                      "as ambiguous. To set aside ONE boundary and keep the rest "
+                      "of the series scoring, tick 'Not sure' on its row instead."):
         _save(ambiguous=True)
         st.rerun()
     if b4.button("← Back", use_container_width=True,

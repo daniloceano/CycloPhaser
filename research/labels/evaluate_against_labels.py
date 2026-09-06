@@ -31,6 +31,11 @@ What is reported, and why separately
 * `kind=ambiguous` labels are excluded from the hit rate and the MAE — there is
   nothing to be near — but kept in the refusal accounting, where "the detector
   also declined" is still worth knowing.
+* individual boundaries the labeller marked **not sure** are excluded the same
+  way, and counted. Ambiguity is per BOUNDARY since schema 3: one unreadable
+  mature->decay roll no longer voids the incipient knee four phases away from it.
+  The count is printed because a phase that is routinely unreadable is a finding
+  about the phase, not noise to be hidden.
 
 **The whole sequence.** Sequence mismatch (the detector found different phases,
 or in a different order) and boundary error are counted separately and never
@@ -178,6 +183,10 @@ def _fmt_phases(m: dict) -> str:
         f"    boundaries        {m['n_boundaries_hit']} of {m['n_boundaries']} within "
         f"their own margin ({pct(m['boundary_hit_rate'])})",
     ]
+    if m.get("n_boundaries_unsure"):
+        lines.append(
+            f"    not sure          {m['n_boundaries_unsure']} boundary/ies the "
+            f"labeller declined to place, excluded from the rate above")
     if m["per_phase"]:
         lines.append("      phase              n   hit    MAE  worst")
         for phase in ("incipient", "intensification", "mature", "decay", "residual"):
@@ -227,10 +236,12 @@ def main(argv=None) -> int:
               f"exists and are EXCLUDED: {', '.join(sorted(missing))}\n")
     legacy = [sid for sid, r in records.items() if is_legacy_record(r)]
     if legacy:
-        print(f"WARNING: {len(legacy)} label(s) predate the whole-sequence format "
-              f"and are EXCLUDED — the phases they never recorded cannot be "
-              f"recovered from the boundary they did. Re-label: "
-              f"{', '.join(sorted(legacy))}\n")
+        print(f"WARNING: {len(legacy)} label(s) were written against an earlier "
+              f"schema and are EXCLUDED. Neither is upgradable: a schema-1 record "
+              f"never stored the phase sequence, and a schema-2 record never "
+              f"stored whether the labeller could place each boundary — assuming "
+              f"they could is the one assumption that changes the score. "
+              f"Re-label: {', '.join(sorted(legacy))}\n")
     usable = {sid: r for sid, r in records.items()
               if sid not in stale and sid not in missing and sid not in legacy}
 

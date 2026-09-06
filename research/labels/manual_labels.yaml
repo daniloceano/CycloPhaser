@@ -20,18 +20,30 @@
 #                  silently wrong
 #   labeled_at     UTC ISO timestamp
 #   n_steps        length of the series the indices refer to
-#   phases         [{phase, start_idx, tolerance_idx}, ...] — the sequence.
-#                  tolerance_idx is per BOUNDARY: an unmistakable incipient knee
-#                  and a long gentle mature->decay roll do not deserve the same
-#                  forgiveness. The first entry always starts at 0 and its margin
-#                  is unused.
+#   phases         [{phase, start_idx, tolerance_idx, unsure}, ...] — the
+#                  sequence. tolerance_idx is per BOUNDARY: an unmistakable
+#                  incipient knee and a long gentle mature->decay roll do not
+#                  deserve the same forgiveness. `unsure` is per boundary too —
+#                  "I cannot place THIS one" — and takes that boundary out of the
+#                  hit rate and the MAE while the rest of the series keeps
+#                  scoring. The first entry always starts at 0; its margin is
+#                  unused and its `unsure` is always false, there being no
+#                  boundary there to be unsure about.
 #   verdict        DERIVED from phases, so the two cannot contradict each other:
 #                  {kind: boundary, incipient_end_idx: N}  incipient is [0, N)
 #                  {kind: none}                            no incipient phase
-#                  {kind: ambiguous}                       set by the labeller
+#                  {kind: ambiguous}                       the labeller declined,
+#                  either for the whole series or by marking the incipient
+#                  boundary `unsure`
+#
+# schema 3 (was 2) since `unsure` became per boundary. A record whose phases lack
+# the field is a schema-2 record and is REFUSED rather than defaulted to
+# "confident" — that would be a claim the labeller never made, and it is exactly
+# the claim that decides whether a boundary counts against the detector. Both
+# bumps were free because this file was empty; a third will not be.
 #   tolerance_idx  DERIVED — the margin on the boundary that ends the incipient
 #                  phase. Ignored in evaluation for kind=none.
 #   notes          optional free text
-schema: 2
+schema: 3
 n_labels: 0
 labels: []

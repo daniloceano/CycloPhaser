@@ -97,18 +97,50 @@ Streamlit's bundle does not expose `window.Plotly`.
 Drawn by hand in a `st.components.v2` surface, the problem disappears instead of
 being repaired: the drag handler reads `clientX` and nothing else, so a bar
 cannot leave the time axis — not because it is pushed back, but because nothing
-ever moves it there. `tests/js/` runs the shipped JS under Node against a stubbed
-DOM whose pointer events **throw if `clientY` is read**, which makes that a check
-rather than a claim.
+ever moves it there.
 
+- **The table is the label.** Every field is editable, and a whole cyclone can be
+  marked without touching the chart. This is the canonical path; the chart is a
+  convenience on top of it. Chart and table are two views of one list in session
+  state, so a drag moves the numbers and a typed number moves the bar.
 - **Drag a bar** to move that boundary. The phase bands are recomputed from the
   bar positions on every frame, so the shading follows for free.
 - **Drag a bar's edge** to widen or narrow its margin. The bar's own **thickness
   is the uncertainty**, so the margin travels with the boundary by construction
   instead of being a second object that has to be kept in sync.
-- The **table** below is the exact path and always works. If the component cannot
-  run, a static chart is drawn instead and the table still saves — labelling is
-  degraded there, never blocked.
+- **Click a bar and use the arrow keys**: ← → move the boundary one step (shift,
+  five), ↑ ↓ change its margin. On a 259-step track one index is under four
+  pixels, so the keyboard is the only way to place the last few — and it is the
+  path that still works when the pointer path does not.
+- **A chart that cannot mount says so, in red, naming the exception.** There is
+  no static fallback any more. There was one, and it is the reason this took four
+  rounds: `key=f"lab_chart__{sid}"` contained `__`, which Streamlit reserves
+  inside a bidirectional component's id, so the mount raised on *every* render
+  from the day it was written. `except Exception` caught it and drew a plausible
+  non-interactive picture, so a total failure of the component looked like a
+  working screen. A drawing nobody can use is worse than an error message.
+
+### Verified in a browser, not in a stub
+
+`tests/test_label_browser.py` starts `streamlit run tools/calibration_app/app.py`
+on a free port, drives Chromium at it with **real pointer events**, and reads
+every assertion back from the values that reached **Python** — the phase table —
+never from a pixel. It covers the four gestures that were broken or unprovable:
+dragging a bar there and back, dragging a tolerance handle wider and narrower,
+releasing the pointer *outside* the chart mid-drag, and dragging *through* a
+Streamlit rerender. Plus the keyboard, and the table→chart direction.
+
+It replaces `tests/js/`, which ran the component's JS against a hand-written DOM
+stub under Node. That spec passed while the feature worked in nobody's browser,
+three times, because the fault was in the Python that mounts the component and
+the stub never executed a mount. Keeping both would have duplicated the
+maintenance and preserved the false confidence.
+
+    pip install playwright && python -m playwright install chromium
+    pytest tests/test_label_browser.py
+
+Both are test-only; every test skips when they are absent, and neither reaches
+the package's requirements or its CI.
 
 Everything downstream of the drag is pure Python (`chart_payload`, `apply_edit`,
 `is_new_edit`) and tested. `chart_payload` is the only channel from the app to
@@ -137,14 +169,22 @@ set is spent the first time a parameter is chosen after looking at it.
   labeled_at: '2026-09-06T00:00:00+00:00'
   n_steps: 133
   phases:                     # an ordered partition of [0, n_steps)
-    - {phase: incipient,       start_idx: 0,   tolerance_idx: 0}
-    - {phase: intensification, start_idx: 7,   tolerance_idx: 3}
-    - {phase: mature,          start_idx: 40,  tolerance_idx: 5}
-    - {phase: decay,           start_idx: 60,  tolerance_idx: 4}
+    - {phase: incipient,       start_idx: 0,   tolerance_idx: 0, unsure: false}
+    - {phase: intensification, start_idx: 7,   tolerance_idx: 3, unsure: false}
+    - {phase: mature,          start_idx: 40,  tolerance_idx: 5, unsure: false}
+    - {phase: decay,           start_idx: 60,  tolerance_idx: 4, unsure: true}
   verdict: {kind: boundary, incipient_end_idx: 7}   # DERIVED; incipient is [0, 7)
   tolerance_idx: 3                                  # DERIVED
   notes: clear knee           # optional
 ```
+
+The document carries `schema: 3`. Records written against an earlier schema are
+**refused**, not upgraded, and named so the series goes back in the queue: a
+schema-1 record never stored the phase sequence, and a schema-2 record never
+stored `unsure`. Defaulting a missing `unsure` to `false` would put a claim in
+the labeller's mouth — *they were confident* — and that claim is exactly what
+decides whether a boundary counts against the detector. Both bumps were free
+because `manual_labels.yaml` was still empty each time; a third will not be.
 
 Phase *i* runs from its own `start_idx` up to the next one's; the last runs to
 the end. The first always starts at 0. Repeats are allowed — `residual →
@@ -171,6 +211,17 @@ transition is a long gentle roll. One global margin would force the worst case
 onto every boundary and hide exactly that difference. The first phase's margin is
 unused (its start is 0 by construction).
 
+`unsure` says *I cannot place this boundary* — and it is per boundary for the
+same reason the margin is. Ambiguity used to be a property of the whole series,
+so being unable to read one long mature→decay roll discarded the incipient knee
+four phases away from it: throwing away the evidence you have in order to
+register the one you lack. Marked here, that boundary drops out of the hit rate
+and the MAE while the rest of the series keeps scoring, and the count of
+exclusions is printed — a phase that is routinely unreadable is a finding about
+the phase, not noise. The whole-series `ambiguous` verdict still exists as a
+shortcut for a cyclone you cannot read at all. The first phase's flag is always
+false: its start is 0 by construction, so there is no boundary there to doubt.
+
 ## What is reported, and why separately
 
 Two blocks, side by side.
@@ -186,7 +237,9 @@ Two blocks, side by side.
   Refusing is a different failure from being off by *k* steps; averaging the two
   would hide both.
 * `ambiguous` verdicts are out of the hit rate and the MAE (there is nothing to
-  be near) but stay in the refusal accounting.
+  be near) but stay in the refusal accounting. An `unsure` incipient boundary
+  arrives here as `ambiguous`, so the two spellings of the same judgement cannot
+  disagree.
 
 **The whole sequence:**
 
@@ -197,5 +250,8 @@ Two blocks, side by side.
 * **Boundary error**, only where the sequences agree, broken out **per phase**,
   each against its own margin. The first phase's start is excluded: it is 0 on
   both sides by construction and would pad every rate with free agreement.
+* Boundaries marked `unsure` are excluded in **both** directions and counted
+  separately — including when the detector happens to land on one, since
+  counting that agreement would inflate the rate with a coin flip.
 
 All of it split by train/test and by real/synthetic.
