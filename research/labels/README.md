@@ -86,6 +86,18 @@ and anchoring is automatic rather than something care avoids.
 the package or names any detector output. Synthetic cases appear under an opaque
 hashed id, because names like `IcDItMD_noisy` spell the expected sequence.
 
+**Dragging.** Boundary lines and the ends of the tolerance arrows can be dragged
+directly on the chart. `st.plotly_chart` cannot deliver this on its own — its own
+docs say *"Only selection events are supported at this time"*, and a dragged
+shape arrives as `plotly_relayout`, which it does not forward — so a small
+`st.components.v2` bridge attaches to the chart Streamlit already rendered and
+forwards just those keys. It draws nothing and reads nothing. If it fails to bind,
+or the Streamlit version has no `components.v2`, dragging simply does nothing and
+the click and the table are untouched: **labelling is never blocked on it.**
+Everything downstream of the payload is pure Python (`apply_drag`, `drag_map`)
+and tested; whether a given browser emits those keys on a drag is the one part
+that has to be confirmed by trying it.
+
 Each boundary's margin is drawn as a shaded band and a **double-headed arrow**
 spanning `[start-tol, start+tol]`. The margin is the part of a label that is
 easiest to set carelessly: a number in a table gives no sense of how much of the

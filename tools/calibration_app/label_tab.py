@@ -45,6 +45,8 @@ diagnostic layer here, that test fails, and it is right to.
 
 from __future__ import annotations
 
+import json
+import re
 import sys
 from pathlib import Path
 
@@ -60,6 +62,77 @@ if str(_LABELS_PKG) not in sys.path:
 import labels_core as lc  # noqa: E402
 
 DEFAULT_TOLERANCE = 5
+
+# Names stamped on the draggable shapes/annotations, and the relayout keys the
+# browser reports them under.
+_BND, _TOL = "bnd", "tol"
+_SHAPE_KEY = re.compile(r"^shapes\[(\d+)\]\.x0$")
+_ANN_KEY = re.compile(r"^annotations\[(\d+)\]\.ax$")
+
+
+# ── the drag bridge ──────────────────────────────────────────────────────────
+# st.plotly_chart cannot deliver a drag: its own docs say "Only selection events
+# are supported at this time", and a dragged shape arrives as `plotly_relayout`,
+# which it does not forward. So a small bidirectional component attaches to the
+# chart that st.plotly_chart already rendered — same DOM, components are not
+# sandboxed — and forwards just the relayout keys this view cares about.
+#
+# It adds no visuals and reads nothing: if it fails to bind, or the Streamlit
+# version has no components.v2, dragging simply does nothing and the table and
+# click paths are untouched. Labelling is never blocked on it.
+_DRAG_JS = """
+export default function (component) {
+  const { setTriggerValue } = component;
+
+  const bind = () => {
+    const gds = document.querySelectorAll('.js-plotly-plot');
+    let bound = false;
+    gds.forEach((gd) => {
+      if (typeof gd.on !== 'function') return;
+      bound = true;
+      if (gd.__cpLabelDragBound) return;
+      gd.__cpLabelDragBound = true;
+      gd.on('plotly_relayout', (ev) => {
+        const out = {};
+        for (const k in ev) {
+          if (/^shapes\\[\\d+\\]\\.x0$/.test(k) || /^annotations\\[\\d+\\]\\.ax$/.test(k)) {
+            out[k] = ev[k];
+          }
+        }
+        if (Object.keys(out).length) setTriggerValue('drag', JSON.stringify(out));
+      });
+    });
+    return bound;
+  };
+
+  // The component can mount before Plotly has finished drawing, so retry
+  // briefly rather than giving up on the first miss.
+  if (!bind()) {
+    let tries = 0;
+    const t = setInterval(() => { if (bind() || ++tries > 40) clearInterval(t); }, 100);
+  }
+}
+"""
+
+
+@st.cache_resource(show_spinner=False)
+def _drag_component():
+    """Registered once per process — re-registering the same name warns."""
+    return st.components.v2.component("cyclophaser_label_drag", js=_DRAG_JS)
+
+
+def _read_drag() -> dict | None:
+    """The last drag payload, or None if the bridge is unavailable or idle."""
+    try:
+        result = _drag_component()(key="lab_drag", on_drag_change=lambda: None,
+                                   height=0)
+        raw = getattr(result, "drag", None)
+        return json.loads(raw) if raw else None
+    except Exception:
+        # No components.v2, a changed component API, malformed JSON — none of
+        # which should cost the labeller their session. Drag is a convenience;
+        # the table is the contract.
+        return None
 
 
 @st.cache_data(show_spinner=False)
@@ -121,7 +194,7 @@ def _fig(sid: str, values: pd.Series, phases: list[dict]) -> go.Figure:
     for k, ph in enumerate(phases):
         x0 = ph["start_idx"]
         x1 = phases[k + 1]["start_idx"] if k + 1 < len(phases) else n - 1
-        fig.add_vrect(x0=x0, x1=x1, layer="below", line_width=0,
+        fig.add_vrect(x0=x0, x1=x1, layer="below", line_width=0, editable=False,
                       fillcolor=lc.PHASE_COLORS.get(ph["phase"], "#cccccc"),
                       opacity=0.30,
                       annotation_text=ph["phase"], annotation_position="top left",
@@ -147,16 +220,23 @@ def _fig(sid: str, values: pd.Series, phases: list[dict]) -> go.Figure:
         idx = ph["start_idx"]
         tol = int(ph["tolerance_idx"])
         colour = lc.PHASE_COLORS.get(ph["phase"], "#666666")
-        fig.add_vline(x=idx, line=dict(color=colour, width=3))
+        # `name` is what makes the drag round-trip robust: Plotly reports a drag
+        # as `shapes[i].x0`, by POSITION in layout.shapes, and the positions
+        # depend on the order these helpers happen to append in. Naming the
+        # draggable ones and looking their indices back up (see `drag_map`)
+        # survives any reordering of this function.
+        fig.add_vline(x=idx, line=dict(color=colour, width=3),
+                      name=f"{_BND}{k}", editable=True)
         if tol > 0:
             a, b = max(0, idx - tol), min(n - 1, idx + tol)
-            fig.add_vrect(x0=a, x1=b, layer="below", line_width=0,
+            fig.add_vrect(x0=a, x1=b, layer="below", line_width=0, editable=False,
                           fillcolor=colour, opacity=0.22)
             fig.add_annotation(
                 x=b, y=y_arrow, ax=a, ay=y_arrow,
                 xref="x", yref="y", axref="x", ayref="y",
                 showarrow=True, arrowhead=3, arrowsize=1.1, arrowwidth=1.8,
-                arrowcolor=colour, arrowside="end+start", text="")
+                arrowcolor=colour, arrowside="end+start", text="",
+                name=f"{_TOL}{k}")
         fig.add_annotation(
             x=idx, y=y_arrow, xref="x", yref="y", showarrow=False,
             text=f"<b>{idx}</b> ±{tol}", yshift=13,
@@ -175,6 +255,70 @@ def _fig(sid: str, values: pd.Series, phases: list[dict]) -> go.Figure:
         dragmode=False,
     )
     return fig
+
+
+def drag_map(fig) -> dict[str, dict[int, int]]:
+    """Which layout index belongs to which boundary.
+
+    Plotly reports a drag positionally — `shapes[7].x0`, `annotations[2].ax` —
+    so the browser's message is meaningless without this. Built by reading the
+    names back off the figure rather than by counting the calls that made it, so
+    adding a decoration to `_fig` cannot silently misroute a drag onto the wrong
+    boundary.
+    """
+    shapes = {i: int(sh.name[len(_BND):])
+              for i, sh in enumerate(fig.layout.shapes or ())
+              if sh.name and sh.name.startswith(_BND)}
+    anns = {i: int(an.name[len(_TOL):])
+            for i, an in enumerate(fig.layout.annotations or ())
+            if an.name and an.name.startswith(_TOL)}
+    return {"shapes": shapes, "annotations": anns}
+
+
+def apply_drag(payload: dict, phases: list[dict], dmap: dict, n: int) -> bool:
+    """Fold a Plotly relayout payload into the phases. True if anything moved.
+
+    PURE, and deliberately so: whether the browser emits these keys on a drag is
+    the one part of this feature that cannot be tested from here, so everything
+    downstream of the payload is ordinary Python with ordinary tests.
+
+    Boundaries are applied before tolerances, because a tolerance arrives as the
+    absolute position of the arrow's tail and only becomes a ± once it is
+    measured against the boundary it belongs to — which may have moved in the
+    same gesture.
+    """
+    moved = False
+    for key, value in sorted(payload.items()):
+        m = _SHAPE_KEY.match(key)
+        if not m:
+            continue
+        k = dmap["shapes"].get(int(m.group(1)))
+        if k is None or not (1 <= k < len(phases)):
+            continue
+        low = phases[k - 1]["start_idx"] + 1
+        high = phases[k + 1]["start_idx"] - 1 if k + 1 < len(phases) else n - 1
+        if low > high:
+            continue
+        new = max(low, min(int(round(float(value))), high))
+        if new != phases[k]["start_idx"]:
+            phases[k]["start_idx"] = new
+            moved = True
+
+    for key, value in sorted(payload.items()):
+        m = _ANN_KEY.match(key)
+        if not m:
+            continue
+        k = dmap["annotations"].get(int(m.group(1)))
+        if k is None or not (0 <= k < len(phases)):
+            continue
+        # The arrow is drawn symmetric, so the tail is one half of it: the margin
+        # is its distance from the boundary, whichever side it was dragged to.
+        tol = abs(int(round(float(value))) - phases[k]["start_idx"])
+        tol = max(0, min(tol, n - 1))
+        if tol != phases[k]["tolerance_idx"]:
+            phases[k]["tolerance_idx"] = tol
+            moved = True
+    return moved
 
 
 def _apply_click(sid: str, event, target: int, phases: list[dict], n: int) -> bool:
@@ -271,14 +415,30 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
         key=f"lab_target__{sid}",
         help="Clicking the chart is the fast path; the table below is the exact "
              "one. The first phase always starts at step 0, so it is not listed.")
+    st.caption(
+        "**Drag** a boundary line to move it, or the end of a tolerance arrow to "
+        "widen or narrow that margin. If dragging does nothing in your browser, "
+        "nothing is broken — use the click above or the table below, which are "
+        "the paths that do not depend on it.")
     target = (labels.index(target_label) + 1) if labels and target_label in labels else 0
 
+    fig = _fig(sid, values, phases)
     event = st.plotly_chart(
-        _fig(sid, values, phases),
+        fig,
         key=f"lab_chart__{sid}",
         on_select="rerun", selection_mode="points",
-        config={"displayModeBar": False},
+        config={"displayModeBar": False,
+                # Only the boundary lines carry editable=True; every band is
+                # pinned editable=False, so these two switches cannot make the
+                # phase shading draggable by accident.
+                "edits": {"shapePosition": True, "annotationTail": True}},
     )
+
+    payload = _read_drag()
+    if payload and apply_drag(payload, phases, drag_map(fig), n):
+        st.session_state[key_rev] += 1
+        st.rerun()
+
     if _apply_click(sid, event, target, phases, n):
         st.session_state[key_rev] += 1
         st.rerun()

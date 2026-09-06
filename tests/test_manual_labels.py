@@ -36,6 +36,7 @@ Five things are worth testing here, and they are not the usual ones.
 
 import ast
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -662,6 +663,172 @@ def test_the_opening_scaffold_is_a_valid_partition():
         assert lc.validate_phases(ph, n_steps=n) == ph
         assert [p["phase"] for p in ph] == ["incipient", "intensification",
                                             "mature", "decay"]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5d. Dragging boundaries and tolerance arrows
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# st.plotly_chart cannot deliver a drag — its own docs say "Only selection events
+# are supported at this time" — so a small components.v2 bridge forwards
+# plotly_relayout instead. Whether the browser really emits those keys on a drag
+# is the ONE thing that cannot be checked from here. Everything downstream of the
+# payload is pure Python, and that is what these tests pin: given the message,
+# the phases move correctly, and the two sides agree on the message's shape.
+
+def _toy_fig(phases, n=60):
+    lt = _label_tab()
+    s = pd.Series(range(n), dtype="float64",
+                  index=pd.date_range("2020-01-01", periods=n, freq="3h"))
+    return lt, lt._fig("x", s, phases)
+
+
+def test_drag_map_finds_the_boundaries_by_name_not_by_counting():
+    """Plotly reports a drag POSITIONALLY. If the map were built by counting the
+    calls in _fig, adding one decoration would silently reroute a drag onto the
+    wrong boundary."""
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    assert sorted(dm["shapes"].values()) == [1, 2, 3]     # not the first phase
+    assert sorted(dm["annotations"].values()) == [1, 2, 3]
+    for i, k in dm["shapes"].items():
+        assert fig.layout.shapes[i].name == f"bnd{k}"
+        assert fig.layout.shapes[i].editable is True
+
+
+def test_only_the_boundary_lines_are_draggable():
+    """edits.shapePosition is global, so every band must be pinned shut or the
+    phase shading itself would drag."""
+    _lt, fig = _toy_fig(FOUR)
+    for sh in fig.layout.shapes:
+        if sh.name and sh.name.startswith("bnd"):
+            assert sh.editable is True
+        else:
+            assert sh.editable is False, f"{sh.type} band is draggable"
+
+
+def test_dragging_a_boundary_moves_that_phase():
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    idx = next(i for i, k in dm["shapes"].items() if k == 2)   # the mature start
+    phases = [dict(p) for p in FOUR]
+    assert lt.apply_drag({f"shapes[{idx}].x0": 23.7}, phases, dm, 60)
+    assert phases[2]["start_idx"] == 24                        # rounded
+    assert [p["start_idx"] for p in phases] == [0, 7, 24, 30]   # nothing else moved
+
+
+def test_a_boundary_cannot_be_dragged_past_its_neighbours():
+    """A partition has to stay a partition; a drag that would cross is clamped
+    rather than rejected, because a line that refuses to move reads as broken."""
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    idx = next(i for i, k in dm["shapes"].items() if k == 2)
+    phases = [dict(p) for p in FOUR]
+    lt.apply_drag({f"shapes[{idx}].x0": -400}, phases, dm, 60)
+    assert phases[2]["start_idx"] == 8            # one past the boundary before it
+    lt.apply_drag({f"shapes[{idx}].x0": 999}, phases, dm, 60)
+    assert phases[2]["start_idx"] == 29           # one before the boundary after it
+    assert lc.validate_phases(phases, n_steps=60)
+
+
+def test_dragging_an_arrow_tail_sets_that_boundarys_margin():
+    """The arrow is drawn symmetric, so its tail is one half: the margin is the
+    tail's distance from the boundary, whichever side it was pulled to."""
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    idx = next(i for i, k in dm["annotations"].items() if k == 1)   # It @ 7, ±3
+    phases = [dict(p) for p in FOUR]
+    assert lt.apply_drag({f"annotations[{idx}].ax": 1.0}, phases, dm, 60)
+    assert phases[1]["tolerance_idx"] == 6          # |7 - 1|
+    # pulled to the other side, same margin
+    lt.apply_drag({f"annotations[{idx}].ax": 13.0}, phases, dm, 60)
+    assert phases[1]["tolerance_idx"] == 6
+    assert phases[1]["start_idx"] == 7              # the boundary itself is untouched
+
+
+def test_a_margin_dragged_onto_its_boundary_becomes_zero_not_negative():
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    idx = next(i for i, k in dm["annotations"].items() if k == 1)
+    phases = [dict(p) for p in FOUR]
+    lt.apply_drag({f"annotations[{idx}].ax": 7.0}, phases, dm, 60)
+    assert phases[1]["tolerance_idx"] == 0
+    assert lc.validate_phases(phases, n_steps=60)
+
+
+def test_a_boundary_and_its_margin_moving_together_measure_against_the_new_place():
+    """A tolerance arrives as an absolute tail position and only becomes a ±
+    once measured against its boundary — which may have moved in the same gesture,
+    so the order of application is load-bearing."""
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    sh = next(i for i, k in dm["shapes"].items() if k == 1)
+    an = next(i for i, k in dm["annotations"].items() if k == 1)
+    phases = [dict(p) for p in FOUR]
+    lt.apply_drag({f"shapes[{sh}].x0": 12.0, f"annotations[{an}].ax": 8.0},
+                  phases, dm, 60)
+    assert phases[1]["start_idx"] == 12
+    assert phases[1]["tolerance_idx"] == 4          # |12 - 8|, not |7 - 8|
+
+
+def test_unrelated_relayout_keys_are_ignored():
+    """plotly_relayout also fires for autorange, zoom and legend moves."""
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    phases = [dict(p) for p in FOUR]
+    assert not lt.apply_drag(
+        {"xaxis.range[0]": 3, "yaxis.autorange": True, "shapes[0].x1": 9,
+         "annotations[0].y": 2}, phases, dm, 60)
+    assert phases == FOUR
+
+
+def test_a_drag_that_changes_nothing_reports_no_movement():
+    """Otherwise every stray relayout would trigger a rerun loop."""
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    idx = next(i for i, k in dm["shapes"].items() if k == 1)
+    phases = [dict(p) for p in FOUR]
+    assert not lt.apply_drag({f"shapes[{idx}].x0": 7.0}, phases, dm, 60)
+
+
+def test_the_browser_filter_and_the_python_parser_accept_the_same_keys():
+    """The JS forwards a subset of relayout keys and Python parses them. They are
+    written in two languages in two places; if they drift, drags vanish silently.
+    """
+    lt = _label_tab()
+    js_patterns = re.findall(r"/([^/]+)/\.test", lt._DRAG_JS)
+    assert len(js_patterns) == 2, js_patterns
+    for pattern in js_patterns:
+        compiled = re.compile(pattern)
+        # every key the browser would forward, Python must also route
+        for key in ("shapes[7].x0", "annotations[2].ax"):
+            if compiled.match(key):
+                assert lt._SHAPE_KEY.match(key) or lt._ANN_KEY.match(key), key
+        # and nothing else gets through either side
+        for key in ("xaxis.range[0]", "shapes[7].x1", "annotations[2].y"):
+            assert not compiled.match(key)
+            assert not (lt._SHAPE_KEY.match(key) or lt._ANN_KEY.match(key))
+
+
+def test_the_drag_bridge_reads_nothing_and_draws_nothing():
+    """It exists only to forward coordinates. If it ever grew a `data=` payload
+    it could start showing something, and the tab's blindness is not negotiable.
+    """
+    lt = _label_tab()
+    assert "data=" not in lt._DRAG_JS
+    assert "setTriggerValue" in lt._DRAG_JS
+    # no detector name can reach the browser either
+    for name in FORBIDDEN_NAMES:
+        assert name not in lt._DRAG_JS
+
+
+def test_a_missing_drag_bridge_does_not_break_labelling(monkeypatch):
+    """Drag is a convenience; the table is the contract. An older Streamlit, or a
+    changed component API, must cost nothing."""
+    lt = _label_tab()
+    monkeypatch.setattr(lt, "_drag_component",
+                        lambda: (_ for _ in ()).throw(RuntimeError("no v2")))
+    assert lt._read_drag() is None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
