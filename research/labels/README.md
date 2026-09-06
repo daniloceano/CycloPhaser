@@ -94,9 +94,21 @@ shape arrives as `plotly_relayout`, which it does not forward — so a small
 forwards just those keys. It draws nothing and reads nothing. If it fails to bind,
 or the Streamlit version has no `components.v2`, dragging simply does nothing and
 the click and the table are untouched: **labelling is never blocked on it.**
-Everything downstream of the payload is pure Python (`apply_drag`, `drag_map`)
-and tested; whether a given browser emits those keys on a drag is the one part
-that has to be confirmed by trying it.
+Only movement along the **time axis** counts: a label is an index, so vertical
+position means nothing. It cannot be locked at the source — Plotly has no axis
+constraint for draggable shapes or annotations, and Streamlit does not expose
+`window.Plotly`, so the browser cannot be told to snap it back either. Instead a
+vertical drag is forwarded as a redraw signal and the chart is re-rendered from
+Python, which puts the line back. The chart's Streamlit key carries a revision
+counter for the same reason: re-sending the same figure under the same key would
+not fix it, because the frontend diffs against the previous *spec*, not against a
+div the user has since dragged. The remount is also what makes a horizontal drag
+settle honestly — Plotly leaves the shape where the mouse released it (63.7)
+while the label is the rounded index (64).
+
+Everything downstream of the payload is pure Python (`apply_drag`, `drag_map`,
+`has_vertical_move`, `is_new_drag`) and tested; whether a given browser emits
+those keys on a drag is the one part that has to be confirmed by trying it.
 
 Each boundary's margin is drawn as a shaded band and a **double-headed arrow**
 spanning `[start-tol, start+tol]`. The margin is the part of a label that is

@@ -810,6 +810,58 @@ def test_the_browser_filter_and_the_python_parser_accept_the_same_keys():
             assert not (lt._SHAPE_KEY.match(key) or lt._ANN_KEY.match(key))
 
 
+def test_the_same_drag_message_is_only_acted_on_once():
+    """A trigger value that outlived its rerun would be re-applied every pass:
+    each bumps the revision, which reruns, which re-reads it. That loop takes the
+    app down mid-labelling, so it is guarded rather than hoped about."""
+    lt = _label_tab()
+    payload = {"shapes[8].x0": 12.0}
+    sig = lt.drag_signature(payload)
+    assert lt.is_new_drag(payload, None)
+    assert not lt.is_new_drag(payload, sig)
+    # key order must not make the same drag look new
+    assert not lt.is_new_drag({"shapes[8].x0": 12.0}, sig)
+    # a different position is a different drag
+    assert lt.is_new_drag({"shapes[8].x0": 13.0}, sig)
+    # and an empty payload is never a drag
+    assert not lt.is_new_drag({}, None)
+
+
+def test_vertical_movement_is_detected_so_it_can_be_undone():
+    """Selection is temporal. Vertical drag carries no information — but it does
+    displace what is drawn, and Plotly has no axis lock while Streamlit does not
+    expose window.Plotly, so the only way back is a redraw from Python."""
+    lt = _label_tab()
+    assert lt.has_vertical_move({"shapes[3].y0": 0.4, "shapes[3].y1": 1.4})
+    assert lt.has_vertical_move({"annotations[1].ay": -3e-5})
+    assert lt.has_vertical_move({"shapes[3].x0": 12.0, "shapes[3].y0": 0.4})
+    assert not lt.has_vertical_move({"shapes[3].x0": 12.0})
+    assert not lt.has_vertical_move({"annotations[1].ax": 8.0})
+    assert not lt.has_vertical_move({"xaxis.range[0]": 3, "annotations[1].y": 2})
+
+
+def test_a_purely_vertical_drag_changes_no_phase():
+    """It must trigger a redraw, but it must not silently edit the label."""
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    phases = [dict(p) for p in FOUR]
+    payload = {"shapes[8].y0": 0.3, "shapes[8].y1": 1.3, "annotations[1].ay": 5.0}
+    assert not lt.apply_drag(payload, phases, dm, 60)
+    assert phases == FOUR
+    assert lt.has_vertical_move(payload)     # ...but the chart still gets redrawn
+
+
+def test_a_diagonal_drag_keeps_the_horizontal_part_only():
+    lt, fig = _toy_fig(FOUR)
+    dm = lt.drag_map(fig)
+    idx = next(i for i, k in dm["shapes"].items() if k == 1)
+    phases = [dict(p) for p in FOUR]
+    assert lt.apply_drag({f"shapes[{idx}].x0": 15.0, f"shapes[{idx}].y0": 0.6,
+                          f"shapes[{idx}].y1": 1.6}, phases, dm, 60)
+    assert phases[1]["start_idx"] == 15
+    assert [p["tolerance_idx"] for p in phases] == [0, 3, 5, 4]   # untouched
+
+
 def test_the_drag_bridge_reads_nothing_and_draws_nothing():
     """It exists only to forward coordinates. If it ever grew a `data=` payload
     it could start showing something, and the tab's blindness is not negotiable.

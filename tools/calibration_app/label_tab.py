@@ -68,6 +68,10 @@ DEFAULT_TOLERANCE = 5
 _BND, _TOL = "bnd", "tol"
 _SHAPE_KEY = re.compile(r"^shapes\[(\d+)\]\.x0$")
 _ANN_KEY = re.compile(r"^annotations\[(\d+)\]\.ax$")
+# A drag off the time axis. The label is an index into the series, so vertical
+# movement carries no information — but it does displace what is drawn, and that
+# has to be undone.
+_VERT_KEY = re.compile(r"^(?:shapes\[\d+\]\.y[01]|annotations\[\d+\]\.ay)$")
 
 
 # ── the drag bridge ──────────────────────────────────────────────────────────
@@ -93,6 +97,12 @@ export default function (component) {
       if (gd.__cpLabelDragBound) return;
       gd.__cpLabelDragBound = true;
       gd.on('plotly_relayout', (ev) => {
+        // The vertical keys are forwarded even though Python ignores their
+        // VALUES: a drag has no meaning off the time axis, and Python needs to
+        // hear about one in order to redraw the chart back into place. Plotly
+        // has no axis lock for shapes or annotations (checked: no such property
+        // exists), and Streamlit does not expose window.Plotly, so the position
+        // cannot be corrected in the browser — only by re-rendering.
         const out = {};
         for (const k in ev) {
           if (/^shapes\\[\\d+\\]\\.x0$/.test(k) || /^annotations\\[\\d+\\]\\.ax$/.test(k)) {
@@ -321,6 +331,42 @@ def apply_drag(payload: dict, phases: list[dict], dmap: dict, n: int) -> bool:
     return moved
 
 
+def drag_signature(payload: dict) -> str:
+    """A stable identity for one drag message, for the replay guard."""
+    return json.dumps(payload, sort_keys=True)
+
+
+def is_new_drag(payload: dict, last_signature: str | None) -> bool:
+    """Whether this drag message has already been acted on.
+
+    A trigger value that outlived its rerun would otherwise be re-applied on
+    every pass: each one bumps the revision, which reruns, which re-reads the
+    same value — a loop that takes the app down in the middle of a labelling
+    session. Re-sending an identical drag is a no-op anyway, since it describes
+    the same position, so treating it as already-handled costs nothing.
+    """
+    return bool(payload) and drag_signature(payload) != last_signature
+
+
+def has_vertical_move(payload: dict) -> bool:
+    """True if a drag moved something off the time axis.
+
+    Selection here is purely temporal: a boundary is an index, and a margin is a
+    number of steps. Vertical position means nothing, so the values are thrown
+    away — but the drag still displaced the line or the arrow on screen, and
+    nothing else will put it back.
+
+    It cannot be locked at the source. Plotly has no axis constraint for
+    draggable shapes or annotations, and Streamlit does not expose window.Plotly,
+    so the browser cannot be told to snap it back either. What is left is to
+    re-render the chart from Python, which is why this is reported separately
+    from `apply_drag`: a purely vertical drag changes no phase, so without this
+    it would produce no rerun and the displaced line would simply stay displaced.
+    That is the "mais ou menos" in dragging working mais ou menos.
+    """
+    return any(_VERT_KEY.match(k) for k in payload)
+
+
 def _apply_click(sid: str, event, target: int, phases: list[dict], n: int) -> bool:
     """Fold a Plotly click into the selected boundary. True if anything moved.
 
@@ -417,15 +463,25 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
              "one. The first phase always starts at step 0, so it is not listed.")
     st.caption(
         "**Drag** a boundary line to move it, or the end of a tolerance arrow to "
-        "widen or narrow that margin. If dragging does nothing in your browser, "
-        "nothing is broken — use the click above or the table below, which are "
-        "the paths that do not depend on it.")
+        "widen or narrow that margin. Only movement along the time axis counts — "
+        "drag something up or down and it snaps straight back, because a label "
+        "is an index and vertical position means nothing. If dragging does "
+        "nothing at all in your browser, nothing is broken: use the click above "
+        "or the table below, which do not depend on it.")
     target = (labels.index(target_label) + 1) if labels and target_label in labels else 0
 
     fig = _fig(sid, values, phases)
+    # The revision is part of the chart's KEY, so any accepted change remounts
+    # the chart instead of patching it. That is what makes a drag settle
+    # honestly: Plotly leaves the shape wherever the mouse released it (63.7),
+    # while the label is the rounded index (64), and a vertical drag leaves it
+    # off-axis entirely. Remounting redraws both back to what was actually
+    # stored. Re-rendering the same figure under the same key would not do it —
+    # the frontend diffs against the previous SPEC, not against a div the user
+    # has since dragged.
     event = st.plotly_chart(
         fig,
-        key=f"lab_chart__{sid}",
+        key=f"lab_chart__{sid}__{st.session_state[key_rev]}",
         on_select="rerun", selection_mode="points",
         config={"displayModeBar": False,
                 # Only the boundary lines carry editable=True; every band is
@@ -435,9 +491,14 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
     )
 
     payload = _read_drag()
-    if payload and apply_drag(payload, phases, drag_map(fig), n):
-        st.session_state[key_rev] += 1
-        st.rerun()
+    if is_new_drag(payload, st.session_state.get(f"_lab_lastdrag__{sid}")):
+        st.session_state[f"_lab_lastdrag__{sid}"] = drag_signature(payload)
+        moved = apply_drag(payload, phases, drag_map(fig), n)
+        # A vertical-only drag edits nothing but still has to redraw, or the
+        # line stays wherever it was dropped off-axis.
+        if moved or has_vertical_move(payload):
+            st.session_state[key_rev] += 1
+            st.rerun()
 
     if _apply_click(sid, event, target, phases, n):
         st.session_state[key_rev] += 1
