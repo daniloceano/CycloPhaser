@@ -6,6 +6,7 @@ parameters interactively, and inspect results across all cyclones at once.
 
 import hashlib
 import io
+import sys
 import warnings
 import zipfile
 from datetime import datetime, timezone
@@ -13,12 +14,26 @@ from pathlib import Path
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+# numpy was already being USED here (in _render_probe_png) without being
+# imported, so the incipient-probe overlay always raised NameError into the
+# `except Exception` around it and reported itself as "unavailable". Adding
+# the import fixes that; nothing else about the probe changed.
+import numpy as np
 import pandas as pd
 import streamlit as st
 import yaml
 
 from cyclophaser.determine_periods import get_periods, periods_to_dict, process_vorticity
+from cyclophaser.find_stages import find_decay_period, find_intensification_period
 from cyclophaser.plots import plot_all_periods, plot_didactic
+
+# `streamlit run` puts this file's directory on sys.path, but other launchers
+# do not; make the sibling modules importable either way (same __file__-relative
+# strategy the data paths below use, and for the same reason).
+if str(Path(__file__).parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent))
+import layer_inspector as li  # noqa: E402
+from inspector_plotly import build_inspector_figure  # noqa: E402
 
 # CycloPhaser version (read from setup.py at import time)
 try:
@@ -141,6 +156,22 @@ _DEFAULTS: dict = {
     "savgol_poly":       3,
     "boundary_padding":  "reflect",
     "n_cols":            2,
+    # Layer-inspector view state: which mode, which track, which decision
+    # overlays are computed. Listed here so "Reset to defaults" clears it, like
+    # n_cols; deliberately NOT part of the YAML export/import, which carries
+    # only parameters that change detection.
+    "view_mode":            "Grid",
+    "inspector_track":      None,
+    # Every overlay starts ON: the inspector is opened to see the whole picture
+    # at once, and the work is per-TRACK (one selected cyclone), not per-grid,
+    # so computing all four up front is cheap. Untick one to drop its cost.
+    "inspector_ribbon":     True,
+    "inspector_ledger":     True,
+    "inspector_mature":     True,
+    "inspector_incipient":  True,
+    # Shared y scale: divide every curve in a panel by its own max|y| so they
+    # fit one axis (a twinx is not an option -- see _plot_compact's zorder bug).
+    "inspector_normalize":  True,
     "thr_int_len":       0.075,
     "thr_dec_len":       0.075,
     "thr_mat_len":       0.030,
@@ -169,6 +200,7 @@ _DEFAULTS: dict = {
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
+_VIEW_MODES = ["Grid", "Inspector"]
 _BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
@@ -706,38 +738,158 @@ def _render_probe_png(file_bytes: bytes,
     t = np.arange(z_raw.size)
 
     fig, axes = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
-    axes[0].plot(t, z_raw, color="#999999", lw=1.1, label="zeta cru")
+    axes[0].plot(t, z_raw, color="#999999", lw=1.1, label="raw zeta")
     if window > 0:
         axes[0].plot(t, z_s, color="#1d3557", lw=1.9,
-                     label=f"sondagem suavizada (w={window})")
+                     label=f"smoothed probe (w={window})")
     axes[0].set_ylabel("zeta", fontsize=8)
     axes[0].legend(fontsize=7, loc="lower right")
 
-    axes[1].plot(t, rel_off, color="#999999", lw=1.1, label="rel(t) sem suavizacao")
+    axes[1].plot(t, rel_off, color="#999999", lw=1.1, label="rel(t), smoothing off")
     if window > 0:
         axes[1].plot(t, rel_on, color="#e63946", lw=1.9,
-                     label=f"rel(t) com w={window}")
+                     label=f"rel(t), w={window}")
     axes[1].axhline(tau, color="#8856a7", lw=1.2, ls="--", label=f"tau={tau:.2f}")
-    for b, c, lbl in ((b_off, "#999999", "fronteira sem suavizacao"),
-                      (b_on, "#d000d0", "fronteira com suavizacao")):
+    for b, c, lbl in ((b_off, "#999999", "boundary, smoothing off"),
+                      (b_on, "#d000d0", "boundary, smoothing on")):
         if b > 0:
             axes[1].axvline(b, color=c, lw=1.8)
     axes[1].set_ylim(0, 1.02)
     axes[1].set_ylabel("rel(t) = |dz|/max|dz|", fontsize=8)
-    axes[1].set_xlabel("passo", fontsize=8)
+    axes[1].set_xlabel("step", fontsize=8)
     axes[1].legend(fontsize=7, loc="upper right")
     for a in axes:
         a.tick_params(labelsize=7)
         a.set_xlim(-0.5, z_raw.size - 0.5)
     fig.suptitle(
-        f"sondagem da incipiente · signal={signal} · w={window} · "
-        f"fronteira {b_off} (sem) -> {b_on} (com)", fontsize=9, fontweight="bold")
+        f"incipient probe · signal={signal} · w={window} · "
+        f"boundary {b_off} (off) -> {b_on} (on)", fontsize=9, fontweight="bold")
     fig.tight_layout()
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")
     plt.close(fig)
     buf.seek(0)
     return buf.getvalue()
+
+
+# ── Layer inspector — server-side helpers ────────────────────────────────────────
+# Everything here is PURE VISUALISATION: it either rebuilds the frame get_periods
+# works on (via layer_inspector.build_working_frame) or calls the package's own
+# stage functions on a COPY of it. Detection is never affected, and none of this
+# runs at all unless the corresponding overlay checkbox is ticked -- which is the
+# whole reason the decision overlays are checkboxes while the series layers are
+# legend clicks (see inspector_plotly.py's module docstring).
+@st.cache_data(
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+    show_spinner=False,
+)
+def _inspector_working_frame(
+    file_bytes: bytes,
+    use_filter, cutoff_low, cutoff_high,
+    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+    boundary_padding,
+    prominence, prominence_relative, distance,
+) -> pd.DataFrame:
+    """The frame get_periods builds internally, ready for the stage functions.
+
+    prominence / prominence_relative / distance are taken explicitly (rather
+    than from the phase-params tuple, which drops None values) so "filter
+    disabled" is distinguishable from "key absent" in the cache key.
+    """
+    vort, _ = _run_process_vorticity(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
+    )
+    return li.build_working_frame(vort, prominence=prominence,
+                                  prominence_relative=prominence_relative,
+                                  distance=distance)
+
+
+def _stage_frame_after_decay(work: pd.DataFrame, args_periods: dict) -> pd.DataFrame:
+    """The frame state find_mature_stage receives: steps 1-2 applied, nothing else.
+
+    The mature ledger needs it because the strict confirmation reads the labels
+    on either side of each candidate window, and those are exactly what steps 1
+    and 2 left there. Built by calling the package's own two functions on a
+    deep copy -- the same discipline as the ribbon.
+    """
+    df = work.copy(deep=True)
+    df = find_intensification_period(df, **args_periods)
+    df = find_decay_period(df, **args_periods)
+    return df
+
+
+def _fmt_td(value) -> str:
+    """Compact Timedelta rendering for the ledger tables ('1d 06.0h', '9.0h')."""
+    total_h = pd.Timedelta(value).total_seconds() / 3600.0
+    days, hours = divmod(total_h, 24)
+    return f"{int(days)}d {hours:04.1f}h" if days else f"{hours:.1f}h"
+
+
+def _ledger_table(ledgers: dict, ribbon) -> pd.DataFrame:
+    """Ledger rows for both stage functions, ordered in time.
+
+    'Final label' crosses the ledger with the pipeline ribbon: an accepted
+    candidate can still lose its stretch to a later step, which is invisible in
+    the final figure and is the single most confusing thing about calibrating
+    these thresholds. Left blank when the ribbon overlay is off (it is what
+    supplies the final labels).
+    """
+    rows = []
+    for kind, ledger in ledgers.items():
+        for rec in ledger["candidates"] + ledger["gaps"]:
+            is_gap = rec["type"] == "gap"
+            row = {
+                "Step": kind,
+                "Type": "gap" if is_gap else ("candidate → end of series"
+                                              if rec["to_series_end"] else "candidate"),
+                "Start": rec["start"].strftime("%d/%m %Hh"),
+                "End": rec["end"].strftime("%d/%m %Hh"),
+                "Duration": _fmt_td(rec["duration"]),
+                "Scale": _fmt_td(rec["scale"]),
+                ("Max. allowed" if is_gap else "Min. required"): _fmt_td(rec["minimum"]),
+                "Verdict": ("filled" if rec["accepted"] else "left open") if is_gap
+                           else ("ACCEPTED" if rec["accepted"] else "rejected"),
+                "Final label": "",
+                "_sort": rec["start"],
+            }
+            if ribbon is not None and rec["accepted"]:
+                fate = li.fate_of_segment(ribbon, rec["start"], rec["end"])
+                row["Final label"] = ", ".join(
+                    f"{lbl} ({n}/{fate['n']})"
+                    for lbl, n in sorted(fate["final"].items(), key=lambda kv: -kv[1])
+                )
+            rows.append(row)
+    if not rows:
+        return pd.DataFrame()
+    out = pd.DataFrame(rows).sort_values(["_sort", "Step"]).drop(columns="_sort")
+    # The two stage functions use opposite comparisons, so the threshold column
+    # is named differently per row type; merge them for display.
+    if "Max. allowed" in out.columns and "Min. required" in out.columns:
+        out["Threshold"] = out["Min. required"].fillna("") + out["Max. allowed"].fillna("")
+        out = out.drop(columns=["Min. required", "Max. allowed"])
+        cols = list(out.columns)
+        cols.insert(cols.index("Verdict"), cols.pop(cols.index("Threshold")))
+        out = out[cols]
+    return out.reset_index(drop=True)
+
+
+def _mature_table(records: list) -> pd.DataFrame:
+    """One row per candidate mature window, with the discard reason spelled out."""
+    rows = []
+    for rec in records:
+        rows.append({
+            "z valley": rec["z_valley"].strftime("%d/%m %Hh"),
+            "Window": (f"{pd.Timestamp(rec['start']):%d/%m %Hh} → "
+                       f"{pd.Timestamp(rec['end']):%d/%m %Hh}"),
+            "Written": "yes" if rec["written"] else "no",
+            "Confirmed": "yes" if rec["confirmed"] else "no",
+            "Previous neighbour": rec.get("prev_label") or "—",
+            "Next neighbour": rec.get("next_label") or "—",
+            "Discard reason": rec["reason"] or "—",
+        })
+    return pd.DataFrame(rows)
 
 
 def _build_zip(ok_results: dict, yaml_str: str) -> bytes:
@@ -1894,12 +2046,32 @@ tab_cal, tab_doc = st.tabs(["Calibration", "Documentation"])
 # TAB 1 — Calibration
 # ══════════════════════════════════════════════════════════════════════════════════
 with tab_cal:
-    # Top row: grid selector + ZIP export
+    # Top row: display mode + ZIP export.
+    #
+    # "Grid" is the historical view and renders exactly what it rendered
+    # before the inspector existed -- same matplotlib functions, same figures,
+    # same ZIP bytes; only the widget it shares this row with changed.
+    # "Inspector" answers a different question -- one track, with every pipeline
+    # series and every decision overlay switchable one by one -- so it gets its
+    # own renderer (Plotly, for client-side legend toggling) instead of being
+    # squeezed into the grid. See the module docstring of inspector_plotly.py.
     _c1, _c2 = st.columns([4, 1])
     with _c1:
-        n_cols: int = st.select_slider(
-            "Grid columns", options=[1, 2, 3, 4, 5, 6],
-            value=_DEFAULTS["n_cols"], key="n_cols",
+        view_mode: str = st.radio(
+            "Display mode", options=_VIEW_MODES,
+            index=_VIEW_MODES.index(_DEFAULTS["view_mode"]),
+            key="view_mode", horizontal=True,
+            help=(
+                "**Grid** — every loaded track at once, one small phase "
+                "figure each. Use it to scan a whole parameter set for "
+                "outliers. Unchanged from before the inspector existed.\n\n"
+                "**Inspector** — one track, every pipeline series and every "
+                "decision the algorithm made, each on its own switchable "
+                "layer. Use it when a track in the grid looks wrong and you "
+                "need to know *why*.\n\n"
+                "Neither mode changes detection, and no inspector setting "
+                "reaches the exported YAML."
+            ),
         )
     with _c2:
         st.download_button(
@@ -1915,139 +2087,391 @@ with tab_cal:
             ),
         )
 
-    if n_cols >= 4:
-        _render_global_legend()
+    # ══════════════════════════════════════════════════════════════════════════
+    # MODE "Grid" — unchanged multi-cyclone grid (matplotlib, cached PNGs)
+    # ══════════════════════════════════════════════════════════════════════════
+    if view_mode == "Grid":
+        n_cols: int = st.select_slider(
+            "Grid columns", options=[1, 2, 3, 4, 5, 6],
+            value=_DEFAULTS["n_cols"], key="n_cols",
+        )
 
-    # Display grid
-    grid = st.columns(n_cols)
-    for idx, (cyclone_name, res) in enumerate(all_results.items()):
-        with grid[idx % n_cols]:
-            _bad_key = f"{_BAD_CASE_KEY_PREFIX}{cyclone_name}"
-            _is_bad = st.session_state.get(_bad_key, False)
-            st.subheader(f"⚠️ {cyclone_name}" if _is_bad else cyclone_name)
+        if n_cols >= 4:
+            _render_global_legend()
 
-            if not res["ok"]:
-                st.error(res.get("error", "Unknown error"))
-                continue
+        # Display grid
+        grid = st.columns(n_cols)
+        for idx, (cyclone_name, res) in enumerate(all_results.items()):
+            with grid[idx % n_cols]:
+                _bad_key = f"{_BAD_CASE_KEY_PREFIX}{cyclone_name}"
+                _is_bad = st.session_state.get(_bad_key, False)
+                st.subheader(f"⚠️ {cyclone_name}" if _is_bad else cyclone_name)
 
-            for msg in res["filter_warns"]:
-                st.warning(msg)
-            for msg in res["phase_warns"]:
-                st.warning(msg)
+                if not res["ok"]:
+                    st.error(res.get("error", "Unknown error"))
+                    continue
 
-            # Figure — rendered to PNG bytes by a cached function and shown via
-            # st.image() rather than building a live Figure + st.pyplot() here,
-            # so a rerun that doesn't change filter/phase params (e.g. a
-            # bad-case-mark checkbox click) is a cache hit for every cyclone's
-            # figure instead of a full matplotlib re-render of the whole grid.
-            try:
-                if n_cols >= 4:
-                    _png_display = _render_compact_png(
-                        files[cyclone_name], use_filter, cutoff_low, cutoff_high,
-                        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-                        boundary_padding,
-                        _phase_params_tuple, cyclone_name, n_cols,
-                    )
-                else:
-                    _png_display = _render_periods_png(
-                        files[cyclone_name], use_filter, cutoff_low, cutoff_high,
-                        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-                        boundary_padding,
-                        _phase_params_tuple, cyclone_name,
-                        figsize=_FIGSIZES[n_cols], show_title=True,
-                        gt_boundary_iso=_gt_boundary_iso(
-                            cyclone_name, files[cyclone_name]),
-                    )
-            except Exception as exc:
-                st.error(f"Error in {'compact' if n_cols >= 4 else 'phase'} figure: {exc}")
-                continue
-            st.image(_png_display, use_container_width=True)
+                for msg in res["filter_warns"]:
+                    st.warning(msg)
+                for msg in res["phase_warns"]:
+                    st.warning(msg)
 
-            if show_incipient_probe and incipient_method == "plateau":
-                with st.expander("Sondagem da incipiente (crua vs suavizada)",
-                                 expanded=False):
-                    try:
-                        st.image(_render_probe_png(
+                # Figure — rendered to PNG bytes by a cached function and shown via
+                # st.image() rather than building a live Figure + st.pyplot() here,
+                # so a rerun that doesn't change filter/phase params (e.g. a
+                # bad-case-mark checkbox click) is a cache hit for every cyclone's
+                # figure instead of a full matplotlib re-render of the whole grid.
+                try:
+                    if n_cols >= 4:
+                        _png_display = _render_compact_png(
                             files[cyclone_name], use_filter, cutoff_low, cutoff_high,
-                            use_smoothing, use_smoothing_twice, replace_endpoints,
-                            savgol_poly, boundary_padding,
-                            incipient_plateau_signal, int(incipient_smooth_window),
-                            int(incipient_smooth_polyorder),
-                            float(incipient_plateau_tau), incipient_plateau_crossing,
-                            int(incipient_plateau_k),
-                        ), use_container_width=True)
-                    except Exception as exc:
-                        st.warning(f"Probe overlay unavailable: {exc}")
-
-            st.checkbox(
-                "⚠️ Mark as bad",
-                value=False, key=_bad_key,
-                help=(
-                    "Flags this cyclone's detection result as bad for the current "
-                    "parameter set. Persists across parameter changes within this "
-                    "session (use '🗑 Clear bad-case marks' in the sidebar to reset) "
-                    "and is included in the exported YAML's 'evaluation' section."
-                ),
-            )
-
-            # 1-col extras
-            if n_cols == 1:
-                with st.expander("Step-by-step analysis"):
-                    try:
-                        fig_d = plot_didactic(
-                            res["df_result"], res["vort"],
-                            output_directory=None, **_PHASE_PARAMS,
+                            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                            boundary_padding,
+                            _phase_params_tuple, cyclone_name, n_cols,
                         )
-                        st.pyplot(fig_d); plt.close(fig_d)
-                    except Exception as exc:
-                        st.error(f"Error in didactic plot: {exc}")
+                    else:
+                        _png_display = _render_periods_png(
+                            files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                            boundary_padding,
+                            _phase_params_tuple, cyclone_name,
+                            figsize=_FIGSIZES[n_cols], show_title=True,
+                            gt_boundary_iso=_gt_boundary_iso(
+                                cyclone_name, files[cyclone_name]),
+                        )
+                except Exception as exc:
+                    st.error(f"Error in {'compact' if n_cols >= 4 else 'phase'} figure: {exc}")
+                    continue
+                st.image(_png_display, use_container_width=True)
 
-                diag = res["diag"]
-                with st.expander("Detailed diagnostics", expanded=True):
-                    if diag["gaps"] > 0:
-                        st.warning(f"Unlabelled gaps: {diag['gaps']} timesteps")
-                    if diag["short_phases"]:
-                        st.warning(f"Short phases (< 6 h): {', '.join(diag['short_phases'])}")
-                    st.dataframe(
-                        pd.DataFrame(diag["phase_rows"]).set_index("Phase"),
-                        use_container_width=True,
+                if show_incipient_probe and incipient_method == "plateau":
+                    with st.expander("Incipient probe (raw vs smoothed)",
+                                     expanded=False):
+                        try:
+                            st.image(_render_probe_png(
+                                files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                                use_smoothing, use_smoothing_twice, replace_endpoints,
+                                savgol_poly, boundary_padding,
+                                incipient_plateau_signal, int(incipient_smooth_window),
+                                int(incipient_smooth_polyorder),
+                                float(incipient_plateau_tau), incipient_plateau_crossing,
+                                int(incipient_plateau_k),
+                            ), use_container_width=True)
+                        except Exception as exc:
+                            st.warning(f"Probe overlay unavailable: {exc}")
+
+                st.checkbox(
+                    "⚠️ Mark as bad",
+                    value=False, key=_bad_key,
+                    help=(
+                        "Flags this cyclone's detection result as bad for the current "
+                        "parameter set. Persists across parameter changes within this "
+                        "session (use '🗑 Clear bad-case marks' in the sidebar to reset) "
+                        "and is included in the exported YAML's 'evaluation' section."
+                    ),
+                )
+
+                # 1-col extras
+                if n_cols == 1:
+                    with st.expander("Step-by-step analysis"):
+                        try:
+                            fig_d = plot_didactic(
+                                res["df_result"], res["vort"],
+                                output_directory=None, **_PHASE_PARAMS,
+                            )
+                            st.pyplot(fig_d); plt.close(fig_d)
+                        except Exception as exc:
+                            st.error(f"Error in didactic plot: {exc}")
+
+                    diag = res["diag"]
+                    with st.expander("Detailed diagnostics", expanded=True):
+                        if diag["gaps"] > 0:
+                            st.warning(f"Unlabelled gaps: {diag['gaps']} timesteps")
+                        if diag["short_phases"]:
+                            st.warning(f"Short phases (< 6 h): {', '.join(diag['short_phases'])}")
+                        st.dataframe(
+                            pd.DataFrame(diag["phase_rows"]).set_index("Phase"),
+                            use_container_width=True,
+                        )
+                        # Individual download buttons
+                        _dl1, _dl2 = st.columns(2)
+                        with _dl1:
+                            st.download_button(
+                                "⬇ Download CSV",
+                                data=res["csv_bytes"],
+                                file_name=f"{cyclone_name}_periods.csv",
+                                mime="text/csv",
+                                use_container_width=True,
+                            )
+                        with _dl2:
+                            st.download_button(
+                                "⬇ Download PNG",
+                                data=res["png_bytes"],
+                                file_name=f"{cyclone_name}_periods.png",
+                                mime="image/png",
+                                use_container_width=True,
+                                disabled=not bool(res["png_bytes"]),
+                            )
+
+        # Consolidated diagnostics — 2+ col mode
+        if n_cols > 1 and _ok_results:
+            st.divider()
+            st.subheader("Consolidated diagnostics")
+            rows = []
+            for d in (r["diag"] for r in _ok_results.values()):
+                rows.append({
+                    "Cyclone":      d["name"],
+                    "Phases":       " → ".join(d["phases"]),
+                    "N phases":     len(d["phases"]),
+                    "Gaps":         f"{d['gaps']} ⚠️" if d["gaps"] > 0 else "0",
+                    "Residual":     "✓" if d["residual"] else "—",
+                    "Short phases": ", ".join(d["short_phases"]) if d["short_phases"] else "—",
+                    "Warnings":     f"{len(d['warns'])} ⚠️" if d["warns"] else "0",
+                })
+            st.dataframe(pd.DataFrame(rows).set_index("Cyclone"), use_container_width=True)
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # MODE "Inspector" — one track, every layer switchable (Plotly)
+    # ══════════════════════════════════════════════════════════════════════════
+    # PURE VISUALISATION. Nothing below changes detection: every array drawn is
+    # either read back from the run (`res["df_result"]`, `res["vort"]`) or
+    # computed by `layer_inspector`, which only ever CALLS the package's own
+    # functions. No widget here reaches `_PHASE_PARAMS`, and none of this state
+    # is exported to YAML -- it is view state, like `n_cols`.
+    else:
+        _inspectable = [n for n, r in all_results.items() if r["ok"]]
+        if not _inspectable:
+            st.warning("No cyclone was processed successfully — nothing to inspect.")
+        else:
+            _isel, _inorm, _ihelp = st.columns([2, 1, 3])
+            with _isel:
+                # Seeded before the widget is built rather than via `index=`:
+                # passing a default AND a key that session_state already holds
+                # is what Streamlit warns about, and the stored track may no
+                # longer be loaded (the file set changes between reruns).
+                if st.session_state.get("inspector_track") not in _inspectable:
+                    st.session_state["inspector_track"] = _inspectable[0]
+                _track = st.selectbox(
+                    "Track to inspect", options=_inspectable,
+                    key="inspector_track",
+                )
+            with _inorm:
+                _normalize = st.checkbox(
+                    "Shared y scale", key="inspector_normalize",
+                    help=(
+                        "Rescales the curves to a 0–1 band, in the same groups "
+                        "the Grid figure puts on its two y-axes: raw `zeta` "
+                        "gets a band of its own, while `filtered_vorticity`, "
+                        "`vorticity_smoothed` and `vorticity_smoothed2` share "
+                        "one. The dz/dz2 panels work the same way "
+                        "(`*_filt` and `*_smoothed2` share a band).\n\n"
+                        "Giving the raw series its own band is what makes it "
+                        "**overlay** the filtered one — it spans 2–3× more, so "
+                        "on a common scale it just flattens the others. "
+                        "Keeping the pipeline stages **together** is what "
+                        "preserves the amplitude each smoothing pass removed; "
+                        "scaling them apart would force every stage to fill "
+                        "the panel and look identical.\n\n"
+                        "Which means the panel reads as one track seen at "
+                        "successive stages: same shape, progressively cleaner "
+                        "and progressively damped — the thing the phase rules "
+                        "actually act on.\n\n"
+                        "Side effect: zero ends up at a different height per "
+                        "band, so the dz/dz2 zero line is not drawn. Untick "
+                        "for true units and a real zero."
+                    ),
+                )
+            with _ihelp:
+                st.caption(
+                    "**Series layers** — every pipeline stage (zeta, "
+                    "filtered_vorticity, vorticity_smoothed, "
+                    "vorticity_smoothed2, dz/dz2) and the three "
+                    "`*_peaks_valleys` are already in the chart, all on. "
+                    "Click a legend entry to switch one off; it happens in the "
+                    "browser, with no reload. Phase shading is always on — it "
+                    "is the background the rest is read against.\n\n"
+                    "**Decision overlays** — the four boxes below need "
+                    "server-side computation, so they are checkboxes rather "
+                    "than legend entries. They start on; untick one to drop "
+                    "its cost."
+                )
+
+            _o1, _o2, _o3, _o4 = st.columns(4)
+            with _o1:
+                _show_ribbon = st.checkbox(
+                    "Pipeline ribbon", key="inspector_ribbon",
+                    help=(
+                        "Shows the phase labels as they stood after each of "
+                        "the 6 detection steps — one lane per step, top to "
+                        "bottom, lane 6 being the final result.\n\n"
+                        "A stretch whose colour changes from one lane to the "
+                        "next was **overwritten by that step**: the steps run "
+                        "in a fixed order and later ones write over earlier "
+                        "ones.\n\n"
+                        "Which means a threshold can look like it did nothing "
+                        "when it actually worked and a later step took the "
+                        "result away. The lane where a stretch changes hands "
+                        "tells you which knob to turn."
+                    ),
+                )
+            with _o2:
+                _show_ledger = st.checkbox(
+                    "Candidate ledger", key="inspector_ledger",
+                    help=(
+                        "Shows every segment the two length tests looked at: "
+                        "each z peak → next z valley (intensification) and "
+                        "each z valley → next z peak (decay), drawn on the z "
+                        "panel — solid if it passed, dotted grey if not.\n\n"
+                        "A segment fails when it is shorter than "
+                        "`scale × threshold`; the table below gives all three "
+                        "numbers for every segment.\n\n"
+                        "Which means you can watch a length slider add and "
+                        "drop segments as you move it, instead of inferring "
+                        "it from a phase figure that only shows what "
+                        "survived."
+                    ),
+                )
+            with _o3:
+                _show_mature = st.checkbox(
+                    "Mature layers", key="inspector_mature",
+                    help=(
+                        "Shows which z peaks and valleys the prominence "
+                        "filter kept (filled markers) and which it dropped "
+                        "(hollow), plus every mature window that was built "
+                        "around a surviving valley.\n\n"
+                        "A window drawn dotted was built and then **erased**: "
+                        "`find_mature_stage` only keeps a window whose "
+                        "previous timestep is `intensification` and whose next "
+                        "one is `decay`.\n\n"
+                        "Which means a missing mature phase gets an answer "
+                        "instead of a shrug — either no window was ever built, "
+                        "or one was built and discarded, and the table below "
+                        "names the reason."
+                    ),
+                )
+            with _o4:
+                _show_incipient = st.checkbox(
+                    "Incipient layers", key="inspector_incipient",
+                    help=(
+                        "Shows the normalised slope `rel = |dz|/max|dz|` "
+                        "against the τ line, the |dz2| knee, and the incipient "
+                        "boundary the run actually produced.\n\n"
+                        "The plateau rule ends the incipient phase at the "
+                        "first point where `rel` reaches τ; the knee marks "
+                        "where the series genuinely stops being flat.\n\n"
+                        "Which means you can see whether τ is firing on the "
+                        "real start of deepening or somewhere on the flat "
+                        "before or after it — and, when the produced boundary "
+                        "sits later than the τ crossing, how much of the "
+                        "incipient phase τ did not decide.\n\n"
+                        "Outside `incipient_method=\"plateau\"` there is no "
+                        "rel/τ/probe to show; dz and dz2 stay."
+                    ),
+                )
+
+            _res = all_results[_track]
+            _plateau_active = incipient_method == "plateau"
+            if _show_incipient and not _plateau_active:
+                st.caption(
+                    "⚠ `incipient_method` is **geometric**: the rel/τ/probe "
+                    "layers only exist in `plateau` mode and were omitted. The "
+                    "|dz2| knee and the incipient boundary the run produced are "
+                    "still drawn, and so are the raw dz / dz2 panels."
+                )
+
+            try:
+                _ribbon = _ledgers = _mature = _incipient = None
+                _work = _mature_records = None
+                if _show_ribbon or _show_ledger or _show_mature:
+                    _work = _inspector_working_frame(
+                        files[_track], use_filter, cutoff_low, cutoff_high,
+                        use_smoothing, use_smoothing_twice, replace_endpoints,
+                        savgol_poly, boundary_padding,
+                        extrema_prominence, extrema_prominence_relative,
+                        extrema_distance,
                     )
-                    # Individual download buttons
-                    _dl1, _dl2 = st.columns(2)
-                    with _dl1:
-                        st.download_button(
-                            "⬇ Download CSV",
-                            data=res["csv_bytes"],
-                            file_name=f"{cyclone_name}_periods.csv",
-                            mime="text/csv",
-                            use_container_width=True,
-                        )
-                    with _dl2:
-                        st.download_button(
-                            "⬇ Download PNG",
-                            data=res["png_bytes"],
-                            file_name=f"{cyclone_name}_periods.png",
-                            mime="image/png",
-                            use_container_width=True,
-                            disabled=not bool(res["png_bytes"]),
-                        )
+                _args_periods = li.build_args_periods(
+                    **{k: v for k, v in _PHASE_PARAMS.items()
+                       if k not in ("prominence", "prominence_relative", "distance")})
+                if _show_ribbon:
+                    _ribbon = li.pipeline_ribbon(_work, **_args_periods)
+                if _show_ledger:
+                    _ledgers = {
+                        "intensification": li.intensification_ledger(_work, **_args_periods),
+                        "decay": li.decay_ledger(_work, **_args_periods),
+                    }
+                if _show_mature:
+                    _mature_records = li.mature_ledger(
+                        _stage_frame_after_decay(_work, _args_periods), **_args_periods)
+                    _mature = {
+                        "lens": li.mature_lens(
+                            _res["df_result"]["z"],
+                            prominence=extrema_prominence,
+                            prominence_relative=extrema_prominence_relative,
+                            distance=extrema_distance),
+                        "records": _mature_records,
+                    }
+                if _show_incipient:
+                    _incipient = {
+                        "lens": li.incipient_lens(
+                            _res["df_result"]["z_unfil"], _res["df_result"]["dz"],
+                            _res["df_result"]["dz2"],
+                            signal=incipient_plateau_signal,
+                            tau=float(incipient_plateau_tau),
+                            crossing=incipient_plateau_crossing,
+                            k=int(incipient_plateau_k),
+                            smooth_window=int(incipient_smooth_window),
+                            smooth_polyorder=int(incipient_smooth_polyorder)),
+                        "boundary": li.incipient_lead(_res["df_result"]),
+                        "tau": float(incipient_plateau_tau),
+                        "plateau_active": _plateau_active,
+                    }
 
-    # Consolidated diagnostics — 2+ col mode
-    if n_cols > 1 and _ok_results:
-        st.divider()
-        st.subheader("Consolidated diagnostics")
-        rows = []
-        for d in (r["diag"] for r in _ok_results.values()):
-            rows.append({
-                "Cyclone":      d["name"],
-                "Phases":       " → ".join(d["phases"]),
-                "N phases":     len(d["phases"]),
-                "Gaps":         f"{d['gaps']} ⚠️" if d["gaps"] > 0 else "0",
-                "Residual":     "✓" if d["residual"] else "—",
-                "Short phases": ", ".join(d["short_phases"]) if d["short_phases"] else "—",
-                "Warnings":     f"{len(d['warns'])} ⚠️" if d["warns"] else "0",
-            })
-        st.dataframe(pd.DataFrame(rows).set_index("Cyclone"), use_container_width=True)
+                _fig = build_inspector_figure(
+                    _track, _res["vort"], _res["df_result"], _res["periods_dict"],
+                    gt_boundary_iso=_gt_boundary_iso(_track, files[_track]),
+                    ribbon=_ribbon, ledgers=_ledgers, mature=_mature,
+                    incipient=_incipient, normalize=bool(_normalize),
+                )
+                st.plotly_chart(_fig, use_container_width=True,
+                                key=f"inspector_chart_{_track}")
+            except Exception as exc:
+                st.error(f"Inspector error: {exc}")
+                _ribbon = _ledgers = _mature_records = None
+
+            if _ledgers:
+                st.subheader("Candidate ledger")
+                st.caption(
+                    "One row per segment the stage function tested. It is "
+                    "accepted when **duration > minimum**, where the minimum "
+                    "is `scale × threshold`. Gaps run the other way: a gap "
+                    "**shorter** than its maximum gets filled in. "
+                    "'Final label' says what that stretch ended up labelled "
+                    "as — when it is not the phase this step assigned, a "
+                    "later step overwrote it (see the ribbon)."
+                )
+                st.dataframe(_ledger_table(_ledgers, _ribbon),
+                             use_container_width=True, hide_index=True)
+                if _ribbon is None:
+                    st.caption(
+                        "Tick **Pipeline ribbon** to fill the 'Final label' "
+                        "column — it is read from step 6 of the ribbon."
+                    )
+
+            if _mature_records:
+                st.subheader("Mature windows and the strict confirmation")
+                st.caption(
+                    "A mature window is confirmed only if the timestep before "
+                    "it is `intensification` and the one after it is `decay` — "
+                    "the cyclone has to be seen to decay before a plateau "
+                    "counts as its peak. A window that fails is erased, and "
+                    "then looks exactly like a window that was never found. "
+                    "This table is the difference: 'Written' says one was "
+                    "built, 'Confirmed' says it survived, and 'Discard reason' "
+                    "says which half of the rule it failed."
+                )
+                st.dataframe(_mature_table(_mature_records),
+                             use_container_width=True, hide_index=True)
 
     # Bad-case evaluation summary — always shown, regardless of n_cols.
     st.divider()
