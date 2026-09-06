@@ -35,8 +35,11 @@ Five things are worth testing here, and they are not the usual ones.
 """
 
 import ast
+import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -609,51 +612,38 @@ def test_the_phase_palette_matches_the_package_figures():
     assert set(lc.PHASE_ORDER) == set(found)
 
 
-def test_each_phase_is_shaded_in_its_own_standard_colour():
+def test_each_phase_is_drawn_in_its_own_standard_colour():
     lt = _label_tab()
-    s = pd.Series(range(60), dtype="float64",
-                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
-    fig = lt._fig("x", s, FOUR)
-    fills = [sh.fillcolor for sh in fig.layout.shapes if sh.type == "rect"]
+    s_ = pd.Series(range(60), dtype="float64",
+                   index=pd.date_range("2020-01-01", periods=60, freq="3h"))
+    colours = lt.chart_payload("x", s_, FOUR)["colors"]
     for ph in FOUR:
-        assert lc.PHASE_COLORS[ph["phase"]] in fills, ph["phase"]
-    assert lc.PHASE_COLORS["incipient"] == "#65a1e6"      # blue, as asked
+        assert colours[ph["phase"]] == lc.PHASE_COLORS[ph["phase"]]
+    assert colours["incipient"] == "#65a1e6"              # blue, as asked
 
 
-def test_the_tolerance_is_drawn_as_a_double_headed_arrow():
-    """The margin is the part of a label easiest to set carelessly: a number in a
-    table gives no sense of how much curve it forgives."""
+def test_the_fallback_chart_shows_the_margin_as_bar_thickness_too():
+    """The fallback speaks the same visual language as the real chart, so falling
+    back does not silently change what a bar means."""
     lt = _label_tab()
-    s = pd.Series(range(60), dtype="float64",
-                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
-    fig = lt._fig("x", s, FOUR)
-    arrows = [a for a in fig.layout.annotations if a.showarrow]
-    assert arrows, "no tolerance arrow drawn"
-    assert all(a.arrowside == "end+start" for a in arrows)
-    # one arrow per boundary with a non-zero margin (the first phase has none)
-    assert len(arrows) == sum(1 for k, p in enumerate(FOUR)
-                              if k >= 1 and p["tolerance_idx"] > 0)
-    # and it spans exactly [start-tol, start+tol]
-    it = next(a for a in arrows if a.x == 7 + 3)
-    assert it.ax == 7 - 3
-
-
-def test_a_zero_margin_draws_no_band_and_no_arrow():
-    lt = _label_tab()
-    s = pd.Series(range(60), dtype="float64",
-                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
-    fig = lt._fig("x", s, _phases(("incipient", 0, 0), ("mature", 20, 0)))
-    assert not [a for a in fig.layout.annotations if a.showarrow]
-
-
-def test_the_view_still_plots_exactly_one_series():
-    """Phase shading is shapes, not traces: the one trace is still the raw input."""
-    lt = _label_tab()
-    s = pd.Series(range(60), dtype="float64",
-                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
-    fig = lt._fig("x", s, FOUR)
-    assert len(fig.data) == 1
-    assert (fig.data[0].y == s.to_numpy()).all()
+    s_ = pd.Series(range(60), dtype="float64",
+                   index=pd.date_range("2020-01-01", periods=60, freq="3h"))
+    import plotly.graph_objects as go
+    made = {}
+    real_chart = lt.st.plotly_chart
+    lt.st.plotly_chart = lambda fig, **kw: made.setdefault("fig", fig)
+    lt.st.caption = lambda *a, **k: None
+    try:
+        lt._fallback_chart("x", s_, FOUR)
+    finally:
+        lt.st.plotly_chart = real_chart
+    fig = made["fig"]
+    assert isinstance(fig, go.Figure)
+    assert len(fig.data) == 1                       # still one trace: the raw input
+    assert (fig.data[0].y == s_.to_numpy()).all()
+    widths = [sh.x1 - sh.x0 for sh in fig.layout.shapes
+              if sh.type == "rect" and sh.fillcolor == lc.PHASE_COLORS["mature"]]
+    assert 10 in widths, widths                     # the ±5 margin, drawn 10 steps wide
 
 
 def test_the_opening_scaffold_is_a_valid_partition():
@@ -666,221 +656,163 @@ def test_the_opening_scaffold_is_a_valid_partition():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 5d. Dragging boundaries and tolerance arrows
+# 5d. The chart payload and the drag result, in Python
 # ══════════════════════════════════════════════════════════════════════════════
 #
-# st.plotly_chart cannot deliver a drag — its own docs say "Only selection events
-# are supported at this time" — so a small components.v2 bridge forwards
-# plotly_relayout instead. Whether the browser really emits those keys on a drag
-# is the ONE thing that cannot be checked from here. Everything downstream of the
-# payload is pure Python, and that is what these tests pin: given the message,
-# the phases move correctly, and the two sides agree on the message's shape.
+# The chart is now hand-drawn JS in a components.v2 surface. Plotly could not do
+# what this view needs: a boundary bar that slides along time and drags its
+# shading with it. Plotly has no axis constraint for draggable shapes, so a bar
+# could be pulled off the time axis where it means nothing, and Streamlit does
+# not expose window.Plotly to snap it back. Drawn by hand, only clientX is ever
+# read — see the Node spec in 5e, which enforces that with a clientY that throws.
+#
+# These tests cover the two Python ends of that: what the chart is allowed to
+# know, and what happens to the message it sends back.
 
-def _toy_fig(phases, n=60):
+def test_the_chart_is_told_the_raw_series_and_the_labellers_marks_and_nothing_else():
+    """The payload is the ONLY channel from the app to the drawing surface, so
+    pinning its keys is what keeps the blindness checkable instead of asserted."""
     lt = _label_tab()
-    s = pd.Series(range(n), dtype="float64",
-                  index=pd.date_range("2020-01-01", periods=n, freq="3h"))
-    return lt, lt._fig("x", s, phases)
+    s = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0],
+                  index=pd.date_range("2020-01-01", periods=5, freq="3h"))
+    ph = _phases(("incipient", 0, 0), ("mature", 2, 1))
+    payload = lt.chart_payload("T", s, ph)
+
+    assert set(payload) == {"sid", "n", "y", "phases", "colors",
+                            "w", "h", "ml", "mr", "mt", "mb"}
+    assert payload["y"] == [1.0, 2.0, 3.0, 4.0, 5.0]      # the raw values, verbatim
+    assert payload["n"] == 5
+    assert payload["phases"] == ph
+    assert payload["colors"] == lc.PHASE_COLORS
+    blob = json.dumps(payload)
+    for name in FORBIDDEN_NAMES:
+        assert name not in blob, name
 
 
-def test_drag_map_finds_the_boundaries_by_name_not_by_counting():
-    """Plotly reports a drag POSITIONALLY. If the map were built by counting the
-    calls in _fig, adding one decoration would silently reroute a drag onto the
-    wrong boundary."""
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    assert sorted(dm["shapes"].values()) == [1, 2, 3]     # not the first phase
-    assert sorted(dm["annotations"].values()) == [1, 2, 3]
-    for i, k in dm["shapes"].items():
-        assert fig.layout.shapes[i].name == f"bnd{k}"
-        assert fig.layout.shapes[i].editable is True
+def test_the_chart_payload_is_json_serialisable():
+    """It crosses into the browser as JSON; a stray numpy scalar would break the
+    chart at mount time, in a browser, where the traceback is not visible."""
+    lt = _label_tab()
+    real = lc.load_real_series()
+    sid, values = next(iter(sorted(real.items())))
+    payload = lt.chart_payload(sid, values, lt.default_phases(len(values), 4))
+    round_tripped = json.loads(json.dumps(payload))
+    assert round_tripped["n"] == len(values)
+    assert all(isinstance(v, float) for v in round_tripped["y"])
 
 
-def test_only_the_boundary_lines_are_draggable():
-    """edits.shapePosition is global, so every band must be pinned shut or the
-    phase shading itself would drag."""
-    _lt, fig = _toy_fig(FOUR)
-    for sh in fig.layout.shapes:
-        if sh.name and sh.name.startswith("bnd"):
-            assert sh.editable is True
-        else:
-            assert sh.editable is False, f"{sh.type} band is draggable"
-
-
-def test_dragging_a_boundary_moves_that_phase():
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    idx = next(i for i, k in dm["shapes"].items() if k == 2)   # the mature start
+def test_a_drag_result_moves_the_boundary_it_names():
+    lt = _label_tab()
     phases = [dict(p) for p in FOUR]
-    assert lt.apply_drag({f"shapes[{idx}].x0": 23.7}, phases, dm, 60)
-    assert phases[2]["start_idx"] == 24                        # rounded
-    assert [p["start_idx"] for p in phases] == [0, 7, 24, 30]   # nothing else moved
+    payload = {"sid": "T", "phases": [
+        {"start_idx": 0, "tolerance_idx": 0}, {"start_idx": 11, "tolerance_idx": 3},
+        {"start_idx": 20, "tolerance_idx": 5}, {"start_idx": 30, "tolerance_idx": 4}]}
+    assert lt.apply_edit(payload, phases, 60)
+    assert [p["start_idx"] for p in phases] == [0, 11, 20, 30]
+    assert [p["phase"] for p in phases] == [p["phase"] for p in FOUR]   # names kept
 
 
-def test_a_boundary_cannot_be_dragged_past_its_neighbours():
-    """A partition has to stay a partition; a drag that would cross is clamped
-    rather than rejected, because a line that refuses to move reads as broken."""
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    idx = next(i for i, k in dm["shapes"].items() if k == 2)
+def test_a_drag_result_is_re_clamped_on_arrival():
+    """The browser clamps as it drags, but a message can arrive stale — from a
+    chart drawn before the table was edited — and must not be able to write a
+    sequence that is no longer a partition of [0, n)."""
+    lt = _label_tab()
     phases = [dict(p) for p in FOUR]
-    lt.apply_drag({f"shapes[{idx}].x0": -400}, phases, dm, 60)
-    assert phases[2]["start_idx"] == 8            # one past the boundary before it
-    lt.apply_drag({f"shapes[{idx}].x0": 999}, phases, dm, 60)
-    assert phases[2]["start_idx"] == 29           # one before the boundary after it
-    assert lc.validate_phases(phases, n_steps=60)
+    payload = {"phases": [
+        {"start_idx": 9, "tolerance_idx": 0},        # first is forced to 0
+        {"start_idx": -50, "tolerance_idx": 3},
+        {"start_idx": 999, "tolerance_idx": 5},
+        {"start_idx": 999, "tolerance_idx": -4}]}
+    lt.apply_edit(payload, phases, 60)
+    assert phases[0]["start_idx"] == 0
+    assert lc.validate_phases(phases, n_steps=60) == phases
+    assert all(p["tolerance_idx"] >= 0 for p in phases)
 
 
-def test_dragging_an_arrow_tail_sets_that_boundarys_margin():
-    """The arrow is drawn symmetric, so its tail is one half: the margin is the
-    tail's distance from the boundary, whichever side it was pulled to."""
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    idx = next(i for i, k in dm["annotations"].items() if k == 1)   # It @ 7, ±3
-    phases = [dict(p) for p in FOUR]
-    assert lt.apply_drag({f"annotations[{idx}].ax": 1.0}, phases, dm, 60)
-    assert phases[1]["tolerance_idx"] == 6          # |7 - 1|
-    # pulled to the other side, same margin
-    lt.apply_drag({f"annotations[{idx}].ax": 13.0}, phases, dm, 60)
-    assert phases[1]["tolerance_idx"] == 6
-    assert phases[1]["start_idx"] == 7              # the boundary itself is untouched
-
-
-def test_a_margin_dragged_onto_its_boundary_becomes_zero_not_negative():
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    idx = next(i for i, k in dm["annotations"].items() if k == 1)
-    phases = [dict(p) for p in FOUR]
-    lt.apply_drag({f"annotations[{idx}].ax": 7.0}, phases, dm, 60)
-    assert phases[1]["tolerance_idx"] == 0
-    assert lc.validate_phases(phases, n_steps=60)
-
-
-def test_a_boundary_and_its_margin_moving_together_measure_against_the_new_place():
-    """A tolerance arrives as an absolute tail position and only becomes a ±
-    once measured against its boundary — which may have moved in the same gesture,
-    so the order of application is load-bearing."""
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    sh = next(i for i, k in dm["shapes"].items() if k == 1)
-    an = next(i for i, k in dm["annotations"].items() if k == 1)
-    phases = [dict(p) for p in FOUR]
-    lt.apply_drag({f"shapes[{sh}].x0": 12.0, f"annotations[{an}].ax": 8.0},
-                  phases, dm, 60)
-    assert phases[1]["start_idx"] == 12
-    assert phases[1]["tolerance_idx"] == 4          # |12 - 8|, not |7 - 8|
-
-
-def test_unrelated_relayout_keys_are_ignored():
-    """plotly_relayout also fires for autorange, zoom and legend moves."""
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    phases = [dict(p) for p in FOUR]
-    assert not lt.apply_drag(
-        {"xaxis.range[0]": 3, "yaxis.autorange": True, "shapes[0].x1": 9,
-         "annotations[0].y": 2}, phases, dm, 60)
-    assert phases == FOUR
-
-
-def test_a_drag_that_changes_nothing_reports_no_movement():
-    """Otherwise every stray relayout would trigger a rerun loop."""
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    idx = next(i for i, k in dm["shapes"].items() if k == 1)
-    phases = [dict(p) for p in FOUR]
-    assert not lt.apply_drag({f"shapes[{idx}].x0": 7.0}, phases, dm, 60)
-
-
-def test_the_browser_filter_and_the_python_parser_accept_the_same_keys():
-    """The JS forwards a subset of relayout keys and Python parses them. They are
-    written in two languages in two places; if they drift, drags vanish silently.
+def test_a_malformed_or_mismatched_drag_result_is_ignored():
+    """A message describing a different number of phases is from a chart that no
+    longer matches the table; applying it positionally would scramble the label.
     """
     lt = _label_tab()
-    js_patterns = re.findall(r"/([^/]+)/\.test", lt._DRAG_JS)
-    assert len(js_patterns) == 2, js_patterns
-    for pattern in js_patterns:
-        compiled = re.compile(pattern)
-        # every key the browser would forward, Python must also route
-        for key in ("shapes[7].x0", "annotations[2].ax"):
-            if compiled.match(key):
-                assert lt._SHAPE_KEY.match(key) or lt._ANN_KEY.match(key), key
-        # and nothing else gets through either side
-        for key in ("xaxis.range[0]", "shapes[7].x1", "annotations[2].y"):
-            assert not compiled.match(key)
-            assert not (lt._SHAPE_KEY.match(key) or lt._ANN_KEY.match(key))
+    for bad in ({}, {"phases": None}, {"phases": []},
+                {"phases": [{"start_idx": 0, "tolerance_idx": 0}]},      # too short
+                {"phases": [{"start_idx": 0}] * 4},                      # no margin
+                {"phases": ["nonsense"] * 4}):
+        phases = [dict(p) for p in FOUR]
+        assert not lt.apply_edit(bad, phases, 60), bad
+        assert phases == FOUR
 
 
-def test_the_same_drag_message_is_only_acted_on_once():
+def test_an_unchanged_drag_result_reports_no_change():
+    """Otherwise every message would trigger a rerun."""
+    lt = _label_tab()
+    phases = [dict(p) for p in FOUR]
+    same = {"phases": [{"start_idx": p["start_idx"],
+                        "tolerance_idx": p["tolerance_idx"]} for p in FOUR]}
+    assert not lt.apply_edit(same, phases, 60)
+
+
+def test_the_same_drag_result_is_only_acted_on_once():
     """A trigger value that outlived its rerun would be re-applied every pass:
     each bumps the revision, which reruns, which re-reads it. That loop takes the
     app down mid-labelling, so it is guarded rather than hoped about."""
     lt = _label_tab()
-    payload = {"shapes[8].x0": 12.0}
-    sig = lt.drag_signature(payload)
-    assert lt.is_new_drag(payload, None)
-    assert not lt.is_new_drag(payload, sig)
-    # key order must not make the same drag look new
-    assert not lt.is_new_drag({"shapes[8].x0": 12.0}, sig)
-    # a different position is a different drag
-    assert lt.is_new_drag({"shapes[8].x0": 13.0}, sig)
-    # and an empty payload is never a drag
-    assert not lt.is_new_drag({}, None)
+    payload = {"phases": [{"start_idx": 0, "tolerance_idx": 0}]}
+    sig = lt.edit_signature(payload)
+    assert lt.is_new_edit(payload, None)
+    assert not lt.is_new_edit(payload, sig)
+    assert not lt.is_new_edit({"phases": [{"tolerance_idx": 0, "start_idx": 0}]}, sig)
+    assert lt.is_new_edit({"phases": [{"start_idx": 1, "tolerance_idx": 0}]}, sig)
+    assert not lt.is_new_edit({}, None)
 
 
-def test_vertical_movement_is_detected_so_it_can_be_undone():
-    """Selection is temporal. Vertical drag carries no information — but it does
-    displace what is drawn, and Plotly has no axis lock while Streamlit does not
-    expose window.Plotly, so the only way back is a redraw from Python."""
+def test_the_fallback_chart_exists_for_when_the_component_cannot_run():
+    """Drawing the chart ourselves means an unavailable component leaves nothing
+    on screen, so there has to be a static picture to fall back to. Labelling is
+    degraded there, never blocked: the table still saves."""
     lt = _label_tab()
-    assert lt.has_vertical_move({"shapes[3].y0": 0.4, "shapes[3].y1": 1.4})
-    assert lt.has_vertical_move({"annotations[1].ay": -3e-5})
-    assert lt.has_vertical_move({"shapes[3].x0": 12.0, "shapes[3].y0": 0.4})
-    assert not lt.has_vertical_move({"shapes[3].x0": 12.0})
-    assert not lt.has_vertical_move({"annotations[1].ax": 8.0})
-    assert not lt.has_vertical_move({"xaxis.range[0]": 3, "annotations[1].y": 2})
+    assert callable(lt._fallback_chart)
+    src = ast.parse(LABEL_TAB.read_text())
+    fn = next(n for n in ast.walk(src)
+              if isinstance(n, ast.FunctionDef) and n.name == "render")
+    handlers = [h for n in ast.walk(fn) if isinstance(n, ast.Try) for h in n.handlers]
+    assert any("_fallback_chart" in ast.dump(h) for h in handlers), \
+        "the chart call is not guarded by the fallback"
 
 
-def test_a_purely_vertical_drag_changes_no_phase():
-    """It must trigger a redraw, but it must not silently edit the label."""
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    phases = [dict(p) for p in FOUR]
-    payload = {"shapes[8].y0": 0.3, "shapes[8].y1": 1.3, "annotations[1].ay": 5.0}
-    assert not lt.apply_drag(payload, phases, dm, 60)
-    assert phases == FOUR
-    assert lt.has_vertical_move(payload)     # ...but the chart still gets redrawn
+# ══════════════════════════════════════════════════════════════════════════════
+# 5e. The chart component, exercised headlessly under Node
+# ══════════════════════════════════════════════════════════════════════════════
 
+def test_the_chart_js_drags_horizontally_and_only_horizontally(tmp_path):
+    """Run the shipped component JS against a stubbed DOM.
 
-def test_a_diagonal_drag_keeps_the_horizontal_part_only():
-    lt, fig = _toy_fig(FOUR)
-    dm = lt.drag_map(fig)
-    idx = next(i for i, k in dm["shapes"].items() if k == 1)
-    phases = [dict(p) for p in FOUR]
-    assert lt.apply_drag({f"shapes[{idx}].x0": 15.0, f"shapes[{idx}].y0": 0.6,
-                          f"shapes[{idx}].y1": 1.6}, phases, dm, 60)
-    assert phases[1]["start_idx"] == 15
-    assert [p["tolerance_idx"] for p in phases] == [0, 3, 5, 4]   # untouched
+    The chart is hand-drawn JavaScript precisely because Plotly could not keep a
+    drag on the time axis: it has no axis constraint for shapes or annotations,
+    and Streamlit does not expose window.Plotly to correct one. Drawn by hand,
+    the drag handler reads clientX and nothing else — so the guarantee is
+    structural. The stub's pointer events THROW if clientY is read, which is what
+    turns that from a claim into a check.
 
-
-def test_the_drag_bridge_reads_nothing_and_draws_nothing():
-    """It exists only to forward coordinates. If it ever grew a `data=` payload
-    it could start showing something, and the tab's blindness is not negotiable.
+    The spec also covers what the redesign was asked for: the bar's thickness is
+    the margin, the shading follows the bars, and a bar cannot cross a neighbour.
     """
-    lt = _label_tab()
-    assert "data=" not in lt._DRAG_JS
-    assert "setTriggerValue" in lt._DRAG_JS
-    # no detector name can reach the browser either
-    for name in FORBIDDEN_NAMES:
-        assert name not in lt._DRAG_JS
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
 
-
-def test_a_missing_drag_bridge_does_not_break_labelling(monkeypatch):
-    """Drag is a convenience; the table is the contract. An older Streamlit, or a
-    changed component API, must cost nothing."""
+    js_dir = REPO_ROOT / "tests" / "js"
     lt = _label_tab()
-    monkeypatch.setattr(lt, "_drag_component",
-                        lambda: (_ for _ in ()).throw(RuntimeError("no v2")))
-    assert lt._read_drag() is None
+    # Written from the Python module, so the spec can never drift from the JS
+    # that actually ships.
+    (js_dir / "chart.mjs").write_text(lt._CHART_JS)
+    try:
+        proc = subprocess.run([node, str(js_dir / "chart_drag_spec.mjs")],
+                              capture_output=True, text=True, timeout=120)
+    finally:
+        (js_dir / "chart.mjs").unlink(missing_ok=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "0 failed" in proc.stdout, proc.stdout
 
 
 # ══════════════════════════════════════════════════════════════════════════════

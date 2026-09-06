@@ -86,35 +86,35 @@ and anchoring is automatic rather than something care avoids.
 the package or names any detector output. Synthetic cases appear under an opaque
 hashed id, because names like `IcDItMD_noisy` spell the expected sequence.
 
-**Dragging.** Boundary lines and the ends of the tolerance arrows can be dragged
-directly on the chart. `st.plotly_chart` cannot deliver this on its own — its own
-docs say *"Only selection events are supported at this time"*, and a dragged
-shape arrives as `plotly_relayout`, which it does not forward — so a small
-`st.components.v2` bridge attaches to the chart Streamlit already rendered and
-forwards just those keys. It draws nothing and reads nothing. If it fails to bind,
-or the Streamlit version has no `components.v2`, dragging simply does nothing and
-the click and the table are untouched: **labelling is never blocked on it.**
-Only movement along the **time axis** counts: a label is an index, so vertical
-position means nothing. It cannot be locked at the source — Plotly has no axis
-constraint for draggable shapes or annotations, and Streamlit does not expose
-`window.Plotly`, so the browser cannot be told to snap it back either. Instead a
-vertical drag is forwarded as a redraw signal and the chart is re-rendered from
-Python, which puts the line back. The chart's Streamlit key carries a revision
-counter for the same reason: re-sending the same figure under the same key would
-not fix it, because the frontend diffs against the previous *spec*, not against a
-div the user has since dragged. The remount is also what makes a horizontal drag
-settle honestly — Plotly leaves the shape where the mouse released it (63.7)
-while the label is the rounded index (64).
+**The chart is hand-drawn SVG**, not a Plotly figure, and the reason is the
+interaction. This view needs a bar that slides along time and drags its phase
+shading with it. Plotly can make a shape draggable but only in two dimensions —
+there is no axis constraint for shapes or annotations anywhere in its schema — so
+a boundary could be pulled off the time axis, where it means nothing, taking the
+shading with it. That could not be corrected in the browser either, because
+Streamlit's bundle does not expose `window.Plotly`.
 
-Everything downstream of the payload is pure Python (`apply_drag`, `drag_map`,
-`has_vertical_move`, `is_new_drag`) and tested; whether a given browser emits
-those keys on a drag is the one part that has to be confirmed by trying it.
+Drawn by hand in a `st.components.v2` surface, the problem disappears instead of
+being repaired: the drag handler reads `clientX` and nothing else, so a bar
+cannot leave the time axis — not because it is pushed back, but because nothing
+ever moves it there. `tests/js/` runs the shipped JS under Node against a stubbed
+DOM whose pointer events **throw if `clientY` is read**, which makes that a check
+rather than a claim.
 
-Each boundary's margin is drawn as a shaded band and a **double-headed arrow**
-spanning `[start-tol, start+tol]`. The margin is the part of a label that is
-easiest to set carelessly: a number in a table gives no sense of how much of the
-curve it forgives, and seeing the arrow cover half a ramp is what prompts a
-smaller one.
+- **Drag a bar** to move that boundary. The phase bands are recomputed from the
+  bar positions on every frame, so the shading follows for free.
+- **Drag a bar's edge** to widen or narrow its margin. The bar's own **thickness
+  is the uncertainty**, so the margin travels with the boundary by construction
+  instead of being a second object that has to be kept in sync.
+- The **table** below is the exact path and always works. If the component cannot
+  run, a static chart is drawn instead and the table still saves — labelling is
+  degraded there, never blocked.
+
+Everything downstream of the drag is pure Python (`chart_payload`, `apply_edit`,
+`is_new_edit`) and tested. `chart_payload` is the only channel from the app to
+the drawing surface, and its keys are pinned by a test: the raw values, the
+labeller's own marks, and the palette. Nothing else can reach the screen.
+
 
 Each save rewrites `manual_labels.yaml` atomically (tmp + `os.replace`), so
 closing the tab cannot lose work.
