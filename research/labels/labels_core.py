@@ -29,7 +29,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-import yaml
+
+# NOTE: yaml is imported inside the three functions that serialise, not here.
+# The split, the queue, the phase validation and the metrics are pure logic with
+# nothing to do with a file format, and this module is imported by tests that run
+# in environments where the package's own dependencies are installed but PyYAML
+# is not — the CI installs the wheel plus pytest, and nothing else. A top-level
+# import made a missing optional dependency break COLLECTION of the whole test
+# module, which took the package's CI down with it.
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CALIBRATION_DATA_DIR = REPO_ROOT / "tests" / "calibration_data"
@@ -227,6 +234,7 @@ def build_split_document(real_lengths: dict[str, int], synthetic_ids,
 
 
 def read_split(path: Path | None = None) -> dict:
+    import yaml
     p = Path(path) if path is not None else SPLIT_PATH
     with open(p) as fh:
         return yaml.safe_load(fh)
@@ -363,6 +371,7 @@ def make_label_record(series_id: str, source: str, values, phases,
 def read_labels(path: Path | None = None) -> dict[str, dict]:
     """{id: record}. A missing or empty file reads as no labels, not an error —
     the file is committed empty and the suite must pass before any labelling."""
+    import yaml
     p = Path(path) if path is not None else LABELS_PATH
     if not p.is_file():
         return {}
@@ -414,6 +423,7 @@ def atomic_write_text(path: Path, text: str) -> None:
 
 
 def write_labels(records: dict[str, dict], path: Path | None = None) -> None:
+    import yaml
     p = Path(path) if path is not None else LABELS_PATH
     atomic_write_text(p, yaml.safe_dump(labels_document(records), sort_keys=False,
                                         default_flow_style=False, allow_unicode=True))

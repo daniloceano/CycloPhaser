@@ -35,6 +35,7 @@ Five things are worth testing here, and they are not the usual ones.
 """
 
 import ast
+import importlib.util
 import json
 import os
 import re
@@ -45,14 +46,89 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
 
 import labels_core as lc  # noqa: E402
 
+# The CI installs the package from its wheel plus pytest, and nothing else — so
+# PyYAML, Streamlit and Plotly are all absent there. None of them is a dependency
+# of cyclophaser itself; they belong to the calibration app and to this research
+# front. Guarded per test, the way tests/test_layer_inspector.py already guards
+# plotly, rather than at module level: a module-level skip would take the split,
+# queue, phase-validation and metric tests down with them, and those are pure
+# logic that needs none of it.
+#
+# Anything imported at module scope here MUST be a package dependency. An
+# optional one breaks COLLECTION, which fails the whole suite rather than one
+# module — that is how this first went wrong.
+def _have(mod: str) -> bool:
+    # find_spec does not only return None for a missing module — it raises
+    # ModuleNotFoundError when a PARENT package is absent, and importing a
+    # package can raise anything at all. This runs at collection time, so
+    # anything it lets escape fails the entire suite rather than one test.
+    try:
+        return importlib.util.find_spec(mod) is not None
+    except Exception:
+        return False
+
+
+requires_yaml = pytest.mark.skipif(not _have("yaml"), reason="PyYAML not installed")
+requires_streamlit = pytest.mark.skipif(
+    not _have("streamlit"), reason="Streamlit not installed (calibration-app only)")
+
 LABEL_TAB = REPO_ROOT / "tools" / "calibration_app" / "label_tab.py"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 0. This module must not be able to break the package's CI
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Not dependencies of cyclophaser. They belong to the calibration app and to this
+# research front; the CI installs the package from its wheel plus pytest, so none
+# of them exists there.
+NOT_PACKAGE_DEPS = {"yaml", "streamlit", "plotly", "altair", "watchdog"}
+
+
+def test_this_module_imports_no_optional_dependency_at_module_scope():
+    """A module-scope import of something optional breaks COLLECTION, and a
+    collection error fails the ENTIRE suite rather than one module — 821 tests
+    reported as one error. That is exactly how this front first broke the CI.
+
+    Optional dependencies belong inside the tests that need them, behind
+    `importorskip` or a skipif, the way tests/test_layer_inspector.py already
+    guards plotly.
+    """
+    tree = ast.parse(Path(__file__).read_text())
+    top_level = []
+    for node in tree.body:                      # body only: module scope
+        if isinstance(node, ast.Import):
+            top_level += [a.name.split(".")[0] for a in node.names]
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            top_level.append(node.module.split(".")[0])
+    offending = set(top_level) & NOT_PACKAGE_DEPS
+    assert not offending, (
+        f"{sorted(offending)} imported at module scope; a missing one would fail "
+        "collection of the whole suite, not just this module")
+
+
+def test_labels_core_is_importable_without_a_yaml_library():
+    """The split, the queue, the phase validation and the metrics are pure logic
+    with nothing to do with a file format, so they must not drag PyYAML in. This
+    is what lets 41 of these tests still run in a CI that has no yaml."""
+    tree = ast.parse((REPO_ROOT / "research" / "labels" / "labels_core.py").read_text())
+    top_level = []
+    for node in tree.body:
+        if isinstance(node, ast.Import):
+            top_level += [a.name.split(".")[0] for a in node.names]
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            top_level.append(node.module.split(".")[0])
+    assert "yaml" not in top_level, (
+        "labels_core imports yaml at module scope; import it inside the three "
+        "functions that serialise instead")
+    # ...and it really is importable: this test ran, and lc is already imported.
+    assert lc.stratified_split({f"t{i}": 30 + i for i in range(10)}, seed=1)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -160,6 +236,7 @@ FOUR = _phases(("incipient", 0, 0), ("intensification", 7, 3),
                ("mature", 20, 5), ("decay", 30, 4))
 
 
+@requires_yaml
 def test_label_record_round_trips_through_yaml(tmp_path, toy_series):
     p = tmp_path / "manual_labels.yaml"
     rec = lc.make_label_record("t1", "real", toy_series, FOUR, notes="clear knee")
@@ -171,6 +248,7 @@ def test_label_record_round_trips_through_yaml(tmp_path, toy_series):
     assert back["t1"]["notes"] == "clear knee"
 
 
+@requires_yaml
 def test_upsert_overwrites_in_place_and_keeps_the_others(tmp_path, toy_series):
     p = tmp_path / "l.yaml"
     no_inc = _phases(("intensification", 0, 2), ("mature", 15, 3))
@@ -185,6 +263,7 @@ def test_upsert_overwrites_in_place_and_keeps_the_others(tmp_path, toy_series):
     assert got["b"]["verdict"]["incipient_end_idx"] == 7
 
 
+@requires_yaml
 def test_missing_or_empty_labels_file_reads_as_no_labels(tmp_path):
     """The file is committed empty and the suite has to pass before labelling."""
     assert lc.read_labels(tmp_path / "nope.yaml") == {}
@@ -193,6 +272,7 @@ def test_missing_or_empty_labels_file_reads_as_no_labels(tmp_path):
     assert lc.read_labels(lc.LABELS_PATH) == {} or True  # the real one may be filled
 
 
+@requires_yaml
 def test_interrupted_write_leaves_the_previous_file_intact(tmp_path, monkeypatch):
     """A crash mid-write must not cost the labels already saved.
 
@@ -236,6 +316,7 @@ def test_series_sha256_changes_when_the_data_changes(toy_series):
     assert lc.series_sha256(shifted) == h0
 
 
+@requires_yaml
 def test_a_stale_label_is_detectable(tmp_path, toy_series):
     p = tmp_path / "l.yaml"
     lc.upsert_label(lc.make_label_record("t", "real", toy_series, FOUR), p)
@@ -261,8 +342,10 @@ def test_negative_tolerance_is_rejected(toy_series):
                              _phases(("incipient", 0, 0), ("mature", 5, -1)))
 
 
+@requires_yaml
 def test_committed_labels_file_is_parseable_and_well_formed():
     """Whatever state the artefact is in, it must be readable and valid."""
+    import yaml
     doc = yaml.safe_load(lc.LABELS_PATH.read_text())
     assert doc["schema"] == lc.LABELS_SCHEMA
     for rec in (doc.get("labels") or []):
@@ -308,6 +391,7 @@ def test_split_respects_the_three_length_bands():
     assert set(sp["train"]) | set(sp["test"]) == set(lengths)
 
 
+@requires_yaml
 def test_committed_split_matches_what_the_code_draws():
     """The artefact on disk is the artefact this seed produces — not a stale one."""
     doc = lc.read_split()
@@ -320,6 +404,7 @@ def test_committed_split_matches_what_the_code_draws():
     assert doc["strata"] == rebuilt["strata"]
 
 
+@requires_yaml
 def test_no_synthetic_case_is_held_out():
     """The 12 designed cases are all in train — see make_split.py's rationale."""
     doc = lc.read_split()
@@ -588,7 +673,8 @@ def test_a_legacy_schema_1_record_is_flagged_not_crashed_on():
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _label_tab():
-    import importlib.util
+    pytest.importorskip("streamlit",
+                        reason="the labelling tab is calibration-app code")
     spec = importlib.util.spec_from_file_location("_lt_under_test", LABEL_TAB)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -625,6 +711,7 @@ def test_each_phase_is_drawn_in_its_own_standard_colour():
 def test_the_fallback_chart_shows_the_margin_as_bar_thickness_too():
     """The fallback speaks the same visual language as the real chart, so falling
     back does not silently change what a bar means."""
+    pytest.importorskip("plotly")
     lt = _label_tab()
     s_ = pd.Series(range(60), dtype="float64",
                    index=pd.date_range("2020-01-01", periods=60, freq="3h"))
@@ -819,6 +906,7 @@ def test_the_chart_js_drags_horizontally_and_only_horizontally(tmp_path):
 # 6. The detector read-out, and the end-to-end evaluation
 # ══════════════════════════════════════════════════════════════════════════════
 
+@requires_yaml
 def test_detected_boundary_uses_the_same_convention_as_the_label():
     from evaluate_against_labels import detected_incipient_end
     assert detected_incipient_end(
@@ -833,9 +921,15 @@ def test_detected_boundary_uses_the_same_convention_as_the_label():
 
 # ── the train-only regression gate, skipped until the labels exist ───────────
 
-_LABELS = lc.read_labels()
-_TRAIN = set(lc.read_split()["train"])
-_TRAIN_LABELS = [r for sid, r in sorted(_LABELS.items()) if sid in _TRAIN]
+# Read at module scope, which is COLLECTION time — so a missing PyYAML must
+# degrade to "no labels to gate on", never to an ImportError that fails the
+# whole suite.
+try:
+    _LABELS = lc.read_labels()
+    _TRAIN = set(lc.read_split()["train"])
+    _TRAIN_LABELS = [r for sid, r in sorted(_LABELS.items()) if sid in _TRAIN]
+except Exception:
+    _LABELS, _TRAIN, _TRAIN_LABELS = {}, set(), []
 
 
 @pytest.mark.skipif(not _TRAIN_LABELS,
