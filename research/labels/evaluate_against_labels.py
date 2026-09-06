@@ -7,6 +7,10 @@
 
 What is compared
 ----------------
+A label now carries the cyclone's WHOLE phase sequence, so two things are scored
+and reported side by side.
+
+**The incipient boundary**, which is what this front was commissioned to settle.
 The label says where the incipient phase ENDS: the incipient phase is [0, N).
 The detector's answer is read the same way — the number of leading `incipient`
 entries in the `periods` column, or "no incipient phase" when step 0 is already
@@ -27,6 +31,13 @@ What is reported, and why separately
 * `kind=ambiguous` labels are excluded from the hit rate and the MAE — there is
   nothing to be near — but kept in the refusal accounting, where "the detector
   also declined" is still worth knowing.
+
+**The whole sequence.** Sequence mismatch (the detector found different phases,
+or in a different order) and boundary error are counted separately and never
+averaged: pairing the 3rd labelled boundary with the 3rd detected one across a
+mismatch compares two different transitions and manufactures a number. Boundary
+errors are broken out per phase, each against its own margin, and the first
+phase's start is excluded because it is 0 on both sides by construction.
 
 Everything is broken down by split (train/test) and by source (real/synthetic).
 
@@ -49,8 +60,8 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from labels_core import (  # noqa: E402
-    load_real_series, load_synthetic_series, read_labels, read_split,
-    score_labels, series_sha256,
+    is_legacy_record, load_real_series, load_synthetic_series, normalize_phase,
+    read_labels, read_split, score_labels, score_phase_sequences, series_sha256,
 )
 
 # get_periods' own defaults for everything the config YAML may omit.
@@ -76,6 +87,23 @@ def detected_incipient_end(periods: pd.Series) -> int | None:
     return n
 
 
+def detected_phase_starts(periods: pd.Series) -> list[tuple[str, int]]:
+    """The detected sequence as [(phase, start_idx), ...], phase names normalised.
+
+    The detector numbers repeated phases ("intensification 2"); a label carries
+    the bare name and lets its position in the sequence express the repetition,
+    so the names are normalised before the two are compared.
+    """
+    out: list[tuple[str, int]] = []
+    prev = None
+    for i, lab in enumerate(periods.astype(str)):
+        name = normalize_phase(lab)
+        if name != prev:
+            out.append((name, i))
+            prev = name
+    return out
+
+
 def load_config(path: Path | None):
     """Split a calibration-app YAML into (process_vorticity kwargs, get_periods kwargs).
 
@@ -95,20 +123,23 @@ def load_config(path: Path | None):
     return pv, gp
 
 
-def run_detector(series: dict[str, pd.Series], pv: dict, gp: dict) -> dict[str, int | None]:
+def run_detector(series: dict[str, pd.Series], pv: dict, gp: dict):
+    """Returns ({id: incipient end index or None}, {id: full phase sequence})."""
     from cyclophaser.determine_periods import get_periods, process_vorticity
-    out: dict[str, int | None] = {}
+    inc: dict[str, int | None] = {}
+    seqs: dict[str, list[tuple[str, int]]] = {}
     for sid, values in series.items():
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 vort = process_vorticity(pd.DataFrame({"zeta": values}), **pv)
                 res = get_periods(vort, **gp)
-            out[sid] = detected_incipient_end(res["periods"])
+            inc[sid] = detected_incipient_end(res["periods"])
+            seqs[sid] = detected_phase_starts(res["periods"])
         except Exception as exc:  # a failed track is not a silent pass
             print(f"  !! {sid}: detection failed ({type(exc).__name__}: {exc})",
                   file=sys.stderr)
-    return out
+    return inc, seqs
 
 
 def _fmt(m: dict) -> str:
@@ -131,6 +162,31 @@ def _fmt(m: dict) -> str:
         f"                      label ambiguous: {m['n_ambiguous']:>3}, "
         f"detector found none on {m['n_ambiguous_detector_none']}"
     )
+
+
+def _fmt_phases(m: dict) -> str:
+    def pct(x):
+        return "—" if x is None else f"{100 * x:5.1f}%"
+
+    def num(x, spec="6.2f"):
+        return "—" if x is None else format(x, spec)
+
+    lines = [
+        f"    sequence          {m['n_sequence_match']} of {m['n_series']} match "
+        f"({pct(m['sequence_match_rate'])}); "
+        f"{m['n_sequence_mismatch']} differ in phases or order",
+        f"    boundaries        {m['n_boundaries_hit']} of {m['n_boundaries']} within "
+        f"their own margin ({pct(m['boundary_hit_rate'])})",
+    ]
+    if m["per_phase"]:
+        lines.append("      phase              n   hit    MAE  worst")
+        for phase in ("incipient", "intensification", "mature", "decay", "residual"):
+            v = m["per_phase"].get(phase)
+            if not v:
+                continue
+            lines.append(f"      {phase:<16} {v['n']:>3}  {pct(v['hit_rate'])} "
+                         f"{num(v['mae'])} {v['worst']:>6}")
+    return "\n".join(lines)
 
 
 def main(argv=None) -> int:
@@ -169,13 +225,20 @@ def main(argv=None) -> int:
     if missing:
         print(f"WARNING: {len(missing)} label(s) name a series that no longer "
               f"exists and are EXCLUDED: {', '.join(sorted(missing))}\n")
+    legacy = [sid for sid, r in records.items() if is_legacy_record(r)]
+    if legacy:
+        print(f"WARNING: {len(legacy)} label(s) predate the whole-sequence format "
+              f"and are EXCLUDED — the phases they never recorded cannot be "
+              f"recovered from the boundary they did. Re-label: "
+              f"{', '.join(sorted(legacy))}\n")
     usable = {sid: r for sid, r in records.items()
-              if sid not in stale and sid not in missing}
+              if sid not in stale and sid not in missing and sid not in legacy}
 
     groups = ["train"] + (["test"] if args.test else [])
     wanted = {sid for sid in usable
               if (sid in train and "train" in groups) or (sid in test and "test" in groups)}
-    detected = run_detector({k: series[k] for k in sorted(wanted)}, pv, gp)
+    detected, detected_seqs = run_detector(
+        {k: series[k] for k in sorted(wanted)}, pv, gp)
 
     print("=" * 74)
     print(f"Incipient boundary vs manual labels   ({len(usable)} usable label(s))")
@@ -197,12 +260,18 @@ def main(argv=None) -> int:
                 continue
             m = score_labels(sel, detected)
             print(f"\n  {grp.upper()} · {src}   ({m['n_scored']} labelled)")
+            print("   ── incipient boundary ──")
             print(_fmt(m))
+            print("   ── whole phase sequence ──")
+            print(_fmt_phases(score_phase_sequences(sel, detected_seqs)))
         sel_all = [r for sid, r in sorted(usable.items()) if sid in ids]
         if sel_all:
             m = score_labels(sel_all, detected)
             print(f"\n  {grp.upper()} · ALL   ({m['n_scored']} labelled)")
+            print("   ── incipient boundary ──")
             print(_fmt(m))
+            print("   ── whole phase sequence ──")
+            print(_fmt_phases(score_phase_sequences(sel_all, detected_seqs)))
 
     if not args.test:
         print(f"\n  TEST split held out ({len(test)} series). "

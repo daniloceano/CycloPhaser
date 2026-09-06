@@ -1,4 +1,4 @@
-"""BLIND manual labelling of the incipient boundary.
+"""BLIND manual labelling of a cyclone's whole phase sequence.
 
     THIS MODULE MUST NEVER SHOW DETECTOR OUTPUT.
 
@@ -15,7 +15,7 @@ and the phase after it both at index 0, which is not a boundary at all. The 51
 real tracks have no label of any kind.
 
 So the labels have to come from a human looking at the raw series. If that human
-can see where the detector put the boundary, the label stops being independent
+can see where the detector put its boundaries, the label stops being independent
 evidence and becomes an echo of the thing it is supposed to judge — and the whole
 artefact is worthless, silently. Anchoring is not a risk that careful labelling
 avoids; it is automatic.
@@ -31,6 +31,12 @@ Concretely, this module:
   * loads its own series straight from tests/calibration_data/ and
     tests/synthetic/cases.py, independently of whatever the rest of the app has
     loaded, so the queue is always the same 63 series.
+
+Every colour, band and arrow drawn here comes from the LABELLER'S OWN marks. The
+phase palette is the project's standard one (blue incipient, amber
+intensification, red mature, olive decay, grey residual) so that a labelled
+series reads the same way as every other phase figure in the repo — but it is
+painting the human's answer, never the algorithm's.
 
 tests/test_manual_labels.py asserts the absence of those imports and of the
 detector-output identifiers by reading this file's source. If you add a
@@ -70,18 +76,59 @@ def _load_population():
     return series, sources
 
 
-def _fig(sid: str, values: pd.Series, boundary: int | None) -> go.Figure:
-    """The raw series, a click target, and the candidate boundary. Nothing else.
+def default_phases(n: int, tolerance: int) -> list[dict]:
+    """The scaffold a fresh series opens on: the canonical four phases, evenly spaced.
 
-    x is the STEP INDEX, not the timestamp: the label is an index (the incipient
-    phase is [0, N)), so plotting against the index removes a conversion between
-    what is clicked and what is stored. The timestamp is still available on hover
-    and is printed under the chart.
+    Arbitrary on purpose, and visibly so — quarters of the record are not a
+    proposal about this cyclone, they are somewhere to start dragging from. The
+    anchoring this whole front exists to avoid is anchoring to the DETECTOR;
+    a geometric scaffold carries none of its information. Labelling 63 cyclones
+    four boundaries at a time from an empty table would be the bigger cost.
     """
-    x = list(range(len(values)))
+    span = max(1, n // 4)
+    rows = [("incipient", 0), ("intensification", span),
+            ("mature", 2 * span), ("decay", 3 * span)]
+    return [{"phase": p, "start_idx": min(i, n - 1), "tolerance_idx": int(tolerance)}
+            for p, i in rows]
+
+
+def _fig(sid: str, values: pd.Series, phases: list[dict]) -> go.Figure:
+    """The raw series, the labeller's phases, and their tolerance bands.
+
+    x is the STEP INDEX, not the timestamp: a label is an index, so plotting
+    against the index removes a conversion between what is clicked and what is
+    stored. The timestamp is still on hover and printed under the chart.
+
+    Phases are shaded in the project's standard palette and each boundary gets a
+    translucent band plus a double-headed arrow spanning [start-tol, start+tol],
+    because the margin is the part of a label that is easiest to set carelessly:
+    a number in a table gives no sense of how much of the curve it actually
+    forgives, and seeing the arrow cover half a ramp is what prompts a smaller one.
+    """
+    n = len(values)
+    x = list(range(n))
+    y = values.to_numpy()
+    lo, hi = float(y.min()), float(y.max())
+    span = (hi - lo) or 1.0
+    # Headroom above the curve for the tolerance arrows, so they never sit on
+    # top of the data they are describing.
+    y_arrow = hi + 0.13 * span
+    y_top = hi + 0.26 * span
+
     fig = go.Figure()
+
+    # Phase shading — the labeller's own partition of [0, n).
+    for k, ph in enumerate(phases):
+        x0 = ph["start_idx"]
+        x1 = phases[k + 1]["start_idx"] if k + 1 < len(phases) else n - 1
+        fig.add_vrect(x0=x0, x1=x1, layer="below", line_width=0,
+                      fillcolor=lc.PHASE_COLORS.get(ph["phase"], "#cccccc"),
+                      opacity=0.30,
+                      annotation_text=ph["phase"], annotation_position="top left",
+                      annotation=dict(font=dict(size=11, color="#33414f")))
+
     fig.add_trace(go.Scatter(
-        x=x, y=values.to_numpy(),
+        x=x, y=y,
         mode="lines+markers",
         line=dict(color="#1f2d3d", width=2),
         # Markers are the click targets, so every step must have one; they are
@@ -91,48 +138,73 @@ def _fig(sid: str, values: pd.Series, boundary: int | None) -> go.Figure:
         customdata=[str(t) for t in values.index],
         hovertemplate="step %{x}<br>%{customdata}<br>%{y:.3e}<extra></extra>",
     ))
-    if boundary is not None:
-        fig.add_vline(x=boundary, line=dict(color="#c1121f", width=3, dash="solid"))
-        fig.add_vrect(x0=0, x1=boundary, fillcolor="#c1121f", opacity=0.08,
-                      line_width=0)
+
+    # Boundaries and their tolerance. Index 0 is skipped: it is 0 by
+    # construction, not a judgement, and has no margin to show.
+    for k, ph in enumerate(phases):
+        if k == 0:
+            continue
+        idx = ph["start_idx"]
+        tol = int(ph["tolerance_idx"])
+        colour = lc.PHASE_COLORS.get(ph["phase"], "#666666")
+        fig.add_vline(x=idx, line=dict(color=colour, width=3))
+        if tol > 0:
+            a, b = max(0, idx - tol), min(n - 1, idx + tol)
+            fig.add_vrect(x0=a, x1=b, layer="below", line_width=0,
+                          fillcolor=colour, opacity=0.22)
+            fig.add_annotation(
+                x=b, y=y_arrow, ax=a, ay=y_arrow,
+                xref="x", yref="y", axref="x", ayref="y",
+                showarrow=True, arrowhead=3, arrowsize=1.1, arrowwidth=1.8,
+                arrowcolor=colour, arrowside="end+start", text="")
+        fig.add_annotation(
+            x=idx, y=y_arrow, xref="x", yref="y", showarrow=False,
+            text=f"<b>{idx}</b> ±{tol}", yshift=13,
+            font=dict(size=11, color=colour),
+            bgcolor="rgba(255,255,255,0.75)")
+
     fig.update_layout(
-        height=520, margin=dict(l=60, r=20, t=30, b=45),
+        height=560, margin=dict(l=60, r=20, t=30, b=45),
         showlegend=False, hovermode="closest",
         title=dict(text=f"series {sid}", font=dict(size=15)),
-        xaxis=dict(title="step index", showgrid=True, gridcolor="#eceff3"),
-        yaxis=dict(title="raw input value", showgrid=True, gridcolor="#eceff3"),
+        xaxis=dict(title="step index", showgrid=True, gridcolor="#eceff3",
+                   range=[-1, n]),
+        yaxis=dict(title="raw input value", showgrid=True, gridcolor="#eceff3",
+                   range=[lo - 0.06 * span, y_top]),
         plot_bgcolor="white",
         dragmode=False,
     )
     return fig
 
 
-def _apply_click(sid: str, event, n: int) -> None:
-    """Fold a Plotly click into the index widget's state.
-
-    Runs BEFORE the number_input is constructed, because Streamlit reads a
-    widget's session_state value at construction time; writing it afterwards
-    would not take effect until the following rerun and the marker would appear
-    to lag one click behind.
+def _apply_click(sid: str, event, target: int, phases: list[dict], n: int) -> bool:
+    """Fold a Plotly click into the selected boundary. True if anything moved.
 
     The selection persists across reruns, so the raw event cannot be used
-    directly — it would re-apply itself and pin the widget, making the manual
-    input unusable. Only a click at a DIFFERENT step than the one last applied
-    counts as new.
+    directly — it would re-apply itself on every rerun and pin the boundary,
+    making the table unusable. Only a click at a DIFFERENT step than the one last
+    applied counts as new.
     """
     try:
         pts = (event or {}).get("selection", {}).get("points", [])
     except AttributeError:
         pts = []
-    if not pts:
-        return
-    clicked = int(pts[-1].get("x", 0))
-    clicked = max(1, min(clicked, n - 1))
+    if not pts or target < 1 or target >= len(phases):
+        return False
+    clicked = max(1, min(int(pts[-1].get("x", 0)), n - 1))
     seen_key = f"_lab_lastclick__{sid}"
-    if st.session_state.get(seen_key) == clicked:
-        return
-    st.session_state[seen_key] = clicked
-    st.session_state[f"lab_idx__{sid}"] = clicked
+    if st.session_state.get(seen_key) == (target, clicked):
+        return False
+    st.session_state[seen_key] = (target, clicked)
+    # A click that would cross a neighbouring boundary is clamped rather than
+    # rejected: silently doing nothing on a click reads as a broken chart.
+    low = phases[target - 1]["start_idx"] + 1
+    high = (phases[target + 1]["start_idx"] - 1
+            if target + 1 < len(phases) else n - 1)
+    if low > high:
+        return False
+    phases[target]["start_idx"] = max(low, min(clicked, high))
+    return True
 
 
 def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
@@ -158,10 +230,11 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
     n = len(values)
 
     st.markdown(
-        "#### Manual labelling — where does the incipient phase end?\n"
+        "#### Manual labelling — mark every phase of this cyclone\n"
         "You are looking at the **raw input series only**. No filtering, no "
         "derivatives, and nothing the detector produced — that is deliberate, "
-        "and it is what makes these labels usable as evidence."
+        "and it is what makes these labels usable as evidence. Every band and "
+        "arrow below is drawn from *your* marks."
     )
 
     n_done = len(records)
@@ -171,77 +244,130 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
     existing = records.get(sid)
     stale = bool(existing) and existing.get("series_sha256") != lc.series_sha256(values)
     if existing and not stale:
-        v = existing["verdict"]
-        detail = (f"boundary at {v['incipient_end_idx']}" if v["kind"] == "boundary"
-                  else v["kind"])
-        st.info(f"Already labelled — **{detail}**, ±{existing['tolerance_idx']} steps. "
-                "Saving again overwrites it.")
+        seq = " → ".join(f"{p['phase']}@{p['start_idx']}" for p in existing["phases"])
+        st.info(f"Already labelled — {seq}. Saving again overwrites it.")
     elif stale:
         st.warning("A label exists for this series but was written against "
                    "DIFFERENT data (series_sha256 mismatch). Treat it as void "
                    "and re-label.")
 
-    # Seed the index widget before it is built: mid-series is a neutral starting
-    # point that does not suggest an answer, and a stored label re-opens on itself.
-    key_idx, key_tol = f"lab_idx__{sid}", f"lab_tol__{sid}"
-    if key_idx not in st.session_state:
-        if existing and not stale and existing["verdict"]["kind"] == "boundary":
-            st.session_state[key_idx] = int(existing["verdict"]["incipient_end_idx"])
+    # The authoritative phase list lives in session state, not in the editor
+    # widget: a chart click has to be able to change it BEFORE the editor is
+    # constructed, and a data_editor's own state is a diff of user edits rather
+    # than the table itself.
+    key_ph, key_rev = f"_lab_phases__{sid}", f"_lab_rev__{sid}"
+    if key_ph not in st.session_state:
+        if existing and not stale:
+            st.session_state[key_ph] = [dict(p) for p in existing["phases"]]
         else:
-            st.session_state[key_idx] = max(1, n // 2)
-    if key_tol not in st.session_state:
-        st.session_state[key_tol] = int(existing["tolerance_idx"]) if existing \
-            else int(default_tolerance)
+            st.session_state[key_ph] = default_phases(n, default_tolerance)
+        st.session_state[key_rev] = 0
+    phases = st.session_state[key_ph]
+
+    labels = [f"{k} · {p['phase']} @ {p['start_idx']}"
+              for k, p in enumerate(phases) if k >= 1]
+    target_label = st.selectbox(
+        "Chart click moves this boundary", options=labels or ["(no boundary yet)"],
+        key=f"lab_target__{sid}",
+        help="Clicking the chart is the fast path; the table below is the exact "
+             "one. The first phase always starts at step 0, so it is not listed.")
+    target = (labels.index(target_label) + 1) if labels and target_label in labels else 0
 
     event = st.plotly_chart(
-        _fig(sid, values, int(st.session_state[key_idx])),
+        _fig(sid, values, phases),
         key=f"lab_chart__{sid}",
         on_select="rerun", selection_mode="points",
         config={"displayModeBar": False},
     )
-    _apply_click(sid, event, n)
+    if _apply_click(sid, event, target, phases, n):
+        st.session_state[key_rev] += 1
+        st.rerun()
 
-    col_a, col_b = st.columns([3, 2])
-    with col_a:
-        # The slider is the guaranteed path. Clicking the chart is faster, but it
-        # depends on Plotly selection events surviving the browser and the
-        # Streamlit version; the label must be settable without them.
-        st.slider("Incipient ends at step (the incipient phase is [0, N))",
-                  min_value=1, max_value=max(1, n - 1), key=key_idx)
-    with col_b:
-        st.number_input("± steps you accept for THIS series", min_value=0,
-                        max_value=max(1, n - 1), step=1, key=key_tol,
-                        help="The margin evaluation will allow on this label. "
-                             "Per-series because some knees are obvious and some "
-                             "ramps are gentle enough that ten indices would do.")
+    # The editor is re-seeded (via a changing key) whenever a click mutates the
+    # list, so the table and the chart can never disagree about what is labelled.
+    edited = st.data_editor(
+        pd.DataFrame(phases, columns=["phase", "start_idx", "tolerance_idx"]),
+        key=f"lab_tbl__{sid}__{st.session_state[key_rev]}",
+        num_rows="dynamic", use_container_width=True, hide_index=True,
+        column_config={
+            "phase": st.column_config.SelectboxColumn(
+                "Phase", options=list(lc.PHASE_ORDER), required=True, width="medium"),
+            "start_idx": st.column_config.NumberColumn(
+                "Starts at step", min_value=0, max_value=max(0, n - 1), step=1,
+                required=True, width="small"),
+            "tolerance_idx": st.column_config.NumberColumn(
+                "± steps", min_value=0, max_value=max(1, n - 1), step=1,
+                required=True, width="small",
+                help="The margin evaluation will allow on THIS boundary. Per "
+                     "boundary, not per cyclone: an unmistakable incipient knee "
+                     "and a long gentle mature→decay roll do not deserve the "
+                     "same forgiveness."),
+        },
+    )
 
-    idx = int(st.session_state[key_idx])
-    st.caption(f"**Boundary at step {idx}** · {values.index[idx]} · "
-               f"series length {n} steps · incipient phase would be steps 0–{idx - 1}")
+    proposed = []
+    for row in edited.to_dict("records"):
+        if row.get("phase") is None or pd.isna(row.get("start_idx")):
+            continue
+        proposed.append({"phase": str(row["phase"]),
+                         "start_idx": int(row["start_idx"]),
+                         "tolerance_idx": int(row.get("tolerance_idx") or 0)})
+    # The first phase starts at 0 structurally — a partition of [0, n) has to
+    # begin at 0 — so it is coerced rather than reported as the labeller's error.
+    if proposed:
+        proposed[0]["start_idx"] = 0
+    if proposed != phases:
+        st.session_state[key_ph] = proposed
+        st.rerun()
+
+    problem = None
+    try:
+        lc.validate_phases(phases, n_steps=n)
+    except (ValueError, KeyError, TypeError) as exc:
+        problem = str(exc)
+    if problem:
+        st.error(f"Not saveable yet — {problem}")
+
+    first = phases[0]["phase"] if phases else None
+    inc_end = phases[1]["start_idx"] if (first == "incipient" and len(phases) > 1) else None
+    st.caption(
+        (f"Incipient phase = steps 0–{inc_end - 1} (ends at {inc_end}, "
+         f"{values.index[inc_end]})" if inc_end is not None else
+         "No incipient phase — this series is already changing at step 0")
+        + f" · series length {n} steps"
+    )
 
     notes = st.text_area("Notes (optional)",
                          value=(existing or {}).get("notes", ""),
                          key=f"lab_notes__{sid}", height=68)
 
-    def _save(verdict: dict) -> None:
-        rec = lc.make_label_record(sid, sources[sid], values, verdict,
-                                   int(st.session_state[key_tol]),
-                                   notes=notes or None)
+    def _save(ambiguous: bool) -> None:
+        rec = lc.make_label_record(sid, sources[sid], values, phases,
+                                   notes=notes or None, ambiguous=ambiguous)
         lc.upsert_label(rec)
         st.session_state["lab_pos"] = (pos + 1) % n_total
 
     b1, b2, b3, b4 = st.columns(4)
-    if b1.button("💾 Save & next", type="primary", use_container_width=True):
-        _save({"kind": "boundary", "incipient_end_idx": idx})
+    if b1.button("💾 Save & next", type="primary", use_container_width=True,
+                 disabled=bool(problem)):
+        _save(ambiguous=False)
         st.rerun()
     if b2.button("No incipient phase", use_container_width=True,
-                 help="This series never starts flat — it is already changing at step 0."):
-        _save({"kind": "none"})
+                 disabled=not (phases and phases[0]["phase"] == "incipient"),
+                 help="Drops the leading incipient phase — this series is "
+                      "already changing at step 0. The rest of the sequence is kept."):
+        rest = [dict(p) for p in phases[1:]]
+        if rest:
+            rest[0]["start_idx"] = 0
+            st.session_state[key_ph] = rest
+            st.session_state[key_rev] += 1
         st.rerun()
-    if b3.button("Ambiguous", use_container_width=True,
-                 help="You cannot decide. Kept out of the hit rate and the MAE, "
-                      "counted in the refusal accounting."):
-        _save({"kind": "ambiguous"})
+    if b3.button("Save as ambiguous", use_container_width=True,
+                 disabled=bool(problem),
+                 help="You cannot decide the incipient boundary. The phases you "
+                      "marked are still saved; the incipient verdict is recorded "
+                      "as ambiguous and kept out of the hit rate and the MAE."):
+        _save(ambiguous=True)
         st.rerun()
     if b4.button("← Back", use_container_width=True,
                  help="Re-label the previous series in the queue."):

@@ -2,6 +2,11 @@
 
 Five things are worth testing here, and they are not the usual ones.
 
+0. A label is now the cyclone's WHOLE phase sequence — an ordered partition of
+   [0, n) — rather than one incipient boundary, with a margin per BOUNDARY. The
+   incipient verdict the evaluation speaks is DERIVED from that sequence, so the
+   two can never contradict each other.
+
 1. **The labelling tab is BLIND.** This is the load-bearing property of the whole
    front. There is no ground truth for the incipient boundary — the synthetic
    suite derives one from the segment list and gets it wrong, because
@@ -143,32 +148,37 @@ def toy_series():
     return pd.Series([-1e-5 - 1e-6 * i for i in range(40)], index=idx)
 
 
+def _phases(*triples):
+    return [{"phase": p, "start_idx": i, "tolerance_idx": t} for p, i, t in triples]
+
+
+FOUR = _phases(("incipient", 0, 0), ("intensification", 7, 3),
+               ("mature", 20, 5), ("decay", 30, 4))
+
+
 def test_label_record_round_trips_through_yaml(tmp_path, toy_series):
     p = tmp_path / "manual_labels.yaml"
-    rec = lc.make_label_record("t1", "real", toy_series,
-                               {"kind": "boundary", "incipient_end_idx": 7}, 3,
-                               notes="clear knee")
+    rec = lc.make_label_record("t1", "real", toy_series, FOUR, notes="clear knee")
     lc.upsert_label(rec, p)
     back = lc.read_labels(p)
     assert back["t1"] == rec
-    assert back["t1"]["verdict"] == {"kind": "boundary", "incipient_end_idx": 7}
-    assert back["t1"]["tolerance_idx"] == 3
+    assert back["t1"]["phases"] == FOUR
+    assert back["t1"]["n_steps"] == len(toy_series)
     assert back["t1"]["notes"] == "clear knee"
 
 
 def test_upsert_overwrites_in_place_and_keeps_the_others(tmp_path, toy_series):
     p = tmp_path / "l.yaml"
-    lc.upsert_label(lc.make_label_record("a", "real", toy_series,
-                                         {"kind": "none"}, 2), p)
-    lc.upsert_label(lc.make_label_record("b", "real", toy_series,
-                                         {"kind": "boundary", "incipient_end_idx": 5}, 1), p)
-    lc.upsert_label(lc.make_label_record("a", "real", toy_series,
-                                         {"kind": "ambiguous"}, 4), p)
+    no_inc = _phases(("intensification", 0, 2), ("mature", 15, 3))
+    lc.upsert_label(lc.make_label_record("a", "real", toy_series, no_inc), p)
+    lc.upsert_label(lc.make_label_record("b", "real", toy_series, FOUR), p)
+    lc.upsert_label(lc.make_label_record("a", "real", toy_series, FOUR,
+                                         ambiguous=True), p)
     got = lc.read_labels(p)
     assert set(got) == {"a", "b"}
     assert got["a"]["verdict"]["kind"] == "ambiguous"
-    assert got["a"]["tolerance_idx"] == 4
-    assert got["b"]["verdict"]["incipient_end_idx"] == 5
+    assert got["a"]["phases"] == FOUR          # ambiguous still records the phases
+    assert got["b"]["verdict"]["incipient_end_idx"] == 7
 
 
 def test_missing_or_empty_labels_file_reads_as_no_labels(tmp_path):
@@ -224,8 +234,7 @@ def test_series_sha256_changes_when_the_data_changes(toy_series):
 
 def test_a_stale_label_is_detectable(tmp_path, toy_series):
     p = tmp_path / "l.yaml"
-    lc.upsert_label(lc.make_label_record("t", "real", toy_series,
-                                         {"kind": "boundary", "incipient_end_idx": 4}, 2), p)
+    lc.upsert_label(lc.make_label_record("t", "real", toy_series, FOUR), p)
     changed = toy_series.copy()
     changed.iloc[0] = 0.0
     assert lc.read_labels(p)["t"]["series_sha256"] != lc.series_sha256(changed)
@@ -244,17 +253,19 @@ def test_malformed_verdicts_are_rejected(verdict):
 
 def test_negative_tolerance_is_rejected(toy_series):
     with pytest.raises(ValueError):
-        lc.make_label_record("t", "real", toy_series, {"kind": "none"}, -1)
+        lc.make_label_record("t", "real", toy_series,
+                             _phases(("incipient", 0, 0), ("mature", 5, -1)))
 
 
 def test_committed_labels_file_is_parseable_and_well_formed():
     """Whatever state the artefact is in, it must be readable and valid."""
     doc = yaml.safe_load(lc.LABELS_PATH.read_text())
-    assert doc["schema"] == 1
+    assert doc["schema"] == lc.LABELS_SCHEMA
     for rec in (doc.get("labels") or []):
         assert set(rec) >= {"id", "source", "series_sha256", "labeled_at",
-                            "verdict", "tolerance_idx"}
+                            "n_steps", "phases", "verdict", "tolerance_idx"}
         lc.validate_verdict(rec["verdict"])
+        lc.validate_phases(rec["phases"], n_steps=rec["n_steps"])
         assert int(rec["tolerance_idx"]) >= 0
 
 
@@ -446,6 +457,214 @@ def test_empty_input_yields_no_numbers_rather_than_zeros():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# 5b. The phase sequence: validation, the derived verdict, and its metrics
+# ══════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.parametrize("bad, why", [
+    ([], "empty"),
+    (_phases(("incipient", 3, 0)), "first phase must start at 0"),
+    (_phases(("incipient", 0, 0), ("mature", 0, 1)), "zero-length phase"),
+    (_phases(("incipient", 0, 0), ("mature", 9, 1), ("decay", 5, 1)), "goes backwards"),
+    (_phases(("incipient", 0, 0), ("nonsense", 5, 1)), "unknown phase"),
+    (_phases(("incipient", 0, 0), ("mature", 999, 1)), "past the end"),
+])
+def test_malformed_phase_sequences_are_rejected(bad, why):
+    """A partition of [0, n) that is not one must fail now, not at evaluation —
+    by which time the series has left the screen and the labeller cannot say
+    what they meant."""
+    with pytest.raises((ValueError, KeyError, IndexError)):
+        lc.validate_phases(bad, n_steps=40)
+
+
+def test_repeated_phases_are_allowed():
+    """residual → intensification → mature → decay is a real life cycle; the
+    phase's POSITION carries the repetition, so the name is never numbered."""
+    seq = _phases(("incipient", 0, 0), ("intensification", 5, 2), ("mature", 10, 2),
+                  ("decay", 15, 2), ("residual", 20, 2), ("intensification", 25, 2),
+                  ("mature", 30, 2))
+    assert lc.validate_phases(seq, n_steps=40) == seq
+
+
+def test_phase_names_are_normalised_on_the_way_in():
+    """The detector numbers repeats; a label must not carry the number."""
+    assert lc.normalize_phase("intensification 2") == "intensification"
+    assert lc.normalize_phase("decay") == "decay"
+    got = lc.validate_phases(_phases(("incipient", 0, 0), ("mature 3", 5, 1)),
+                             n_steps=40)
+    assert got[1]["phase"] == "mature"
+
+
+def test_the_incipient_verdict_is_derived_from_the_phases():
+    """Derived rather than asked twice, so the table and the verdict cannot
+    disagree about the very thing this front exists to settle."""
+    v, tol = lc.incipient_verdict_from_phases(FOUR, 40)
+    assert v == {"kind": "boundary", "incipient_end_idx": 7}
+    assert tol == 3                       # the margin ON that boundary, not a series-wide one
+
+    no_inc = _phases(("intensification", 0, 2), ("mature", 10, 3))
+    assert lc.incipient_verdict_from_phases(no_inc, 40)[0] == {"kind": "none"}
+
+    whole = _phases(("incipient", 0, 4))
+    assert lc.incipient_verdict_from_phases(whole, 40)[0] == \
+        {"kind": "boundary", "incipient_end_idx": 40}
+
+
+def test_ambiguous_still_records_the_phases(toy_series):
+    rec = lc.make_label_record("t", "real", toy_series, FOUR, ambiguous=True)
+    assert rec["verdict"] == {"kind": "ambiguous"}
+    assert rec["phases"] == FOUR
+
+
+def _seq_rec(sid, phases):
+    return {"id": sid, "source": "real", "series_sha256": "h", "labeled_at": "t",
+            "n_steps": 60, "phases": phases,
+            "verdict": {"kind": "boundary", "incipient_end_idx": phases[1]["start_idx"]},
+            "tolerance_idx": phases[1]["tolerance_idx"]}
+
+
+def test_sequence_mismatch_is_counted_not_measured():
+    """Pairing the k-th labelled boundary with the k-th detected one across a
+    mismatch compares two different transitions and manufactures a number."""
+    rec = _seq_rec("a", FOUR)
+    det = {"a": [("incipient", 0), ("intensification", 7), ("decay", 30)]}
+    m = lc.score_phase_sequences([rec], det)
+    assert m["n_sequence_mismatch"] == 1
+    assert m["n_sequence_match"] == 0
+    assert m["n_boundaries"] == 0          # nothing measured at all
+    assert m["per_phase"] == {}
+
+
+def test_boundary_errors_are_reported_per_phase_against_their_own_margins():
+    rec = _seq_rec("a", FOUR)              # margins 3 / 5 / 4 on It / M / D
+    det = {"a": [("incipient", 0), ("intensification", 9),   # err 2 <= 3  hit
+                 ("mature", 28), ("decay", 30)]}             # err 8 > 5 miss; 0 <= 4 hit
+    m = lc.score_phase_sequences([rec], det)
+    assert m["n_sequence_match"] == 1
+    assert m["per_phase"]["intensification"] == {
+        "n": 1, "n_hit": 1, "mae": 2.0, "worst": 2, "hit_rate": 1.0}
+    assert m["per_phase"]["mature"]["n_hit"] == 0
+    assert m["per_phase"]["mature"]["worst"] == 8
+    assert m["per_phase"]["decay"]["mae"] == 0.0
+    assert m["n_boundaries"] == 3 and m["n_boundaries_hit"] == 2
+
+
+def test_the_first_phase_start_is_excluded_from_every_rate():
+    """It is 0 on both sides by construction and would pad the hit rate with
+    free agreement."""
+    rec = _seq_rec("a", _phases(("incipient", 0, 0), ("mature", 10, 1)))
+    m = lc.score_phase_sequences([rec], {"a": [("incipient", 0), ("mature", 10)]})
+    assert m["n_boundaries"] == 1          # not 2
+    assert "incipient" not in m["per_phase"]
+
+
+def test_numbered_detected_phases_still_match_a_label():
+    rec = _seq_rec("a", _phases(("incipient", 0, 0), ("intensification", 5, 2),
+                                ("mature", 10, 2), ("decay", 15, 2),
+                                ("residual", 20, 2), ("intensification", 25, 2)))
+    det = {"a": [("incipient", 0), ("intensification", 5), ("mature", 10),
+                 ("decay", 15), ("residual", 20), ("intensification 2", 25)]}
+    m = lc.score_phase_sequences([rec], det)
+    assert m["n_sequence_match"] == 1
+    assert m["per_phase"]["intensification"]["n"] == 2
+
+
+def test_a_legacy_schema_1_record_is_flagged_not_crashed_on():
+    """A working copy can hold single-boundary records from before the format
+    changed; the phases they never recorded are not recoverable from the
+    boundary they did, so they must be excluded loudly."""
+    legacy = {"id": "a", "source": "real", "series_sha256": "h", "labeled_at": "t",
+              "verdict": {"kind": "boundary", "incipient_end_idx": 7},
+              "tolerance_idx": 3}
+    assert lc.is_legacy_record(legacy)
+    assert not lc.is_legacy_record(_seq_rec("b", FOUR))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5c. The labelling view: standard colours, and the tolerance made visible
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _label_tab():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_lt_under_test", LABEL_TAB)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_the_phase_palette_matches_the_package_figures():
+    """Restated in labels_core rather than imported, because the labelling tab
+    must not be able to reach the package at all. Parsed here — not imported —
+    so the duplication cannot silently drift."""
+    plots_src = (REPO_ROOT / "cyclophaser" / "plots.py").read_text()
+    tree = ast.parse(plots_src)
+    found = None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and any(
+                getattr(t, "id", None) == "colors_phases" for t in node.targets):
+            found = ast.literal_eval(node.value)
+            break
+    assert found, "cyclophaser/plots.py no longer defines colors_phases"
+    assert lc.PHASE_COLORS == found
+    assert set(lc.PHASE_ORDER) == set(found)
+
+
+def test_each_phase_is_shaded_in_its_own_standard_colour():
+    lt = _label_tab()
+    s = pd.Series(range(60), dtype="float64",
+                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
+    fig = lt._fig("x", s, FOUR)
+    fills = [sh.fillcolor for sh in fig.layout.shapes if sh.type == "rect"]
+    for ph in FOUR:
+        assert lc.PHASE_COLORS[ph["phase"]] in fills, ph["phase"]
+    assert lc.PHASE_COLORS["incipient"] == "#65a1e6"      # blue, as asked
+
+
+def test_the_tolerance_is_drawn_as_a_double_headed_arrow():
+    """The margin is the part of a label easiest to set carelessly: a number in a
+    table gives no sense of how much curve it forgives."""
+    lt = _label_tab()
+    s = pd.Series(range(60), dtype="float64",
+                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
+    fig = lt._fig("x", s, FOUR)
+    arrows = [a for a in fig.layout.annotations if a.showarrow]
+    assert arrows, "no tolerance arrow drawn"
+    assert all(a.arrowside == "end+start" for a in arrows)
+    # one arrow per boundary with a non-zero margin (the first phase has none)
+    assert len(arrows) == sum(1 for k, p in enumerate(FOUR)
+                              if k >= 1 and p["tolerance_idx"] > 0)
+    # and it spans exactly [start-tol, start+tol]
+    it = next(a for a in arrows if a.x == 7 + 3)
+    assert it.ax == 7 - 3
+
+
+def test_a_zero_margin_draws_no_band_and_no_arrow():
+    lt = _label_tab()
+    s = pd.Series(range(60), dtype="float64",
+                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
+    fig = lt._fig("x", s, _phases(("incipient", 0, 0), ("mature", 20, 0)))
+    assert not [a for a in fig.layout.annotations if a.showarrow]
+
+
+def test_the_view_still_plots_exactly_one_series():
+    """Phase shading is shapes, not traces: the one trace is still the raw input."""
+    lt = _label_tab()
+    s = pd.Series(range(60), dtype="float64",
+                  index=pd.date_range("2020-01-01", periods=60, freq="3h"))
+    fig = lt._fig("x", s, FOUR)
+    assert len(fig.data) == 1
+    assert (fig.data[0].y == s.to_numpy()).all()
+
+
+def test_the_opening_scaffold_is_a_valid_partition():
+    lt = _label_tab()
+    for n in (30, 56, 120, 259):
+        ph = lt.default_phases(n, 4)
+        assert lc.validate_phases(ph, n_steps=n) == ph
+        assert [p["phase"] for p in ph] == ["incipient", "intensification",
+                                            "mature", "decay"]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # 6. The detector read-out, and the end-to-end evaluation
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -484,24 +703,33 @@ def test_detector_matches_the_training_labels_within_their_own_margins():
     import warnings
 
     from cyclophaser.determine_periods import get_periods, process_vorticity
-    from evaluate_against_labels import detected_incipient_end
+    from evaluate_against_labels import (detected_incipient_end,
+                                         detected_phase_starts)
 
     real = lc.load_real_series()
     synth, _ = lc.load_synthetic_series()
     series = {**real, **synth}
 
-    detected = {}
+    detected, seqs = {}, {}
     for rec in _TRAIN_LABELS:
         sid = rec["id"]
         assert sid in series, f"label {sid} names a series that does not exist"
+        assert not lc.is_legacy_record(rec), (
+            f"label {sid} predates the whole-sequence format — re-label it")
         assert rec["series_sha256"] == lc.series_sha256(series[sid]), (
             f"label {sid} was written against different data — it is void")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             vort = process_vorticity(pd.DataFrame({"zeta": series[sid]}))
-            detected[sid] = detected_incipient_end(get_periods(vort)["periods"])
+            periods = get_periods(vort)["periods"]
+        detected[sid] = detected_incipient_end(periods)
+        seqs[sid] = detected_phase_starts(periods)
 
     m = lc.score_labels(_TRAIN_LABELS, detected)
     assert m["n_unscored"] == 0
     assert m["n_scored"] == len(_TRAIN_LABELS)
-    print(f"\ntrain hit rate {m['hit_rate']} · MAE {m['mae']} · worst {m['worst']}")
+    ms = lc.score_phase_sequences(_TRAIN_LABELS, seqs)
+    assert ms["n_unscored"] == 0
+    print(f"\nincipient: hit rate {m['hit_rate']} · MAE {m['mae']} · worst {m['worst']}"
+          f"\nsequence:  {ms['n_sequence_match']}/{ms['n_series']} match · "
+          f"boundaries {ms['boundary_hit_rate']}")

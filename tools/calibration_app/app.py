@@ -1927,16 +1927,19 @@ with st.sidebar:
     st.divider()
     st.subheader("Manual labelling")
     label_default_tolerance = st.number_input(
-        "Default ± steps for a new label", min_value=0, max_value=50, value=5, step=1,
-        key="label_default_tolerance",
+        "Default ± steps for a new boundary", min_value=0, max_value=50, value=5,
+        step=1, key="label_default_tolerance",
         help=(
-            "Starting value of the per-series margin in the **Label** display "
-            "mode. It is only a starting value: the margin is stored per label, "
-            "because the subjectivity is not uniform across series — some knees "
-            "are unmistakable and worth ±1, some ramps are gentle enough that "
-            "any of ten indices would be defensible. A single global margin "
-            "would force the worst case onto every series and hide exactly that "
-            "difference.\n\nDoes not affect detection and is not exported to YAML."
+            "Starting value for each boundary's margin in the **Label** display "
+            "mode. It is only a starting value: the margin is stored per "
+            "BOUNDARY, because the subjectivity is not uniform even within one "
+            "cyclone — an incipient knee can be unmistakable on a track whose "
+            "mature→decay transition is a long gentle roll. A single global "
+            "margin would force the worst case onto every boundary and hide "
+            "exactly that difference.\n\nThe margin is drawn on the chart as a "
+            "shaded band and a double-headed arrow, because a number in a table "
+            "gives no sense of how much of the curve it actually forgives.\n\n"
+            "Does not affect detection and is not exported to YAML."
         ),
     )
 
@@ -2087,12 +2090,15 @@ with tab_cal:
                 "decision the algorithm made, each on its own switchable "
                 "layer. Use it when a track in the grid looks wrong and you "
                 "need to know *why*.\n\n"
-                "**Label** — blind manual labelling of the incipient "
-                "boundary. Shows the raw input series and NOTHING else: no "
-                "filtered series, no derivatives, no phases, no detector "
-                "output of any kind. That is the point — a label written "
-                "while looking at the detector's answer is an echo of it, not "
-                "evidence about it.\n\n"
+                "**Label** — blind manual labelling. One cyclone at a time, "
+                "marking its WHOLE phase sequence before moving on, so each "
+                "track is judged as a complete life cycle rather than one "
+                "boundary in isolation. Shows the raw input series and "
+                "NOTHING else: no filtered series, no derivatives, no "
+                "detector output of any kind. The phase shading is in the "
+                "project's standard colours, but it is painting *your* marks "
+                "— a label written while looking at the algorithm's answer is "
+                "an echo of it, not evidence about it.\n\n"
                 "No mode changes detection, and no view setting reaches the "
                 "exported YAML."
             ),
@@ -2498,7 +2504,7 @@ with tab_cal:
                              use_container_width=True, hide_index=True)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # MODE "Label" — BLIND manual labelling of the incipient boundary
+    # MODE "Label" — BLIND manual labelling of the whole phase sequence
     # ══════════════════════════════════════════════════════════════════════════
     # This mode is deliberately CUT OFF from everything above it. It does not
     # read `all_results`, `files`, `cyclone_names`, or any filter/phase widget;
@@ -2511,7 +2517,10 @@ with tab_cal:
     # opening has zero derivative at t₀ and so starts flat exactly as a designed
     # `Ic` segment would. The labels therefore have to come from a human, and a
     # human who can see the detector's answer is no longer independent evidence
-    # about it. See the module docstring of label_tab.py.
+    # about it. The phase palette is the project's standard one, so a labelled
+    # series reads like every other phase figure in the repo -- but every band
+    # and arrow is drawn from the LABELLER'S marks, never the algorithm's.
+    # See the module docstring of label_tab.py.
     elif view_mode == "Label":
         label_tab.render(default_tolerance=int(label_default_tolerance))
 

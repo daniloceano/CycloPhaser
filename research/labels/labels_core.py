@@ -44,7 +44,39 @@ LABELS_PATH = LABELS_DIR / "manual_labels.yaml"
 SPLIT_SEED = 20260905
 QUEUE_SEED = 20260905
 
+# Bumped from 1 when a label stopped being a single incipient boundary and
+# became the cyclone's whole phase sequence. The artefact was still empty at the
+# bump, so there is nothing to migrate — but a working copy can hold schema-1
+# records from a session that predates it, and those are excluded loudly rather
+# than silently skipped (see `is_legacy_record`).
+LABELS_SCHEMA = 2
+
 VERDICT_KINDS = ("boundary", "none", "ambiguous")
+
+# The five phases, and the palette the rest of the project already draws them in.
+# Duplicated here rather than imported from `cyclophaser.plots` on purpose: the
+# labelling tab must not be able to reach the package at all (see the module
+# docstring of tools/calibration_app/label_tab.py), and a five-entry colour dict
+# is a cheap thing to restate. tests/test_manual_labels.py parses plots.py and
+# fails if the two ever drift apart, so the duplication cannot rot.
+PHASE_ORDER = ("incipient", "intensification", "mature", "decay", "residual")
+PHASE_COLORS = {
+    "incipient":       "#65a1e6",
+    "intensification": "#f7b538",
+    "mature":          "#d62828",
+    "decay":           "#9aa981",
+    "residual":        "gray",
+}
+
+
+def normalize_phase(name: str) -> str:
+    """'intensification 2' -> 'intensification'.
+
+    The detector numbers repeated phases; a label records the phase and lets its
+    POSITION in the sequence carry the repetition, so the two have to be compared
+    on the bare name.
+    """
+    return str(name).rstrip(" 0123456789").strip()
 
 # Length strata for the stratified split, as (label, lo_inclusive, hi_exclusive).
 # Measured on tests/calibration_data: 10 / 22 / 19 tracks respectively.
@@ -229,27 +261,99 @@ def validate_verdict(verdict: dict) -> dict:
     return {"kind": kind}
 
 
-def make_label_record(series_id: str, source: str, values, verdict: dict,
-                      tolerance_idx: int, notes: str | None = None,
-                      labeled_at: str | None = None) -> dict:
-    """One labels-file record. `values` is the raw series the labeller saw."""
+def validate_phases(phases, n_steps: int | None = None) -> list[dict]:
+    """Normalise and check a whole labelled phase sequence.
+
+    A labelled series is an ordered PARTITION of [0, n): phase i runs from its
+    own `start_idx` up to the next one's, and the last runs to the end. So:
+
+      * the first phase starts at 0 — the series has to begin in some phase;
+      * `start_idx` is strictly increasing, which also forbids the zero-length
+        phases the old single-boundary format could express by accident;
+      * repeats are allowed (residual -> intensification -> mature -> decay is a
+        real life cycle), and the phase's POSITION carries the repetition rather
+        than a number in its name.
+
+    Checked eagerly, because a malformed sequence would not fail until evaluation
+    — long after the series has left the screen and the labeller could still say
+    what they meant.
+    """
+    if not phases:
+        raise ValueError("a labelled series needs at least one phase")
+    out, prev = [], None
+    for i, ph in enumerate(phases):
+        name = normalize_phase(ph.get("phase", ""))
+        if name not in PHASE_ORDER:
+            raise ValueError(f"unknown phase {ph.get('phase')!r}; expected one of {PHASE_ORDER}")
+        idx = int(ph["start_idx"])
+        if i == 0 and idx != 0:
+            raise ValueError(f"the first phase must start at 0, got {idx}")
+        if prev is not None and idx <= prev:
+            raise ValueError(
+                f"phase starts must strictly increase; {idx} follows {prev}")
+        if n_steps is not None and idx >= n_steps:
+            raise ValueError(f"start_idx {idx} is past the end of a {n_steps}-step series")
+        tol = int(ph.get("tolerance_idx", 0))
+        if tol < 0:
+            raise ValueError("tolerance_idx must be >= 0")
+        out.append({"phase": name, "start_idx": idx, "tolerance_idx": tol})
+        prev = idx
+    return out
+
+
+def incipient_verdict_from_phases(phases, n_steps: int) -> tuple[dict, int]:
+    """Reduce a phase sequence to the incipient question, and its own margin.
+
+    The full sequence is now the artefact, but the incipient boundary is still
+    what this whole front was commissioned to settle, so it is derived back out
+    into the same `verdict` shape the evaluation already speaks — rather than
+    asked twice and allowed to disagree with the table.
+
+    Returns (verdict, tolerance_idx). The margin is the one attached to the
+    boundary that actually ends the incipient phase, not a series-wide number.
+    """
+    if not phases or phases[0]["phase"] != "incipient":
+        return {"kind": "none"}, 0
+    if len(phases) == 1:
+        # the whole series is incipient; the boundary is its end
+        return {"kind": "boundary", "incipient_end_idx": int(n_steps)}, \
+            int(phases[0]["tolerance_idx"])
+    return ({"kind": "boundary", "incipient_end_idx": int(phases[1]["start_idx"])},
+            int(phases[1]["tolerance_idx"]))
+
+
+def make_label_record(series_id: str, source: str, values, phases,
+                      notes: str | None = None, labeled_at: str | None = None,
+                      ambiguous: bool = False) -> dict:
+    """One labels-file record: the whole phase sequence for one series.
+
+    `values` is the raw series the labeller saw. `verdict` and the top-level
+    `tolerance_idx` are DERIVED from `phases` (except `ambiguous`, which is a
+    judgement the table cannot express) so that the incipient-specific evaluation
+    keeps working without the two ever being able to contradict each other.
+    """
     if source not in ("real", "synthetic"):
         raise ValueError(f"source must be 'real' or 'synthetic', got {source!r}")
-    tol = int(tolerance_idx)
-    if tol < 0:
-        raise ValueError("tolerance_idx must be >= 0")
+    n = len(values)
+    checked = validate_phases(phases, n_steps=n)
+    verdict, tol = incipient_verdict_from_phases(checked, n)
+    if ambiguous:
+        verdict = {"kind": "ambiguous"}
     rec = {
         "id": str(series_id),
         "source": source,
         "series_sha256": series_sha256(values),
         "labeled_at": labeled_at or datetime.now(timezone.utc)
                         .replace(microsecond=0).isoformat(),
+        "n_steps": int(n),
+        "phases": checked,
+        # Derived from `phases`; kept in the file so the artefact answers the
+        # incipient question without every reader having to re-derive it.
         "verdict": validate_verdict(verdict),
-        # Per-label rather than global because the subjectivity is not uniform:
-        # some series have a visually unambiguous knee worth +/-1, others ramp so
-        # gently that any of ten indices would do. A single global margin would
-        # force the worst case onto every series and hide real disagreement.
-        "tolerance_idx": tol,
+        # Per-BOUNDARY rather than per-series, because the subjectivity is not
+        # uniform even within one cyclone: an incipient knee can be unmistakable
+        # on a track whose mature->decay transition is a long gentle roll.
+        "tolerance_idx": int(tol),
     }
     if notes:
         rec["notes"] = str(notes)
@@ -266,9 +370,19 @@ def read_labels(path: Path | None = None) -> dict[str, dict]:
     return {r["id"]: r for r in (doc.get("labels") or [])}
 
 
+def is_legacy_record(rec: dict) -> bool:
+    """True for a schema-1 record — one incipient boundary, no phase sequence.
+
+    Such a record cannot be upgraded automatically: the phases it never recorded
+    are not recoverable from the boundary it did. It is excluded from scoring and
+    named, so the series simply goes back in the queue.
+    """
+    return "phases" not in rec
+
+
 def labels_document(records: dict[str, dict]) -> dict:
     return {
-        "schema": 1,
+        "schema": LABELS_SCHEMA,
         "updated": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "n_labels": len(records),
         "labels": [records[k] for k in sorted(records)],
@@ -427,4 +541,75 @@ def score_labels(records, detected: dict[str, int | None]) -> dict:
         "none_agreement_rate": (n_none_agreed / n_none) if n_none else None,
         "n_ambiguous": n_ambiguous,
         "n_ambiguous_detector_none": n_ambiguous_detector_none,
+    }
+
+
+def phase_sequence(record) -> list[tuple[str, int]]:
+    """A label's sequence as [(phase, start_idx), ...]."""
+    return [(p["phase"], int(p["start_idx"])) for p in record["phases"]]
+
+
+def score_phase_sequences(records, detected: dict[str, list[tuple[str, int]]]) -> dict:
+    """Compare whole labelled phase sequences against detected ones.
+
+    Two failures live here and they are NOT commensurable, so they are never
+    averaged together:
+
+    * **Sequence mismatch** — the detector found a different set of phases in a
+      different order (an extra residual, a missing mature). No boundary-by-
+      boundary distance is meaningful across a mismatch: pairing the 3rd labelled
+      boundary with the 3rd detected one when the sequences differ compares two
+      different transitions and manufactures a number. These series are counted
+      and set aside.
+    * **Boundary error** — same sequence, boundaries in the wrong place. Only
+      these produce distances, per phase, each against its own tolerance.
+
+    The first phase's start is excluded throughout: it is 0 by construction on
+    both sides and would pad every hit rate with free agreement.
+    """
+    per_phase: dict[str, dict] = {}
+    n_series = n_match = n_mismatch = n_unscored = 0
+
+    for rec in records:
+        sid = rec["id"]
+        if sid not in detected:
+            n_unscored += 1
+            continue
+        n_series += 1
+        lab = phase_sequence(rec)
+        det = [(normalize_phase(p), int(i)) for p, i in detected[sid]]
+        if [p for p, _ in lab] != [p for p, _ in det]:
+            n_mismatch += 1
+            continue
+        n_match += 1
+        for k in range(1, len(lab)):
+            phase, lidx = lab[k]
+            didx = det[k][1]
+            tol = int(rec["phases"][k]["tolerance_idx"])
+            err = abs(didx - lidx)
+            slot = per_phase.setdefault(
+                phase, {"n": 0, "n_hit": 0, "errors": []})
+            slot["n"] += 1
+            slot["errors"].append(err)
+            if err <= tol:
+                slot["n_hit"] += 1
+
+    for slot in per_phase.values():
+        errs = slot.pop("errors")
+        slot["mae"] = (sum(errs) / len(errs)) if errs else None
+        slot["worst"] = max(errs) if errs else None
+        slot["hit_rate"] = (slot["n_hit"] / slot["n"]) if slot["n"] else None
+
+    all_n = sum(v["n"] for v in per_phase.values())
+    all_hit = sum(v["n_hit"] for v in per_phase.values())
+    return {
+        "n_series": n_series,
+        "n_unscored": n_unscored,
+        "n_sequence_match": n_match,
+        "n_sequence_mismatch": n_mismatch,
+        "sequence_match_rate": (n_match / n_series) if n_series else None,
+        "per_phase": per_phase,
+        "n_boundaries": all_n,
+        "n_boundaries_hit": all_hit,
+        "boundary_hit_rate": (all_hit / all_n) if all_n else None,
     }

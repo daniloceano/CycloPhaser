@@ -1,8 +1,14 @@
-# Manual labels for the incipient-phase boundary — the deliverable of this front.
+# Manual labels for cyclone phase sequences — the deliverable of this front.
 #
-# Written by the "Label" display mode of tools/calibration_app/app.py, one record
+# Written by the "Label" display mode of tools/calibration_app/app.py, one series
 # at a time, each save rewriting this file atomically (tmp + rename). Committed,
 # not gitignored: it IS the artefact. Empty until the labelling pass is done.
+#
+# A label is the cyclone's WHOLE phase sequence: an ordered partition of [0, n),
+# where phase i runs from its own start_idx up to the next one's and the last
+# runs to the end. Repeats are allowed (residual -> intensification -> mature ->
+# decay is a real life cycle); a phase's position in the list carries the
+# repetition, so the name is never numbered.
 #
 # Record fields
 #   id             series identifier — a track id for the 51 real tracks, an
@@ -13,13 +19,19 @@
 #                  against data that has since changed is detectable instead of
 #                  silently wrong
 #   labeled_at     UTC ISO timestamp
-#   verdict        {kind: boundary, incipient_end_idx: N}  the incipient phase is [0, N)
+#   n_steps        length of the series the indices refer to
+#   phases         [{phase, start_idx, tolerance_idx}, ...] — the sequence.
+#                  tolerance_idx is per BOUNDARY: an unmistakable incipient knee
+#                  and a long gentle mature->decay roll do not deserve the same
+#                  forgiveness. The first entry always starts at 0 and its margin
+#                  is unused.
+#   verdict        DERIVED from phases, so the two cannot contradict each other:
+#                  {kind: boundary, incipient_end_idx: N}  incipient is [0, N)
 #                  {kind: none}                            no incipient phase
-#                  {kind: ambiguous}                       undecidable
-#   tolerance_idx  the margin accepted for THIS label (int >= 0). Always present,
-#                  ignored in evaluation for kind=none. Per-label because the
-#                  subjectivity is not uniform across series.
+#                  {kind: ambiguous}                       set by the labeller
+#   tolerance_idx  DERIVED — the margin on the boundary that ends the incipient
+#                  phase. Ignored in evaluation for kind=none.
 #   notes          optional free text
-schema: 1
+schema: 2
 n_labels: 0
 labels: []

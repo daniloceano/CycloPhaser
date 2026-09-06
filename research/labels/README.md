@@ -1,7 +1,8 @@
-# Manual labels for the incipient-phase boundary
+# Manual labels for cyclone phase sequences
 
-Tooling, artefact and evaluation for a human-labelled reference of where the
-**incipient phase ends** in a cyclone vorticity series.
+Tooling, artefact and evaluation for a human-labelled reference of a cyclone's
+**whole phase sequence** — and, as the question that drove the front, of where
+the **incipient phase ends**.
 
 ## Why this exists
 
@@ -69,14 +70,27 @@ fatigue with the identifier, and any drift in criteria would then look like a
 real time-dependent effect. Progress is persisted, so the queue resumes where it
 stopped.
 
+Each cyclone is labelled **completely** — every phase, in order — before the
+queue moves on, so a track is judged as a whole life cycle rather than as one
+boundary in isolation.
+
 **The tab is blind.** It shows the raw input series and nothing else — no
-filtered series, no derivatives, no phases, no shading, no τ, no extrema, no
-detector boundary. A label written while the detector's answer is on screen is an
-echo of that answer, not evidence about it, and anchoring is automatic rather
-than something care avoids. `tests/test_manual_labels.py` parses
-`label_tab.py`'s AST and fails if it imports the package or names any detector
-output. Synthetic cases appear under an opaque hashed id, because names like
-`IcDItMD_noisy` spell the expected sequence.
+filtered series, no derivatives, no τ, no extrema, no detector boundary. Phases
+are shaded in the project's standard palette (blue incipient, amber
+intensification, red mature, olive decay, grey residual) so a labelled series
+reads like every other phase figure in the repo — but every band, line and arrow
+is painting **your** marks, never the algorithm's. A label written while the
+detector's answer is on screen is an echo of that answer, not evidence about it,
+and anchoring is automatic rather than something care avoids.
+`tests/test_manual_labels.py` parses `label_tab.py`'s AST and fails if it imports
+the package or names any detector output. Synthetic cases appear under an opaque
+hashed id, because names like `IcDItMD_noisy` spell the expected sequence.
+
+Each boundary's margin is drawn as a shaded band and a **double-headed arrow**
+spanning `[start-tol, start+tol]`. The margin is the part of a label that is
+easiest to set carelessly: a number in a table gives no sense of how much of the
+curve it forgives, and seeing the arrow cover half a ramp is what prompts a
+smaller one.
 
 Each save rewrites `manual_labels.yaml` atomically (tmp + `os.replace`), so
 closing the tab cannot lose work.
@@ -97,35 +111,67 @@ set is spent the first time a parameter is chosen after looking at it.
   source: real                # real | synthetic
   series_sha256: 4f3a…        # hash of the RAW values as labelled
   labeled_at: '2026-09-06T00:00:00+00:00'
-  verdict: {kind: boundary, incipient_end_idx: 7}   # incipient phase is [0, 7)
-  tolerance_idx: 3
+  n_steps: 133
+  phases:                     # an ordered partition of [0, n_steps)
+    - {phase: incipient,       start_idx: 0,   tolerance_idx: 0}
+    - {phase: intensification, start_idx: 7,   tolerance_idx: 3}
+    - {phase: mature,          start_idx: 40,  tolerance_idx: 5}
+    - {phase: decay,           start_idx: 60,  tolerance_idx: 4}
+  verdict: {kind: boundary, incipient_end_idx: 7}   # DERIVED; incipient is [0, 7)
+  tolerance_idx: 3                                  # DERIVED
   notes: clear knee           # optional
 ```
 
-`verdict.kind` is one of `boundary` (with `incipient_end_idx`), `none` (no
-incipient phase), or `ambiguous` (undecidable).
+Phase *i* runs from its own `start_idx` up to the next one's; the last runs to
+the end. The first always starts at 0. Repeats are allowed — `residual →
+intensification → mature → decay` is a real life cycle — and a phase's **position**
+in the list carries the repetition, so the name is never numbered.
+
+`verdict` and the top-level `tolerance_idx` are **derived** from `phases` rather
+than asked a second time, so the table and the verdict cannot contradict each
+other about the very thing this front exists to settle. `verdict.kind` is
+`boundary` (with `incipient_end_idx`), `none` (the sequence does not start with
+an incipient phase), or `ambiguous` — the one judgement the table cannot express,
+set by the labeller, and recorded alongside the phases rather than instead of
+them.
 
 `series_sha256` hashes the raw values only — not the index, not any metadata — so
 it answers exactly one question: *is this the data that was looked at?* If a CSV
 or the generator changes, the label goes visibly stale instead of silently
 pointing at positions in a series that no longer exists.
 
-`tolerance_idx` is the margin accepted **for that label**, always present and
-ignored for `kind: none`. Per-label rather than global because the subjectivity
-is not uniform: some knees are unmistakable and worth ±1, some ramps are gentle
-enough that any of ten indices would be defensible. One global margin would force
-the worst case onto every series and hide exactly that difference.
+`tolerance_idx` is the margin accepted **for that boundary**. Per boundary rather
+than per series or global, because the subjectivity is not uniform even within
+one cyclone: an incipient knee can be unmistakable on a track whose mature→decay
+transition is a long gentle roll. One global margin would force the worst case
+onto every boundary and hide exactly that difference. The first phase's margin is
+unused (its start is 0 by construction).
 
 ## What is reported, and why separately
 
+Two blocks, side by side.
+
+**The incipient boundary** — the question the front was commissioned to settle:
+
 * **Hit rate within each label's own margin** — the headline.
-* **MAE and worst case, raw**, alongside — a hit rate under a per-label margin
-  can be inflated by wide margins and says nothing about the size of the misses.
+* **MAE and worst case, raw**, alongside — a hit rate under a per-boundary
+  margin can be inflated by wide margins and says nothing about the size of the
+  misses.
 * **Refusal, both directions** — the detector agreeing there is no incipient
   phase, and the detector refusing where the label says there is a boundary.
   Refusing is a different failure from being off by *k* steps; averaging the two
   would hide both.
 * `ambiguous` verdicts are out of the hit rate and the MAE (there is nothing to
   be near) but stay in the refusal accounting.
+
+**The whole sequence:**
+
+* **Sequence mismatch** — the detector found different phases, or in a different
+  order — is counted and set aside, never measured. Pairing the 3rd labelled
+  boundary with the 3rd detected one across a mismatch compares two different
+  transitions and manufactures a number.
+* **Boundary error**, only where the sequences agree, broken out **per phase**,
+  each against its own margin. The first phase's start is excluded: it is 0 on
+  both sides by construction and would pad every rate with free agreement.
 
 All of it split by train/test and by real/synthetic.
