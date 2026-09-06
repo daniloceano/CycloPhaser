@@ -1,0 +1,25 @@
+# Manual labels for the incipient-phase boundary — the deliverable of this front.
+#
+# Written by the "Label" display mode of tools/calibration_app/app.py, one record
+# at a time, each save rewriting this file atomically (tmp + rename). Committed,
+# not gitignored: it IS the artefact. Empty until the labelling pass is done.
+#
+# Record fields
+#   id             series identifier — a track id for the 51 real tracks, an
+#                  opaque hash for the 12 synthetic cases (their names spell the
+#                  expected phase sequence, so the name is the answer)
+#   source         real | synthetic
+#   series_sha256  hash of the raw series values as labelled, so a label written
+#                  against data that has since changed is detectable instead of
+#                  silently wrong
+#   labeled_at     UTC ISO timestamp
+#   verdict        {kind: boundary, incipient_end_idx: N}  the incipient phase is [0, N)
+#                  {kind: none}                            no incipient phase
+#                  {kind: ambiguous}                       undecidable
+#   tolerance_idx  the margin accepted for THIS label (int >= 0). Always present,
+#                  ignored in evaluation for kind=none. Per-label because the
+#                  subjectivity is not uniform across series.
+#   notes          optional free text
+schema: 1
+n_labels: 0
+labels: []

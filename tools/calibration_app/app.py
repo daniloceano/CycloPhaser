@@ -32,6 +32,7 @@ from cyclophaser.plots import plot_all_periods, plot_didactic
 # strategy the data paths below use, and for the same reason).
 if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
+import label_tab  # noqa: E402
 import layer_inspector as li  # noqa: E402
 from inspector_plotly import build_inspector_figure  # noqa: E402
 
@@ -200,7 +201,7 @@ _DEFAULTS: dict = {
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
-_VIEW_MODES = ["Grid", "Inspector"]
+_VIEW_MODES = ["Grid", "Inspector", "Label"]
 _BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
@@ -1922,6 +1923,23 @@ if load_synthetic_cases:
            "against." if _flat else "")
     )
 
+with st.sidebar:
+    st.divider()
+    st.subheader("Manual labelling")
+    label_default_tolerance = st.number_input(
+        "Default ± steps for a new label", min_value=0, max_value=50, value=5, step=1,
+        key="label_default_tolerance",
+        help=(
+            "Starting value of the per-series margin in the **Label** display "
+            "mode. It is only a starting value: the margin is stored per label, "
+            "because the subjectivity is not uniform across series — some knees "
+            "are unmistakable and worth ±1, some ramps are gentle enough that "
+            "any of ten indices would be defensible. A single global margin "
+            "would force the worst case onto every series and hide exactly that "
+            "difference.\n\nDoes not affect detection and is not exported to YAML."
+        ),
+    )
+
 _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
 
 # Precedence when both an upload and "load all test cyclones" are active: the
@@ -2069,8 +2087,14 @@ with tab_cal:
                 "decision the algorithm made, each on its own switchable "
                 "layer. Use it when a track in the grid looks wrong and you "
                 "need to know *why*.\n\n"
-                "Neither mode changes detection, and no inspector setting "
-                "reaches the exported YAML."
+                "**Label** — blind manual labelling of the incipient "
+                "boundary. Shows the raw input series and NOTHING else: no "
+                "filtered series, no derivatives, no phases, no detector "
+                "output of any kind. That is the point — a label written "
+                "while looking at the detector's answer is an echo of it, not "
+                "evidence about it.\n\n"
+                "No mode changes detection, and no view setting reaches the "
+                "exported YAML."
             ),
         )
     with _c2:
@@ -2238,7 +2262,7 @@ with tab_cal:
     # computed by `layer_inspector`, which only ever CALLS the package's own
     # functions. No widget here reaches `_PHASE_PARAMS`, and none of this state
     # is exported to YAML -- it is view state, like `n_cols`.
-    else:
+    elif view_mode == "Inspector":
         _inspectable = [n for n, r in all_results.items() if r["ok"]]
         if not _inspectable:
             st.warning("No cyclone was processed successfully — nothing to inspect.")
@@ -2473,26 +2497,47 @@ with tab_cal:
                 st.dataframe(_mature_table(_mature_records),
                              use_container_width=True, hide_index=True)
 
-    # Bad-case evaluation summary — always shown, regardless of n_cols.
-    st.divider()
-    st.subheader("Bad-case evaluation")
-    _eval = _compute_evaluation(cyclone_names)
-    st.metric(
-        "Bad cases",
-        f"{_eval['bad_cases_count']} / {_eval['total_cyclones']}",
-        f"{_eval['bad_cases_percent']}%",
-        delta_color="off",
-    )
-    if _eval["bad_cases"]:
-        st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
-    else:
-        st.caption("No cyclones marked as bad in this session.")
-    st.caption(
-        "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
-        "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
-        "is also written to the exported YAML's 'evaluation' section, so different "
-        "parameter sets can be compared by their bad-case rate."
-    )
+    # ══════════════════════════════════════════════════════════════════════════
+    # MODE "Label" — BLIND manual labelling of the incipient boundary
+    # ══════════════════════════════════════════════════════════════════════════
+    # This mode is deliberately CUT OFF from everything above it. It does not
+    # read `all_results`, `files`, `cyclone_names`, or any filter/phase widget;
+    # it loads its own 63 series (51 calibration tracks + 12 synthetic cases)
+    # straight from disk and draws the raw input and nothing else.
+    #
+    # That isolation is the requirement, not an implementation detail. There is
+    # no ground truth for the incipient boundary — the synthetic suite derives
+    # one from the segment list and gets it wrong, because a sine-shaped It or D
+    # opening has zero derivative at t₀ and so starts flat exactly as a designed
+    # `Ic` segment would. The labels therefore have to come from a human, and a
+    # human who can see the detector's answer is no longer independent evidence
+    # about it. See the module docstring of label_tab.py.
+    elif view_mode == "Label":
+        label_tab.render(default_tolerance=int(label_default_tolerance))
+
+    # Bad-case evaluation summary — shown for both detector-facing modes,
+    # regardless of n_cols. NOT shown in "Label": that mode is blind by
+    # construction and must not put any detector-derived number on screen.
+    if view_mode != "Label":
+        st.divider()
+        st.subheader("Bad-case evaluation")
+        _eval = _compute_evaluation(cyclone_names)
+        st.metric(
+            "Bad cases",
+            f"{_eval['bad_cases_count']} / {_eval['total_cyclones']}",
+            f"{_eval['bad_cases_percent']}%",
+            delta_color="off",
+        )
+        if _eval["bad_cases"]:
+            st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
+        else:
+            st.caption("No cyclones marked as bad in this session.")
+        st.caption(
+            "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
+            "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
+            "is also written to the exported YAML's 'evaluation' section, so different "
+            "parameter sets can be compared by their bad-case rate."
+        )
 
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 2 — Documentation
