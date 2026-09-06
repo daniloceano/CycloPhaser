@@ -9,6 +9,122 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+**Opt-in `incipient_method="plateau"` — a slope-based incipient boundary (behaviour
+unchanged by default)**
+
+`determine_periods(..., incipient_method="plateau")` places the incipient/next-phase
+boundary at the end of the initial low-slope *plateau* — the leading stretch over
+which the normalised slope `|dz|/max|dz|` stays below `incipient_plateau_tau`
+(default 0.20) — instead of at `threshold_incipient_length` (0.4) of the distance to
+the next dz extremum. The default remains `"geometric"`, which is byte-identical to
+every prior version; verified over all 51 calibration tracks against `develop-v2.1`
+and pinned in `tests/baselines/baseline_defaults_multitrack.csv`.
+
+Motivation, measured at 01c4492 (see
+`research/incipient_plateau/REPORT_incipient_characterisation.md`): at the point
+where the geometric rule ends the incipient phase, `|dz|` has already reached a
+median **58 %** (author's calibration) / **77 %** (package defaults) of its own
+maximum — the rule is measuring a distance, not a slope. Two further findings scope
+it: the `It → D → It` re-cut branch never fires (0/51, and it is structurally
+unreachable — a smooth It→D transition must pass through a minimum, which is
+detected as `mature`), and the catch-all `fillna` produces no incipient phase at all
+on real data.
+
+Unlike the geometric rule the plateau rule is **self-contained**: it scans from t₀
+and does not use the case A/B/C dispatch. It declines to create an incipient phase
+exactly when the plateau has zero length (`rel(0) >= tau`), which is what replaces
+the case gating as the false-positive guard. `threshold_incipient_length` is ignored
+under `"plateau"`, as `threshold_mature_length` is under `mature_method="amplitude"`.
+
+Two structural options are exposed for validation: `incipient_plateau_signal`
+(`"derivative"`, default, on `dz_dt_smoothed2`; or `"vorticity"`, on `np.gradient`
+of the **unfiltered** input, immune to filter edge artifacts) and
+`incipient_plateau_crossing` (`"single"`, default; or `"sustained"` requiring
+`incipient_plateau_k` consecutive samples, robust to a spike inside the plateau).
+
+Measured effect at `tau=0.20` over the 51 tracks:
+
+| configuration | tracks with `incipient` | boundary Δ (median) | sequences changed |
+|---|---|---|---|
+| author's §3c calibration | 48/51 → **51/51** | −2 steps | 4/51 |
+| package defaults | 49/51 → **7/51** | −5 steps | 43/51 |
+
+**The plateau criterion is only definable once the t₀ boundary artifact is
+controlled.** Under package defaults (`r(t₀)` median 0.526) the first sample already
+exceeds any usable tau on most tracks, so the rule collapses to "no incipient phase"
+on 44 of 51. It is intended for use with a calibration that keeps `r(t₀)` low. `tau`
+and the two structural options are **not yet calibrated** — they await the author's
+visual validation.
+
+Also added: `SYNTHETIC_VALIDATION_PRESET` in `tests/synthetic/cases.py`, and a
+"Load synthetic cases" mode in the calibration app that materialises the synthetic
+suite alongside the real tracks and overlays the designed ground-truth incipient
+boundary.
+
+### Added
+
+**`incipient_smooth_window` / `incipient_smooth_polyorder` — dedicated denoising
+for the incipient probe (opt-in, default off)**
+
+`incipient_plateau_signal="vorticity"` reads the rate on `d(zeta_raw)/dt`, which
+is immune to the pipeline's edge artifacts and, for the same reason, exposed to
+raw noise: on the 2 %-noise synthetic cases the normalised raw gradient at t₀ is
+already 0.25–0.57, above any usable tau, so the criterion trips at the first
+sample and yields no incipient phase at all.
+
+A Savitzky-Golay pass is now applied to the raw vorticity **before** the probe
+differentiates it, controlled by `incipient_smooth_window` (default `0`,
+disabled — previous behaviour byte for byte) and `incipient_smooth_polyorder`
+(default 3). It touches the incipient probe **only**: `df['z']` and `df['dz']`
+are unchanged, so every other phase is unaffected and `use_smoothing` stays off
+as decided in `docs/future_work.md` §4. Both parameters are ignored outside
+`incipient_method="plateau"` with `incipient_plateau_signal="vorticity"`.
+
+Savitzky-Golay rather than a moving average: a boxcar attenuates a sinusoid's
+amplitude and smears its curvature, and curvature is what the probe reads.
+
+Measured on the synthetic suite (`measure_incipient_smoothing.py`,
+`REPORT_incipient_smoothing.md`): a window of 5–9 takes the designed-Ic cases
+left with no phase from 1–2 down to 0, and makes `incipient_plateau_crossing=
+"sustained"` unnecessary — single-crossing catches up with `k=3` once the rate is
+reliable. **Goldilocks caveat, measured:** on real tracks `rel(t₀)` is *not*
+monotone in the window (20170225: 0.44 → 0.66 at w=5 → 0.38 at w=7), so a wider
+window is not reliably safer. No window is chosen here; it awaits visual
+validation.
+
+A curvature-based **knee** candidate (`argmax |d²z|`) was measured alongside and
+deliberately **not** added to the package: like the rejected amplitude rule it
+cannot decline (2/2 false positives on the linear-onset true negatives at every
+window), and smoothing degrades it (worst error 2 → 23 timesteps). It lives in
+the measurement script as a recorded negative result.
+
+### Evaluated and rejected
+
+**`incipient_method="amplitude"` — discarded by construction, not by calibration**
+
+A third incipient rule was implemented and then removed: the incipient phase would
+last until the cyclone had completed a given fraction of its first deepening,
+`|z(t) - z(t0)| >= fraction * |z(first extremum) - z(t0)|` — the level-based
+analogue of `mature_method="amplitude"`.
+
+It fails for a structural reason rather than a tunable one. Amplitude measures an
+*accumulated* quantity: `|z(t) - z(t0)|` is exactly 0 at t0 and the threshold can
+only be met strictly after it, so **some prefix always qualifies as incipient**.
+The rule can never return "no incipient phase" — not for a cyclone that is already
+intensifying at the first sample, and not for one built with a deliberately steep
+onset. Measured before removal, on the 51 calibration tracks it produced a boundary
+on **51/51** (declining on none, against 48/51 for the geometric rule), and on the
+two synthetic cases designed with a `linear` opening ramp — the shape whose whole
+purpose is to have non-zero dz from the first timestep — it still emitted a 3-step
+incipient phase.
+
+No choice of `fraction` repairs this, because the defect is in the quantity being
+thresholded, not in the threshold. The slope-based `"plateau"` rule keeps its
+rejection mechanism (`rel(0) >= tau` is a zero-length plateau) and remains the
+opt-in route under evaluation.
+
 ### Changed
 
 **`use_smoothing=False` now disables the derivative smoothing too (behaviour change)**

@@ -1,0 +1,55 @@
+# Conda environment for CycloPhaser development.
+#
+#     conda env create -f environment.yml
+#     conda activate cyclophaser
+#     pip install -e .
+#
+# Why a dedicated environment rather than `base`:
+#
+#   Installing CycloPhaser into a shared `base` alongside other projects makes
+#   top-level module names collide. This is not hypothetical — the calibration
+#   app's "Load synthetic cases" option failed with
+#   `ModuleNotFoundError: No module named 'tests.synthetic'` because another
+#   project had leaked a top-level `tests` package into `base`'s site-packages,
+#   and `pip install -e .` leaves the repo root on sys.path *after*
+#   site-packages, so the foreign `tests` won the name. The app no longer
+#   depends on that name resolving (it loads tests/synthetic by file path), but
+#   an isolated environment removes the whole class of problem.
+#
+# Dependency scope: this file covers the package, the calibration app
+# (streamlit, pyyaml — declared nowhere else) and the test suite. The docs
+# toolchain (sphinx and friends) stays in requirements.txt.
+#
+# Version floors match setup.py's install_requires. The pinned metrics in
+# docs/future_work.md and research/incipient_plateau/ were verified to
+# reproduce identically under both numpy 2.1.2 / scipy 1.17.1 / pandas 2.3.3
+# and numpy 2.4.0 / scipy 1.17.1 / pandas 2.3.3, so exact pins are not
+# required for reproducibility; pin harder here if that ever changes.
+
+name: cyclophaser
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.13
+
+  # ── scientific core (the package itself) ──────────────────────────────────
+  - numpy>=2.1
+  - scipy>=1.14
+  - pandas>=2.2
+  - xarray>=0.16
+  - matplotlib>=3.9
+  - cmocean>=4.0
+
+  # ── test suite ────────────────────────────────────────────────────────────
+  - pytest>=6.2
+
+  # ── calibration app (tools/calibration_app) ───────────────────────────────
+  - streamlit>=1.30
+  - pyyaml>=6.0
+
+  - pip
+  - pip:
+      # Install CycloPhaser itself in editable mode from the repo root.
+      - -e .

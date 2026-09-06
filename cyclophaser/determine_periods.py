@@ -744,7 +744,14 @@ def get_periods(vorticity,
                 length_scale: str = "global",
                 mature_method: str = "derivative",
                 mature_amplitude_fraction: float = 0.90,
-                decay_tail_amplitude_fraction: float = None) -> pd.DataFrame:
+                decay_tail_amplitude_fraction: float = None,
+                incipient_method: str = "geometric",
+                incipient_plateau_tau: float = 0.20,
+                incipient_plateau_signal: str = "derivative",
+                incipient_plateau_crossing: str = "single",
+                incipient_plateau_k: int = 3,
+                incipient_smooth_window: int = 0,
+                incipient_smooth_polyorder: int = 3) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -885,6 +892,60 @@ def get_periods(vorticity,
         threshold_decay_length (float, optional): Minimum decay stage length. Default is 0.075.
         threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075.
         threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4.
+        incipient_method (str, optional): How the incipient phase boundary is placed.
+            ``"geometric"`` (default) is the historical rule: the incipient phase runs
+            from the start of the first intensification/decay segment to
+            ``threshold_incipient_length`` of the way to the next dz extremum, via the
+            case A/B/C dispatch. ``"plateau"`` instead marks the leading stretch over
+            which the normalised slope stays below ``incipient_plateau_tau``. The
+            plateau rule is self-contained (it scans from t0, ignoring the case
+            dispatch) and **ignores ``threshold_incipient_length``**, in the same way
+            ``mature_method="amplitude"`` ignores ``threshold_mature_length``.
+            **Caveat:** the plateau criterion is only meaningful once the boundary
+            artifact at t0 has been controlled. Under bare package defaults the first
+            sample already exceeds any usable tau on most tracks, so the rule
+            degenerates to "no incipient phase"; it is intended for use with a
+            calibration that keeps ``r(t0)`` low (Lanczos active with
+            ``boundary_padding="reflect"`` and ``use_smoothing=False``). Default is
+            ``"geometric"``.
+
+        incipient_plateau_tau (float, optional): Plateau threshold on the normalised
+            slope, in (0, 1]. The plateau is the leading region where ``rel < tau``.
+            Only used when ``incipient_method="plateau"``. Default is 0.20.
+
+        incipient_plateau_signal (str, optional): Which signal the plateau is measured
+            on. ``"derivative"`` (default) uses ``|dz_dt_smoothed2|`` normalised by its
+            own maximum — the array the stage detection itself consumes.
+            ``"vorticity"`` uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the
+            **unfiltered** input series, which is immune to filter edge artifacts but
+            noisier. Only used when ``incipient_method="plateau"``.
+
+        incipient_plateau_crossing (str, optional): How the end of the plateau is
+            detected. ``"single"`` (default) ends it at the first sample with
+            ``rel >= tau``. ``"sustained"`` requires ``incipient_plateau_k``
+            consecutive samples at or above tau and ends the plateau at the start of
+            that run, which is robust to an isolated spike inside the plateau. If no
+            sustained run exists anywhere in the series, no incipient phase is created.
+            Only used when ``incipient_method="plateau"``.
+
+        incipient_plateau_k (int, optional): Number of consecutive samples required by
+            ``incipient_plateau_crossing="sustained"``. Default is 3. Ignored for
+            ``"single"``.
+        incipient_smooth_window (int, optional): Width of a Savitzky-Golay pass applied
+            to the raw vorticity **before** the incipient probe differentiates it, to
+            make the measured rate reliable without re-enabling any pipeline smoothing.
+            It affects ONLY the incipient probe — ``df['z']`` and ``df['dz']``, and
+            therefore every other phase, are untouched. 0 (default) disables it and
+            reproduces the previous behaviour exactly. Only used when
+            ``incipient_method="plateau"`` **and**
+            ``incipient_plateau_signal="vorticity"``; the ``"derivative"`` path already
+            reads a filtered curve. An even value is rounded up to odd and a value
+            longer than the series is clamped, both silently. Keep it light: too wide a
+            window flattens the rise being measured and displaces the knee.
+
+        incipient_smooth_polyorder (int, optional): Polynomial order of that
+            Savitzky-Golay pass. Default is 3. A window at or below this order cannot
+            define the fit and is skipped (no smoothing).
         prominence (float, optional): Absolute minimum prominence threshold for
             z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``
             for the full description of prominence modes.
@@ -935,6 +996,31 @@ def get_periods(vorticity,
         raise ValueError(f"length_scale must be 'global' or 'local', got {length_scale!r}.")
     if mature_method not in ("derivative", "amplitude"):
         raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {mature_method!r}.")
+    if incipient_method not in ("geometric", "plateau"):
+        raise ValueError(
+            f"incipient_method must be 'geometric' or 'plateau', got {incipient_method!r}.")
+    if incipient_plateau_signal not in ("derivative", "vorticity"):
+        raise ValueError(
+            "incipient_plateau_signal must be 'derivative' or 'vorticity', got "
+            f"{incipient_plateau_signal!r}.")
+    if incipient_plateau_crossing not in ("single", "sustained"):
+        raise ValueError(
+            "incipient_plateau_crossing must be 'single' or 'sustained', got "
+            f"{incipient_plateau_crossing!r}.")
+    if not 0 < incipient_plateau_tau <= 1:
+        raise ValueError(
+            f"incipient_plateau_tau must be in (0, 1], got {incipient_plateau_tau!r}.")
+    if int(incipient_plateau_k) < 1:
+        raise ValueError(
+            f"incipient_plateau_k must be >= 1, got {incipient_plateau_k!r}.")
+    if int(incipient_smooth_window) < 0:
+        raise ValueError(
+            "incipient_smooth_window must be >= 0 (0 disables), got "
+            f"{incipient_smooth_window!r}.")
+    if int(incipient_smooth_polyorder) < 1:
+        raise ValueError(
+            "incipient_smooth_polyorder must be >= 1, got "
+            f"{incipient_smooth_polyorder!r}.")
 
     # Extract smoothed vorticity and derivatives
     z = vorticity.vorticity_smoothed2
@@ -975,6 +1061,13 @@ def get_periods(vorticity,
         "mature_method": mature_method,
         "mature_amplitude_fraction": mature_amplitude_fraction,
         "decay_tail_amplitude_fraction": decay_tail_amplitude_fraction,
+        "incipient_method": incipient_method,
+        "incipient_plateau_tau": incipient_plateau_tau,
+        "incipient_plateau_signal": incipient_plateau_signal,
+        "incipient_plateau_crossing": incipient_plateau_crossing,
+        "incipient_plateau_k": incipient_plateau_k,
+        "incipient_smooth_window": incipient_smooth_window,
+        "incipient_smooth_polyorder": incipient_smooth_polyorder,
     }
 
     # Detect different stages of cyclone lifecycle
@@ -1057,7 +1150,14 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       length_scale: str = "global",
                       mature_method: str = "derivative",
                       mature_amplitude_fraction: float = 0.90,
-                      decay_tail_amplitude_fraction: float = None) -> pd.DataFrame:
+                      decay_tail_amplitude_fraction: float = None,
+                      incipient_method: str = "geometric",
+                      incipient_plateau_tau: float = 0.20,
+                      incipient_plateau_signal: str = "derivative",
+                      incipient_plateau_crossing: str = "single",
+                      incipient_plateau_k: int = 3,
+                      incipient_smooth_window: int = 0,
+                      incipient_smooth_polyorder: int = 3) -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -1147,6 +1247,60 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         threshold_incipient_length (float, optional): Minimum required length of the incipient phase as a fraction of the
             dataset. Default is 0.4.
 
+        incipient_method (str, optional): How the incipient phase boundary is placed.
+            ``"geometric"`` (default) is the historical rule: the incipient phase runs
+            from the start of the first intensification/decay segment to
+            ``threshold_incipient_length`` of the way to the next dz extremum, via the
+            case A/B/C dispatch. ``"plateau"`` instead marks the leading stretch over
+            which the normalised slope stays below ``incipient_plateau_tau``. The
+            plateau rule is self-contained (it scans from t0, ignoring the case
+            dispatch) and **ignores ``threshold_incipient_length``**, in the same way
+            ``mature_method="amplitude"`` ignores ``threshold_mature_length``.
+            **Caveat:** the plateau criterion is only meaningful once the boundary
+            artifact at t0 has been controlled. Under bare package defaults the first
+            sample already exceeds any usable tau on most tracks, so the rule
+            degenerates to "no incipient phase"; it is intended for use with a
+            calibration that keeps ``r(t0)`` low (Lanczos active with
+            ``boundary_padding="reflect"`` and ``use_smoothing=False``). Default is
+            ``"geometric"``.
+
+        incipient_plateau_tau (float, optional): Plateau threshold on the normalised
+            slope, in (0, 1]. The plateau is the leading region where ``rel < tau``.
+            Only used when ``incipient_method="plateau"``. Default is 0.20.
+
+        incipient_plateau_signal (str, optional): Which signal the plateau is measured
+            on. ``"derivative"`` (default) uses ``|dz_dt_smoothed2|`` normalised by its
+            own maximum — the array the stage detection itself consumes.
+            ``"vorticity"`` uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the
+            **unfiltered** input series, which is immune to filter edge artifacts but
+            noisier. Only used when ``incipient_method="plateau"``.
+
+        incipient_plateau_crossing (str, optional): How the end of the plateau is
+            detected. ``"single"`` (default) ends it at the first sample with
+            ``rel >= tau``. ``"sustained"`` requires ``incipient_plateau_k``
+            consecutive samples at or above tau and ends the plateau at the start of
+            that run, which is robust to an isolated spike inside the plateau. If no
+            sustained run exists anywhere in the series, no incipient phase is created.
+            Only used when ``incipient_method="plateau"``.
+
+        incipient_plateau_k (int, optional): Number of consecutive samples required by
+            ``incipient_plateau_crossing="sustained"``. Default is 3. Ignored for
+            ``"single"``.
+        incipient_smooth_window (int, optional): Width of a Savitzky-Golay pass applied
+            to the raw vorticity **before** the incipient probe differentiates it, to
+            make the measured rate reliable without re-enabling any pipeline smoothing.
+            It affects ONLY the incipient probe — ``df['z']`` and ``df['dz']``, and
+            therefore every other phase, are untouched. 0 (default) disables it and
+            reproduces the previous behaviour exactly. Only used when
+            ``incipient_method="plateau"`` **and**
+            ``incipient_plateau_signal="vorticity"``; the ``"derivative"`` path already
+            reads a filtered curve. An even value is rounded up to odd and a value
+            longer than the series is clamped, both silently. Keep it light: too wide a
+            window flattens the rise being measured and displaces the knee.
+
+        incipient_smooth_polyorder (int, optional): Polynomial order of that
+            Savitzky-Golay pass. Default is 3. A window at or below this order cannot
+            define the fit and is skipped (no smoothing).
         length_scale (str, optional): "global" (default) or "local". Controls what
             length ``threshold_intensification_length``, ``threshold_intensification_gap``,
             ``threshold_mature_length``, ``threshold_decay_length`` and
@@ -1267,6 +1421,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         mature_method=mature_method,
         mature_amplitude_fraction=mature_amplitude_fraction,
         decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
+        incipient_method=incipient_method,
+        incipient_plateau_tau=incipient_plateau_tau,
+        incipient_plateau_signal=incipient_plateau_signal,
+        incipient_plateau_crossing=incipient_plateau_crossing,
+        incipient_plateau_k=incipient_plateau_k,
+        incipient_smooth_window=incipient_smooth_window,
+        incipient_smooth_polyorder=incipient_smooth_polyorder,
     )
 
     return df

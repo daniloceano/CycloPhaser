@@ -1,0 +1,205 @@
+==============================================================================
+TABLE 1 — mean |error| vs ground truth, by candidate x smoothing window
+==============================================================================
+(scored on the 5 designed-Ic cases; suite tolerance = 6 timesteps)
+window                0    3    5    7    9
+candidate                                  
+knee                1.6  1.6  6.6  4.4  8.6
+tau0.10_single      2.0  2.0  1.4  1.4  0.8
+tau0.10_sustained3  1.6  1.6  1.0  1.0  0.8
+tau0.15_single      2.4  2.4  1.8  1.4  1.2
+tau0.15_sustained3  1.6  1.6  1.4  1.4  1.2
+tau0.20_single      2.8  2.8  2.0  1.8  1.8
+tau0.20_sustained3  2.6  2.6  2.0  1.8  1.8
+tau0.30_single      3.0  3.0  2.8  3.0  3.0
+tau0.30_sustained3  3.2  3.2  3.2  3.0  3.0
+
+==============================================================================
+TABLE 2 — worst |error| (the stability criterion)
+==============================================================================
+window                0    3     5     7     9
+candidate                                     
+knee                2.0  2.0  14.0  13.0  23.0
+tau0.10_single      3.0  3.0   3.0   3.0   2.0
+tau0.10_sustained3  3.0  3.0   2.0   2.0   2.0
+tau0.15_single      3.0  3.0   3.0   3.0   3.0
+tau0.15_sustained3  3.0  3.0   3.0   3.0   3.0
+tau0.20_single      4.0  4.0   4.0   4.0   4.0
+tau0.20_sustained3  4.0  4.0   4.0   4.0   4.0
+tau0.30_single      6.0  6.0   6.0   6.0   6.0
+tau0.30_sustained3  6.0  6.0   6.0   6.0   6.0
+
+==============================================================================
+TABLE 3 — cases INSIDE tolerance, out of the designed-Ic set
+==============================================================================
+window              0  3  5  7  9
+candidate                        
+knee                5  5  3  4  3
+tau0.10_single      5  5  5  5  5
+tau0.10_sustained3  5  5  5  5  5
+tau0.15_single      5  5  5  5  5
+tau0.15_sustained3  5  5  5  5  5
+tau0.20_single      5  5  5  5  5
+tau0.20_sustained3  5  5  5  5  5
+tau0.30_single      5  5  5  5  5
+tau0.30_sustained3  5  5  5  5  5
+
+==============================================================================
+TABLE 4 — false positives: the two steep-start true negatives
+==============================================================================
+(these are designed with a linear onset; boundary 0 == correctly refused)
+window              0  3  5  7  9
+candidate                        
+knee                2  2  2  2  2
+tau0.10_single      0  0  0  0  0
+tau0.10_sustained3  0  0  0  0  0
+tau0.15_single      0  0  0  0  0
+tau0.15_sustained3  0  0  0  0  0
+tau0.20_single      0  0  0  0  0
+tau0.20_sustained3  0  0  0  0  0
+tau0.30_single      0  0  0  0  0
+tau0.30_sustained3  0  0  0  0  0
+
+==============================================================================
+TABLE 5 — per-case boundary, designed-Ic cases
+==============================================================================
+
+IcItMD_ItMD_noisy  (ground truth 3, noisy)
+window              0  3  5  7   9
+candidate                         
+knee                1  1  4  4  13
+tau0.10_single      0  0  0  0   3
+tau0.10_sustained3  0  0  4  4   3
+tau0.15_single      0  0  0  4   3
+tau0.15_sustained3  4  4  4  4   3
+tau0.20_single      0  0  4  4   4
+tau0.20_sustained3  5  5  4  4   4
+tau0.30_single      0  0  5  5   5
+tau0.30_sustained3  5  5  5  5   5
+
+IcItMD_residual_clean  (ground truth 3, clean)
+window              0  3   5  7  9
+candidate                         
+knee                5  5  17  5  6
+tau0.10_single      4  4   4  4  4
+tau0.10_sustained3  4  4   4  4  4
+tau0.15_single      4  4   4  4  4
+tau0.15_sustained3  4  4   4  4  4
+tau0.20_single      5  5   5  4  4
+tau0.20_sustained3  5  5   5  4  4
+tau0.30_single      5  5   5  5  5
+tau0.30_sustained3  5  5   5  5  5
+
+IcItMD_residual_noisy  (ground truth 3, noisy)
+window              0  3   5   7   9
+candidate                           
+knee                3  3  16  16  26
+tau0.10_single      0  0   3   3   3
+tau0.10_sustained3  2  2   3   3   3
+tau0.15_single      0  0   3   4   4
+tau0.15_sustained3  2  2   3   4   4
+tau0.20_single      0  0   4   4   4
+tau0.20_sustained3  6  6   4   4   4
+tau0.30_single      4  4   4   5   5
+tau0.30_sustained3  6  6   6   5   5
+
+IcIt_observational  (ground truth 6, clean)
+window               0   3   5   7   9
+candidate                             
+knee                 8   8   9   9  10
+tau0.10_single       8   8   8   8   8
+tau0.10_sustained3   8   8   8   8   8
+tau0.15_single       9   9   9   9   9
+tau0.15_sustained3   9   9   9   9   9
+tau0.20_single      10  10  10  10  10
+tau0.20_sustained3  10  10  10  10  10
+tau0.30_single      12  12  12  12  12
+tau0.30_sustained3  12  12  12  12  12
+
+ItMD_clean  (ground truth 3, clean)
+window              0  3  5  7  9
+candidate                        
+knee                5  5  5  6  6
+tau0.10_single      4  4  4  4  4
+tau0.10_sustained3  4  4  4  4  4
+tau0.15_single      5  5  5  4  4
+tau0.15_sustained3  5  5  5  4  4
+tau0.20_single      5  5  5  5  5
+tau0.20_sustained3  5  5  5  5  5
+tau0.30_single      6  6  6  6  6
+tau0.30_sustained3  6  6  6  6  6
+
+==============================================================================
+TABLE 4b — MISSES: designed-Ic cases that get NO incipient phase at all
+==============================================================================
+(boundary 0 on a case that HAS a designed Ic segment — a qualitative
+ failure, not a 3-step error, which is why it is counted separately)
+window              0  3  5  7  9
+candidate                        
+knee                0  0  0  0  0
+tau0.10_single      2  2  1  1  0
+tau0.10_sustained3  1  1  0  0  0
+tau0.15_single      2  2  1  0  0
+tau0.15_sustained3  0  0  0  0  0
+tau0.20_single      2  2  0  0  0
+tau0.20_sustained3  0  0  0  0  0
+tau0.30_single      1  1  0  0  0
+tau0.30_sustained3  0  0  0  0  0
+
+==============================================================================
+BEST BY NUMBER
+==============================================================================
+ranked by (false positives, misses, mean |error|, worst |error|):
+         candidate  window  mean_abs  worst  misses  false_pos
+    tau0.10_single       9       0.8    2.0       0          0
+tau0.10_sustained3       9       0.8    2.0       0          0
+tau0.10_sustained3       5       1.0    2.0       0          0
+tau0.10_sustained3       7       1.0    2.0       0          0
+    tau0.15_single       9       1.2    3.0       0          0
+tau0.15_sustained3       9       1.2    3.0       0          0
+    tau0.15_single       7       1.4    3.0       0          0
+tau0.15_sustained3       5       1.4    3.0       0          0
+tau0.15_sustained3       7       1.4    3.0       0          0
+tau0.15_sustained3       0       1.6    3.0       0          0
+tau0.15_sustained3       3       1.6    3.0       0          0
+    tau0.20_single       7       1.8    4.0       0          0
+    tau0.20_single       9       1.8    4.0       0          0
+tau0.20_sustained3       7       1.8    4.0       0          0
+
+Reading: `false_pos` counts the two linear-onset true negatives that
+wrongly receive an incipient phase; `misses` counts designed-Ic cases
+left with none. A criterion must score 0 on both before its error
+matters at all.
+
+==============================================================================
+TABLE 6 — rel(0) on the real tracks (author's 3c calibration)
+==============================================================================
+tau must EXCEED rel(0) for a boundary to exist at all.
+
+signal='vorticity' — raw gradient, the path the smoothing acts on:
+track           w=0      w=3      w=5      w=7      w=9     w=15     w=21
+20190325      0.283    0.283    0.246    0.214    0.184    0.128    0.102
+20206498      0.677    0.677    0.517    0.459    0.413    0.297    0.057
+20150377      0.534    0.534    0.430    0.372    0.340    0.185    0.232
+20190639      0.255    0.255    0.243    0.164    0.108    0.186    0.226
+20203373      0.210    0.210    0.201    0.247    0.214    0.097    0.106
+20170225      0.436    0.436    0.656    0.382    0.467    0.509    0.478
+20204655      0.177    0.177    0.093    0.015    0.132    0.174    0.189
+
+signal='derivative' — the pipeline-filtered curve, for reference:
+20190325      0.005
+20206498      0.017
+20150377      0.031
+20190639      0.050
+20203373      0.008
+20170225      0.091
+20204655      0.047
+
+Reading: under the author's 3c calibration the Lanczos already controls
+the edge, so 'derivative' sits at 0.005-0.091 — far below any usable tau.
+'vorticity' sits at 0.18-0.68 and the smoothing brings it down only
+slowly and NON-MONOTONICALLY (20170225: 0.436 -> 0.656 at w=5 -> 0.382 at
+w=7 -> 0.467 at w=9), so a wider window is not reliably better. The
+smoothing rescues 'vorticity' on the SYNTHETIC noisy series, where the
+input is genuinely unfiltered; on real TRACK data the Lanczos is already
+doing that job.

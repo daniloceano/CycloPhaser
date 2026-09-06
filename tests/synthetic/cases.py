@@ -457,3 +457,142 @@ CASES["IcItMD_residual_clean"] = {
         "*** FLAG: residual diff=6 at tolerance boundary."
     ),
 }
+
+
+# ── Clean / noisy split ───────────────────────────────────────────────────────
+# The suite contains two populations that need DIFFERENT pre-processing, and
+# lumping them together is what made the first version of this preset wrong.
+CLEAN_CASE_IDS = tuple(
+    k for k, v in CASES.items() if not v.get("kwargs", {}).get("noise_frac", 0.0))
+NOISY_CASE_IDS = tuple(
+    k for k, v in CASES.items() if v.get("kwargs", {}).get("noise_frac", 0.0))
+
+
+# ── Initial-plateau classification ────────────────────────────────────────────
+# Observed by visual inspection in the calibration app and confirmed by
+# measurement (2026-09-04): almost every case in this suite opens with a
+# low-slope plateau, whether or not it was designed with an explicit 'Ic'
+# segment. It is a property of the GENERATOR, not of the life cycle:
+#
+#   * `_ramp_sine` is a half-period cosine, which has **zero derivative at both
+#     endpoints** (generators.py says so in its own docstring). So any series
+#     opening with a `sine` It or D segment starts flat, exactly like an Ic
+#     segment would.
+#   * `shape="linear"` is the deliberate exception. The generator documents it
+#     as "constant-slope ramp (non-zero dz from the first timestep; prevents
+#     CycloPhaser from misidentifying the onset as 'incipient')".
+#
+# Measured: 10 of the 12 cases have a genuine initial plateau, and the suite's
+# own `expected_phases` already contains 'incipient' in 9 of 12 — including five
+# cases with no designed Ic segment at all. The only two cases claiming no
+# incipient, DItMD_noisy and DItMD_residual_noisy, are precisely the two opening
+# with `D/linear`, whose normalised |dz| on the RAW series is 0.94 and 0.66 at
+# the first sample.
+#
+# Consequence for validating incipient_method: "was an Ic segment designed" is
+# NOT the right ground truth for "should there be an incipient phase". The right
+# question is whether the series starts flat, which is what these two sets
+# record. Only STEEP_START_CASE_IDS are true negatives.
+def _opening_shape(case: dict) -> str:
+    """Ramp shape of the first segment, applying the generator's own defaults."""
+    seg0 = case["segments"][0]
+    return seg0.get(
+        "shape", "sine" if seg0["type"] in ("It", "D", "residual") else "plateau")
+
+
+# Cases that begin flat, so an incipient phase is CORRECT, not a false positive.
+PLATEAU_START_CASE_IDS = tuple(
+    k for k, v in CASES.items() if _opening_shape(v) != "linear")
+# Cases deliberately built with a non-zero initial slope: a true negative.
+STEEP_START_CASE_IDS = tuple(
+    k for k, v in CASES.items() if _opening_shape(v) == "linear")
+
+
+# ── Synthetic validation presets ──────────────────────────────────────────────
+# Pre-processing to use when validating PHASE DETECTION on these synthetic
+# series. Both presets were chosen by measurement (2026-09-04), scoring every
+# candidate with the suite's own criteria — exact `expected_phases` match and
+# `expected_starts_idx` within `tolerance` — separately on the clean and noisy
+# populations.
+#
+# Why not simply reuse the real-track calibration: these series are analytic
+# ramps/sines with segment boundaries placed exactly where the ground truth says
+# they are. The real-track Lanczos band-pass (a len//2 kernel) rounds off the
+# very boundaries under test. So both presets drop it where they can.
+#
+# Why not "no pre-processing at all", which is what the first version of this
+# preset did (use_filter=False AND use_smoothing=False): measured, that fails
+# on BOTH populations, not just the noisy one —
+#
+#     variant                        clean seq   noisy seq
+#     both off (the old preset)          1/3        0/8
+#     no filter, 1 smoothing pass        3/3        6/8
+#     no filter, 2 smoothing passes      3/3        8/8
+#     filter on, no smoothing            3/3        6/8
+#
+# With no pre-processing the derivative of a piecewise-analytic series has a
+# kink at every segment join, and the extra extrema fragment the phases.
+#
+# ── The tension that decides the noisy preset ────────────────────────────────
+# For the noisy cases the two goals cannot both be maximised:
+#
+#   * "no filter, 2 smoothing passes" gets the SEQUENCE right 8/8, but the two
+#     Savitzky-Golay passes on the derivative put the edge artifact back at t0
+#     (docs/future_work.md item 4: derivative smoothing multiplies r(t0) by ~8),
+#     so rel(0) >= tau and the PLATEAU incipient rule collapses to "no incipient
+#     phase" on 4 of the 5 designed-Ic cases. Useless for validating
+#     incipient_method.
+#   * "filter on, no smoothing" keeps r(t0) low, so the plateau boundary is
+#     definable and lands within tolerance, at the cost of 2/8 sequences
+#     (DItMD_noisy, DItMD_residual_noisy).
+#
+# SYNTHETIC_NOISY_PRESET takes the second, because these presets exist to
+# validate phase *detection* — and it mirrors the author's validated section-3c
+# calibration (Lanczos active, Savgol off, cutoff_high=18), which is the regime
+# where the plateau rule is definable on real tracks too. The 2/8 sequence cost
+# is documented below, not hidden.
+
+# Clean cases: no noise to suppress, so the Lanczos is dropped entirely and a
+# single Savgol pass is kept — the minimum that survives the segment-join kinks.
+# Measured on the 4 clean cases: sequence 3/3, 0 timing failures.
+SYNTHETIC_CLEAN_PRESET: dict = {
+    "use_filter": False,
+    "use_smoothing": "auto",
+    "use_smoothing_twice": False,
+    "replace_endpoints_with_lowpass": 0,
+    "savgol_polynomial": 3,
+    # Inert while use_filter=False; listed so the preset can be splatted
+    # straight into determine_periods/process_vorticity.
+    "boundary_padding": "reflect",
+    "cutoff_low": 168,
+    "cutoff_high": 48,
+}
+
+# Noisy cases: the noise DOES need suppressing, and it is the Lanczos that does
+# it here — mirroring the author's section-3c calibration.
+# Measured on the 8 noisy cases: sequence 6/8, 0 timing failures.
+# KNOWN LIMITATION: DItMD_noisy and DItMD_residual_noisy are the 2/8 whose
+# sequence is wrong under this preset, and they are also the two cases designed
+# WITHOUT an incipient phase that nevertheless pick up a 1-timestep spurious one.
+SYNTHETIC_NOISY_PRESET: dict = {
+    "use_filter": "auto",
+    "cutoff_low": 168,
+    "cutoff_high": 18,
+    "boundary_padding": "reflect",
+    "use_smoothing": False,
+    "use_smoothing_twice": False,
+    "replace_endpoints_with_lowpass": 0,
+    "savgol_polynomial": 3,
+}
+
+
+def preset_for(case_id: str) -> dict:
+    """Pre-processing preset appropriate to one synthetic case.
+
+    Raises KeyError for an unknown case id, rather than silently returning a
+    default that would be wrong for half the suite.
+    """
+    if case_id not in CASES:
+        raise KeyError(f"unknown synthetic case: {case_id!r}")
+    return dict(SYNTHETIC_NOISY_PRESET if case_id in NOISY_CASE_IDS
+                else SYNTHETIC_CLEAN_PRESET)

@@ -36,6 +36,94 @@ _METHOD_IMG = (
 # depending on how `streamlit run` is invoked) so "Load all test cyclones" works
 # regardless of the working directory the app was launched from.
 _CALIBRATION_DATA_DIR = Path(__file__).parent.parent.parent / "tests" / "calibration_data"
+# Same resolution strategy for the synthetic suite, which the app can load as an
+# alternative track set for validating PHASE DETECTION against known ground truth.
+_SYNTHETIC_DIR = Path(__file__).parent.parent.parent / "tests" / "synthetic"
+_REPO_ROOT = Path(__file__).parent.parent.parent
+
+
+@st.cache_data(show_spinner=False)
+def _load_synthetic_cases():
+    """Materialise tests/synthetic/cases.py in the app's own file format.
+
+    Returns (files, ground_truth, groups, error):
+      files        {name: csv_bytes}  — ';'-delimited, column 'min_max_zeta_850',
+                   identical in shape to the real calibration CSVs, so every
+                   downstream code path (process_vorticity, get_periods, the
+                   figure renderers, the ZIP export) works unchanged.
+      ground_truth {name: int|None}   — index of the designed incipient boundary
+                   (the length of a leading 'Ic' segment), or None when the case
+                   has no designed Ic.
+      groups       {"clean": {...}, "noisy": {...}} — each holds "ids" (tuple of
+                   case names) and "preset" (the pre-processing appropriate to
+                   that population). The two populations need DIFFERENT
+                   pre-processing, which is why they load separately.
+      error        str|None           — import failure message, if any.
+
+    The modules are loaded BY FILE PATH under a private package name rather
+    than with `import tests.synthetic.cases`, because a plain import of a
+    top-level name as generic as `tests` is not safe:
+
+      - `pip install -e .` puts the repo root on sys.path via a .pth file,
+        which is processed *inside* site-packages handling, so the repo root
+        lands AFTER site-packages;
+      - any other project that leaked a top-level `tests` package into the
+        same environment then wins the name, and `tests.synthetic` raises
+        ModuleNotFoundError even though the repo's own tests/ is right there.
+
+    That is not hypothetical — it is what this loader was first reported
+    failing on. Resolving the two files directly removes the dependency on
+    sys.path ordering (and on `tests` being importable at all), and leaves
+    sys.path untouched for everything else in the process.
+    """
+    import importlib.util
+    import sys
+    import types
+
+    cases_py = _SYNTHETIC_DIR / "cases.py"
+    if not cases_py.is_file():
+        return {}, {}, {}, f"not found: {cases_py}"
+
+    try:
+        # A private package whose __path__ is tests/synthetic, so that
+        # cases.py's `from .generators import ...` resolves next to it.
+        pkg_name = "_cyclophaser_app_synthetic"
+        pkg = types.ModuleType(pkg_name)
+        pkg.__path__ = [str(_SYNTHETIC_DIR)]
+        sys.modules[pkg_name] = pkg
+
+        spec = importlib.util.spec_from_file_location(
+            f"{pkg_name}.cases", cases_py)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = mod
+        spec.loader.exec_module(mod)
+
+        CASES = mod.CASES
+        groups = {
+            "clean": {"ids": tuple(mod.CLEAN_CASE_IDS),
+                      "preset": dict(mod.SYNTHETIC_CLEAN_PRESET)},
+            "noisy": {"ids": tuple(mod.NOISY_CASE_IDS),
+                      "preset": dict(mod.SYNTHETIC_NOISY_PRESET)},
+            # Which cases genuinely start flat. Not the same as "has a designed
+            # Ic segment": the generator's sine ramp is a half-period cosine with
+            # zero derivative at its endpoints, so a sine It/D opening starts
+            # flat too. 10 of 12; only the `linear` openings are true negatives.
+            "plateau_start": tuple(mod.PLATEAU_START_CASE_IDS),
+            "steep_start": tuple(mod.STEEP_START_CASE_IDS),
+        }
+    except Exception as exc:  # missing file, syntax error, anything at import
+        return {}, {}, {}, f"{type(exc).__name__}: {exc}"
+
+    files, gt = {}, {}
+    for name, case in CASES.items():
+        series = case["series"]
+        files[name] = series.to_csv(
+            sep=";", header=["min_max_zeta_850"], index_label="time"
+        ).encode("utf-8")
+        segs = case.get("segments") or []
+        types = [x["type"] for x in segs]
+        gt[name] = segs[0]["n"] if (types and types[0] == "Ic") else None
+    return files, gt, groups, None
 
 # ── Page config ──────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="CycloPhaser Calibration", layout="wide")
@@ -69,6 +157,13 @@ _DEFAULTS: dict = {
     "extrema_prominence_val":         1e-6,         # absolute threshold
     "extrema_distance_enabled":       False,
     "extrema_distance_val":           3,
+    "incipient_method":               "geometric",
+    "incipient_plateau_tau":          0.20,
+    "incipient_plateau_signal":       "derivative",
+    "incipient_plateau_crossing":     "single",
+    "incipient_plateau_k":            3,
+    "incipient_smooth_window":        0,
+    "incipient_smooth_polyorder":     3,
     "decay_tail_enabled":             False,
     "decay_tail_fraction_val":        0.05,   # author's validated reference value
 }
@@ -118,6 +213,33 @@ def _parse_mature_method(v) -> str:
     v = str(v)
     if v not in ("derivative", "amplitude"):
         raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {v!r}")
+    return v
+
+
+def _parse_incipient_method(v) -> str:
+    """Validating str converter for incipient_method — same rationale as
+    _parse_mature_method above."""
+    v = str(v)
+    if v not in ("geometric", "plateau"):
+        raise ValueError(f"incipient_method must be 'geometric' or 'plateau', got {v!r}")
+    return v
+
+
+def _parse_incipient_signal(v) -> str:
+    """Validating str converter for incipient_plateau_signal."""
+    v = str(v)
+    if v not in ("derivative", "vorticity"):
+        raise ValueError(
+            f"incipient_plateau_signal must be 'derivative' or 'vorticity', got {v!r}")
+    return v
+
+
+def _parse_incipient_crossing(v) -> str:
+    """Validating str converter for incipient_plateau_crossing."""
+    v = str(v)
+    if v not in ("single", "sustained"):
+        raise ValueError(
+            f"incipient_plateau_crossing must be 'single' or 'sustained', got {v!r}")
     return v
 
 
@@ -185,6 +307,13 @@ _YAML_PHASE_MAP: dict = {
     "length_scale":                     ("length_scale", _parse_length_scale),
     "mature_method":                    ("mature_method", _parse_mature_method),
     "mature_amplitude_fraction":        ("mature_amplitude_fraction", float),
+    "incipient_method":                 ("incipient_method", _parse_incipient_method),
+    "incipient_plateau_tau":            ("incipient_plateau_tau", float),
+    "incipient_plateau_signal":         ("incipient_plateau_signal", _parse_incipient_signal),
+    "incipient_plateau_crossing":       ("incipient_plateau_crossing", _parse_incipient_crossing),
+    "incipient_plateau_k":              ("incipient_plateau_k", lambda v: int(float(v))),
+    "incipient_smooth_window":          ("incipient_smooth_window", lambda v: int(float(v))),
+    "incipient_smooth_polyorder":       ("incipient_smooth_polyorder", lambda v: int(float(v))),
 }
 # The extrema-filtering parameters (prominence / prominence_relative / distance)
 # and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
@@ -198,7 +327,20 @@ _YAML_PHASE_MAP: dict = {
 # (_REQUIRED_PHASE_YAML_KEYS), which would otherwise warn about a mode that
 # simply wasn't in use.
 _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
-                              "decay_tail_amplitude_fraction"}
+                              "decay_tail_amplitude_fraction",
+                              # The incipient_* keys are optional for the same
+                              # backward-compatibility reason as boundary_padding
+                              # below: every YAML exported before the plateau
+                              # method existed legitimately lacks them and must
+                              # import cleanly, falling back to the
+                              # "geometric" defaults without a spurious
+                              # "missing key" warning.
+                              "incipient_method", "incipient_plateau_tau",
+                              "incipient_plateau_signal",
+                              "incipient_plateau_crossing",
+                              "incipient_plateau_k",
+                              "incipient_smooth_window",
+                              "incipient_smooth_polyorder"}
 
 # boundary_padding is OPTIONAL on import for the same reason as the optional
 # phase keys above, but for a backward-compatibility reason rather than a
@@ -207,6 +349,11 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
 # to the default ("zero") without a spurious "missing key" warning. It is still
 # recognised for the "unknown key" check.
 _OPTIONAL_FILTER_YAML_KEYS = {"boundary_padding"}
+
+# phase_params entries that are string enums, not numbers: exported as-is
+# rather than coerced through float().
+_PHASE_ENUM_KEYS = ("length_scale", "mature_method", "incipient_method",
+                    "incipient_plateau_signal", "incipient_plateau_crossing")
 
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
 _REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
@@ -448,11 +595,10 @@ def _build_yaml(cyclone_names) -> str:
         # extrema keys appear also encodes whether that filter was enabled —
         # see the extrema-import block in _load_yaml_config.
         "phase_params": {
-            **{k: (int(v) if k == "distance" else float(v))
+            **{k: (int(v) if k in ("distance", "incipient_plateau_k") else float(v))
                for k, v in _PHASE_PARAMS.items()
-               if v is not None and k not in ("length_scale", "mature_method")},
-            "length_scale": _PHASE_PARAMS["length_scale"],
-            "mature_method": _PHASE_PARAMS["mature_method"],
+               if v is not None and k not in _PHASE_ENUM_KEYS},
+            **{k: _PHASE_PARAMS[k] for k in _PHASE_ENUM_KEYS},
         },
         "evaluation": _compute_evaluation(cyclone_names),
     }
@@ -482,6 +628,7 @@ def _render_periods_png(
     name: str,
     figsize: tuple,
     show_title: bool,
+    gt_boundary_iso: str | None = None,
 ) -> bytes:
     """Render a plot_all_periods PNG at the given figsize. Cached per unique
     (file, filter params, phase params, name, figsize, show_title) combination
@@ -504,6 +651,12 @@ def _render_periods_png(
     fig, ax = plt.subplots(figsize=figsize)
     try:
         plot_all_periods(periods_dict, df_result, ax=ax, vorticity=vort)
+        # Ground-truth incipient boundary (synthetic cases only): the designed
+        # end of the leading 'Ic' segment. Same green dashed convention as the
+        # measurement figures in research/incipient_plateau/.
+        if gt_boundary_iso:
+            ax.axvline(pd.Timestamp(gt_boundary_iso), color="#00a000",
+                       lw=2.0, ls=":", zorder=6, label="ground truth Ic")
         _format_date_axis_mmdd(ax)
     except Exception:
         pass
@@ -511,6 +664,77 @@ def _render_periods_png(
         ax.set_title(name, fontweight="bold")
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+@st.cache_data(
+    hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
+    show_spinner=False,
+)
+def _render_probe_png(file_bytes: bytes,
+                      use_filter, cutoff_low, cutoff_high,
+                      use_smoothing, use_smoothing_twice, replace_endpoints,
+                      savgol_poly, boundary_padding,
+                      signal: str, window: int, polyorder: int,
+                      tau: float, crossing: str, k: int) -> bytes:
+    """Incipient-probe overlay: raw vs smoothed probe, and the rate with tau.
+
+    Kept out of the main phase figure on purpose -- it answers a different
+    question ("what does the smoothing window do to the curve the incipient
+    criterion reads") and only matters while that criterion is being tuned.
+    """
+    from cyclophaser.find_stages import (
+        _incipient_plateau_boundary, _incipient_plateau_rel,
+        _smooth_incipient_probe,
+    )
+    vort, _ = _run_process_vorticity(
+        file_bytes, use_filter, cutoff_low, cutoff_high,
+        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+        boundary_padding,
+    )
+    z_raw = np.asarray(vort["zeta"].values, dtype=float)
+    dz_pipe = np.asarray(vort["dz_dt_smoothed2"].values, dtype=float)
+    df_probe = pd.DataFrame({"z_unfil": z_raw, "dz": dz_pipe})
+
+    rel_off = _incipient_plateau_rel(df_probe, signal, 0, polyorder)
+    rel_on = _incipient_plateau_rel(df_probe, signal, window, polyorder)
+    b_off = _incipient_plateau_boundary(rel_off, tau, crossing, k)
+    b_on = _incipient_plateau_boundary(rel_on, tau, crossing, k)
+    z_s = _smooth_incipient_probe(z_raw, window, polyorder)
+    t = np.arange(z_raw.size)
+
+    fig, axes = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
+    axes[0].plot(t, z_raw, color="#999999", lw=1.1, label="zeta cru")
+    if window > 0:
+        axes[0].plot(t, z_s, color="#1d3557", lw=1.9,
+                     label=f"sondagem suavizada (w={window})")
+    axes[0].set_ylabel("zeta", fontsize=8)
+    axes[0].legend(fontsize=7, loc="lower right")
+
+    axes[1].plot(t, rel_off, color="#999999", lw=1.1, label="rel(t) sem suavizacao")
+    if window > 0:
+        axes[1].plot(t, rel_on, color="#e63946", lw=1.9,
+                     label=f"rel(t) com w={window}")
+    axes[1].axhline(tau, color="#8856a7", lw=1.2, ls="--", label=f"tau={tau:.2f}")
+    for b, c, lbl in ((b_off, "#999999", "fronteira sem suavizacao"),
+                      (b_on, "#d000d0", "fronteira com suavizacao")):
+        if b > 0:
+            axes[1].axvline(b, color=c, lw=1.8)
+    axes[1].set_ylim(0, 1.02)
+    axes[1].set_ylabel("rel(t) = |dz|/max|dz|", fontsize=8)
+    axes[1].set_xlabel("passo", fontsize=8)
+    axes[1].legend(fontsize=7, loc="upper right")
+    for a in axes:
+        a.tick_params(labelsize=7)
+        a.set_xlim(-0.5, z_raw.size - 0.5)
+    fig.suptitle(
+        f"sondagem da incipiente · signal={signal} · w={window} · "
+        f"fronteira {b_off} (sem) -> {b_on} (com)", fontsize=9, fontweight="bold")
+    fig.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=110, bbox_inches="tight")
     plt.close(fig)
     buf.seek(0)
     return buf.getvalue()
@@ -732,6 +956,65 @@ def _run_get_periods(
     phase_warns = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
     periods_dict = periods_to_dict(df_result)
     return df_result, periods_dict, phase_warns
+
+
+# ── Synthetic-preset application ─────────────────────────────────────────────────
+# Must run BEFORE the sidebar widgets are constructed: Streamlit reads a widget's
+# session_state value at construction time, so writing a preset after the sidebar
+# has rendered would only take effect one rerun later (and would then fight the
+# user's own edits). The checkboxes that drive this live further down the page,
+# but their values are already in session_state by the time this reruns.
+#
+# The clean and noisy populations need DIFFERENT pre-processing (see the block
+# comment on the presets in tests/synthetic/cases.py), so which preset is applied
+# depends on which boxes are ticked. With both ticked, the noisy preset wins:
+# it is the one that suppresses noise, and it is also correct on all four clean
+# cases, whereas the clean preset is not usable on the noisy ones.
+#
+# A preset is applied ONLY when the selection actually CHANGES, so the
+# pre-processing controls stay fully editable afterwards -- it is a starting
+# point, not a lock.
+_synth_clean_on = bool(st.session_state.get("load_synthetic_clean", False))
+_synth_noisy_on = bool(st.session_state.get("load_synthetic_noisy", False))
+_synth_sel = ("noisy" if _synth_noisy_on else "clean") if (_synth_clean_on or _synth_noisy_on) else None
+
+
+def _preset_to_widgets(preset: dict) -> dict:
+    """Translate a cases.py preset into this app's widget keys.
+
+    use_smoothing / use_smoothing_twice are a (mode, value) pair of widgets here
+    rather than the single polymorphic argument cyclophaser takes, so False maps
+    to mode 'off', 'auto' to mode 'auto', and an int to mode 'manual' + value.
+    """
+    out = {
+        "use_filter":        bool(preset.get("use_filter", False)),
+        "replace_endpoints": int(preset.get("replace_endpoints_with_lowpass", 0)),
+        "savgol_poly":       int(preset.get("savgol_polynomial", 3)),
+        "boundary_padding":  str(preset.get("boundary_padding", "reflect")),
+        "cutoff_low":        int(preset.get("cutoff_low", 168)),
+        "cutoff_high":       int(preset.get("cutoff_high", 48)),
+    }
+    for src, mode_key, val_key in (("use_smoothing", "sm_mode", "sm_val"),
+                                   ("use_smoothing_twice", "sm2_mode", "sm2_val")):
+        v = preset.get(src, "auto")
+        if v is False:
+            out[mode_key] = "off"
+        elif isinstance(v, int) and not isinstance(v, bool):
+            out[mode_key] = "manual"
+            out[val_key] = int(v)
+        else:
+            out[mode_key] = "auto"
+    return out
+
+
+if _synth_sel is not None and st.session_state.get("_synth_preset_applied") != _synth_sel:
+    _g, _, _pre_groups, _pre_err = _load_synthetic_cases()
+    if _pre_groups:
+        for _k, _v in _preset_to_widgets(_pre_groups[_synth_sel]["preset"]).items():
+            st.session_state[_k] = _v
+        st.session_state["_synth_preset_applied"] = _synth_sel
+elif _synth_sel is None:
+    st.session_state.pop("_synth_preset_applied", None)
 
 
 # ── Page header ──────────────────────────────────────────────────────────────────
@@ -1047,16 +1330,157 @@ with st.sidebar:
                 "recoveries during decay that should not fragment the phase."
             ),
         )
-        thr_inc_len = st.slider(
-            "Min. incipient length", 0.1, 0.6, step=0.01,
-            value=_DEFAULTS["thr_inc_len"], key="thr_inc_len",
+        incipient_method = st.radio(
+            "incipient_method",
+            options=["geometric", "plateau"],
+            index=["geometric", "plateau"].index(_DEFAULTS["incipient_method"]),
+            key="incipient_method",
+            horizontal=True,
+            format_func=lambda x: (
+                "Geometric (default)" if x == "geometric" else "Plateau (opt-in)"
+            ),
             help=(
-                "Minimum length of the incipient phase (pre-intensification period) as a "
-                "fraction of total series length. The incipient stage covers genesis and "
-                "early development before any identifiable intensification. "
-                "Lower values allow shorter incipient phases."
+                "'geometric' is the historical rule: the incipient phase ends "
+                "`Min. incipient length` of the way to the next dz extremum. "
+                "'plateau' instead ends it where the normalised slope first "
+                "reaches tau — the end of the initial low-slope plateau.\n\n"
+                "**Caveat (measured on the 51-track set):** the plateau rule is only "
+                "meaningful once the t0 boundary artifact is controlled. With the "
+                "Lanczos filter off, or with derivative smoothing active, the first "
+                "sample already exceeds any usable tau on most tracks and the rule "
+                "degenerates to 'no incipient phase'."
             ),
         )
+        if incipient_method == "geometric":
+            thr_inc_len = st.slider(
+                "Min. incipient length", 0.1, 0.6, step=0.01,
+                value=_DEFAULTS["thr_inc_len"], key="thr_inc_len",
+                help=(
+                    "Minimum length of the incipient phase (pre-intensification period) as a "
+                    "fraction of total series length. The incipient stage covers genesis and "
+                    "early development before any identifiable intensification. "
+                    "Lower values allow shorter incipient phases."
+                ),
+            )
+        else:
+            # Kept out of the widget tree (not just disabled) under 'plateau' for
+            # the same reason threshold_mature_length is hidden under
+            # mature_method='amplitude': the parameter is genuinely ignored, and
+            # a live slider that does nothing reads as a bug during calibration.
+            thr_inc_len = st.session_state.get("thr_inc_len", _DEFAULTS["thr_inc_len"])
+            st.caption(
+                "`Min. incipient length` is ignored under `incipient_method='plateau'` "
+                "(as `Min. mature length` is under `mature_method='amplitude'`)."
+            )
+
+        incipient_plateau_tau = st.slider(
+            "Plateau tau (normalised slope)", 0.01, 0.60, step=0.01,
+            value=_DEFAULTS["incipient_plateau_tau"], key="incipient_plateau_tau",
+            disabled=incipient_method != "plateau",
+            help=(
+                "The incipient phase is the leading stretch where the normalised "
+                "slope stays below this value. Measured reference points on the "
+                "51-track set under the author's calibration: tau=0.15 is the "
+                "smallest value that yields a non-empty plateau on all 51 tracks; "
+                "the resulting plateau is short (median 1-3 timesteps)."
+            ),
+        )
+        incipient_plateau_signal = st.radio(
+            "Plateau signal",
+            options=["derivative", "vorticity"],
+            index=["derivative", "vorticity"].index(_DEFAULTS["incipient_plateau_signal"]),
+            key="incipient_plateau_signal", horizontal=True,
+            disabled=incipient_method != "plateau",
+            help=(
+                "'derivative': |dz/dt| of the smoothed series — the exact array the "
+                "stage detection consumes, so the criterion sees what the detector "
+                "sees, but it inherits the filter's edge artifact. "
+                "'vorticity': |d(zeta)/dt| computed on the UNFILTERED input, immune "
+                "to filter edge artifacts but noisier."
+            ),
+        )
+        incipient_plateau_crossing = st.radio(
+            "Plateau crossing",
+            options=["single", "sustained"],
+            index=["single", "sustained"].index(_DEFAULTS["incipient_plateau_crossing"]),
+            key="incipient_plateau_crossing", horizontal=True,
+            disabled=incipient_method != "plateau",
+            help=(
+                "'single': the plateau ends at the first sample reaching tau. "
+                "'sustained': it ends at the start of the first run of k consecutive "
+                "samples at or above tau, so an isolated noise spike inside the "
+                "plateau does not cut it short. If no such run exists anywhere in the "
+                "series, no incipient phase is created."
+            ),
+        )
+        if incipient_plateau_crossing == "sustained":
+            incipient_plateau_k = st.number_input(
+                "Plateau k (consecutive steps)", min_value=1, max_value=25, step=1,
+                value=_DEFAULTS["incipient_plateau_k"], key="incipient_plateau_k",
+                disabled=incipient_method != "plateau",
+                help="Number of consecutive samples at or above tau required by "
+                     "'sustained'. Ignored for 'single'.",
+            )
+        else:
+            incipient_plateau_k = st.session_state.get(
+                "incipient_plateau_k", _DEFAULTS["incipient_plateau_k"])
+
+        show_incipient_probe = st.checkbox(
+            "Show incipient probe overlay",
+            value=False, key="show_incipient_probe",
+            disabled=incipient_method != "plateau",
+            help=("Adds a per-cyclone panel showing the raw vs smoothed probe "
+                  "curve and the rate rel(t) with tau, so the effect of the "
+                  "smoothing window is visible directly."),
+        )
+
+        # --- dedicated smoothing for the incipient probe -------------------
+        # Only meaningful for signal="vorticity": the "derivative" path already
+        # reads a curve the pipeline filtered, so smoothing it here would be a
+        # second, hidden pass over the same signal.
+        if incipient_plateau_signal == "vorticity":
+            incipient_smooth_window = st.slider(
+                "Probe smoothing window (0 = off)", 0, 21, step=1,
+                value=_DEFAULTS["incipient_smooth_window"],
+                key="incipient_smooth_window",
+                disabled=incipient_method != "plateau",
+                help=(
+                    "Savitzky-Golay window applied to the RAW vorticity before the "
+                    "incipient probe differentiates it. Affects the incipient "
+                    "probe only — `z` and `dz` used by every other phase are "
+                    "untouched, and the pipeline stays Savgol-off.\n\n"
+                    "0 disables it (default, previous behaviour). Even values are "
+                    "rounded up to odd.\n\n"
+                    "Measured on the synthetic suite: w≥5 removes the spurious "
+                    "noise trip that leaves the noisy designed-Ic cases with no "
+                    "incipient phase at all, and makes `sustained k` unnecessary. "
+                    "**Goldilocks:** too wide flattens the rise and displaces the "
+                    "knee — and on real tracks rel(t₀) is NOT monotone in the "
+                    "window (20170225: 0.44 → 0.66 at w=5 → 0.38 at w=7), so a "
+                    "bigger window is not reliably safer."
+                ),
+            )
+            incipient_smooth_polyorder = st.number_input(
+                "Probe smoothing polyorder", min_value=1, max_value=7, step=1,
+                value=_DEFAULTS["incipient_smooth_polyorder"],
+                key="incipient_smooth_polyorder",
+                disabled=incipient_method != "plateau",
+                help=("Polynomial order of that Savitzky-Golay pass. Savgol rather "
+                      "than a moving average because it preserves the position and "
+                      "shape of the turn being measured. A window at or below this "
+                      "order cannot define the fit and is skipped."),
+            )
+        else:
+            incipient_smooth_window = st.session_state.get(
+                "incipient_smooth_window", _DEFAULTS["incipient_smooth_window"])
+            incipient_smooth_polyorder = st.session_state.get(
+                "incipient_smooth_polyorder", _DEFAULTS["incipient_smooth_polyorder"])
+            if incipient_method == "plateau":
+                st.caption(
+                    "Probe smoothing applies only to "
+                    "`incipient_plateau_signal='vorticity'` — the 'derivative' "
+                    "path already reads a pipeline-filtered curve."
+                )
 
     st.divider()
     # --- Extrema filtering (optional) ---
@@ -1203,6 +1627,13 @@ _PHASE_PARAMS = dict(
     mature_method=mature_method,
     mature_amplitude_fraction=mature_amplitude_fraction,
     decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
+    incipient_method=incipient_method,
+    incipient_plateau_tau=incipient_plateau_tau,
+    incipient_plateau_signal=incipient_plateau_signal,
+    incipient_plateau_crossing=incipient_plateau_crossing,
+    incipient_plateau_k=incipient_plateau_k,
+    incipient_smooth_window=incipient_smooth_window,
+    incipient_smooth_polyorder=incipient_smooth_polyorder,
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
@@ -1233,6 +1664,112 @@ load_all_test_cyclones = st.checkbox(
     ),
 )
 
+_synth_files, _synth_gt, _synth_groups, _synth_err = _load_synthetic_cases()
+_clean_ids = _synth_groups.get("clean", {}).get("ids", ())
+_noisy_ids = _synth_groups.get("noisy", {}).get("ids", ())
+_plateau_start_ids = set(_synth_groups.get("plateau_start", ()))
+_steep_start_ids = set(_synth_groups.get("steep_start", ()))
+
+# Two separate options rather than one: the clean and noisy populations need
+# DIFFERENT pre-processing, so loading them together would force a single preset
+# onto both. See the presets' block comment in tests/synthetic/cases.py.
+_sc1, _sc2 = st.columns(2)
+with _sc1:
+    load_synthetic_clean = st.checkbox(
+        f"Load synthetic — clean ({len(_clean_ids)} cases, no noise)"
+        if _clean_ids else "Load synthetic — clean (unavailable)",
+        value=False, key="load_synthetic_clean", disabled=not bool(_clean_ids),
+        help=(
+            "The noise-free synthetic cases: "
+            + ", ".join(_clean_ids) + ".\n\n"
+            "Pre-processing is set to SYNTHETIC_CLEAN_PRESET — Lanczos off, one "
+            "Savgol pass. These series have nothing to denoise, so the band-pass "
+            "is dropped; the single smoothing pass is the minimum that survives "
+            "the kink at each segment join. Measured: sequence 3/3, no timing "
+            "failures."
+            if _clean_ids else
+            f"tests/synthetic could not be imported ({_synth_err})."
+        ),
+    )
+with _sc2:
+    load_synthetic_noisy = st.checkbox(
+        f"Load synthetic — noisy ({len(_noisy_ids)} cases, 2 % noise)"
+        if _noisy_ids else "Load synthetic — noisy (unavailable)",
+        value=False, key="load_synthetic_noisy", disabled=not bool(_noisy_ids),
+        help=(
+            "The synthetic cases carrying 2 % Gaussian noise.\n\n"
+            "Pre-processing is set to SYNTHETIC_NOISY_PRESET — Lanczos ACTIVE "
+            "(cutoff_high=18), Savgol off, mirroring the author's validated "
+            "section-3c calibration. These series genuinely need the noise "
+            "suppressed, and it is the band-pass that does it here. Measured: "
+            "sequence 6/8, no timing failures; DItMD_noisy and "
+            "DItMD_residual_noisy are the two that miss."
+            if _noisy_ids else
+            f"tests/synthetic could not be imported ({_synth_err})."
+        ),
+    )
+
+load_synthetic_cases = bool(load_synthetic_clean or load_synthetic_noisy)
+
+if _synth_err and not _synth_files:
+    st.caption(f"⚠ tests/synthetic unavailable: {_synth_err}")
+
+if load_synthetic_cases:
+    _active = "noisy" if load_synthetic_noisy else "clean"
+    _both = load_synthetic_clean and load_synthetic_noisy
+    st.caption(
+        f"**Synthetic mode — {_active} preset applied.** "
+        "These series are analytic, so the real-track Lanczos band-pass would "
+        "round off the very segment boundaries under test. "
+        "**Pre-processing conclusions do not transfer from synthetic to real "
+        "tracks; phase-detection conclusions do.** The phase controls are "
+        "unaffected and remain fully editable; so is the pre-processing, which "
+        "the preset only seeds."
+        + (" Both groups are loaded, so the *noisy* preset is applied — it is "
+           "also correct on all four clean cases, whereas the clean preset is "
+           "not usable on the noisy ones." if _both else "")
+        + ("\n\n**Combined with the real tracks above.** This is a coherent "
+           "pairing, not an accident: SYNTHETIC_NOISY_PRESET *is* the author's "
+           "section-3c calibration (Lanczos on, cutoff_high=18, Savgol off), so "
+           "both sets are being processed identically and can be judged side by "
+           "side." if (load_synthetic_noisy and load_all_test_cyclones) else "")
+        + ("\n\nKnown limitation of the noisy preset: it keeps the incipient "
+           "plateau measurable (Savgol off keeps r(t₀) low) at the cost of 2/8 "
+           "sequences — `DItMD_noisy` and `DItMD_residual_noisy`, which also "
+           "pick up a 1-step spurious incipient. The alternative (two Savgol "
+           "passes) gets 8/8 sequences but puts the edge artifact back at t₀, "
+           "collapsing the plateau rule to 'no incipient phase' on 4 of the 5 "
+           "designed-Ic cases." if load_synthetic_noisy else "")
+    )
+    # Derived from the checkbox state, not from `files` — that dict is built
+    # further down the page, after this caption renders.
+    _sel_ids = ((set(_clean_ids) if load_synthetic_clean else set())
+                | (set(_noisy_ids) if load_synthetic_noisy else set()))
+    _loaded_syn = [k for k in _synth_files if k in _sel_ids]
+    _flat = [k for k in _loaded_syn if k in _plateau_start_ids]
+    _steep = [k for k in _loaded_syn if k in _steep_start_ids]
+    st.caption(
+        f"**Initial plateau: {len(_flat)} of {len(_loaded_syn)} loaded cases "
+        "start flat.** An initial plateau is a property of the generator, not "
+        "of the designed life cycle: `_ramp_sine` is a half-period cosine with "
+        "zero derivative at its endpoints, so a series opening with a sine "
+        "It/D segment starts flat just as an `Ic` segment would. An incipient "
+        "phase on these is CORRECT, not over-detection — the suite's own "
+        "`expected_phases` already contains `incipient` in 9 of the 12 cases, "
+        "five of them with no designed `Ic` segment."
+        + (f"\n\nTrue negatives (built with a `linear` opening ramp, non-zero "
+           f"slope from the first sample): **{', '.join(_steep)}**. Note these "
+           "still pick up a 1-step incipient under `signal='derivative'`, "
+           "because the Lanczos smooths their abrupt onset (normalised |dz| at "
+           "t₀ goes 0.94/0.66 raw → 0.147/0.150 filtered); "
+           "`signal='vorticity'` reads the unfiltered series and rejects them "
+           "correctly." if _steep else "")
+        + ("\n\nGreen dotted line = designed `Ic` boundary, drawn only for the "
+           "cases that have an explicit `Ic` segment; the other flat-opening "
+           "cases have a real plateau but no designed boundary index to check "
+           "against." if _flat else "")
+    )
+
 _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
 
 # Precedence when both an upload and "load all test cyclones" are active: the
@@ -1243,6 +1780,10 @@ _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" 
 files: dict[str, bytes] = {}
 if load_all_test_cyclones and _calib_data_files:
     files.update({p.stem: p.read_bytes() for p in _calib_data_files})
+if _synth_files:
+    _wanted = ((set(_clean_ids) if load_synthetic_clean else set())
+               | (set(_noisy_ids) if load_synthetic_noisy else set()))
+    files.update({k: v for k, v in _synth_files.items() if k in _wanted})
 if uploaded:
     files.update({Path(f.name).stem: f.getvalue() for f in uploaded})
 if not files:
@@ -1267,6 +1808,26 @@ with st.sidebar:
         mime="text/yaml",
         use_container_width=True,
     )
+
+def _gt_boundary_iso(name: str, file_bytes: bytes) -> str | None:
+    """ISO timestamp of the designed incipient boundary, for synthetic cases.
+
+    Returns None for real tracks and for synthetic cases with no designed Ic
+    segment (those have no checkable boundary — see section 5 of
+    research/incipient_plateau/REPORT_incipient_characterisation.md).
+    """
+    if not (load_synthetic_cases and _synth_files):
+        return None
+    idx = _synth_gt.get(name)
+    if idx is None:
+        return None
+    try:
+        d = pd.read_csv(io.BytesIO(file_bytes), sep=";", index_col="time",
+                        parse_dates=True)
+        return d.index[int(idx)].isoformat()
+    except Exception:
+        return None
+
 
 # ── Pre-process all cyclones ─────────────────────────────────────────────────────
 # Done before rendering tabs so export data (CSV + PNG) is ready for the ZIP button.
@@ -1305,6 +1866,7 @@ for _cname, _fbytes in files.items():
             use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
             boundary_padding,
             _phase_params_tuple, _cname, figsize=(12, 5), show_title=True,
+            gt_boundary_iso=_gt_boundary_iso(_cname, _fbytes),
         )
     except Exception:
         _png = b""
@@ -1393,11 +1955,29 @@ with tab_cal:
                         boundary_padding,
                         _phase_params_tuple, cyclone_name,
                         figsize=_FIGSIZES[n_cols], show_title=True,
+                        gt_boundary_iso=_gt_boundary_iso(
+                            cyclone_name, files[cyclone_name]),
                     )
             except Exception as exc:
                 st.error(f"Error in {'compact' if n_cols >= 4 else 'phase'} figure: {exc}")
                 continue
             st.image(_png_display, use_container_width=True)
+
+            if show_incipient_probe and incipient_method == "plateau":
+                with st.expander("Sondagem da incipiente (crua vs suavizada)",
+                                 expanded=False):
+                    try:
+                        st.image(_render_probe_png(
+                            files[cyclone_name], use_filter, cutoff_low, cutoff_high,
+                            use_smoothing, use_smoothing_twice, replace_endpoints,
+                            savgol_poly, boundary_padding,
+                            incipient_plateau_signal, int(incipient_smooth_window),
+                            int(incipient_smooth_polyorder),
+                            float(incipient_plateau_tau), incipient_plateau_crossing,
+                            int(incipient_plateau_k),
+                        ), use_container_width=True)
+                    except Exception as exc:
+                        st.warning(f"Probe overlay unavailable: {exc}")
 
             st.checkbox(
                 "⚠️ Mark as bad",
