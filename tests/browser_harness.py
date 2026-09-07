@@ -330,6 +330,29 @@ class LabelPage:
             label.click()
             self.settle()
 
+    # ── layout ───────────────────────────────────────────────────────────────
+    def chart_box(self) -> dict:
+        return self.page.locator(self.CHART).bounding_box()
+
+    def working_area(self) -> tuple[float, float]:
+        """(top, bottom) of the block you actually label in, in viewport pixels.
+
+        Top of the curve to the bottom of the button row. Everything between is
+        needed at once: you cannot judge a shape you cannot see while typing the
+        number that describes it.
+        """
+        chart = self.chart_box()
+        buttons = self.page.get_by_role("button", name="← Back").bounding_box()
+        return chart["y"], buttons["y"] + buttons["height"]
+
+    def clipped_chart_labels(self) -> list[str]:
+        """Any boundary tag or band label pushed off the top of the window."""
+        return self.page.locator(self.CHART).evaluate(
+            """(svg) => [...svg.querySelectorAll('text')]
+                 .filter((t) => t.textContent &&
+                                t.getBoundingClientRect().top < 0)
+                 .map((t) => t.textContent)""")
+
     # ── forcing a rerun from outside the chart ───────────────────────────────
     def poke_sidebar(self) -> None:
         """Change a sidebar widget, which reruns the whole script.

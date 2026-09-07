@@ -73,14 +73,27 @@ def server(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
-def lab(server):
-    with playwright_api.sync_playwright() as pw:
-        browser = pw.chromium.launch()
-        page = browser.new_page(viewport={"width": 1600, "height": 1100})
-        page.set_default_timeout(60_000)
-        lp = LabelPage(page).open(server.url)
-        yield lp
-        browser.close()
+def pw():
+    """One Playwright instance for the module.
+
+    Module-scoped because the sync API refuses to be re-entered: opening a
+    second `sync_playwright()` while the first is live raises "you are using
+    Playwright Sync API inside the asyncio loop". Tests that need their own
+    window (the viewport-size ones) launch another BROWSER from this instance
+    rather than another instance.
+    """
+    with playwright_api.sync_playwright() as instance:
+        yield instance
+
+
+@pytest.fixture(scope="module")
+def lab(server, pw):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 1600, "height": 1100})
+    page.set_default_timeout(60_000)
+    lp = LabelPage(page).open(server.url)
+    yield lp
+    browser.close()
 
 
 @pytest.fixture
@@ -322,6 +335,72 @@ def test_not_sure_is_per_boundary_and_survives_a_drag(fresh):
 
 def test_the_first_row_cannot_be_unsure(fresh):
     assert fresh.page.get_by_label("unsure, row 0", exact=True).is_disabled()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# It has to fit on the screen
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Not cosmetics. The chart was a fixed 520 viewBox units tall, which rendered at
+# ~540px and put the curve and the table on different screenfuls: you scrolled
+# up to see the shape, down to type the number, and up again to check. You
+# cannot judge a boundary you cannot see while setting it. The component now
+# sizes itself from window.innerHeight and the app scrolls the working area to
+# the top when a new series arrives.
+
+@pytest.mark.parametrize("width,height", [(1440, 800), (1680, 950), (1920, 1080)])
+def test_the_working_area_fits_in_the_viewport(server, pw, width, height):
+    """Chart top to button bottom, on the three sizes this is actually used at.
+
+    A separate page per size on purpose: the height is computed once per build
+    from window.innerHeight, so resizing an existing page would test the resize
+    path rather than the initial one (that is the next test).
+    """
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": width, "height": height})
+    page.set_default_timeout(60_000)
+    try:
+        lp = LabelPage(page).open(server.url)
+        top, bottom = lp.working_area()
+        assert bottom - top <= height, (
+            f"the working area is {bottom - top:.0f}px tall in a {height}px "
+            "window — the curve and the table cannot both be seen")
+        assert top >= 0 and bottom <= height, (
+            f"it fits ({bottom - top:.0f}px) but is not on screen: "
+            f"top={top:.0f} bottom={bottom:.0f}")
+        assert not lp.clipped_chart_labels()
+        assert lp.chart_box()["height"] <= 460, "the chart ignored its cap"
+        assert lp.chart_box()["height"] >= 220, "the chart is too short to read"
+    finally:
+        browser.close()
+
+
+def test_the_chart_resizes_with_the_window_without_losing_the_marks(server, pw):
+    """The axes and the series path are baked in at build time, so a size change
+    is a rebuild — and a rebuild must not be a way to lose work."""
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 1600, "height": 1000})
+    page.set_default_timeout(60_000)
+    try:
+        lp = LabelPage(page).open(server.url)
+        lp.set_start_idx(1, 27)
+        tall = lp.chart_box()["height"]
+
+        page.set_viewport_size({"width": 1600, "height": 700})
+        page.wait_for_timeout(900)
+        short = lp.chart_box()["height"]
+        assert short < tall - 40, f"{short} vs {tall}: the chart did not shrink"
+        assert lp.start_idx(1) == 27, "the resize rebuild dropped the marks"
+
+        page.set_viewport_size({"width": 1600, "height": 1000})
+        page.wait_for_timeout(900)
+        assert lp.chart_box()["height"] > short + 40, "it did not grow back"
+        assert lp.start_idx(1) == 27
+        # and it is still a working chart, not just a picture
+        lp.drag_boundary(1, 40)
+        assert lp.start_idx(1) == pytest.approx(40, abs=2)
+    finally:
+        browser.close()
 
 
 # ══════════════════════════════════════════════════════════════════════════════

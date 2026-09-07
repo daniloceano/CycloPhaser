@@ -121,9 +121,15 @@ import labels_core as lc  # noqa: E402
 DEFAULT_TOLERANCE = 5
 
 # The component's drawing surface, in viewBox units. The SVG scales to the
-# container with preserveAspectRatio, so every coordinate below is resolution
-# independent and nothing has to be recomputed when the window is resized.
-_W, _H = 1000, 520
+# container with preserveAspectRatio, so every coordinate is resolution
+# independent.
+#
+# _H is the DESIGN height and the cap, not the rendered one: the component sizes
+# itself to the viewport (see `targetPx` in _CHART_JS) so that the curve and the
+# table that is being typed into fit on screen together. Scrolling between the
+# shape you are judging and the number you are setting is not a cosmetic
+# problem — it means you cannot see both at once, which is the whole job.
+_W, _H = 1000, 430
 _ML, _MR, _MT, _MB = 74, 22, 26, 44
 
 
@@ -143,17 +149,45 @@ export default function (component) {
     return e;
   };
 
+  // ── how tall the chart should be ───────────────────────────────────────────
+  // Sized to the VIEWPORT, not to a constant. The whole point of this view is to
+  // look at one series and mark it, and a chart taller than the window makes you
+  // scroll between the curve and the table you are typing into — you cannot see
+  // the shape you are judging and the number you are setting at the same time.
+  //
+  // `data.h` is the design height and the cap; RESERVE is what the rest of the
+  // page needs (heading, progress, the four-row table, notes, buttons). The
+  // result is a target in CSS pixels, converted to viewBox units against the
+  // measured container width so that the scale factor — and therefore the
+  // rendered size of every label — stays put however tall the box gets.
+  // RESERVE is what the rest of the working area needs below the curve: the
+  // four-row table, the notes line, the button row and the two captions. It was
+  // measured, not guessed — see tests/test_label_browser.py, which fails if the
+  // block from the heading to the buttons stops fitting in the viewport.
+  const RESERVE = 400, MIN_PX = 230;
+  const targetPx = () => Math.max(
+    MIN_PX, Math.min(Math.round((window.innerHeight || 900) - RESERVE), data.h));
+  const wantH = (width) => {
+    // The width MUST be measured from an element that is already laid out.
+    // Falling back to data.w pretends the column is 1000px wide, and on a wide
+    // screen that silently scales the chart past its own cap — the first
+    // version of this did exactly that and drew a 628px chart with a 430px cap.
+    const cw = width || parentElement.clientWidth || data.w;
+    return Math.max(200, Math.round(data.w * targetPx() / cw));
+  };
+
   // ── reuse before rebuild ───────────────────────────────────────────────────
   // This function runs again on EVERY Streamlit rerender, and a rerender can
   // land in the middle of a gesture (any sidebar widget triggers one). Tearing
   // the SVG down and building a new one would take the listeners and the
   // in-flight drag with it, so the node is kept and its attributes updated
-  // whenever the series and the number of phases are unchanged. Only a genuinely
-  // different chart is rebuilt.
+  // whenever the series, the number of phases AND the height are unchanged.
+  // Only a genuinely different chart is rebuilt.
   const host0 = parentElement.querySelector('#cp-label-chart');
   const S0 = host0 && host0.__cp;
+  const H0 = host0 ? wantH(host0.clientWidth) : 0;
   if (S0 && S0.sid === data.sid && S0.n === data.n &&
-      S0.PH.length === data.phases.length) {
+      S0.PH.length === data.phases.length && Math.abs(S0.h - H0) < 10) {
     S0.setTrigger = setTriggerValue;   // a fresh closure arrives each rerender
     if (!S0.drag) {                    // never overwrite what is being dragged
       for (let k = 0; k < data.phases.length; k++) {
@@ -166,15 +200,40 @@ export default function (component) {
     }
     return;
   }
+  // Carry the marks across a pure resize: the geometry is baked in at build
+  // time, so a resize is a rebuild, and a rebuild must not be a way to lose
+  // work that has not been through a rerun yet.
+  const carried = (S0 && S0.sid === data.sid && S0.n === data.n &&
+                   S0.PH.length === data.phases.length)
+    ? S0.PH.map((p) => ({ ...p })) : null;
   if (S0) S0.teardown();
   if (host0) host0.remove();
+  build(H0, carried);
+
+  // Nested, and a declaration rather than a const, so it is hoisted above the
+  // call above and still closes over `data`, `setTriggerValue` and
+  // `parentElement`. `H` is a parameter because a resize re-enters here with a
+  // different one, and every coordinate below is derived from it.
+  function build(hintH, carriedPH) {
 
   const N = data.n;
   const Y = data.y;
   const COL = data.colors;
-  const PH = data.phases.map((p) => ({ ...p }));
-  const W = data.w, H = data.h;
+  const PH = (carriedPH || data.phases).map((p) => ({ ...p }));
+  const W = data.w;
   const ML = data.ml, MR = data.mr, MT = data.mt, MB = data.mb;
+
+  // Attached BEFORE anything is measured, so `clientWidth` is the real column
+  // width rather than zero. Everything below is derived from H, so H has to be
+  // settled here and not before.
+  const host = document.createElement('div');
+  host.id = 'cp-label-chart';
+  host.dataset.sid = data.sid;
+  host.style.scrollMarginTop = '10px';   // air above the boundary tags
+  parentElement.appendChild(host);
+  const H = wantH(host.clientWidth) || hintH;
+  host.dataset.h = String(H);
+
   const PW = W - ML - MR, PH_ = H - MT - MB;
 
   let lo = Infinity, hi = -Infinity;
@@ -186,11 +245,6 @@ export default function (component) {
   const sx = (i) => ML + (N > 1 ? i / (N - 1) : 0.5) * PW;
   const sy = (v) => MT + (1 - (v - y0) / (y1 - y0)) * PH_;
   const ix = (px) => Math.round(((px - ML) / PW) * (N - 1));
-
-  const host = document.createElement('div');
-  host.id = 'cp-label-chart';
-  host.dataset.sid = data.sid;
-  parentElement.appendChild(host);
 
   const svg = el('svg', {
     viewBox: `0 0 ${W} ${H}`, width: '100%',
@@ -284,7 +338,7 @@ export default function (component) {
   // it where the labeller is already looking, at the moment the gesture that
   // failed was made — a console message would be silence.
   const alert = svg.appendChild(el('text', {
-    x: ML, y: H - 26, 'font-size': 13, fill: '#c1121f', 'font-weight': '600',
+    x: ML + 8, y: MT + 36, 'font-size': 13, fill: '#c1121f', 'font-weight': '600',
     'font-family': 'sans-serif' }));
   const warn = (msg) => { alert.textContent = msg || ''; };
 
@@ -455,17 +509,55 @@ export default function (component) {
   };
   svg.addEventListener('keydown', onKey);
 
+  // ── resize ────────────────────────────────────────────────────────────────
+  // The axes, the series path and every margin are baked in at build time from
+  // H, so there is nothing to nudge: a size change is a rebuild. Debounced,
+  // because a drag of the window edge fires this continuously, and skipped
+  // while a gesture is in flight so the rebuild cannot happen under the
+  // labeller's own pointer.
+  let resizeTimer = null;
+  const onResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (S.drag) return;
+      const h2 = wantH(host.clientWidth);
+      if (Math.abs(h2 - H) < 8) return;
+      const keep = S.PH.map((p) => ({ ...p }));
+      S.teardown();
+      host.remove();
+      build(h2, keep);
+    }, 180);
+  };
+  window.addEventListener('resize', onResize);
+
   const S = {
-    sid: data.sid, n: N, PH: PH, drag: null, seq: 0, sel: 1,
+    sid: data.sid, n: N, h: H, PH: PH, drag: null, seq: 0, sel: 1,
     setTrigger: setTriggerValue, update: update,
     teardown: () => {
+      clearTimeout(resizeTimer);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onUp);
+      window.removeEventListener('resize', onResize);
     },
   };
   host.__cp = S;
   update();
+
+  // Bring the working area to the top of the window when a NEW series arrives.
+  // The app's own header, uploader and mode switch sit above this view and
+  // cannot be removed — they belong to Grid and Inspector too — so ~680px of
+  // chrome stands between the top of the page and the curve. Left alone, every
+  // "Save & next" drops the labeller at the top of the page with the series
+  // they are supposed to be reading below the fold. Only on a genuinely new
+  // chart: doing it on every rerender would yank the page away mid-edit, and a
+  // resize rebuild carries `carriedPH`, which is how that case is told apart.
+  if (!carriedPH) {
+    try {
+      host.scrollIntoView({ block: 'start', behavior: 'instant' });
+    } catch (_) { /* older browsers: the page simply stays where it was */ }
+  }
+  }
 }
 """
 
@@ -590,11 +682,14 @@ def _draw(sid: str, values: pd.Series, phases: list[dict]) -> dict | None:
     able to tell "the labeller has not touched it yet" from "the chart is not
     there", because those two need opposite things on screen.
     """
+    # height="content": the component decides its own height from the viewport,
+    # so a fixed number here would either crop it or reserve space it does not
+    # use.
     result = _chart_component()(
         data=chart_payload(sid, values, phases),
         key=chart_key(sid),
         on_edit_change=lambda: None,
-        height=_H + 20,
+        height="content",
     )
     raw = getattr(result, "edit", None)
     return json.loads(raw) if raw else None
@@ -632,6 +727,29 @@ def default_phases(n: int, tolerance: int) -> list[dict]:
 
 # phase · start · margin · not-sure
 _TABLE_COLS = [2.2, 1.6, 1.6, 1.4]
+
+
+def _compact_layout() -> None:
+    """Tighten the vertical rhythm of the main column for this view only.
+
+    Streamlit's default 1rem gap between blocks is right for a page you read and
+    wrong for one you work in: across a heading, a progress bar, an expander, the
+    chart, four table rows, a notes box and six buttons it adds up to more than
+    the chart itself, and pushes the curve off screen. Halving it is what lets
+    the series and the table it describes be visible at the same time.
+
+    Scoped to the main area, so the sidebar keeps its normal spacing, and
+    written defensively: if the selector stops matching a future Streamlit, the
+    layout is merely roomy again — nothing breaks.
+    """
+    st.markdown(
+        """<style>
+        [data-testid="stMain"] [data-testid="stVerticalBlock"] { gap: 0.45rem; }
+        [data-testid="stMain"] [data-testid="stElementContainer"] { margin: 0; }
+        [data-testid="stMain"] .stProgress > div { margin-bottom: 0; }
+        </style>""",
+        unsafe_allow_html=True,
+    )
 
 
 def _phase_table(sid: str, phases: list[dict], n: int, rev: int) -> list[dict]:
@@ -712,13 +830,12 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
     values = series[sid]
     n = len(values)
 
-    st.markdown(
-        "#### Manual labelling — mark every phase of this cyclone\n"
-        "You are looking at the **raw input series only**. No filtering, no "
-        "derivatives, and nothing the detector produced — that is deliberate, "
-        "and it is what makes these labels usable as evidence. Every bar and "
-        "band below is drawn from *your* marks."
-    )
+    # Everything explanatory is collapsed. It is all still here — it is why the
+    # labels are worth anything — but it is read once and then re-read only on
+    # purpose, whereas the vertical space it costs is paid on all 63 series. The
+    # curve and the table have to be on screen together; the prose does not.
+    _compact_layout()
+    st.markdown("#### Manual labelling — the **raw input series only**")
 
     n_done = len(records)
     st.progress(n_done / n_total, text=f"{n_done} of {n_total} labelled "
@@ -751,16 +868,38 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
         st.session_state[key_rev] = 0
     phases = st.session_state[key_ph]
 
-    st.caption(
-        "**Drag a bar** along the time axis to move that phase boundary — the "
-        "shading follows it. **Drag a bar's edge** to widen or narrow its "
-        "margin: the bar's own thickness *is* the uncertainty. Click a bar and "
-        "use **← →** to nudge it one step (**shift** for five) and **↑ ↓** to "
-        "change its margin — on a long series one step is under four pixels, so "
-        "the keyboard is the only way to place the last few. **The table below "
-        "is the label**: every field is editable and a whole cyclone can be "
-        "marked there without touching the chart."
-    )
+    with st.expander("How to mark a series, and why it is blind", expanded=False):
+        st.markdown(
+            "You are looking at the **raw input series only**. No filtering, no "
+            "derivatives, and nothing the detector produced — that is "
+            "deliberate, and it is what makes these labels usable as evidence. "
+            "A label written while the algorithm's answer is on screen is an "
+            "echo of that answer, not evidence about it. Every bar and band is "
+            "drawn from *your* marks; the colours are the project's standard "
+            "phase palette only so the figure reads like every other one in the "
+            "repo.\n\n"
+            "* **Drag a bar** along the time axis to move that phase boundary — "
+            "the shading follows it.\n"
+            "* **Drag a bar's edge** to widen or narrow its margin: the bar's "
+            "own thickness *is* the uncertainty.\n"
+            "* **Click a bar, then ← →** to nudge it one step (**shift** for "
+            "five), **↑ ↓** for its margin. On a 259-step track one step is "
+            "under four pixels, so the keyboard is the only way to place the "
+            "last few — and it is the path that still works if the pointer one "
+            "does not.\n"
+            "* **The table is the label.** Every field is editable and a whole "
+            "cyclone can be marked there without touching the chart.\n"
+            "* **Not sure** sets one boundary aside from the scoring and leaves "
+            "the rest of the series counting.\n\n"
+            f"Queue order is shuffled with a fixed seed ({lc.QUEUE_SEED}) rather "
+            "than sorted by id: the real track ids are chronological, so "
+            "labelling them in order would align fatigue with the identifier "
+            "and any drift in your criteria would look like a real "
+            "time-dependent effect. Labels are written to "
+            f"`{lc.LABELS_PATH.relative_to(_REPO_ROOT)}` the moment you press a "
+            "button, each save rewriting the file atomically — closing the tab "
+            "cannot lose work."
+        )
 
     try:
         edit = _draw(sid, values, phases)
@@ -806,16 +945,22 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
 
     first = phases[0]["phase"] if phases else None
     inc_end = phases[1]["start_idx"] if (first == "incipient" and len(phases) > 1) else None
+    # Carries the queue position as well as the boundary. The progress bar above
+    # the chart scrolls out of view once the working area is brought to the top
+    # of the window, and "which of the 63 am I on" is worth keeping in sight.
     st.caption(
         (f"Incipient phase = steps 0–{inc_end - 1} (ends at {inc_end}, "
          f"{values.index[inc_end]})" if inc_end is not None else
          "No incipient phase — this series is already changing at step 0")
         + f" · series length {n} steps"
+        + f" · #{pos + 1} of {n_total} in the queue, {n_done} labelled"
     )
 
-    notes = st.text_area("Notes (optional)",
-                         value=(existing or {}).get("notes", ""),
-                         key=f"lab_notes__{sid}", height=68)
+    notes = st.text_input("Notes (optional)",
+                          value=(existing or {}).get("notes", ""),
+                          key=f"lab_notes__{sid}",
+                          placeholder="anything that made this one hard to read",
+                          label_visibility="collapsed")
 
     def _save(ambiguous: bool) -> None:
         rec = lc.make_label_record(sid, sources[sid], values, phases,
@@ -823,7 +968,7 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
         lc.upsert_label(rec)
         st.session_state["lab_pos"] = (pos + 1) % n_total
 
-    r1, r2 = st.columns(2)
+    r1, r2, b1, b2, b3, b4 = st.columns([1.1, 1.3, 1.2, 1.2, 1.3, 0.9])
     if r1.button("＋ Add a phase", use_container_width=True,
                  disabled=bool(phases) and phases[-1]["start_idx"] >= n - 1,
                  help="Appends one more phase after the last, starting one step "
@@ -833,19 +978,17 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
                        "tolerance_idx": int(default_tolerance), "unsure": False})
         st.session_state[key_rev] += 1
         st.rerun()
-    if r2.button("－ Remove the last phase", use_container_width=True,
+    if r2.button("－ Remove last", use_container_width=True,
                  disabled=len(phases) <= 1,
                  help="Drops the final phase; the one before it runs to the end."):
         phases.pop()
         st.session_state[key_rev] += 1
         st.rerun()
-
-    b1, b2, b3, b4 = st.columns(4)
     if b1.button("💾 Save & next", type="primary", use_container_width=True,
                  disabled=bool(problem)):
         _save(ambiguous=False)
         st.rerun()
-    if b2.button("No incipient phase", use_container_width=True,
+    if b2.button("No incipient", use_container_width=True,
                  disabled=not (phases and phases[0]["phase"] == "incipient"
                                and len(phases) > 1),
                  help="Drops the leading incipient phase — this series is "
@@ -857,7 +1000,7 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
             st.session_state[key_ph] = rest
             st.session_state[key_rev] += 1
         st.rerun()
-    if b3.button("Save as ambiguous", use_container_width=True,
+    if b3.button("Save ambiguous", use_container_width=True,
                  disabled=bool(problem),
                  help="You cannot decide this cyclone AT ALL. The phases you "
                       "marked are still saved; the incipient verdict is recorded "
@@ -870,12 +1013,3 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
         st.session_state["lab_pos"] = (pos - 1) % n_total
         st.rerun()
 
-    st.caption(
-        f"Queue order is shuffled with a fixed seed ({lc.QUEUE_SEED}) rather than "
-        "sorted by id: the real track ids are chronological, so labelling them in "
-        "order would align fatigue with the identifier and any drift in your "
-        "criteria would look like a real time-dependent effect. "
-        f"Labels are written to `{lc.LABELS_PATH.relative_to(_REPO_ROOT)}` the "
-        "moment you press a button, each save rewriting the file atomically — "
-        "closing the tab cannot lose work."
-    )
