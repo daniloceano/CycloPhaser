@@ -21,7 +21,13 @@ jobs:
 
       - run:
           name: Install test dependencies
-          command: pip install pytest
+          # PyYAML is NOT a dependency of cyclophaser and must not become one --
+          # the package never reads or writes YAML. It is here because the
+          # manual-labelling front's artefact is a YAML file, and without it the
+          # 8 round-trip/atomicity tests that guard that artefact were being
+          # SKIPPED in CI: the artefact was unprotected in the one place that
+          # runs on every push.
+          command: pip install pytest pyyaml
 
       - run:
           name: Run tests
