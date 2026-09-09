@@ -19,18 +19,25 @@ import numpy as np
 import pandas as pd
 
 from layer_inspector import (
+    C_ABOVE_TAU,
     C_ACCEPT_PEAK,
     C_ACCEPT_VALLEY,
     C_BOUNDARY,
+    C_FILTERED,
     C_KNEE,
+    C_RAW,
     C_REJECT,
     C_REL,
     C_SMOOTH,
+    C_SMOOTHED,
+    C_SMOOTHED_LIGHT,
     C_THRESHOLD,
     PHASE_COLORS,
+    REFUSAL_REASON_TEXT,
     STEP_NAMES,
     label_runs,
     phase_spans_for_shading,
+    requirement_text,
     rescaler,
 )
 
@@ -38,33 +45,33 @@ C_INT = "#f7b538"
 C_DEC = "#7d8c5c"
 C_GT = "#00a000"
 
-# Type sizes and line weights, matching the Plotly renderer's intent: large
-# enough to read on a laptop with every layer on, and the detection input of
-# each panel is the thickest line in it.
+# Type sizes and line weights, matching the Plotly renderer's intent: the raw
+# curve is always the thickest line in its panel (stands out under every other
+# layer); the stage detection actually reads is next; intermediate stages stay
+# thin.
 F_TICK = 11
 F_AXIS = 13
 F_LEGEND = 10
 F_TITLE = 15
+LW_RAW = 4.6
 LW_PRIMARY = 3.2
 LW_SERIES = 2.0
 LW_OVERLAY = 9.0
 LW_MARK = 2.6
 
-# Palette taken from the package itself (cyclophaser/plots.py, plot_didactic):
-# grey raw zeta, amber filtered_vorticity, navy vorticity_smoothed, red
-# vorticity_smoothed2 -- so a curve looks the same here as in cyclophaser's own
-# figures. The derivative panels follow the same file's per-quantity colours
-# (dz red, dz2 amber), with the intermediate *_filt stage in a light tint.
+# Palette -- see layer_inspector's C_RAW/C_FILTERED/C_SMOOTHED for the
+# role-based convention (grey=raw, yellow=post-filter, red=post-smoothing,
+# raw always the thickest line via LW_RAW below).
 _SERIES_Z = [
-    ("zeta", "zeta (raw input)", "gray", LW_SERIES),
-    ("filtered_vorticity", "filtered_vorticity (Lanczos)", "#d68c45", LW_SERIES),
-    ("vorticity_smoothed", "vorticity_smoothed (Savgol 1)", "#1d3557", LW_SERIES),
+    ("zeta", "zeta (raw input)", C_RAW, LW_RAW),
+    ("filtered_vorticity", "filtered_vorticity (Lanczos)", C_FILTERED, LW_SERIES),
+    ("vorticity_smoothed", "vorticity_smoothed (Savgol 1)", C_SMOOTHED_LIGHT, LW_SERIES),
     ("vorticity_smoothed2", "vorticity_smoothed2 (what detection reads)",
-     "#e63946", LW_PRIMARY),
+     C_SMOOTHED, LW_PRIMARY),
 ]
 _SERIES_D = {
-    "dz":  {"filt": "#eba0a0", "smoothed": "#d62828"},
-    "dz2": {"filt": "#f6dcaa", "smoothed": "#f7b538"},
+    "dz":  {"filt": C_FILTERED, "smoothed": C_SMOOTHED},
+    "dz2": {"filt": C_FILTERED, "smoothed": C_SMOOTHED},
 }
 
 
@@ -154,8 +161,11 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
         _draw_incipient(ax_dz, ax_dz2, ax_rel, index, dz_scale, normalize,
                         np.asarray(df_result["dz"], dtype=float), incipient)
 
+    # One legend per panel, pinned just outside its OWN right edge -- not one
+    # combined legend, and not overlapping the data inside the panel either.
     for ax in (axes[:-1] if ribbon else axes):
-        ax.legend(fontsize=F_LEGEND, loc="best", ncol=2, framealpha=0.88)
+        ax.legend(fontsize=F_LEGEND, loc="upper left", bbox_to_anchor=(1.01, 1.0),
+                  ncol=1, framealpha=0.92, borderaxespad=0.0)
         ax.tick_params(labelsize=F_TICK)
 
     if ax_rib is not None:
@@ -163,7 +173,7 @@ def render_static_inspector(name, vort, df_result, periods_dict, *,
 
     fig.suptitle(f"Layer inspector — {name}{title_suffix}",
                  fontsize=F_TITLE, fontweight="bold")
-    fig.tight_layout(rect=(0, 0, 1, 0.98))
+    fig.tight_layout(rect=(0, 0, 0.80, 0.98))
     return fig
 
 
@@ -292,23 +302,58 @@ def _draw_incipient(ax_dz, ax_dz2, ax_rel, index, dz_scale, normalize, dz,
     if not plateau or ax_rel is None:
         return
     tau = float(incipient["tau"])
+    rel_label_short = lens["rel_label_short"]
     ax_rel.plot(x, lens["rel_raw"], color=C_REJECT, lw=LW_SERIES,
-                label="rel (probe smoothing off)")
+                label=f"{rel_label_short} (probe smoothing off)")
+    rel_active = np.asarray(lens["rel_smoothed"], dtype=float)
     if lens["smoothing_applies"]:
-        ax_rel.plot(x, lens["rel_smoothed"], color=C_REL, lw=LW_PRIMARY,
-                    label="rel (probe smoothing on)")
+        ax_rel.plot(x, rel_active, color=C_REL, lw=LW_PRIMARY,
+                    label=f"{rel_label_short} (probe smoothing on)")
     ax_rel.axhline(tau, color=C_THRESHOLD, lw=LW_MARK, ls="--",
                    label=f"τ = {tau:.2f}")
-    cross = int(lens.get("boundary_smoothed") or lens.get("boundary_raw") or 0)
+
+    # Requirement evidence: which samples clear tau, which runs the
+    # crossing/k rule rejected as too short, and the accepted run's start.
+    above = np.asarray(lens["above"], dtype=bool)
+    if above.any():
+        ax_rel.scatter(x[above], rel_active[above], color=C_ABOVE_TAU, s=70,
+                       edgecolors="#0b4a26", linewidths=1.0,
+                       zorder=6, label="rel ≥ τ samples")
+    k_eff = int(lens["k_effective"])
+    first_rejected = True
+    for start, length, accepted in lens["runs"]:
+        if lens["crossing"] == "sustained" and not accepted and length < k_eff:
+            hi = min(start + length - 1, len(index) - 1)
+            ax_rel.plot(x[start:hi + 1], rel_active[start:hi + 1],
+                       color=C_REJECT, lw=LW_MARK + 1.5, ls="--", zorder=5,
+                       label="run rejected (too short)" if first_rejected else None)
+            ax_rel.annotate(f"len={length}<k={k_eff}", (x[start], rel_active[start]),
+                            textcoords="offset points", xytext=(0, -14),
+                            ha="left", fontsize=F_LEGEND - 1, color="#555555")
+            first_rejected = False
+        if accepted:
+            ax_rel.scatter([x[start]], [rel_active[start]], color=C_BOUNDARY,
+                           marker="D", s=90, zorder=8, edgecolors="black",
+                           linewidths=1.2,
+                           label=f"accepted run starts (step {start})")
+
+    ax_rel.text(0.01, 0.94, requirement_text(lens["crossing"], k_eff),
+               transform=ax_rel.transAxes, fontsize=F_LEGEND, color="#222222",
+               va="top",
+               bbox=dict(fc="white", ec="none", alpha=0.75))
+
+    cross = int(lens["boundary_smoothed"])
     if 0 < cross < len(index):
         ax_rel.axvline(index[cross], color=C_BOUNDARY, lw=LW_MARK, ls="--",
                        label=f"τ crossing (step {cross})")
-    else:
-        ax_rel.text(0.01, 0.08,
-                    "no crossing (rel(t0) >= τ, or no sustained run)",
-                    transform=ax_rel.transAxes, fontsize=F_LEGEND, color="#555555")
+    reason = lens.get("refusal_reason")
+    if reason:
+        ax_rel.text(0.01, 0.08, REFUSAL_REASON_TEXT.get(reason, reason),
+                    transform=ax_rel.transAxes, fontsize=F_LEGEND,
+                    color="#8b0000",
+                    bbox=dict(fc="white", ec=C_REJECT, lw=0.8, alpha=0.9))
     ax_rel.set_ylim(0, 1.02)
-    ax_rel.set_ylabel("rel", fontsize=F_AXIS)
+    ax_rel.set_ylabel(rel_label_short, fontsize=F_AXIS)
 
 
 def _draw_ribbon(ax, ribbon) -> None:

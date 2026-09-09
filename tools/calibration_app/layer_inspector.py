@@ -92,6 +92,31 @@ C_REL = "#e63946"
 C_SMOOTH = "#e07b00"
 C_BOUNDARY = "#d000d0"
 C_KNEE = "#00a000"
+# The rel>=tau sample markers: green (not C_KNEE's green -- the knee vline can
+# land in the same rel panel) and bold, so they stand out against the red
+# rel(t) line they sit on top of.
+C_ABOVE_TAU = "#1a9850"
+
+# Series-layer palette, by PIPELINE ROLE rather than by quantity or panel, so a
+# colour always means the same processing stage everywhere and no two series
+# share a colour within one panel: grey is always the raw input, yellow is
+# always post-filter, red is always post-smoothing. The raw curve is also
+# always the thickest line in its panel. Where a panel carries two smoothing
+# passes (the z panel's Savgol 1 and Savgol 2), both stay red but at different
+# tints so they remain distinguishable from each other.
+C_RAW = "#4d4d4d"
+C_FILTERED = "#f2c744"
+C_SMOOTHED = "#8b0000"
+C_SMOOTHED_LIGHT = "#e8828a"
+
+# Human-readable text for ``incipient_lens``'s ``refusal_reason``, shared by
+# both renderers so the wording can never drift between them.
+REFUSAL_REASON_TEXT = {
+    "crossing_at_t0": "no incipient phase: rel(t0) already ≥ τ",
+    "no_sustained_run": "no incipient phase: rel never sustains the requirement",
+    "k_exceeds_length": "no incipient phase: k exceeds the series length",
+    "flat_signal": "no incipient phase: rel is flat at zero",
+}
 
 # The six detection steps, in the fixed order get_periods calls them.
 STEP_NAMES = (
@@ -876,6 +901,105 @@ def knee_index(dz2, fraction: float = 0.5) -> int:
     return int(np.nanargmax(window))
 
 
+def rel_signal_label(signal: str, smooth_window: int = 0,
+                     smooth_polyorder: int = 3) -> tuple:
+    """Legend/title text for the plateau's ``rel(t)``, derived from the same
+    branches ``_incipient_plateau_rel`` dispatches on
+    (``cyclophaser/find_stages.py:799-837``), so the label can never name a
+    different curve than the one actually plotted:
+
+      * ``signal="derivative"`` reads ``|dz|`` — the smoothed derivative the
+        pipeline itself consumes.
+      * ``signal="vorticity"`` with ``smooth_window<=0`` reads
+        ``|d(zeta_raw)/dt|`` on the unfiltered input.
+      * ``signal="vorticity"`` with ``smooth_window=w>0`` reads that same
+        derivative after a Savitzky-Golay pass of window ``w`` is applied to
+        ``zeta_raw`` first.
+
+    The denominator is always the same quantity's max — ``rel`` is normalised
+    to ``[0, 1]`` in every branch.
+
+    Returns:
+        (short, long): ``short`` is a compact trace/legend name; ``long`` is
+        the fuller panel title / ylabel text.
+    """
+    if signal == "derivative":
+        num_short = num_long = "|dz|"
+    elif signal == "vorticity":
+        w = int(smooth_window)
+        if w > 0:
+            p = int(smooth_polyorder)
+            num_short = f"|dζ_sg(w={w})/dt|"
+            num_long = f"|d(ζ_raw smoothed via Savgol w={w}, p={p})/dt|"
+        else:
+            num_short = num_long = "|d(ζ_raw)/dt|"
+    else:
+        raise ValueError(
+            f"signal must be 'derivative' or 'vorticity', got {signal!r}.")
+    short = f"rel = {num_short} / max|·|"
+    long = f"rel = {num_long} / max{num_long}"
+    return short, long
+
+
+def _rel_runs(above, crossing_index: int) -> list:
+    """Contiguous runs of ``True`` in ``above``, each tagged accepted iff its
+    start is the crossing index ``_incipient_plateau_boundary`` produced —
+    the same ``rel >= tau`` mask the package's own boundary rule reads, never
+    a separately reimplemented threshold.
+
+    Returns:
+        list of ``(start, length, accepted)``.
+    """
+    above = np.asarray(above, dtype=bool)
+    runs = []
+    n = above.size
+    i = 0
+    while i < n:
+        if above[i]:
+            j = i
+            while j < n and above[j]:
+                j += 1
+            runs.append((int(i), int(j - i),
+                        bool(crossing_index > 0 and i == crossing_index)))
+            i = j
+        else:
+            i += 1
+    return runs
+
+
+def _incipient_refusal_reason(rel, tau: float, crossing: str,
+                              k_effective: int, crossing_index: int):
+    """Why the plateau rule produced no crossing (``crossing_index == 0``).
+
+    Reuses exactly the ``above = rel >= tau`` comparison and the run-length
+    rule ``_incipient_plateau_boundary`` itself applies, so this only
+    explains that decision, never a differently computed one.
+
+    Returns:
+        None when there is a crossing; otherwise one of
+        ``"crossing_at_t0"``, ``"no_sustained_run"``, ``"k_exceeds_length"``,
+        ``"flat_signal"``.
+    """
+    if crossing_index > 0:
+        return None
+    rel = np.asarray(rel, dtype=float)
+    if rel.size == 0 or not np.any(rel):
+        return "flat_signal"
+    if crossing == "sustained" and k_effective > rel.size:
+        return "k_exceeds_length"
+    above = rel >= tau
+    if above.size >= k_effective and bool(np.all(above[:k_effective])):
+        return "crossing_at_t0"
+    return "no_sustained_run"
+
+
+def requirement_text(crossing: str, k_effective: int) -> str:
+    """Positive statement of the active crossing/k requirement."""
+    if k_effective <= 1:
+        return "requirement: 1 sample ≥ τ"
+    return f"requirement: k={k_effective} consecutive samples ≥ τ"
+
+
 def incipient_lens(z_unfil,
                    dz,
                    dz2,
@@ -905,6 +1029,16 @@ def incipient_lens(z_unfil,
         probe reads the already-filtered derivative (see
         ``_incipient_plateau_rel``), in which case the two rel profiles are
         identical by construction.
+
+        Also, describing the rel EN VIGOR (``rel_smoothed`` — the curve and
+        boundary the active configuration actually produces):
+        ``rel_label_short``/``rel_label`` (trace/legend and panel-title/ylabel
+        text, from ``rel_signal_label``); ``crossing``/``k_effective`` (the
+        active crossing rule and its run-length requirement — 1 for
+        ``"single"``); ``above`` (boolean mask ``rel_smoothed >= tau``);
+        ``runs`` (contiguous ``above`` runs as ``(start, length, accepted)``);
+        ``crossing_index`` (alias of ``boundary_smoothed``, the boundary in
+        force); and ``refusal_reason`` (``None`` iff ``crossing_index > 0``).
     """
     z_raw = np.asarray(z_unfil, dtype=float)
     probe = pd.DataFrame({"z_unfil": z_raw,
@@ -913,18 +1047,32 @@ def incipient_lens(z_unfil,
     rel_raw = _incipient_plateau_rel(probe, signal, 0, smooth_polyorder)
     rel_smoothed = _incipient_plateau_rel(probe, signal, smooth_window,
                                           smooth_polyorder)
+    boundary_smoothed = _incipient_plateau_boundary(rel_smoothed, tau,
+                                                     crossing, k)
+    rel_label_short, rel_label = rel_signal_label(signal, smooth_window,
+                                                  smooth_polyorder)
+    k_effective = 1 if crossing == "single" else int(k)
+    above = rel_smoothed >= tau
     return {
         "rel_raw": rel_raw,
         "rel_smoothed": rel_smoothed,
         "boundary_raw": _incipient_plateau_boundary(rel_raw, tau, crossing, k),
-        "boundary_smoothed": _incipient_plateau_boundary(rel_smoothed, tau,
-                                                         crossing, k),
+        "boundary_smoothed": boundary_smoothed,
         "probe_raw": z_raw,
         "probe_smoothed": _smooth_incipient_probe(z_raw, smooth_window,
                                                   smooth_polyorder),
         "knee": knee_index(dz2, knee_fraction),
         "smoothing_applies": bool(int(smooth_window) > 0
                                   and signal == "vorticity"),
+        "rel_label_short": rel_label_short,
+        "rel_label": rel_label,
+        "crossing": crossing,
+        "k_effective": k_effective,
+        "above": above,
+        "runs": _rel_runs(above, boundary_smoothed),
+        "crossing_index": boundary_smoothed,
+        "refusal_reason": _incipient_refusal_reason(
+            rel_smoothed, tau, crossing, k_effective, boundary_smoothed),
     }
 
 

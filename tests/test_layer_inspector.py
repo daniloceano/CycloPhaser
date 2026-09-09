@@ -721,3 +721,134 @@ def test_rescaler_pools_a_group_into_one_band():
     f = li.rescaler([wide, narrow], normalize=True)
     np.testing.assert_allclose(f(wide), [0.0, 1.0])
     np.testing.assert_allclose(f(narrow), [0.2, 0.4])   # keeps its 1/5 amplitude
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 6. Incipient inspector: rel label sourced from `signal`, and the crossing/k
+#    evidence the plateau rule's refusal is explained by (FRENTE F(i)(ii))
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_rel_signal_label_names_the_active_quantity():
+    """`rel_label`/`rel_label_short` must name the curve `rel` actually reads,
+    branch for branch with `_incipient_plateau_rel` (find_stages.py:799-837)."""
+    short, long = li.rel_signal_label("derivative")
+    assert "|dz|" in short and "|dz|" in long
+
+    short0, long0 = li.rel_signal_label("vorticity", smooth_window=0)
+    assert "|dz|" not in short0 and "|dz|" not in long0
+    assert "ζ_raw" in long0 and "dt" in long0
+
+    short_w, long_w = li.rel_signal_label("vorticity", smooth_window=5,
+                                          smooth_polyorder=3)
+    assert "|dz|" not in short_w and "|dz|" not in long_w
+    assert "5" in long_w and "Savgol" in long_w
+    # The window shows up in the label, so w=5 and w=9 must read differently.
+    _, long_w9 = li.rel_signal_label("vorticity", smooth_window=9,
+                                     smooth_polyorder=3)
+    assert long_w != long_w9
+
+    with pytest.raises(ValueError):
+        li.rel_signal_label("not-a-signal")
+
+
+def _incipient_dict(df_result, *, signal="derivative", tau=0.20,
+                    crossing="single", k=3, smooth_window=0,
+                    smooth_polyorder=3):
+    """Builds the same `incipient=` dict app.py hands the renderers."""
+    lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
+                             df_result["dz2"], signal=signal, tau=tau,
+                             crossing=crossing, k=k,
+                             smooth_window=smooth_window,
+                             smooth_polyorder=smooth_polyorder)
+    return {
+        "lens": lens,
+        "boundary": li.incipient_lead(df_result),
+        "tau": tau,
+        "plateau_active": True,
+    }
+
+
+def test_no_hardcoded_derivative_formula_under_vorticity_signal(vort_cache):
+    """With signal='vorticity', the string '|dz| / max|dz|' must not appear
+    anywhere in the plotly figure's trace names / subplot titles, nor in the
+    mpl figure's legend labels / ylabel — it would misname the curve drawn."""
+    pytest.importorskip("plotly")
+    from inspector_mpl import render_static_inspector
+    from inspector_plotly import build_inspector_figure
+
+    forbidden = "|dz| / max|dz|"
+    vort = _vort(vort_cache, "20190325", key="author", **AUTHOR_PV)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, incipient_method="plateau",
+                                incipient_plateau_tau=0.20)
+    incipient = _incipient_dict(df_result, signal="vorticity",
+                                smooth_window=5, smooth_polyorder=3)
+
+    fig = build_inspector_figure("20190325", vort, df_result,
+                                 periods_to_dict(df_result), incipient=incipient)
+    for trace in fig.data:
+        assert forbidden not in (trace.name or "")
+    for ann in fig.layout.annotations:
+        assert forbidden not in (ann.text or "")
+
+    mpl_fig = render_static_inspector("20190325", vort, df_result,
+                                      periods_to_dict(df_result),
+                                      incipient=incipient)
+    ax_rel = mpl_fig.axes[3]
+    assert forbidden not in ax_rel.get_ylabel()
+    legend = ax_rel.get_legend()
+    if legend is not None:
+        for text in legend.get_texts():
+            assert forbidden not in text.get_text()
+    plt.close(mpl_fig)
+
+
+@pytest.mark.parametrize("track_id", ALL_TRACKS)
+@pytest.mark.parametrize("crossing,k", [("single", 1), ("sustained", 3)])
+def test_crossing_index_matches_the_package_boundary_function(vort_cache,
+                                                              track_id,
+                                                              crossing, k):
+    """`crossing_index` is never a second, parallel implementation of the
+    plateau rule — it must equal `_incipient_plateau_boundary` on the rel
+    profile in force, and `refusal_reason` must exist iff there is no
+    crossing."""
+    vort = _vort(vort_cache, track_id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, incipient_method="plateau",
+                                incipient_plateau_tau=0.20,
+                                incipient_plateau_crossing=crossing,
+                                incipient_plateau_k=k)
+    lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
+                             df_result["dz2"], signal="derivative", tau=0.20,
+                             crossing=crossing, k=k)
+    expected = li._incipient_plateau_boundary(lens["rel_smoothed"], 0.20,
+                                              crossing, k)
+    assert lens["crossing_index"] == expected
+    assert (lens["refusal_reason"] is None) == (lens["crossing_index"] > 0)
+
+
+@pytest.mark.parametrize("track_id", ALL_TRACKS)
+@pytest.mark.parametrize("crossing,k", [("single", 1), ("sustained", 3)])
+def test_incipient_lead_never_precedes_the_crossing_index(vort_cache,
+                                                          track_id,
+                                                          crossing, k):
+    """The phase `find_incipient_period` produces may sit LATER than the
+    crossing (the leading-NaN fillna can extend it — see `incipient_lead`'s
+    docstring), but it must never start before the crossing the same
+    configuration produces."""
+    vort = _vort(vort_cache, track_id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, incipient_method="plateau",
+                                incipient_plateau_tau=0.20,
+                                incipient_plateau_crossing=crossing,
+                                incipient_plateau_k=k)
+    lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
+                             df_result["dz2"], signal="derivative", tau=0.20,
+                             crossing=crossing, k=k)
+    lead = li.incipient_lead(df_result)
+    assert lead >= lens["crossing_index"], (
+        f"{track_id} ({crossing}, k={k}): lead={lead} < "
+        f"crossing_index={lens['crossing_index']}")
