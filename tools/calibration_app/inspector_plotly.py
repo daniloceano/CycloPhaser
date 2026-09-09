@@ -49,12 +49,13 @@ off to read true units.
 
 Colours
 -------
-The vorticity panel follows the package's own palette (``cyclophaser/plots.py``,
-``plot_didactic``): grey raw ζ, amber ζ_f, navy ζ_fs, red ζ_fs². The derivative
-panels follow the package's per-quantity colours from the same file
-(``series_colors``: dz red, dz2 amber), with the intermediate ``*_filt`` stage
-in a light tint of its panel's colour and the stage detection actually reads in
-the full colour at full weight.
+By PIPELINE ROLE, not by quantity or by panel, so a colour always means the
+same processing stage everywhere and no two series share a colour within one
+panel: grey is always the raw input, yellow is always post-filter, red is
+always post-smoothing. The raw curve is also always the thickest line in its
+panel, so it stands out under every other layer. The z panel's two smoothing
+passes (Savgol 1, Savgol 2 — the one detection reads) both stay red but at
+different tints so they remain distinguishable from each other.
 
 Nothing here computes anything about detection: every array it draws comes from
 ``layer_inspector``.
@@ -68,40 +69,41 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from layer_inspector import (
+    C_ABOVE_TAU,
     C_ACCEPT_PEAK,
     C_ACCEPT_VALLEY,
     C_BOUNDARY,
+    C_FILTERED,
     C_KNEE,
+    C_RAW,
     C_REJECT,
     C_REL,
     C_SMOOTH,
+    C_SMOOTHED,
+    C_SMOOTHED_LIGHT,
     C_THRESHOLD,
     PHASE_COLORS,
+    REFUSAL_REASON_TEXT,
     STEP_NAMES,
     label_runs,
     phase_at_step,
     phase_spans_for_shading,
+    requirement_text,
     rescaler,
 )
 
-# Series-layer palette, taken from the package itself so a curve looks the same
-# here as it does in cyclophaser's own figures.
-#
-# Vorticity panel — cyclophaser/plots.py, plot_didactic: raw zeta is grey,
-# filtered_vorticity amber, vorticity_smoothed navy, vorticity_smoothed2 red.
-# Derivative panels — the same file's `series_colors` gives each QUANTITY a
-# colour (dz red, dz2 amber); within a panel the pipeline STAGE is carried by
-# weight instead, with the intermediate *_filt in a light tint and the stage
-# detection actually reads in the full colour at full weight.
+# Series-layer palette — see layer_inspector's C_RAW/C_FILTERED/C_SMOOTHED for
+# the role-based convention (grey=raw, yellow=post-filter, red=post-smoothing,
+# raw always the thickest line via LW_RAW below).
 SERIES_COLORS = {
-    "zeta":                 "gray",
-    "filtered_vorticity":   "#d68c45",
-    "vorticity_smoothed":   "#1d3557",
-    "vorticity_smoothed2":  "#e63946",
-    "dz_dt_filt":           "#eba0a0",
-    "dz_dt_smoothed2":      "#d62828",
-    "dz_dt2_filt":          "#f6dcaa",
-    "dz_dt2_smoothed2":     "#f7b538",
+    "zeta":                 C_RAW,
+    "filtered_vorticity":   C_FILTERED,
+    "vorticity_smoothed":   C_SMOOTHED_LIGHT,
+    "vorticity_smoothed2":  C_SMOOTHED,
+    "dz_dt_filt":           C_FILTERED,
+    "dz_dt_smoothed2":      C_SMOOTHED,
+    "dz_dt2_filt":          C_FILTERED,
+    "dz_dt2_smoothed2":     C_SMOOTHED,
 }
 
 C_INT = "#f7b538"
@@ -117,9 +119,10 @@ F_SUBPLOT_TITLE = 15
 F_TITLE = 20
 F_HOVER = 13
 
-# Line weights. The detection input of each panel is the thickest line in it:
-# with every layer on, "which curve does the algorithm actually read" has to be
-# answerable at a glance.
+# Line weights. The raw curve is always the thickest line in its panel (it
+# must stand out under every other layer); the stage detection actually reads
+# is next; every intermediate stage stays thin.
+LW_RAW = 5.4
 LW_PRIMARY = 4.0
 LW_SERIES = 2.6
 LW_OVERLAY = 8.0
@@ -406,7 +409,7 @@ def _incipient_traces(fig, rows, index, dz, dz_scale, normalize, incipient):
     if plateau and row_rel is not None:
         fig.add_trace(
             go.Scatter(x=x, y=lens["rel_raw"], mode="lines",
-                       name="incipient: rel = |dz| / max|dz|",
+                       name=f"incipient: {lens['rel_label_short']}",
                        line=dict(color=C_REJECT, width=LW_SERIES),
                        hovertemplate="%{x|%d/%m %Hh}<br>rel = %{y:.3f}"
                                      "<extra>%{fullData.name}</extra>",
@@ -428,6 +431,59 @@ def _incipient_traces(fig, rows, index, dz, dz_scale, normalize, incipient):
                        line=dict(color=C_THRESHOLD, width=LW_MARK, dash="dash"),
                        hoverinfo="skip", visible=True),
             row=row_rel, col=1)
+
+        # Requirement evidence: which samples clear tau, which runs the
+        # crossing/k rule rejected as too short, and the accepted run's start.
+        rel_active = np.asarray(lens["rel_smoothed"], dtype=float)
+        above = np.asarray(lens["above"], dtype=bool)
+        if above.any():
+            fig.add_trace(
+                go.Scatter(x=x[above], y=rel_active[above], mode="markers",
+                           name="incipient: rel ≥ τ samples",
+                           marker=dict(color=C_ABOVE_TAU, size=11, symbol="circle",
+                                      line=dict(width=1.2, color="#0b4a26")),
+                           hoverinfo="skip", visible=True),
+                row=row_rel, col=1)
+
+        k_eff = int(lens["k_effective"])
+        first_rejected = True
+        for start, length, accepted in lens["runs"]:
+            if lens["crossing"] == "sustained" and not accepted and length < k_eff:
+                hi = min(start + length - 1, len(x) - 1)
+                fig.add_trace(
+                    go.Scatter(
+                        x=x[start:hi + 1], y=rel_active[start:hi + 1],
+                        mode="lines", name="incipient: run rejected (too short)",
+                        line=dict(color=C_REJECT, width=LW_MARK + 1.5, dash="dash"),
+                        hovertemplate=f"run length {length} < k={k_eff}"
+                                      "<extra>%{fullData.name}</extra>",
+                        legendgroup="incipient-rejected-run",
+                        showlegend=first_rejected, visible=True),
+                    row=row_rel, col=1)
+                first_rejected = False
+            if accepted:
+                fig.add_trace(
+                    go.Scatter(
+                        x=[x[start]], y=[rel_active[start]], mode="markers",
+                        name=f"incipient: accepted run starts (step {start})",
+                        marker=dict(color=C_BOUNDARY, size=11, symbol="diamond",
+                                   line=dict(width=1.5, color="#000000")),
+                        hoverinfo="skip", visible=True),
+                    row=row_rel, col=1)
+
+        fig.add_annotation(
+            x=x[0], y=0.97, xanchor="left", yanchor="top",
+            text=requirement_text(lens["crossing"], k_eff),
+            showarrow=False, font=dict(size=F_TICK),
+            bgcolor="rgba(255,255,255,0.75)", row=row_rel, col=1)
+
+        reason = lens.get("refusal_reason")
+        if reason:
+            fig.add_annotation(
+                x=x[0], y=0.82, xanchor="left", yanchor="top",
+                text=REFUSAL_REASON_TEXT.get(reason, reason),
+                showarrow=False, font=dict(size=F_TICK, color="#8b0000"),
+                bgcolor="rgba(255,255,255,0.75)", row=row_rel, col=1)
 
 
 def build_inspector_figure(
@@ -491,7 +547,7 @@ def build_inspector_figure(
     row_rel = None
     if want_rel:
         row_rel = len(titles) + 1
-        titles.append("rel = |dz| / max|dz|  (plateau rule)")
+        titles.append(f"{incipient['lens']['rel_label']}  (plateau rule)")
         heights.append(0.14)
     row_ribbon = None
     if ribbon:
@@ -521,10 +577,11 @@ def build_inspector_figure(
     )
     for row, unit, series, default_scale in panels:
         for var, label, primary in series:
+            width = LW_RAW if var == "zeta" else (LW_PRIMARY if primary else LW_SERIES)
             _series_trace(fig, row, index, vort[var].values, label,
                           SERIES_COLORS[var], phases, unit,
                           panel_scale.get(var, default_scale), normalize,
-                          width=LW_PRIMARY if primary else LW_SERIES)
+                          width=width)
 
     _extrema_trace(fig, 1, index, df_result["z"], df_result["z_peaks_valleys"],
                    "z_peaks_valleys", phases, "z", z_scale, normalize)
@@ -576,8 +633,7 @@ def build_inspector_figure(
                    f"incipient: boundary produced by the run (step {b})",
                    "#000000", dash="solid", width=LW_MARK)
         if incipient.get("plateau_active"):
-            cross = int(incipient["lens"].get("boundary_smoothed")
-                        or incipient["lens"].get("boundary_raw") or 0)
+            cross = int(incipient["lens"]["boundary_smoothed"])
             if 0 < cross < len(index) and cross != b:
                 _vline(fig, span_rows, index[cross],
                        f"incipient: τ crossing (step {cross})",
@@ -590,6 +646,11 @@ def build_inspector_figure(
     # ── phase shading (always on: it is the background, not a layer) ─────────
     _add_phase_shading(fig, periods_dict)
 
+    panel_names = {1: "z", 2: "dz", 3: "dz2"}
+    if row_rel:
+        panel_names[row_rel] = "rel"
+    legend_kwargs = _split_legends_by_row(fig, panel_names)
+
     fig.update_layout(
         title=dict(text=f"Layer inspector — {name}", x=0.01,
                    font=dict(size=F_TITLE)),
@@ -597,12 +658,9 @@ def build_inspector_figure(
         hovermode="x unified",
         hoverlabel=dict(font_size=F_HOVER),
         font=dict(size=F_TICK),
-        legend=dict(orientation="v", x=1.01, y=1.0, font=dict(size=F_LEGEND),
-                    groupclick="toggleitem",
-                    title=dict(text="Layers — click to toggle",
-                               font=dict(size=F_LEGEND + 2))),
         margin=dict(l=80, r=400, t=90, b=50),
         template="plotly_white",
+        **legend_kwargs,
     )
     axis_note = " (rescaled 0-1)" if normalize else ""
     fig.update_yaxes(title_text=f"z{axis_note}", row=1, col=1)
@@ -626,6 +684,45 @@ def build_inspector_figure(
     for ann in fig.layout.annotations:
         ann.font.size = F_SUBPLOT_TITLE
     return fig
+
+
+def _split_legends_by_row(fig, panel_names: dict) -> dict:
+    """One legend per panel, each pinned to the TOP of that panel's own row,
+    instead of one combined legend for the whole figure (which cannot tell you
+    which panel a "vorticity_smoothed2" entry belongs to once several panels
+    are stacked).
+
+    Args:
+        panel_names: {row: short label}, e.g. {1: "z", 2: "dz", 3: "dz2"} — a
+            row missing from this dict keeps no legend (the pipeline ribbon:
+            its traces are all ``showlegend=False``).
+
+    Returns:
+        kwargs for ``fig.update_layout`` — ``legend``, ``legend2``, ... one
+        per row in ``panel_names``, plus the row -> legend-name assignment
+        already written onto every trace in ``fig.data``.
+    """
+    row_legend_name = {row: ("legend" if i == 0 else f"legend{i + 1}")
+                       for i, row in enumerate(sorted(panel_names))}
+
+    for trace in fig.data:
+        axis = trace.yaxis or "y"
+        row = 1 if axis == "y" else int(axis[1:])
+        name = row_legend_name.get(row)
+        if name:
+            trace.legend = name
+
+    legend_kwargs = {}
+    for row, legend_name in row_legend_name.items():
+        axis_key = "yaxis" if row == 1 else f"yaxis{row}"
+        top = fig.layout[axis_key].domain[1]
+        legend_kwargs[legend_name] = dict(
+            orientation="v", x=1.01, y=top, yanchor="top",
+            font=dict(size=F_LEGEND), groupclick="toggleitem",
+            title=dict(text=f"{panel_names[row]} — click to toggle",
+                       font=dict(size=F_LEGEND + 1)),
+        )
+    return legend_kwargs
 
 
 def _add_ribbon(fig, row, ribbon) -> None:

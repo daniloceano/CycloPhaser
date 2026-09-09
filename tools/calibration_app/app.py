@@ -739,16 +739,16 @@ def _render_probe_png(file_bytes: bytes,
     t = np.arange(z_raw.size)
 
     fig, axes = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
-    axes[0].plot(t, z_raw, color="#999999", lw=1.1, label="raw zeta")
+    axes[0].plot(t, z_raw, color=li.C_RAW, lw=2.2, label="raw zeta")
     if window > 0:
-        axes[0].plot(t, z_s, color="#1d3557", lw=1.9,
+        axes[0].plot(t, z_s, color=li.C_SMOOTHED, lw=1.4,
                      label=f"smoothed probe (w={window})")
     axes[0].set_ylabel("zeta", fontsize=8)
     axes[0].legend(fontsize=7, loc="lower right")
 
-    axes[1].plot(t, rel_off, color="#999999", lw=1.1, label="rel(t), smoothing off")
+    axes[1].plot(t, rel_off, color=li.C_RAW, lw=2.2, label="rel(t), smoothing off")
     if window > 0:
-        axes[1].plot(t, rel_on, color="#e63946", lw=1.9,
+        axes[1].plot(t, rel_on, color=li.C_SMOOTHED, lw=1.4,
                      label=f"rel(t), w={window}")
     axes[1].axhline(tau, color="#8856a7", lw=1.2, ls="--", label=f"tau={tau:.2f}")
     for b, c, lbl in ((b_off, "#999999", "boundary, smoothing off"),
@@ -756,7 +756,8 @@ def _render_probe_png(file_bytes: bytes,
         if b > 0:
             axes[1].axvline(b, color=c, lw=1.8)
     axes[1].set_ylim(0, 1.02)
-    axes[1].set_ylabel("rel(t) = |dz|/max|dz|", fontsize=8)
+    _rel_label_short, _ = li.rel_signal_label(signal, window, polyorder)
+    axes[1].set_ylabel(_rel_label_short, fontsize=8)
     axes[1].set_xlabel("step", fontsize=8)
     axes[1].legend(fontsize=7, loc="upper right")
     for a in axes:
@@ -1635,6 +1636,10 @@ with st.sidebar:
                     "path already reads a pipeline-filtered curve."
                 )
 
+    _rel_label_short, _rel_label = li.rel_signal_label(
+        incipient_plateau_signal, incipient_smooth_window,
+        incipient_smooth_polyorder)
+
     st.divider()
     # --- Extrema filtering (optional) ---
     st.header("Extrema Filtering")
@@ -2385,7 +2390,7 @@ with tab_cal:
                 _show_incipient = st.checkbox(
                     "Incipient layers", key="inspector_incipient",
                     help=(
-                        "Shows the normalised slope `rel = |dz|/max|dz|` "
+                        f"Shows the normalised slope `{_rel_label}` "
                         "against the τ line, the |dz2| knee, and the incipient "
                         "boundary the run actually produced.\n\n"
                         "The plateau rule ends the incipient phase at the "

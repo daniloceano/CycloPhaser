@@ -196,3 +196,7 @@ research/incipient_plateau/run_log.txt
 # App layer-inspector check figures (generated, not tracked)
 research/app_layer_inspector/figures/
 
+# Manual-inspection diagnostics for the inspector rel/crossing layer fix
+# (generated, not tracked)
+research/labels/diagnostics/
+
