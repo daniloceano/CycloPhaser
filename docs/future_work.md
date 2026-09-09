@@ -572,6 +572,128 @@ uncertainty bounds on detected phase boundaries.
 
 ---
 
+## 8. Front A — index-0 boundary extremum type (investigation closed, unresolved)
+
+**Status: closed without a fix.** Related to item 1 above (`argrelextrema`'s
+`>=`/`<=` comparators). Full investigation, all measurements, and the refuted
+code change live on branch `fix/idx0-boundary-extremum-type` (pushed, **not
+merged** — the change is refuted and the branch exists only as a
+self-contained record) in `research/labels/diagnostics/` (`REPORT.md`,
+`FIX_REPORT.md`, `FIX_REPORT_v2.md`, `idx0_inventory.csv`,
+`synthetic_sign_table.csv`, and the scripts/figures alongside them). All
+numbers below are sourced from there; nothing here is a new measurement.
+
+### (a) Symptom, mechanical cause, four discarded routes
+
+**Symptom:** in 5 of the 51 real calibration tracks (`20180170`, `20180608`,
+`20190325`, `20191014` — training; `20206498` — held-out test split), the
+detected life cycle opens with a spurious `decay` phase instead of
+`intensification`.
+
+**Mechanical cause:** `find_peaks_valleys` (`cyclophaser/determine_periods.py:122-123`)
+calls `argrelextrema` with non-strict comparators (`np.greater_equal` /
+`np.less_equal`) and the default `mode='clip'`. Under `mode='clip'`, index 0
+is compared against itself as its own "missing" left neighbour, which always
+passes under a non-strict comparator — index 0 is marked as an extremum in
+51/51 real tracks, and its TYPE is decided only by the sign of
+`data[1]-data[0]` on the filtered series. This extremum has calculated
+prominence exactly `0.0` in the 5 affected cases and survives the
+prominence/distance filter only via an explicit boundary exemption
+(`cyclophaser/determine_periods.py:181-223`).
+
+**Four routes discarded, each with the number that killed it:**
+
+1. **Remove the index-0 extremum entirely** → 40/51 tracks then open with
+   decay instead (worse, not fixed).
+2. **Guard `find_decay_period` against a decay run starting at index 0** →
+   no part of the pipeline has any handling for an unassigned gap at the
+   START of the series (`cyclophaser/determine_periods.py:259`,
+   `cyclophaser/find_stages.py:621-628`); a guard here would leave up to 52%
+   of a series with no assigned phase at all.
+3. **Force index 0 to `'peak'` unconditionally** → mechanically clean on the
+   51 real tracks (46/46 no-op on the already-correct ones, incipient
+   boundary identical field-for-field, 3/3 correct on the affected training
+   tracks' first non-incipient phase), **but** 4 of the 12 synthetic cases
+   that open with genuine decay by construction (`DItMD_noisy`,
+   `DItMD_residual_noisy`, `IcDItMD_noisy`, `IcDItMD_residual_noisy`)
+   regressed from a perfect sequence match to a mismatch.
+4. **Condition route 3 on raw/filtered sign disagreement** (the raw and
+   filtered series disagree on `sign(z[1]-z[0])` in exactly the 5 affected
+   real tracks, 5/5) → refuted at a gate, before implementation, by the
+   counter-example `IcDItMD_residual_noisy`: it opens with genuine decay AND
+   has disagreeing raw/filtered signs — the same signature the rule would
+   use to (wrongly) call it a boundary artefact.
+
+**Front A does not block the v2.1 release.** The incipient-phase boundary —
+the metric v2.1 is actually closing on — is IDENTICAL, field for field, with
+and without route 3's fix applied (`TRAIN · real`: 17 boundary labels, 8
+within margin, MAE 4.82, worst 26; refusal 16/14 — all unchanged). This is
+not incidental: `boundary` is computed from `dz`/`z_unfil` and config alone
+(`cyclophaser/find_stages.py:969-978`), never from the phase map, so it is
+mathematically invariant to how index 0 is classified in `z_peaks_valleys`.
+The index-0 problem affects the opening decay/intensification phase in 5/51
+real tracks — not the incipient boundary v2.1 depends on.
+
+### (b) Not pursued: magnitude instead of sign
+
+The counter-example that refuted route 4, `IcDItMD_residual_noisy`, has
+`|z[1]-z[0]|` = 2.6×10⁻⁶ raw vs. 1.9×10⁻⁵ filtered — the filter AMPLIFIES the
+difference by ~7×. The three genuine-decay-opening synthetic cases that
+passed the gate have large raw magnitude, and the filter ATTENUATES it
+instead of amplifying it. A rule keyed on amplification-vs-attenuation of
+`|z[1]-z[0]|` was **not pursued**, because it would require a numeric
+amplification/attenuation threshold — i.e. a new parameter, which this
+investigation was explicitly constrained not to introduce. Left here as a
+lead for whoever reopens Front A.
+
+### (c) Defect H (open): unconditional incipient overwrite can mask a wrong phase map
+
+`find_incipient_period` overwrites `df.iloc[:boundary]` unconditionally,
+regardless of what was already assigned there:
+
+```
+cyclophaser/find_stages.py:982:        df.iloc[:boundary, df.columns.get_loc('periods')] = 'incipient'
+```
+
+Observed case: `20180608` — the incipient boundary happens to consume the
+entire spurious decay block produced by the index-0 artefact, so the final
+output looks correct (opens with `intensification`) even though the
+underlying extremum classification at index 0 was wrong underneath it.
+Correct-looking final output here is not evidence that the phase map
+beneath it is correct.
+
+### (d) Defect I (open): Lanczos boundary padding flips the sign at t0 in 7/51 real tracks
+
+With `boundary_padding='edge'`, the raw and filtered series disagree on
+`sign(z[1]-z[0])` in **7 of the 51** real calibration tracks (5 of which are
+the `valley`-at-index-0 cases in (a); the other 2 keep the correct `'peak'`
+classification, since the classification depends only on the filtered
+series' sign and that one happens to still read the same way despite the
+disagreement). This is the underlying mechanism behind both routes 3 and 4
+above, and behind item 3c's `r(t₀)` measurements for `boundary_padding`.
+
+### (e) ⚠️ The synthetic suite does not represent the real tracks at the t0 boundary
+
+**The 12 synthetic cases (`tests/synthetic/cases.py`) are not evidence about
+real-track behaviour at the t0 boundary, and real-track measurements are not
+evidence about the synthetic suite there — the two populations have a
+measurably different sign structure at index 0.** Measured 2×2 table,
+`idx0_tipo` (peak/valley) × whether the raw and filtered signs agree:
+
+| population | `valley` & signs disagree | `valley` & signs agree |
+|---|---|---|
+| 51 real tracks | 5 | 0 |
+| 12 synthetic cases | 3 | 3 |
+
+The real tracks separate cleanly (every `valley`-at-index-0 case is a sign
+disagreement, no exceptions); the synthetic suite does not (split evenly).
+**Any future front that touches the index-0 boundary and validates only
+against the synthetic suite, or only against the real tracks, is not
+validating against the other population** — they do not agree well enough
+here to stand in for each other.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
