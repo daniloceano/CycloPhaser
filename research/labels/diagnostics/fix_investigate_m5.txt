@@ -1,0 +1,19 @@
+usable TRAIN real labelled tracks: 35
+
+match before: 18
+match after:  19
+
+flips mismatch->match (1):
+  20180170: label=['incipient', 'intensification', 'mature', 'decay']
+         before=['incipient', 'decay', 'intensification', 'mature', 'decay']
+         after =['incipient', 'intensification', 'mature', 'decay']
+
+flips match->mismatch (0) -- REGRESSIONS:
+
+unchanged, still mismatched, among the 4 affected tracks (20180170/20180608/20190325/20191014):
+  20190325: label=['incipient', 'intensification', 'mature', 'decay']
+         before=['incipient', 'decay', 'intensification', 'mature', 'decay']
+         after =['incipient', 'intensification', 'mature', 'decay', 'intensification', 'mature', 'decay']
+  20191014: label=['intensification', 'mature', 'decay']
+         before=['incipient', 'decay', 'intensification', 'mature', 'decay']
+         after =['incipient', 'intensification', 'mature', 'decay', 'intensification', 'mature', 'decay']

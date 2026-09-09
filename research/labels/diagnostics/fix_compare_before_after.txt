@@ -1,0 +1,62 @@
+==============================================================================
+M1 — no-op check on the 46 idx0_tipo=peak real tracks
+==============================================================================
+identical: 46/46
+diverging: 0/46  []
+
+==============================================================================
+M2 — index 0 present in surviving peaks AFTER prominence/distance filter, 5 valley tracks
+==============================================================================
+  20180170: before[0]='valley'  after[0]='peak'
+  20180608: before[0]='valley'  after[0]='peak'
+  20190325: before[0]='valley'  after[0]='peak'
+  20191014: before[0]='valley'  after[0]='peak'
+  20206498: before[0]='valley'  after[0]='peak'
+
+==============================================================================
+M3 — first non-incipient phase, final output, 4 TRAIN affected tracks
+==============================================================================
+  20180170: before='decay' after='intensification'
+  20180608: before='intensification' after='intensification'
+  20190325: before='decay' after='intensification'
+  20191014: before='decay' after='intensification'
+
+==============================================================================
+M6 — mature phase, 5 valley tracks (no judgement, just report)
+==============================================================================
+  20180170: n=69
+    before mature blocks (start,end): [(37, 45)]
+    after  mature blocks (start,end): [(37, 45)]
+  20180608: n=117
+    before mature blocks (start,end): [(63, 69)]
+    after  mature blocks (start,end): [(63, 69)]
+  20190325: n=167
+    before mature blocks (start,end): [(101, 104)]
+    after  mature blocks (start,end): [(59, 67), (101, 104)]
+  20191014: n=206
+    before mature blocks (start,end): [(135, 139)]
+    after  mature blocks (start,end): [(47, 56), (135, 139)]
+  20206498: n=133
+    before mature blocks (start,end): []
+    after  mature blocks (start,end): [(34, 46)]
+
+==============================================================================
+M7 — synthetic cases (12), full periods array before vs after
+==============================================================================
+  s0596ea57: idx0_type before='valley' after='peak'  periods SAME
+  s46657891: idx0_type before='peak' after='peak'  periods SAME
+  s4e7ff65c: idx0_type before='valley' after='peak'  periods SAME
+  s5b8aa46f: idx0_type before='valley' after='peak'  periods DIFFERENT
+      first differing position 0: before='decay' after='intensification'
+  s5dcc0f79: idx0_type before='peak' after='peak'  periods SAME
+  s6b1e8245: idx0_type before='valley' after='peak'  periods DIFFERENT
+      first differing position 2: before='decay' after='intensification'
+  s6b542eee: idx0_type before='peak' after='peak'  periods SAME
+  s8001f17b: idx0_type before='valley' after='peak'  periods DIFFERENT
+      first differing position 0: before='decay' after='intensification'
+  s9ddbc53c: idx0_type before='peak' after='peak'  periods SAME
+  sbceec644: idx0_type before='peak' after='peak'  periods SAME
+  sbd6c6920: idx0_type before='peak' after='peak'  periods SAME
+  scfcf1387: idx0_type before='valley' after='peak'  periods DIFFERENT
+      first differing position 2: before='decay' after='intensification'
+identical: 8/12

@@ -121,6 +121,22 @@ def find_peaks_valleys(series, prominence=None, prominence_relative=None, distan
     # Detect raw extrema (>= / <= catches flat-top plateaux as multiple indices)
     peaks   = argrelextrema(data, np.greater_equal)[0]
     valleys = argrelextrema(data, np.less_equal)[0]
+
+    # Index 0's extremum type is an artefact of mode='clip' (see the NOTE #14
+    # in this function's docstring): with no real left neighbour, argrelextrema
+    # compares data[0] against itself, which always passes under a non-strict
+    # comparator, so index 0 is marked as an extremum regardless of the data.
+    # Its TYPE (peak vs valley) then falls out of the sign of data[1]-data[0]
+    # alone -- a single boundary finite difference, not a reliable signal about
+    # the cyclone's actual state at t0. A cyclone life cycle opens with
+    # intensification, never decay, so index 0 is forced to 'peak': dropped
+    # from valleys if present, and added to peaks unless it is already there
+    # (it may already be in both, on a data[0]==data[1] tie).
+    if 0 in valleys:
+        valleys = valleys[valleys != 0]
+        if 0 not in peaks:
+            peaks = np.sort(np.append(peaks, 0))
+
     zeros   = np.where(data == 0)[0]
 
     # Collapse each run of consecutive plateau indices to a single midpoint

@@ -1,0 +1,5 @@
+track_id,idx_primeiro_peak_sobrevivente,rotulo_incipiente_start_idx,rotulo_incipiente_end_idx,rotulo_incipiente_tolerance_idx,rotulo_primeira_fase_nao_incipiente,detector_incipient_boundary,serie_comprimento_total
+20180170,21,0,20,5,intensification,8,69
+20180608,10,0,37,5,intensification,38,117
+20190325,87,0,10,5,intensification,9,167
+20191014,123,,0,,intensification,9,206

@@ -1,0 +1,6 @@
+track_id,split,decai_comprimento_passos,incipient_boundary,bloco_sobrevive,primeira_fase_nao_incipiente_saida_final,primeira_fase_nao_incipiente_rotulo
+20180170,treino,22,8,sim,decay,intensification
+20180608,treino,11,38,nao,intensification,intensification
+20190325,treino,88,9,sim,decay,intensification
+20191014,treino,124,9,sim,decay,intensification
+20206498,teste,77,9,sim,decay,

@@ -1,0 +1,13 @@
+caso,abre_com_decaimento_genuino,idx0_tipo,sinal_dz_bruta,sinal_dz_filtrada,sinais_concordam,mag_dz_bruta,mag_dz_filtrada,mudou_na_regra_incondicional
+ItMD_clean,nao,valley,0,+,nao,0.0,3.0413037468676377e-07,nao
+IcItMD_residual_noisy,nao,peak,-,-,sim,2.1515218975918832e-05,2.2345427098150077e-06,nao
+ItMD_noisy,nao,peak,-,-,sim,7.54741680063097e-06,5.9197193673546475e-06,nao
+IcDItMD_noisy,sim,valley,+,+,sim,1.4427303349421336e-05,1.4072660811236416e-05,sim
+IcDItMD_residual_noisy,sim,valley,-,+,nao,2.6478694659107715e-06,1.934963274571877e-05,sim
+DItMD_noisy,sim,valley,+,+,sim,9.65054321118709e-05,4.631907376006757e-05,sim
+DItMD_residual_noisy,sim,valley,+,+,sim,7.75000597165004e-05,4.7449180128481005e-05,sim
+IcItMD_ItMD_noisy,nao,peak,-,-,sim,7.354534644318981e-05,9.471009614735743e-06,nao
+ItMD_ItMD_noisy,nao,peak,-,-,sim,3.990091265004594e-06,2.5683836733560048e-05,nao
+IcIt_observational,nao,valley,0,+,nao,0.0,3.15126981180873e-07,nao
+quase_ItD,nao,peak,-,-,sim,1.9261093311212317e-06,3.1196434919638922e-06,nao
+IcItMD_residual_clean,nao,peak,0,-,nao,0.0,1.072313806657308e-06,nao
