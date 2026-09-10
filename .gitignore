@@ -200,3 +200,15 @@ research/app_layer_inspector/figures/
 # (generated, not tracked)
 research/labels/diagnostics/
 
+# Live-browser verification screenshots for the inert-params UI guards
+# (generated, not tracked -- sent directly, see REPORT_inertia_sweep.md)
+research/inert_params/verify_*.png
+research/inert_params/streamlit_verify.log
+
+# Raw sweep run logs (generated, not tracked) -- same convention as
+# research/incipient_plateau/run_log.txt; the curated sweep_summary.txt and
+# inertia_matrix.csv are the versioned record.
+research/inert_params/run_log.txt
+research/inert_params/followup_results.txt
+research/inert_params/extra_checks_results.txt
+
