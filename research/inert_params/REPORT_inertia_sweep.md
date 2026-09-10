@@ -305,13 +305,30 @@ INEXPLICADA columns; zero unclassified INERT rows in either file).
 ### PASSO 4 gate status going into merge
 
 - sha256 of `determine_periods()` over the 51-track calibration set +
-  `example_file`, all-default config: **unchanged** —
+  `example_file`, all-default config: **unchanged**
+  (`cb4fdf67e51a54fb3b0ccebdbd5170e14bec548dbc2892673061077b40c6df84`) —
   `cyclophaser/` was not touched in either the PASSO 0 commit or this
   closeout (`git diff --stat -- cyclophaser/` empty both times).
-- Full pytest suite: see the closing chat message for the run performed
-  immediately before the merge in this closeout.
 - Both new guards (`use_smoothing_twice`, `replace_endpoints_with_lowpass`)
   verified live in a real browser, not just by reading code.
+- **Full pytest suite: NOT clean — documented exception, not silently
+  waived.** `1120 passed, 1 skipped, 4 failed` in
+  `tests/test_label_browser.py` (`test_dragging_the_edge_widens_the_margin_
+  in_python`, `test_dragging_the_edge_back_narrows_the_margin`,
+  `test_a_drag_updates_the_number`,
+  `test_the_chart_resizes_with_the_window_without_losing_the_marks` — a
+  pixel-drag-to-value assertion off by a few units, e.g. `36 == 40 ± 2`).
+  Verified via `git stash` that these 4 fail **identically** with every
+  file this front touched removed from the working tree — i.e. they
+  already fail on `develop-v2.1`'s current tip
+  (`f837052`/`1f38611`+later, before this closeout's own commit), unrelated
+  to `find_stages.py`/`determine_periods.py`/the two new UI guards, and
+  most likely sensitive to headless-browser viewport/DPI in this sandbox
+  rather than a real regression. Danilo confirmed proceeding with the merge
+  despite this — the failures are pre-existing on `develop-v2.1`, not
+  introduced by this front, and fixing `test_label_browser.py` is out of
+  F(iii)'s scope (a different feature — the labelling view drag margin,
+  not calibration parameter inertness).
 
 ## Pending — stop for Danilo's review (superseded)
 
