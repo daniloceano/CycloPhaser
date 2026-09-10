@@ -879,6 +879,95 @@ itself. Superseded by immediate same-process verification right after
 re-labelling, rather than trusting a hash written and checked in separate
 sessions.
 
+**Addendum, 2026-09-10 (see item 11):** the structural fix below found, as a
+side effect of its own measurements, that a fresh process on this machine
+reproduces 12/12 MATCHING hashes against the unmodified in-memory generator
+— the opposite of what is recorded above. `manual_labels.yaml` was not
+touched between the two sessions (`git log` shows its last change at
+`7f1cd04`, 2026-09-08, before this investigation). This is left as-recorded
+above rather than revised, since it was not re-investigated; item 11 is the
+next measurement in the timeline, not a correction of this one.
+
+---
+
+## 11. Front G blocker — synthetic series frozen to versioned file — **closed, PASS, 2026-09-10**
+
+**Status: closed with a fix.** Unblocks Front G (`expected_starts_idx`).
+Branch `feat/freeze-synthetic-series`, pushed, not merged. Implements the
+structural fix item 10 named as actionable: the 12 synthetic series no
+longer regenerate in memory on every load.
+
+**What changed:**
+- `research/labels/freeze_synthetic_series.py` (new): one-time script,
+  execs `tests/synthetic/cases.py` to get its CURRENT generator output and
+  writes each of the 12 series to `tests/synthetic/data/<opaque_id>.csv` —
+  no value was invented; this only relocates what the generator already
+  produced.
+- `labels_core.load_synthetic_series()`: reads those 12 CSVs instead of
+  exec'ing `cases.py`. Case names (needed to derive the opaque id) are
+  still read from `cases.py`, but via static AST parsing of the
+  `CASES["name"] = {...}` assignments, not import/exec — so the load path
+  performs no computation at all, matching `load_real_series()`.
+
+**Declared gate — PASS on all five parts:**
+- (a) the 12 series are read from a versioned file, and synthetic loading
+  recomputes nothing — verified structurally (AST-based name parsing, no
+  generator call, no RNG) and by the full test suite passing unchanged.
+- (b) `series_sha256` of the 12 identical across 3 separate Python
+  processes — measured, byte-identical (see below on the precision fix
+  this required).
+- (c) fresh-process verification, right after freezing, validates the 12
+  labels — measured PASS, with a scope change from what was planned:
+  Danilo decided (2026-09-10) to accept this as satisfying the gate rather
+  than running the blind relabelling protocol, because there turned out to
+  be no NEW rotulagem to verify — see next paragraph.
+- (d) the real labels' recorded `series_sha256` is unchanged and still
+  validates — measured across all 51 (the gate text said 35, the TRAIN
+  subset; all 51 real labels, train and test, were checked and PASS, 0
+  stale).
+- (e) the 12 ids and `split.yaml` are unchanged — measured, `git diff` on
+  `split.yaml` is empty; the 12 ids derived from the frozen files match
+  `split.yaml`'s synthetic id list exactly.
+
+**The scope change on (c), in full:** a fresh-process check (done to
+satisfy (c)) found that the UNMODIFIED in-memory generator's current output
+already matches all 12 recorded 2026-09-08 label hashes — 0 stale, direct
+contradiction of item 10's "12/12 mismatch, root cause not identified."
+`manual_labels.yaml` has not been touched since 2026-09-08 (`git log`).
+Once the CSV freeze round-trips losslessly (see below), the frozen files
+validate against the EXISTING 12 labels with no new labelling performed.
+Presented to Danilo as a three-way choice (accept as satisfying (c) /
+relabel anyway as independent confirmation / hold off pending a look at why
+item 10 said otherwise); he chose to accept it. This front does not
+re-investigate item 10's finding — it is left standing as its own
+measurement, unrevised, with this file cross-referencing both directions.
+
+**A fix required within this front, not carried over from item 10:** the
+freeze is not a no-op — pandas' default `to_csv`/`read_csv` float
+formatting does NOT guarantee recovering the exact float64 a value was
+written from (measured: ~16-significant-digit truncation on write by
+default, plus a separate low-precision fast parser on read). Either alone
+silently perturbs the last 1-2 bits of most values, which `series_sha256`
+hashes raw — this would have manufactured a NEW staleness bug distinct
+from, and unrelated to, item 10's. Fixed for the synthetic loader with
+`float_format="%.17g"` on write and `float_precision="round_trip"` on
+read; verified bit-exact (`.tobytes()` equality) for all 12 series.
+**Deliberately NOT applied to `load_real_series()`**: measured that
+switching its parser to `round_trip` makes all 51 real labels newly void,
+because their recorded hashes were written against the default parser's
+(imprecise) output — the fix belongs only on the newly-introduced
+synthetic round-trip, not on a real-track path that was already correct
+under its existing parser.
+
+**Verification method:** `git stash` used throughout to compare
+before/after on the same commit rather than trusting either state
+asserted; the pandas round-trip precision loss was caught this way, not
+assumed. Full `pytest tests/ -k "not label_browser"` — 1098 passed, 1
+skipped (`test_synthetic_lifecycles.py:128`, pre-existing, unrelated to
+this front — an observational-mode case with no timing assertion), before
+and after, no new failures. `test_label_browser.py` itself deselected, not
+run — pre-existing sandbox-only Playwright exception, per item 9.
+
 ---
 
 ## Note
