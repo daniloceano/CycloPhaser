@@ -182,8 +182,139 @@ inertia sweep is a standalone measurement tool, not a pytest suite).
 (18 insertions, 1 deletion — four `disabled=` kwargs plus their inline
 "Inactive" help-text notes, nothing else).
 
-## Pending — stop for Danilo's review
+## Closeout audit (Danilo's second brief, post-PASSO-0-commit)
 
-`disabled=` + inline-note diffs in `tools/calibration_app/app.py` are ready
-but **not committed**. Per the front's rules: no merge, no PR, no push of
-`develop-v2.1` by the agent — Danilo merges manually after reviewing.
+The original PASSO 0 commit above (`disabled=` on `cutoff_low`,
+`cutoff_high`, `boundary_padding`, `savgol_poly`) had already been
+committed, pushed, and merged into `develop-v2.1` by the time this audit
+brief arrived — a sequencing violation of the brief's own "merge is PASSO 4,
+after 1–3" rule, reported transparently rather than hidden or fixed by
+rewriting published history. See the closing chat message for the exact
+timeline and commit hashes.
+
+### PASSO 1 — auditing the sweep's own enumeration
+
+**The reported gap was real.** `(use_smoothing_twice, base where
+use_smoothing=False)` was never enumerated: `sweep_inertia.SWEEP_PLAN`
+(hand-written) tested `sm2_val` only under `manual_sm2`
+(`use_smoothing_twice=17`, `use_smoothing` stays `"auto"`) — never under a
+base where `use_smoothing=False`. A hand-written enumeration has no
+mechanism to make an *absent* pair visible; this is exactly how it stayed
+hidden.
+
+`research/inert_params/sweep_derived.py` replaces the hand-written plan
+with a **derived** full cartesian enumeration: every parameter in `PARAMS`
+(27) × every `base_config` (14) = **378 pairs**, each classified
+automatically into `TESTED_CURATED` / `TESTED_NEW` / `SKIPPED_REDUNDANT` /
+`SKIPPED_DEFERRED` (rule and justification for each status documented in
+the script's own docstring). Full output:
+`research/inert_params/inertia_matrix_full.csv` (with `category`) and
+`sweep_derived_summary.txt`.
+
+- **156 pairs run** (46 curated + 110 new). **72 `SKIPPED_REDUNDANT`**
+  (pv-kind parameter, base only changes phase-kind keys — mathematically
+  identical to the `default` pair already run, since `process_vorticity`
+  takes no phase kwargs). **150 `SKIPPED_DEFERRED`** (phase-kind parameter
+  × phase-only base not in the original plan — not run, for combinatorial
+  cost, listed explicitly in `sweep_derived_summary.txt` rather than
+  silently absent).
+- **Gate (a) re-run on the full 156-pair set: PASSED** — all 13 known
+  (parameter, base) pairs still correctly flagged inert.
+- **The specific missed pair, now run:
+  `sm2_val` / `nosmoothing` → INERT (0/51).** Confirmed.
+- **A sibling gap found by the same exhaustive pv-kind coverage:
+  `replace_endpoints` / `nofilter` → INERT (0/51).**
+  `determine_periods.py:625` (`if use_filter and
+  replace_endpoints_with_lowpass:`) already names `use_filter` as a
+  precondition; the widget had no `disabled=` for it.
+- Of the 40 `TESTED_NEW` pairs that came back INERT, only these 2 are
+  genuinely new UI cases — the other 38 are the **same already-known
+  design gate**, confirmed true under an additional pv-mode base that
+  doesn't change the controlling switch (e.g. `mature_amplitude_fraction`
+  is INERT under `nofilter`/`nosmoothing`/`manual_sm`/`manual_sm2` only
+  because none of those bases touch `mature_method`, which stays at its
+  `"derivative"` default — identical condition to the already-signalled
+  `mature_derivative` case). Full accounting in
+  `sweep_derived_summary.txt`.
+
+**Implemented, in this closeout (not PASSO 0's commit):**
+
+| Parameter | Inert when | Line | UI change |
+|---|---|---|---|
+| `use_smoothing_twice` (`sm2_mode` selectbox + `sm2_val` slider) | `use_smoothing is False` | `determine_periods.py:648` (`if use_smoothing:`) with the second pass nested inside at `:655` (`if use_smoothing_twice:`) — never reached when the first pass doesn't run | `disabled=use_smoothing is False` + inline "Inactive" note on both widgets |
+| `replace_endpoints_with_lowpass` | `use_filter=False` | `determine_periods.py:625` (`if use_filter and replace_endpoints_with_lowpass:`) | `disabled=not use_filter` + inline "Inactive" note |
+
+Verified live in the running app (screenshots sent to Danilo, gitignored
+like the PASSO 0 screenshots): `use_smoothing_twice`'s selectbox renders
+greyed out when `use_smoothing` is switched to `off` (the same action also
+re-reproduces the incidental crash bug below, live, a second independent
+confirmation of its one-click reproducibility); `Replace endpoints with
+lowpass` renders greyed out when "Apply Lanczos filter" is unchecked.
+
+### PASSO 2 — the crash, independently re-confirmed, not fixed
+
+Full re-derivation, fresh traceback, a 288-combination brute-forced
+blast-radius table (2 tracks × 6×6×4 `use_smoothing`/`use_smoothing_twice`/
+`savgol_polynomial` values, 0 track-dependence), and a test-coverage check
+(no existing test exercises `use_smoothing=False` with
+`use_smoothing_twice` left at its own default `'auto'` — every test that
+sets `use_smoothing=False` also explicitly sets `use_smoothing_twice=False`
+in the same call) — all added to `INCIDENTAL_crash_bug.md`. Chain
+re-confirmed correct (line numbers corrected to this checkout: 567, 582–586,
+608, not the brief's approximate 568/585/607). **Not fixed** — still a
+package-logic change explicitly out of this front's scope.
+
+### PASSO 3 — three categories, not two
+
+Original two-bucket gate (b) (POR DESENHO / INEXPLICADA) was incomplete: an
+inertia can be a true, traced property of *this calibration set at the
+tested values* without being either "a code line skips it" or "unexplained"
+— filing it as INEXPLICADA invites a bug hunt for a defect that isn't
+there. Three categories now, defined operationally in
+`DATA_DEPENDENT_findings.md` and applied to every INERT row in both
+`inertia_matrix.csv` and `inertia_matrix_full.csv` via
+`research/inert_params/classify.py` (POR_DESENHO / DEPENDENTE_DOS_DADOS /
+INEXPLICADA columns; zero unclassified INERT rows in either file).
+
+- `threshold_intensification_gap` and `incipient_plateau_crossing` (under
+  `signal="derivative"`) **moved from `BACKLOG_inexplicada.md` to
+  `DATA_DEPENDENT_findings.md`** — `BACKLOG_inexplicada.md` now has zero
+  entries.
+- **Correction, not just a re-label:** `incipient_plateau_crossing`'s
+  "single = sustained" claim was only ever measured at one (τ, k) point
+  (0.20, 3). Quantified across a 7×8 (τ, k) grid (`FINDING_signal_
+  derivative_crossing_for_G_E.md`): the two modes agree on **all 51 tracks
+  for every k ≤ 10** (37/56 grid points, including the default), and
+  diverge only at k ≥ 15, growing to 15/51 tracks at the farthest corner
+  tested (τ=0.60, k=25). The original wording ("single and sustained
+  coincide under signal=derivative") overstated a single-point measurement
+  as a general property; corrected here.
+- Standalone document written for fronts G and E
+  (`FINDING_signal_derivative_crossing_for_G_E.md`): the `k`/sustained-run
+  code path is not exercised by this calibration set under
+  `signal="derivative"` at any k a user is likely to reach for (UI default
+  3, flat out to 10), which matters both for validating that mechanism (G)
+  and for testing the F(i)(ii) rejected-run visualization layer (E) — use
+  `signal="vorticity"` tracks instead, where the two modes already diverge
+  on 42/51.
+- Confirmed (PASSO 3, item 4): neither `threshold_intensification_gap` nor
+  `incipient_plateau_crossing` has any `disabled=` or inline "inactive"
+  note anywhere in `app.py` — both remain fully live, uncaptioned, as
+  required for DEPENDENTE DOS DADOS.
+
+### PASSO 4 gate status going into merge
+
+- sha256 of `determine_periods()` over the 51-track calibration set +
+  `example_file`, all-default config: **unchanged** —
+  `cyclophaser/` was not touched in either the PASSO 0 commit or this
+  closeout (`git diff --stat -- cyclophaser/` empty both times).
+- Full pytest suite: see the closing chat message for the run performed
+  immediately before the merge in this closeout.
+- Both new guards (`use_smoothing_twice`, `replace_endpoints_with_lowpass`)
+  verified live in a real browser, not just by reading code.
+
+## Pending — stop for Danilo's review (superseded)
+
+This section described the state after PASSO 0 only. The closeout above
+completed PASSO 1–3; see the closing chat message for the PASSO 4 merge
+result and hashes.

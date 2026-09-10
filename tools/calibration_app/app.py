@@ -1317,22 +1317,31 @@ with st.sidebar:
     _sm2_mode = st.selectbox(
         "use_smoothing_twice", _SM_OPTS,
         index=_SM_OPTS.index(_DEFAULTS["sm2_mode"]), key="sm2_mode",
+        disabled=use_smoothing is False,
         help=(
             "Applies the Savitzky-Golay filter a second time on the already-smoothed curve. "
             "Useful for noisy or high-temporal-resolution series where a single pass is "
             "insufficient to remove spurious oscillations. "
             "May distort or shorten phases in short-lived cyclones."
+            + ("" if use_smoothing is not False else
+               " **Inactive**: the second Savgol pass is nested inside the first "
+               "(`if use_smoothing: ... if use_smoothing_twice: ...`) — with "
+               "`use_smoothing='off'` the first pass never runs, so this mode/window "
+               "is never reached regardless of its own value.")
         ),
     )
     if _sm2_mode == "manual":
         use_smoothing_twice = st.slider(
             "Savgol window 2× (steps, odd)", 3, 61, step=2,
             value=_DEFAULTS["sm2_val"], key="sm2_val",
+            disabled=use_smoothing is False,
             help=(
                 "Window size for the second Savitzky-Golay smoothing pass. "
                 "Works the same as the 1× window, but is applied to the already-smoothed "
                 "series. Generally can be equal to or slightly larger than the 1× window "
                 "to ensure incremental smoothing."
+                + ("" if use_smoothing is not False else
+                   " **Inactive**: `use_smoothing='off'` skips the pass this window feeds.")
             ),
         )
     elif _sm2_mode == "off":
@@ -1344,6 +1353,7 @@ with st.sidebar:
         replace_endpoints = st.slider(
             "Replace endpoints with lowpass (timesteps) — DEPRECATED", 0, 48, step=1,
             value=_DEFAULTS["replace_endpoints"], key="replace_endpoints",
+            disabled=not use_filter,
             help=(
                 "**Deprecated — leave at 0.** Replaces the first and last 5% of the filtered "
                 "series with a simple low-pass estimate. It was a palliative for the Lanczos "
@@ -1354,6 +1364,9 @@ with st.sidebar:
                 "Measured: **28 of 51** calibration tracks opened with a spurious `decay` phase "
                 "with this at 24, against **0/51** with it at 0.\n\n"
                 "Default: 0 (was 24 up to v2.0.0)."
+                + ("" if use_filter else
+                   " **Inactive**: only applied when `use_filter` is on "
+                   "(`if use_filter and replace_endpoints_with_lowpass:`).")
             ),
         )
         savgol_poly = st.slider(
