@@ -694,6 +694,130 @@ here to stand in for each other.
 
 ---
 
+## 9. Calibration app — layer inspector fidelity and inert-parameter UI signaling (F(i)(ii) and F(iii), implemented 2026-09-10)
+
+**Status: implemented, merged into `develop-v2.1`.** Two related fronts on
+`tools/calibration_app/`, both UI-only — no `cyclophaser/` file was touched
+by either, verified by a byte-identical sha256 of `determine_periods()`
+default output before/after each.
+
+### (a) F(i)(ii) — rel-panel fidelity and a boundary-selection bug (commit `7133570`, merge `1f38611`)
+
+The layer inspector's "rel" panel hardcoded `"rel = |dz| / max|dz|"` as its
+label everywhere, even under `incipient_plateau_signal="vorticity"` where
+the curve actually plotted is `|d(zeta_raw)/dt|` — misleading whenever the
+signal choice didn't match the label. It also never showed the crossing/k
+evidence that decides whether a plateau incipient phase exists, so a
+refused plateau just said "no crossing" with no reason.
+
+**Bug fixed:** the panel picked which crossing to draw with
+`boundary_smoothed or boundary_raw or 0`, which silently fell back to the
+unsmoothed probe's boundary whenever the active configuration *legitimately
+refused* a crossing — `0` is both a valid falsy Python value and this
+codebase's refusal sentinel, so the `or`-chain could not tell "there is no
+crossing" from "the crossing is at index 0." Affected **5 of the 51 real
+calibration tracks**: `20150561`, `20150656`, `20170225`, `20171179`,
+`20180263` (diagnostic before/after renders in
+`research/labels/diagnostics/04_item3_*`, reviewed visually before commit).
+
+`rel_signal_label()` now derives the label from the actual
+`signal`/`smooth_window` at the same site `rel` is computed, and the
+crossing/k evidence (rejected runs, accepted run, active requirement,
+refusal reason) is read back from the same package helpers the detector
+itself uses, not recomputed. Fidelity locked in by
+`tests/test_layer_inspector.py`: label/anti-hardcode tests, and
+crossing/k-evidence fidelity checked across all 51 tracks × 2 configs.
+
+Series colours were also made role-based (grey/thickest = raw, yellow =
+post-filter, red = post-smoothing) with per-panel legends, at Danilo's
+request — a separate, purely cosmetic follow-up commit from the bug fix
+above, per this project's "aesthetic changes go in their own commit" rule.
+
+### (b) F(iii) — inert calibration parameters were live controls that silently did nothing (commits `f188bae`, `25a113a`, `20e003d`; merges `f837052`, `402d3f7`)
+
+Several `app.py` widgets were clickable and had a real effect under *some*
+configurations but were completely inert (no effect on `determine_periods`'
+`periods` output) under others, with no indication to the user. Measured
+with an automated "inertia sweep" (`research/inert_params/sweep_inertia.py`,
+later replaced by a **derived** cartesian enumeration,
+`research/inert_params/sweep_derived.py` — see the methodology note below)
+across all 51 calibration tracks, and every inert case classified into
+**POR DESENHO** (a citable line skips the parameter) or **DEPENDENTE DOS
+DADOS** (the parameter is read unconditionally; the flat result is a
+property of this specific 51-track set, not of the code) — never left
+uncaptioned-but-unclassified, since captioning a data-dependent coincidence
+as "unused" would misrepresent it as documented behaviour.
+
+**3 POR DESENHO conditions, now signalled with `disabled=` + an inline
+"Inactive" note:**
+
+1. `use_filter=False` → `cutoff_low`, `cutoff_high`, `boundary_padding`
+   (`determine_periods.py:614`, the Lanczos convolution's sole consumer).
+2. `use_smoothing is False` → `savgol_polynomial`
+   (`determine_periods.py:648`/`:688`, both Savgol passes on `z` and the
+   derivative passes gated on this check).
+3. Found in a follow-up audit of the sweep's own enumeration (below):
+   `use_smoothing is False` → `use_smoothing_twice` (the second pass is
+   nested inside the first, `determine_periods.py:648,655`, never reached);
+   and `use_filter=False` → `replace_endpoints_with_lowpass`
+   (`determine_periods.py:625`).
+
+**Methodology finding, worth keeping in mind for any future sweep-style
+audit:** the original sweep's `(parameter, base_config)` pairs were a
+hand-written list — and a hand-written list has no way to make an *absent*
+pair visible, which is exactly how the `use_smoothing_twice` case above
+stayed hidden through the front's own gate (a) self-test. Replaced with a
+**derived** enumeration: the full cartesian product of every parameter ×
+every base config, with every pair explicitly marked `TESTED` /
+`SKIPPED_REDUNDANT` (provably identical to an already-tested pair) /
+`SKIPPED_DEFERRED` (not run, cost, but listed rather than silently absent)
+— see `research/inert_params/sweep_derived.py` and
+`inertia_matrix_full.csv`.
+
+**3 items registered here rather than left only in `research/inert_params/`
+(which a future front is not guaranteed to read):**
+
+1. **Real package defect, not fixed (out of scope for a UI-only front):**
+   `process_vorticity(use_smoothing=False, use_smoothing_twice="auto")`
+   raises `ValueError`. `bool` is a subclass of `int`, so
+   `use_smoothing=False` degrades `window_length_savgol` to `0` in the
+   `'auto'` derivation of the second pass's window
+   (`determine_periods.py:582-586`), which then fails the
+   `>= savgol_polynomial` guard at `:608` for any polynomial degree the UI
+   allows. **One click from the app's own defaults** (`use_smoothing` to
+   `"off"`, `use_smoothing_twice` left at its own default `"auto"`) —
+   reproduced live twice, independently. No existing test exercises this
+   combination (every test that sets `use_smoothing=False` also explicitly
+   sets `use_smoothing_twice=False` in the same call). Full brute-forced
+   blast-radius table (288 combinations) and blocked-vs-legitimate-error
+   split in `research/inert_params/INCIDENTAL_crash_bug.md`.
+2. `threshold_intensification_gap` is inert under the *default*
+   configuration across its whole UI range (0/51 tracks change) — read
+   unconditionally, but the gap-merge loop it feeds only runs when a track
+   has more than one intensification block, which none of the 51 tracks do
+   at default thresholds. **Untested:** whether a different
+   `threshold_intensification_length`, or `length_scale='local'`, exposes
+   tracks where this parameter bites.
+3. `incipient_plateau_crossing` (`"single"` vs `"sustained"`) only agrees
+   on all 51 tracks for `k ≤ 10`, across the whole τ range tested — not in
+   general, as first reported; it diverges (up to 15/51 tracks) at
+   `k ≥ 15`. Practical implication for whoever works on the `k`/sustained-
+   run mechanism or its F(i)(ii) visualization next: **that machinery is
+   barely exercised by this calibration set under
+   `signal="derivative"` at any `k` a user is likely to reach for** (UI
+   default 3) — validate against `signal="vorticity"` tracks instead,
+   where the two modes already diverge on 42/51. Full (τ, k) grid in
+   `research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md`.
+
+**Also surfaced, unrelated to this front, not investigated:** the full
+pytest suite has 4 pre-existing failures in `tests/test_label_browser.py`
+(drag-to-resize margin assertions off by a few pixels, e.g. `36 == 40 ± 2`)
+— confirmed via `git stash` to fail identically with every file this front
+touched removed, so not a regression from F(iii). Likely
+viewport/DPI-sensitive in this sandbox; candidate for its own front.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
