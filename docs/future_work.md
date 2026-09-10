@@ -818,6 +818,69 @@ viewport/DPI-sensitive in this sandbox; candidate for its own front.
 
 ---
 
+## 10. Front G blocker — `series_sha256` void on all 12 synthetic train labels (investigation closed, unresolved)
+
+**Status: closed without a fix — FAIL against the declared gate (root cause
+identified).** Blocks Front G (`expected_starts_idx`) until resolved. Full
+investigation, all measurements, and the diagnostic script live on branch
+`diag/series-sha256-mismatch` (pushed, **not merged** — the branch exists
+only as a self-contained record) in `research/labels/diagnostics/`
+(`diag_series_sha256.py`, `series_sha256_report.md`, `.csv`; that directory
+is gitignored, the three files were force-added). All numbers below are
+sourced from there; nothing here is a new measurement.
+
+**Symptom:** 12 of 47 TRAIN labels in `research/labels/manual_labels.yaml`
+are marked void by the `series_sha256` guard — the totality of the 12
+synthetic cases, 0 of the 35 real tracks. Deterministic, reproduced outside
+CircleCI.
+
+**Declared gate:** identify the root cause. **Not identified — FAIL.**
+
+**What was measured:**
+- There is exactly one hash function, `labels_core.py:105`
+  (`series_sha256`) — `sha256(np.asarray(values, dtype="float64").tobytes())`,
+  values only, no index.
+- WRITE (`labels_core.py:376`, `label_tab.py:830/845/966`) and VERIFY
+  (`evaluate_against_labels.py:221-229`, `test_manual_labels.py:1129-1140`)
+  call that same function over the output of the same two loaders
+  (`load_real_series`/`load_synthetic_series`).
+- **WRITE and VERIFY agree with each other today: 12/12 synthetic ids have
+  `max|Δ| == 0` between the two routes.** The two-diverging-routes
+  hypothesis is refuted.
+- None of 11 alternative byte encodings tried (float32, big-endian,
+  index-inclusive, rounded, CSV round-trip, repr/str text, Fortran order)
+  reproduces the hash recorded on 2026-09-08, for any of the 12 synthetic
+  ids.
+- `tests/synthetic/cases.py` and `generators.py` are git-diff-identical
+  between the commit predating labelling (`f80c2f6`, 2026-09-04) and HEAD.
+- The recorded-vs-current mismatch is stable across four numpy versions
+  tested (1.26.4, 2.1.2, 2.4.0, 2.5.3 — spanning the pre-/post-2.0
+  BLAS-backend split), so it is not numpy/Accelerate/OpenBLAS drift.
+
+**Conclusion by elimination:** the hash function is correct (the 35 real
+labels pass through it and match) and the encoding is correct (11 tried,
+none explains it). So the values of the 12 synthetic series on 2026-09-08
+were not the values produced by the code today. A sha256 mismatch is not
+reversible, so this cannot be directly demonstrated — it is the only
+reading compatible with the measurements above.
+
+**Leading theory, not confirmed and not confirmable:** a long-lived
+`st.cache_data` Streamlit session serving a stale synthetic snapshot from
+before a local edit that was never committed. The original session no
+longer exists to inspect.
+
+**Structural cause, this one actionable:** synthetic series are generated
+in memory on every load; real series are read from a file on disk. The 12
+broken labels are exactly the ones with no file backing them. Addressed by
+freezing the synthetic suite to a versioned file, in a following front.
+
+**Not tested:** cross-checking the id → values pairing at write time
+itself. Superseded by immediate same-process verification right after
+re-labelling, rather than trusting a hash written and checked in separate
+sessions.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
