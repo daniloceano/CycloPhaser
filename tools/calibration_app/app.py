@@ -1232,21 +1232,29 @@ with st.sidebar:
     cutoff_low = st.slider(
         "Low cutoff (hours)", 48, 336, step=24,
         value=_DEFAULTS["cutoff_low"], key="cutoff_low",
+        disabled=not use_filter,
         help=(
             "Maximum period (hours) retained by the filter — the lower frequency bound. "
             "Components with periods longer than this value are suppressed. "
             "Higher values remove more large-scale trend; lower values preserve slower "
             "cyclone variations. Default: 168 h (7 days)."
+            + ("" if use_filter else
+               " **Inactive**: only the Lanczos convolution reads it, and it does not "
+               "run when 'Apply Lanczos filter' is off.")
         ),
     )
     cutoff_high = st.slider(
         "High cutoff (hours)", 12, 96, step=6,
         value=_DEFAULTS["cutoff_high"], key="cutoff_high",
+        disabled=not use_filter,
         help=(
             "Minimum period (hours) retained by the filter — the upper frequency bound. "
             "Components with periods shorter than this value are suppressed as noise. "
             "Lower values allow more high-frequency variability; higher values produce "
             "a smoother curve. Default: 48 h (2 days)."
+            + ("" if use_filter else
+               " **Inactive**: only the Lanczos convolution reads it, and it does not "
+               "run when 'Apply Lanczos filter' is off.")
         ),
     )
     boundary_padding = st.selectbox(
@@ -1254,6 +1262,7 @@ with st.sidebar:
         options=_BOUNDARY_PADDING_OPTS,
         index=_BOUNDARY_PADDING_OPTS.index(_DEFAULTS["boundary_padding"]),
         key="boundary_padding",
+        disabled=not use_filter,
         help=(
             "How the series is extended beyond its own ends before the Lanczos "
             "convolution.\n\n"
@@ -1269,7 +1278,10 @@ with st.sidebar:
             "(median 0.50), changes marginally fewer phase sequences.\n\n"
             "Changing this alters the smoothed signal near the boundaries, so a "
             "calibrated parameter set must be re-validated before it is trusted "
-            "in a new mode. Only has an effect when the Lanczos filter is on."
+            "in a new mode."
+            + ("" if use_filter else
+               " **Inactive**: only the Lanczos convolution reads it, and it does not "
+               "run when 'Apply Lanczos filter' is off.")
         ),
     )
 
@@ -1347,11 +1359,16 @@ with st.sidebar:
         savgol_poly = st.slider(
             "Savgol polynomial degree", 2, 5, step=1,
             value=_DEFAULTS["savgol_poly"], key="savgol_poly",
+            disabled=use_smoothing is False,
             help=(
                 "Degree of the polynomial fitted in each Savitzky-Golay window. "
                 "Lower degrees (2–3) yield more aggressive smoothing. "
                 "Higher degrees (4–5) better preserve local extrema and inflection points, "
                 "but may be unstable with small window sizes. Default: 3."
+                + ("" if use_smoothing is not False else
+                   " **Inactive**: `use_smoothing='off'` skips every Savgol pass this "
+                   "reads — including the ones over `dz`/`dz2` — regardless of "
+                   "`use_smoothing_twice`.")
             ),
         )
 
