@@ -1,0 +1,434 @@
+Full cartesian enumeration: 378 (parameter, base_config) pairs (27 parameters x 14 base configs).
+
+Status counts:
+  SKIPPED_DEFERRED  : 150
+  SKIPPED_REDUNDANT : 72
+  TESTED_CURATED    : 46
+  TESTED_NEW        : 110
+
+GATE (a) — known-inert self-test on the full re-run:
+  PASSED — all 13 known (parameter, base) pairs correctly flagged inert.
+
+TESTED_NEW pairs found INERT (candidate new POR DESENHO cases, 40):
+  sm2_val                          / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  replace_endpoints                / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  thr_int_gap                      / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  thr_int_gap                      / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  thr_int_gap                      / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  thr_int_gap                      / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  mature_amplitude_fraction        / default                  -> INERT (changed 0/51, unevaluable 0/51)
+  mature_amplitude_fraction        / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  mature_amplitude_fraction        / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  mature_amplitude_fraction        / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  mature_amplitude_fraction        / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_tau            / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_tau            / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_tau            / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_tau            / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_signal         / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_signal         / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_signal         / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_signal         / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_crossing       / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_crossing       / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_crossing       / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_crossing       / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_k              / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_k              / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_k              / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_plateau_k              / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_window          / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_window          / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_window          / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_window          / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_polyorder       / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_polyorder       / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_polyorder       / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  incipient_smooth_polyorder       / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+  decay_tail_amplitude_fraction    / default                  -> INERT (changed 0/51, unevaluable 0/51)
+  decay_tail_amplitude_fraction    / nofilter                 -> INERT (changed 0/51, unevaluable 0/51)
+  decay_tail_amplitude_fraction    / nosmoothing              -> INERT (changed 0/51, unevaluable 0/51)
+  decay_tail_amplitude_fraction    / manual_sm                -> INERT (changed 0/51, unevaluable 0/51)
+  decay_tail_amplitude_fraction    / manual_sm2               -> INERT (changed 0/51, unevaluable 0/51)
+
+TESTED_NEW pairs found NOT inert (70):
+  cutoff_low                       / nosmoothing              -> not inert (changed 51/51)
+  cutoff_low                       / manual_sm                -> not inert (changed 51/51)
+  cutoff_low                       / manual_sm2               -> not inert (changed 51/51)
+  cutoff_high                      / nosmoothing              -> not inert (changed 51/51)
+  cutoff_high                      / manual_sm                -> not inert (changed 50/51)
+  cutoff_high                      / manual_sm2               -> not inert (changed 49/51)
+  boundary_padding                 / nosmoothing              -> not inert (changed 49/51)
+  boundary_padding                 / manual_sm                -> not inert (changed 51/51)
+  boundary_padding                 / manual_sm2               -> not inert (changed 46/51)
+  sm_val                           / default                  -> not inert (changed 50/51)
+  sm_val                           / nofilter                 -> not inert (changed 51/51)
+  sm_val                           / nosmoothing              -> not inert (changed 50/51)
+  sm_val                           / manual_sm2               -> not inert (changed 50/51)
+  sm2_val                          / default                  -> not inert (changed 47/51)
+  sm2_val                          / nofilter                 -> not inert (changed 51/51)
+  sm2_val                          / manual_sm                -> not inert (changed 50/51)
+  replace_endpoints                / nosmoothing              -> not inert (changed 51/51)
+  replace_endpoints                / manual_sm                -> not inert (changed 51/51)
+  replace_endpoints                / manual_sm2               -> not inert (changed 51/51)
+  savgol_poly                      / nofilter                 -> not inert (changed 51/51)
+  savgol_poly                      / manual_sm                -> not inert (changed 18/51)
+  savgol_poly                      / manual_sm2               -> not inert (changed 47/51)
+  use_filter                       / nofilter                 -> not inert (changed 41/51)
+  use_filter                       / nosmoothing              -> not inert (changed 51/51)
+  use_filter                       / manual_sm                -> not inert (changed 51/51)
+  use_filter                       / manual_sm2               -> not inert (changed 46/51)
+  thr_int_len                      / nofilter                 -> not inert (changed 6/51)
+  thr_int_len                      / nosmoothing              -> not inert (changed 14/51)
+  thr_int_len                      / manual_sm                -> not inert (changed 14/51)
+  thr_int_len                      / manual_sm2               -> not inert (changed 9/51)
+  thr_dec_len                      / nofilter                 -> not inert (changed 16/51)
+  thr_dec_len                      / nosmoothing              -> not inert (changed 22/51)
+  thr_dec_len                      / manual_sm                -> not inert (changed 21/51)
+  thr_dec_len                      / manual_sm2               -> not inert (changed 17/51)
+  thr_dec_gap                      / nofilter                 -> not inert (changed 3/51)
+  thr_dec_gap                      / nosmoothing              -> not inert (changed 11/51)
+  thr_dec_gap                      / manual_sm                -> not inert (changed 9/51)
+  thr_dec_gap                      / manual_sm2               -> not inert (changed 5/51)
+  thr_mat_len                      / default                  -> not inert (changed 50/51)
+  thr_mat_len                      / nofilter                 -> not inert (changed 51/51)
+  thr_mat_len                      / nosmoothing              -> not inert (changed 50/51)
+  thr_mat_len                      / manual_sm                -> not inert (changed 50/51)
+  thr_mat_len                      / manual_sm2               -> not inert (changed 50/51)
+  thr_mat_dist                     / default                  -> not inert (changed 50/51)
+  thr_mat_dist                     / nofilter                 -> not inert (changed 51/51)
+  thr_mat_dist                     / nosmoothing              -> not inert (changed 50/51)
+  thr_mat_dist                     / manual_sm                -> not inert (changed 50/51)
+  thr_mat_dist                     / manual_sm2               -> not inert (changed 50/51)
+  thr_inc_len                      / nofilter                 -> not inert (changed 50/51)
+  thr_inc_len                      / nosmoothing              -> not inert (changed 50/51)
+  thr_inc_len                      / manual_sm                -> not inert (changed 50/51)
+  thr_inc_len                      / manual_sm2               -> not inert (changed 50/51)
+  length_scale                     / nofilter                 -> not inert (changed 2/51)
+  length_scale                     / nosmoothing              -> not inert (changed 5/51)
+  length_scale                     / manual_sm                -> not inert (changed 6/51)
+  length_scale                     / manual_sm2               -> not inert (changed 5/51)
+  mature_method                    / nofilter                 -> not inert (changed 51/51)
+  mature_method                    / nosmoothing              -> not inert (changed 50/51)
+  mature_method                    / manual_sm                -> not inert (changed 50/51)
+  mature_method                    / manual_sm2               -> not inert (changed 50/51)
+  extrema_prominence_relative      / default                  -> not inert (changed 4/51)
+  extrema_prominence_relative      / nofilter                 -> not inert (changed 4/51)
+  extrema_prominence_relative      / nosmoothing              -> not inert (changed 14/51)
+  extrema_prominence_relative      / manual_sm                -> not inert (changed 12/51)
+  extrema_prominence_relative      / manual_sm2               -> not inert (changed 8/51)
+  extrema_distance                 / default                  -> not inert (changed 2/51)
+  extrema_distance                 / nofilter                 -> not inert (changed 1/51)
+  extrema_distance                 / nosmoothing              -> not inert (changed 2/51)
+  extrema_distance                 / manual_sm                -> not inert (changed 2/51)
+  extrema_distance                 / manual_sm2               -> not inert (changed 1/51)
+
+SKIPPED_DEFERRED pairs (150) — phase-kind parameter, phase-only base_config, not in the original curated plan; NOT run this pass for combinatorial cost, listed here rather than absent:
+  thr_int_len                      / mature_derivative       
+  thr_int_len                      / mature_amplitude        
+  thr_int_len                      / plateau_single_derivative
+  thr_int_len                      / plateau_single_vorticity
+  thr_int_len                      / plateau_sustained_derivative
+  thr_int_len                      / plateau_sustained_vorticity
+  thr_int_len                      / extrema_prominence_on   
+  thr_int_len                      / extrema_distance_on     
+  thr_int_len                      / decay_tail_on           
+  thr_dec_len                      / mature_derivative       
+  thr_dec_len                      / mature_amplitude        
+  thr_dec_len                      / plateau_single_derivative
+  thr_dec_len                      / plateau_single_vorticity
+  thr_dec_len                      / plateau_sustained_derivative
+  thr_dec_len                      / plateau_sustained_vorticity
+  thr_dec_len                      / extrema_prominence_on   
+  thr_dec_len                      / extrema_distance_on     
+  thr_dec_len                      / decay_tail_on           
+  thr_int_gap                      / mature_derivative       
+  thr_int_gap                      / mature_amplitude        
+  thr_int_gap                      / plateau_single_derivative
+  thr_int_gap                      / plateau_single_vorticity
+  thr_int_gap                      / plateau_sustained_derivative
+  thr_int_gap                      / plateau_sustained_vorticity
+  thr_int_gap                      / extrema_prominence_on   
+  thr_int_gap                      / extrema_distance_on     
+  thr_int_gap                      / decay_tail_on           
+  thr_dec_gap                      / mature_derivative       
+  thr_dec_gap                      / mature_amplitude        
+  thr_dec_gap                      / plateau_single_derivative
+  thr_dec_gap                      / plateau_single_vorticity
+  thr_dec_gap                      / plateau_sustained_derivative
+  thr_dec_gap                      / plateau_sustained_vorticity
+  thr_dec_gap                      / extrema_prominence_on   
+  thr_dec_gap                      / extrema_distance_on     
+  thr_dec_gap                      / decay_tail_on           
+  thr_mat_len                      / plateau_single_derivative
+  thr_mat_len                      / plateau_single_vorticity
+  thr_mat_len                      / plateau_sustained_derivative
+  thr_mat_len                      / plateau_sustained_vorticity
+  thr_mat_len                      / extrema_prominence_on   
+  thr_mat_len                      / extrema_distance_on     
+  thr_mat_len                      / decay_tail_on           
+  thr_mat_dist                     / plateau_single_derivative
+  thr_mat_dist                     / plateau_single_vorticity
+  thr_mat_dist                     / plateau_sustained_derivative
+  thr_mat_dist                     / plateau_sustained_vorticity
+  thr_mat_dist                     / extrema_prominence_on   
+  thr_mat_dist                     / extrema_distance_on     
+  thr_mat_dist                     / decay_tail_on           
+  thr_inc_len                      / mature_derivative       
+  thr_inc_len                      / mature_amplitude        
+  thr_inc_len                      / plateau_single_vorticity
+  thr_inc_len                      / plateau_sustained_derivative
+  thr_inc_len                      / plateau_sustained_vorticity
+  thr_inc_len                      / extrema_prominence_on   
+  thr_inc_len                      / extrema_distance_on     
+  thr_inc_len                      / decay_tail_on           
+  mature_amplitude_fraction        / plateau_single_derivative
+  mature_amplitude_fraction        / plateau_single_vorticity
+  mature_amplitude_fraction        / plateau_sustained_derivative
+  mature_amplitude_fraction        / plateau_sustained_vorticity
+  mature_amplitude_fraction        / extrema_prominence_on   
+  mature_amplitude_fraction        / extrema_distance_on     
+  mature_amplitude_fraction        / decay_tail_on           
+  length_scale                     / mature_derivative       
+  length_scale                     / mature_amplitude        
+  length_scale                     / plateau_single_derivative
+  length_scale                     / plateau_single_vorticity
+  length_scale                     / plateau_sustained_derivative
+  length_scale                     / plateau_sustained_vorticity
+  length_scale                     / extrema_prominence_on   
+  length_scale                     / extrema_distance_on     
+  length_scale                     / decay_tail_on           
+  mature_method                    / mature_derivative       
+  mature_method                    / mature_amplitude        
+  mature_method                    / plateau_single_derivative
+  mature_method                    / plateau_single_vorticity
+  mature_method                    / plateau_sustained_derivative
+  mature_method                    / plateau_sustained_vorticity
+  mature_method                    / extrema_prominence_on   
+  mature_method                    / extrema_distance_on     
+  mature_method                    / decay_tail_on           
+  incipient_plateau_tau            / mature_derivative       
+  incipient_plateau_tau            / mature_amplitude        
+  incipient_plateau_tau            / plateau_single_vorticity
+  incipient_plateau_tau            / plateau_sustained_derivative
+  incipient_plateau_tau            / plateau_sustained_vorticity
+  incipient_plateau_tau            / extrema_prominence_on   
+  incipient_plateau_tau            / extrema_distance_on     
+  incipient_plateau_tau            / decay_tail_on           
+  incipient_plateau_signal         / mature_derivative       
+  incipient_plateau_signal         / mature_amplitude        
+  incipient_plateau_signal         / plateau_single_vorticity
+  incipient_plateau_signal         / plateau_sustained_derivative
+  incipient_plateau_signal         / plateau_sustained_vorticity
+  incipient_plateau_signal         / extrema_prominence_on   
+  incipient_plateau_signal         / extrema_distance_on     
+  incipient_plateau_signal         / decay_tail_on           
+  incipient_plateau_crossing       / mature_derivative       
+  incipient_plateau_crossing       / mature_amplitude        
+  incipient_plateau_crossing       / plateau_single_vorticity
+  incipient_plateau_crossing       / plateau_sustained_derivative
+  incipient_plateau_crossing       / plateau_sustained_vorticity
+  incipient_plateau_crossing       / extrema_prominence_on   
+  incipient_plateau_crossing       / extrema_distance_on     
+  incipient_plateau_crossing       / decay_tail_on           
+  incipient_plateau_k              / mature_derivative       
+  incipient_plateau_k              / mature_amplitude        
+  incipient_plateau_k              / extrema_prominence_on   
+  incipient_plateau_k              / extrema_distance_on     
+  incipient_plateau_k              / decay_tail_on           
+  incipient_smooth_window          / mature_derivative       
+  incipient_smooth_window          / mature_amplitude        
+  incipient_smooth_window          / plateau_sustained_derivative
+  incipient_smooth_window          / plateau_sustained_vorticity
+  incipient_smooth_window          / extrema_prominence_on   
+  incipient_smooth_window          / extrema_distance_on     
+  incipient_smooth_window          / decay_tail_on           
+  incipient_smooth_polyorder       / mature_derivative       
+  incipient_smooth_polyorder       / mature_amplitude        
+  incipient_smooth_polyorder       / plateau_sustained_derivative
+  incipient_smooth_polyorder       / plateau_sustained_vorticity
+  incipient_smooth_polyorder       / extrema_prominence_on   
+  incipient_smooth_polyorder       / extrema_distance_on     
+  incipient_smooth_polyorder       / decay_tail_on           
+  extrema_prominence_relative      / mature_derivative       
+  extrema_prominence_relative      / mature_amplitude        
+  extrema_prominence_relative      / plateau_single_derivative
+  extrema_prominence_relative      / plateau_single_vorticity
+  extrema_prominence_relative      / plateau_sustained_derivative
+  extrema_prominence_relative      / plateau_sustained_vorticity
+  extrema_prominence_relative      / extrema_distance_on     
+  extrema_prominence_relative      / decay_tail_on           
+  extrema_distance                 / mature_derivative       
+  extrema_distance                 / mature_amplitude        
+  extrema_distance                 / plateau_single_derivative
+  extrema_distance                 / plateau_single_vorticity
+  extrema_distance                 / plateau_sustained_derivative
+  extrema_distance                 / plateau_sustained_vorticity
+  extrema_distance                 / extrema_prominence_on   
+  extrema_distance                 / decay_tail_on           
+  decay_tail_amplitude_fraction    / mature_derivative       
+  decay_tail_amplitude_fraction    / mature_amplitude        
+  decay_tail_amplitude_fraction    / plateau_single_derivative
+  decay_tail_amplitude_fraction    / plateau_single_vorticity
+  decay_tail_amplitude_fraction    / plateau_sustained_derivative
+  decay_tail_amplitude_fraction    / plateau_sustained_vorticity
+  decay_tail_amplitude_fraction    / extrema_prominence_on   
+  decay_tail_amplitude_fraction    / extrema_distance_on     
+
+Full TESTED matrix:
+  [TESTED_CURATED] cutoff_low                       / default                  -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] cutoff_low                       / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] cutoff_low                       / nosmoothing              -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] cutoff_low                       / manual_sm                -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] cutoff_low                       / manual_sm2               -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] cutoff_high                      / default                  -> not inert   (changed 48/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] cutoff_high                      / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] cutoff_high                      / nosmoothing              -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] cutoff_high                      / manual_sm                -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] cutoff_high                      / manual_sm2               -> not inert   (changed 49/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] boundary_padding                 / default                  -> not inert   (changed 49/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] boundary_padding                 / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] boundary_padding                 / nosmoothing              -> not inert   (changed 49/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] boundary_padding                 / manual_sm                -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] boundary_padding                 / manual_sm2               -> not inert   (changed 46/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm_val                           / default                  -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm_val                           / nofilter                 -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm_val                           / nosmoothing              -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] sm_val                           / manual_sm                -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm_val                           / manual_sm2               -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm2_val                          / default                  -> not inert   (changed 47/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm2_val                          / nofilter                 -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm2_val                          / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] sm2_val                          / manual_sm                -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] sm2_val                          / manual_sm2               -> not inert   (changed 47/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] replace_endpoints                / default                  -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] replace_endpoints                / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] replace_endpoints                / nosmoothing              -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] replace_endpoints                / manual_sm                -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] replace_endpoints                / manual_sm2               -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] savgol_poly                      / default                  -> not inert   (changed 45/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] savgol_poly                      / nofilter                 -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] savgol_poly                      / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] savgol_poly                      / manual_sm                -> not inert   (changed 18/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] savgol_poly                      / manual_sm2               -> not inert   (changed 47/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] use_filter                       / default                  -> not inert   (changed 41/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] use_filter                       / nofilter                 -> not inert   (changed 41/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] use_filter                       / nosmoothing              -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] use_filter                       / manual_sm                -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] use_filter                       / manual_sm2               -> not inert   (changed 46/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_int_len                      / default                  -> not inert   (changed 4/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_len                      / nofilter                 -> not inert   (changed 6/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_len                      / nosmoothing              -> not inert   (changed 14/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_len                      / manual_sm                -> not inert   (changed 14/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_len                      / manual_sm2               -> not inert   (changed 9/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_dec_len                      / default                  -> not inert   (changed 16/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_len                      / nofilter                 -> not inert   (changed 16/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_len                      / nosmoothing              -> not inert   (changed 22/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_len                      / manual_sm                -> not inert   (changed 21/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_len                      / manual_sm2               -> not inert   (changed 17/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_int_gap                      / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_gap                      / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_gap                      / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_gap                      / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_int_gap                      / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_dec_gap                      / default                  -> not inert   (changed 3/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_gap                      / nofilter                 -> not inert   (changed 3/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_gap                      / nosmoothing              -> not inert   (changed 11/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_gap                      / manual_sm                -> not inert   (changed 9/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_dec_gap                      / manual_sm2               -> not inert   (changed 5/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_len                      / default                  -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_len                      / nofilter                 -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_len                      / nosmoothing              -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_len                      / manual_sm                -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_len                      / manual_sm2               -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_mat_len                      / mature_derivative        -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_mat_len                      / mature_amplitude         -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_dist                     / default                  -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_dist                     / nofilter                 -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_dist                     / nosmoothing              -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_dist                     / manual_sm                -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_mat_dist                     / manual_sm2               -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_mat_dist                     / mature_derivative        -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_mat_dist                     / mature_amplitude         -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_inc_len                      / default                  -> not inert   (changed 49/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_inc_len                      / nofilter                 -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_inc_len                      / nosmoothing              -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_inc_len                      / manual_sm                -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] thr_inc_len                      / manual_sm2               -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] thr_inc_len                      / plateau_single_derivative -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_amplitude_fraction        / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_amplitude_fraction        / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_amplitude_fraction        / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_amplitude_fraction        / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_amplitude_fraction        / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] mature_amplitude_fraction        / mature_derivative        -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] mature_amplitude_fraction        / mature_amplitude         -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] length_scale                     / default                  -> not inert   (changed 1/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] length_scale                     / nofilter                 -> not inert   (changed 2/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] length_scale                     / nosmoothing              -> not inert   (changed 5/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] length_scale                     / manual_sm                -> not inert   (changed 6/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] length_scale                     / manual_sm2               -> not inert   (changed 5/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] mature_method                    / default                  -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_method                    / nofilter                 -> not inert   (changed 51/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_method                    / nosmoothing              -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_method                    / manual_sm                -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] mature_method                    / manual_sm2               -> not inert   (changed 50/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_tau            / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_tau            / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_tau            / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_tau            / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_tau            / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_tau            / plateau_single_derivative -> not inert   (changed 33/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_signal         / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_signal         / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_signal         / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_signal         / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_signal         / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_signal         / plateau_single_derivative -> not inert   (changed 13/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_crossing       / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_crossing       / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_crossing       / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_crossing       / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_crossing       / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_crossing       / plateau_single_derivative -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_k              / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_k              / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_k              / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_k              / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_plateau_k              / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_k              / plateau_single_derivative -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_k              / plateau_single_vorticity -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_k              / plateau_sustained_derivative -> not inert   (changed 1/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_plateau_k              / plateau_sustained_vorticity -> not inert   (changed 42/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_smooth_window          / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_window          / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_window          / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_window          / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_window          / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_smooth_window          / plateau_single_derivative -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_smooth_window          / plateau_single_vorticity -> not inert   (changed 22/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_smooth_polyorder       / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_polyorder       / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_polyorder       / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_polyorder       / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] incipient_smooth_polyorder       / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_smooth_polyorder       / plateau_single_derivative -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] incipient_smooth_polyorder       / plateau_single_vorticity -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_prominence_relative      / default                  -> not inert   (changed 4/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_prominence_relative      / nofilter                 -> not inert   (changed 4/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_prominence_relative      / nosmoothing              -> not inert   (changed 14/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_prominence_relative      / manual_sm                -> not inert   (changed 12/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_prominence_relative      / manual_sm2               -> not inert   (changed 8/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] extrema_prominence_relative      / extrema_prominence_on    -> not inert   (changed 4/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_distance                 / default                  -> not inert   (changed 2/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_distance                 / nofilter                 -> not inert   (changed 1/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_distance                 / nosmoothing              -> not inert   (changed 2/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_distance                 / manual_sm                -> not inert   (changed 2/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] extrema_distance                 / manual_sm2               -> not inert   (changed 1/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] extrema_distance                 / extrema_distance_on      -> not inert   (changed 2/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] decay_tail_amplitude_fraction    / default                  -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] decay_tail_amplitude_fraction    / nofilter                 -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] decay_tail_amplitude_fraction    / nosmoothing              -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] decay_tail_amplitude_fraction    / manual_sm                -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_NEW    ] decay_tail_amplitude_fraction    / manual_sm2               -> INERT       (changed 0/51 tracks, unevaluable 0/51)
+  [TESTED_CURATED] decay_tail_amplitude_fraction    / decay_tail_on            -> INERT       (changed 0/51 tracks, unevaluable 0/51)
