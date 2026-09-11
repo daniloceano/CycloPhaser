@@ -41,6 +41,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CALIBRATION_DATA_DIR = REPO_ROOT / "tests" / "calibration_data"
 SYNTHETIC_DIR = REPO_ROOT / "tests" / "synthetic"
+SYNTHETIC_DATA_DIR = SYNTHETIC_DIR / "data"
 LABELS_DIR = Path(__file__).resolve().parent
 SPLIT_PATH = LABELS_DIR / "split.yaml"
 LABELS_PATH = LABELS_DIR / "manual_labels.yaml"
@@ -136,7 +137,15 @@ def opaque_synthetic_id(case_name: str) -> str:
 # ── loading the series populations ───────────────────────────────────────────
 
 def load_real_series(data_dir: Path | None = None) -> dict[str, pd.Series]:
-    """The 51 calibration tracks, as {track_id: raw vorticity Series}."""
+    """The 51 calibration tracks, as {track_id: raw vorticity Series}.
+
+    Deliberately NOT float_precision="round_trip" here (unlike the synthetic
+    loader below): the 51 recorded label hashes were written against pandas'
+    default CSV float parser, so switching parsers here would make every real
+    label newly void, not fix anything -- measured 2026-09-10 (round_trip
+    parses all 51 to *different* float64 values than the default parser did,
+    and only the default parser's output matches the recorded series_sha256).
+    """
     d = Path(data_dir) if data_dir is not None else CALIBRATION_DATA_DIR
     out = {}
     for p in sorted(d.glob("*.csv")):
@@ -145,37 +154,61 @@ def load_real_series(data_dir: Path | None = None) -> dict[str, pd.Series]:
     return out
 
 
-def load_synthetic_series(synthetic_dir: Path | None = None):
+def _synthetic_case_names(cases_py: Path) -> list[str]:
+    """Case names in CASES, in source order -- by parsing cases.py, not importing it.
+
+    `load_synthetic_series` used to `exec_module` this file to get both the case
+    names and freshly-GENERATED series (see docs/future_work.md item 10: series
+    regenerated in memory on every load, with no file backing them, is what let
+    12/12 synthetic labels go silently stale between sessions). Case names are
+    plain string literals in `CASES["name"] = {...}` assignments, so they can be
+    read by static parsing alone, with no generator call and no RNG involved.
+    """
+    import ast
+    tree = ast.parse(cases_py.read_text(), filename=str(cases_py))
+    names = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Assign) and len(node.targets) == 1):
+            continue
+        target = node.targets[0]
+        if not (isinstance(target, ast.Subscript)
+                and isinstance(target.value, ast.Name) and target.value.id == "CASES"
+                and isinstance(target.slice, ast.Constant)
+                and isinstance(target.slice.value, str)):
+            continue
+        names.append(target.slice.value)
+    return names
+
+
+def load_synthetic_series(synthetic_dir: Path | None = None,
+                          data_dir: Path | None = None):
     """The synthetic suite as {opaque_id: Series}, plus {opaque_id: case_name}.
 
-    Loaded BY FILE PATH under a private package name for the same reason
-    tools/calibration_app/app.py does it: `import tests.synthetic.cases` depends
-    on a top-level name as generic as `tests` resolving to this repo, which is
-    not guaranteed once anything else leaks a `tests` package into the
-    environment.
+    Reads each series from its frozen CSV under tests/synthetic/data/ (one file
+    per opaque id, written once by freeze_synthetic_series.py) instead of
+    regenerating it from tests/synthetic/cases.py -- see docs/future_work.md
+    item 10. Case names still come from cases.py, but via `_synthetic_case_names`
+    (static parsing, no import), so nothing on this path recomputes a single
+    sample of series data; the values a label was written against can no longer
+    drift from the values a later session re-hashes.
     """
-    import importlib.util
-    import sys
-    import types
-
     d = Path(synthetic_dir) if synthetic_dir is not None else SYNTHETIC_DIR
+    dd = Path(data_dir) if data_dir is not None else SYNTHETIC_DATA_DIR
     cases_py = d / "cases.py"
     if not cases_py.is_file():
         return {}, {}
 
-    pkg_name = "_cyclophaser_labels_synthetic"
-    pkg = types.ModuleType(pkg_name)
-    pkg.__path__ = [str(d)]
-    sys.modules[pkg_name] = pkg
-    spec = importlib.util.spec_from_file_location(f"{pkg_name}.cases", cases_py)
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    spec.loader.exec_module(mod)
-
     series, names = {}, {}
-    for case_name, case in mod.CASES.items():
+    for case_name in _synthetic_case_names(cases_py):
         oid = opaque_synthetic_id(case_name)
-        series[oid] = case["series"].astype("float64")
+        csv_path = dd / f"{oid}.csv"
+        if not csv_path.is_file():
+            raise FileNotFoundError(
+                f"no frozen series for case {case_name!r} (id {oid}) at {csv_path}; "
+                "run research/labels/freeze_synthetic_series.py")
+        df = pd.read_csv(csv_path, sep=";", index_col="time", parse_dates=True,
+                         float_precision="round_trip")
+        series[oid] = df["min_max_zeta_850"].astype("float64")
         names[oid] = case_name
     return series, names
 
