@@ -888,6 +888,26 @@ touched between the two sessions (`git log` shows its last change at
 above rather than revised, since it was not re-investigated; item 11 is the
 next measurement in the timeline, not a correction of this one.
 
+**Addendum, 2026-09-11 — main finding, from item 12's work, not a
+re-investigation of this one:** CircleCI build `#327` (Linux runner,
+`cimg/python:3.12.3`, fresh wheel install), run on `feat/dedicated-conda-env`
+before item 11 had merged into it, failed the same `series_sha256` guard on
+the same id (`s0596ea57`) with a **third** hash value — distinct from the
+value recorded on 2026-09-08, from the diagnostic session's value (commit
+`3ae6082`), and from this machine's value (the 2026-09-10 addendum above).
+Three separate environments (the original labelling session, the diagnostic
+session, and a Linux CI runner) produced three different values for the same
+nominal computation. **This is evidence for environment dependence (OS,
+numpy/BLAS build, float rounding), not for the "leading theory" above of one
+specific lost/stale Streamlit session** — a single stale session could
+account for two diverging values, not three independently-diverging ones
+across unrelated environments including a CI runner that never had a
+Streamlit process running at all. Left here as a correction of the *shape* of
+the evidence, not a resolution of the root cause: WHICH environment factor
+causes the divergence is still not identified, and is not being
+re-investigated. See item 12 for the build `#327` → `#329` (green, after item
+11 merged) comparison this is drawn from.
+
 ---
 
 ## 11. Front G blocker — synthetic series frozen to versioned file — **closed, PASS, 2026-09-10**
@@ -1050,6 +1070,36 @@ recorded here so it is not ambiguous again:**
    regenerated) closes that off regardless of what CI or any future
    environment installs, which is what makes keeping CI thin safe rather
    than reintroducing the original risk.
+
+---
+
+## 13. Open risk — earlier fronts may have run against the shadowed cyclophaser 1.7.3, not this repo (OPEN, not investigated)
+
+**Status: OPEN.** Flagged 2026-09-11, not yet checked. Item 12 established
+that, before its fix, `import cyclophaser` in conda env "lorenz" resolved to
+the non-editable, installed **1.7.3** package or to this repository depending
+on the launch directory (repo root → repo; elsewhere, e.g. `/tmp` → 1.7.3).
+Any analysis run from "lorenz" in a directory where that resolved to 1.7.3
+was measuring a **different version of the detector than this repository's**,
+silently, with no error.
+
+**At risk, named so far:** Front A (item 8, "index-0 boundary extremum
+type") — its investigation cites specific line numbers in
+`cyclophaser/determine_periods.py` (`find_peaks_valleys`, lines 122-123) and
+draws conclusions about `argrelextrema`'s `mode='clip'` behaviour; if it was
+launched from a directory where the import shadowed to 1.7.3, those line
+numbers and that behaviour may not be this repository's code at all. A
+second front, referred to as "Front E," was also named as at risk in the
+same message that opened this item, but is **not identified** in this file,
+in `docs/`, or in project memory as of this writing — which front "E" refers
+to needs to come from Danilo directly before it can be checked.
+
+**Not yet done:** determining, for each at-risk front, which directory/
+environment it was actually launched from, and if it cannot be determined,
+whether the front's conclusions change under a re-run against this
+repository's code as of the commit that front used. This item exists so
+that risk is not lost, not as a verdict that either front's findings are
+wrong — nothing about their correctness has been checked yet.
 
 ---
 
