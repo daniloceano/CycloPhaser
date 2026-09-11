@@ -920,7 +920,11 @@ longer regenerate in memory on every load.
   labels — measured PASS, with a scope change from what was planned:
   Danilo decided (2026-09-10) to accept this as satisfying the gate rather
   than running the blind relabelling protocol, because there turned out to
-  be no NEW rotulagem to verify — see next paragraph.
+  be no NEW rotulagem to verify — see next paragraph. (c) as originally
+  written assumed today's synthetic values differed from September's; that
+  premise was wrong, and the measured hash coincidence is stronger evidence
+  than the relabelling protocol it stood in for — without this correction
+  (c) would read as not measured, which it is not.
 - (d) the real labels' recorded `series_sha256` is unchanged and still
   validates — measured across all 51 (the gate text said 35, the TRAIN
   subset; all 51 real labels, train and test, were checked and PASS, 0
@@ -967,6 +971,85 @@ skipped (`test_synthetic_lifecycles.py:128`, pre-existing, unrelated to
 this front — an observational-mode case with no timing assertion), before
 and after, no new failures. `test_label_browser.py` itself deselected, not
 run — pre-existing sandbox-only Playwright exception, per item 9.
+
+---
+
+## 12. Dedicated conda environment for development — **closed, PASS, 2026-09-11**
+
+**Status: closed with a fix.** Branch `feat/dedicated-conda-env`, merged
+into `develop-v2.1`. Fixes the shadowing bug behind `research/labels/
+evaluate_against_labels.py` resolving `cyclophaser.determine_periods` to
+whichever version happens to be installed in the active environment rather
+than to this repository, depending on the launch directory — confirmed
+concretely (repo root vs `/tmp`, under the non-editable 1.7.3 install in
+conda env "lorenz").
+
+**What changed:**
+- `environment.yml` (already existed, commit `e17fe12`, never actually
+  built as an env): `python=3.13` → `python=3.12`, to match "lorenz", the
+  environment development has actually happened in; added `plotly>=5.24`
+  (floor matches `tools/calibration_app/requirements.txt`), which
+  `tools/calibration_app/inspector_plotly.py` imports unconditionally and
+  which was undeclared in every root dependency file (`environment.yml`,
+  `requirements.txt`, `Pipfile`, `setup.py`) — it was already declared in
+  the app's own `requirements.txt`/`requirements-app.txt`, just not here.
+- `README.md`: new "Development Environment" section documenting the
+  shadowing failure mode and the verification command. No `CONTRIBUTING.md`
+  exists, so this went into `README.md` per the task's own fallback.
+- `cyclophaser.__version__` does not exist anywhere in the package (neither
+  the repo copy nor the installed 1.7.3 copy) — measured, `AttributeError`
+  in both. Documented verification uses
+  `importlib.metadata.version('cyclophaser')` instead.
+
+**Declared gate, three parts, decided explicitly (2026-09-11) because the
+two declared texts for it disagreed with each other on authorship — not
+resolved by picking whichever text is more literal, resolved by judgement,
+recorded here so it is not ambiguous again:**
+
+1. **Import resolves to the repo from any directory** — measured PASS.
+   Checked from `/tmp`, `$HOME`, the repo root, and `tests/`: all four
+   resolve to `.../CycloPhaser/cyclophaser/__init__.py`, version `2.0.0`
+   (via `importlib.metadata`, not `1.7.3`).
+2. **Full pytest suite, "mesmo resultado do ambiente atual"** — measured,
+   not literally identical: `cyclophaser` (new) = 1098 passed / 2 skipped /
+   0 failed (1100 collected); "lorenz" (the environment named as current in
+   this front's own problem statement) = 1079 passed / **21 skipped** / 0
+   failed (1100 collected) — `lorenz` lacks `streamlit` and `plotly`
+   entirely, so it cannot even collect-and-run 19 tests
+   (`test_layer_inspector.py` ×4, `test_manual_labels.py` ×15) that the new
+   environment runs and passes. **Decided: PASS.** No test passed in one
+   environment and failed in the other — the declared FAIL trigger did not
+   fire — and the difference is not noise: it is monotonic (strictly more
+   tests execute and pass, zero regress), and it is fully and only
+   explained by `environment.yml` declaring dependencies `lorenz` was
+   missing, which is this front's entire point. A "same result" reading
+   that penalizes fixing a coverage gap by calling it FAIL would reward the
+   deficient baseline.
+3. **CircleCI vs `environment.yml`** — decided: **deliberately kept
+   different, not unified**, and documented as a choice rather than left
+   implicit (comments added to both `.circleci/config.yml` and
+   `environment.yml`). CircleCI builds the sdist/wheel and installs it plus
+   bare `pytest`+`pyyaml` — no `streamlit`, no `plotly`, no conda — which is
+   *closer to a PyPI user's install than to `environment.yml`*, on purpose:
+   that minimal, from-a-wheel install is exactly what caught `plotly` being
+   undeclared, and it is what caught the hash instability below. Making CI
+   provision from `environment.yml` (conda) would have CI stop validating
+   what a `pip install cyclophaser` user actually gets, for a package that
+   is published to PyPI — the two environments testing different things is
+   the reason to keep them apart, not an oversight to fix.
+   **Directly relevant evidence, not a new investigation:** CircleCI build
+   `#327`, on this branch, **before** item 11 merged into it, failed the
+   same `series_sha256` guard as items 10/11, on the same id (`s0596ea57`)
+   — with a **third** hash value distinct from every one already on record
+   (the recorded label, the item-10 diagnostic session's, and this front's
+   local session's). Build `#329`, immediately after merging item 11 into
+   this branch and re-running, was green — 1100 collected, 0 failed,
+   matching `lorenz` exactly. The environment-set difference between CI and
+   local was a real, active contributor to the instability items 10/11
+   chased; item 11's fix (series read from a committed file, never
+   regenerated) closes that off regardless of what CI or any future
+   environment installs, which is what makes keeping CI thin safe rather
+   than reintroducing the original risk.
 
 ---
 

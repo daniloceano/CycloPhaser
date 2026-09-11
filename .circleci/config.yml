@@ -1,5 +1,16 @@
 version: 2.1
 
+# This job installs from the built wheel plus bare pytest/pyyaml -- it does NOT
+# provision from environment.yml (conda), on purpose. environment.yml is for
+# local development (editable install, streamlit, plotly, the full app
+# toolchain); this job checks what a `pip install cyclophaser` user actually
+# gets. Keeping the two apart is a deliberate choice, not an oversight: this
+# minimal install is exactly what caught `plotly` being undeclared, and what
+# caught the series_sha256 hash instability documented in
+# docs/future_work.md items 10-12 -- a real, measured failure mode this same
+# thin environment surfaced that a conda-provisioned CI would not have.
+# See docs/future_work.md item 12 for the full record of that decision.
+
 jobs:
   build_test:
     docker:

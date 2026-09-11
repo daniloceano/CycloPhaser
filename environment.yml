@@ -28,6 +28,11 @@
 # reproduce identically under both numpy 2.1.2 / scipy 1.17.1 / pandas 2.3.3
 # and numpy 2.4.0 / scipy 1.17.1 / pandas 2.3.3, so exact pins are not
 # required for reproducibility; pin harder here if that ever changes.
+#
+# CI (.circleci/config.yml) deliberately does NOT provision from this file --
+# it builds the wheel and installs it plus bare pytest/pyyaml, closer to what
+# a PyPI user gets. Keeping the two apart is a choice, not an omission: see
+# docs/future_work.md item 12.
 
 name: cyclophaser
 
