@@ -63,6 +63,41 @@ pip install -r tools/calibration_app/requirements-app.txt
 streamlit run tools/calibration_app/app.py
 ```
 
+## Development Environment
+
+Development on this repository (as opposed to just using the released
+package) needs `cyclophaser` installed in **editable** mode, in an
+environment dedicated to this repo. Installing it non-editably into an
+environment shared with other projects lets `import cyclophaser` silently
+resolve to a *different* installed copy depending on the current working
+directory a script happens to be launched from — confirmed concretely: from
+the repository root it resolves to the repository, from `/tmp` it resolves
+to whichever released version is sitting in that environment's
+`site-packages`. `research/labels/evaluate_against_labels.py` imports
+`cyclophaser.determine_periods`, so under a shared, non-editable install the
+version of the detector that scores the manual labels depends on where the
+script was launched from — silently, with no error.
+
+```bash
+conda env create -f environment.yml
+conda activate cyclophaser
+pip install -e .
+```
+
+**Verify the editable install actually wins**, from a directory *outside*
+the repository (the failure mode above only shows up off-repo):
+
+```bash
+cd /tmp && python -c "import cyclophaser, importlib.metadata as m; print(cyclophaser.__file__); print(m.version('cyclophaser'))"
+```
+
+(`cyclophaser.__version__` is not defined by the package — use
+`importlib.metadata.version('cyclophaser')` instead, as above.) The printed
+path must be inside this repository's `cyclophaser/` directory and the
+printed version must be this repository's (`setup.py`'s `VERSION`), not
+whatever else may be installed elsewhere — if either is wrong, a different
+environment is active or the editable install did not take.
+
 # Support and Contact
 
 For support, feature requests, or any queries, please open an issue on the GitHub repository.
