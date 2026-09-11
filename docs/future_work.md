@@ -1103,6 +1103,47 @@ wrong — nothing about their correctness has been checked yet.
 
 ---
 
+## 14. Open items and debt carried forward from items 11 and 12
+
+**Status: not closed, not being closed by this entry.** Three items named
+alongside item 13, registered together here because they belong to items 11
+and 12 respectively, not because they are one investigation.
+
+**OPEN — root cause of the synthetic generator's non-determinism across
+environments.** Item 11 worked around this for the 12 labelled cases only:
+`load_synthetic_series()` no longer calls the generator at all, so the
+non-determinism items 10's addenda measured (three distinct hash values
+across three environments, for the same nominal computation) cannot reach a
+label anymore, regardless of what causes it. It is **not fixed at the
+source** — `tests/synthetic/generators.py`'s `make_lifecycle_series` is
+unchanged, and any use of the synthetic suite outside
+`load_synthetic_series()` (a script calling the generator directly, or a
+future case added to `cases.py`) is exposed to the same non-determinism
+item 10 measured and did not explain. Not being investigated here — see
+item 10 for what was already ruled out.
+
+**DEBT — the freeze uses CSV, a text format.** `tests/synthetic/data/*.csv`
+round-trips exactly today only because of the explicit
+`float_format="%.17g"` / `float_precision="round_trip"` pairing item 11 had
+to add (pandas' defaults were silently lossy on both the write and the read
+side — measured, see item 11). A binary format (`.npz`, NetCDF) would not
+depend on a text round-trip being configured correctly to stay exact, and
+would remove this as a maintenance hazard for whoever next touches either
+side without knowing the precision pairing is load-bearing. Not urgent —
+the current pairing is verified bit-exact for all 12 series — noted as the
+more robust long-term choice, not an active problem.
+
+**COVERAGE GAP — CI exercises none of the streamlit/plotly code paths.**
+Direct, accepted consequence of item 12's decision 3 (CI deliberately does
+not provision `streamlit`/`plotly`, to stay close to a PyPI install).
+`tools/calibration_app/` — `label_tab.py`, `inspector_plotly.py`, `app.py`
+— is untested on every push; the only checks on that code are local
+(`tests/test_label_browser.py`, sandbox-only per item 9) or manual. Accepted
+as a tradeoff, not accidental — but it means a regression in the
+calibration app can land on `develop-v2.1` with a green CI.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
