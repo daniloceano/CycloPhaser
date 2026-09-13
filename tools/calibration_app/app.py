@@ -1083,22 +1083,43 @@ def _run_process_vorticity(
     return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
 
 
-def _label_overlays(values: pd.Series) -> dict[str, list]:
+# Colors/labels are supplied HERE, not invented in label_tab.py: that module
+# stays generic about what an "overlay" is (a name, a label, a color, values),
+# so it never needs to know cyclophaser's own vocabulary to draw one.
+# Progressively thinner in the app's stroke-width scheme (see _CHART_JS),
+# matching pipeline order: each is one more processing step than the last.
+_LABEL_OVERLAY_STYLE = {
+    "filtered_vorticity": {"label": "filtered_vorticity — Lanczos band-pass",
+                          "color": "#1f9e89"},
+    "vorticity_smoothed": {"label": "vorticity_smoothed — 1st Savitzky-Golay pass",
+                          "color": "#e8702a"},
+    "vorticity_smoothed2": {"label": "vorticity_smoothed2 — 2nd pass (what phase "
+                                    "detection is actually run against)",
+                           "color": "#8856a7"},
+}
+
+
+def _label_overlays(values: pd.Series) -> dict[str, dict]:
     """Filtered/smoothed overlays for the Label tab's Inspection mode.
 
-    Called ONLY from `label_tab._overlay_section`, and only after the
-    labeller has explicitly opted into seeing it — see that function's
-    docstring for the blindness gate. This is where the actual call into
-    `cyclophaser.determine_periods.process_vorticity` happens: label_tab.py
-    itself imports nothing from the package (see its module docstring), so
-    the curve the labeller can choose to reveal is guaranteed to be the SAME
-    function the detector runs, computed here, in the one module that is
-    already allowed to import cyclophaser, and handed down as plain numbers.
+    Called ONLY from label_tab.py's overlay controls, and only after the
+    labeller has explicitly opted into seeing it. This is where the actual
+    call into `cyclophaser.determine_periods.process_vorticity` happens:
+    label_tab.py itself imports nothing from the package (see its module
+    docstring), so the curves the labeller can choose to reveal are
+    guaranteed to be the SAME function the detector runs, computed here, in
+    the one module that is already allowed to import cyclophaser, and handed
+    down as plain numbers plus a label/color pair.
 
     Uses the CURRENT sidebar filter widgets, deliberately: Inspection mode is
     already non-blind by construction, and it exists to show what the
     detector currently sees under whatever calibration is being tried, not a
     second, independent snapshot.
+
+    Returns {name: {"label": str, "color": str, "values": [float, ...]}} —
+    label_tab.py draws these in the SAME interactive chart as the raw series,
+    on the identical y-axis (no per-curve normalisation), so a flat overlay
+    stays visibly flat rather than being rescaled into looking eventful.
     """
     zeta_df = pd.DataFrame({"zeta": values})
     vort = process_vorticity(
@@ -1108,9 +1129,8 @@ def _label_overlays(values: pd.Series) -> dict[str, list]:
         boundary_padding=boundary_padding,
     )
     return {
-        "filtered_vorticity": [float(v) for v in vort["filtered_vorticity"].values],
-        "vorticity_smoothed": [float(v) for v in vort["vorticity_smoothed"].values],
-        "vorticity_smoothed2": [float(v) for v in vort["vorticity_smoothed2"].values],
+        name: {**style, "values": [float(v) for v in vort[name].values]}
+        for name, style in _LABEL_OVERLAY_STYLE.items()
     }
 
 

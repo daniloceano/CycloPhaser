@@ -333,8 +333,77 @@ def test_not_sure_is_per_boundary_and_survives_a_drag(fresh):
     fresh.set_unsure(2, False)
 
 
-def test_the_first_row_cannot_be_unsure(fresh):
-    assert fresh.page.get_by_label("unsure, row 0", exact=True).is_disabled()
+def test_row_zero_start_unsure_is_settable_it_is_the_series_opening_edge(fresh):
+    """Unlike schema 3's single per-phase flag (disabled on row 0, since a
+    partition of [0, n) begins at 0 by construction and there was nothing to
+    be unsure about there), row 0's START checkbox is now `open_unsure` — the
+    edge BEFORE the first phase, which the phase list has no boundary to
+    carry. It must be enabled and settable like any other checkbox."""
+    box = fresh.page.get_by_label("unsure, row 0", exact=True)
+    assert not box.is_disabled()
+    fresh.set_unsure(0, True)
+    assert fresh.is_unsure(0)
+    fresh.set_unsure(0, False)
+
+
+def test_end_unsure_of_one_row_mirrors_start_unsure_of_the_next(fresh):
+    """A phase sequence of N phases has N+1 edges; row k's 'end unsure' and
+    row k+1's 'start unsure' are two on-screen checkboxes for the SAME
+    stored edge. They are two different Streamlit widgets under two
+    different keys, so ticking one does not, by itself, change what the
+    other widget shows — this is exactly the class of bug the module's own
+    docstring warns about elsewhere (a keyed widget ignores a changed
+    `value=`). Both must settle on the identical state after one rerun."""
+    fresh.set_end_unsure(1, True)
+    assert fresh.is_end_unsure(1)
+    assert fresh.is_unsure(2), "row 2's start-unsure did not mirror row 1's end-unsure"
+    fresh.set_unsure(2, False)
+    assert not fresh.is_end_unsure(1), "row 1's end-unsure did not follow back down"
+    assert not fresh.is_unsure(2)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Overlays share the chart, never the boundaries
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_dragging_a_boundary_gives_the_same_start_idx_with_overlays_on(fresh):
+    """The three filtered/smoothed layers are drawn in the SAME chart as the
+    raw series, on the SAME x/y mapping — a boundary's screen position comes
+    only from `sx(step index)`, never from any curve's value (see
+    label_tab.py's _CHART_JS: `setStart`/`onMove` read `clientX` and the
+    step index alone). Dragging near a differently-scaled curve must
+    therefore land on the identical step as dragging with no overlay on.
+
+    Leaves overlays switched off again at the end: a later test in this
+    module (`test_nothing_the_detector_produced_is_on_the_page`) asserts
+    package vocabulary is absent from the WHOLE page, which an overlay
+    checkbox's own label would violate if left ticked on.
+    """
+    fresh.drag_boundary(1, 34)
+    target_start = fresh.start_idx(1)
+    fresh.set_start_idx(1, 20)   # back to `fresh`'s known starting position
+
+    fresh.enable_overlay("vorticity_smoothed2")
+    try:
+        fresh.drag_boundary(1, 34)
+        with_overlay_start = fresh.start_idx(1)
+    finally:
+        fresh.set_start_idx(1, 20)
+        # switch the layer and the master back off
+        layer = fresh.page.get_by_label("vorticity_smoothed2", exact=False)
+        if layer.is_checked():
+            layer.locator("xpath=ancestor::label[1]").click()
+            fresh.settle()
+        master = fresh.page.get_by_label("Show filtered/smoothed overlays",
+                                         exact=False)
+        if master.is_checked():
+            master.locator("xpath=ancestor::label[1]").click()
+            fresh.settle()
+
+    assert with_overlay_start == pytest.approx(target_start, abs=1), (
+        f"drag landed on {with_overlay_start} with an overlay on vs. "
+        f"{target_start} without — the boundary must not depend on which "
+        "curve is drawn near the pointer")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

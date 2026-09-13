@@ -292,6 +292,9 @@ class LabelPage:
     def is_unsure(self, k: int) -> bool:
         return self.page.get_by_label(f"unsure, row {k}", exact=True).is_checked()
 
+    def is_end_unsure(self, k: int) -> bool:
+        return self.page.get_by_label(f"end unsure, row {k}", exact=True).is_checked()
+
     def n_rows(self) -> int:
         k = 0
         while self._num("tolerance_idx", k).count():
@@ -323,11 +326,31 @@ class LabelPage:
         no clickable box of its own and Playwright refuses it as "outside of the
         viewport". The label is what a person clicks, so it is what this clicks.
         """
-        box = self.page.get_by_label(f"unsure, row {k}", exact=True)
+        self._click_labelled_checkbox(f"unsure, row {k}", value)
+
+    def set_end_unsure(self, k: int, value: bool) -> None:
+        self._click_labelled_checkbox(f"end unsure, row {k}", value)
+
+    def _click_labelled_checkbox(self, label: str, value: bool) -> None:
+        box = self.page.get_by_label(label, exact=True)
         if box.is_checked() != value:
-            label = box.locator("xpath=ancestor::label[1]")
-            label.scroll_into_view_if_needed()
-            label.click()
+            lbl = box.locator("xpath=ancestor::label[1]")
+            lbl.scroll_into_view_if_needed()
+            lbl.click()
+            self.settle()
+
+    # ── overlays (Inspection mode only) ──────────────────────────────────────
+    def enable_overlay(self, layer_label_substring: str) -> None:
+        """Turn the master overlay switch on, then one layer by its visible
+        (partial) label text, e.g. 'vorticity_smoothed2'."""
+        master = self.page.get_by_label("Show filtered/smoothed overlays",
+                                        exact=False)
+        if not master.is_checked():
+            master.locator("xpath=ancestor::label[1]").click()
+            self.settle()
+        layer = self.page.get_by_label(layer_label_substring, exact=False)
+        if not layer.is_checked():
+            layer.locator("xpath=ancestor::label[1]").click()
             self.settle()
 
     # ── layout ───────────────────────────────────────────────────────────────
