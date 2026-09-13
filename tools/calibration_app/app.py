@@ -1083,6 +1083,37 @@ def _run_process_vorticity(
     return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
 
 
+def _label_overlays(values: pd.Series) -> dict[str, list]:
+    """Filtered/smoothed overlays for the Label tab's Inspection mode.
+
+    Called ONLY from `label_tab._overlay_section`, and only after the
+    labeller has explicitly opted into seeing it — see that function's
+    docstring for the blindness gate. This is where the actual call into
+    `cyclophaser.determine_periods.process_vorticity` happens: label_tab.py
+    itself imports nothing from the package (see its module docstring), so
+    the curve the labeller can choose to reveal is guaranteed to be the SAME
+    function the detector runs, computed here, in the one module that is
+    already allowed to import cyclophaser, and handed down as plain numbers.
+
+    Uses the CURRENT sidebar filter widgets, deliberately: Inspection mode is
+    already non-blind by construction, and it exists to show what the
+    detector currently sees under whatever calibration is being tried, not a
+    second, independent snapshot.
+    """
+    zeta_df = pd.DataFrame({"zeta": values})
+    vort = process_vorticity(
+        zeta_df, use_filter=use_filter, cutoff_low=cutoff_low, cutoff_high=cutoff_high,
+        use_smoothing=use_smoothing, use_smoothing_twice=use_smoothing_twice,
+        replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
+        boundary_padding=boundary_padding,
+    )
+    return {
+        "filtered_vorticity": [float(v) for v in vort["filtered_vorticity"].values],
+        "vorticity_smoothed": [float(v) for v in vort["vorticity_smoothed"].values],
+        "vorticity_smoothed2": [float(v) for v in vort["vorticity_smoothed2"].values],
+    }
+
+
 @st.cache_data(
     show_spinner=False,
     hash_funcs={bytes: lambda b: hashlib.md5(b).hexdigest()},
@@ -2559,7 +2590,8 @@ with tab_cal:
     # and arrow is drawn from the LABELLER'S marks, never the algorithm's.
     # See the module docstring of label_tab.py.
     elif view_mode == "Label":
-        label_tab.render(default_tolerance=int(label_default_tolerance))
+        label_tab.render(default_tolerance=int(label_default_tolerance),
+                         overlay_provider=_label_overlays)
 
     # Bad-case evaluation summary — shown for both detector-facing modes,
     # regardless of n_cols. NOT shown in "Label": that mode is blind by

@@ -65,8 +65,9 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from labels_core import (  # noqa: E402
-    is_legacy_record, load_real_series, load_synthetic_series, normalize_phase,
-    read_labels, read_split, score_labels, score_phase_sequences, series_sha256,
+    first_blind_record, is_legacy_record, load_real_series, load_synthetic_series,
+    normalize_phase, read_labels, read_split, score_labels, score_phase_sequences,
+    series_sha256,
 )
 
 # get_periods' own defaults for everything the config YAML may omit.
@@ -205,6 +206,15 @@ def main(argv=None) -> int:
                     help="calibration-app YAML; omitted means package defaults")
     ap.add_argument("--test", action="store_true",
                     help="also score the held-out test split (see the warning)")
+    ap.add_argument("--against", choices=("current", "first-blind"), default="current",
+                    help="'current' (default) scores the vigente record, i.e. the "
+                         "most recent save for each case, whether or not an overlay "
+                         "was on screen when it was written. 'first-blind' scores "
+                         "the EARLIEST version of each case's label that was saved "
+                         "with no overlay shown (schema-3 records qualify: overlays "
+                         "did not exist yet) — cases where every saved version had "
+                         "an overlay on screen are excluded, the same way a stale "
+                         "or legacy one is.")
     args = ap.parse_args(argv)
 
     records = read_labels()
@@ -213,6 +223,17 @@ def main(argv=None) -> int:
               "Label the queue first: streamlit run tools/calibration_app/app.py, "
               "then choose the 'Label' display mode.")
         return 0
+
+    if args.against == "first-blind":
+        never_blind = sorted(sid for sid, r in records.items()
+                             if first_blind_record(r) is None)
+        records = {sid: (first_blind_record(r) or r) for sid, r in records.items()
+                  if sid not in never_blind}
+        if never_blind:
+            print(f"WARNING: {len(never_blind)} label(s) have no blind version on "
+                  f"file (an overlay was already shown by the first save) and are "
+                  f"EXCLUDED from --against first-blind: "
+                  f"{', '.join(never_blind)}\n")
 
     split = read_split()
     train, test = set(split["train"]), set(split["test"])
@@ -254,6 +275,7 @@ def main(argv=None) -> int:
     print("=" * 74)
     print(f"Incipient boundary vs manual labels   ({len(usable)} usable label(s))")
     print(f"config: {args.config if args.config else 'package defaults'}")
+    print(f"against: {args.against}")
     print("=" * 74)
 
     if args.test:

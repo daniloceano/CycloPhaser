@@ -65,7 +65,29 @@ QUEUE_SEED = 20260905
 # still hold schema-1 or schema-2 records from a session that predates a bump,
 # and those are excluded loudly rather than silently skipped
 # (see `is_legacy_record`).
-LABELS_SCHEMA = 3
+#
+# 3 -> 4 for three additions, none of which touches `phases`, `verdict` or
+# `tolerance_idx` — a schema-3 record re-read and re-saved unchanged still
+# derives the identical verdict, because none of the three is read by
+# `incipient_verdict_from_phases`:
+#
+#   * `open_unsure` / `close_unsure` — uncertainty on the two edges a phase
+#     sequence cannot express: the series' own opening (before phase 0, which
+#     is pinned at start_idx 0 by construction) and its own close (after the
+#     last phase, which has no boundary at all to attach a flag to). Every
+#     OTHER boundary already carries `unsure` on the phase that starts there;
+#     these two are the ones with no phase to carry it.
+#   * `overlays_shown` — which filtered/smoothed overlays (if any) were on
+#     screen in THIS session before the label was saved. Empty means blind.
+#     Absent (every schema-3 record) means blind too — overlays did not exist
+#     yet, so a record written under schema 3 has nothing to disclose.
+#   * `superseded` — see `upsert_label`: overwriting a case no longer erases
+#     the record that was there before; it is preserved, flattened, oldest
+#     first, in this list, on the record that replaces it.
+#
+# A schema-3 file is read and left exactly as it is — nothing here invents any
+# of the three fields on a record that was not itself resaved.
+LABELS_SCHEMA = 4
 
 VERDICT_KINDS = ("boundary", "none", "ambiguous")
 
@@ -388,13 +410,27 @@ def incipient_verdict_from_phases(phases, n_steps: int) -> tuple[dict, int]:
 
 def make_label_record(series_id: str, source: str, values, phases,
                       notes: str | None = None, labeled_at: str | None = None,
-                      ambiguous: bool = False) -> dict:
+                      ambiguous: bool = False, open_unsure: bool = False,
+                      close_unsure: bool = False,
+                      overlays_shown=None) -> dict:
     """One labels-file record: the whole phase sequence for one series.
 
     `values` is the raw series the labeller saw. `verdict` and the top-level
     `tolerance_idx` are DERIVED from `phases` (except `ambiguous`, which is a
     judgement the table cannot express) so that the incipient-specific evaluation
     keeps working without the two ever being able to contradict each other.
+
+    `open_unsure` / `close_unsure` are schema-4 additions for the two edges a
+    phase sequence has no boundary to attach uncertainty to: the series' own
+    start (before phase 0) and its own end (after the last phase). Neither
+    reaches `incipient_verdict_from_phases` — a schema-3 record replayed
+    through this function with both left at their default produces the exact
+    same `verdict` it always did.
+
+    `overlays_shown` is the schema-4 blindness-provenance field: an iterable of
+    overlay-layer names that were on screen in THIS session before this label
+    was saved, or falsy for none. Stored sorted and de-duplicated; empty means
+    the label was written blind. See `is_blind`.
     """
     if source not in ("real", "synthetic"):
         raise ValueError(f"source must be 'real' or 'synthetic', got {source!r}")
@@ -418,10 +454,56 @@ def make_label_record(series_id: str, source: str, values, phases,
         # uniform even within one cyclone: an incipient knee can be unmistakable
         # on a track whose mature->decay transition is a long gentle roll.
         "tolerance_idx": int(tol),
+        # The two edges no phase boundary can carry uncertainty for — see the
+        # schema 3 -> 4 note above LABELS_SCHEMA. Written explicitly (not
+        # omitted when False), the same convention `unsure` already uses.
+        "open_unsure": bool(open_unsure),
+        "close_unsure": bool(close_unsure),
+        "overlays_shown": sorted(set(overlays_shown)) if overlays_shown else [],
     }
     if notes:
         rec["notes"] = str(notes)
     return rec
+
+
+# ── schema 4: blindness provenance and superseded history ───────────────────
+
+def is_blind(record: dict) -> bool:
+    """True if no overlay was on screen when this record was saved.
+
+    A schema-3 record has no `overlays_shown` key at all — overlays did not
+    exist yet — and is blind by construction, the same as a schema-4 record
+    whose list is empty.
+    """
+    return not record.get("overlays_shown")
+
+
+def label_history(record: dict) -> list[dict]:
+    """The full chronological history behind one case's CURRENT record.
+
+    Oldest first, ending with `record` itself (with its own `superseded` list
+    stripped, so every entry here is a self-contained snapshot — this is what
+    keeps `superseded` flat instead of nesting a copy of the whole history
+    inside each of its own entries).
+    """
+    history = [dict(r) for r in record.get("superseded", [])]
+    history.append({k: v for k, v in record.items() if k != "superseded"})
+    return history
+
+
+def first_blind_record(record: dict) -> dict | None:
+    """The earliest version of this case's label that was written blind.
+
+    None only if every version on file — including the current one — was
+    saved with an overlay already on screen. The evaluation script uses this
+    to score against the label as it stood before any overlay could have
+    biased it, as an alternative to scoring the (always-current) vigente
+    record directly.
+    """
+    for rec in label_history(record):
+        if is_blind(rec):
+            return rec
+    return None
 
 
 def read_labels(path: Path | None = None) -> dict[str, dict]:
@@ -507,9 +589,21 @@ def upsert_label(record: dict, path: Path | None = None) -> dict[str, dict]:
     Rewriting everything on every save is O(n) in a file of at most 63 short
     records — irrelevant — and buys the guarantee that the file on disk is always
     a complete, parseable document.
+
+    Overwriting a case that already has a record does NOT discard it: the
+    previous record (own `superseded` list flattened away, so this never
+    nests) is appended to the NEW record's `superseded`, oldest first. The
+    vigente record is always the one at the top level; `label_history` and
+    `first_blind_record` read the two together. Applies uniformly to real and
+    synthetic cases — nothing here treats the two differently.
     """
     p = Path(path) if path is not None else LABELS_PATH
     records = read_labels(p)
+    prev = records.get(record["id"])
+    if prev is not None:
+        record = dict(record)
+        record["superseded"] = [dict(r) for r in prev.get("superseded", [])] + \
+            [{k: v for k, v in prev.items() if k != "superseded"}]
     records[record["id"]] = record
     write_labels(records, p)
     return records
