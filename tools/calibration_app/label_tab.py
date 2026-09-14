@@ -995,7 +995,7 @@ def _case_navigation(queue: list[str], records: dict, series: dict,
     controls the sidebar already carries.
 
     Keyed on `pos` itself (the pattern `_phase_table` already uses via `rev`):
-    whenever `pos` changes for ANY reason — this selector, Save & next, Back —
+    whenever `pos` changes for ANY reason — this selector, Save & next, Previous/Next —
     the key changes and the widget is rebuilt fresh from the new `pos`, so it
     can never show a stale selection left over from a previous case.
     """
@@ -1160,7 +1160,7 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     synth_names = _load_synthetic_names()
 
     # Resume where the last session stopped. Stored in session state after the
-    # first computation so the Back button can move off it without the next
+    # first computation so Previous/Next can move off it without the next
     # rerun snapping back to the first unlabelled item.
     if "lab_pos" not in st.session_state:
         st.session_state["lab_pos"] = min(lc.queue_position(queue, records), n_total - 1)
@@ -1196,8 +1196,8 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     disk_open = bool(usable_existing.get("open_unsure", False)) if usable_existing else False
     disk_close = bool(usable_existing.get("close_unsure", False)) if usable_existing else False
 
-    # Switching case — via the sidebar selector, Save & next, or Back — must
-    # reload from the file, not silently keep showing whatever this session
+    # Switching case — via the top selector, Save & next, or Previous/Next —
+    # must reload from the file, not silently keep showing whatever this session
     # happened to have in memory for the new sid from an earlier, unsaved visit.
     # Session state that disagrees with the file is orphaned state, and it gets
     # named as such rather than displayed as if it were the file's content.
@@ -1382,41 +1382,96 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
         + f" · #{pos + 1} of {n_total} in the queue, {n_done} labelled"
     )
 
+    # Backed by its own session_state entry, not just the widget's key, for
+    # the same reason the confirmation checkboxes below are: an earlier
+    # widget's rerun (the mode switch, case navigation) can skip this one for
+    # a pass and reset it to the `value=` given, which must therefore be
+    # "whatever was last typed", not always "whatever is on disk".
+    key_notes = f"_lab_notes__{sid}"
+    if key_notes not in st.session_state:
+        st.session_state[key_notes] = (existing or {}).get("notes", "")
     notes = st.text_input("Notes (optional)",
-                          value=(existing or {}).get("notes", ""),
-                          key=f"lab_notes__{sid}",
+                          value=st.session_state[key_notes],
+                          key=f"lab_notes_widget__{sid}",
                           placeholder="anything that made this one hard to read",
                           label_visibility="collapsed")
+    st.session_state[key_notes] = notes
 
     # ── save gates ────────────────────────────────────────────────────────────
     # Every gate here is a HARD block on the buttons themselves (`disabled=`),
     # not a warning a click can walk past. They stack: a synthetic case that
     # already has a label needs the overwrite checkbox AND both synthetic
     # checkboxes; a TEST-split case cannot be saved no matter what is ticked.
+    #
+    # Each checkbox's `value=` is read from ITS OWN backing session_state
+    # entry, not left to the widget's own key-based memory — because that
+    # memory does not reliably survive a rerun that an EARLIER widget in this
+    # same script triggers before this point is reached (the mode-switch
+    # radio's Confirm/Cancel flow does exactly this: it calls `st.rerun()`
+    # from higher up in `render`, which skips these checkboxes for that one
+    # pass, and Streamlit does not treat that as "still checked" on the next
+    # one). `_phase_table`'s own checkboxes were never vulnerable to this
+    # because they already read every `value=` from the phases/open/close
+    # backing store rather than from widget memory; these three are the same
+    # fix applied to the confirmation checkboxes, which previously trusted
+    # widget memory alone and could silently reset to unticked.
     overwrite_needed = bool(existing) and not stale and not legacy
     overwrite_ok = True
     if overwrite_needed:
+        key_ow = f"_lab_overwrite_confirm__{sid}"
         overwrite_ok = st.checkbox(
             "Overwrite the existing label for this case (the previous version "
             "is kept under 'superseded', not erased)",
-            value=False, key=f"lab_overwrite_confirm__{sid}")
+            value=st.session_state.get(key_ow, False),
+            key=f"lab_overwrite_confirm_widget__{sid}")
+        st.session_state[key_ow] = overwrite_ok
 
     synthetic_ok = True
     if is_synthetic:
         st.warning("This is one of the 12 FROZEN synthetic cases — saving "
                    "needs two separate confirmations.")
+        key_sc1 = f"_lab_synth_confirm1__{sid}"
+        key_sc2 = f"_lab_synth_confirm2__{sid}"
         sc1 = st.checkbox("I understand this is a frozen synthetic case",
-                          value=False, key=f"lab_synth_confirm1__{sid}")
+                          value=st.session_state.get(key_sc1, False),
+                          key=f"lab_synth_confirm1_widget__{sid}")
+        st.session_state[key_sc1] = sc1
         sc2 = st.checkbox("I still want to save a label for it",
-                          value=False, key=f"lab_synth_confirm2__{sid}")
+                          value=st.session_state.get(key_sc2, False),
+                          key=f"lab_synth_confirm2_widget__{sid}")
+        st.session_state[key_sc2] = sc2
         synthetic_ok = sc1 and sc2
 
     if is_test_case:
         st.error("This case is in the TEST split (research/labels/split.yaml) "
                  "— saving is BLOCKED, not just discouraged.")
 
-    can_save = (mode == "label" and not is_test_case and not split_error
-               and not problem and overwrite_ok and synthetic_ok)
+    # Named explicitly, not just left as a greyed-out button: a labeller who
+    # has ticked every confirmation on screen and still cannot save has no
+    # way to tell why unless the ONE remaining reason is spelled out — the
+    # mode gate in particular is easy to satisfy every OTHER condition for
+    # and still miss, because it lives in the sidebar, away from these
+    # checkboxes and buttons.
+    blockers = []
+    if mode != "label":
+        blockers.append("switch to **Labelling** mode in the sidebar — "
+                        "saving is off while Inspecting")
+    if split_error:
+        blockers.append(f"{lc.SPLIT_PATH.name} could not be read; saving is "
+                        "locked repo-wide until this is fixed")
+    elif is_test_case:
+        blockers.append("this case is in the TEST split — saving is blocked, "
+                        "not just discouraged")
+    if problem:
+        blockers.append("fix the phase sequence above first")
+    if overwrite_needed and not overwrite_ok:
+        blockers.append("tick the overwrite-confirmation checkbox above")
+    if is_synthetic and not synthetic_ok:
+        blockers.append("tick BOTH frozen-synthetic checkboxes above")
+
+    can_save = not blockers
+    if blockers:
+        st.caption("Cannot save yet — " + "; ".join(blockers) + ".")
 
     def _save(ambiguous: bool) -> None:
         rec = lc.make_label_record(
@@ -1426,8 +1481,16 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
         lc.upsert_label(rec)
         st.session_state["lab_pos"] = (pos + 1) % n_total
 
-    r1, r2, r3, b1, b2, b3, b4 = st.columns(
-        [1.0, 1.1, 1.3, 1.1, 1.1, 1.2, 0.8])
+    # "Remove last" and "No incipient" are gone: both were special cases of
+    # the general per-row 'Remove' checkbox + 'Remove selected' button above
+    # (tick the last row, or row 0, and remove it — row 0's removal already
+    # re-pins the new first phase to start at 0, same as "No incipient" did).
+    # "← Back" is gone too, replaced by a Previous/Next pair that ONLY moves
+    # through the queue and never saves — the case-navigation dropdown at the
+    # top of the tab covers "jump to any case"; these cover "step through the
+    # ones next to it", which matters most in INSPECTION mode, where nothing
+    # here can save at all.
+    r1, r2, b1, b2, p1, p2 = st.columns([1.3, 1.6, 1.3, 1.4, 1.0, 1.0])
     if r1.button("＋ Add a phase", use_container_width=True,
                  disabled=bool(phases) and phases[-1]["start_idx"] >= n - 1,
                  help="Appends one more phase after the last, starting one step "
@@ -1437,17 +1500,11 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
                        "tolerance_idx": int(default_tolerance), "unsure": False})
         st.session_state[key_rev] += 1
         st.rerun()
-    if r2.button("－ Remove last", use_container_width=True,
-                 disabled=len(phases) <= 1,
-                 help="Drops the final phase; the one before it runs to the end."):
-        phases.pop()
-        st.session_state[key_rev] += 1
-        st.rerun()
-    if r3.button(f"🗑 Remove selected ({len(to_remove)})", use_container_width=True,
+    if r2.button(f"🗑 Remove selected ({len(to_remove)})", use_container_width=True,
                  disabled=not to_remove or len(to_remove) >= len(phases),
                  help="Removes every phase whose 'Remove' box is ticked, all at "
                       "once. The first remaining phase is re-pinned to start at "
-                      "0, the same way 'No incipient' already does."):
+                      "0."):
         remaining = [dict(p) for i, p in enumerate(phases) if i not in to_remove]
         remaining[0]["start_idx"] = 0
         remaining[0]["unsure"] = False
@@ -1458,19 +1515,7 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
                  disabled=not can_save):
         _save(ambiguous=False)
         st.rerun()
-    if b2.button("No incipient", use_container_width=True,
-                 disabled=not (phases and phases[0]["phase"] == "incipient"
-                               and len(phases) > 1),
-                 help="Drops the leading incipient phase — this series is "
-                      "already changing at step 0. The rest of the sequence is kept."):
-        rest = [dict(p) for p in phases[1:]]
-        if rest:
-            rest[0]["start_idx"] = 0
-            rest[0]["unsure"] = False
-            st.session_state[key_ph] = rest
-            st.session_state[key_rev] += 1
-        st.rerun()
-    if b3.button("Save ambiguous", use_container_width=True,
+    if b2.button("Save ambiguous", use_container_width=True,
                  disabled=not can_save,
                  help="You cannot decide this cyclone AT ALL. The phases you "
                       "marked are still saved; the incipient verdict is recorded "
@@ -1478,8 +1523,12 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
                       "of the series scoring, tick 'Not sure' on its row instead."):
         _save(ambiguous=True)
         st.rerun()
-    if b4.button("← Back", use_container_width=True,
-                 help="Re-label the previous series in the queue."):
+    if p1.button("◂ Previous", use_container_width=True,
+                 help="Move to the previous case in the queue. Never saves."):
         st.session_state["lab_pos"] = (pos - 1) % n_total
+        st.rerun()
+    if p2.button("Next ▸", use_container_width=True,
+                 help="Move to the next case in the queue. Never saves."):
+        st.session_state["lab_pos"] = (pos + 1) % n_total
         st.rerun()
 

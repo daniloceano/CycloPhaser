@@ -145,3 +145,126 @@ def test_toggling_overlay_layers_does_not_move_any_phase():
         now = [int(nb.value) for nb in _start_idx(at)]
         assert now == before, (
             f"toggling {cb.label!r} off moved a phase: {now} != {before}")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Confirmation checkboxes must survive the mode-switch confirm dialog
+# ══════════════════════════════════════════════════════════════════════════
+#
+# A real bug, not a hypothetical: the overwrite/frozen-synthetic confirmation
+# checkboxes read `value=False` on every render and relied on Streamlit's own
+# widget-key memory to keep them ticked afterward. That memory does not
+# survive being skipped for one script pass, and `_mode_switch`'s pending ->
+# Confirm flow calls `st.rerun()` from EARLIER in `render` than these
+# checkboxes, which skips them for exactly one pass — enough to reset them to
+# unticked. Reported as "I tick everything and Save stays disabled".
+
+def _synthetic_case_index(at) -> int:
+    for sb in at.main.selectbox:
+        if sb.label == "Jump to case":
+            nav = sb
+            break
+    return next(i for i, o in enumerate(nav.options)
+               if "frozen synthetic" in o and "TEST split" not in o)
+
+
+def _switch_to_labelling(at) -> None:
+    for r in at.sidebar.radio:
+        if set(r.options) >= {"Inspection", "Labelling"}:
+            r.set_value("Labelling")
+    at.run()
+    for b in at.sidebar.button:
+        if b.label == "Confirm":
+            b.click()
+    at.run()
+
+
+def test_overwrite_confirmation_survives_switching_to_labelling_mode():
+    at = _label_app()
+    for sb in at.main.selectbox:
+        if sb.label == "Jump to case":
+            sb.set_value(_synthetic_case_index(at))
+    at.run()
+
+    ow = next(cb for cb in at.checkbox
+             if "Overwrite the existing label" in cb.label)
+    ow.set_value(True)
+    at.run()
+    assert ow.value is True
+
+    _switch_to_labelling(at)
+
+    ow_after = next(cb for cb in at.checkbox
+                   if "Overwrite the existing label" in cb.label)
+    assert ow_after.value is True, (
+        "the overwrite confirmation reset to unticked after switching to "
+        "Labelling mode — it must survive the mode-switch confirm dialog")
+
+
+def test_all_three_confirmations_together_enable_save_after_mode_switch():
+    """The exact scenario reported: tick overwrite + both synthetic
+    confirmations, switch to Labelling, and Save must become available with
+    no further explanation needed than what's already on screen."""
+    at = _label_app()
+    for sb in at.main.selectbox:
+        if sb.label == "Jump to case":
+            sb.set_value(_synthetic_case_index(at))
+    at.run()
+
+    next(cb for cb in at.checkbox
+        if "Overwrite the existing label" in cb.label).set_value(True)
+    at.run()
+    _switch_to_labelling(at)
+    next(cb for cb in at.checkbox
+        if "I understand this is a frozen synthetic case" in cb.label).set_value(True)
+    at.run()
+    next(cb for cb in at.checkbox
+        if "I still want to save a label for it" in cb.label).set_value(True)
+    at.run()
+
+    save_btn = next(b for b in at.button if "Save & next" in b.label)
+    assert save_btn.disabled is False
+    blockers = [c.value for c in at.caption if c.value.startswith("Cannot save yet")]
+    assert blockers == []
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Previous/Next: pure navigation, never a save
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_no_incipient_and_remove_last_buttons_are_gone():
+    at = _label_app()
+    labels = {b.label for b in at.main.button}
+    assert "No incipient" not in labels
+    assert "－ Remove last" not in labels
+    assert "← Back" not in labels
+    assert {"◂ Previous", "Next ▸"} <= labels
+
+
+def test_previous_and_next_move_through_the_queue_without_saving():
+    import sys
+    sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
+    import labels_core as lc
+
+    before_text = lc.LABELS_PATH.read_text()
+
+    at = _label_app()
+
+    def pos_value(at):
+        for sb in at.main.selectbox:
+            if sb.label == "Jump to case":
+                return sb.value
+
+    start = pos_value(at)
+    next(b for b in at.button if b.label == "Next ▸").click()
+    at.run()
+    after_next = pos_value(at)
+    assert after_next != start
+
+    next(b for b in at.button if b.label == "◂ Previous").click()
+    at.run()
+    after_previous = pos_value(at)
+    assert after_previous == start
+
+    assert lc.LABELS_PATH.read_text() == before_text, (
+        "Previous/Next must never write to manual_labels.yaml")

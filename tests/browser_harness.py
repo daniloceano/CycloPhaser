@@ -372,7 +372,7 @@ class LabelPage:
         number that describes it.
         """
         chart = self.chart_box()
-        buttons = self.page.get_by_role("button", name="← Back").bounding_box()
+        buttons = self.page.get_by_role("button", name="Next ▸").bounding_box()
         return chart["y"], buttons["y"] + buttons["height"]
 
     def clipped_chart_labels(self) -> list[str]:
