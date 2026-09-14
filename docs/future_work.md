@@ -1190,6 +1190,93 @@ overlay was on screen before this specific re-save.
 
 ---
 
+## 16. Calibration app — Label tab navigation, per-boundary uncertainty, overlays, schema 4 — **closed, PASS, 2026-09-14**
+
+**Status: closed with a fix.** Branch `feat/label-tab-navigation-overlays`
+(6 commits: `ab17faa`, `d1e23a5`, `2b9d5a1`, `c8d3dbb`, `ddc4522`, `f300420`),
+merged into `develop-v2.1` as `8102334` (`--no-ff`). Follows on from item 9's
+Label tab.
+
+**What changed, in the Label tab (`tools/calibration_app/label_tab.py`)
+only, plus a schema bump in `research/labels/labels_core.py`:**
+- Case-navigation dropdown (status/split/frozen indicators) moved into the
+  main content area, above the heading — it originally shipped in the
+  sidebar, mixed with Grid/Inspector filters, and Danilo could not find it.
+- Uncertainty is now settable on both edges (`open`/`close`) of every phase,
+  including the two series edges, not one flag per row; reconciled per
+  boundary across the two rows that share it.
+- Selective multi-phase removal via a per-row checkbox + "Remove selected",
+  replacing the old "No incipient" / "Remove last" buttons. Navigation is a
+  pure "◂ Previous" / "Next ▸" pair that never saves.
+- An opt-in, Inspection-only overlay of the detector's own filtered/smoothed
+  series (`cyclophaser.determine_periods.process_vorticity`, computed in
+  `app.py`, never reimplemented in the tab), drawn in the SAME chart and
+  y-axis as the raw series and the boundary bars — forced off in Labelling
+  mode, so blind labelling never sees it.
+- `manual_labels.yaml` schema 3 → 4: `open_unsure`, `close_unsure`,
+  `overlays_shown` (blindness provenance), `superseded` (label history on
+  overwrite). Schema-3 records are read unchanged and do not migrate until a
+  deliberate resave; the addition never changes verdict derivation — checked
+  by round-tripping all 63 committed records with zero content change.
+- Hard blocks before save: TEST-split cases cannot be saved at all; the 12
+  frozen synthetic cases require two separate confirmations; overwriting any
+  existing label requires an explicit confirmation. An explicit "Cannot save
+  yet — <reasons>" caption makes a blocked save diagnosable from the screen.
+
+**Two bugs found and fixed against real usage, both root-caused before being
+patched:**
+1. A genuine Streamlit lesson, not specific to this tab: a widget rendered
+   after another widget that can call `st.rerun()` earlier in the same
+   script pass loses its ticked/typed state on the pass it gets skipped,
+   even though its key is unchanged — bare widget-key memory does not
+   survive being skipped. Hit this on the three save-confirmation checkboxes
+   and the Notes field, right after `_mode_switch`'s Confirm button reruns.
+   Fixed by backing each with an explicit `st.session_state` entry read as
+   `value=`. See [[streamlit_widget_state_after_early_rerun]].
+2. **Real, pre-existing bug, not introduced by this front**: dragging a
+   phase boundary in the chart could silently move the WRONG boundary
+   whenever two adjacent boundaries' tolerance hit-areas overlapped (an
+   ordinary condition, not an edge case). Root cause: one `pointerdown`
+   listener per boundary's hit-rect, so an overlap was resolved by DOM
+   z-order (whichever rect was painted last won), never by geometry.
+   Confirmed pre-existing via a throwaway `git worktree` of unmodified
+   `develop-v2.1` — reproduces there identically, so the front's own
+   initial hypothesis (the new three-curve overlay chart broke boundary
+   identification) was investigated and ruled out (reproduces with zero
+   overlays active) before any fix was applied. Fixed with one chart-level
+   listener that picks the target by distance to boundary geometry.
+   `setStart`/`setTol`/`onMove`/`onKey` — the pointer/keyboard code that
+   only ever reads `clientX`/step index, never a curve value — are
+   untouched by this fix, confirmed by diff. Verified with a new invariance
+   test: dragging never changes the number of phases, only `start_idx`.
+
+Also fixed, found only once real Chromium became available for this
+front's browser suite: two `tests/browser_harness.py` selectors broken by a
+Streamlit version's migration to react-aria components (slider `role`,
+combobox value storage in an `input` attribute rather than text) —
+confirmed pre-existing on `develop-v2.1` too, not caused by the navigation
+move; and a ~3px viewport overflow at 1440x800 fixed by a chart-height
+budget bump, re-measured at 1440x800 / 1680x950 / 1920x1080 to confirm no
+shrinkage on the two larger sizes.
+
+**Verification:** `tests/test_label_browser.py` (real Chromium, branch tip
+`f300420`, pre-merge): 29/29 passed. Full project suite, run on merged
+`develop-v2.1` (`8102334`) in the dedicated `cyclophaser` conda env (item
+12): **1144 passed, 1 skipped, 95 warnings in 546.53s** — a first attempt at
+this same run, from a shell where `python` resolved to the base conda env
+(3.13) rather than `cyclophaser` (3.12), produced 2 failures and 1 error, all
+three Playwright timeouts specific to that wrong environment (missing/
+different browser binaries) — exactly the shadowing failure mode item 13
+warned about, not a regression from this merge. Discarded once identified;
+not the number recorded above.
+
+**Data change carried in from this branch:** two manual labels Danilo saved
+while testing (`20170794`, `s5dcc0f79`), and item 15's
+[[synthetic-incipient-ground-truth-decision]] (registered separately, ahead
+of this front closing, at Danilo's explicit request).
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
