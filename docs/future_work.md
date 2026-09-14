@@ -1144,6 +1144,52 @@ calibration app can land on `develop-v2.1` with a green CI.
 
 ---
 
+## 15. Synthetic incipient ground truth — manual label overrules `expected_starts_idx` (decision, 2026-09-14)
+
+**Status: decided, no code change required.** Danilo, after blind-labelling
+the 12 synthetic cases through the calibration app's Label tab (see item 9;
+the tab itself gained navigation, per-boundary edge uncertainty, selective
+phase removal and gated overlays on branch
+`feat/label-tab-navigation-overlays`, not merged as of this writing):
+
+> nos sintéticos quase sempre há uma fase incipiente que não foi pretendida
+> originalmente. Pelo menos para os sintéticos eu confirmo meu label manual
+> como fonte da verdade
+
+For the 12 synthetic cases, his blind manual label in
+`research/labels/manual_labels.yaml` is the source of truth for the
+incipient phase — not `tests/synthetic/cases.py`'s segment-derived
+`expected_starts_idx`.
+
+**Why:** this independently confirms, by blind human judgment, what
+`cases.py`'s own comments and `research/incipient_plateau/
+REPORT_incipient_characterisation.md` already measured algorithmically:
+`_ramp_sine` is a half-period cosine with zero derivative at both endpoints,
+so any `It`/`D` segment opening in `sine` starts flat and produces a genuine
+incipient plateau the segment list never designed for. Only the two
+`linear` openings (`DItMD_noisy`, `DItMD_residual_noisy` —
+`STEEP_START_CASE_IDS`) are true negatives.
+
+**Practical consequence:** `research/labels/evaluate_against_labels.py`
+already scores every case, synthetic included, against `manual_labels.yaml`
+— it never reads `expected_starts_idx` at all, so this decision needs **no
+code change** there. What it DOES affect: `research/incipient_plateau/
+REPORT_incipient_characterisation.md` and `measure_incipient.py`'s
+`synthetic_ground_truth()` (`designed_Ic` / `expected_Ic` / `no_Ic`,
+built entirely from `expected_starts_idx`) predate the blind-labelling front
+and are now **superseded**, for the synthetic set, by the manual labels.
+Neither has been updated to reflect this ruling — not done as part of this
+entry, pending a separate request.
+
+**Data change, same date:** one synthetic case was re-labelled under this
+front's schema 4 — `s5dcc0f79` (`IcItMD_residual_clean`) gained a `residual`
+phase. Its previous version is preserved under that record's `superseded`
+list (schema 4 never discards an overwritten label), and the new version is
+flagged `overlays_shown: [vorticity_smoothed2]` — not blind, since an
+overlay was on screen before this specific re-save.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
