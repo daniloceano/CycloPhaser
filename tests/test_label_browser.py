@@ -102,11 +102,25 @@ def fresh(lab):
 
     Deliberately not through the chart: a test whose setup uses the thing under
     test cannot fail honestly.
+
+    Row 3 is pinned too, not left at whatever the currently-loaded real case
+    happens to have on disk. It didn't used to matter when this suite was
+    authored against a partially-labelled queue, but the queue is now 63/63
+    complete, so the case this fixture opens is always the SAME one (last in
+    the fixed shuffle order) with whatever decay boundary is actually
+    recorded for it — which drifts as that label gets refined, and at one
+    point sat at 54, close enough to block `drag_boundary(2, 61)` and
+    `drag_tolerance(2, 62)` from ever reaching their targets (correctly
+    clamped against row 3, not a bug — just a fixture that didn't control
+    every row it depends on). Pinned to 100 here, far past every target any
+    test in this file drags row 1 or row 2 toward.
     """
     lab.set_start_idx(1, 20)
     lab.set_tolerance_idx(1, 4)
     lab.set_start_idx(2, 50)
     lab.set_tolerance_idx(2, 5)
+    lab.set_start_idx(3, 100)
+    lab.set_tolerance_idx(3, 5)
     lab.set_unsure(1, False)
     lab.set_unsure(2, False)
     assert lab.table_state()[1] == (20, 4, False), lab.table_state()
@@ -302,6 +316,34 @@ def test_a_drag_updates_the_number(fresh):
     assert fresh.start_idx(2) == pytest.approx(61, abs=1), fresh.table_state()
 
 
+def test_dragging_never_changes_the_number_of_phases(fresh):
+    """A real bug, not a hypothetical: with overlapping grip/edge hit-areas
+    resolved by DOM z-order instead of geometry, a click meant for boundary 2
+    could silently move boundary 3 instead, and reading the table afterward
+    looked exactly like a phase had been added at the drag target while the
+    original boundary "stayed behind" — same length, but the WRONG entry
+    moved. Length alone would not have caught that regression; this checks it
+    on every kind of edit the chart can make, pinned against `n_rows()`
+    before and after each one.
+    """
+    n_before = fresh.n_rows()
+
+    fresh.drag_boundary(2, 61)
+    assert fresh.n_rows() == n_before
+    fresh.set_start_idx(2, 50)  # restore for the next assertion in this test
+
+    fresh.drag_tolerance(2, 58)
+    assert fresh.n_rows() == n_before
+    fresh.set_tolerance_idx(2, 5)
+
+    fresh.click_boundary(1)
+    fresh.press("ArrowRight")
+    assert fresh.n_rows() == n_before
+
+    fresh.drag_boundary(1, 40, release_outside=True)
+    assert fresh.n_rows() == n_before
+
+
 def test_a_margin_typed_in_the_table_resizes_the_bar(fresh):
     fresh.set_tolerance_idx(2, 9)
     assert fresh.tolerance_idx(2) == 9
@@ -333,8 +375,77 @@ def test_not_sure_is_per_boundary_and_survives_a_drag(fresh):
     fresh.set_unsure(2, False)
 
 
-def test_the_first_row_cannot_be_unsure(fresh):
-    assert fresh.page.get_by_label("unsure, row 0", exact=True).is_disabled()
+def test_row_zero_start_unsure_is_settable_it_is_the_series_opening_edge(fresh):
+    """Unlike schema 3's single per-phase flag (disabled on row 0, since a
+    partition of [0, n) begins at 0 by construction and there was nothing to
+    be unsure about there), row 0's START checkbox is now `open_unsure` — the
+    edge BEFORE the first phase, which the phase list has no boundary to
+    carry. It must be enabled and settable like any other checkbox."""
+    box = fresh.page.get_by_label("unsure, row 0", exact=True)
+    assert not box.is_disabled()
+    fresh.set_unsure(0, True)
+    assert fresh.is_unsure(0)
+    fresh.set_unsure(0, False)
+
+
+def test_end_unsure_of_one_row_mirrors_start_unsure_of_the_next(fresh):
+    """A phase sequence of N phases has N+1 edges; row k's 'end unsure' and
+    row k+1's 'start unsure' are two on-screen checkboxes for the SAME
+    stored edge. They are two different Streamlit widgets under two
+    different keys, so ticking one does not, by itself, change what the
+    other widget shows — this is exactly the class of bug the module's own
+    docstring warns about elsewhere (a keyed widget ignores a changed
+    `value=`). Both must settle on the identical state after one rerun."""
+    fresh.set_end_unsure(1, True)
+    assert fresh.is_end_unsure(1)
+    assert fresh.is_unsure(2), "row 2's start-unsure did not mirror row 1's end-unsure"
+    fresh.set_unsure(2, False)
+    assert not fresh.is_end_unsure(1), "row 1's end-unsure did not follow back down"
+    assert not fresh.is_unsure(2)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Overlays share the chart, never the boundaries
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_dragging_a_boundary_gives_the_same_start_idx_with_overlays_on(fresh):
+    """The three filtered/smoothed layers are drawn in the SAME chart as the
+    raw series, on the SAME x/y mapping — a boundary's screen position comes
+    only from `sx(step index)`, never from any curve's value (see
+    label_tab.py's _CHART_JS: `setStart`/`onMove` read `clientX` and the
+    step index alone). Dragging near a differently-scaled curve must
+    therefore land on the identical step as dragging with no overlay on.
+
+    Leaves overlays switched off again at the end: a later test in this
+    module (`test_nothing_the_detector_produced_is_on_the_page`) asserts
+    package vocabulary is absent from the WHOLE page, which an overlay
+    checkbox's own label would violate if left ticked on.
+    """
+    fresh.drag_boundary(1, 34)
+    target_start = fresh.start_idx(1)
+    fresh.set_start_idx(1, 20)   # back to `fresh`'s known starting position
+
+    fresh.enable_overlay("vorticity_smoothed2")
+    try:
+        fresh.drag_boundary(1, 34)
+        with_overlay_start = fresh.start_idx(1)
+    finally:
+        fresh.set_start_idx(1, 20)
+        # switch the layer and the master back off
+        layer = fresh.page.get_by_label("vorticity_smoothed2", exact=False)
+        if layer.is_checked():
+            layer.locator("xpath=ancestor::label[1]").click()
+            fresh.settle()
+        master = fresh.page.get_by_label("Show filtered/smoothed overlays",
+                                         exact=False)
+        if master.is_checked():
+            master.locator("xpath=ancestor::label[1]").click()
+            fresh.settle()
+
+    assert with_overlay_start == pytest.approx(target_start, abs=1), (
+        f"drag landed on {with_overlay_start} with an overlay on vs. "
+        f"{target_start} without — the boundary must not depend on which "
+        "curve is drawn near the pointer")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -384,6 +495,12 @@ def test_the_chart_resizes_with_the_window_without_losing_the_marks(server, pw):
     try:
         lp = LabelPage(page).open(server.url)
         lp.set_start_idx(1, 27)
+        # Row 2's own position on disk isn't controlled by this test (it uses
+        # a fresh page, not the `fresh` fixture, which pins it for exactly
+        # this reason) — push it out of the way so the drag to 40 at the
+        # bottom of this test has room; otherwise it is legitimately clamped
+        # against whatever row 2 happens to be for the currently-loaded case.
+        lp.set_start_idx(2, 60)
         tall = lp.chart_box()["height"]
 
         page.set_viewport_size({"width": 1600, "height": 700})

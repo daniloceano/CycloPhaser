@@ -281,16 +281,24 @@ class LabelPage:
         return int(self._num("tolerance_idx", k).input_value())
 
     def phase_name(self, k: int) -> str:
-        """A Streamlit selectbox renders as a combobox whose value is text in
-        the widget, not an input value — so it is read, not typed. Scoped to the
-        main area because the sidebar has selectboxes of its own, three of them
-        ahead of these in document order."""
-        return self.page.locator(
-            '[data-testid="stMain"] [data-testid="stSelectbox"]'
-        ).nth(k).inner_text().strip().splitlines()[0]
+        """A Streamlit selectbox is a react-aria combobox: the chosen value
+        lives in its `<input value="...">` attribute, not as visible text
+        content. `.inner_text()` reads rendered text nodes and returns '' for
+        this widget regardless of which one — confirmed against unmodified
+        develop-v2.1 too, so this is a Streamlit-version rendering change,
+        predating and unrelated to anything on this front. Read via the
+        accessible label instead of position: `get_by_label` matches this
+        widget's own `aria-label` directly, so it needs no index arithmetic
+        and does not care how many OTHER selectboxes (the case-navigation
+        dropdown included) sit before it on the page.
+        """
+        return self.page.get_by_label(f"phase, row {k}", exact=True).input_value()
 
     def is_unsure(self, k: int) -> bool:
         return self.page.get_by_label(f"unsure, row {k}", exact=True).is_checked()
+
+    def is_end_unsure(self, k: int) -> bool:
+        return self.page.get_by_label(f"end unsure, row {k}", exact=True).is_checked()
 
     def n_rows(self) -> int:
         k = 0
@@ -323,11 +331,31 @@ class LabelPage:
         no clickable box of its own and Playwright refuses it as "outside of the
         viewport". The label is what a person clicks, so it is what this clicks.
         """
-        box = self.page.get_by_label(f"unsure, row {k}", exact=True)
+        self._click_labelled_checkbox(f"unsure, row {k}", value)
+
+    def set_end_unsure(self, k: int, value: bool) -> None:
+        self._click_labelled_checkbox(f"end unsure, row {k}", value)
+
+    def _click_labelled_checkbox(self, label: str, value: bool) -> None:
+        box = self.page.get_by_label(label, exact=True)
         if box.is_checked() != value:
-            label = box.locator("xpath=ancestor::label[1]")
-            label.scroll_into_view_if_needed()
-            label.click()
+            lbl = box.locator("xpath=ancestor::label[1]")
+            lbl.scroll_into_view_if_needed()
+            lbl.click()
+            self.settle()
+
+    # ── overlays (Inspection mode only) ──────────────────────────────────────
+    def enable_overlay(self, layer_label_substring: str) -> None:
+        """Turn the master overlay switch on, then one layer by its visible
+        (partial) label text, e.g. 'vorticity_smoothed2'."""
+        master = self.page.get_by_label("Show filtered/smoothed overlays",
+                                        exact=False)
+        if not master.is_checked():
+            master.locator("xpath=ancestor::label[1]").click()
+            self.settle()
+        layer = self.page.get_by_label(layer_label_substring, exact=False)
+        if not layer.is_checked():
+            layer.locator("xpath=ancestor::label[1]").click()
             self.settle()
 
     # ── layout ───────────────────────────────────────────────────────────────
@@ -342,7 +370,7 @@ class LabelPage:
         number that describes it.
         """
         chart = self.chart_box()
-        buttons = self.page.get_by_role("button", name="← Back").bounding_box()
+        buttons = self.page.get_by_role("button", name="Next ▸").bounding_box()
         return chart["y"], buttons["y"] + buttons["height"]
 
     def clipped_chart_labels(self) -> list[str]:
@@ -360,7 +388,15 @@ class LabelPage:
         Used two ways: to fire a rerender in the middle of a drag, and to prove
         afterwards that a value survived one — a value that is still on screen
         after the server has re-rendered the page came from the server.
+
+        Targets the slider's native `<input type="range">`, not `[role=
+        "slider"]`: Streamlit's slider moved to a react-aria implementation
+        that exposes the handle as a visually-hidden range input under
+        `role="group"`, not a `role="slider"` element — the old selector
+        matched nothing and this timed out. Pre-existing drift, unrelated to
+        anything this front changed (nothing here touches the filter
+        sidebar); confirmed by inspecting the live DOM, not guessed.
         """
         slider = self.page.locator(
             '[data-testid="stSidebar"] [data-testid="stSlider"]').first
-        slider.locator('[role="slider"]').first.press("ArrowRight")
+        slider.locator('input[type="range"]').first.press("ArrowRight")

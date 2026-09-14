@@ -164,7 +164,21 @@ export default function (component) {
   // four-row table, the notes line, the button row and the two captions. It was
   // measured, not guessed — see tests/test_label_browser.py, which fails if the
   // block from the heading to the buttons stops fitting in the viewport.
-  const RESERVE = 400, MIN_PX = 230;
+  //
+  // 400 -> 420: the save-gate section below the table grew (the "Cannot save
+  // yet" caption, and the overwrite/frozen-synthetic confirmation checkboxes
+  // for cases that need them) without a matching bump here. That alone was a
+  // ~3px overflow on the SPAN (chart-top to button-bottom); a first fix to
+  // 410 closed the span but missed that the chart's own `scrollMarginTop`
+  // ('10px' — see host.style below) means its top sits ~10px down the
+  // viewport even after being scrolled fully into view, so the ABSOLUTE
+  // bottom position needs slack for that offset too, not just the span.
+  // Remeasured at 1440x800/1680x950/1920x1080 with tests/test_label_browser.
+  // py's own `working_area()` after this change: fits at 1440x800 (with
+  // margin, not flush against the limit), and the chart is already at its
+  // `data.h` cap on the two larger sizes (constrained by the cap, not by
+  // RESERVE), so it does not shrink there.
+  const RESERVE = 420, MIN_PX = 230;
   const targetPx = () => Math.max(
     MIN_PX, Math.min(Math.round((window.innerHeight || 900) - RESERVE), data.h));
   const wantH = (width) => {
@@ -181,13 +195,22 @@ export default function (component) {
   // land in the middle of a gesture (any sidebar widget triggers one). Tearing
   // the SVG down and building a new one would take the listeners and the
   // in-flight drag with it, so the node is kept and its attributes updated
-  // whenever the series, the number of phases AND the height are unchanged.
-  // Only a genuinely different chart is rebuilt.
+  // whenever the series, the number of phases, the ACTIVE OVERLAY SET and the
+  // height are unchanged. Only a genuinely different chart is rebuilt.
+  //
+  // The overlay set is part of this comparison because toggling a layer
+  // changes which <path> elements must exist, which `update()` does not
+  // touch (it only repositions bands/bars from step indices) — so a toggle
+  // has to fall through to a full rebuild, same as a changed phase count
+  // does. `overlayKey` is a plain string so it can be compared with `===`
+  // the same way every other field here is.
+  const overlayKey = (data.overlays || []).map((o) => o.name).join('|');
   const host0 = parentElement.querySelector('#cp-label-chart');
   const S0 = host0 && host0.__cp;
   const H0 = host0 ? wantH(host0.clientWidth) : 0;
   if (S0 && S0.sid === data.sid && S0.n === data.n &&
-      S0.PH.length === data.phases.length && Math.abs(S0.h - H0) < 10) {
+      S0.PH.length === data.phases.length && S0.overlayKey === overlayKey &&
+      Math.abs(S0.h - H0) < 10) {
     S0.setTrigger = setTriggerValue;   // a fresh closure arrives each rerender
     if (!S0.drag) {                    // never overwrite what is being dragged
       for (let k = 0; k < data.phases.length; k++) {
@@ -218,6 +241,7 @@ export default function (component) {
 
   const N = data.n;
   const Y = data.y;
+  const OVERLAYS = data.overlays || [];
   const COL = data.colors;
   const PH = (carriedPH || data.phases).map((p) => ({ ...p }));
   const W = data.w;
@@ -236,8 +260,20 @@ export default function (component) {
 
   const PW = W - ML - MR, PH_ = H - MT - MB;
 
+  // ONE y-domain for every curve on screen — the raw series AND every active
+  // overlay. Deliberately NOT per-curve normalised: a flat overlay is
+  // information (it means that processing step did little here), and
+  // rescaling it to fill the axis would erase exactly that. If an overlay is
+  // visually flat against the raw series' range, that is the honest picture.
   let lo = Infinity, hi = -Infinity;
-  for (let i = 0; i < N; i++) { if (Y[i] < lo) lo = Y[i]; if (Y[i] > hi) hi = Y[i]; }
+  const _scan = (arr) => {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] < lo) lo = arr[i];
+      if (arr[i] > hi) hi = arr[i];
+    }
+  };
+  _scan(Y);
+  OVERLAYS.forEach((o) => _scan(o.values));
   const pad = (hi - lo) * 0.06 || 1;
   const y0 = lo - pad, y1 = hi + pad;
 
@@ -300,12 +336,54 @@ export default function (component) {
   xlab.textContent = 'step index';
   svg.appendChild(xlab);
 
-  // 3. the raw series
-  let d = '';
-  for (let i = 0; i < N; i++) d += (i ? ' L' : 'M') + sx(i).toFixed(2) + ',' + sy(Y[i]).toFixed(2);
+  // 3. the raw series — drawn FIRST so every overlay sits visually on top
+  //    of it, per the labeller's request: raw in the background, processed
+  //    layers above. Never removable: it is the one curve the label is
+  //    actually written from.
+  const curveD = (arr) => {
+    let d = '';
+    for (let i = 0; i < arr.length; i++) {
+      d += (i ? ' L' : 'M') + sx(i).toFixed(2) + ',' + sy(arr[i]).toFixed(2);
+    }
+    return d;
+  };
   svg.appendChild(el('path', {
-    d: d, fill: 'none', stroke: '#1f2d3d', 'stroke-width': 1.8,
+    d: curveD(Y), fill: 'none', stroke: '#1f2d3d', 'stroke-width': 1.8,
     'stroke-linejoin': 'round' }));
+
+  // 3b. active overlays — SAME x/y mapping (sx/sy) as the raw series above,
+  // so a boundary line drawn later crosses all of them at the identical
+  // pixel regardless of which curve it is next to (see the boundary bars
+  // below: their position comes ONLY from `sx(step index)`, never from any
+  // curve's value, so this ordering cannot change what a drag does).
+  // Progressively thinner than the raw line so the raw curve — the one the
+  // label is actually written from — reads as the visual anchor even with
+  // three lines on screen; color is the primary distinguishing channel.
+  OVERLAYS.forEach((o, idx) => {
+    svg.appendChild(el('path', {
+      d: curveD(o.values), fill: 'none', stroke: o.color,
+      'stroke-width': Math.max(0.9, 1.6 - idx * 0.3), 'stroke-linejoin': 'round',
+      'stroke-opacity': 0.9,
+    }));
+  });
+
+  // 3c. legend for the active overlays, top-right so it never collides with
+  // the phase-band labels or the alert text (both left-anchored, see below).
+  if (OVERLAYS.length) {
+    const leg = el('g', {});
+    svg.appendChild(leg);
+    OVERLAYS.forEach((o, idx) => {
+      const ly = MT + 14 + idx * 16;
+      leg.appendChild(el('line', {
+        x1: ML + PW - 130, x2: ML + PW - 106, y1: ly - 4, y2: ly - 4,
+        stroke: o.color, 'stroke-width': Math.max(0.9, 1.6 - idx * 0.3) }));
+      const lt = el('text', {
+        x: ML + PW - 100, y: ly, 'font-size': 11, fill: '#33414f',
+        'font-family': 'sans-serif' });
+      lt.textContent = o.name;
+      leg.appendChild(lt);
+    });
+  }
 
   // 4. boundary bars. The bar's WIDTH is the tolerance, so the uncertainty
   //    travels with the boundary instead of being a second object to keep in
@@ -436,18 +514,62 @@ export default function (component) {
     return true;
   };
 
-  const onDown = (k, mode) => (e) => {
+  // ── which boundary does a pointerdown belong to? ───────────────────────────
+  // Decided by DISTANCE from the click to every boundary's own geometry, never
+  // by which invisible hit-rect happens to be on top at that pixel. Adjacent
+  // boundaries' grip/edge rects legitimately overlap whenever their combined
+  // tolerance reach exceeds their spacing (the bar's width IS the tolerance —
+  // real data, not something to shrink to avoid a collision), and with the
+  // OLD per-element listeners, whichever rect was appended LAST always won an
+  // overlap, silently grabbing the wrong boundary. Two boundaries 4 steps
+  // apart with a margin of 5 on each side overlap this way on a perfectly
+  // ordinary label (verified against develop-v2.1 before this rewrite: the
+  // bug reproduces there unchanged, so it predates every commit on this
+  // front — this is not new breakage, it is the first fix for it).
+  //
+  // Edge (tolerance-resize) targets are checked before body (move) targets,
+  // preserving the original z-order's intent ("edge grips come last so they
+  // win where they overlap the body") — just decided by geometry now, across
+  // ALL boundaries at once, not only within one boundary's own two hit areas.
+  const pickTarget = (x) => {
+    let best = null, bestDist = Infinity;
+    for (let k = 1; k < PH.length; k++) {
+      const cx = sx(PH[k].start_idx);
+      const half = PH[k].tolerance_idx * step;
+      const edge = Math.max(half, 11);
+      for (const ex of [cx - edge, cx + edge]) {
+        const d = Math.abs(x - ex);
+        if (d <= 6 && d < bestDist) { bestDist = d; best = { k, mode: 'tol' }; }
+      }
+    }
+    if (best) return best;
+    bestDist = Infinity;
+    for (let k = 1; k < PH.length; k++) {
+      const cx = sx(PH[k].start_idx);
+      const half = PH[k].tolerance_idx * step;
+      const inner = Math.max(7, half - 7);
+      const d = Math.abs(x - cx);
+      if (d <= inner && d < bestDist) { bestDist = d; best = { k, mode: 'move' }; }
+    }
+    return best;
+  };
+
+  const onDown = (e) => {
+    const x = at(e);
+    if (x === null) return;
+    const hit = pickTarget(x);
+    if (!hit) return;
     e.preventDefault();
-    S.drag = { k: k, mode: mode };
-    S.sel = k;
+    S.drag = { k: hit.k, mode: hit.mode };
+    S.sel = hit.k;
     try { svg.focus({ preventScroll: true }); } catch (_) { /* not focusable */ }
     update();
   };
-  for (let k = 1; k < PH.length; k++) {
-    grip[k].addEventListener('pointerdown', onDown(k, 'move'));
-    hL[k].addEventListener('pointerdown', onDown(k, 'tol'));
-    hR[k].addEventListener('pointerdown', onDown(k, 'tol'));
-  }
+  // One listener for the whole chart, not one per hit-rect: pointerdown still
+  // bubbles up from whichever grip/edge rect the browser painted on top, but
+  // `pickTarget` re-decides the target from `x` alone, so which element was
+  // actually under the pointer no longer matters.
+  svg.addEventListener('pointerdown', onDown);
 
   // ── move/up/cancel live on WINDOW, not on the <svg> ────────────────────────
   // On the SVG they only fire while the pointer is over it. A pointer released
@@ -531,7 +653,8 @@ export default function (component) {
   window.addEventListener('resize', onResize);
 
   const S = {
-    sid: data.sid, n: N, h: H, PH: PH, drag: null, seq: 0, sel: 1,
+    sid: data.sid, n: N, h: H, PH: PH, overlayKey: overlayKey,
+    drag: null, seq: 0, sel: 1,
     setTrigger: setTriggerValue, update: update,
     teardown: () => {
       clearTimeout(resizeTimer);
@@ -675,18 +798,32 @@ def is_new_edit(payload: dict, last_signature: str | None) -> bool:
     return bool(payload) and edit_signature(payload) != last_signature
 
 
-def _draw(sid: str, values: pd.Series, phases: list[dict]) -> dict | None:
+def _draw(sid: str, values: pd.Series, phases: list[dict],
+         overlays: list[dict] | None = None) -> dict | None:
     """Mount the chart and return its last message, if any.
 
     Raises rather than returning None on a mount failure: the caller has to be
     able to tell "the labeller has not touched it yet" from "the chart is not
     there", because those two need opposite things on screen.
+
+    `overlays`, when non-empty, draws those layers in the SAME chart, on the
+    SAME y-axis as the raw series (see the chart JS: the y-domain is the union
+    of the raw series and every active overlay, never normalised per curve).
+    Merged into the wire payload HERE rather than inside `chart_payload`
+    itself: that function's return keys are pinned by
+    tests/test_manual_labels.py to the raw-series-only contract, and `render`
+    only ever passes a non-empty list here from INSPECTION mode (see
+    `_overlay_controls`) — LABELLING mode always calls this with `overlays`
+    left at its default, so the wire payload it produces is byte-for-byte
+    what it always was.
     """
     # height="content": the component decides its own height from the viewport,
     # so a fixed number here would either crop it or reserve space it does not
     # use.
+    payload = chart_payload(sid, values, phases)
+    payload["overlays"] = overlays or []
     result = _chart_component()(
-        data=chart_payload(sid, values, phases),
+        data=payload,
         key=chart_key(sid),
         on_edit_change=lambda: None,
         height="content",
@@ -725,8 +862,8 @@ def default_phases(n: int, tolerance: int) -> list[dict]:
              "unsure": False} for p, i in rows]
 
 
-# phase · start · margin · not-sure
-_TABLE_COLS = [2.2, 1.6, 1.6, 1.4]
+# phase · start · margin · start-unsure · end-unsure · remove
+_TABLE_COLS = [2.0, 1.4, 1.4, 1.2, 1.2, 0.9]
 
 
 def _compact_layout() -> None:
@@ -752,7 +889,9 @@ def _compact_layout() -> None:
     )
 
 
-def _phase_table(sid: str, phases: list[dict], n: int, rev: int) -> list[dict]:
+def _phase_table(sid: str, phases: list[dict], n: int, rev: int,
+                 open_unsure: bool, close_unsure: bool
+                 ) -> tuple[list[dict], list[int], bool, bool]:
     """The numeric table: one row per phase, every field editable.
 
     THE CANONICAL PATH, not a read-out of the chart. A complete label can be
@@ -770,14 +909,46 @@ def _phase_table(sid: str, phases: list[dict], n: int, rev: int) -> list[dict]:
     `rev` is bumped whenever the chart changes the list, so the widgets are
     rebuilt: a keyed Streamlit widget keeps its own value and ignores a changed
     `value=` argument, so without it a dragged bar would not move the number.
+
+    Returns `(proposed_phases, marked_for_removal, open_unsure, close_unsure)`.
+    The removal checkbox is a separate return value rather than a field on the
+    phase dict: removal is an action on the ROW, not a property of the phase
+    it currently holds.
+
+    Two boundary checkboxes per row, not two independent flags
+    -------------------------------------------------------------
+    A phase sequence of N phases has N+1 EDGES: before phase 0, between every
+    pair of adjacent phases, and after phase N-1. Storage still has exactly
+    one value per edge — `open_unsure` (edge 0), `phases[k]['unsure']` for
+    k=1..N-1 (edge k, the phase that STARTS there), `close_unsure` (edge N) —
+    unchanged from schema 4. What changes here is that every row now shows
+    BOTH of ITS OWN two edges: row k's "start unsure" is edge k, row k's "end
+    unsure" is edge k+1. Row k's "end" and row (k+1)'s "start" are therefore
+    two on-screen checkboxes for the identical stored value.
+
+    Because they are two different Streamlit widgets, ticking one does not by
+    itself change what the other shows — a keyed widget keeps its own value
+    regardless of what `value=` says on the next render (the same fact this
+    module already works around for the chart/table split, see `rev` above).
+    So this function reads BOTH raw checkbox results for every internal edge
+    and reconciles them AFTER the loop: whichever of the two disagrees with
+    the edge's OLD stored value is the one that was just clicked, and that
+    becomes the new value for the edge — which both checkboxes then render
+    from, via a bumped `rev`, on the very next rerun. They cannot be left
+    showing different states for more than the one rerun it takes Streamlit
+    to redraw both from the single reconciled value.
     """
     head = st.columns(_TABLE_COLS)
     head[0].caption("Phase")
     head[1].caption("Starts at step")
     head[2].caption("± margin")
-    head[3].caption("Not sure")
+    head[3].caption("Start unsure")
+    head[4].caption("End unsure")
+    head[5].caption("Remove")
 
-    proposed = []
+    n_phases = len(phases)
+    proposed, to_remove = [], []
+    row_start_unsure, row_end_unsure = [], []
     for k, ph in enumerate(phases):
         c = st.columns(_TABLE_COLS)
         name = c[0].selectbox(
@@ -785,8 +956,9 @@ def _phase_table(sid: str, phases: list[dict], n: int, rev: int) -> list[dict]:
             index=(list(lc.PHASE_ORDER).index(ph["phase"])
                    if ph["phase"] in lc.PHASE_ORDER else 0),
             key=f"labphase-{sid}-{k}-{rev}", label_visibility="collapsed")
-        # Row 0 is not a boundary: a partition of [0, n) begins at 0, so there is
-        # nothing there to move and nothing to be unsure about.
+        # Row 0's start_idx is not a boundary: a partition of [0, n) begins at
+        # 0, so there is nothing there to move — but there IS something to be
+        # unsure about (edge 0, i.e. `open_unsure`; see the docstring).
         start = c[1].number_input(
             f"start_idx, row {k}", min_value=0, max_value=max(0, n - 1),
             value=int(ph["start_idx"]), step=1, disabled=(k == 0),
@@ -795,21 +967,243 @@ def _phase_table(sid: str, phases: list[dict], n: int, rev: int) -> list[dict]:
             f"tolerance_idx, row {k}", min_value=0, max_value=max(1, n - 1),
             value=int(ph["tolerance_idx"]), step=1,
             key=f"labtol-{sid}-{k}-{rev}", label_visibility="collapsed")
-        unsure = c[3].checkbox(
-            f"unsure, row {k}", value=bool(ph.get("unsure", False)),
-            disabled=(k == 0), key=f"labunsure-{sid}-{k}-{rev}",
-            label_visibility="collapsed")
+        start_default = open_unsure if k == 0 else bool(ph.get("unsure", False))
+        su = c[3].checkbox(
+            f"unsure, row {k}", value=start_default,
+            key=f"labunsure-{sid}-{k}-{rev}", label_visibility="collapsed")
+        end_default = (bool(phases[k + 1].get("unsure", False))
+                       if k + 1 < n_phases else close_unsure)
+        eu = c[4].checkbox(
+            f"end unsure, row {k}", value=end_default,
+            key=f"labendunsure-{sid}-{k}-{rev}", label_visibility="collapsed")
+        remove = c[5].checkbox(
+            f"remove, row {k}", value=False,
+            key=f"labremove-{sid}-{k}-{rev}", label_visibility="collapsed")
+        row_start_unsure.append(bool(su))
+        row_end_unsure.append(bool(eu))
         proposed.append({"phase": str(name), "start_idx": int(start),
-                         "tolerance_idx": int(tol),
-                         "unsure": bool(unsure) and k > 0})
+                         "tolerance_idx": int(tol), "unsure": False})
+        if remove:
+            to_remove.append(k)
+
+    new_open = row_start_unsure[0] if n_phases else open_unsure
+    new_close = row_end_unsure[-1] if n_phases else close_unsure
+    for i in range(1, n_phases):
+        old = bool(phases[i].get("unsure", False))
+        end_of_prev, start_of_this = row_end_unsure[i - 1], row_start_unsure[i]
+        if end_of_prev != old:
+            proposed[i]["unsure"] = end_of_prev
+        elif start_of_this != old:
+            proposed[i]["unsure"] = start_of_this
+        else:
+            proposed[i]["unsure"] = old
     if proposed:
         proposed[0]["start_idx"] = 0
-        proposed[0]["unsure"] = False
-    return proposed
+        proposed[0]["unsure"] = False   # structural: edge 0 is `open_unsure`, not this
+    return proposed, to_remove, new_open, new_close
 
 
-def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
-    """Draw the Label mode. Called from app.py's Calibration tab."""
+@st.cache_data(show_spinner=False)
+def _load_synthetic_names() -> dict[str, str]:
+    """{opaque_id: case_name} — for the navigation list in INSPECTION only.
+
+    The opaque id is what the labeller sees while labelling (see
+    `lc.opaque_synthetic_id`'s own docstring on why: the case name spells the
+    expected phase sequence). Showing the name too is fine ONLY in Inspection,
+    which this whole front already treats as a mode where the label is not
+    blind — see `_overlay_controls` and `_mode_switch`.
+    """
+    _series, names = lc.load_synthetic_series()
+    return names
+
+
+@st.cache_data(show_spinner=False)
+def _read_split():
+    """(split_doc, error). `error` is a message, not an exception: a failure to
+    read the split must not crash the tab, but it also must not be silently
+    treated as "no test cases exist" — see the fail-closed use in `render`."""
+    try:
+        return lc.read_split(), None
+    except Exception as exc:
+        return None, f"{type(exc).__name__}: {exc}"
+
+
+_STATUS_ICON = {"labeled": "✅", "stale": "⚠️", "unlabeled": "⬜"}
+
+
+def _case_status(values: pd.Series, rec: dict | None) -> str:
+    """One of the three states the navigation list shows per case."""
+    if not rec:
+        return "unlabeled"
+    if lc.is_legacy_record(rec) or rec.get("series_sha256") != lc.series_sha256(values):
+        return "stale"
+    return "labeled"
+
+
+def _case_navigation(queue: list[str], records: dict, series: dict,
+                     sources: dict, synth_names: dict[str, str],
+                     test_ids: set, mode: str, pos: int) -> int:
+    """The case picker: a dropdown to jump to ANY of the 63 cases directly,
+    with status/split/frozen indicators, plus a filter for "not yet labelled".
+
+    In the MAIN content area, at the very top of the Label tab, deliberately
+    — not in the sidebar. A control this central to actually using the tab
+    (open a specific case for a second look) has to be the first thing on
+    screen, not one more widget mixed in among the Grid/Inspector filter
+    controls the sidebar already carries.
+
+    Keyed on `pos` itself (the pattern `_phase_table` already uses via `rev`):
+    whenever `pos` changes for ANY reason — this selector, Save & next, Previous/Next —
+    the key changes and the widget is rebuilt fresh from the new `pos`, so it
+    can never show a stale selection left over from a previous case.
+    """
+    def _option_text(i: int) -> str:
+        sid = queue[i]
+        status = _case_status(series[sid], records.get(sid))
+        tag = ""
+        if sid in test_ids:
+            tag += "  [TEST split — locked]"
+        if sources[sid] == "synthetic":
+            tag += "  [frozen synthetic]"
+            if mode == "inspect":
+                tag += f"  ({synth_names.get(sid, '?')})"
+        return f"{_STATUS_ICON[status]} #{i + 1}/{len(queue)}  {sid}{tag}"
+
+    nav_col, filter_col = st.columns([3, 1.4])
+    only_unlabeled = filter_col.checkbox(
+        "Show only not-yet-labelled", value=False, key="lab_nav_only_unlabeled")
+
+    options = [i for i, sid in enumerate(queue)
+              if not only_unlabeled
+              or _case_status(series[sid], records.get(sid)) != "labeled"]
+    if not options:
+        st.success("Every case is labelled.")
+        options = list(range(len(queue)))
+
+    default_i = pos if pos in options else options[0]
+    chosen = nav_col.selectbox(
+        "Jump to case", options=options, index=options.index(default_i),
+        format_func=_option_text, key=f"lab_case_select__{pos}__{only_unlabeled}")
+    if chosen != pos:
+        st.session_state["lab_pos"] = chosen
+        st.rerun()
+    return pos
+
+
+def _mode_switch(sid: str) -> str:
+    """INSPECTION / LABELLING toggle, opening always on INSPECTION.
+
+    INSPECTION allows overlays and disables saving; LABELLING allows saving and
+    never offers an overlay at all (see `_overlay_controls`). Switching FROM
+    inspection TO labelling is the direction that matters — it means this
+    case's label, from this point in the session, is no longer blind — so it
+    needs an explicit confirmation naming the case, separate from the toggle
+    itself. Switching back to Inspection is always free: it only restricts
+    what can be saved, it never reveals anything.
+    """
+    mode = st.session_state.setdefault("_lab_mode", "inspect")
+    gen = st.session_state.setdefault("_lab_mode_gen", 0)
+    st.sidebar.markdown("### Mode")
+    if st.session_state.get("_lab_mode_pending"):
+        st.sidebar.warning(
+            f"Switching to LABELLING now makes labelling **{sid}** "
+            "NOT BLIND from this point in the session onward. Confirm?")
+        c1, c2 = st.sidebar.columns(2)
+        if c1.button("Confirm", key="lab_mode_confirm", use_container_width=True):
+            st.session_state["_lab_mode"] = "label"
+            st.session_state["_lab_mode_pending"] = False
+            st.rerun()
+        if c2.button("Cancel", key="lab_mode_cancel", use_container_width=True):
+            st.session_state["_lab_mode_pending"] = False
+            st.session_state["_lab_mode_gen"] = gen + 1
+            st.rerun()
+        return mode
+    choice = st.sidebar.radio(
+        "Mode", ["Inspection", "Labelling"], index=0 if mode == "inspect" else 1,
+        key=f"lab_mode_radio__{gen}")
+    wanted = "inspect" if choice == "Inspection" else "label"
+    if wanted != mode:
+        if wanted == "label":
+            st.session_state["_lab_mode_pending"] = True
+        else:
+            st.session_state["_lab_mode"] = "inspect"
+        st.rerun()
+    return mode
+
+
+def _overlay_controls(sid: str, values: pd.Series, mode: str,
+                      overlay_provider) -> list[dict]:
+    """INSPECTION-only controls for drawing the package's own filtered/smoothed
+    series IN THE SAME interactive chart as the raw one (see `_draw`).
+
+    Returns the list of ACTIVE layers, each `{"name", "label", "color",
+    "values"}` — everything the chart component needs, and nothing chart_payload
+    itself carries (that function's return keys are pinned exactly to the raw
+    series by tests/test_manual_labels.py's blindness tests; this list is
+    merged in separately by `_draw`, only when non-empty).
+
+    Gated twice over: the master checkbox is OFF by default and its own label
+    names no package internals, so neither the overlay computation nor any
+    package vocabulary reaches the page until the labeller opts in — and this
+    function returns `[]` immediately in LABELLING mode (see `render`), so
+    there is no path from here back into what the RAW-ONLY chart draws while
+    a label is actually being written.
+
+    Every name/label/color/value that could name a package internal is DATA
+    handed back by `overlay_provider` (app.py, which is allowed to import
+    cyclophaser) — never a Python identifier in this module, which is what
+    keeps this file's own AST free of them (see the module docstring and
+    tests/test_manual_labels.py's FORBIDDEN_NAMES check). `values` is only
+    ever passed to `overlay_provider`, never filtered here.
+
+    Whatever layer is actually switched on here is recorded into
+    `_lab_overlays_seen__{sid}`, which never resets for the rest of the
+    session — that accumulator is what `render` reads at save time into the
+    schema-4 `overlays_shown` provenance field.
+    """
+    if mode != "inspect" or overlay_provider is None:
+        return []
+    seen = st.session_state.setdefault(f"_lab_overlays_seen__{sid}", set())
+    show = st.checkbox(
+        "Show filtered/smoothed overlays, in the SAME chart (Inspection "
+        "only — never offered while Labelling)",
+        value=False, key=f"lab_overlay_master__{sid}")
+    if not show:
+        return []
+    try:
+        layers = overlay_provider(values) or {}
+    except Exception as exc:
+        st.error(f"Could not compute overlays — {type(exc).__name__}: {exc}")
+        return []
+    if not layers:
+        st.caption("No overlay available for this series.")
+        return []
+    active = []
+    cols = st.columns(len(layers))
+    for col, (name, info) in zip(cols, layers.items()):
+        label = info.get("label", name) if isinstance(info, dict) else name
+        on = col.checkbox(label, value=False, key=f"lab_overlay__{sid}__{name}")
+        if on:
+            seen.add(name)
+            active.append({
+                "name": name, "label": label,
+                "color": info.get("color", "#666666"),
+                "values": list(info.get("values", [])),
+            })
+    return active
+
+
+def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) -> None:
+    """Draw the Label mode. Called from app.py's Calibration tab.
+
+    `overlay_provider`, if given, is a `values -> {layer_name: [float, ...]}`
+    callable that app.py defines using cyclophaser directly (this module still
+    imports nothing from the package — see the module docstring). It is only
+    ever invoked from `_overlay_controls`, which only ever runs in INSPECTION
+    mode behind its own opt-in checkbox: the raw-series-only chart that the
+    label is actually written from (`_draw`, below) never receives it and
+    never changes shape depending on it.
+    """
     series, sources = _load_population()
     if not series:
         st.error("No series found to label "
@@ -819,16 +1213,78 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
     queue = lc.build_queue(series.keys())
     records = lc.read_labels()
     n_total = len(queue)
+    split_doc, split_error = _read_split()
+    test_ids = set(split_doc.get("test", [])) if split_doc else set()
+    synth_names = _load_synthetic_names()
 
     # Resume where the last session stopped. Stored in session state after the
-    # first computation so the Back button can move off it without the next
+    # first computation so Previous/Next can move off it without the next
     # rerun snapping back to the first unlabelled item.
     if "lab_pos" not in st.session_state:
         st.session_state["lab_pos"] = min(lc.queue_position(queue, records), n_total - 1)
     pos = int(st.session_state["lab_pos"]) % n_total
+
+    pos = _case_navigation(queue, records, series, sources, synth_names,
+                          test_ids, st.session_state.get("_lab_mode", "inspect"), pos)
     sid = queue[pos]
+    mode = _mode_switch(sid)
     values = series[sid]
     n = len(values)
+    is_synthetic = sources[sid] == "synthetic"
+    is_test_case = sid in test_ids
+
+    if split_error:
+        st.error(f"Cannot read {lc.SPLIT_PATH.name} ({split_error}) — ALL saving "
+                 "is locked until this is fixed: a case's train/test membership "
+                 "cannot be verified, and the test split must never be trained "
+                 "on by accident.")
+
+    # The authoritative phase list lives in session state, not in a widget: the
+    # chart has to be able to change it before the table is constructed, and the
+    # two must read and write ONE list rather than keeping copies that drift.
+    key_ph, key_rev = f"_lab_phases__{sid}", f"_lab_rev__{sid}"
+    key_open, key_close = f"_lab_open__{sid}", f"_lab_close__{sid}"
+
+    existing = records.get(sid)
+    stale = bool(existing) and existing.get("series_sha256") != lc.series_sha256(values)
+    legacy = bool(existing) and lc.is_legacy_record(existing)
+    usable_existing = existing if (existing and not stale and not legacy) else None
+    disk_phases = ([dict(p) for p in usable_existing["phases"]] if usable_existing
+                   else default_phases(n, default_tolerance))
+    disk_open = bool(usable_existing.get("open_unsure", False)) if usable_existing else False
+    disk_close = bool(usable_existing.get("close_unsure", False)) if usable_existing else False
+
+    # Switching case — via the top selector, Save & next, or Previous/Next —
+    # must reload from the file, not silently keep showing whatever this session
+    # happened to have in memory for the new sid from an earlier, unsaved visit.
+    # Session state that disagrees with the file is orphaned state, and it gets
+    # named as such rather than displayed as if it were the file's content.
+    if st.session_state.get("_lab_last_sid") != sid:
+        if key_ph in st.session_state and (
+                st.session_state[key_ph] != disk_phases
+                or st.session_state.get(key_open, False) != disk_open
+                or st.session_state.get(key_close, False) != disk_close):
+            st.session_state[f"_lab_conflict__{sid}"] = True
+        st.session_state["_lab_last_sid"] = sid
+
+    if st.session_state.get(f"_lab_conflict__{sid}"):
+        st.warning(
+            f"There is an unsaved edit from earlier in this session for "
+            f"**{sid}** that differs from what is currently on file. Choose one:")
+        cc1, cc2 = st.columns(2)
+        if cc1.button("Discard my edit, reload from file",
+                      key=f"lab_conflict_discard__{sid}", use_container_width=True):
+            st.session_state[key_ph] = [dict(p) for p in disk_phases]
+            st.session_state[key_open] = disk_open
+            st.session_state[key_close] = disk_close
+            st.session_state[key_rev] = st.session_state.get(key_rev, 0) + 1
+            st.session_state[f"_lab_conflict__{sid}"] = False
+            st.rerun()
+        if cc2.button("Keep my edit, ignore the file",
+                      key=f"lab_conflict_keep__{sid}", use_container_width=True):
+            st.session_state[f"_lab_conflict__{sid}"] = False
+            st.rerun()
+        return
 
     # Everything explanatory is collapsed. It is all still here — it is why the
     # labels are worth anything — but it is read once and then re-read only on
@@ -836,17 +1292,22 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
     # curve and the table have to be on screen together; the prose does not.
     _compact_layout()
     st.markdown("#### Manual labelling — the **raw input series only**")
+    st.caption(
+        f"Mode: **{'Inspection' if mode == 'inspect' else 'Labelling'}**"
+        + ("  ·  🔒 TEST split — saving locked" if is_test_case else "")
+        + ("  ·  ❄️ frozen synthetic — saving needs double confirmation"
+           if is_synthetic else "")
+    )
 
     n_done = len(records)
     st.progress(n_done / n_total, text=f"{n_done} of {n_total} labelled "
                                        f"· now showing #{pos + 1} in the queue")
 
-    existing = records.get(sid)
-    stale = bool(existing) and existing.get("series_sha256") != lc.series_sha256(values)
-    legacy = bool(existing) and lc.is_legacy_record(existing)
     if existing and not stale and not legacy:
         seq = " → ".join(f"{p['phase']}@{p['start_idx']}" for p in existing["phases"])
-        st.info(f"Already labelled — {seq}. Saving again overwrites it.")
+        st.info(f"Already labelled — {seq}. Saving again preserves this version "
+               "in 'superseded' rather than erasing it — see the overwrite "
+               "confirmation near the buttons below.")
     elif stale:
         st.warning("A label exists for this series but was written against "
                    "DIFFERENT data (series_sha256 mismatch). Treat it as void "
@@ -856,16 +1317,13 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
                    "format and cannot be upgraded — the per-boundary 'not sure' "
                    "marks it never recorded are not recoverable. Re-label it.")
 
-    # The authoritative phase list lives in session state, not in a widget: the
-    # chart has to be able to change it before the table is constructed, and the
-    # two must read and write ONE list rather than keeping copies that drift.
-    key_ph, key_rev = f"_lab_phases__{sid}", f"_lab_rev__{sid}"
     if key_ph not in st.session_state:
-        if existing and not stale and not legacy:
-            st.session_state[key_ph] = [dict(p) for p in existing["phases"]]
-        else:
-            st.session_state[key_ph] = default_phases(n, default_tolerance)
+        st.session_state[key_ph] = [dict(p) for p in disk_phases]
         st.session_state[key_rev] = 0
+    if key_open not in st.session_state:
+        st.session_state[key_open] = disk_open
+    if key_close not in st.session_state:
+        st.session_state[key_close] = disk_close
     phases = st.session_state[key_ph]
 
     with st.expander("How to mark a series, and why it is blind", expanded=False):
@@ -889,8 +1347,13 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
             "does not.\n"
             "* **The table is the label.** Every field is editable and a whole "
             "cyclone can be marked there without touching the chart.\n"
-            "* **Not sure** sets one boundary aside from the scoring and leaves "
-            "the rest of the series counting.\n\n"
+            "* **Start unsure / End unsure** set one EDGE aside from the "
+            "scoring — a phase sequence of N phases has N+1 edges (before "
+            "the first, between every pair, after the last), and every row "
+            "shows both of its own two. A row's 'End unsure' and the next "
+            "row's 'Start unsure' are the SAME edge shown twice — ticking "
+            "either one ticks both, on the next redraw. The rest of the "
+            "series keeps counting regardless of which edges are set aside.\n\n"
             f"Queue order is shuffled with a fixed seed ({lc.QUEUE_SEED}) rather "
             "than sorted by id: the real track ids are chronological, so "
             "labelling them in order would align fatigue with the identifier "
@@ -898,11 +1361,19 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
             "time-dependent effect. Labels are written to "
             f"`{lc.LABELS_PATH.relative_to(_REPO_ROOT)}` the moment you press a "
             "button, each save rewriting the file atomically — closing the tab "
-            "cannot lose work."
+            "cannot lose work.\n\n"
+            "**Inspection vs. Labelling.** The tab opens in Inspection: you can "
+            "browse any case and reveal the package's own filtered/smoothed "
+            "overlays, but saving is off. Switching to Labelling turns saving on "
+            "and removes the overlays entirely — and switching a given case FROM "
+            "Inspection TO Labelling needs a confirmation, because that case's "
+            "label is no longer blind from that point on."
         )
 
+    overlay_layers = _overlay_controls(sid, values, mode, overlay_provider)
+
     try:
-        edit = _draw(sid, values, phases)
+        edit = _draw(sid, values, phases, overlays=overlay_layers)
     except Exception as exc:
         # Loudly, and naming the exception. The previous version swallowed this
         # and drew a static picture instead, which is how a component that had
@@ -921,10 +1392,23 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
             st.session_state[key_rev] += 1
             st.rerun()
 
-    proposed = _phase_table(sid, phases, n, st.session_state[key_rev])
-    if proposed != phases:
+    proposed, to_remove, new_open, new_close = _phase_table(
+        sid, phases, n, st.session_state[key_rev],
+        st.session_state[key_open], st.session_state[key_close])
+    if (proposed != phases or new_open != st.session_state[key_open]
+            or new_close != st.session_state[key_close]):
         st.session_state[key_ph] = proposed
+        st.session_state[key_open] = new_open
+        st.session_state[key_close] = new_close
+        # Bumped unconditionally, not just for the edge case: a plain
+        # start_idx/tolerance edit does not need it (that widget already
+        # shows what the user typed), but the paired start/end-unsure
+        # checkboxes on TWO DIFFERENT rows do — see _phase_table's docstring.
+        # Bumping here too, rather than only on that path, keeps this one
+        # rule instead of two.
+        st.session_state[key_rev] += 1
         st.rerun()
+    open_unsure, close_unsure = st.session_state[key_open], st.session_state[key_close]
 
     problem = None
     try:
@@ -956,19 +1440,115 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
         + f" · #{pos + 1} of {n_total} in the queue, {n_done} labelled"
     )
 
+    # Backed by its own session_state entry, not just the widget's key, for
+    # the same reason the confirmation checkboxes below are: an earlier
+    # widget's rerun (the mode switch, case navigation) can skip this one for
+    # a pass and reset it to the `value=` given, which must therefore be
+    # "whatever was last typed", not always "whatever is on disk".
+    key_notes = f"_lab_notes__{sid}"
+    if key_notes not in st.session_state:
+        st.session_state[key_notes] = (existing or {}).get("notes", "")
     notes = st.text_input("Notes (optional)",
-                          value=(existing or {}).get("notes", ""),
-                          key=f"lab_notes__{sid}",
+                          value=st.session_state[key_notes],
+                          key=f"lab_notes_widget__{sid}",
                           placeholder="anything that made this one hard to read",
                           label_visibility="collapsed")
+    st.session_state[key_notes] = notes
+
+    # ── save gates ────────────────────────────────────────────────────────────
+    # Every gate here is a HARD block on the buttons themselves (`disabled=`),
+    # not a warning a click can walk past. They stack: a synthetic case that
+    # already has a label needs the overwrite checkbox AND both synthetic
+    # checkboxes; a TEST-split case cannot be saved no matter what is ticked.
+    #
+    # Each checkbox's `value=` is read from ITS OWN backing session_state
+    # entry, not left to the widget's own key-based memory — because that
+    # memory does not reliably survive a rerun that an EARLIER widget in this
+    # same script triggers before this point is reached (the mode-switch
+    # radio's Confirm/Cancel flow does exactly this: it calls `st.rerun()`
+    # from higher up in `render`, which skips these checkboxes for that one
+    # pass, and Streamlit does not treat that as "still checked" on the next
+    # one). `_phase_table`'s own checkboxes were never vulnerable to this
+    # because they already read every `value=` from the phases/open/close
+    # backing store rather than from widget memory; these three are the same
+    # fix applied to the confirmation checkboxes, which previously trusted
+    # widget memory alone and could silently reset to unticked.
+    overwrite_needed = bool(existing) and not stale and not legacy
+    overwrite_ok = True
+    if overwrite_needed:
+        key_ow = f"_lab_overwrite_confirm__{sid}"
+        overwrite_ok = st.checkbox(
+            "Overwrite the existing label for this case (the previous version "
+            "is kept under 'superseded', not erased)",
+            value=st.session_state.get(key_ow, False),
+            key=f"lab_overwrite_confirm_widget__{sid}")
+        st.session_state[key_ow] = overwrite_ok
+
+    synthetic_ok = True
+    if is_synthetic:
+        st.warning("This is one of the 12 FROZEN synthetic cases — saving "
+                   "needs two separate confirmations.")
+        key_sc1 = f"_lab_synth_confirm1__{sid}"
+        key_sc2 = f"_lab_synth_confirm2__{sid}"
+        sc1 = st.checkbox("I understand this is a frozen synthetic case",
+                          value=st.session_state.get(key_sc1, False),
+                          key=f"lab_synth_confirm1_widget__{sid}")
+        st.session_state[key_sc1] = sc1
+        sc2 = st.checkbox("I still want to save a label for it",
+                          value=st.session_state.get(key_sc2, False),
+                          key=f"lab_synth_confirm2_widget__{sid}")
+        st.session_state[key_sc2] = sc2
+        synthetic_ok = sc1 and sc2
+
+    if is_test_case:
+        st.error("This case is in the TEST split (research/labels/split.yaml) "
+                 "— saving is BLOCKED, not just discouraged.")
+
+    # Named explicitly, not just left as a greyed-out button: a labeller who
+    # has ticked every confirmation on screen and still cannot save has no
+    # way to tell why unless the ONE remaining reason is spelled out — the
+    # mode gate in particular is easy to satisfy every OTHER condition for
+    # and still miss, because it lives in the sidebar, away from these
+    # checkboxes and buttons.
+    blockers = []
+    if mode != "label":
+        blockers.append("switch to **Labelling** mode in the sidebar — "
+                        "saving is off while Inspecting")
+    if split_error:
+        blockers.append(f"{lc.SPLIT_PATH.name} could not be read; saving is "
+                        "locked repo-wide until this is fixed")
+    elif is_test_case:
+        blockers.append("this case is in the TEST split — saving is blocked, "
+                        "not just discouraged")
+    if problem:
+        blockers.append("fix the phase sequence above first")
+    if overwrite_needed and not overwrite_ok:
+        blockers.append("tick the overwrite-confirmation checkbox above")
+    if is_synthetic and not synthetic_ok:
+        blockers.append("tick BOTH frozen-synthetic checkboxes above")
+
+    can_save = not blockers
+    if blockers:
+        st.caption("Cannot save yet — " + "; ".join(blockers) + ".")
 
     def _save(ambiguous: bool) -> None:
-        rec = lc.make_label_record(sid, sources[sid], values, phases,
-                                   notes=notes or None, ambiguous=ambiguous)
+        rec = lc.make_label_record(
+            sid, sources[sid], values, phases, notes=notes or None,
+            ambiguous=ambiguous, open_unsure=open_unsure, close_unsure=close_unsure,
+            overlays_shown=st.session_state.get(f"_lab_overlays_seen__{sid}"))
         lc.upsert_label(rec)
         st.session_state["lab_pos"] = (pos + 1) % n_total
 
-    r1, r2, b1, b2, b3, b4 = st.columns([1.1, 1.3, 1.2, 1.2, 1.3, 0.9])
+    # "Remove last" and "No incipient" are gone: both were special cases of
+    # the general per-row 'Remove' checkbox + 'Remove selected' button above
+    # (tick the last row, or row 0, and remove it — row 0's removal already
+    # re-pins the new first phase to start at 0, same as "No incipient" did).
+    # "← Back" is gone too, replaced by a Previous/Next pair that ONLY moves
+    # through the queue and never saves — the case-navigation dropdown at the
+    # top of the tab covers "jump to any case"; these cover "step through the
+    # ones next to it", which matters most in INSPECTION mode, where nothing
+    # here can save at all.
+    r1, r2, b1, b2, p1, p2 = st.columns([1.3, 1.6, 1.3, 1.4, 1.0, 1.0])
     if r1.button("＋ Add a phase", use_container_width=True,
                  disabled=bool(phases) and phases[-1]["start_idx"] >= n - 1,
                  help="Appends one more phase after the last, starting one step "
@@ -978,38 +1558,35 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE) -> None:
                        "tolerance_idx": int(default_tolerance), "unsure": False})
         st.session_state[key_rev] += 1
         st.rerun()
-    if r2.button("－ Remove last", use_container_width=True,
-                 disabled=len(phases) <= 1,
-                 help="Drops the final phase; the one before it runs to the end."):
-        phases.pop()
+    if r2.button(f"🗑 Remove selected ({len(to_remove)})", use_container_width=True,
+                 disabled=not to_remove or len(to_remove) >= len(phases),
+                 help="Removes every phase whose 'Remove' box is ticked, all at "
+                      "once. The first remaining phase is re-pinned to start at "
+                      "0."):
+        remaining = [dict(p) for i, p in enumerate(phases) if i not in to_remove]
+        remaining[0]["start_idx"] = 0
+        remaining[0]["unsure"] = False
+        st.session_state[key_ph] = remaining
         st.session_state[key_rev] += 1
         st.rerun()
     if b1.button("💾 Save & next", type="primary", use_container_width=True,
-                 disabled=bool(problem)):
+                 disabled=not can_save):
         _save(ambiguous=False)
         st.rerun()
-    if b2.button("No incipient", use_container_width=True,
-                 disabled=not (phases and phases[0]["phase"] == "incipient"
-                               and len(phases) > 1),
-                 help="Drops the leading incipient phase — this series is "
-                      "already changing at step 0. The rest of the sequence is kept."):
-        rest = [dict(p) for p in phases[1:]]
-        if rest:
-            rest[0]["start_idx"] = 0
-            rest[0]["unsure"] = False
-            st.session_state[key_ph] = rest
-            st.session_state[key_rev] += 1
-        st.rerun()
-    if b3.button("Save ambiguous", use_container_width=True,
-                 disabled=bool(problem),
+    if b2.button("Save ambiguous", use_container_width=True,
+                 disabled=not can_save,
                  help="You cannot decide this cyclone AT ALL. The phases you "
                       "marked are still saved; the incipient verdict is recorded "
                       "as ambiguous. To set aside ONE boundary and keep the rest "
                       "of the series scoring, tick 'Not sure' on its row instead."):
         _save(ambiguous=True)
         st.rerun()
-    if b4.button("← Back", use_container_width=True,
-                 help="Re-label the previous series in the queue."):
+    if p1.button("◂ Previous", use_container_width=True,
+                 help="Move to the previous case in the queue. Never saves."):
         st.session_state["lab_pos"] = (pos - 1) % n_total
+        st.rerun()
+    if p2.button("Next ▸", use_container_width=True,
+                 help="Move to the next case in the queue. Never saves."):
+        st.session_state["lab_pos"] = (pos + 1) % n_total
         st.rerun()
 

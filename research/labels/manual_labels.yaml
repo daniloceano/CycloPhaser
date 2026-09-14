@@ -1,5 +1,5 @@
-schema: 3
-updated: '2026-09-08T16:23:23+00:00'
+schema: 4
+updated: '2026-09-14T12:02:32+00:00'
 n_labels: 63
 labels:
 - id: '20150069'
@@ -475,7 +475,7 @@ labels:
 - id: '20170794'
   source: real
   series_sha256: 23958fd4d07daa40b78410488c65e239a758310e345da069f97bd9f4d4c50d0b
-  labeled_at: '2026-09-08T15:27:41+00:00'
+  labeled_at: '2026-09-13T17:32:09+00:00'
   n_steps: 224
   phases:
   - phase: intensification
@@ -491,9 +491,9 @@ labels:
     tolerance_idx: 5
     unsure: false
   - phase: residual
-    start_idx: 54
+    start_idx: 117
     tolerance_idx: 5
-    unsure: false
+    unsure: true
   verdict:
     kind: none
   tolerance_idx: 0
@@ -1338,7 +1338,7 @@ labels:
 - id: s5dcc0f79
   source: synthetic
   series_sha256: 9454fe8e2b34a814878f8744cad252aa159a09627f52f798f2f9803707aa399e
-  labeled_at: '2026-09-08T13:35:19+00:00'
+  labeled_at: '2026-09-14T12:02:32+00:00'
   n_steps: 66
   phases:
   - phase: incipient
@@ -1357,10 +1357,45 @@ labels:
     start_idx: 27
     tolerance_idx: 2
     unsure: false
+  - phase: residual
+    start_idx: 44
+    tolerance_idx: 4
+    unsure: false
   verdict:
     kind: boundary
     incipient_end_idx: 4
   tolerance_idx: 1
+  open_unsure: false
+  close_unsure: false
+  overlays_shown:
+  - vorticity_smoothed2
+  superseded:
+  - id: s5dcc0f79
+    source: synthetic
+    series_sha256: 9454fe8e2b34a814878f8744cad252aa159a09627f52f798f2f9803707aa399e
+    labeled_at: '2026-09-08T13:35:19+00:00'
+    n_steps: 66
+    phases:
+    - phase: incipient
+      start_idx: 0
+      tolerance_idx: 5
+      unsure: false
+    - phase: intensification
+      start_idx: 4
+      tolerance_idx: 1
+      unsure: false
+    - phase: mature
+      start_idx: 16
+      tolerance_idx: 2
+      unsure: false
+    - phase: decay
+      start_idx: 27
+      tolerance_idx: 2
+      unsure: false
+    verdict:
+      kind: boundary
+      incipient_end_idx: 4
+    tolerance_idx: 1
 - id: s6b1e8245
   source: synthetic
   series_sha256: c3f0600e92b645f829b052d80e602d353e83e68faacf75b972982ec0c4a2ac01

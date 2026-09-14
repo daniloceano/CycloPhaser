@@ -226,15 +226,22 @@ def test_label_tab_plots_exactly_one_series():
 
 
 def test_label_tab_does_not_read_app_detection_parameters():
-    """The tab's only entry point takes a margin default — no detector params.
+    """The tab's only entry point takes a margin default and an overlay
+    callback — no filter or phase parameter of its own.
 
     If it grew a filter or phase argument, a sidebar setting could change what
-    the labeller sees, and the label would silently depend on a parameter choice.
+    the RAW-SERIES chart shows in LABELLING mode, and the blind label would
+    silently depend on a parameter choice. `overlay_provider` does not open
+    that door: it is a `values -> {name: [float]}` callable app.py builds
+    (using cyclophaser directly — this module still does not), and
+    `label_tab.render` only ever calls it from `_overlay_section`, which is
+    unreachable in LABELLING mode (see `test_label_tab_names_no_detector_output`
+    and the overlay-blindness tests below for the two halves of that guarantee).
     """
     fn = next(n for n in ast.walk(_tab_ast())
               if isinstance(n, ast.FunctionDef) and n.name == "render")
     argnames = [a.arg for a in fn.args.args]
-    assert argnames == ["default_tolerance"], argnames
+    assert argnames == ["default_tolerance", "overlay_provider"], argnames
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -372,10 +379,16 @@ def test_negative_tolerance_is_rejected(toy_series):
 
 @requires_yaml
 def test_committed_labels_file_is_parseable_and_well_formed():
-    """Whatever state the artefact is in, it must be readable and valid."""
+    """Whatever state the artefact is in, it must be readable and valid.
+
+    The committed file is schema 3 and stays that way until a case is
+    deliberately re-saved by the app — bumping LABELS_SCHEMA does not rewrite
+    it (see the loader-accepts-3-and-4 tests below) — so this only pins the
+    file to a schema the current code still reads, not to the newest one.
+    """
     import yaml
     doc = yaml.safe_load(lc.LABELS_PATH.read_text())
-    assert doc["schema"] == lc.LABELS_SCHEMA
+    assert doc["schema"] in (3, lc.LABELS_SCHEMA)
     for rec in (doc.get("labels") or []):
         assert set(rec) >= {"id", "source", "series_sha256", "labeled_at",
                             "n_steps", "phases", "verdict", "tolerance_idx"}
@@ -772,6 +785,125 @@ def test_an_unsure_boundary_is_excluded_even_when_the_detector_agrees():
     assert m["n_boundaries"] == 0
     assert m["n_boundaries_unsure"] == 1
     assert m["boundary_hit_rate"] is None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5b-ter. Schema 4: the two series edges, blindness provenance, superseded history
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_schema_3_replayed_through_make_label_record_derives_the_same_verdict():
+    """The load-bearing schema-3 -> 4 guarantee: none of the three additions is
+    read by the verdict derivation, so a schema-3 record replayed with the new
+    arguments left at their defaults produces the byte-identical verdict."""
+    rec3_shaped = lc.make_label_record("t", "real",
+                                       pd.Series(range(40), dtype="float64"), FOUR)
+    rec4_shaped = lc.make_label_record(
+        "t", "real", pd.Series(range(40), dtype="float64"), FOUR,
+        open_unsure=False, close_unsure=False, overlays_shown=None)
+    assert rec3_shaped["verdict"] == rec4_shaped["verdict"]
+    assert rec3_shaped["tolerance_idx"] == rec4_shaped["tolerance_idx"]
+    # and setting either edge flag STILL does not move the verdict
+    rec_edges = lc.make_label_record(
+        "t", "real", pd.Series(range(40), dtype="float64"), FOUR,
+        open_unsure=True, close_unsure=True)
+    assert rec_edges["verdict"] == rec3_shaped["verdict"]
+    assert rec_edges["tolerance_idx"] == rec3_shaped["tolerance_idx"]
+    assert rec_edges["open_unsure"] is True
+    assert rec_edges["close_unsure"] is True
+
+
+def test_open_and_close_unsure_default_false_and_are_written_explicitly():
+    rec = lc.make_label_record("t", "real", pd.Series(range(40), dtype="float64"), FOUR)
+    assert rec["open_unsure"] is False
+    assert rec["close_unsure"] is False
+    assert "open_unsure" in rec and "close_unsure" in rec  # explicit, not omitted
+
+
+def test_overlays_shown_defaults_empty_and_is_blind():
+    rec = lc.make_label_record("t", "real", pd.Series(range(40), dtype="float64"), FOUR)
+    assert rec["overlays_shown"] == []
+    assert lc.is_blind(rec)
+
+
+def test_overlays_shown_is_sorted_and_deduplicated():
+    rec = lc.make_label_record(
+        "t", "real", pd.Series(range(40), dtype="float64"), FOUR,
+        overlays_shown=["vorticity_smoothed2", "filtered_vorticity",
+                       "vorticity_smoothed2"])
+    assert rec["overlays_shown"] == ["filtered_vorticity", "vorticity_smoothed2"]
+    assert not lc.is_blind(rec)
+
+
+def test_a_schema_3_record_with_no_overlays_shown_key_reads_as_blind():
+    """Schema-3 predates overlays entirely; absence means blind, not unknown."""
+    schema3 = _seq_rec("a", FOUR)
+    assert "overlays_shown" not in schema3
+    assert lc.is_blind(schema3)
+
+
+@requires_yaml
+def test_overwriting_a_case_preserves_the_previous_record_as_superseded(tmp_path, toy_series):
+    """Regravar não apaga: the old record moves into `superseded`, oldest
+    first, and the vigente (top-level) record is always the most recent save.
+    Applies identically to real and synthetic sources."""
+    p = tmp_path / "l.yaml"
+    first = lc.make_label_record("t", "real", toy_series, FOUR, labeled_at="T1")
+    lc.upsert_label(first, p)
+    second = lc.make_label_record(
+        "t", "real", toy_series,
+        _phases(("incipient", 0, 0), ("mature", 12, 3)), labeled_at="T2")
+    lc.upsert_label(second, p)
+
+    got = lc.read_labels(p)["t"]
+    assert got["labeled_at"] == "T2"                 # vigente is the latest
+    assert len(got["superseded"]) == 1
+    assert got["superseded"][0]["labeled_at"] == "T1"
+    assert got["superseded"][0]["phases"] == FOUR
+    assert "superseded" not in got["superseded"][0]  # flattened, never nested
+
+    third = lc.make_label_record(
+        "t", "real", toy_series,
+        _phases(("decay", 0, 0),), labeled_at="T3")
+    lc.upsert_label(third, p)
+    got3 = lc.read_labels(p)["t"]
+    assert [r["labeled_at"] for r in got3["superseded"]] == ["T1", "T2"]
+    assert got3["labeled_at"] == "T3"
+
+
+@requires_yaml
+def test_overwrite_preserves_superseded_for_synthetic_cases_too(tmp_path, toy_series):
+    p = tmp_path / "l.yaml"
+    lc.upsert_label(lc.make_label_record("s1", "synthetic", toy_series, FOUR,
+                                         labeled_at="T1"), p)
+    lc.upsert_label(lc.make_label_record("s1", "synthetic", toy_series, FOUR,
+                                         labeled_at="T2"), p)
+    got = lc.read_labels(p)["s1"]
+    assert got["source"] == "synthetic"
+    assert len(got["superseded"]) == 1
+
+
+def test_label_history_is_oldest_first_ending_with_the_vigente_record():
+    old = {"id": "a", "labeled_at": "T1", "overlays_shown": []}
+    current = {"id": "a", "labeled_at": "T2", "overlays_shown": ["vorticity_smoothed"],
+              "superseded": [old]}
+    hist = lc.label_history(current)
+    assert [r["labeled_at"] for r in hist] == ["T1", "T2"]
+    assert "superseded" not in hist[-1]
+
+
+def test_first_blind_record_finds_the_earliest_blind_version():
+    blind_v1 = {"id": "a", "labeled_at": "T1", "overlays_shown": []}
+    seen_v2 = {"id": "a", "labeled_at": "T2", "overlays_shown": ["filtered_vorticity"],
+              "superseded": [blind_v1]}
+    assert lc.first_blind_record(seen_v2)["labeled_at"] == "T1"
+    # a schema-3 record (no key at all) counts as blind too
+    schema3_current = _seq_rec("b", FOUR)
+    assert lc.first_blind_record(schema3_current) == schema3_current
+
+
+def test_first_blind_record_is_none_when_every_version_saw_an_overlay():
+    seen_only = {"id": "a", "labeled_at": "T1", "overlays_shown": ["vorticity_smoothed2"]}
+    assert lc.first_blind_record(seen_only) is None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
