@@ -164,7 +164,21 @@ export default function (component) {
   // four-row table, the notes line, the button row and the two captions. It was
   // measured, not guessed — see tests/test_label_browser.py, which fails if the
   // block from the heading to the buttons stops fitting in the viewport.
-  const RESERVE = 400, MIN_PX = 230;
+  //
+  // 400 -> 420: the save-gate section below the table grew (the "Cannot save
+  // yet" caption, and the overwrite/frozen-synthetic confirmation checkboxes
+  // for cases that need them) without a matching bump here. That alone was a
+  // ~3px overflow on the SPAN (chart-top to button-bottom); a first fix to
+  // 410 closed the span but missed that the chart's own `scrollMarginTop`
+  // ('10px' — see host.style below) means its top sits ~10px down the
+  // viewport even after being scrolled fully into view, so the ABSOLUTE
+  // bottom position needs slack for that offset too, not just the span.
+  // Remeasured at 1440x800/1680x950/1920x1080 with tests/test_label_browser.
+  // py's own `working_area()` after this change: fits at 1440x800 (with
+  // margin, not flush against the limit), and the chart is already at its
+  // `data.h` cap on the two larger sizes (constrained by the cap, not by
+  // RESERVE), so it does not shrink there.
+  const RESERVE = 420, MIN_PX = 230;
   const targetPx = () => Math.max(
     MIN_PX, Math.min(Math.round((window.innerHeight || 900) - RESERVE), data.h));
   const wantH = (width) => {
@@ -500,18 +514,62 @@ export default function (component) {
     return true;
   };
 
-  const onDown = (k, mode) => (e) => {
+  // ── which boundary does a pointerdown belong to? ───────────────────────────
+  // Decided by DISTANCE from the click to every boundary's own geometry, never
+  // by which invisible hit-rect happens to be on top at that pixel. Adjacent
+  // boundaries' grip/edge rects legitimately overlap whenever their combined
+  // tolerance reach exceeds their spacing (the bar's width IS the tolerance —
+  // real data, not something to shrink to avoid a collision), and with the
+  // OLD per-element listeners, whichever rect was appended LAST always won an
+  // overlap, silently grabbing the wrong boundary. Two boundaries 4 steps
+  // apart with a margin of 5 on each side overlap this way on a perfectly
+  // ordinary label (verified against develop-v2.1 before this rewrite: the
+  // bug reproduces there unchanged, so it predates every commit on this
+  // front — this is not new breakage, it is the first fix for it).
+  //
+  // Edge (tolerance-resize) targets are checked before body (move) targets,
+  // preserving the original z-order's intent ("edge grips come last so they
+  // win where they overlap the body") — just decided by geometry now, across
+  // ALL boundaries at once, not only within one boundary's own two hit areas.
+  const pickTarget = (x) => {
+    let best = null, bestDist = Infinity;
+    for (let k = 1; k < PH.length; k++) {
+      const cx = sx(PH[k].start_idx);
+      const half = PH[k].tolerance_idx * step;
+      const edge = Math.max(half, 11);
+      for (const ex of [cx - edge, cx + edge]) {
+        const d = Math.abs(x - ex);
+        if (d <= 6 && d < bestDist) { bestDist = d; best = { k, mode: 'tol' }; }
+      }
+    }
+    if (best) return best;
+    bestDist = Infinity;
+    for (let k = 1; k < PH.length; k++) {
+      const cx = sx(PH[k].start_idx);
+      const half = PH[k].tolerance_idx * step;
+      const inner = Math.max(7, half - 7);
+      const d = Math.abs(x - cx);
+      if (d <= inner && d < bestDist) { bestDist = d; best = { k, mode: 'move' }; }
+    }
+    return best;
+  };
+
+  const onDown = (e) => {
+    const x = at(e);
+    if (x === null) return;
+    const hit = pickTarget(x);
+    if (!hit) return;
     e.preventDefault();
-    S.drag = { k: k, mode: mode };
-    S.sel = k;
+    S.drag = { k: hit.k, mode: hit.mode };
+    S.sel = hit.k;
     try { svg.focus({ preventScroll: true }); } catch (_) { /* not focusable */ }
     update();
   };
-  for (let k = 1; k < PH.length; k++) {
-    grip[k].addEventListener('pointerdown', onDown(k, 'move'));
-    hL[k].addEventListener('pointerdown', onDown(k, 'tol'));
-    hR[k].addEventListener('pointerdown', onDown(k, 'tol'));
-  }
+  // One listener for the whole chart, not one per hit-rect: pointerdown still
+  // bubbles up from whichever grip/edge rect the browser painted on top, but
+  // `pickTarget` re-decides the target from `x` alone, so which element was
+  // actually under the pointer no longer matters.
+  svg.addEventListener('pointerdown', onDown);
 
   // ── move/up/cancel live on WINDOW, not on the <svg> ────────────────────────
   // On the SVG they only fire while the pointer is over it. A pointer released

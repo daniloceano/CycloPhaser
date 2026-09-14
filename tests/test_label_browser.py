@@ -102,11 +102,25 @@ def fresh(lab):
 
     Deliberately not through the chart: a test whose setup uses the thing under
     test cannot fail honestly.
+
+    Row 3 is pinned too, not left at whatever the currently-loaded real case
+    happens to have on disk. It didn't used to matter when this suite was
+    authored against a partially-labelled queue, but the queue is now 63/63
+    complete, so the case this fixture opens is always the SAME one (last in
+    the fixed shuffle order) with whatever decay boundary is actually
+    recorded for it — which drifts as that label gets refined, and at one
+    point sat at 54, close enough to block `drag_boundary(2, 61)` and
+    `drag_tolerance(2, 62)` from ever reaching their targets (correctly
+    clamped against row 3, not a bug — just a fixture that didn't control
+    every row it depends on). Pinned to 100 here, far past every target any
+    test in this file drags row 1 or row 2 toward.
     """
     lab.set_start_idx(1, 20)
     lab.set_tolerance_idx(1, 4)
     lab.set_start_idx(2, 50)
     lab.set_tolerance_idx(2, 5)
+    lab.set_start_idx(3, 100)
+    lab.set_tolerance_idx(3, 5)
     lab.set_unsure(1, False)
     lab.set_unsure(2, False)
     assert lab.table_state()[1] == (20, 4, False), lab.table_state()
@@ -302,6 +316,34 @@ def test_a_drag_updates_the_number(fresh):
     assert fresh.start_idx(2) == pytest.approx(61, abs=1), fresh.table_state()
 
 
+def test_dragging_never_changes_the_number_of_phases(fresh):
+    """A real bug, not a hypothetical: with overlapping grip/edge hit-areas
+    resolved by DOM z-order instead of geometry, a click meant for boundary 2
+    could silently move boundary 3 instead, and reading the table afterward
+    looked exactly like a phase had been added at the drag target while the
+    original boundary "stayed behind" — same length, but the WRONG entry
+    moved. Length alone would not have caught that regression; this checks it
+    on every kind of edit the chart can make, pinned against `n_rows()`
+    before and after each one.
+    """
+    n_before = fresh.n_rows()
+
+    fresh.drag_boundary(2, 61)
+    assert fresh.n_rows() == n_before
+    fresh.set_start_idx(2, 50)  # restore for the next assertion in this test
+
+    fresh.drag_tolerance(2, 58)
+    assert fresh.n_rows() == n_before
+    fresh.set_tolerance_idx(2, 5)
+
+    fresh.click_boundary(1)
+    fresh.press("ArrowRight")
+    assert fresh.n_rows() == n_before
+
+    fresh.drag_boundary(1, 40, release_outside=True)
+    assert fresh.n_rows() == n_before
+
+
 def test_a_margin_typed_in_the_table_resizes_the_bar(fresh):
     fresh.set_tolerance_idx(2, 9)
     assert fresh.tolerance_idx(2) == 9
@@ -453,6 +495,12 @@ def test_the_chart_resizes_with_the_window_without_losing_the_marks(server, pw):
     try:
         lp = LabelPage(page).open(server.url)
         lp.set_start_idx(1, 27)
+        # Row 2's own position on disk isn't controlled by this test (it uses
+        # a fresh page, not the `fresh` fixture, which pins it for exactly
+        # this reason) — push it out of the way so the drag to 40 at the
+        # bottom of this test has room; otherwise it is legitimately clamped
+        # against whatever row 2 happens to be for the currently-loaded case.
+        lp.set_start_idx(2, 60)
         tall = lp.chart_box()["height"]
 
         page.set_viewport_size({"width": 1600, "height": 700})
