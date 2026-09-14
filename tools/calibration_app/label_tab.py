@@ -982,20 +982,23 @@ def _case_status(values: pd.Series, rec: dict | None) -> str:
     return "labeled"
 
 
-def _sidebar_navigation(queue: list[str], records: dict, series: dict,
-                        sources: dict, synth_names: dict[str, str],
-                        test_ids: set, mode: str, pos: int) -> int:
-    """The case picker: every case, its status, and a jump-to-any-case selector.
+def _case_navigation(queue: list[str], records: dict, series: dict,
+                     sources: dict, synth_names: dict[str, str],
+                     test_ids: set, mode: str, pos: int) -> int:
+    """The case picker: a dropdown to jump to ANY of the 63 cases directly,
+    with status/split/frozen indicators, plus a filter for "not yet labelled".
+
+    In the MAIN content area, at the very top of the Label tab, deliberately
+    — not in the sidebar. A control this central to actually using the tab
+    (open a specific case for a second look) has to be the first thing on
+    screen, not one more widget mixed in among the Grid/Inspector filter
+    controls the sidebar already carries.
 
     Keyed on `pos` itself (the pattern `_phase_table` already uses via `rev`):
     whenever `pos` changes for ANY reason — this selector, Save & next, Back —
     the key changes and the widget is rebuilt fresh from the new `pos`, so it
     can never show a stale selection left over from a previous case.
     """
-    st.sidebar.markdown("### Label queue")
-    only_unlabeled = st.sidebar.checkbox(
-        "Show only not-yet-labelled", value=False, key="lab_nav_only_unlabeled")
-
     def _option_text(i: int) -> str:
         sid = queue[i]
         status = _case_status(series[sid], records.get(sid))
@@ -1008,15 +1011,19 @@ def _sidebar_navigation(queue: list[str], records: dict, series: dict,
                 tag += f"  ({synth_names.get(sid, '?')})"
         return f"{_STATUS_ICON[status]} #{i + 1}/{len(queue)}  {sid}{tag}"
 
+    nav_col, filter_col = st.columns([3, 1.4])
+    only_unlabeled = filter_col.checkbox(
+        "Show only not-yet-labelled", value=False, key="lab_nav_only_unlabeled")
+
     options = [i for i, sid in enumerate(queue)
               if not only_unlabeled
               or _case_status(series[sid], records.get(sid)) != "labeled"]
     if not options:
-        st.sidebar.success("Every case is labelled.")
+        st.success("Every case is labelled.")
         options = list(range(len(queue)))
 
     default_i = pos if pos in options else options[0]
-    chosen = st.sidebar.selectbox(
+    chosen = nav_col.selectbox(
         "Jump to case", options=options, index=options.index(default_i),
         format_func=_option_text, key=f"lab_case_select__{pos}__{only_unlabeled}")
     if chosen != pos:
@@ -1159,8 +1166,8 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
         st.session_state["lab_pos"] = min(lc.queue_position(queue, records), n_total - 1)
     pos = int(st.session_state["lab_pos"]) % n_total
 
-    pos = _sidebar_navigation(queue, records, series, sources, synth_names,
-                              test_ids, st.session_state.get("_lab_mode", "inspect"), pos)
+    pos = _case_navigation(queue, records, series, sources, synth_names,
+                          test_ids, st.session_state.get("_lab_mode", "inspect"), pos)
     sid = queue[pos]
     mode = _mode_switch(sid)
     values = series[sid]

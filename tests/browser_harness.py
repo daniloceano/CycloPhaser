@@ -284,10 +284,17 @@ class LabelPage:
         """A Streamlit selectbox renders as a combobox whose value is text in
         the widget, not an input value — so it is read, not typed. Scoped to the
         main area because the sidebar has selectboxes of its own, three of them
-        ahead of these in document order."""
+        ahead of these in document order.
+
+        Offset by 1: the Label tab's own case-navigation dropdown ("Jump to
+        case") is now the FIRST stSelectbox in the main content area, ahead
+        of the phase table — it moved out of the sidebar into the main area
+        deliberately (see label_tab.py's `_case_navigation`), so phase row k
+        is the (k+1)-th selectbox here, not the k-th.
+        """
         return self.page.locator(
             '[data-testid="stMain"] [data-testid="stSelectbox"]'
-        ).nth(k).inner_text().strip().splitlines()[0]
+        ).nth(k + 1).inner_text().strip().splitlines()[0]
 
     def is_unsure(self, k: int) -> bool:
         return self.page.get_by_label(f"unsure, row {k}", exact=True).is_checked()
