@@ -1,5 +1,5 @@
 schema: 4
-updated: '2026-09-14T12:02:32+00:00'
+updated: '2026-09-14T18:47:26+00:00'
 n_labels: 63
 labels:
 - id: '20150069'
@@ -171,7 +171,7 @@ labels:
 - id: '20150656'
   source: real
   series_sha256: ef2fbd35f71ee080ffeccff5360379df84d7ad4175f9bd3a26de4a54ddc40b32
-  labeled_at: '2026-09-08T13:33:15+00:00'
+  labeled_at: '2026-09-14T18:45:17+00:00'
   n_steps: 160
   phases:
   - phase: intensification
@@ -187,12 +187,42 @@ labels:
     tolerance_idx: 3
     unsure: false
   - phase: residual
-    start_idx: 91
+    start_idx: 100
     tolerance_idx: 13
     unsure: false
   verdict:
     kind: none
   tolerance_idx: 0
+  open_unsure: false
+  close_unsure: false
+  overlays_shown:
+  - vorticity_smoothed2
+  superseded:
+  - id: '20150656'
+    source: real
+    series_sha256: ef2fbd35f71ee080ffeccff5360379df84d7ad4175f9bd3a26de4a54ddc40b32
+    labeled_at: '2026-09-08T13:33:15+00:00'
+    n_steps: 160
+    phases:
+    - phase: intensification
+      start_idx: 0
+      tolerance_idx: 2
+      unsure: false
+    - phase: mature
+      start_idx: 34
+      tolerance_idx: 3
+      unsure: false
+    - phase: decay
+      start_idx: 53
+      tolerance_idx: 3
+      unsure: false
+    - phase: residual
+      start_idx: 91
+      tolerance_idx: 13
+      unsure: false
+    verdict:
+      kind: none
+    tolerance_idx: 0
 - id: '20150746'
   source: real
   series_sha256: bd773cf2f40ff8504eda336c8120079cf0d184866a50433d4e0e90d22d85b4fe
@@ -295,7 +325,7 @@ labels:
 - id: '20170154'
   source: real
   series_sha256: 73cc56cddca17020ea67550512b371425d4db36a2ed7a4c71552f49ad7fb6dad
-  labeled_at: '2026-09-08T13:45:15+00:00'
+  labeled_at: '2026-09-14T18:47:03+00:00'
   n_steps: 124
   phases:
   - phase: incipient
@@ -315,9 +345,38 @@ labels:
     tolerance_idx: 21
     unsure: true
   verdict:
-    kind: boundary
-    incipient_end_idx: 6
+    kind: ambiguous
   tolerance_idx: 2
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+  superseded:
+  - id: '20170154'
+    source: real
+    series_sha256: 73cc56cddca17020ea67550512b371425d4db36a2ed7a4c71552f49ad7fb6dad
+    labeled_at: '2026-09-08T13:45:15+00:00'
+    n_steps: 124
+    phases:
+    - phase: incipient
+      start_idx: 0
+      tolerance_idx: 5
+      unsure: false
+    - phase: intensification
+      start_idx: 6
+      tolerance_idx: 2
+      unsure: false
+    - phase: mature
+      start_idx: 31
+      tolerance_idx: 5
+      unsure: true
+    - phase: decay
+      start_idx: 77
+      tolerance_idx: 21
+      unsure: true
+    verdict:
+      kind: boundary
+      incipient_end_idx: 6
+    tolerance_idx: 2
 - id: '20170225'
   source: real
   series_sha256: 70fc5fc2361328b03bd444b9cae9d60b6625cc2cfedc68f96912b7449ab8461f
@@ -368,7 +427,7 @@ labels:
 - id: '20170409'
   source: real
   series_sha256: cceb45f7f0210c9d7babae0d2e77a0de9d7f1982b85d40d8ff847868d280cfea
-  labeled_at: '2026-09-08T13:34:38+00:00'
+  labeled_at: '2026-09-14T18:45:42+00:00'
   n_steps: 169
   phases:
   - phase: incipient
@@ -384,13 +443,43 @@ labels:
     tolerance_idx: 4
     unsure: false
   - phase: decay
-    start_idx: 74
+    start_idx: 71
     tolerance_idx: 3
     unsure: false
   verdict:
     kind: boundary
     incipient_end_idx: 6
   tolerance_idx: 2
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+  superseded:
+  - id: '20170409'
+    source: real
+    series_sha256: cceb45f7f0210c9d7babae0d2e77a0de9d7f1982b85d40d8ff847868d280cfea
+    labeled_at: '2026-09-08T13:34:38+00:00'
+    n_steps: 169
+    phases:
+    - phase: incipient
+      start_idx: 0
+      tolerance_idx: 5
+      unsure: false
+    - phase: intensification
+      start_idx: 6
+      tolerance_idx: 2
+      unsure: false
+    - phase: mature
+      start_idx: 55
+      tolerance_idx: 4
+      unsure: false
+    - phase: decay
+      start_idx: 74
+      tolerance_idx: 3
+      unsure: false
+    verdict:
+      kind: boundary
+      incipient_end_idx: 6
+    tolerance_idx: 2
 - id: '20170520'
   source: real
   series_sha256: fa77671f026a1558b353dc3a08857bdc5015b4c8530a3d2e41f040f2f1e266b3
@@ -560,7 +649,7 @@ labels:
 - id: '20180170'
   source: real
   series_sha256: 973acda6e116b414aef211b4ad5a16c3824b0923c2f899c0e43c307f85508b03
-  labeled_at: '2026-09-08T13:47:44+00:00'
+  labeled_at: '2026-09-14T18:47:26+00:00'
   n_steps: 69
   phases:
   - phase: incipient
@@ -582,6 +671,35 @@ labels:
   verdict:
     kind: ambiguous
   tolerance_idx: 1
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+  superseded:
+  - id: '20180170'
+    source: real
+    series_sha256: 973acda6e116b414aef211b4ad5a16c3824b0923c2f899c0e43c307f85508b03
+    labeled_at: '2026-09-08T13:47:44+00:00'
+    n_steps: 69
+    phases:
+    - phase: incipient
+      start_idx: 0
+      tolerance_idx: 5
+      unsure: false
+    - phase: intensification
+      start_idx: 20
+      tolerance_idx: 1
+      unsure: true
+    - phase: mature
+      start_idx: 34
+      tolerance_idx: 1
+      unsure: true
+    - phase: decay
+      start_idx: 43
+      tolerance_idx: 1
+      unsure: true
+    verdict:
+      kind: ambiguous
+    tolerance_idx: 1
 - id: '20180263'
   source: real
   series_sha256: e13175eff293a3b4309c80155b4d17db8479b95651e40386132c6487dfc08c3a
