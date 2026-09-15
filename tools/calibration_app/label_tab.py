@@ -261,10 +261,12 @@ export default function (component) {
   const PW = W - ML - MR, PH_ = H - MT - MB;
 
   // ONE y-domain for every curve on screen — the raw series AND every active
-  // overlay. Deliberately NOT per-curve normalised: a flat overlay is
-  // information (it means that processing step did little here), and
-  // rescaling it to fill the axis would erase exactly that. If an overlay is
-  // visually flat against the raw series' range, that is the honest picture.
+  // overlay. This code never rescales anything itself; it just scans
+  // whatever values it is handed. An overlay's own values may already have
+  // been rescaled to sit within the raw series' range before they got here
+  // (see app.py's `_label_overlays`), specifically so a heavily-damped
+  // filtered/smoothed curve does not just look flat next to the raw one —
+  // but that choice is made upstream, not in this scan.
   let lo = Infinity, hi = -Infinity;
   const _scan = (arr) => {
     for (let i = 0; i < arr.length; i++) {
@@ -667,18 +669,58 @@ export default function (component) {
   host.__cp = S;
   update();
 
-  // Bring the working area to the top of the window when a NEW series arrives.
-  // The app's own header, uploader and mode switch sit above this view and
-  // cannot be removed — they belong to Grid and Inspector too — so ~680px of
-  // chrome stands between the top of the page and the curve. Left alone, every
-  // "Save & next" drops the labeller at the top of the page with the series
-  // they are supposed to be reading below the fold. Only on a genuinely new
-  // chart: doing it on every rerender would yank the page away mid-edit, and a
-  // resize rebuild carries `carriedPH`, which is how that case is told apart.
+  // ── first paint, possibly while hidden ───────────────────────────────────
+  // Label is its own top-level `st.tabs()` entry now, and EVERY tab's body
+  // runs on EVERY script pass regardless of which one is visually selected
+  // (tab selection is client-side CSS only) -- so on first load, with
+  // Calibration the default active tab, this component can mount while its
+  // own tab panel is `hidden`. Two things measured above, at build time, are
+  // wrong under `display:none`: `H` itself (`wantH(host.clientWidth)` falls
+  // back to `data.w` for the container width, which is not the eventual
+  // real one) and the "bring the working area to the top" scroll below
+  // (`scrollIntoView` on a hidden element is a no-op — it has no layout box
+  // to scroll to). Both share one cause and one fix: wait for the host to
+  // genuinely HAVE a size — immediately, if it is already visible (the
+  // ordinary case, and the only one before Label had its own always-mounted
+  // tab); otherwise the moment the tab panel stops being hidden. Once it
+  // does, re-measure; if the now-correct height differs meaningfully from
+  // what was actually built, rebuild once through the SAME path an ordinary
+  // window resize already takes (`onResize`, above, already handles
+  // `S.drag` and `carriedPH`) and scroll the rebuilt host instead. A resize
+  // rebuild itself is skipped entirely here (`carriedPH` is truthy then),
+  // so a live resize is never yanked back to the top mid-edit.
   if (!carriedPH) {
-    try {
-      host.scrollIntoView({ block: 'start', behavior: 'instant' });
-    } catch (_) { /* older browsers: the page simply stays where it was */ }
+    const bringToTop = (el) => {
+      try {
+        el.scrollIntoView({ block: 'start', behavior: 'instant' });
+      } catch (_) { /* older browsers: the page simply stays where it was */ }
+    };
+    const settle = () => {
+      const real = wantH(host.clientWidth);
+      if (!S.drag && Math.abs(real - H) >= 8) {
+        const keep = S.PH.map((p) => ({ ...p }));
+        S.teardown();
+        host.remove();
+        build(real, keep);
+        const host2 = parentElement.querySelector('#cp-label-chart');
+        bringToTop(host2 || host);
+      } else {
+        bringToTop(host);
+      }
+    };
+    const box = host.getBoundingClientRect();
+    if (box.width > 0 || box.height > 0) {
+      settle();
+    } else if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver((entries) => {
+        const r = entries[0].contentRect;
+        if (r.width > 0 || r.height > 0) {
+          ro.disconnect();
+          settle();
+        }
+      });
+      ro.observe(host);
+    }
   }
   }
 }
@@ -808,14 +850,17 @@ def _draw(sid: str, values: pd.Series, phases: list[dict],
 
     `overlays`, when non-empty, draws those layers in the SAME chart, on the
     SAME y-axis as the raw series (see the chart JS: the y-domain is the union
-    of the raw series and every active overlay, never normalised per curve).
-    Merged into the wire payload HERE rather than inside `chart_payload`
-    itself: that function's return keys are pinned by
+    of the raw series and every active overlay). This function itself never
+    normalises anything — any rescaling of an overlay curve's values happens
+    upstream, in the `overlay_provider` that computed them (see app.py's
+    `_label_overlays`), so what arrives here is already whatever scale it
+    should be drawn at. Merged into the wire payload HERE rather than inside
+    `chart_payload` itself: that function's return keys are pinned by
     tests/test_manual_labels.py to the raw-series-only contract, and `render`
-    only ever passes a non-empty list here from INSPECTION mode (see
-    `_overlay_controls`) — LABELLING mode always calls this with `overlays`
-    left at its default, so the wire payload it produces is byte-for-byte
-    what it always was.
+    only ever passes a non-empty list here once the labeller has opted into
+    an overlay via `_overlay_controls` — with none switched on, `overlays`
+    is left at its default and the wire payload is byte-for-byte what it
+    always was.
     """
     # height="content": the component decides its own height from the viewport,
     # so a fixed number here would either crop it or reserve space it does not
@@ -1005,13 +1050,15 @@ def _phase_table(sid: str, phases: list[dict], n: int, rev: int,
 
 @st.cache_data(show_spinner=False)
 def _load_synthetic_names() -> dict[str, str]:
-    """{opaque_id: case_name} — for the navigation list in INSPECTION only.
+    """{opaque_id: case_name} — revealed in the navigation list only once
+    overlays have been shown for that specific case.
 
     The opaque id is what the labeller sees while labelling (see
     `lc.opaque_synthetic_id`'s own docstring on why: the case name spells the
-    expected phase sequence). Showing the name too is fine ONLY in Inspection,
-    which this whole front already treats as a mode where the label is not
-    blind — see `_overlay_controls` and `_mode_switch`.
+    expected phase sequence). Showing the name too is fine only once that
+    particular case is no longer blind — see `_overlay_controls`, which
+    tracks this per case in `_lab_overlays_seen__{sid}`, and `_case_navigation`,
+    which reads it.
     """
     _series, names = lc.load_synthetic_series()
     return names
@@ -1042,7 +1089,7 @@ def _case_status(values: pd.Series, rec: dict | None) -> str:
 
 def _case_navigation(queue: list[str], records: dict, series: dict,
                      sources: dict, synth_names: dict[str, str],
-                     test_ids: set, mode: str, pos: int) -> int:
+                     test_ids: set, pos: int) -> int:
     """The case picker: a dropdown to jump to ANY of the 63 cases directly,
     with status/split/frozen indicators, plus a filter for "not yet labelled".
 
@@ -1065,7 +1112,7 @@ def _case_navigation(queue: list[str], records: dict, series: dict,
             tag += "  [TEST split — locked]"
         if sources[sid] == "synthetic":
             tag += "  [frozen synthetic]"
-            if mode == "inspect":
+            if st.session_state.get(f"_lab_overlays_seen__{sid}"):
                 tag += f"  ({synth_names.get(sid, '?')})"
         return f"{_STATUS_ICON[status]} #{i + 1}/{len(queue)}  {sid}{tag}"
 
@@ -1090,51 +1137,9 @@ def _case_navigation(queue: list[str], records: dict, series: dict,
     return pos
 
 
-def _mode_switch(sid: str) -> str:
-    """INSPECTION / LABELLING toggle, opening always on INSPECTION.
-
-    INSPECTION allows overlays and disables saving; LABELLING allows saving and
-    never offers an overlay at all (see `_overlay_controls`). Switching FROM
-    inspection TO labelling is the direction that matters — it means this
-    case's label, from this point in the session, is no longer blind — so it
-    needs an explicit confirmation naming the case, separate from the toggle
-    itself. Switching back to Inspection is always free: it only restricts
-    what can be saved, it never reveals anything.
-    """
-    mode = st.session_state.setdefault("_lab_mode", "inspect")
-    gen = st.session_state.setdefault("_lab_mode_gen", 0)
-    st.sidebar.markdown("### Mode")
-    if st.session_state.get("_lab_mode_pending"):
-        st.sidebar.warning(
-            f"Switching to LABELLING now makes labelling **{sid}** "
-            "NOT BLIND from this point in the session onward. Confirm?")
-        c1, c2 = st.sidebar.columns(2)
-        if c1.button("Confirm", key="lab_mode_confirm", use_container_width=True):
-            st.session_state["_lab_mode"] = "label"
-            st.session_state["_lab_mode_pending"] = False
-            st.rerun()
-        if c2.button("Cancel", key="lab_mode_cancel", use_container_width=True):
-            st.session_state["_lab_mode_pending"] = False
-            st.session_state["_lab_mode_gen"] = gen + 1
-            st.rerun()
-        return mode
-    choice = st.sidebar.radio(
-        "Mode", ["Inspection", "Labelling"], index=0 if mode == "inspect" else 1,
-        key=f"lab_mode_radio__{gen}")
-    wanted = "inspect" if choice == "Inspection" else "label"
-    if wanted != mode:
-        if wanted == "label":
-            st.session_state["_lab_mode_pending"] = True
-        else:
-            st.session_state["_lab_mode"] = "inspect"
-        st.rerun()
-    return mode
-
-
-def _overlay_controls(sid: str, values: pd.Series, mode: str,
-                      overlay_provider) -> list[dict]:
-    """INSPECTION-only controls for drawing the package's own filtered/smoothed
-    series IN THE SAME interactive chart as the raw one (see `_draw`).
+def _overlay_controls(sid: str, values: pd.Series, overlay_provider) -> list[dict]:
+    """Controls for drawing the package's own filtered/smoothed series IN THE
+    SAME interactive chart as the raw one (see `_draw`).
 
     Returns the list of ACTIVE layers, each `{"name", "label", "color",
     "values"}` — everything the chart component needs, and nothing chart_payload
@@ -1142,12 +1147,11 @@ def _overlay_controls(sid: str, values: pd.Series, mode: str,
     series by tests/test_manual_labels.py's blindness tests; this list is
     merged in separately by `_draw`, only when non-empty).
 
-    Gated twice over: the master checkbox is OFF by default and its own label
-    names no package internals, so neither the overlay computation nor any
-    package vocabulary reaches the page until the labeller opts in — and this
-    function returns `[]` immediately in LABELLING mode (see `render`), so
-    there is no path from here back into what the RAW-ONLY chart draws while
-    a label is actually being written.
+    Available at any time — there is no separate Inspection/Labelling mode any
+    more, and saving is never gated on whether an overlay happens to be on
+    screen (see `render`). The master checkbox is OFF by default and its own
+    label names no package internals, so neither the overlay computation nor
+    any package vocabulary reaches the page until the labeller opts in.
 
     Every name/label/color/value that could name a package internal is DATA
     handed back by `overlay_provider` (app.py, which is allowed to import
@@ -1159,14 +1163,17 @@ def _overlay_controls(sid: str, values: pd.Series, mode: str,
     Whatever layer is actually switched on here is recorded into
     `_lab_overlays_seen__{sid}`, which never resets for the rest of the
     session — that accumulator is what `render` reads at save time into the
-    schema-4 `overlays_shown` provenance field.
+    schema-4 `overlays_shown` provenance field, and what `_case_navigation`
+    reads to decide whether this specific case's synthetic name is safe to
+    reveal in the jump-to-case dropdown.
     """
-    if mode != "inspect" or overlay_provider is None:
+    if overlay_provider is None:
         return []
     seen = st.session_state.setdefault(f"_lab_overlays_seen__{sid}", set())
     show = st.checkbox(
-        "Show filtered/smoothed overlays, in the SAME chart (Inspection "
-        "only — never offered while Labelling)",
+        "Show filtered/smoothed overlays, in the SAME chart — revealing one "
+        "makes THIS case's label no longer blind (recorded in the saved "
+        "record's 'overlays_shown')",
         value=False, key=f"lab_overlay_master__{sid}")
     if not show:
         return []
@@ -1194,15 +1201,17 @@ def _overlay_controls(sid: str, values: pd.Series, mode: str,
 
 
 def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) -> None:
-    """Draw the Label mode. Called from app.py's Calibration tab.
+    """Draw the Label tab. Called from app.py's own top-level Label tab.
 
     `overlay_provider`, if given, is a `values -> {layer_name: [float, ...]}`
     callable that app.py defines using cyclophaser directly (this module still
     imports nothing from the package — see the module docstring). It is only
-    ever invoked from `_overlay_controls`, which only ever runs in INSPECTION
-    mode behind its own opt-in checkbox: the raw-series-only chart that the
-    label is actually written from (`_draw`, below) never receives it and
-    never changes shape depending on it.
+    ever invoked from `_overlay_controls`, behind its own opt-in checkbox:
+    with that checkbox off, the raw-series-only chart that the label is
+    actually written from (`_draw`, below) never receives it and never
+    changes shape depending on it. There is no separate Inspection/Labelling
+    mode any more — saving and overlays are both available at all times; the
+    checkbox alone decides whether this case's label stays blind.
     """
     series, sources = _load_population()
     if not series:
@@ -1225,9 +1234,8 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     pos = int(st.session_state["lab_pos"]) % n_total
 
     pos = _case_navigation(queue, records, series, sources, synth_names,
-                          test_ids, st.session_state.get("_lab_mode", "inspect"), pos)
+                          test_ids, pos)
     sid = queue[pos]
-    mode = _mode_switch(sid)
     values = series[sid]
     n = len(values)
     is_synthetic = sources[sid] == "synthetic"
@@ -1293,7 +1301,9 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     _compact_layout()
     st.markdown("#### Manual labelling — the **raw input series only**")
     st.caption(
-        f"Mode: **{'Inspection' if mode == 'inspect' else 'Labelling'}**"
+        ("👁 overlays revealed — this label is no longer blind"
+         if st.session_state.get(f"_lab_overlays_seen__{sid}")
+         else "🙈 blind — no detector output shown for this case")
         + ("  ·  🔒 TEST split — saving locked" if is_test_case else "")
         + ("  ·  ❄️ frozen synthetic — saving needs double confirmation"
            if is_synthetic else "")
@@ -1362,15 +1372,16 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
             f"`{lc.LABELS_PATH.relative_to(_REPO_ROOT)}` the moment you press a "
             "button, each save rewriting the file atomically — closing the tab "
             "cannot lose work.\n\n"
-            "**Inspection vs. Labelling.** The tab opens in Inspection: you can "
-            "browse any case and reveal the package's own filtered/smoothed "
-            "overlays, but saving is off. Switching to Labelling turns saving on "
-            "and removes the overlays entirely — and switching a given case FROM "
-            "Inspection TO Labelling needs a confirmation, because that case's "
-            "label is no longer blind from that point on."
+            "**Overlays.** The checkbox above the chart can reveal the "
+            "package's own filtered/smoothed series, in the SAME chart as "
+            "the raw one, at any time — there is no separate mode to switch "
+            "to first. Revealing even one of them makes THIS case's label "
+            "no longer blind from that point on in the session; which "
+            "overlays were ever shown is recorded in the saved record's "
+            "'overlays_shown' field, so this is never silently lost."
         )
 
-    overlay_layers = _overlay_controls(sid, values, mode, overlay_provider)
+    overlay_layers = _overlay_controls(sid, values, overlay_provider)
 
     try:
         edit = _draw(sid, values, phases, overlays=overlay_layers)
@@ -1442,9 +1453,10 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
 
     # Backed by its own session_state entry, not just the widget's key, for
     # the same reason the confirmation checkboxes below are: an earlier
-    # widget's rerun (the mode switch, case navigation) can skip this one for
-    # a pass and reset it to the `value=` given, which must therefore be
-    # "whatever was last typed", not always "whatever is on disk".
+    # widget's rerun (case navigation, if the dropdown just jumped to a
+    # different case) can skip this one for a pass and reset it to the
+    # `value=` given, which must therefore be "whatever was last typed", not
+    # always "whatever is on disk".
     key_notes = f"_lab_notes__{sid}"
     if key_notes not in st.session_state:
         st.session_state[key_notes] = (existing or {}).get("notes", "")
@@ -1464,11 +1476,11 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     # Each checkbox's `value=` is read from ITS OWN backing session_state
     # entry, not left to the widget's own key-based memory — because that
     # memory does not reliably survive a rerun that an EARLIER widget in this
-    # same script triggers before this point is reached (the mode-switch
-    # radio's Confirm/Cancel flow does exactly this: it calls `st.rerun()`
-    # from higher up in `render`, which skips these checkboxes for that one
-    # pass, and Streamlit does not treat that as "still checked" on the next
-    # one). `_phase_table`'s own checkboxes were never vulnerable to this
+    # same script triggers before this point is reached (the case-navigation
+    # dropdown does exactly this when it jumps to a different case: it calls
+    # `st.rerun()` from higher up in `render`, which skips these checkboxes
+    # for that one pass, and Streamlit does not treat that as "still checked"
+    # on the next one). `_phase_table`'s own checkboxes were never vulnerable to this
     # because they already read every `value=` from the phases/open/close
     # backing store rather than from widget memory; these three are the same
     # fix applied to the confirmation checkboxes, which previously trusted
@@ -1506,14 +1518,8 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
 
     # Named explicitly, not just left as a greyed-out button: a labeller who
     # has ticked every confirmation on screen and still cannot save has no
-    # way to tell why unless the ONE remaining reason is spelled out — the
-    # mode gate in particular is easy to satisfy every OTHER condition for
-    # and still miss, because it lives in the sidebar, away from these
-    # checkboxes and buttons.
+    # way to tell why unless the ONE remaining reason is spelled out.
     blockers = []
-    if mode != "label":
-        blockers.append("switch to **Labelling** mode in the sidebar — "
-                        "saving is off while Inspecting")
     if split_error:
         blockers.append(f"{lc.SPLIT_PATH.name} could not be read; saving is "
                         "locked repo-wide until this is fixed")
@@ -1546,8 +1552,7 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     # "← Back" is gone too, replaced by a Previous/Next pair that ONLY moves
     # through the queue and never saves — the case-navigation dropdown at the
     # top of the tab covers "jump to any case"; these cover "step through the
-    # ones next to it", which matters most in INSPECTION mode, where nothing
-    # here can save at all.
+    # ones next to it" for a quick look, without risking an accidental save.
     r1, r2, b1, b2, p1, p2 = st.columns([1.3, 1.6, 1.3, 1.4, 1.0, 1.0])
     if r1.button("＋ Add a phase", use_container_width=True,
                  disabled=bool(phases) and phases[-1]["start_idx"] >= n - 1,

@@ -38,12 +38,12 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 
 
 def _label_app() -> AppTest:
+    """Label lives in its own top-level `st.tabs()` entry now, not behind a
+    `view_mode` radio choice inside Calibration — and every `st.tabs()` body
+    executes on every script run regardless of which tab is visually active
+    (tab selection is a client-side concern only), so `label_tab.render()`
+    has already run once this returns; no radio to set first."""
     at = AppTest.from_file(str(APP), default_timeout=60)
-    at.run()
-    for r in at.radio:
-        if set(r.options) >= {"Grid", "Inspector", "Label"}:
-            r.set_value("Label")
-            break
     at.run()
     assert not at.exception, [str(e) for e in at.exception]
     return at
@@ -148,16 +148,22 @@ def test_toggling_overlay_layers_does_not_move_any_phase():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Confirmation checkboxes must survive the mode-switch confirm dialog
+# Confirmation checkboxes must survive an EARLIER widget's rerun
 # ══════════════════════════════════════════════════════════════════════════
 #
 # A real bug, not a hypothetical: the overwrite/frozen-synthetic confirmation
 # checkboxes read `value=False` on every render and relied on Streamlit's own
 # widget-key memory to keep them ticked afterward. That memory does not
-# survive being skipped for one script pass, and `_mode_switch`'s pending ->
-# Confirm flow calls `st.rerun()` from EARLIER in `render` than these
-# checkboxes, which skips them for exactly one pass — enough to reset them to
-# unticked. Reported as "I tick everything and Save stays disabled".
+# survive being skipped for one script pass. Originally demonstrated via the
+# Inspection/Labelling mode switch's Confirm button, which called
+# `st.rerun()` from earlier in `render` than these checkboxes — that mode
+# switch is gone now (Danilo removed it: the tab is always in the mode that
+# used to be called "Labelling", and overlays are available regardless), but
+# `_phase_table` calling `st.rerun()` when a start/end-unsure checkbox
+# changes is a rerun that still fires earlier in `render` than these
+# confirmation checkboxes, for the SAME case, so it still exercises the same
+# class of bug and is used here in the mode switch's place. Originally
+# reported as "I tick everything and Save stays disabled".
 
 def _synthetic_case_index(at) -> int:
     for sb in at.main.selectbox:
@@ -168,18 +174,7 @@ def _synthetic_case_index(at) -> int:
                if "frozen synthetic" in o and "TEST split" not in o)
 
 
-def _switch_to_labelling(at) -> None:
-    for r in at.sidebar.radio:
-        if set(r.options) >= {"Inspection", "Labelling"}:
-            r.set_value("Labelling")
-    at.run()
-    for b in at.sidebar.button:
-        if b.label == "Confirm":
-            b.click()
-    at.run()
-
-
-def test_overwrite_confirmation_survives_switching_to_labelling_mode():
+def test_overwrite_confirmation_survives_an_earlier_widgets_rerun():
     at = _label_app()
     for sb in at.main.selectbox:
         if sb.label == "Jump to case":
@@ -192,19 +187,23 @@ def test_overwrite_confirmation_survives_switching_to_labelling_mode():
     at.run()
     assert ow.value is True
 
-    _switch_to_labelling(at)
+    # Flip (not just set) row 0's start-unsure, so this fires `_phase_table`'s
+    # internal `st.rerun()` regardless of whatever it was already showing.
+    su0 = _start_unsure(at)[0]
+    su0.set_value(not su0.value)
+    at.run()
 
     ow_after = next(cb for cb in at.checkbox
                    if "Overwrite the existing label" in cb.label)
     assert ow_after.value is True, (
-        "the overwrite confirmation reset to unticked after switching to "
-        "Labelling mode — it must survive the mode-switch confirm dialog")
+        "the overwrite confirmation reset to unticked after an earlier "
+        "widget's rerun in the same script pass")
 
 
-def test_all_three_confirmations_together_enable_save_after_mode_switch():
+def test_all_three_confirmations_together_enable_save():
     """The exact scenario reported: tick overwrite + both synthetic
-    confirmations, switch to Labelling, and Save must become available with
-    no further explanation needed than what's already on screen."""
+    confirmations and Save must become available with no further step
+    needed — there is no mode to switch to first any more."""
     at = _label_app()
     for sb in at.main.selectbox:
         if sb.label == "Jump to case":
@@ -214,7 +213,6 @@ def test_all_three_confirmations_together_enable_save_after_mode_switch():
     next(cb for cb in at.checkbox
         if "Overwrite the existing label" in cb.label).set_value(True)
     at.run()
-    _switch_to_labelling(at)
     next(cb for cb in at.checkbox
         if "I understand this is a frozen synthetic case" in cb.label).set_value(True)
     at.run()

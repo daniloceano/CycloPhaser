@@ -13,7 +13,7 @@ have found that, because the simulated DOM never ran the mount.
 
 So this harness does the only thing that would have: it starts
 `streamlit run tools/calibration_app/app.py` on a free port, opens Chromium at
-it, clicks into the Label mode, and operates the page with real pointer events
+it, clicks into the Label tab, and operates the page with real pointer events
 (`mouse.move` / `mouse.down` / `mouse.up` — not `dispatchEvent`). Every assertion
 is read back from the values Streamlit rendered from PYTHON state, never from a
 pixel: "the bar moved on screen" is not a pass, because the bar moving on screen
@@ -115,7 +115,7 @@ class AppServer:
 
 
 class LabelPage:
-    """The Label mode of the running app, driven through a real browser.
+    """The Label tab of the running app, driven through a real browser.
 
     Index arithmetic is done in the page via the SVG's own screen CTM rather than
     recomputed here from the viewBox: the chart scales with
@@ -344,7 +344,7 @@ class LabelPage:
             lbl.click()
             self.settle()
 
-    # ── overlays (Inspection mode only) ──────────────────────────────────────
+    # ── overlays (available at any time, no separate mode) ──────────────────
     def enable_overlay(self, layer_label_substring: str) -> None:
         """Turn the master overlay switch on, then one layer by its visible
         (partial) label text, e.g. 'vorticity_smoothed2'."""

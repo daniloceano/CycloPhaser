@@ -1,4 +1,4 @@
-"""Tests for the manual-labelling front (research/labels/ + the app's Label mode).
+"""Tests for the manual-labelling front (research/labels/ + the app's Label tab).
 
 Five things are worth testing here, and they are not the usual ones.
 
@@ -230,13 +230,14 @@ def test_label_tab_does_not_read_app_detection_parameters():
     callback — no filter or phase parameter of its own.
 
     If it grew a filter or phase argument, a sidebar setting could change what
-    the RAW-SERIES chart shows in LABELLING mode, and the blind label would
-    silently depend on a parameter choice. `overlay_provider` does not open
-    that door: it is a `values -> {name: [float]}` callable app.py builds
-    (using cyclophaser directly — this module still does not), and
-    `label_tab.render` only ever calls it from `_overlay_section`, which is
-    unreachable in LABELLING mode (see `test_label_tab_names_no_detector_output`
-    and the overlay-blindness tests below for the two halves of that guarantee).
+    the RAW-SERIES chart shows by default, and the blind label would silently
+    depend on a parameter choice. `overlay_provider` does not open that door:
+    it is a `values -> {name: [float]}` callable app.py builds (using
+    cyclophaser directly — this module still does not), and
+    `label_tab.render` only ever calls it from `_overlay_controls`, behind
+    its own opt-in checkbox (see `test_label_tab_names_no_detector_output`
+    and the overlay-blindness tests below for the two halves of that
+    guarantee).
     """
     fn = next(n for n in ast.walk(_tab_ast())
               if isinstance(n, ast.FunctionDef) and n.name == "render")

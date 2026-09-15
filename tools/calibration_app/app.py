@@ -201,7 +201,7 @@ _DEFAULTS: dict = {
 }
 
 _SM_OPTS = ["auto", "off", "manual"]
-_VIEW_MODES = ["Grid", "Inspector", "Label"]
+_VIEW_MODES = ["Grid", "Inspector"]
 _BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
@@ -1099,8 +1099,34 @@ _LABEL_OVERLAY_STYLE = {
 }
 
 
+def _rescale_to_raw_range(curve: np.ndarray, raw_min: float, raw_max: float) -> list[float]:
+    """Min-max rescale `curve` onto `[raw_min, raw_max]`, display-only.
+
+    Filtering and smoothing damp amplitude by design — `vorticity_smoothed2`
+    in particular is the pass phase detection actually reads, chosen
+    specifically for how much noise it has removed — so plotted in its own
+    true units next to the raw series it can look all but flat, which
+    defeats the reason to show it at all. Rescaled onto the raw curve's own
+    range, its SHAPE (where it turns, and when) reads at a comparable size
+    instead, which is what makes lining a filtered curve up against the raw
+    one to sanity-check a phase boundary actually useful. This changes no
+    number that is ever saved or scored — it only touches the copy of the
+    values handed to the chart.
+
+    A curve with (numerically) zero spread is centred on the raw range's
+    midpoint instead of divided by zero.
+    """
+    c = np.asarray(curve, dtype=float)
+    c_min, c_max = float(c.min()), float(c.max())
+    spread = c_max - c_min
+    if spread < 1e-12:
+        return [(raw_min + raw_max) / 2.0] * len(c)
+    scaled = raw_min + (c - c_min) / spread * (raw_max - raw_min)
+    return [float(v) for v in scaled]
+
+
 def _label_overlays(values: pd.Series) -> dict[str, dict]:
-    """Filtered/smoothed overlays for the Label tab's Inspection mode.
+    """Filtered/smoothed overlays for the Label tab.
 
     Called ONLY from label_tab.py's overlay controls, and only after the
     labeller has explicitly opted into seeing it. This is where the actual
@@ -1111,15 +1137,17 @@ def _label_overlays(values: pd.Series) -> dict[str, dict]:
     the one module that is already allowed to import cyclophaser, and handed
     down as plain numbers plus a label/color pair.
 
-    Uses the CURRENT sidebar filter widgets, deliberately: Inspection mode is
-    already non-blind by construction, and it exists to show what the
-    detector currently sees under whatever calibration is being tried, not a
-    second, independent snapshot.
+    Uses the CURRENT sidebar filter widgets, deliberately: revealing an
+    overlay is already non-blind by construction, and it exists to show what
+    the detector currently sees under whatever calibration is being tried,
+    not a second, independent snapshot.
 
     Returns {name: {"label": str, "color": str, "values": [float, ...]}} —
-    label_tab.py draws these in the SAME interactive chart as the raw series,
-    on the identical y-axis (no per-curve normalisation), so a flat overlay
-    stays visibly flat rather than being rescaled into looking eventful.
+    label_tab.py draws these in the SAME interactive chart as the raw
+    series, on the identical y-axis. Each curve's values are min-max
+    rescaled onto the raw series' own range (see `_rescale_to_raw_range`)
+    rather than left in true units, so the shape of a heavily-damped pass
+    stays visible next to the raw curve instead of reading as flat.
     """
     zeta_df = pd.DataFrame({"zeta": values})
     vort = process_vorticity(
@@ -1128,8 +1156,10 @@ def _label_overlays(values: pd.Series) -> dict[str, dict]:
         replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
         boundary_padding=boundary_padding,
     )
+    raw_min, raw_max = float(values.min()), float(values.max())
     return {
-        name: {**style, "values": [float(v) for v in vort[name].values]}
+        name: {**style,
+              "values": _rescale_to_raw_range(vort[name].values, raw_min, raw_max)}
         for name, style in _LABEL_OVERLAY_STYLE.items()
     }
 
@@ -2016,8 +2046,8 @@ with st.sidebar:
         "Default ± steps for a new boundary", min_value=0, max_value=50, value=5,
         step=1, key="label_default_tolerance",
         help=(
-            "Starting value for each boundary's margin in the **Label** display "
-            "mode. It is only a starting value: the margin is stored per "
+            "Starting value for each boundary's margin in the **Label** tab. "
+            "It is only a starting value: the margin is stored per "
             "BOUNDARY, because the subjectivity is not uniform even within one "
             "cyclone — an incipient knee can be unmistakable on a track whose "
             "mature→decay transition is a long gentle roll. A single global "
@@ -2147,7 +2177,7 @@ _ok_results = {n: r for n, r in all_results.items() if r["ok"]}
 _zip_bytes  = _build_zip(_ok_results, _build_yaml(cyclone_names))
 
 # ── Tabs ─────────────────────────────────────────────────────────────────────────
-tab_cal, tab_doc = st.tabs(["Calibration", "Documentation"])
+tab_cal, tab_label, tab_doc = st.tabs(["Calibration", "Label", "Documentation"])
 
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 1 — Calibration
@@ -2176,17 +2206,9 @@ with tab_cal:
                 "decision the algorithm made, each on its own switchable "
                 "layer. Use it when a track in the grid looks wrong and you "
                 "need to know *why*.\n\n"
-                "**Label** — blind manual labelling. One cyclone at a time, "
-                "marking its WHOLE phase sequence before moving on, so each "
-                "track is judged as a complete life cycle rather than one "
-                "boundary in isolation. Drag a bar to move a phase boundary; "
-                "the bar's thickness is the margin you accept on it, and the "
-                "shading follows. Shows the raw input series and NOTHING "
-                "else: no filtered series, no derivatives, no detector output "
-                "of any kind. The phase colours are the project's standard "
-                "ones, but they are painting *your* marks — a label written "
-                "while looking at the algorithm's answer is an echo of it, "
-                "not evidence about it.\n\n"
+                "Blind manual labelling has its own **Label** tab, next to "
+                "this one — see it for one cyclone at a time, its WHOLE "
+                "phase sequence marked before moving on.\n\n"
                 "No mode changes detection, and no view setting reaches the "
                 "exported YAML."
             ),
@@ -2375,8 +2397,15 @@ with tab_cal:
                 )
             with _inorm:
                 _normalize = st.checkbox(
-                    "Shared y scale", key="inspector_normalize",
+                    "Shared y scale", value=_DEFAULTS["inspector_normalize"],
+                    key="inspector_normalize",
                     help=(
+                        "On by default: with every layer on, a panel holds "
+                        "series of genuinely different magnitude, and "
+                        "rescaling is what keeps the filtered/smoothed ones "
+                        "legible next to raw `zeta` instead of reading flat, "
+                        "which is what actually helps with reading off the "
+                        "phase boundaries.\n\n"
                         "Rescales the curves to a 0–1 band, in the same groups "
                         "the Grid figure puts on its two y-axes: raw `zeta` "
                         "gets a band of its own, while `filtered_vorticity`, "
@@ -2591,54 +2620,52 @@ with tab_cal:
                 st.dataframe(_mature_table(_mature_records),
                              use_container_width=True, hide_index=True)
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # MODE "Label" — BLIND manual labelling of the whole phase sequence
-    # ══════════════════════════════════════════════════════════════════════════
-    # This mode is deliberately CUT OFF from everything above it. It does not
-    # read `all_results`, `files`, `cyclone_names`, or any filter/phase widget;
-    # it loads its own 63 series (51 calibration tracks + 12 synthetic cases)
-    # straight from disk and draws the raw input and nothing else.
-    #
-    # That isolation is the requirement, not an implementation detail. There is
-    # no ground truth for the incipient boundary — the synthetic suite derives
-    # one from the segment list and gets it wrong, because a sine-shaped It or D
-    # opening has zero derivative at t₀ and so starts flat exactly as a designed
-    # `Ic` segment would. The labels therefore have to come from a human, and a
-    # human who can see the detector's answer is no longer independent evidence
-    # about it. The phase palette is the project's standard one, so a labelled
-    # series reads like every other phase figure in the repo -- but every band
-    # and arrow is drawn from the LABELLER'S marks, never the algorithm's.
-    # See the module docstring of label_tab.py.
-    elif view_mode == "Label":
-        label_tab.render(default_tolerance=int(label_default_tolerance),
-                         overlay_provider=_label_overlays)
-
     # Bad-case evaluation summary — shown for both detector-facing modes,
-    # regardless of n_cols. NOT shown in "Label": that mode is blind by
-    # construction and must not put any detector-derived number on screen.
-    if view_mode != "Label":
-        st.divider()
-        st.subheader("Bad-case evaluation")
-        _eval = _compute_evaluation(cyclone_names)
-        st.metric(
-            "Bad cases",
-            f"{_eval['bad_cases_count']} / {_eval['total_cyclones']}",
-            f"{_eval['bad_cases_percent']}%",
-            delta_color="off",
-        )
-        if _eval["bad_cases"]:
-            st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
-        else:
-            st.caption("No cyclones marked as bad in this session.")
-        st.caption(
-            "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
-            "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
-            "is also written to the exported YAML's 'evaluation' section, so different "
-            "parameter sets can be compared by their bad-case rate."
-        )
+    # regardless of n_cols.
+    st.divider()
+    st.subheader("Bad-case evaluation")
+    _eval = _compute_evaluation(cyclone_names)
+    st.metric(
+        "Bad cases",
+        f"{_eval['bad_cases_count']} / {_eval['total_cyclones']}",
+        f"{_eval['bad_cases_percent']}%",
+        delta_color="off",
+    )
+    if _eval["bad_cases"]:
+        st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
+    else:
+        st.caption("No cyclones marked as bad in this session.")
+    st.caption(
+        "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
+        "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
+        "is also written to the exported YAML's 'evaluation' section, so different "
+        "parameter sets can be compared by their bad-case rate."
+    )
 
 # ══════════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Documentation
+# TAB 2 — Label — BLIND manual labelling of the whole phase sequence
+# ══════════════════════════════════════════════════════════════════════════════════
+# This tab is deliberately CUT OFF from everything in Calibration. It does not
+# read `all_results`, `files`, `cyclone_names`, or any filter/phase widget; it
+# loads its own 63 series (51 calibration tracks + 12 synthetic cases) straight
+# from disk and draws the raw input and nothing else.
+#
+# That isolation is the requirement, not an implementation detail. There is no
+# ground truth for the incipient boundary — the synthetic suite derives one
+# from the segment list and gets it wrong, because a sine-shaped It or D
+# opening has zero derivative at t₀ and so starts flat exactly as a designed
+# `Ic` segment would. The labels therefore have to come from a human, and a
+# human who can see the detector's answer is no longer independent evidence
+# about it. The phase palette is the project's standard one, so a labelled
+# series reads like every other phase figure in the repo -- but every band
+# and arrow is drawn from the LABELLER'S marks, never the algorithm's.
+# See the module docstring of label_tab.py.
+with tab_label:
+    label_tab.render(default_tolerance=int(label_default_tolerance),
+                     overlay_provider=_label_overlays)
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# TAB 3 — Documentation
 # ══════════════════════════════════════════════════════════════════════════════════
 with tab_doc:
     st.header("CycloPhaser — Method Documentation")
