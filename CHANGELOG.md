@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (tests only)
+
+**Synthetic timing test scored against manual labels.** `test_lifecycle_phase_timing`
+now compares detected boundaries with `research/labels/manual_labels.yaml` on the
+frozen synthetic series (hash-checked), instead of the hand-typed
+`expected_starts_idx`. No change to the package. See `docs/future_work.md` item 17.
+
 ### Added
 
 **Opt-in `incipient_method="plateau"` — a slope-based incipient boundary (behaviour
