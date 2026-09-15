@@ -1190,7 +1190,7 @@ overlay was on screen before this specific re-save.
 
 ---
 
-## 17. Front G — synthetic timing test reads the manual labels, not `expected_starts_idx` — **gate FAIL (finding), 2026-09-15; awaiting Danilo**
+## 17. Front G — synthetic timing test reads the manual labels, not `expected_starts_idx` — **gate FAIL (finding); verified and decided, 2026-09-15**
 
 **What changed.** `tests/synthetic/test_synthetic_lifecycles.py::test_lifecycle_phase_timing`
 no longer reads `expected_starts_idx` from `tests/synthetic/cases.py`. It now
@@ -1209,9 +1209,9 @@ generator non-determinism). Measured: no phase assignment changed between the
 two sources in any of the 12 cases.
 
 **Margin used.** The assertion margin is still the case `tolerance` (6). The
-labels' own `tolerance_idx` (1–5 on the synthetic boundaries, mostly 1–2) is
-reported alongside, not asserted: with it as the margin, 18 of 45 boundaries
-would fail. Which margin the suite should assert is a decision for Danilo.
+labels' own `tolerance_idx` (1–4 on the synthetic boundaries, mostly 1–2: 40
+of 45 boundaries) is reported alongside, not asserted: with it as the margin,
+18 of 45 boundaries would fail. See the decision below.
 
 **Result.** Suite passes; no case changed pass/fail (`quase_ItD` went from a
 vacuous timing pass — it had no `expected_starts_idx` — to a real one;
@@ -1236,6 +1236,87 @@ intensification — no boundary to subtract. Observational, so not asserted.
 7–16 steps (not 8–16: `ItMD_ItMD_noisy` first mature is 7), across 13 mature
 phases in 11 cases, not 12 of 12 (`IcIt_observational` has no mature;
 `quase_ItD` has one but no designed plateau at all).
+
+### (a) Independent verification in the conda `cyclophaser` environment (2026-09-15)
+
+The patch was authored and first measured in a pip venv (numpy 2.4.0, scipy
+1.17.1, pandas 2.3.3). Re-verified on branch `feat/front-g-manual-labels-source`
+(commit `727efd2`, branched from `develop-v2.1` at `ff53f1f`) in the dedicated
+conda environment of item 12 — python 3.12.14, numpy 2.5.3, scipy 1.18.0,
+pandas 3.0.5, `cyclophaser` resolving to this repository (not the shadowed
+1.7.3 of item 13):
+
+- **Deviation table identical across all 45 boundary rows.** Regenerating
+  `front_g_synthetic_deviations.md` changed only the embedded library-versions
+  line. Every `dev`, `slack` and `label_tol` is unchanged across those three
+  library upgrades.
+- **Suite: 1115 passed, 0 failures** (`pytest -m "not browser"`).
+- Both slack ≤ 1 boundaries reproduce exactly (`ItMD_clean` / mature dev +6
+  slack 0; `DItMD_noisy` / mature dev +5 slack 1), as does the 18/45 figure.
+
+### (b) The `case["series"]` hash mismatch is environment-specific
+
+Measured in the conda `cyclophaser` environment: `case["series"]` (regenerated
+at import) matches the recorded `series_sha256` for **12 of 12** synthetic
+cases, with `max |Δ|` against the frozen CSV of **exactly 0.0**. In the pip
+venv with numpy 2.4.0 it matched **0 of 12** (≤ 1.1e-19, the observation in
+item 14 that motivated the change of series source).
+
+The timing test reads the frozen `tests/synthetic/data/<id>.csv` precisely so
+that it does not depend on which of those two environments it runs in. The
+hash guard stays regardless. Do not cite the 1.1e-19 figure as a property of
+the generators — it is a property of that one sandbox. This is also a third
+dated data point in the unreconciled item 10 / item 11 contradiction, agreeing
+with item 11; not investigated here.
+
+### (c) Skip counts are environment-dependent — do not gate on them
+
+The front's declared gate predicted `1115 passed / 2 skipped` and got
+`1115 passed / 1 skipped / 29 deselected`. No test changed outcome. Cause:
+`tests/test_label_browser.py` does a module-level
+`pytest.importorskip("playwright.sync_api")`, so the same commit reports two
+shapes under `-m "not browser"`:
+
+| playwright | reported |
+|---|---|
+| absent | 1115 passed, **2 skipped**, 0 deselected — module skips whole at collection, its 29 tests never collected |
+| present | 1115 passed, **1 skipped**, 29 deselected — the 29 collect, then the marker filter drops them |
+
+The 29 was confirmed exactly by collection. The only real runtime skip is
+`test_synthetic_lifecycles.py:244` (observational case). **The correct
+prediction for a gate is "1115 passed, 0 failures"** — predict `passed` and
+`failed`, never the skipped/deselected split, which reports on the machine
+rather than on the code.
+
+### (d) DECISION (Danilo, 2026-09-15): the asserted margin stays a fixed 6
+
+`max(6, tolerance_idx)` was considered and **rejected**. On today's labels it
+would change nothing — the largest `tolerance_idx` on any synthetic boundary
+is 4, so the expression yields 6 at **45 of 45** boundaries — but it was
+rejected on principle, not on effect: it would mix the detector's error margin
+with the labeller's own uncertainty, which are two different quantities. The
+labels' `tolerance_idx` stays reported alongside and unasserted.
+
+This closes the open question left in *Margin used* above. `expected_starts_idx`
+remains in `cases.py`, unread, for its own clean-up front.
+
+### (e) OPEN backlog — the detector's mature starts late at every labelled boundary
+
+All **13** labelled mature boundaries have a positive deviation: the detector
+places the start of mature **after** the label, by **+1 to +6** steps (12 of
+13 at +2 or more; devs +1, +2, +2, +3, +3, +3, +4, +4, +4, +4, +4, +5, +6).
+This is systematic, not scatter — there is no mature boundary the detector
+finds early or on time. The labelled mature phases it is measured against run
+7–16 steps across 11 cases, so a +6 offset consumes a large fraction of the
+shorter ones.
+
+This is registered against the definition of mature decided in **front E**:
+the label marks the start of the visually flat region, and the detector does
+not. Not investigated and not to be fixed here — no detector change was in
+this front's scope. Whoever picks this up should start from the 13 mature rows
+of `research/labels/front_g/front_g_synthetic_deviations.md` and front E's
+definition, and decide whether the detector, the definition, or the labelling
+convention is the thing that moves.
 
 ---
 
