@@ -1188,6 +1188,12 @@ list (schema 4 never discards an overwritten label), and the new version is
 flagged `overlays_shown: [vorticity_smoothed2]` — not blind, since an
 overlay was on screen before this specific re-save.
 
+**Extended to every phase, 2026-09-15 (front E).** The ruling recorded above
+is scoped to the incipient phase. Front E extended it: for the synthetic set
+the manual label is the source of truth for **all** phases, `mature`
+included. See item 17, which is where the timing test was switched over to
+the labels and where the consequences for `mature` are recorded.
+
 ---
 
 ## 17. Front G — synthetic timing test reads the manual labels, not `expected_starts_idx` — **gate FAIL (finding); verified and decided, 2026-09-15**
