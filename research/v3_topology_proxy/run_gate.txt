@@ -1,0 +1,207 @@
+series_sha256 verified for all 47 training cases.
+
+==============================================================================
+PRIMARY METRIC — exact phase-name-sequence agreement, 47 training cases
+==============================================================================
+  Reader T (topology proxy)      15 / 47    31.9%
+  six-function detector          22 / 47    46.8%
+  majority-class baseline        16 / 47    34.0%   (incipient -> intensification -> mature -> decay)
+
+  gate:
+    1  >= 70% (>= 33/47)                      FAIL
+    2  >= majority baseline + 10 pts          FAIL   (need >= 44.0%)
+    3  >= six-function detector               FAIL
+
+  VERDICT: FAIL
+
+------------------------------------------------------------------------------
+by source
+------------------------------------------------------------------------------
+  real       n=35   Reader T 14/35 ( 40.0%)   detector 11/35 ( 31.4%)
+  synthetic  n=12   Reader T  1/12 (  8.3%)   detector 11/12 ( 91.7%)
+
+------------------------------------------------------------------------------
+per-phase PRESENCE agreement — does the proxy agree the phase exists at all?
+------------------------------------------------------------------------------
+  phase             label has proxy has   agree    rate    miss  false
+  incipient                28         5      24   51.1%      23      0
+  intensification          47        47      47  100.0%       0      0
+  mature                   44        45      46   97.9%       0      1
+  decay                    44        45      46   97.9%       0      1
+  residual                 10        15      30   63.8%       6     11
+
+------------------------------------------------------------------------------
+phase COUNT agreement (len of the sequence)
+------------------------------------------------------------------------------
+  exact count match            22 / 47    46.8%
+  proxy_len - label_len: {-4: 1, -2: 2, -1: 11, 0: 22, 1: 5, 2: 3, 3: 1, 4: 1, 6: 1}
+
+------------------------------------------------------------------------------
+SKELETON only — sequence with incipient/residual stripped from BOTH sides
+------------------------------------------------------------------------------
+  core-sequence match          33 / 47    70.2%
+  mature-count match           41 / 47    87.2%
+
+------------------------------------------------------------------------------
+every disagreeing case
+------------------------------------------------------------------------------
+  20150656     [real]
+      label : intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+      det   : incipient -> intensification -> mature -> decay -> residual
+      (extrema=5, valleys=2, head_plateau=0, tail_plateau=30)
+  20160587     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  20160735     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+      det   : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+      (extrema=7, valleys=3, head_plateau=0, tail_plateau=21)
+  20170154     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  20170342     [real]
+      label : intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> intensification -> residual
+      det   : incipient -> intensification -> mature -> decay -> residual
+      (extrema=4, valleys=2, head_plateau=0, tail_plateau=23)
+  20170409     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  20170794     [real]
+      label : intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay -> intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay
+      (extrema=5, valleys=2, head_plateau=0, tail_plateau=0)
+  20171179     [real]
+      label : incipient -> intensification
+      proxy : intensification -> mature -> decay -> residual
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=18)
+  20180263     [real]
+      label : intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay -> intensification -> residual
+      det   : incipient -> intensification -> mature -> decay -> residual
+      (extrema=4, valleys=2, head_plateau=0, tail_plateau=16)
+  20180628     [real]
+      label : incipient -> intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  20180733     [real]
+      label : intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+      det   : intensification -> mature -> decay -> intensification -> mature -> decay
+      (extrema=5, valleys=2, head_plateau=0, tail_plateau=51)
+  20180759     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> residual
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=4)
+  20181046     [real]
+      label : incipient -> intensification
+      proxy : intensification -> residual
+      det   : intensification
+      (extrema=2, valleys=1, head_plateau=0, tail_plateau=6)
+  20190325     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> intensification -> residual
+      det   : incipient -> intensification -> mature -> decay -> residual
+      (extrema=4, valleys=2, head_plateau=0, tail_plateau=41)
+  20190397     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  20190639     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : incipient -> decay -> intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=4, valleys=2, head_plateau=7, tail_plateau=0)
+  20190870     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  20190879     [real]
+      label : intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> residual
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=2)
+  20202023     [real]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  20203947     [real]
+      label : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay -> intensification
+      det   : incipient -> intensification -> mature -> decay -> residual
+      (extrema=4, valleys=2, head_plateau=0, tail_plateau=0)
+  20205386     [real]
+      label : incipient -> intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  s0596ea57    [synthetic]
+      label : incipient -> intensification
+      proxy : incipient -> intensification -> residual
+      det   : intensification
+      (extrema=2, valleys=1, head_plateau=8, tail_plateau=4)
+  s46657891    [synthetic]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=0)
+  s4e7ff65c    [synthetic]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> residual
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=1)
+  s5b8aa46f    [synthetic]
+      label : decay -> intensification -> mature -> decay -> residual
+      proxy : decay -> intensification -> mature -> decay -> intensification
+      det   : decay -> intensification -> mature -> decay -> residual
+      (extrema=5, valleys=3, head_plateau=0, tail_plateau=0)
+  s5dcc0f79    [synthetic]
+      label : incipient -> intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay -> intensification -> residual
+      det   : incipient -> intensification -> mature -> decay -> residual
+      (extrema=4, valleys=2, head_plateau=0, tail_plateau=1)
+  s6b1e8245    [synthetic]
+      label : incipient -> decay -> intensification -> mature -> decay
+      proxy : decay -> intensification -> mature -> decay
+      det   : incipient -> decay -> intensification -> mature -> decay
+      (extrema=4, valleys=2, head_plateau=0, tail_plateau=0)
+  s6b542eee    [synthetic]
+      label : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay
+      (extrema=5, valleys=2, head_plateau=0, tail_plateau=0)
+  s9ddbc53c    [synthetic]
+      label : incipient -> intensification -> mature -> decay -> residual
+      proxy : intensification -> mature -> decay -> intensification -> residual
+      det   : incipient -> intensification -> mature -> decay -> residual
+      (extrema=4, valleys=2, head_plateau=0, tail_plateau=1)
+  sbceec644    [synthetic]
+      label : incipient -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> residual
+      det   : incipient -> intensification -> mature -> decay
+      (extrema=3, valleys=1, head_plateau=0, tail_plateau=1)
+  sbd6c6920    [synthetic]
+      label : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay
+      proxy : intensification -> mature -> decay -> intensification -> mature -> decay
+      det   : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay
+      (extrema=5, valleys=2, head_plateau=0, tail_plateau=0)
+  scfcf1387    [synthetic]
+      label : incipient -> decay -> intensification -> mature -> decay -> residual
+      proxy : decay -> intensification -> mature -> decay -> intensification
+      det   : incipient -> decay -> intensification -> mature -> decay -> residual
+      (extrema=5, valleys=3, head_plateau=0, tail_plateau=0)

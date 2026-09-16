@@ -1414,6 +1414,109 @@ of this front closing, at Danilo's explicit request).
 
 ---
 
+## 18. Front v3.0 premise — the filtered series as a proxy for *which* phases exist — **gate FAIL (finding), measured 2026-09-16**
+
+**Status: measurement done, gate FAIL, no implementation attempted.** Branch
+`research/v3-topology-proxy`, not merged. Everything lives in
+`research/v3_topology_proxy/` — `PROTOCOL.md` (the declaration),
+`measure_topology_proxy.py` (the gate), `ceiling_diagnostic.py` (post-hoc),
+`RESULTS.md` (the full write-up), plus both console logs.
+
+**The premise under test.** A heavily filtered series (Lanczos `len//2` + double
+Savgol, all `'auto'`) is bad at timing but was claimed to be good at *inventory*
+— at saying WHICH phases a cyclone has — which would let a v3.0 architecture
+take the phase inventory from it and leave timing to a later stage, replacing
+the six sequential phase functions. This front measured the premise only.
+
+**Method.** A topology-only reader ("Reader T") that calls none of the six phase
+functions: the skeleton from `find_peaks_valleys(z)` on the filtered series
+(descending run → intensification, interior valley → mature, ascending run →
+decay), plus the package's own shipped plateau rule (`tau=0.20`) applied at the
+head for `incipient` and, mirrored, at the tail for `residual`. Scored on
+**exact phase-name-sequence agreement** — order and multiplicity, **no index
+ever compared** — against the manual labels, over the **47 training cases** of
+the frozen split. `series_sha256` verified on all 47; the 16 test cases were not
+read.
+
+**The gate was declared and committed (`2d95e25`) before the reader ran**, and
+the prediction with it. Three criteria: ≥ 70 %; ≥ majority-class baseline + 10
+points; ≥ the six-function detector.
+
+**Result — FAIL on all three:**
+
+| reader | exact-sequence agreement |
+|---|---|
+| Reader T (the proxy) | **15/47 — 31.9 %** |
+| the six-function detector | 22/47 — 46.8 % |
+| majority-class baseline | 16/47 — 34.0 % |
+
+Reader T scores **below the constant baseline** of always answering
+`incipient → intensification → mature → decay`.
+
+**The declared prediction held on every point**: FAIL; inside the predicted
+30–55 % band; incipient the dominant error at 51.1 % (predicted < 75 %);
+incipient *under*-detected (23 misses, **0** false positives, as predicted from
+the `boundary_padding` median `|dz|` of 0.42 at t0 vs `tau=0.20`); residual
+over-firing (11 false, 6 missed); the skeleton the strong part.
+
+**The failure is exactly the flatness-defined phases, and only those:**
+
+| phase | presence agreement |
+|---|---|
+| intensification | 100.0 % |
+| mature | 97.9 % |
+| decay | 97.9 % |
+| **incipient** | **51.1 %** |
+| **residual** | **63.8 %** |
+
+**It is not a threshold artefact.** A post-hoc sweep over `tau_head`, `tau_tail`
+and `prominence_relative`, with the best setting chosen on the same 47 cases it
+is scored on — an *optimistically biased upper bound* no held-out calibration
+could beat — tops out at **22/47 = 46.8 %**, nowhere near 70 %, and lands on the
+six-function detector's own number rather than above it. The sweep's optimum for
+the tail is `tau_tail = 0.0`: **the best available policy for `residual` is to
+never emit it.** Sweeping `tau_head` alone, incipient presence never separates
+the two populations — it only trades misses for false positives, peaking at
+68.1 %, a mere 8.5 points above answering "yes" every time (59.6 %).
+
+**Where the information went.** The same probe on the **unfiltered** input
+(`incipient_plateau_signal="vorticity"`) reaches **80.9 %** on incipient
+presence against the filtered series' 68.1 %. Incipient presence is not
+intrinsically unreadable — **the filtering is what destroys it**, to the tune of
+12.8 points.
+
+**What the premise does get right.** With incipient and residual stripped from
+both sides, leaving the deepening/weakening skeleton that topology actually
+speaks to: core-sequence agreement **78.7 %** and mature-count agreement
+**91.5 %** (at `prominence_relative` 0.30–0.50; 70.2 % / 87.2 % at Reader T's
+parameter-free defaults). This is the half of the impression measurement
+supports.
+
+**Corrected statement, and the consequence.** The filtered series is a usable
+proxy for the **cycle skeleton** (which cycles, how many matures) and is **not**
+a proxy for the presence of `incipient` or `residual`, with no threshold that
+makes it one. A v3.0 built on a *single* filtered series would inherit a wrong
+phase inventory on roughly half its cases — and item 17 / Front A is the
+precedent for what a wrong skeleton does downstream (forcing index 0 to `peak`
+made `find_mature_stage` invent a spurious mature block on 20190325 and
+20191014). A proxy architecture is not ruled out, but it cannot be
+single-series: the skeleton and the two flat-end phases must be read off
+**different** signals, the latter at a filtering level that still has the
+flatness in it. That is a different architecture from the one tested here and
+needs its own front and its own declared gate before any implementation.
+
+**Not affected:** nothing on `develop-v2.1`, nothing in the v2.1 release, and no
+detector code — this front added only `research/v3_topology_proxy/`. The test
+split stays frozen and unread.
+
+**Incidental observation, not a front.** On the 35 *real* tracks alone Reader T
+(40.0 %) outscores the six-function detector (31.4 %), while on the 12
+synthetics the detector wins 91.7 % to 8.3 %. The detector's real-track losses
+are mostly `incipient` emitted where the label has none. Noted, not
+investigated, and not a gate of anything.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

@@ -1,0 +1,60 @@
+==============================================================================
+POST-HOC CEILING — best exact-sequence agreement over all threshold settings
+(oracle-selected on the same 47 cases it is scored on: an UPPER BOUND)
+==============================================================================
+  prominence_relative= None   best  21/47 ( 44.7%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.02   best  21/47 ( 44.7%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.05   best  21/47 ( 44.7%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.10   best  21/47 ( 44.7%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.15   best  21/47 ( 44.7%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.20   best  21/47 ( 44.7%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.30   best  22/47 ( 46.8%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.40   best  22/47 ( 46.8%)  at tau_head=0.4, tau_tail=0.0
+  prominence_relative= 0.50   best  22/47 ( 46.8%)  at tau_head=0.4, tau_tail=0.0
+
+  CEILING  22/47  =  46.8%   (prominence_relative=0.3, tau_head=0.4, tau_tail=0.0)
+  declared gate threshold                70.0%  (NOT reached)
+  Reader T as declared                    31.9%
+  six-function detector                   46.8%
+  majority-class baseline                 34.0%
+
+------------------------------------------------------------------------------
+core skeleton alone (incipient/residual stripped from BOTH sides)
+------------------------------------------------------------------------------
+  prominence_relative= None   core  33/47 ( 70.2%)   mature-count  41/47 ( 87.2%)
+  prominence_relative= 0.02   core  34/47 ( 72.3%)   mature-count  42/47 ( 89.4%)
+  prominence_relative= 0.05   core  34/47 ( 72.3%)   mature-count  42/47 ( 89.4%)
+  prominence_relative= 0.10   core  34/47 ( 72.3%)   mature-count  42/47 ( 89.4%)
+  prominence_relative= 0.15   core  34/47 ( 72.3%)   mature-count  42/47 ( 89.4%)
+  prominence_relative= 0.20   core  34/47 ( 72.3%)   mature-count  42/47 ( 89.4%)
+  prominence_relative= 0.30   core  37/47 ( 78.7%)   mature-count  43/47 ( 91.5%)
+  prominence_relative= 0.40   core  37/47 ( 78.7%)   mature-count  43/47 ( 91.5%)
+  prominence_relative= 0.50   core  37/47 ( 78.7%)   mature-count  43/47 ( 91.5%)
+
+------------------------------------------------------------------------------
+incipient PRESENCE alone, as a function of tau_head (28 of 47 labels have one)
+------------------------------------------------------------------------------
+    tau  proxy says yes   agree    rate   miss  false
+    0.0               0      19   40.4%     28      0
+   0.05               2      21   44.7%     26      0
+    0.1               3      22   46.8%     25      0
+   0.15               5      24   51.1%     23      0
+    0.2               5      24   51.1%     23      0
+    0.3              13      28   59.6%     17      2
+    0.4              18      29   61.7%     14      4
+    0.5              21      30   63.8%     12      5
+    0.6              32      31   66.0%      6     10
+    0.7              39      32   68.1%      2     13
+    0.8              42      31   66.0%      1     15
+    0.9              45      30   63.8%      0     17
+   1.01               0      19   40.4%     28      0
+
+------------------------------------------------------------------------------
+incipient PRESENCE: filtered dz vs the RAW series, each at its own best tau
+------------------------------------------------------------------------------
+  filtered dz (the premise)    best  32/47 ( 68.1%) at tau=0.7
+  raw zeta                     best  38/47 ( 80.9%) at tau=0.4
+  raw zeta, savgol 11          best  37/47 ( 78.7%) at tau=0.2
+  raw zeta, savgol 21          best  38/47 ( 80.9%) at tau=0.4
+  constant always-incipient         28/47 ( 59.6%)
+  constant never-incipient          19/47 ( 40.4%)
