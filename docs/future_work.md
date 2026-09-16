@@ -1150,7 +1150,8 @@ calibration app can land on `develop-v2.1` with a green CI.
 the 12 synthetic cases through the calibration app's Label tab (see item 9;
 the tab itself gained navigation, per-boundary edge uncertainty, selective
 phase removal and gated overlays on branch
-`feat/label-tab-navigation-overlays`, not merged as of this writing):
+`feat/label-tab-navigation-overlays`, not merged as of this writing (merged
+since, 8102334)):
 
 > nos sintéticos quase sempre há uma fase incipiente que não foi pretendida
 > originalmente. Pelo menos para os sintéticos eu confirmo meu label manual

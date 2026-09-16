@@ -25,8 +25,8 @@ what was measured, what was decided, what is still open — lives in
 
 ## Ground truth for the synthetic suite
 
-- `research/labels/manual_labels.yaml` — the maintainer's blind manual labels —
-  is the source of truth for phase **timing**.
+- `research/labels/manual_labels.yaml` — the maintainer's manual labels — is the
+  source of truth for phase **timing**.
   `tests/synthetic/test_synthetic_lifecycles.py` compares each detected boundary
   with the label by position, running on the frozen series in
   `tests/synthetic/data/` and verifying that label's `series_sha256` before
@@ -37,9 +37,15 @@ what was measured, what was decided, what is still open — lives in
 - `expected_phases` **is** still the ground truth for the phase *sequence* test.
 - **`mature` follows the human label**, not the short plateau the segment lists
   were designed around: labelled mature runs 7–16 steps across 13 phases in 11
-  cases. The mechanical reason is that the sine segments enter and leave with
-  zero derivative, so a segment opening in `sine` begins flat and that flat
-  region belongs to the phase before the designed boundary.
+  cases. The mechanical reason is that the neighbouring sine phases arrive at and
+  leave the plateau with **zero derivative**, so the visually flat region is far
+  larger than the designed plateau — and that flat region belongs to `mature`
+  itself. The label therefore marks `mature` starting *before* and ending *after*
+  the designed boundaries.
+- Separately, and about the **incipient** phase rather than `mature`: a segment
+  opening in `sine` begins flat, which creates a genuine incipient plateau the
+  segment lists never designed for. That is why the labels exist at all; see
+  `research/labels/README.md`.
 
 ## The asserted margin is a fixed 6
 
