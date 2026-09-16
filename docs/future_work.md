@@ -1419,8 +1419,9 @@ of this front closing, at Danilo's explicit request).
 **Status: measurement done, gate FAIL, no implementation attempted.** Branch
 `research/v3-topology-proxy`, not merged. Everything lives in
 `research/v3_topology_proxy/` — `PROTOCOL.md` (the declaration),
-`measure_topology_proxy.py` (the gate), `ceiling_diagnostic.py` (post-hoc),
-`RESULTS.md` (the full write-up), plus both console logs.
+`measure_topology_proxy.py` (the gate), `ceiling_diagnostic.py` and
+`baselines.py` (both POST-HOC / EXPLORATORY), `RESULTS.md` (the full write-up),
+plus the three console logs.
 
 **The premise under test.** A heavily filtered series (Lanczos `len//2` + double
 Savgol, all `'auto'`) is bad at timing but was claimed to be good at *inventory*
@@ -1469,8 +1470,11 @@ over-firing (11 false, 6 missed); the skeleton the strong part.
 | **incipient** | **51.1 %** |
 | **residual** | **63.8 %** |
 
-**It is not a threshold artefact.** A post-hoc sweep over `tau_head`, `tau_tail`
-and `prominence_relative`, with the best setting chosen on the same 47 cases it
+**It is not a threshold artefact.** *(POST-HOC / EXPLORATORY — this block, the
+raw-series probe and the skeleton reduction below were all produced after the
+gate was run and its verdict recorded; the sweeps pick their winner on the same
+47 cases they are scored on, so they are upper bounds.)* A post-hoc sweep over
+`tau_head`, `tau_tail` and `prominence_relative`, with the best setting chosen on the same 47 cases it
 is scored on — an *optimistically biased upper bound* no held-out calibration
 could beat — tops out at **22/47 = 46.8 %**, nowhere near 70 %, and lands on the
 six-function detector's own number rather than above it. The sweep's optimum for
@@ -1479,23 +1483,68 @@ never emit it.** Sweeping `tau_head` alone, incipient presence never separates
 the two populations — it only trades misses for false positives, peaking at
 68.1 %, a mere 8.5 points above answering "yes" every time (59.6 %).
 
-**Where the information went.** The same probe on the **unfiltered** input
+**Where the information went.** *(POST-HOC / EXPLORATORY.)* The same probe on the **unfiltered** input
 (`incipient_plateau_signal="vorticity"`) reaches **80.9 %** on incipient
 presence against the filtered series' 68.1 %. Incipient presence is not
 intrinsically unreadable — **the filtering is what destroys it**, to the tune of
 12.8 points.
 
-**What the premise does get right.** With incipient and residual stripped from
-both sides, leaving the deepening/weakening skeleton that topology actually
-speaks to: core-sequence agreement **78.7 %** and mature-count agreement
+**The skeleton reduction, and its retraction.** *(POST-HOC / EXPLORATORY.)*
+With incipient and residual stripped from both sides, the deepening/weakening
+skeleton gives core-sequence agreement **78.7 %** and mature-count agreement
 **91.5 %** (at `prominence_relative` 0.30–0.50; 70.2 % / 87.2 % at Reader T's
-parameter-free defaults). This is the half of the impression measurement
-supports.
+parameter-free defaults). The first write-up of this item called that "the half
+of the impression measurement supports". **The complementary round of
+2026-09-16 withdraws that claim**: those figures *are* the constant baselines,
+to the case. 37 of the 47 labels have the core sequence
+`intensification → mature → decay`, so always answering it scores 78.7 %; 41 of
+47 have exactly one mature, so always answering 1 scores 87.2 %.
 
-**Corrected statement, and the consequence.** The filtered series is a usable
-proxy for the **cycle skeleton** (which cycles, how many matures) and is **not**
-a proxy for the presence of `incipient` or `residual`, with no threshold that
-makes it one. A v3.0 built on a *single* filtered series would inherit a wrong
+| reader | core sequence | vs constant 78.7 % | mature count | vs constant 87.2 % |
+|---|---|---|---|---|
+| proxy, `prominence_relative=None` (as declared) | 70.2 % | **−8.5 pts (−4 cases)** | 87.2 % | **+0.0 pts (0 cases)** |
+| proxy, `prominence_relative=0.30` (swept) | 78.7 % | **+0.0 pts (0 cases)** | 91.5 % | +4.3 pts (+2 cases) |
+| six-function detector | 89.4 % | **+10.6 pts (+5 cases)** | 89.4 % | +2.1 pts (+1 case) |
+
+The proxy's apparent skeleton competence was the label population's
+homogeneity, not information the proxy extracts. **Nothing in this front shows
+the filtered series' topology carrying inventory information a constant answer
+does not already carry.**
+
+**Per-phase presence against the per-phase constant bars** (the bar is the
+larger of "always emit" and "never emit"):
+
+| phase | label has | bar | Reader T | detector |
+|---|---|---|---|---|
+| intensification | 47 | 100.0 % | 100.0 % *(ties — a 100 % bar carries no information)* | 100.0 % *(ties)* |
+| mature | 44 | 93.6 % | 97.9 % *(+2 cases)* | 97.9 % *(+2)* |
+| decay | 44 | 93.6 % | 97.9 % *(+2 cases)* | 97.9 % *(+2)* |
+| incipient | 28 | 59.6 % | **51.1 % — below bar** | 61.7 % *(+1)* |
+| residual | 10 | 78.7 % | **63.8 % — below bar** | 87.2 % *(+4)* |
+
+Reader T clears its own majority bar on two of five phases, by two cases each.
+The detector clears four of five.
+
+**The detector's own topology baseline, for the record.** Exact full-sequence
+agreement: the modal constant (`incipient → intensification → mature → decay`)
+scores **16/47 = 34.0 %**; the six-function detector **22/47 = 46.8 %**,
+**+12.8 pts (+6 cases)**; Reader T 15/47 = 31.9 %, **−2.1 pts (−1 case)**. The
+detector carries real information over a constant answer; the proxy does not.
+
+**The two incipient-presence numbers, reconciled.** 51.1 % and 68.1 % are the
+same probe on the same signal — the **filtered** `dz` — at two taus. 51.1 % is
+Reader T exactly as `PROTOCOL.md` froze it (`tau_head = 0.20`, the package's
+shipped default) and is **the configuration the gate scored**. 68.1 % is the
+post-hoc sweep's oracle best (`tau_head = 0.70`, 39 yeses, 2 misses, 13 false
+positives), and it appears only in the filtered-vs-raw table, where each signal
+gets its own best tau so neither is handicapped. Neither number is a raw-series
+number. For scale the constant "always incipient" is 59.6 %, so the as-declared
+probe is 8.5 points *below* a constant and the oracle-tuned one 8.5 above.
+
+**Corrected statement, and the consequence.** The filtered series is **not** a
+proxy for the presence of `incipient` or `residual`, with no threshold that
+makes it one — and on the cycle skeleton it is **not measurably better than a
+constant answer** either (see the retraction above). A v3.0 built on a *single* filtered series would inherit a wrong
 phase inventory on roughly half its cases — and item 17 / Front A is the
 precedent for what a wrong skeleton does downstream (forcing index 0 to `peak`
 made `find_mature_stage` invent a spurious mature block on 20190325 and

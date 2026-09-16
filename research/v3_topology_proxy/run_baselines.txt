@@ -1,0 +1,76 @@
+series_sha256 verified for all 47 training cases.
+POST-HOC / EXPLORATORY — baselines only. The gate verdict (FAIL) is untouched.
+
+======================================================================================
+1. PER-PHASE PRESENCE AGREEMENT vs the two constant answers
+======================================================================================
+   'always' = emit the phase on every case.  'never' = emit it on none.
+   The bar a reader must clear is the LARGER of the two (the per-phase
+   majority class), printed in the last column.
+
+   phase             label has   always    never  Reader T  detector    bar (majority)
+   -----------------------------------------------------------------------------------
+   incipient                28    59.6%    40.4%     51.1%     61.7%             59.6%
+   intensification          47   100.0%     0.0%    100.0%    100.0%            100.0%
+   mature                   44    93.6%     6.4%     97.9%     97.9%             93.6%
+   decay                    44    93.6%     6.4%     97.9%     97.9%             93.6%
+   residual                 10    21.3%    78.7%     63.8%     87.2%             78.7%
+
+   clears its own majority bar?
+     incipient         Reader T 24/47 vs bar 28/47  -> NO     |  detector 29/47 vs bar 28/47  -> yes
+     intensification   Reader T 47/47 vs bar 47/47  -> ties   |  detector 47/47 vs bar 47/47  -> ties
+     mature            Reader T 46/47 vs bar 44/47  -> yes    |  detector 46/47 vs bar 44/47  -> yes
+     decay             Reader T 46/47 vs bar 44/47  -> yes    |  detector 46/47 vs bar 44/47  -> yes
+     residual          Reader T 30/47 vs bar 37/47  -> NO     |  detector 41/47 vs bar 37/47  -> yes
+
+======================================================================================
+2. SKELETON and MATURE-COUNT vs their modal constant answers
+======================================================================================
+
+   label core-sequence distribution (4 distinct):
+      37  intensification -> mature -> decay
+       4  decay -> intensification -> mature -> decay
+       3  intensification
+       3  intensification -> mature -> decay -> intensification -> mature -> decay
+
+   modal core sequence: intensification -> mature -> decay
+   CONSTANT BASELINE (always answer the modal core):  37/47 = 78.7%
+
+   reader                                            core seq   vs baseline
+   ---------------------------------------------------------------------
+   proxy, prominence_relative=None  (as declared)  33/47  70.2%         -8.5 pts
+   proxy, prominence_relative=0.30  (POST-HOC swept)  37/47  78.7%         +0.0 pts
+   six-function detector                           42/47  89.4%        +10.6 pts
+   CONSTANT modal-core baseline                    37/47  78.7%           --
+
+   label mature-count distribution: {0: 3, 1: 41, 2: 3}
+   modal mature count: 1
+   CONSTANT BASELINE (always answer 1):  41/47 = 87.2%
+
+   reader                                            mature n   vs baseline
+   ---------------------------------------------------------------------
+   proxy, prominence_relative=None  (as declared)  41/47  87.2%         +0.0 pts
+   proxy, prominence_relative=0.30  (POST-HOC swept)  43/47  91.5%         +4.3 pts
+   six-function detector                           42/47  89.4%         +2.1 pts
+   CONSTANT modal-count baseline                   41/47  87.2%           --
+
+======================================================================================
+3. THE TWO INCIPIENT-PRESENCE NUMBERS, RECONCILED
+======================================================================================
+   Same series, same probe, same signal. Only tau differs.
+
+   tau_head = 0.20   24/47 =  51.1%   (says yes on  5, misses 23, false  0)
+                 as declared -- the package's shipped default; THIS is the
+                 one scored by the gate.
+
+   tau_head = 0.70   32/47 =  68.1%   (says yes on 39, misses  2, false 13)
+                 POST-HOC -- the sweep's oracle best, chosen on these 47
+                 cases it is scored on.
+
+   for scale: constant 'always incipient' = 28/47 = 59.6%;  'never' = 19/47 = 40.4%
+
+   Both rows read the SAME filtered dz. The 51.1 % is Reader T exactly as
+   PROTOCOL.md froze it. The 68.1 % appears only in the post-hoc table that
+   compares filtered dz against the RAW series, where each signal is given
+   its own best tau so neither is handicapped -- it is an oracle-tuned
+   upper bound for the filtered signal, not a configuration anyone ran.
