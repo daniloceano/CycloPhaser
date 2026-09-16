@@ -1150,7 +1150,8 @@ calibration app can land on `develop-v2.1` with a green CI.
 the 12 synthetic cases through the calibration app's Label tab (see item 9;
 the tab itself gained navigation, per-boundary edge uncertainty, selective
 phase removal and gated overlays on branch
-`feat/label-tab-navigation-overlays`, not merged as of this writing):
+`feat/label-tab-navigation-overlays`, not merged as of this writing (merged
+since, 8102334)):
 
 > nos sintéticos quase sempre há uma fase incipiente que não foi pretendida
 > originalmente. Pelo menos para os sintéticos eu confirmo meu label manual
@@ -1187,6 +1188,12 @@ phase. Its previous version is preserved under that record's `superseded`
 list (schema 4 never discards an overwritten label), and the new version is
 flagged `overlays_shown: [vorticity_smoothed2]` — not blind, since an
 overlay was on screen before this specific re-save.
+
+**Extended to every phase, 2026-09-15 (front E).** The ruling recorded above
+is scoped to the incipient phase. Front E extended it: for the synthetic set
+the manual label is the source of truth for **all** phases, `mature`
+included. See item 17, which is where the timing test was switched over to
+the labels and where the consequences for `mature` are recorded.
 
 ---
 

@@ -24,6 +24,14 @@ around that. `tests/synthetic/cases.py` is deliberately **not** modified here:
 replacing the derived synthetic ground truth is a separate step, and it should
 happen after the labels exist, not before.
 
+**That step has since happened** (`docs/future_work.md` item 17).
+`tests/synthetic/test_synthetic_lifecycles.py` now scores phase timing against
+`manual_labels.yaml`, and `expected_starts_idx` is read by no test at all — it
+is still present in `cases.py`, awaiting its own clean-up front.
+`expected_phases` still holds, as the ground truth for the phase *sequence*
+test. The decision extends beyond the incipient boundary: for the synthetic set
+the manual label is the source of truth for every phase, `mature` included.
+
 ## Contents
 
 | File | What it is |
@@ -58,7 +66,7 @@ The script **refuses to overwrite an existing `split.yaml`** without `--force`.
 That refusal is the point: a split redrawn after results have been seen is not a
 test set. Result — **train 47** (35 real + 12 synthetic), **test 16**.
 
-**2 — labelling (pending).**
+**2 — labelling (done: all 63 series are labelled).**
 
 ```bash
 streamlit run tools/calibration_app/app.py    # then: Display mode → "Label"
@@ -176,15 +184,34 @@ set is spent the first time a parameter is chosen after looking at it.
   verdict: {kind: boundary, incipient_end_idx: 7}   # DERIVED; incipient is [0, 7)
   tolerance_idx: 3                                  # DERIVED
   notes: clear knee           # optional
+  open_unsure: false          # schema 4 — uncertainty before phase 0
+  close_unsure: false         # schema 4 — uncertainty after the last phase
+  overlays_shown: []          # schema 4 — empty or absent means blind
+  superseded: [...]           # schema 4 — prior versions, oldest first
 ```
 
-The document carries `schema: 3`. Records written against an earlier schema are
+The document carries `schema: 4`. Records written against schema **1 or 2** are
 **refused**, not upgraded, and named so the series goes back in the queue: a
 schema-1 record never stored the phase sequence, and a schema-2 record never
 stored `unsure`. Defaulting a missing `unsure` to `false` would put a claim in
 the labeller's mouth — *they were confident* — and that claim is exactly what
-decides whether a boundary counts against the detector. Both bumps were free
-because `manual_labels.yaml` was still empty each time; a third will not be.
+decides whether a boundary counts against the detector. Those two bumps were
+free because `manual_labels.yaml` was still empty each time; refusal is detected
+structurally, per record, rather than from the document's version number,
+because a working copy can hold a mix.
+
+The 3 → 4 bump cost no re-labelling, which is why it could happen with the queue
+already labelled. None of its three additions — `open_unsure`/`close_unsure`,
+`overlays_shown`, `superseded` — touches `phases`, `verdict` or `tolerance_idx`,
+so a schema-3 record still derives the identical verdict and stays valid. A
+schema-3 file is read and left exactly as it is; none of the three fields is
+invented on a record that was not itself re-saved. `open_unsure` and
+`close_unsure` carry uncertainty on the two edges a phase sequence cannot
+express (before phase 0, which is pinned at `start_idx` 0, and after the last
+phase, which has no boundary to flag); `overlays_shown` records which
+smoothed/filtered overlays were on screen before the save, so a non-blind label
+says so; `superseded` preserves the record a re-label replaced instead of
+erasing it.
 
 Phase *i* runs from its own `start_idx` up to the next one's; the last runs to
 the end. The first always starts at 0. Repeats are allowed — `residual →
