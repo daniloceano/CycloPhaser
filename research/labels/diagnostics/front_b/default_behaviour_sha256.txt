@@ -1,0 +1,4 @@
+definition: cyclophaser package defaults, 47 train series (split.yaml), sorted by id,
+'<id>:<periods joined by |>' per line, newline-joined, sha256
+n_series: 47
+sha256: b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5

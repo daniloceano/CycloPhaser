@@ -1,0 +1,59 @@
+==============================================================================
+20160735   (real, n=259 steps, sha256 OK=True)
+==============================================================================
+  detected sequence : intensification -> mature -> decay -> intensification -> mature -> decay -> intensification -> mature -> decay -> intensification -> mature -> decay
+  labelled sequence : incipient -> intensification -> mature -> decay
+
+  MATURE window
+    detected : start=   8  end=  10  duration=  3 steps
+    detected : start=  55  end=  62  duration=  8 steps
+    detected : start= 154  end= 166  duration= 13 steps
+    detected : start= 225  end= 232  duration=  8 steps
+    label    : start= 145  end= 177  duration= 33 steps   (tolerance_idx=5, unsure=False)
+    delta    : start -137   end -167   duration -30  (margin +/-5)
+
+  z EXTREMA  (raw -> kept), interior drops attributed
+    raw peaks   (  7): [0, 21, 85, 121, 172, 210, 258]
+    kept peaks  (  5): [0, 21, 121, 210, 258]
+    raw valleys (  6): [9, 59, 97, 159, 178, 228]
+    kept valleys(  4): [9, 59, 159, 228]
+
+    dropped peaks   by prominence: [85, 172]
+    dropped peaks   by distance  : []
+    dropped valleys by prominence: [97, 178]
+    dropped valleys by distance  : []
+
+    kept peaks  if distance DISABLED: [0, 21, 121, 210, 258]
+    kept valleys if distance DISABLED: [9, 59, 159, 228]
+    => distance filter changes the extremum set? NO
+
+==============================================================================
+20203947   (real, n=242 steps, sha256 OK=True)
+==============================================================================
+  detected sequence : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay -> intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+  labelled sequence : incipient -> intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+
+  MATURE window
+    detected : start=  59  end=  62  duration=  4 steps
+    detected : start=  88  end=  92  duration=  5 steps
+    detected : start= 130  end= 135  duration=  6 steps
+    detected : start= 182  end= 187  duration=  6 steps
+    label    : start= 122  end= 144  duration= 23 steps   (tolerance_idx=5, unsure=False)
+    label    : start= 178  end= 188  duration= 11 steps   (tolerance_idx=3, unsure=True)
+    delta    : start -63   end -82   duration -19  (margin +/-5)
+
+  z EXTREMA  (raw -> kept), interior drops attributed
+    raw peaks   (  8): [0, 13, 40, 74, 106, 159, 202, 241]
+    kept peaks  (  6): [0, 74, 106, 159, 202, 241]
+    raw valleys (  7): [8, 24, 61, 90, 132, 185, 229]
+    kept valleys(  4): [61, 90, 132, 185]
+
+    dropped peaks   by prominence: [13, 40]
+    dropped peaks   by distance  : []
+    dropped valleys by prominence: [8, 24, 229]
+    dropped valleys by distance  : []
+
+    kept peaks  if distance DISABLED: [0, 74, 106, 159, 202, 241]
+    kept valleys if distance DISABLED: [61, 90, 132, 185]
+    => distance filter changes the extremum set? NO
+
