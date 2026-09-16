@@ -1,4 +1,4 @@
-"""Tests for optional prominence/distance filtering in find_peaks_valleys.
+"""Tests for optional prominence filtering in find_peaks_valleys.
 
 Phase 1a — ship the mechanism with no-op defaults.  Confirms:
   1. No-op equivalence: default call is byte-identical to explicit (None, None).
@@ -34,7 +34,7 @@ class TestNoOpEquivalence:
 
     def _check_identical(self, series):
         default = find_peaks_valleys(series)
-        explicit = find_peaks_valleys(series, prominence=None, distance=None)
+        explicit = find_peaks_valleys(series, prominence=None)
         pd.testing.assert_series_equal(default, explicit)
 
     def test_plateau_series(self):
@@ -126,116 +126,56 @@ class TestProminenceFiltering:
         pd.testing.assert_series_equal(default, filtered)
 
 
-# ── 3. Distance filtering ──────────────────────────────────────────────────────
+# ── 3. `distance` is gone ─────────────────────────────────────────────────────
 
-class TestDistanceFiltering:
-    """Minimum distance keeps the most prominent extremum among nearby ones."""
+class TestDistanceRemoved:
+    """`distance` was removed; passing it must raise the ordinary TypeError.
 
-    def _build_close_valley_series(self):
-        """
-        Series with two close valleys:
-          index 5  : strong valley at -8e-4 (more prominent)
-          index 8  : weaker valley at -5e-4 (less prominent)
-        Boundary points at index 0 and index 14 are NOT extrema (they sit at a
-        moderate positive value bracketed by the same value on the other side,
-        so argrelextrema mode='clip' marks them).
+    It was a third extrema filter (minimum separation between surviving
+    same-type extrema) added after v2.0.0 and never published. Measured over the
+    47 training series it removed nothing at any value up to 14 and changed no
+    phase until 20, against a calibrated value of 5 — redundant with
+    `prominence_relative` throughout the calibrated range. There is deliberately
+    NO compatibility shim: a caller still passing it should fail loudly.
+    See research/inert_params/REPORT_inertia_sweep.md.
+    """
 
-        We use a symmetric construction so index 0 and N-1 are the boundary
-        and build peaks between the two valleys.
-        """
-        data = np.array([
-            0.5,    # 0  boundary
-            0.5,    # 1
-            0.2,    # 2
-           -3.0,    # 3
-           -6.0,    # 4
-           -8.0,    # 5  strong valley
-           -5.5,    # 6
-           -4.0,    # 7
-           -5.0,    # 8  weaker valley
-           -3.0,    # 9
-            0.1,    # 10
-            0.4,    # 11
-            0.5,    # 12
-            0.5,    # 13  boundary
-        ], dtype=float) * 1e-4
-        return _make_series(data)
+    def test_find_peaks_valleys_rejects_distance(self):
+        series = _make_series(np.sin(np.linspace(0, 4 * np.pi, 40)) * 1e-4)
+        with pytest.raises(TypeError, match="distance"):
+            find_peaks_valleys(series, distance=5)
 
-    def test_distance_merges_close_valleys_keeps_prominent(self):
-        series = self._build_close_valley_series()
-        N = len(series)
+    def test_get_periods_rejects_distance(self):
+        from cyclophaser.determine_periods import get_periods, process_vorticity
+        df = pd.DataFrame({"zeta": np.sin(np.linspace(0, 4 * np.pi, 80)) * 1e-4})
+        with pytest.raises(TypeError, match="distance"):
+            get_periods(process_vorticity(df), distance=5)
 
-        default = find_peaks_valleys(series)
-        valleys_default = _positions(default, "valley")
-        # Both valleys should be present without filtering
-        assert 5 in valleys_default, "strong valley must appear in default result"
-        assert 8 in valleys_default, "weaker valley must appear in default result"
+    def test_signatures_carry_no_distance(self):
+        import inspect
 
-        # distance=5 means indices 5 and 8 are only 3 apart → one must be removed
-        filtered = find_peaks_valleys(series, distance=5)
-        valleys_filt = _positions(filtered, "valley")
-
-        # The stronger valley (index 5) must survive
-        assert 5 in valleys_filt, "stronger valley must be kept by distance filter"
-        # The weaker valley (index 8) must be removed
-        assert 8 not in valleys_filt, "weaker valley must be removed by distance filter"
-
-    def test_distance_preserves_boundary_extrema(self):
-        """Boundary extrema always survive regardless of distance setting."""
-        series = self._build_close_valley_series()
-        N = len(series)
-        default = find_peaks_valleys(series)
-
-        boundary_marks = {}
-        for pos in (0, N - 1):
-            t = series.index[pos]
-            if default[t] in ("peak", "valley"):
-                boundary_marks[pos] = default[t]
-
-        filtered = find_peaks_valleys(series, distance=100)  # very large
-        for pos, label in boundary_marks.items():
-            t = series.index[pos]
-            assert filtered[t] == label, (
-                f"Boundary extremum at index {pos} ({label}) must survive distance=100"
-            )
-
-    def test_large_distance_keeps_only_most_prominent(self):
-        """A very large distance must leave at most one interior same-type extremum."""
-        series = self._build_close_valley_series()
-        filtered = find_peaks_valleys(series, distance=100)
-        interior_valleys = [
-            p for p in _positions(filtered, "valley")
-            if p not in (0, len(series) - 1)
-        ]
-        assert len(interior_valleys) <= 1, (
-            f"Expected ≤1 interior valley with distance=100, got {interior_valleys}"
-        )
-
-    def test_distance_one_is_noop(self):
-        """distance=1 cannot merge any extrema (all are at least 1 step apart)."""
-        series = self._build_close_valley_series()
-        default = find_peaks_valleys(series)
-        filtered = find_peaks_valleys(series, distance=1)
-        pd.testing.assert_series_equal(default, filtered)
+        from cyclophaser.determine_periods import (_refine_extrema,
+                                                   determine_periods, get_periods)
+        for fn in (find_peaks_valleys, _refine_extrema, get_periods,
+                   determine_periods):
+            assert "distance" not in inspect.signature(fn).parameters, fn.__name__
 
 
-# ── 4. Combined absolute prominence + distance ────────────────────────────────
+# ── 4. Absolute prominence, combined with the relative mode ───────────────────
 
 class TestCombined:
-    """Absolute prominence AND distance can be active simultaneously."""
+    """Absolute and relative prominence can be active simultaneously."""
 
-    def test_combined_removes_spurious_and_merges_close(self):
-        """
-        Use a prominence filter that drops the spurious valley, plus a distance
-        filter that would also catch it — verifies both codepaths interact cleanly.
-        """
+    def test_combined_absolute_then_relative(self):
+        """Absolute runs first; relative is applied to the survivors."""
         t = np.linspace(0, 2 * np.pi, 60)
         # Main trough + small ripple nearby
         values = (-np.sin(t) + 0.05 * np.sin(10 * t)) * 1e-4
         series = _make_series(values)
 
         default  = find_peaks_valleys(series)
-        combined = find_peaks_valleys(series, prominence=0.02e-4, distance=4)
+        combined = find_peaks_valleys(series, prominence=0.02e-4,
+                                      prominence_relative=0.10)
 
         default_valleys  = _positions(default,  "valley")
         combined_valleys = _positions(combined, "valley")

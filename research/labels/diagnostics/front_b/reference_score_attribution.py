@@ -21,7 +21,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[4]
 OUT = Path(__file__).resolve().parent
 EVAL = REPO / "research" / "labels" / "evaluate_against_labels.py"
-CONFIG = Path.home() / "Downloads" / "cyclophaser_params-9.yaml"
+CONFIG = REPO / "research" / "labels" / "configs" / "cyclophaser_params-9.yaml"
 
 lines = []
 

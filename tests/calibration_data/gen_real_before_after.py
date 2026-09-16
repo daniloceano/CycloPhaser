@@ -6,11 +6,11 @@ A ÚNICA variável entre os dois lados é o parâmetro de filtragem ativo —
 isto isola o efeito real do mecanismo de filtragem de extremos.
 
 Modos suportados (escolhidos via FILTER_MODE abaixo):
-  "absolute"  — filtra por prominence absoluta + distance
+  "absolute"  — filtra por prominence absoluta
   "relative"  — filtra por prominence relativa (fração do extremo dominante)
 
 Coluna ESQUERDA — v2.0.0 sem filtragem de extremos:
-  Pipeline padrão CycloPhaser v2.0.0.  Sem prominence / distance.
+  Pipeline padrão CycloPhaser v2.0.0.  Sem prominence.
 
 Coluna DIREITA — v2.0.0 com filtragem de extremos:
   Mesmo pipeline.  Extremos de z filtrados pelo modo escolhido.
@@ -52,7 +52,7 @@ PHASE_COLORS = {
 ALL_PHASES = ["incipient", "intensification", "mature", "decay", "residual"]
 C_Z, C_DZ, C_DZ2 = "#1d3557", "#457b9d", "#e63946"
 
-# Marcadores: azul = sem filtro (v2.0.0), vermelho = com prominence/distance
+# Marcadores: azul = sem filtro (v2.0.0), vermelho = com prominence
 _BLUE = "#2171b5"
 _RED  = "#cb181d"
 
@@ -105,7 +105,7 @@ def _build_legend_handles():
 
 
 def make_figure(csv_path, prominence=None, prominence_relative=None,
-                distance=None, out_dir=None):
+                out_dir=None):
     track_id = csv_path.stem
     df_input = pd.read_csv(csv_path, sep=";", index_col="time", parse_dates=True)
     series   = df_input["min_max_zeta_850"].rename("zeta")
@@ -122,9 +122,6 @@ def make_figure(csv_path, prominence=None, prominence_relative=None,
         filter_parts.append(f"abs={prominence:.1e}")
     if prominence_relative is not None:
         filter_parts.append(f"rel={prominence_relative:.2f}")
-    if distance is not None:
-        dist_hours = distance * dt_hours
-        filter_parts.append(f"dist={distance}steps/{dist_hours:.0f}h")
     filter_tag = "  ·  ".join(filter_parts) if filter_parts else "(nenhum)"
 
     zeta_df = pd.DataFrame({"zeta": series})
@@ -149,8 +146,7 @@ def make_figure(csv_path, prominence=None, prominence_relative=None,
         warnings.simplefilter("ignore")
         df_base = get_periods(vort)
         df_filt = get_periods(vort, prominence=prominence,
-                              prominence_relative=prominence_relative,
-                              distance=distance)
+                              prominence_relative=prominence_relative)
 
     phases_base = periods_to_dict(df_base)
     phases_filt = periods_to_dict(df_filt)
@@ -163,8 +159,7 @@ def make_figure(csv_path, prominence=None, prominence_relative=None,
     # dz e dz2: não filtrados por prominence (idênticos nos dois lados)
     z_extr_base = find_peaks_valleys(z)
     z_extr_filt = find_peaks_valleys(z, prominence=prominence,
-                                     prominence_relative=prominence_relative,
-                                     distance=distance)
+                                     prominence_relative=prominence_relative)
     dz_extr     = find_peaks_valleys(dz)
     dz2_extr    = find_peaks_valleys(dz2)
 
@@ -254,7 +249,7 @@ def make_figure(csv_path, prominence=None, prominence_relative=None,
 # ── Modo de filtragem ─────────────────────────────────────────────────────────
 # Altere FILTER_MODE para escolher o que comparar:
 #   "relative"  → prominence_relative=0.10 (fração do extremo dominante)
-#   "absolute"  → prominence=5e-6, distance=10
+#   "absolute"  → prominence=5e-6
 FILTER_MODE = "relative"
 
 # Parâmetros por modo
@@ -262,19 +257,16 @@ _CONFIGS = {
     "relative": dict(
         prominence=None,
         prominence_relative=0.10,
-        distance=None,
     ),
     "absolute": dict(
         prominence=5e-6,
         prominence_relative=None,
-        distance=10,
     ),
 }
 
 _cfg = _CONFIGS[FILTER_MODE]
 PROMINENCE          = _cfg["prominence"]
 PROMINENCE_RELATIVE = _cfg["prominence_relative"]
-DISTANCE            = _cfg["distance"]
 
 
 def _out_tag():
@@ -284,8 +276,6 @@ def _out_tag():
         parts.append(_pt(PROMINENCE))
     if PROMINENCE_RELATIVE is not None:
         parts.append(f"prom_rel{PROMINENCE_RELATIVE:.2f}")
-    if DISTANCE is not None:
-        parts.append(f"dist{DISTANCE}steps")
     return "_".join(parts) if parts else "baseline"
 
 
@@ -305,7 +295,6 @@ for csv in csvs:
     out, sb, sf = make_figure(csv,
                                prominence=PROMINENCE,
                                prominence_relative=PROMINENCE_RELATIVE,
-                               distance=DISTANCE,
                                out_dir=OUT)
     flag = "⚠" if sb != sf else " "
     results.append((csv.stem, sb, sf, flag))

@@ -1,6 +1,17 @@
 #!/usr/bin/env python
 """FRONT B part 1 - read-only diagnostic. No detector code is modified.
 
+POST-REMOVAL NOTE. `distance` has since been removed from cyclophaser. The
+config loader below filters the YAML against get_periods' signature, so the
+`distance: 5` still recorded in params-9 is dropped automatically and this
+script keeps running unchanged. Its own local reimplementation of the extrema
+filter (`refine_traced`) still carries a `distance` argument, which is now
+always None: the "dropped by distance" and "kept if distance DISABLED" columns
+in the output are therefore vestigial and trivially empty/equal. They were
+already empty when measured against the pre-removal package with distance=5 --
+that measurement is what justified the removal -- so the output file is
+byte-identical either way.
+
 Reproduces the reference configuration (cyclophaser_params-9.yaml) on the TRAIN
 split only, and reports, per series:
   * the detected mature window vs the manual label's mature window
@@ -26,7 +37,7 @@ from cyclophaser.determine_periods import (get_periods, process_vorticity,
                                            _collapse_plateaux)
 from scipy.signal import argrelextrema, peak_prominences
 
-CONFIG = Path.home() / "Downloads" / "cyclophaser_params-9.yaml"
+CONFIG = REPO / "research" / "labels" / "configs" / "cyclophaser_params-9.yaml"
 OUT = REPO / "research" / "labels" / "diagnostics" / "front_b"
 OUT.mkdir(parents=True, exist_ok=True)
 

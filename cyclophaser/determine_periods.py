@@ -57,7 +57,7 @@ def _collapse_plateaux(indices):
     return np.array(collapsed, dtype=indices.dtype)
 
 
-def find_peaks_valleys(series, prominence=None, prominence_relative=None, distance=None):
+def find_peaks_valleys(series, prominence=None, prominence_relative=None):
     """Find peaks, valleys, and zero locations in a pandas Series.
 
     Uses argrelextrema with np.greater_equal / np.less_equal so that a flat
@@ -105,12 +105,6 @@ def find_peaks_valleys(series, prominence=None, prominence_relative=None, distan
                              removes any interior extremum whose prominence is
                              below 10 % of the most prominent one.  Default None
                              disables relative filtering (no-op).
-        distance:            int or None. Minimum number of steps separating any
-                             two surviving same-type extrema.  When candidates
-                             are closer than this, the one with higher prominence
-                             is kept.  Boundary indices are always preserved and
-                             count toward the exclusion radius.  Default None
-                             disables distance filtering (no-op).
 
     Returns:
         result: pandas Series with NaN, 'peak', 'valley', or 0 at each position
@@ -136,10 +130,10 @@ def find_peaks_valleys(series, prominence=None, prominence_relative=None, distan
     if len(overlap):
         peaks = peaks[~np.isin(peaks, overlap)]
 
-    # Optional prominence / distance refinement (no-op when all three are None)
-    if prominence is not None or prominence_relative is not None or distance is not None:
-        peaks   = _refine_extrema(data,  data, peaks,   prominence, prominence_relative, distance, N)
-        valleys = _refine_extrema(data, -data, valleys, prominence, prominence_relative, distance, N)
+    # Optional prominence refinement (no-op when both are None)
+    if prominence is not None or prominence_relative is not None:
+        peaks   = _refine_extrema(data,  data, peaks,   prominence, prominence_relative, N)
+        valleys = _refine_extrema(data, -data, valleys, prominence, prominence_relative, N)
 
     # Build result series
     result = pd.Series(index=series.index, dtype=object)
@@ -151,14 +145,20 @@ def find_peaks_valleys(series, prominence=None, prominence_relative=None, distan
     return result
 
 
-def _refine_extrema(data, signed_data, candidates, prominence, prominence_relative, distance, N):
-    """Filter *candidates* by prominence (absolute and/or relative) and/or distance.
+def _refine_extrema(data, signed_data, candidates, prominence, prominence_relative, N):
+    """Filter *candidates* by prominence (absolute and/or relative).
 
     Boundary indices (0 and N-1) are unconditionally preserved.  Interior
-    candidates are pruned in order: absolute prominence → relative prominence →
-    minimum distance (greedy, highest-prominence-first).  Prominences are
-    computed once on the initial interior set and kept in sync after each
-    filtering step.
+    candidates are pruned in order: absolute prominence → relative prominence.
+    Prominences are computed once on the initial interior set and kept in sync
+    after each filtering step.
+
+    A third filter, ``distance`` (a minimum separation in timesteps between
+    surviving same-type extrema), existed between v2.0.0 and its removal and is
+    gone: measured over the 47 training series it was redundant with
+    ``prominence_relative`` throughout the calibrated range — 0 extrema removed
+    at every value up to 14, the first phase change only at 20, against a
+    calibrated value of 5.  See research/inert_params/REPORT_inertia_sweep.md.
 
     Args:
         data:                original data array (passed for API symmetry; not
@@ -169,7 +169,6 @@ def _refine_extrema(data, signed_data, candidates, prominence, prominence_relati
         prominence:          float absolute threshold, or None.
         prominence_relative: float relative threshold (fraction of max interior
                              prominence), or None.
-        distance:            int minimum separation in steps, or None.
         N:                   total series length.
 
     Returns:
@@ -183,7 +182,7 @@ def _refine_extrema(data, signed_data, candidates, prominence, prominence_relati
 
     # Compute prominence once for all interior candidates.
     # Reused by all three filters; kept in sync after each filtering step.
-    if len(interior) > 0 and (prominence is not None or prominence_relative is not None or distance is not None):
+    if len(interior) > 0 and (prominence is not None or prominence_relative is not None):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             prom_vals = peak_prominences(signed_data, interior)[0]
@@ -208,17 +207,7 @@ def _refine_extrema(data, signed_data, candidates, prominence, prominence_relati
             interior  = interior[mask]
             prom_vals = prom_vals[mask]
 
-    # --- Distance filtering (greedy, highest prominence first) ---
-    if distance is not None:
-        order = np.argsort(-prom_vals) if len(interior) > 0 else np.array([], dtype=int)
-        kept  = list(boundary)
-        for rank in order:
-            idx = interior[rank]
-            if all(abs(idx - k) >= distance for k in kept):
-                kept.append(idx)
-        surviving_interior = np.array([i for i in interior if i in set(kept)])
-    else:
-        surviving_interior = interior
+    surviving_interior = interior
 
     result = np.array(sorted(boundary | set(surviving_interior.tolist())), dtype=np.intp)
     return result
@@ -740,7 +729,6 @@ def get_periods(vorticity,
                 threshold_incipient_length: float = 0.4,
                 prominence: float = None,
                 prominence_relative: float = None,
-                distance: int = None,
                 length_scale: str = "global",
                 mature_method: str = "derivative",
                 mature_amplitude_fraction: float = 0.90,
@@ -955,8 +943,6 @@ def get_periods(vorticity,
             and strong systems without re-tuning. Example: 0.10 keeps only
             z-extrema whose prominence is ≥ 10 % of the dominant extremum's
             prominence. Default None (no-op).
-        distance (int, optional): Minimum separation in timesteps between two
-            same-type z-extrema. Default None (no-op).
         length_scale (str, optional): "global" (default) or "local". See the
             "length_scale note" above. Default "global" reproduces the exact
             behaviour of all versions prior to this option.
@@ -1040,8 +1026,7 @@ def get_periods(vorticity,
     # locate the incipient/intensification boundary.
     df['z_peaks_valleys']   = find_peaks_valleys(df['z'],
                                                   prominence=prominence,
-                                                  prominence_relative=prominence_relative,
-                                                  distance=distance)
+                                                  prominence_relative=prominence_relative)
     df['dz_peaks_valleys']  = find_peaks_valleys(df['dz'])
     df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'])
 
@@ -1146,8 +1131,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       threshold_incipient_length: float = 0.4,
                       prominence: float = None,
                       prominence_relative: float = None,
-                      distance: int = None,
-                      length_scale: str = "global",
+                            length_scale: str = "global",
                       mature_method: str = "derivative",
                       mature_amplitude_fraction: float = 0.90,
                       decay_tail_amplitude_fraction: float = None,
@@ -1416,7 +1400,6 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         threshold_incipient_length=threshold_incipient_length,
         prominence=prominence,
         prominence_relative=prominence_relative,
-        distance=distance,
         length_scale=length_scale,
         mature_method=mature_method,
         mature_amplitude_fraction=mature_amplitude_fraction,

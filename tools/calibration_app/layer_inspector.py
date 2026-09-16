@@ -177,14 +177,14 @@ def build_args_periods(**overrides) -> dict:
 def build_working_frame(vorticity,
                         prominence=None,
                         prominence_relative=None,
-                        distance=None) -> pd.DataFrame:
+                        ) -> pd.DataFrame:
     """Reproduce ``get_periods``' internal frame, field for field.
 
     This is a TRANSCRIPTION of the block in
     ``determine_periods.get_periods`` between "Extract smoothed vorticity and
     derivatives" and "Detect different stages of cyclone lifecycle" — same
     columns, same source arrays, same ``find_peaks_valleys`` arguments (the
-    prominence/distance filters applied to ``z`` only, never to ``dz``/``dz2``),
+    prominence filters applied to ``z`` only, never to ``dz``/``dz2``),
     same ``object``-dtype NaN ``periods`` column.
 
     It is transcribed rather than imported because ``get_periods`` does not
@@ -197,7 +197,7 @@ def build_working_frame(vorticity,
     Args:
         vorticity: the ``process_vorticity`` dataset (needs ``zeta``,
             ``vorticity_smoothed2``, ``dz_dt_smoothed2``, ``dz_dt2_smoothed2``).
-        prominence, prominence_relative, distance: the z-extrema filter
+        prominence, prominence_relative: the z-extrema filter
             settings, forwarded to ``find_peaks_valleys`` verbatim.
 
     Returns:
@@ -216,7 +216,7 @@ def build_working_frame(vorticity,
     df['z_peaks_valleys'] = find_peaks_valleys(df['z'],
                                                prominence=prominence,
                                                prominence_relative=prominence_relative,
-                                               distance=distance)
+                                               )
     df['dz_peaks_valleys'] = find_peaks_valleys(df['dz'])
     df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'])
 
@@ -676,13 +676,13 @@ def _effective_threshold(signed_data: np.ndarray,
 def mature_lens(z: pd.Series,
                 prominence=None,
                 prominence_relative=None,
-                distance=None) -> dict:
+                ) -> dict:
     """Accepted/rejected z extrema under the current extrema-filter settings.
 
     Args:
         z: the smoothed vorticity the detector runs on (``df['z']`` /
            ``vorticity_smoothed2``), indexed as in the working frame.
-        prominence, prominence_relative, distance: the extrema-filter
+        prominence, prominence_relative: the extrema-filter
            parameters, passed through to ``find_peaks_valleys`` verbatim.
 
     Returns:
@@ -706,7 +706,7 @@ def mature_lens(z: pd.Series,
     candidates = find_peaks_valleys(z)
     accepted = find_peaks_valleys(z, prominence=prominence,
                                   prominence_relative=prominence_relative,
-                                  distance=distance)
+                                  )
 
     out = {"n": n, "boundary": tuple(i for i in (0, n - 1) if n > 0)}
     for kind, signed in (("peak", data), ("valley", -data)):

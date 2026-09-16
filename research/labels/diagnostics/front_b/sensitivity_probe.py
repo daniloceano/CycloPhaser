@@ -8,11 +8,42 @@ from cyclophaser.determine_periods import get_periods, process_vorticity
 
 PV_KEYS = ("use_filter","replace_endpoints_with_lowpass","use_smoothing",
            "use_smoothing_twice","savgol_polynomial","cutoff_low","cutoff_high","boundary_padding")
-doc = yaml.safe_load((Path.home()/"Downloads/cyclophaser_params-9.yaml").read_text())
+doc = yaml.safe_load((REPO/"research/labels/configs/cyclophaser_params-9.yaml").read_text())
 gp_ok = set(inspect.signature(get_periods).parameters) - {"vorticity"}
 PV = {k:v for k,v in doc["filter_params"].items() if k in PV_KEYS}
 GP = {k:v for k,v in doc["phase_params"].items() if k in gp_ok}
 
+# ---------------------------------------------------------------------------
+# HISTORICAL — does not run against the current package, by design.
+#
+# This script sweeps `distance`, the extrema filter that front B measured and
+# that was REMOVED as a result (it was redundant with `prominence_relative`
+# throughout the calibrated range). Against the current package every call
+# below raises TypeError, which is the intended post-removal behaviour: there
+# is no compatibility shim.
+#
+# It is kept as the evidence that justified the removal. Its frozen output
+# alongside this file was produced on the pre-removal code
+# (develop-v2.1 @ ab7f244, diagnostics commit 491a5d0) in the conda
+# `cyclophaser` environment. To re-run it, check out that commit.
+# ---------------------------------------------------------------------------
+import sys as _sys
+
+
+def _refuse_if_distance_is_gone():
+    import inspect
+
+    from cyclophaser.determine_periods import get_periods
+    if "distance" not in inspect.signature(get_periods).parameters:
+        _sys.exit(
+            "HISTORICAL SCRIPT: `distance` was removed from cyclophaser, so this "
+            "sweep cannot run against the current package. Its frozen output is "
+            "next to this file; re-run it against develop-v2.1 @ ab7f244 if you "
+            "need to reproduce it. See research/inert_params/REPORT_inertia_sweep.md."
+        )
+
+
+_refuse_if_distance_is_gone()
 real = load_real_series()
 LAB = {"20160735": [(145,177)], "20203947": [(122,144),(178,188)]}
 

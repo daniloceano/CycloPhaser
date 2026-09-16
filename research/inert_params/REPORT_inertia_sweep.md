@@ -335,3 +335,99 @@ INEXPLICADA columns; zero unclassified INERT rows in either file).
 This section described the state after PASSO 0 only. The closeout above
 completed PASSO 1–3; see the closing chat message for the PASSO 4 merge
 result and hashes.
+
+---
+
+# FRENTE B — `distance` removed; `length_scale` guarded (2026-09-16)
+
+Front B was commissioned on the hypothesis that a fixed `distance` in timesteps
+was producing mature phases that were too short on `20160735` and `20203947`.
+It closes as **PREMISE REFUTED**. Full diagnosis, method and raw output:
+`research/labels/diagnostics/front_b/` (`REPORT_front_b_part1.md`,
+`ADDENDUM_part1b.md`).
+
+## `distance` — REMOVED (not merely inert)
+
+`distance` filtered z extrema by a minimum separation between surviving
+same-type extrema, applied only to `z_peaks_valleys` and running *after*
+relative prominence, on the set prominence had already thinned.
+
+It belongs in this report for a reason the rest of the table does not share:
+**it is not inert because a mode switch disables it.** There is a live
+mechanism — push the value high enough and it removes extrema and changes
+phases. It is inert because, in the calibrated range, `prominence_relative`
+has already done its work. **Redundancy, not absence of mechanism.** A UI
+guard cannot express that, which is why the parameter was removed instead.
+
+Measured over the 47 TRAIN series of `split.yaml` under
+`research/labels/configs/cyclophaser_params-9.yaml`
+(`prominence_relative=0.30`, calibrated `distance=5`):
+
+| `distance` | extrema removed | series with a removal | series with a **phase** change |
+|---:|---:|---:|---:|
+| None, 1, 2, 3, **5 (calibrated)**, 8, 10, 12, 14 | **0** | **0** | **0** |
+| 15, 16, 18 | 1 | 1 | 0 |
+| 20 | 3 | 3 | 1 |
+| 25 | 8 | 7 | 5 |
+| 30 | 17 | 14 | 11 |
+| 40 | 32 | 21 | 17 |
+
+The binding quantity is the smallest same-type gap among post-prominence
+survivors: **14**, on `20170760`. Hence exactly 0 removals at 14 and exactly 1
+at 15. The calibrated value of 5 sits a factor of ~3 below the floor.
+
+Source: `research/labels/diagnostics/front_b/sweep_distance.py` →
+`distance_sweep.txt` (that script is now HISTORICAL — it cannot run against the
+post-removal package, by design).
+
+**Decision (Danilo, 2026-09-16): remove from package and app.** `distance` was
+added after v2.0.0 (commit `969904b`) and never published, so no released API
+carries it and no deprecation period is owed. **No compatibility shim** —
+passing it raises the ordinary Python `TypeError`. A calibration YAML that
+still carries the key (every export from the previous build does, including the
+versioned `params-9`) imports cleanly: the key is applied to nothing and is
+listed explicitly as removed, not as an unknown key.
+
+**Not re-measured, and deliberately left open:** at `distance=25` the phases of
+`20160735` did change. Whether that change is an *improvement* was never scored
+— the removal did not test that range. Registered as backlog item (iv) in
+`docs/future_work.md`.
+
+## `length_scale` — KEPT, guarded with a scoped note
+
+Under `mature_method="amplitude"` — the reference config's setting —
+`find_stages.find_mature_stage` reads `length_scale` (`find_stages.py:236`) and
+then never uses it: the only consumer, `find_stages.py:309`, sits in the
+`derivative` branch. Its mature role is genuinely inert there, exactly like
+`threshold_mature_length` and `threshold_mature_distance`.
+
+**But it is not inert overall, and must not be disabled.** `length_scale` still
+scales the intensification (`find_stages.py:387`) and decay
+(`find_stages.py:458`) duration thresholds, and a mature window is only
+confirmed when bounded by a literal `intensification` and a literal `decay`.
+Measured on the 47 training series under `params-9` (amplitude), switching
+`local` → `global` changes the phase output on **3 of 47**:
+
+| series | `local` | `global` |
+|---|---|---|
+| `20160735` | 4 × (intensification → mature → decay) | incipient → 2 × (int → mature → decay) |
+| `20191014` | incipient → decay → intensification → mature → decay | incipient → decay |
+| `20203947` | 4 cycles → residual | incipient → 1 cycle → residual |
+
+So `length_scale` gets an **inline scoped note and stays enabled**, rather than
+the blanket `disabled=True` carried by `Min. mature length` / `Mature distance`.
+Disabling it would commit this front's own defect class in reverse: presenting
+a live, outcome-changing control as inert. Pinned by
+`tests/test_app_distance_removed.py::TestLengthScaleGuard`.
+
+**Divergence from the front brief — raised, and ACCEPTED by Danilo
+(2026-09-16).** The brief asked for "o mesmo guard de
+threshold_mature_length/distance (disabled quando mature_method='amplitude')".
+That was not implemented as written, because the measurement above shows it
+would be factually wrong: the control is live under `amplitude`. The scoped
+note names precisely which role is inactive and which remains active, and the
+widget stays enabled. Danilo accepted this resolution — keep the note, keep
+`disabled is False` pinned by the test.
+
+Which of `local`/`global` is *better* on those three tracks was not measured;
+that question is registered as backlog in `docs/future_work.md` item 19(d).

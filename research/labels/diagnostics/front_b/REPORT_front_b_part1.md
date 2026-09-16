@@ -19,7 +19,7 @@
 **Environment** conda `cyclophaser`; `cyclophaser.__file__` =
 `/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py`
 — the working tree, **not** the published 1.7.3.
-**Reference config** `~/Downloads/cyclophaser_params-9.yaml` (`boundary_padding: edge`).
+**Reference config** `research/labels/configs/cyclophaser_params-9.yaml` (`boundary_padding: edge`).
 **Split** `research/labels/split.yaml`, TRAIN only. The 16 test series were never
 loaded, scored or inspected. `series_sha256` verified for all 47 train series.
 
@@ -235,7 +235,7 @@ is delete legitimate extrema in the most densely-structured track in the split.
 
 ## 5. Reference scores reconfirmed
 
-`python research/labels/evaluate_against_labels.py --config ~/Downloads/cyclophaser_params-9.yaml`
+`python research/labels/evaluate_against_labels.py --config research/labels/configs/cyclophaser_params-9.yaml`
 (TRAIN, 63 usable labels):
 
 | quantity | expected | measured | |
