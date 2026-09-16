@@ -1,0 +1,32 @@
+FRONT B part 1b - what 'n=45' counts, and what was excluded
+==============================================================================================
+
+train series                                  : 47
+series with >=1 LABELLED mature               : 44
+series with NO labelled mature                : 3  ['20171179', '20181046', 's0596ea57']
+TOTAL labelled mature windows (the population): 47
+total DETECTED mature windows                 : 59
+
+The unit of the deviation table is one LABELLED MATURE WINDOW.
+Each is paired with the detected mature window it overlaps most (>0 steps).
+
+paired   : 45   <- this is the n=45
+unpaired : 2
+check    : 45 + 2 = 47 == 47 labelled mature windows  OK
+
+EXCLUDED - labelled mature windows with zero overlap with any detected mature:
+   20170760 [real]  label mature [26,39] (len 14, unsure=False)
+      detected matures in this series: []  -> no overlap with the label
+   20191014 [real]  label mature [43,68] (len 26, unsure=False)
+      detected matures in this series: [[135, 139]]  -> no overlap with the label
+
+NOT excluded, for the record:
+   * `unsure` labelled matures ARE included (3 of them: 20170154[31,76], 20180170[34,42], 20203947[178,188]).
+   * series whose detected SEQUENCE differs from the label ARE included -
+     pairing is by overlap, not by position, precisely so a sequence
+     mismatch does not manufacture a deviation.
+
+Recomputed from this audit (must match the part-1 table):
+   duration (det-label)   n= 45  median=  -5.0  min= -40  max=  +3  mean= -6.58
+   start    (det-label)   n= 45  median=  +2.0  min=  -3  max=  +9  mean= +2.64
+   end      (det-label)   n= 45  median=  -2.0  min= -34  max=  +3  mean= -3.93

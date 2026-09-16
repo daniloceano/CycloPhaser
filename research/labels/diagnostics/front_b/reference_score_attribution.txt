@@ -1,0 +1,42 @@
+FRONT B part 1b - provenance of every reference number
+==============================================================================================
+
+Running evaluate_against_labels.py twice (TRAIN only)...
+
+  metric                       source       DEFAULTS   params-9
+  --------------------------------------------------------------
+  incipient boundary           real             5/17       8/17
+  refusal                      real             1/16      14/16
+  sequence                     real            11/35      18/35
+  incipient boundary           synthetic        6/10       9/10
+  refusal                      synthetic         2/2        2/2
+  sequence                     synthetic       11/12      12/12
+  incipient boundary           all             11/27      17/27
+  refusal                      all              3/18      16/18
+  sequence                     all             22/47      30/47
+
+==============================================================================================
+ATTRIBUTION of the numbers quoted in the brief
+==============================================================================================
+
+  number   script                             config                     verified  
+  ----------------------------------------------------------------------------------
+  8/17     evaluate_against_labels.py         params-9                   YES       
+  14/16    evaluate_against_labels.py         params-9                   YES       
+  18/35    evaluate_against_labels.py         params-9                   YES       
+  9/10     evaluate_against_labels.py         params-9                   YES       
+  12/12    evaluate_against_labels.py         params-9                   YES       
+  11/12    evaluate_against_labels.py         PACKAGE DEFAULTS           YES       
+  22/47    evaluate_against_labels.py         PACKAGE DEFAULTS           YES       
+
+  11/12 and 22/47 are ALSO produced by measure_topology_proxy.py (branch
+  research/v3-topology-proxy), which runs the detector at package defaults:
+      six-function detector        22 / 47    46.8%
+      real       n=35   detector 11/35 ( 31.4%)
+      synthetic  n=12   detector 11/12 ( 91.7%)
+  The two scripts agree exactly at defaults, so 11/12 and 22/47 are NOT
+  specific to the topology front - they are the default-parameter figures.
+
+  Consistency check:
+      defaults : real 11/35 + synthetic 11/12 = 22/47  (reported ALL: 22/47)
+      params-9 : real 18/35 + synthetic 12/12 = 30/47  (reported ALL: 30/47)

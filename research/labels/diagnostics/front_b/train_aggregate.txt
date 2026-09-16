@@ -1,0 +1,43 @@
+FRONT B - part 1 - train-split aggregate (reference config params-9)
+==========================================================================================
+
+[4a] series with more than one cycle (>1 z-valley bounded by two z-peaks):
+     9 of 47
+     real 7/35, synthetic 2/12
+     cycle-count histogram: {0: 2, 1: 36, 2: 6, 3: 1, 4: 2}
+
+[4b] detected mature windows shorter than 7 steps:
+     real     : 14 of 35 series have >=1 mature < 7 steps
+         20150528  1/1 short  [(30, 35, 6)]
+         20150656  1/2 short  [(141, 146, 6)]
+         20160735  1/4 short  [(8, 10, 3)]
+         20170154  1/1 short  [(37, 42, 6)]
+         20170409  1/1 short  [(61, 65, 5)]
+         20170520  1/1 short  [(28, 33, 6)]
+         20170794  1/2 short  [(160, 165, 6)]
+         20180263  1/1 short  [(27, 32, 6)]
+         20180628  1/2 short  [(71, 74, 4)]
+         20181046  1/1 short  [(22, 26, 5)]
+         20190325  1/1 short  [(101, 104, 4)]
+         20191014  1/1 short  [(135, 139, 5)]
+         20203947  4/4 short  [(59, 62, 4), (88, 92, 5), (130, 135, 6), (182, 187, 6)]
+         20205386  3/3 short  [(38, 42, 5), (60, 62, 3), (81, 84, 4)]
+     synthetic: 6 of 12 series have >=1 mature < 7 steps
+         s9ddbc53c  1/1 short  [(19, 24, 6)]
+         scfcf1387  1/1 short  [(31, 36, 6)]
+         s5b8aa46f  1/1 short  [(25, 30, 6)]
+         sbd6c6920  2/2 short  [(15, 19, 5), (46, 50, 5)]
+         s6b542eee  2/2 short  [(13, 18, 6), (45, 50, 6)]
+         s5dcc0f79  1/1 short  [(19, 24, 6)]
+
+[4c] mature DURATION deviation (detected - label), overlap-paired:
+     duration (det-label)   n= 45  median=  -5.0  min= -40  max=  +3  mean= -6.58
+     start    (det-label)   n= 45  median=  +2.0  min=  -3  max=  +9  mean= +2.64
+     end      (det-label)   n= 45  median=  -2.0  min= -34  max=  +3  mean= -3.93
+     labelled matures with NO overlapping detected mature: 2
+         20170760  label mature [26,39]
+         20191014  label mature [43,68]
+
+[4d] series where the `distance` filter removes at least one z extremum:
+     0 of 47
+     total interior extrema removed: prominence=63, distance=0
