@@ -9,6 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+**`distance` extrema filter removed from the package and the calibration app.**
+
+`get_periods`, `determine_periods`, `find_peaks_valleys` and `_refine_extrema` no
+longer accept a `distance` argument, and the calibration app no longer offers the
+control or writes the key. `prominence` and `prominence_relative` are unchanged.
+
+`distance` required surviving same-type z extrema to be at least N timesteps
+apart, and ran *after* relative prominence — on the set prominence had already
+thinned. Measured over the 47 training series at the calibrated configuration
+(`prominence_relative=0.30`, `distance=5`) it removed **0 extrema**: nothing is
+removed at any value up to 14, one inert extremum at 15–18, and the first phase
+change only at 20. It was redundant with `prominence_relative` throughout the
+calibrated range.
+
+**No compatibility shim, and none is owed**: `distance` was added after v2.0.0
+(commit `969904b`) and never appeared in a release, so no published API carries
+it. Passing it now raises the ordinary Python `TypeError`. A calibration YAML
+that still carries the key imports cleanly — the key is applied to nothing and
+reported as removed rather than as an unknown key.
+
+`length_scale` is **not** removed. Under `mature_method="amplitude"` it no longer
+scales the mature window, but it still scales the intensification and decay
+thresholds (measured to change the phase output on 3 of the 47 training series),
+so the app annotates it rather than disabling it.
+
+Default behaviour is unchanged: the phase output over the 47 training series at
+package defaults is byte-identical before and after
+(sha256 `b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5`).
+
+See `docs/future_work.md` item 19 and
+`research/inert_params/REPORT_inertia_sweep.md`.
+
 ### Changed (tests only)
 
 **Synthetic timing test scored against manual labels.** `test_lifecycle_phase_timing`

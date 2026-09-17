@@ -1,7 +1,7 @@
-"""Gera figuras antes x depois da filtragem de extremos (prominence + distance).
+"""Gera figuras antes x depois da filtragem de extremos (prominence).
 
 Para cada caso sintético: mostra z, dz, dz2 com picos/vales marcados
-antes (padrão) e depois (com prominence + distance). Em todos os painéis
+antes (padrão) e depois (com prominence). Em todos os painéis
 o fundo mostra as fases *detectadas* pelo CycloPhaser para aquele cenário,
 permitindo avaliar o impacto da filtragem na detecção de fases.
 
@@ -132,7 +132,7 @@ def _build_legend_handles(has_gt=False):
     return handles
 
 
-def make_figure(case_name, case, prominence, distance):
+def make_figure(case_name, case, prominence):
     series = case["series"]
 
     with warnings.catch_warnings():
@@ -156,7 +156,7 @@ def make_figure(case_name, case, prominence, distance):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         df_bef = get_periods(vort)
-        df_aft = get_periods(vort, prominence=prominence, distance=distance)
+        df_aft = get_periods(vort, prominence=prominence)
 
     phases_bef = periods_to_dict(df_bef)
     phases_aft = periods_to_dict(df_aft)
@@ -165,8 +165,7 @@ def make_figure(case_name, case, prominence, distance):
     extr = {}
     for key, ser in [("z", z), ("dz", dz), ("dz2", dz2)]:
         extr[f"{key}_bef"] = find_peaks_valleys(ser)
-        extr[f"{key}_aft"] = find_peaks_valleys(ser, prominence=prominence,
-                                                 distance=distance)
+        extr[f"{key}_aft"] = find_peaks_valleys(ser, prominence=prominence)
 
     # ── Nomes das fases detectadas (para título de coluna) ────────────────────
     def _phase_seq(pd_): return " → ".join(
@@ -185,11 +184,10 @@ def make_figure(case_name, case, prominence, distance):
 
     fig = plt.figure(figsize=(17, 13))
     dt_hours = (series.index[1] - series.index[0]).total_seconds() / 3600
-    dist_hours = distance * dt_hours
     fig.suptitle(
         f"{case_name}  —  Antes vs. Depois da filtragem de extremos\n"
-        f"prominence = {prominence:.1e}   distance = {distance} steps "
-        f"({dist_hours:.0f}h a {dt_hours:.0f}h/step)   |   impacto nas fases: {changed}",
+        f"prominence = {prominence:.1e}   "
+        f"(dt = {dt_hours:.0f}h/step)   |   impacto nas fases: {changed}",
         fontsize=12, fontweight="bold", y=0.99,
     )
     gs = gridspec.GridSpec(3, 2, figure=fig, hspace=0.52, wspace=0.10,
@@ -197,7 +195,7 @@ def make_figure(case_name, case, prominence, distance):
 
     col_titles = [
         f"ANTES (padrão)\n{seq_bef}",
-        f"DEPOIS (prominence={prominence:.1e}, dist={distance} steps/{dist_hours:.0f}h)\n{seq_aft}",
+        f"DEPOIS (prominence={prominence:.1e})\n{seq_aft}",
     ]
 
     for ri, (key, ser, ser_raw, color, ser_label) in enumerate(panel_cfg):
@@ -263,13 +261,12 @@ def make_figure(case_name, case, prominence, distance):
 # ── Main ──────────────────────────────────────────────────────────────────────
 # Valores ilustrativos — NÃO ajustados; mostram apenas o mecanismo.
 PROMINENCE = 0.5e-4   # ~6% da amplitude baseline→peak (8e-4)
-DISTANCE   = 5        # 5 passos = 15 h a 3 h/passo
 
-print(f"prominence = {PROMINENCE:.1e}   distance = {DISTANCE}")
+print(f"prominence = {PROMINENCE:.1e}")
 print(f"Saída em: {OUT}/\n")
 
 for case_name, case in CASES.items():
-    out = make_figure(case_name, case, PROMINENCE, DISTANCE)
+    out = make_figure(case_name, case, PROMINENCE)
     print(f"  {case_name:30s}  →  {out.name}")
 
 print(f"\nTotal: {len(CASES)} figuras geradas.")

@@ -97,7 +97,6 @@ _PHASE_PARAMS = dict(
     threshold_mature_distance=0.18,
     threshold_mature_length=0.15,
     prominence_relative=0.3,
-    distance=3,
     mature_amplitude_fraction=0.95,
     decay_tail_amplitude_fraction=0.05,
     length_scale="local",

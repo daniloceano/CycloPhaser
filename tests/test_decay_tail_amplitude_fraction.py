@@ -113,7 +113,6 @@ _PHASE_PARAMS = dict(
     threshold_decay_gap=0.075,
     threshold_incipient_length=0.4,
     prominence_relative=0.3,
-    distance=3,
     mature_amplitude_fraction=0.95,
     length_scale="local",
     mature_method="amplitude",

@@ -1,16 +1,16 @@
-"""Integration tests: prominence/distance impact on the full phase-detection pipeline.
+"""Integration tests: prominence impact on the full phase-detection pipeline.
 
-These tests complement the unit tests in test_prominence_distance.py (which cover
-find_peaks_valleys in isolation) by verifying how prominence/distance interact with
+These tests complement the unit tests in test_prominence.py (which cover
+find_peaks_valleys in isolation) by verifying how prominence interacts with
 the complete determine_periods pipeline on synthetic lifecycle series.
 
 Tests are split into three groups:
 
-1. NoOpEquivalence — prominence=None, prominence_relative=None, distance=None must
+1. NoOpEquivalence — prominence=None, prominence_relative=None must
    produce byte-identical results to the default determine_periods call for every
    synthetic case in CASES.
 
-2. ConservativeFiltering (absolute) — with small, conservative prominence/distance
+2. ConservativeFiltering (absolute) — with small, conservative prominence
    values that should not affect clean, well-formed synthetic signals:
    a) Core phase sequence must be preserved for cases that have expected_phases.
    b) The number of z_peaks_valleys can only decrease or stay the same.
@@ -33,7 +33,6 @@ from tests.synthetic.cases import CASES
 # Conservative values chosen to minimally perturb clean synthetic signals.
 # These are NOT calibrated for production use — purpose is to verify mechanics.
 _PROM     = 1e-5    # s^-1, small relative to synthetic peak amplitude (~9e-4)
-_DIST     = 3       # steps (9 h at 3 h/step)
 _PROM_REL = 0.05    # 5 % of max interior prominence — very conservative
 
 
@@ -51,7 +50,7 @@ def _detected_sequence(df: pd.DataFrame) -> list[str]:
 # ── 1. No-op equivalence ──────────────────────────────────────────────────────
 
 class TestNoOpEquivalence:
-    """prominence=None, prominence_relative=None, distance=None → identical to default."""
+    """prominence=None, prominence_relative=None → identical to default."""
 
     @pytest.mark.parametrize("case_name", list(CASES.keys()))
     def test_full_pipeline_identical(self, case_name):
@@ -61,7 +60,7 @@ class TestNoOpEquivalence:
             warnings.simplefilter("ignore")
             df_default  = determine_periods(series)
             df_explicit = determine_periods(series, prominence=None,
-                                            prominence_relative=None, distance=None)
+                                            prominence_relative=None)
         pd.testing.assert_frame_equal(df_default, df_explicit,
                                       check_like=False,
                                       obj=f"{case_name}: default vs explicit None")
@@ -76,7 +75,7 @@ class TestNoOpEquivalence:
             vort = process_vorticity(zeta_df)
             df_default  = get_periods(vort)
             df_explicit = get_periods(vort, prominence=None,
-                                      prominence_relative=None, distance=None)
+                                      prominence_relative=None)
         pd.testing.assert_frame_equal(df_default, df_explicit,
                                       obj=f"{case_name}: get_periods default vs None")
 
@@ -96,7 +95,7 @@ class TestNoOpEquivalence:
 # ── 2. Conservative filtering ─────────────────────────────────────────────────
 
 class TestConservativeFiltering:
-    """Small prominence/distance values on clean signals preserve correct detection."""
+    """Small prominence values on clean signals preserve correct detection."""
 
     @pytest.mark.parametrize("case_name", [
         cn for cn, c in CASES.items()
@@ -110,18 +109,18 @@ class TestConservativeFiltering:
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            df = determine_periods(series, prominence=_PROM, distance=_DIST)
+            df = determine_periods(series, prominence=_PROM)
 
         detected = _detected_sequence(df)
         for phase in expected:
             assert phase in detected, (
                 f"{case_name}: expected phase '{phase}' missing with "
-                f"prominence={_PROM:.1e}, distance={_DIST}"
+                f"prominence={_PROM:.1e}"
             )
 
     @pytest.mark.parametrize("case_name", list(CASES.keys()))
     def test_filtering_never_adds_extrema(self, case_name):
-        """prominence/distance can only remove or keep extrema, never add them."""
+        """prominence can only remove or keep extrema, never add them."""
         series = CASES[case_name]["series"]
         zeta_df = pd.DataFrame({"zeta": series})
         with warnings.catch_warnings():
@@ -130,7 +129,7 @@ class TestConservativeFiltering:
 
         z = pd.Series(vort["vorticity_smoothed2"].values, index=series.index)
         base    = find_peaks_valleys(z)
-        filtered = find_peaks_valleys(z, prominence=_PROM, distance=_DIST)
+        filtered = find_peaks_valleys(z, prominence=_PROM)
 
         n_base     = (base    == "peak").sum() + (base    == "valley").sum()
         n_filtered = (filtered == "peak").sum() + (filtered == "valley").sum()
@@ -142,11 +141,11 @@ class TestConservativeFiltering:
 
     @pytest.mark.parametrize("case_name", list(CASES.keys()))
     def test_no_crash(self, case_name):
-        """determine_periods with prominence/distance must not raise."""
+        """determine_periods with prominence must not raise."""
         series = CASES[case_name]["series"]
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            df = determine_periods(series, prominence=_PROM, distance=_DIST)
+            df = determine_periods(series, prominence=_PROM)
         assert df is not None
         assert "periods" in df.columns
 

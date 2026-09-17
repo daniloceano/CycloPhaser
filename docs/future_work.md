@@ -1414,6 +1414,82 @@ of this front closing, at Danilo's explicit request).
 
 ---
 
+## 19. Front B — `distance` removed; premise refuted — **closed, PREMISE REFUTED, 2026-09-16**
+
+> Item 18 is claimed by the v3.0 topology-proxy front, which lives on the
+> unmerged branch `research/v3-topology-proxy`. This item is numbered 19 to
+> avoid a collision when that branch merges.
+
+Front B was commissioned on the hypothesis that the fixed-in-timesteps
+`distance` extrema filter was producing mature phases that were too short on
+`20160735` and `20203947`, with a view to letting `length_scale` govern it. The
+read-only diagnosis refuted the premise: under the reference config
+(`research/labels/configs/cyclophaser_params-9.yaml`, `distance=5`) the filter
+removes **zero** extrema across all 47 training series — every one of the 63
+interior extrema removed in the split goes by relative prominence. Swept over
+the whole split, `distance` removes nothing up to and including 14, removes one
+inert extremum at 15–18, and first changes a phase at 20. `length_scale`, in
+turn, never reaches the mature window under `mature_method="amplitude"`
+(`find_stages.py:309` is in the `derivative` branch alone), so the proposed
+coupling would have joined two controls that are both inert on mature. Because
+the redundancy is with `prominence_relative` rather than a mode switch — a UI
+guard cannot express "already done by another parameter" — and because
+`distance` was added after v2.0.0 (`969904b`) and never published, Danilo's
+decision was to **remove it from the package and the app** with no compatibility
+shim. Diagnosis: `research/labels/diagnostics/front_b/`; removal rationale and
+the sweep table: `research/inert_params/REPORT_inertia_sweep.md`.
+
+### (a) OPEN backlog — the mature phase ends EARLY, not just starts late
+
+Item 17(e) registered that the detector's mature **starts** late at every
+labelled synthetic boundary. Measured here on the 47 training series (real and
+synthetic), over 45 overlap-paired labelled mature windows, the end is early by
+a comparable median and a far worse tail: start deviation median **+2**
+(−3…+9), end **−2** (−34…+3), duration **−5** (−40…+3). The mature window is
+squeezed from both sides, so 17(e) is half the picture. Not investigated.
+
+### (b) OPEN backlog — `derivative` + `length_scale="global"` yields no mature at all
+
+On both front-B target tracks, `mature_method="derivative"` with
+`length_scale="global"` returns **no mature phase whatsoever** (`local` returns
+3). Observed during the causal sweep and not pursued; it may be the same
+global-denominator inflation already described in `find_stages.py`'s comment on
+`threshold_decay_length`. Not investigated.
+
+### (c) OPEN backlog — the real cause of short matures was never addressed
+
+The measured drivers of short mature windows are `mature_amplitude_fraction`
+(width, symmetric: `20160735`'s labelled-overlapping window goes 13 → 32 → 45
+steps as the fraction goes 0.95 → 0.90 → 0.70) and `prominence_relative`
+(cycle inventory: it leaves enough z extrema to cut one labelled cycle into
+four detected ones). **20 of the 47 training series carry at least one detected
+mature shorter than 7 steps** (14 of 35 real, 6 of 12 synthetic). Front B
+changed neither parameter — removing `distance` does not touch this. Whoever
+picks it up should start from `research/labels/diagnostics/front_b/sensitivity.txt`.
+
+### (d) OPEN backlog — `distance=25` changed `20160735`'s phases, and nobody scored it
+
+The sweep recorded that at `distance=25` the phase output changes on five
+series including `20160735`, and at 30 on eleven. **Whether any of those changes
+is an improvement was never measured** — the front scored nothing above the
+calibrated value, and the removal did not test that range. This is the one
+substantive thing the removal forecloses: if a future front wants a separation
+constraint on z extrema, it starts from scratch, and the history is
+`research/labels/diagnostics/front_b/distance_sweep.txt` (regenerable only
+against `develop-v2.1` @ `ab7f244`).
+
+Observed in passing while guarding the app and recorded here without
+investigation: `length_scale` is likewise unscored on these tracks. Switching
+`local` → `global` under `params-9`/`amplitude` changes the phase output on
+**`20160735`, `20191014` and `20203947`** — not through the mature window
+(inert under `amplitude`) but through the intensification and decay duration
+thresholds, and from there through the intensification/mature/decay neighbour
+check that confirms a mature window. Which setting is *better* on those three
+was never measured.
+
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

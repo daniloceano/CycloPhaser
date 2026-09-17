@@ -187,8 +187,6 @@ _DEFAULTS: dict = {
     "extrema_prominence_mode":        "relative",   # 'relative' | 'absolute'
     "extrema_prominence_rel_val":     0.10,         # fraction (relative mode)
     "extrema_prominence_val":         1e-6,         # absolute threshold
-    "extrema_distance_enabled":       False,
-    "extrema_distance_val":           3,
     "incipient_method":               "geometric",
     "incipient_plateau_tau":          0.20,
     "incipient_plateau_signal":       "derivative",
@@ -299,19 +297,6 @@ def _parse_prominence(v) -> float:
     return v
 
 
-def _parse_distance(v) -> int:
-    """Validating converter for distance (separation in timesteps).
-
-    int(float(...)) because _build_yaml historically coerced every numeric phase
-    param through float(), so files exported before that was fixed carry e.g.
-    `3.0`; int("3.0") would raise. The lower bound mirrors the sidebar
-    number_input's min_value=2 — same rationale as _parse_prominence_relative."""
-    v = int(float(v))
-    if v < 2:
-        raise ValueError(f"distance must be >= 2 timesteps, got {v!r}")
-    return v
-
-
 def _parse_decay_tail_amplitude_fraction(v) -> float:
     """Validating converter for decay_tail_amplitude_fraction — same rationale
     as _parse_prominence_relative: the sidebar slider is bounded to
@@ -348,7 +333,7 @@ _YAML_PHASE_MAP: dict = {
     "incipient_smooth_window":          ("incipient_smooth_window", lambda v: int(float(v))),
     "incipient_smooth_polyorder":       ("incipient_smooth_polyorder", lambda v: int(float(v))),
 }
-# The extrema-filtering parameters (prominence / prominence_relative / distance)
+# The extrema-filtering parameters (prominence / prominence_relative)
 # and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
 # *group* of session_state keys (enabled flag + mode/value), not to a single
 # widget, so they get the same dedicated handling that use_smoothing/
@@ -359,7 +344,7 @@ _YAML_PHASE_MAP: dict = {
 # check (_KNOWN_PHASE_YAML_KEYS) but excluded from the "missing key" check
 # (_REQUIRED_PHASE_YAML_KEYS), which would otherwise warn about a mode that
 # simply wasn't in use.
-_OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative", "distance",
+_OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative",
                               "decay_tail_amplitude_fraction",
                               # The incipient_* keys are optional for the same
                               # backward-compatibility reason as boundary_padding
@@ -390,6 +375,14 @@ _PHASE_ENUM_KEYS = ("length_scale", "mature_method", "incipient_method",
 
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
 _REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
+# Keys a previous build of this app exported and which the package no longer
+# accepts. Kept here (rather than deleted outright) so an old YAML imports
+# cleanly with an explicit, accurate explanation instead of a bare "unknown key".
+_REMOVED_PHASE_YAML_KEYS = {
+    "distance": ("distance removido: redundante com prominence_relative — "
+                 "ver research/inert_params/REPORT_inertia_sweep.md"),
+}
+
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
 _REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP)
 
@@ -477,8 +470,15 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
 
     ignored = (
         [f"filter_params.{k}" for k in fp if k not in _KNOWN_FILTER_YAML_KEYS]
-        + [f"phase_params.{k}" for k in pp if k not in _KNOWN_PHASE_YAML_KEYS]
+        + [f"phase_params.{k}" for k in pp if k not in _KNOWN_PHASE_YAML_KEYS
+           if k not in _REMOVED_PHASE_YAML_KEYS]
     )
+    # Parameters that this app once wrote and no longer applies. They are called
+    # out with their own explanation rather than landing in the generic "unknown
+    # key" list: a YAML exported by an older build legitimately carries them, and
+    # "unknown" would wrongly suggest a typo. Nothing is applied from them.
+    ignored += [f"phase_params.{k} ({why})"
+                for k, why in _REMOVED_PHASE_YAML_KEYS.items() if k in pp]
     missing = (
         [f"filter_params.{k}" for k in _REQUIRED_FILTER_YAML_KEYS if k not in fp]
         + [f"phase_params.{k}" for k in _REQUIRED_PHASE_YAML_KEYS if k not in pp]
@@ -517,7 +517,7 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
             except (ValueError, TypeError):
                 ignored.append(f"phase_params.{yaml_key} (conversion error)")
 
-    # Extrema filtering (prominence / prominence_relative / distance) — each is a
+    # Extrema filtering (prominence / prominence_relative) — each is a
     # *group* of session_state keys (enabled + mode + value), so it cannot go
     # through _YAML_PHASE_MAP's single-key mapping; see _EXTREMA_YAML_KEYS above.
     #
@@ -549,16 +549,6 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
             ignored.append("phase_params.prominence (conversion error)")
     else:
         st.session_state["extrema_prominence_enabled"] = False
-
-    if "distance" in pp:
-        try:
-            st.session_state["extrema_distance_val"]     = _parse_distance(pp["distance"])
-            st.session_state["extrema_distance_enabled"] = True
-            count += 1
-        except (ValueError, TypeError):
-            ignored.append("phase_params.distance (conversion error)")
-    else:
-        st.session_state["extrema_distance_enabled"] = False
 
     # decay_tail_amplitude_fraction — same enabled+value group pattern as the
     # extrema block above, and same reasoning for setting `enabled` in BOTH
@@ -621,14 +611,12 @@ def _build_yaml(cyclone_names) -> str:
         },
         # length_scale and mature_method are string enums ("global"/"local",
         # "derivative"/"amplitude"), not numeric thresholds — exported as-is
-        # rather than coerced through float(). `distance` is a count of
-        # timesteps and is exported as int so it round-trips as `3` rather than
-        # the `3.0` a blanket float() produced (the importer tolerates both).
+        # rather than coerced through float().
         # Note every key here is omitted when its value is None, so which
         # extrema keys appear also encodes whether that filter was enabled —
         # see the extrema-import block in _load_yaml_config.
         "phase_params": {
-            **{k: (int(v) if k in ("distance", "incipient_plateau_k") else float(v))
+            **{k: (int(v) if k in ("incipient_plateau_k",) else float(v))
                for k, v in _PHASE_PARAMS.items()
                if v is not None and k not in _PHASE_ENUM_KEYS},
             **{k: _PHASE_PARAMS[k] for k in _PHASE_ENUM_KEYS},
@@ -790,11 +778,11 @@ def _inspector_working_frame(
     use_filter, cutoff_low, cutoff_high,
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
     boundary_padding,
-    prominence, prominence_relative, distance,
+    prominence, prominence_relative,
 ) -> pd.DataFrame:
     """The frame get_periods builds internally, ready for the stage functions.
 
-    prominence / prominence_relative / distance are taken explicitly (rather
+    prominence / prominence_relative are taken explicitly (rather
     than from the phase-params tuple, which drops None values) so "filter
     disabled" is distinguishable from "key absent" in the cache key.
     """
@@ -804,8 +792,7 @@ def _inspector_working_frame(
         boundary_padding,
     )
     return li.build_working_frame(vort, prominence=prominence,
-                                  prominence_relative=prominence_relative,
-                                  distance=distance)
+                                  prominence_relative=prominence_relative)
 
 
 def _stage_frame_after_decay(work: pd.DataFrame, args_periods: dict) -> pd.DataFrame:
@@ -1439,6 +1426,17 @@ with st.sidebar:
     st.divider()
     # --- Phase detection thresholds ---
     st.header("Phase Detection")
+    # `mature_method`'s own radio renders further down, so its current value is
+    # read from session_state here. Under "amplitude" length_scale stops scaling
+    # the MATURE window (find_stages.find_mature_stage reads it but only uses it
+    # in the "derivative" branch), but it keeps scaling the intensification and
+    # decay duration thresholds — so unlike 'Min. mature length'/'Mature
+    # distance' this control is NOT disabled, only annotated. Disabling it would
+    # present a live, outcome-changing control as inert: measured on the 47
+    # training series under params-9 (amplitude), local vs global changes the
+    # phase output on 20160735, 20191014 and 20203947.
+    _length_scale_mature_active = (
+        st.session_state.get("mature_method", _DEFAULTS["mature_method"]) == "derivative")
     length_scale = st.radio(
         "Threshold scale",
         options=["global", "local"],
@@ -1460,6 +1458,15 @@ with st.sidebar:
             "'Min. incipient length' below, which were already local. "
             "Switching this does not re-run the Lanczos/Savgol filtering — "
             "only phase detection is re-computed."
+            + ("" if _length_scale_mature_active else
+               " **Partially inactive**: with Mature stage method = 'amplitude' "
+               "this setting no longer scales the mature window ('Min. mature "
+               "length' is itself inactive there). It REMAINS ACTIVE for the "
+               "intensification and decay thresholds, and through them can still "
+               "change which mature windows survive the "
+               "intensification/mature/decay neighbour check — measured to change "
+               "the phase output on 3 of the 47 training series under "
+               "'amplitude'. It is therefore left enabled on purpose.")
         ),
     )
     thr_int_len = st.slider(
@@ -1724,7 +1731,7 @@ with st.sidebar:
     st.divider()
     # --- Extrema filtering (optional) ---
     st.header("Extrema Filtering")
-    with st.expander("Prominence & distance filtering (advanced)", expanded=False):
+    with st.expander("Prominence filtering (advanced)", expanded=False):
         st.caption(
             "Optional post-processing for the detected peaks/valleys. "
             "Boundary extrema (first and last points) are always preserved. "
@@ -1785,24 +1792,6 @@ with st.sidebar:
             extrema_prominence          = None
             extrema_prominence_relative = None
 
-        _dist_enabled = st.checkbox(
-            "Enable distance filter", value=_DEFAULTS["extrema_distance_enabled"],
-            key="extrema_distance_enabled",
-            help=(
-                "If enabled, same-type extrema closer than this many timesteps are merged, "
-                "keeping the one with higher prominence. Boundary extrema always count toward "
-                "the exclusion radius."
-            ),
-        )
-        if _dist_enabled:
-            _dist_val = st.number_input(
-                "Minimum distance (timesteps)", min_value=2, step=1,
-                value=_DEFAULTS["extrema_distance_val"], key="extrema_distance_val",
-                help="Minimum separation (in timesteps) between two same-type extrema.",
-            )
-            extrema_distance = int(_dist_val)
-        else:
-            extrema_distance = None
 
     st.divider()
     # --- Decay-tail extension (optional) ---
@@ -1861,7 +1850,6 @@ _PHASE_PARAMS = dict(
     threshold_incipient_length=thr_inc_len,
     prominence=extrema_prominence,
     prominence_relative=extrema_prominence_relative,
-    distance=extrema_distance,
     length_scale=length_scale,
     mature_method=mature_method,
     mature_amplitude_fraction=mature_amplitude_fraction,
@@ -2506,11 +2494,10 @@ with tab_cal:
                         use_smoothing, use_smoothing_twice, replace_endpoints,
                         savgol_poly, boundary_padding,
                         extrema_prominence, extrema_prominence_relative,
-                        extrema_distance,
                     )
                 _args_periods = li.build_args_periods(
                     **{k: v for k, v in _PHASE_PARAMS.items()
-                       if k not in ("prominence", "prominence_relative", "distance")})
+                       if k not in ("prominence", "prominence_relative")})
                 if _show_ribbon:
                     _ribbon = li.pipeline_ribbon(_work, **_args_periods)
                 if _show_ledger:
@@ -2525,8 +2512,7 @@ with tab_cal:
                         "lens": li.mature_lens(
                             _res["df_result"]["z"],
                             prominence=extrema_prominence,
-                            prominence_relative=extrema_prominence_relative,
-                            distance=extrema_distance),
+                            prominence_relative=extrema_prominence_relative),
                         "records": _mature_records,
                     }
                 if _show_incipient:

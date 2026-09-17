@@ -208,12 +208,12 @@ def test_gap_records_use_the_opposite_comparison(vort_cache):
 RIBBON_TRACKS = ALL_TRACKS[:12]        # the brief asked for >= 10
 RIBBON_CONFIGS = [
     dict(),
-    dict(prominence_relative=0.30, distance=3, length_scale="local"),
+    dict(prominence_relative=0.30, length_scale="local"),
     dict(mature_method="amplitude", mature_amplitude_fraction=0.95,
          decay_tail_amplitude_fraction=0.05),
     dict(incipient_method="plateau", incipient_plateau_tau=0.20),
 ]
-_EXTREMA_KEYS = ("prominence", "prominence_relative", "distance")
+_EXTREMA_KEYS = ("prominence", "prominence_relative")
 
 
 @pytest.mark.parametrize("config", RIBBON_CONFIGS,
@@ -279,7 +279,7 @@ def test_ribbon_shows_a_later_step_overwriting_an_earlier_one(vort_cache):
 MATURE_TRACKS = ["20150377", "20190325", "20203373", "20203947", "20206498"]
 MATURE_CONFIGS = [
     dict(),
-    dict(prominence_relative=0.30, distance=3),
+    dict(prominence_relative=0.30),
     dict(mature_method="amplitude", mature_amplitude_fraction=0.95),
     dict(length_scale="local", threshold_mature_length=0.06),
 ]
@@ -337,7 +337,7 @@ def records_written(records):
 
 
 @pytest.mark.parametrize("track_id", MATURE_TRACKS)
-@pytest.mark.parametrize("extrema", [dict(), dict(prominence_relative=0.30, distance=3),
+@pytest.mark.parametrize("extrema", [dict(), dict(prominence_relative=0.30),
                                      dict(prominence_relative=0.05)],
                          ids=["no-filter", "tight-0.30-d3", "loose-0.05"])
 def test_mature_lens_accepted_extrema_are_the_detector_s(vort_cache, track_id,
@@ -363,7 +363,7 @@ def test_mature_lens_accepted_extrema_are_the_detector_s(vort_cache, track_id,
 def test_effective_threshold_explains_the_classification(vort_cache):
     """The drawn threshold line separates accepted from rejected, exactly.
 
-    No distance filter, so prominence is the ONLY reason an interior candidate
+    Prominence is the ONLY reason an interior candidate
     can be dropped and the line must account for every rejection. Boundary
     extrema are excluded: the package preserves them unconditionally.
     """
