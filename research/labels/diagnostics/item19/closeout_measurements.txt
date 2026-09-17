@@ -1,0 +1,39 @@
+==============================================================================
+1a. 20205386 as prominence_relative rises (mature_amplitude_fraction held at 0.95)
+==============================================================================
+label mature      : 56-64
+labelled sequence : incipient -> intensification -> mature -> decay -> residual
+
+| prom_rel | surviving valleys (rel prom) | mature blocks | paired | Dstart | Dend | within +-6 | seq match |
+|---|---|---|---|---|---|---|---|
+| 0.30 | 41(0.3115), 61(0.3074), 82(1.0000) | [(38, 42), (60, 62), (81, 84)] | (60, 62) from valley 61 | 4 | -2 | YES | NO |
+| 0.45 | 82(1.0000) | [(81, 84)] | (81, 84) from valley 82 | 25 | 20 | no | NO |
+| 0.50 | 82(1.0000) | [(81, 84)] | (81, 84) from valley 82 | 25 | 20 | no | NO |
+| 0.55 | 82(1.0000) | [(81, 84)] | (81, 84) from valley 82 | 25 | 20 | no | NO |
+| 0.60 | 82(1.0000) | [(81, 84)] | (81, 84) from valley 82 | 25 | 20 | no | NO |
+
+  detected sequence at pr=0.60 : incipient -> intensification -> mature -> decay
+  detected sequence at params-10: incipient -> intensification -> mature -> decay -> intensification -> mature -> decay -> intensification -> mature -> decay
+
+==============================================================================
+1c. 20160735: spurious mature blocks as maf widens (prominence_relative=0.3)
+==============================================================================
+label mature: 145-177 (33 steps)
+
+| maf | all blocks (len) | overlapping the label | SPURIOUS blocks (len) | correct matures in split | of those, < 7 steps | < 9 | median len |
+|---|---|---|---|---|---|---|---|
+| 0.95 | [(8, 10, 3), (55, 62, 8), (154, 166, 13), (225, 232, 8)] | [(154, 166, 13)] | [(8, 10, 3), (55, 62, 8), (225, 232, 8)] | 32 | 11 | 17 | 8 |
+| 0.90 | [(7, 11, 5), (53, 64, 12), (150, 181, 32), (224, 235, 12)] | [(150, 181, 32)] | [(7, 11, 5), (53, 64, 12), (224, 235, 12)] | 38 | 2 | 8 | 13 |
+| 0.85 | [(7, 11, 5), (52, 66, 15), (148, 183, 36), (223, 243, 21)] | [(148, 183, 36)] | [(7, 11, 5), (52, 66, 15), (223, 243, 21)] | 36 | 1 | 3 | 15 |
+| 0.80 | [(6, 12, 7), (50, 68, 19), (146, 184, 39), (222, 245, 24)] | [(146, 184, 39)] | [(6, 12, 7), (50, 68, 19), (222, 245, 24)] | 32 | 1 | 1 | 18 |
+
+==============================================================================
+1c (continued). What a pure DURATION floor would cost at each maf
+==============================================================================
+
+| maf | spurious block lengths | floor needed to remove them all | correct matures | min/median/max | correct matures that floor kills |
+|---|---|---|---|---|---|
+| 0.95 | [3, 8, 8] | >= 9 | 32 | 3/8/16 | **17 of 32** |
+| 0.90 | [5, 12, 12] | >= 13 | 38 | 4/13/32 | **19 of 38** |
+| 0.85 | [5, 15, 21] | >= 22 | 36 | 5/15/36 | **31 of 36** |
+| 0.80 | [7, 19, 24] | >= 25 | 32 | 5/18/28 | **30 of 32** |

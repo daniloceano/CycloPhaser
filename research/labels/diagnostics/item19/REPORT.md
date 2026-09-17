@@ -134,7 +134,9 @@ of fixing `20160735` by prominence alone at one valley, and stage 2 measures
 whether "one" is small enough.** It is not, and the table understates the cost:
 table (ii) lists only series whose mature already *matches* its label, so a series
 like `20191014` — which has a mature, badly placed — contributes no row and its
-loss is invisible here. Stage 2 finds it. See §2.3 and §3.
+loss is invisible here. Stage 2 finds it. The one valley this table *does* name,
+`20205386`'s at relative prominence 0.3074, turns out not to be lost at all but
+displaced, in a way the gate itself cannot see: §2.4. See also §2.3 and §3.
 
 ---
 
@@ -192,6 +194,16 @@ The harness records such a cell as a total failure and names the series rather
 than swallowing the exception; a cell that cannot be computed on all 47 series
 cannot satisfy a gate defined over all 47.
 
+**The crash is environment-dependent; the defect is not.** It was observed here
+on **numpy 2.5.3 / scipy 1.18.0 / pandas 3.0.5, Python 3.12.14**. An independent
+run on **numpy 2.4.4 / scipy 1.17.1** did **not** reproduce it — `s5b8aa46f` ran
+without error there. That is exactly what a round-off-triggered out-of-range index
+looks like: the guard at `find_stages.py:152` is missing in every environment, and
+whether the last element of the segment lands a part in 1e20 above or below the
+level depends on the arithmetic of the installed builds. **The verdict does not
+move**: the `maf = 1.00` column is degenerate on its own terms — the window
+collapses to a single step — in every environment, crash or no crash.
+
 ### 2.3 The trade-off, exactly
 
 Criterion (b) — `20160735` reduced to exactly one mature within ±6 of 145 and 178
@@ -204,6 +216,18 @@ Criterion (b) — `20160735` reduced to exactly one mature within ±6 of 145 and
 | `pr=0.60, maf=0.90` | PASS | +5 | +4 | identical costs |
 
 Criterion (e) is the only one these cells keep.
+
+**How much weight those costs carry — stated plainly.** `20191014`'s mature under
+`params-10` sits at 135–137 against a label of 43–69: it is wrong by 92 steps.
+Losing it is not clearly a regression, and criterion (d) flags it only because the
+gate was written to compare `sum|Δ|` against "no mature at all". Strip that case
+out and **the FAIL rests on `scfcf1387` alone** — a synthetic series that loses a
+correctly-placed mature, breaks its phase sequence, and takes the synthetic score
+from 12/12 to 11/12, failing (a′), (c) and (f) on its own. One series is enough to
+fail the gate as declared, and `scfcf1387` is the cleanest possible case (a
+synthetic with an unambiguous label), but the honest statement is that the cost of
+`prominence_relative = 0.60` is **one clearly-correct mature destroyed plus one
+badly-placed one**, not two equally damning losses.
 
 No cell fixes `20160735` below `prominence_relative = 0.60`, and no cell at
 `0.60` leaves the rest of the split intact. The curves are in
@@ -228,7 +252,49 @@ does not decide whether a candidate exists. Against this failure the two knobs
 are not two degrees of freedom — they are one, and the second only trims the
 result of the first.
 
-### 2.4 Before/after figures (step 3.4)
+### 2.4 The gate's blind spot — `20205386`
+
+§1.3 predicted that a threshold above the worst spurious value (0.5709) would also
+reject one true mature-generating valley: `20205386`'s valley at 61, relative
+prominence 0.3074. §2.3 lists only `20191014` and `scfcf1387` as losses. Both are
+correct, and the gap between them is a hole in the gate.
+
+Measured (`closeout_measurements.txt`), `maf` held at 0.95:
+
+| `prom_rel` | surviving valleys | mature blocks | paired | Δstart | Δend | within ±6 | sequence match |
+|---|---|---|---|---|---|---|---|
+| 0.30 (`params-10`) | 41 (0.3115), 61 (0.3074), 82 (1.0000) | (38,42) (60,62) (81,84) | (60,62) from valley **61** | +4 | −2 | **YES** | NO |
+| 0.45 → 0.60 | **82 (1.0000) only** | (81,84) | (81,84) from valley **82** | **+25** | **+20** | **no** | NO |
+
+So `20205386` **keeps a mature** — the deepest valley at 82 survives any threshold —
+but it is a different mature, 25 steps late, and the series stops agreeing with its
+label. Three criteria let it through:
+
+* **(a′)** exempts it: it still has a mature, so "no series loses its mature" is
+  satisfied.
+* **(c)** exempts it: `20205386` does **not** match its sequence under `params-10`
+  either, and (c) only protects series that already match.
+* **(d)** does not watch it — the gate names only `20191014` and `20203947`.
+
+**The gate as declared cannot see a series whose mature moves to the wrong place
+without disappearing, unless that series' sequence was already correct.** On this
+split that is not a small exemption: 17 of 47 series fail the sequence under
+`params-10`, and all 17 are outside (c)'s protection.
+
+It is genuinely mixed rather than simply bad, which is why it deserves reporting
+rather than folding into the loss count. At `pr=0.60` the detected sequence becomes
+`incipient → intensification → mature → decay` against a label of
+`incipient → intensification → mature → decay → residual` — four phases of five,
+where `params-10` produced a ten-phase sequence. The sequence gets tidier while the
+mature boundary collapses from (+4, −2) to (+25, +20). Raising prominence trades
+boundary accuracy for sequence tidiness on this series, and the gate scores neither
+trade.
+
+**This strengthens the FAIL rather than weakening it**: a third training series is
+damaged at `pr = 0.60` beyond the two the gate counted, and it was damaged
+invisibly.
+
+### 2.5 Before/after figures (step 3.4)
 
 Conditional on a PASS cell existing. None does, so the step is empty as
 specified. `fig_tradeoff_pr060_maf090.png` is supplied in its place: the two
@@ -294,44 +360,72 @@ Two things that next front should carry:
    at `find_stages.py:288-302` is a deliberate decision against exactly such a
    floor, made on a different case (`20160030`) under thresholds calibrated for
    `derivative`; it will have to be revisited explicitly, not worked around.
-2. **A ≥ 7-step floor does not, on its own, fix `20160735` under `params-10` — and
-   at `params-10` it would do real damage.** `20160735`'s four blocks are 3, 8, 13
-   and 8 steps long, so a floor of 7 removes only the 3-step block and leaves
-   three matures where the label has one; clearing the 8-step blocks needs a floor
-   of 9. Meanwhile the detector's own correct matures are short at this config:
-   of the 32 label-matching matures, **11 are shorter than 7 steps and 17 shorter
-   than 9**. A ≥ 7-step floor at `params-10` would delete 11 correct matures to
-   remove one spurious block.
+2. **A ≥ 7-step floor does not, on its own, fix `20160735` under `params-10`, and
+   widening the window does not rescue the idea — the spurious blocks widen too.**
 
-   That is a statement about `params-10`, not about the mechanism. Widening the
-   window first changes it completely:
+   `20160735`'s four blocks at `maf=0.95` are 3, 8, 13 and 8 steps, of which the
+   13-step block is the one overlapping the label. A floor of 7 removes only the
+   3-step block and leaves three matures where the label has one. The earlier
+   draft of this report recommended measuring the floor at `maf ≈ 0.90` because
+   the *correct* matures are longer there. That recommendation was not supported,
+   and measuring it shows why:
 
-   | `maf` (at `pr=0.30`) | matures matching the label | windows < 7 steps | < 9 steps | median length |
-   |---|---|---|---|---|
-   | 0.95 (`params-10`) | 32 | **11** | 17 | 8 |
-   | 0.90 | **38** | 2 | 8 | 13 |
-   | 0.85 | 36 | 1 | 3 | 15 |
-   | 0.80 | 32 | 1 | 1 | 18 |
+   | `maf` | `20160735` all blocks (len) | overlapping the label | **spurious** | correct matures in split | < 7 | < 9 | median |
+   |---|---|---|---|---|---|---|---|
+   | 0.95 | 3, 8, 13, 8 | 13 | **3, 8, 8** | 32 | 11 | 17 | 8 |
+   | 0.90 | 5, 12, 32, 12 | 32 | **5, 12, 12** | 38 | 2 | 8 | 13 |
+   | 0.85 | 5, 15, 36, 21 | 36 | **5, 15, 21** | 36 | 1 | 3 | 15 |
+   | 0.80 | 7, 19, 39, 24 | 39 | **7, 19, 24** | 32 | 1 | 1 | 18 |
 
-   **So the duration floor should be measured at `mature_amplitude_fraction ≈ 0.90`,
-   not at 0.95**, where it costs 2 correct matures rather than 11. The floor's
-   value still has to be measured on the train split against a gate declared
-   first, exactly as this one was — but it should not be measured at `params-10`'s
-   amplitude fraction.
+   Lowering `mature_amplitude_fraction` widens everything roughly together, so the
+   floor has to rise with it, and the cost rises faster than the benefit:
+
+   | `maf` | floor needed to remove **all** spurious blocks | correct matures (min/med/max) | correct matures that floor destroys |
+   |---|---|---|---|
+   | 0.95 | ≥ 9 | 3 / 8 / 16 | **17 of 32** |
+   | 0.90 | ≥ 13 | 4 / 13 / 32 | **19 of 38** |
+   | 0.85 | ≥ 22 | 5 / 15 / 36 | **31 of 36** |
+   | 0.80 | ≥ 25 | 5 / 18 / 28 | **30 of 32** |
+
+   The best ratio anywhere in the column is `maf = 0.90`, and it still destroys
+   **half** the correct matures. **A pure duration floor therefore looks no more
+   separable than the height filter it was meant to replace**, at any amplitude
+   fraction measured here. The declared next step is still the declared next step
+   — the condition that triggers it was met (§3, code A) — but it should be
+   measured knowing that the un-measured version of it, "≥ 7 steps at
+   `params-10`", removes one of `20160735`'s three spurious blocks and 11 correct
+   matures, and that no floor in this table separates the two populations.
+
+   This is a measured prediction about a mechanism, not a result about it. A floor
+   combined with something else — the candidates now registered as item 20(e) —
+   is a different proposition and is not scored here.
 
 ---
 
 ## 4. Findings recorded in passing (not part of the gate)
 
-**(a) `mature_amplitude_fraction = 1.0` raises `IndexError`.** Documented as a
-legal value (`0 < maf ≤ 1`, validated `find_stages.py:242-245`) and reachable from
-the calibration app. Two of 47 training series hit it; whether a given series does
-depends on floating-point round-off in `z_peak − 1.0 × (z_peak − z_valley)`
-against `z_valley`. The forward side of the same function has the mirror defect
-and is **worse because it is silent**: `mature_end = seg_next.index[violations_next[0] - 1]`
+**(a) `mature_amplitude_fraction = 1.0` can raise `IndexError`, and the missing
+guard is unconditional.** Documented as a legal value (`0 < maf ≤ 1`, validated
+`find_stages.py:242-245`) and reachable from the calibration app. `find_stages.py:152`
+computes `seg_prev.index[violations_prev[-1] + 1]` with no check that the result is
+in range, so when the last element of the segment — the valley itself — counts as a
+violation, the index runs one past the end.
+
+**Whether it fires depends on the environment.** Here, on **numpy 2.5.3 / scipy
+1.18.0 / pandas 3.0.5, Python 3.12.14**, two of 47 training series hit it
+(`20150532`, `s5b8aa46f`), because round-off puts `z[z_valley]` ~1e-20 above
+`level_prev = z_peak − 1.0 × (z_peak − z_valley)`. An **independent run on numpy
+2.4.4 / scipy 1.17.1 did not reproduce it** — `s5b8aa46f` completed there. The
+absent bounds check is the same in both; only the last bit of the subtraction
+differs. A defect that appears and disappears with a dependency bump is worse to
+own than one that always fires, not better.
+
+The forward side of the same function has the mirror defect and is **worse because
+it is silent in every environment**: `mature_end = seg_next.index[violations_next[0] - 1]`
 (`find_stages.py:160`) wraps to `index[-1]` when the first element violates, which
-returns `next_z_peak` — a maximally wrong window — instead of raising. Not fixed
-here; this front changes no package code.
+returns `next_z_peak` — a maximally wrong window — instead of raising.
+
+Not fixed here; this front changes no package code.
 
 **(b) The "true" prominence distribution is nearly degenerate.** 30 of the 32
 label-matching matures are generated by their series' single deepest valley
@@ -351,6 +445,10 @@ not pursued here because this front's gate is about `20160735`, which 0.90 does
 not fix. It is the cheapest unclaimed improvement the grid turned up and it bears
 directly on item 19(a) (the mature window is squeezed from both sides).
 
+Read it as an improvement to the *window*, not as help for a duration floor: §3
+measures that `20160735`'s spurious blocks widen along with the correct ones at
+0.90, from 3/8/8 steps to 5/12/12.
+
 **(d) Criterion (e) is the most robust of the six** — the incipient boundary moves
 in only 9 of 45 cells, all of them at `maf = 1.00` (where the detector fails
 wholesale). Neither parameter reaches the incipient boundary in the informative
@@ -368,9 +466,17 @@ knobs against incipient behaviour.
 | criterion (b) alone | met in 2 of 45 cells, both at `prominence_relative = 0.60` |
 | those 2 cells | fail (a′), (c), (d) and (f) |
 | where the matures are lost | **A** (prominence filter) in 2 of 2 informative series; B 0, C 0 (structurally), D 0 |
+| cost of the (b)-passing cells | 1 clearly-correct mature destroyed (`scfcf1387`), 1 badly-placed one lost (`20191014`), 1 moved 25 steps off its label unseen by the gate (`20205386`) |
 | test split | not read, not scored, not plotted |
 
 The premise of the front is **confirmed**: `prominence_relative` and
 `mature_amplitude_fraction` cannot separate "reject the spurious troughs in
 `20160735`" from "keep the true extrema in the rest of the split". A different
-mechanism is required, and the gate already declared which one to try.
+mechanism is required.
+
+The gate declared one — a ≥ 7-step duration floor — and the condition that
+triggers it was met. But §3 now measures that a floor high enough to clear
+`20160735`'s spurious blocks destroys between half and all of the correct matures
+at every amplitude fraction tested, so the floor should not be expected to work
+alone. Candidate mechanisms that have **not** been measured are registered in
+`docs/future_work.md`, item 20(e).

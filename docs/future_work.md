@@ -1622,19 +1622,50 @@ the valley) and is reported apart.
 
 **Consequence for the declared next step.** The declared condition is met — the
 lost matures disappear in the prominence filter — so the ≥ 7-step duration floor
-is the mechanism to try, with no new rule to declare. Two carries: it is a **new**
-mechanism in the `amplitude` arm, and the deliberate decision against such a floor
-at `find_stages.py:288-302` has to be revisited explicitly; and it must **not** be
-measured at `params-10`'s `mature_amplitude_fraction=0.95`, where 11 of the 32
-correct matures are already shorter than 7 steps. At 0.90 only 2 are.
+is the mechanism to try, with no new rule to declare. But the follow-up
+measurement asked for at closeout weakens it: `20160735`'s **spurious** blocks
+widen along with the correct ones as `mature_amplitude_fraction` falls (3/8/8 steps
+at 0.95, 5/12/12 at 0.90, 5/15/21 at 0.85, 7/19/24 at 0.80), so the floor must rise
+with the window, and a floor high enough to remove all three destroys **17 of 32,
+19 of 38, 31 of 36 and 30 of 32** correct matures at those four fractions. The best
+ratio anywhere is `maf = 0.90`, and it still costs half of them. A duration floor
+**alone** should not be expected to work. It is also a **new** mechanism in the
+`amplitude` arm — `threshold_mature_length` is unreachable there — so the
+deliberate decision against such a floor at `find_stages.py:288-302` has to be
+revisited explicitly. Candidates that have not been measured: item 20(e).
+
+**A blind spot in the gate, found at closeout.** `20205386` keeps a mature at
+`prominence_relative=0.60` but a *different* one: its valleys at 41 (0.3115) and 61
+(0.3074) are cut, the deepest valley at 82 survives, and the detected mature moves
+from (60,62) — within ±6 of the label — to (81,84), 25 steps late. No criterion
+catches it: (a′) exempts it because a mature still exists, (c) exempts it because
+`20205386` did not match its sequence under `params-10` either, and (d) watches
+only `20191014` and `20203947`. **The gate cannot see a mature that moves to the
+wrong place without disappearing, unless the series' sequence was already
+correct** — and 17 of the 47 training series are outside (c)'s protection on that
+ground. It strengthens the FAIL (a third series is damaged at `pr = 0.60`) and it
+is a lesson for the next gate's wording.
+
+**How much weight the two counted losses carry.** `20191014`'s mature under
+`params-10` is at 135–137 against a label of 43–69 — wrong by 92 steps — so losing
+it is not clearly a regression. Stripped of that case, the FAIL rests on
+`scfcf1387` alone, which fails (a′), (c) and (f) on its own. One series is enough
+to fail the gate as declared, and `scfcf1387` is the cleanest possible case, but
+the honest accounting is one clearly-correct mature destroyed, one badly-placed one
+lost, and one displaced unseen.
 
 ### (c) OPEN — `mature_amplitude_fraction=1.0` raises `IndexError`
 
 A documented-legal value (`0 < maf ≤ 1`, validated `find_stages.py:242-245`) that
-crashes: floating-point round-off puts `z[z_valley]` a part in 1e20 above
+crashes: `find_stages.py:152` indexes one past the end of the segment when
+floating-point round-off puts `z[z_valley]` a part in 1e20 above
 `level_prev = z_peak − 1.0 × (z_peak − z_valley)`, so the valley counts as a
-violation and `find_stages.py:152` indexes one past the end. 2 of 47 training
-series hit it. The forward side (`find_stages.py:160`) has the mirror defect and
+violation. 2 of 47 training series hit it **on numpy 2.5.3 / scipy 1.18.0 /
+pandas 3.0.5, Python 3.12.14**; an independent run on **numpy 2.4.4 / scipy
+1.17.1 did not reproduce it**. The missing bounds check is unconditional in both
+— only whether it fires is environment-dependent, which makes it harder to own,
+not less real. The `maf = 1.00` column is degenerate either way, so the item-20
+verdict does not move. The forward side (`find_stages.py:160`) has the mirror defect and
 is worse because it is **silent**: it wraps to `index[-1]` and returns
 `next_z_peak`, a maximally wrong window, instead of raising. Not fixed — this
 front changes no package code.
@@ -1647,6 +1678,64 @@ synthetics at 12/12, and moves no incipient boundary. Not pursued here because i
 does not fix `20160735`. It bears directly on item 19(a) — the mature window is
 squeezed from both sides — and is the cheapest unclaimed gain the grid turned up.
 
+
+### 20(e) — candidate mechanisms not yet measured
+
+Registered, not implemented, not scored. Each is a **separate** candidate, and
+none of them has been measured on any split. They exist because part 1 refuted
+the mechanism it tested: `prominence_relative` and `mature_amplitude_fraction`
+are one degree of freedom against a fragmented mature, and part 1's own follow-up
+measurement (`REPORT.md` §3) shows that a duration floor on its own is no more
+separable — a floor high enough to clear `20160735`'s spurious blocks destroys
+between half and all of the correct matures at every amplitude fraction tested.
+
+**(i) A duration floor on mature candidates, measured over the window actually
+chosen — not over `params-10`.** This is the next step the item-20 gate declared
+in advance, and the condition that triggers it was met (every informative loss is
+code A, the prominence filter). Part 1 measured only the un-measured version of
+it: "≥ 7 steps at `mature_amplitude_fraction=0.95`" removes one of `20160735`'s
+three spurious blocks and 11 of 32 correct matures. Whatever window a future front
+settles on, the floor has to be calibrated **on that window**, and the numbers in
+`REPORT.md` §3 say a floor alone is unlikely to be enough. It is also a **new**
+mechanism in the `amplitude` arm — `threshold_mature_length`
+(`find_stages.py:304-312`) is unreachable there — so the deliberate decision
+against such a floor at `find_stages.py:288-302` has to be revisited explicitly.
+
+**(ii) Absolute valley depth, as distinct from prominence.** `peak_prominences`
+returns the **smaller** of the two climbs from a valley to its bounding peaks, so
+a deep minimum sitting next to an even deeper neighbour scores low, and a shallow
+dip between two modest bumps can score high. The proposed alternative is the
+valley's depth measured against the **series minimum** (or against the series'
+own dynamic range) — a global quantity the current filter never computes. Part 1
+gives a reason to expect it to behave differently: 30 of the 32 correct matures
+are generated by their series' single deepest valley, which is precisely the
+population an absolute-depth criterion selects and a relative-prominence
+criterion only approximately recovers.
+
+**(iii) The asymmetry between the two flanks.** Prominence collapses the two
+climbs into their minimum and throws the rest away. The ratio (or difference) of
+the previous-peak climb to the next-peak climb is information the detector
+currently discards, and it is exactly the quantity that distinguishes a genuine
+mature — a deep minimum flanked by comparable intensification and decay — from a
+pause on one side of a larger cycle. Untested.
+
+**(iv) The leanest variant: one mature per cycle, anchored on the deepest
+valley.** Rather than filtering extrema and hoping the survivors produce one
+window, select the mature directly: the deepest valley of the series gets the
+mature, and a second is admitted only if its **absolute depth is comparable**
+(criterion (ii)). Two facts from part 1's train split motivate it: **41 of the 47
+labels carry exactly one mature** (3 carry none, 3 carry two), and **30 of the 32
+detected matures that match their label are generated by the series' deepest
+valley** (relative prominence exactly 1.0000). Under that rule, `20160735`'s three
+spurious blocks never form, because they are not anchored on the deepest valley —
+without touching any threshold.
+
+Candidates (ii), (iii) and (iv) come from **Danilo's intuition about what
+prominence throws away**, recorded here on 2026-09-17 before any measurement, so
+that whichever is taken up is scored against a gate declared in advance, as items
+19 and 20 were. **None of the four has been measured.** Any front that picks one
+up starts by declaring its gate and its prediction, and the frozen test split
+(`research/labels/split.yaml`) stays untouched until a mechanism is chosen.
 
 ---
 
