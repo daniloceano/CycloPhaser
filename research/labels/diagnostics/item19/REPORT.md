@@ -129,9 +129,12 @@ therefore also rejects 1 of the 32 true mature-generating valleys.
 `fig_prominence_distributions.png`.
 
 **This is the mechanical statement of the trade-off, before any grid was run:
-the separation is not clean, but it is nearly clean — the cost of fixing
-`20160735` by prominence alone is small in this table (one valley), and stage 2
-measures whether "small" is small enough.** It is not: see §2.3.
+the separation is not clean, but it looks nearly clean — this table puts the cost
+of fixing `20160735` by prominence alone at one valley, and stage 2 measures
+whether "one" is small enough.** It is not, and the table understates the cost:
+table (ii) lists only series whose mature already *matches* its label, so a series
+like `20191014` — which has a mature, badly placed — contributes no row and its
+loss is invisible here. Stage 2 finds it. See §2.3 and §3.
 
 ---
 
