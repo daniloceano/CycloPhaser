@@ -1,0 +1,1763 @@
+[
+ {
+  "pr": 0.2,
+  "maf": 0.8,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=1, Dend=7",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.2,
+  "maf": 0.85,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=3, Dend=6",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.2,
+  "maf": 0.9,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=5, Dend=4",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.2,
+  "maf": 0.95,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=9, Dend=-11",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.2,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.25,
+  "maf": 0.8,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=1, Dend=7",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.25,
+  "maf": 0.85,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=3, Dend=6",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.25,
+  "maf": 0.9,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=5, Dend=4",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.25,
+  "maf": 0.95,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=9, Dend=-11",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.25,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.3,
+  "maf": 0.8,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=1, Dend=7",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.3,
+  "maf": 0.85,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=3, Dend=6",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.3,
+  "maf": 0.9,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=5, Dend=4",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.3,
+  "maf": 0.95,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=4, Dstart=9, Dend=-11",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 4,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.3,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.35,
+  "maf": 0.8,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=1, Dend=7",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.35,
+  "maf": 0.85,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=3, Dend=6",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.35,
+  "maf": 0.9,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=5, Dend=4",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.35,
+  "maf": 0.95,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=9, Dend=-11",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.35,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.4,
+  "maf": 0.8,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=1, Dend=7",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.4,
+  "maf": 0.85,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=3, Dend=6",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->164)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 4,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.4,
+  "maf": 0.9,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=5, Dend=4",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.4,
+  "maf": 0.95,
+  "res": {
+   "a'": true,
+   "b": false,
+   "c": true,
+   "d": true,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "0 series lost their mature",
+   "b": "n_mature=3, Dstart=9, Dend=-11",
+   "c": "0 series stopped matching",
+   "d": "neither worsened",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 5,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.4,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.45,
+  "maf": 0.8,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=3, Dstart=1, Dend=7",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.45,
+  "maf": 0.85,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=3, Dstart=3, Dend=6",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.45,
+  "maf": 0.9,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=3, Dstart=5, Dend=4",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.45,
+  "maf": 0.95,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=3, Dstart=9, Dend=-11",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 3,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.45,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.5,
+  "maf": 0.8,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=2, Dstart=1, Dend=7",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.5,
+  "maf": 0.85,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=2, Dstart=3, Dend=6",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.5,
+  "maf": 0.9,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=2, Dstart=5, Dend=4",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.5,
+  "maf": 0.95,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": true,
+   "d": false,
+   "e": true,
+   "f": true
+  },
+  "why": {
+   "a'": "1 series lost their mature: ['20191014']",
+   "b": "n_mature=2, Dstart=9, Dend=-11",
+   "c": "0 series stopped matching",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 12"
+  },
+  "n_ok": 3,
+  "errors": [],
+  "seq": 31,
+  "syn_seq": 12,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.5,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.55,
+  "maf": 0.8,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=2, Dstart=1, Dend=7",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 1,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.55,
+  "maf": 0.85,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=2, Dstart=3, Dend=6",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 1,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.55,
+  "maf": 0.9,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=2, Dstart=5, Dend=4",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 1,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.55,
+  "maf": 0.95,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=2, Dstart=9, Dend=-11",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 1,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 2,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.55,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ },
+ {
+  "pr": 0.6,
+  "maf": 0.8,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=1, Dstart=1, Dend=7",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 1,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 1,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.6,
+  "maf": 0.85,
+  "res": {
+   "a'": false,
+   "b": true,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=1, Dstart=3, Dend=6",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 2,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 1,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.6,
+  "maf": 0.9,
+  "res": {
+   "a'": false,
+   "b": true,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=1, Dstart=5, Dend=4",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 2,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 1,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.6,
+  "maf": 0.95,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "why": {
+   "a'": "2 series lost their mature: ['20191014', 'scfcf1387']",
+   "b": "n_mature=1, Dstart=9, Dend=-11",
+   "c": "1 series stopped matching: ['scfcf1387']",
+   "d": "20191014(seq False->False, sum|D| 163->None)",
+   "e": "0 series moved",
+   "f": "synthetic sequence 12 -> 11"
+  },
+  "n_ok": 1,
+  "errors": [],
+  "seq": 30,
+  "syn_seq": 11,
+  "tgt_n": 1,
+  "no_mature": [
+   "20170760",
+   "20191014",
+   "scfcf1387",
+   "s0596ea57"
+  ]
+ },
+ {
+  "pr": 0.6,
+  "maf": 1.0,
+  "res": {
+   "a'": false,
+   "b": false,
+   "c": false,
+   "d": false,
+   "e": false,
+   "f": false
+  },
+  "why": {
+   "a'": "44 series lost their mature: ['20150069', '20150436', '20150528', '20150532', '20150656', '20160587', '20160735', '20170154', '20170342', '20170409', '20170520', '20170794', '20171179', '20180170', '20180263', '20180300', '20180608', '20180628', '20180733', '20180759', '20181046', '20190325', '20190397', '20190639', '20190870', '20190879', '20191014', '20191104', '20191155', '20201245', '20202023', '20203947', '20205386', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "b": "n_mature=0, Dstart=None, Dend=None",
+   "c": "28 series stopped matching: ['20150069', '20150436', '20150528', '20150532', '20170154', '20170409', '20170520', '20180263', '20180300', '20180608', '20180759', '20190397', '20190639', '20190870', '20190879', '20191104', '20201245', '20207822', 's4e7ff65c', 's9ddbc53c', 'sbceec644', 's6b1e8245', 'scfcf1387', 's8001f17b', 's5b8aa46f', 'sbd6c6920', 's6b542eee', 's46657891']",
+   "d": "20191014(seq False->False, sum|D| 163->None); 20203947(seq False->False, sum|D| 17->None)",
+   "e": "2 series moved: ['20150532', 's5b8aa46f']",
+   "f": "synthetic sequence 12 -> 2",
+   "error": "detector raised on 2 series: ['20150532', 's5b8aa46f']"
+  },
+  "n_ok": 0,
+  "errors": [
+   "20150532",
+   "s5b8aa46f"
+  ],
+  "seq": 2,
+  "syn_seq": 2,
+  "tgt_n": 0,
+  "no_mature": [
+   "20150069",
+   "20150436",
+   "20150528",
+   "20150532",
+   "20150656",
+   "20160587",
+   "20160735",
+   "20170154",
+   "20170342",
+   "20170409",
+   "20170520",
+   "20170760",
+   "20170794",
+   "20171179",
+   "20180170",
+   "20180263",
+   "20180300",
+   "20180608",
+   "20180628",
+   "20180733",
+   "20180759",
+   "20181046",
+   "20190325",
+   "20190397",
+   "20190639",
+   "20190870",
+   "20190879",
+   "20191014",
+   "20191104",
+   "20191155",
+   "20201245",
+   "20202023",
+   "20203947",
+   "20205386",
+   "20207822",
+   "s4e7ff65c",
+   "s9ddbc53c",
+   "sbceec644",
+   "s6b1e8245",
+   "scfcf1387",
+   "s8001f17b",
+   "s5b8aa46f",
+   "sbd6c6920",
+   "s6b542eee",
+   "s0596ea57",
+   "s46657891"
+  ]
+ }
+]

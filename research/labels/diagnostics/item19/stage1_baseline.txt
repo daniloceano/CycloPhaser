@@ -1,0 +1,29 @@
+Stage 1 step 2 - constant baseline (TRAIN, same metric as the table above)
+config: params-10 is irrelevant here - the baseline ignores the detector
+
+modal labelled phase sequence over the 47 training labels:
+  incipient -> intensification -> mature -> decay
+  held by 16 of 47 series
+
+A constant predictor that emits that sequence for every series scores, on the
+same 'whole sequence matches' metric:
+  ALL        16/47  (34.0%)
+  real       13/35
+  synthetic  3/12
+
+The detector under params-10 scores 30/47 on the same metric
+  real       18/35
+  synthetic  12/12
+
+All labelled sequences by frequency:
+   16  incipient -> intensification -> mature -> decay
+   14  intensification -> mature -> decay
+    4  incipient -> intensification -> mature -> decay -> residual
+    3  intensification -> mature -> decay -> residual
+    3  incipient -> intensification
+    2  incipient -> intensification -> mature -> decay -> intensification -> mature -> decay
+    1  incipient -> intensification -> mature -> decay -> intensification -> mature -> decay -> residual
+    1  incipient -> decay -> intensification -> mature -> decay
+    1  incipient -> decay -> intensification -> mature -> decay -> residual
+    1  decay -> intensification -> mature -> decay
+    1  decay -> intensification -> mature -> decay -> residual
