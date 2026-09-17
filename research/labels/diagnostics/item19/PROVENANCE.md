@@ -3,9 +3,13 @@
 This file holds **only the config-independent half** of the front's stage 1 and
 stage 2 deliverables: where in the package the quantities named by the gate are
 computed, and which code path each way of losing a mature goes through. It
-contains **no scores, no tables and no figures**, because
-`research/labels/configs/cyclophaser_params-10.yaml` was not supplied and stages
-1 and 2 have not been run. See `docs/future_work.md`, item 20(b).
+contains no scores and no figures by design.
+
+It was written and committed (`79bb7b3`) **before** `params-10` was supplied and
+before anything was measured, so its claims are predictions from the code
+structure alone. Stages 1 and 2 have since been run; the measured results are in
+`REPORT.md`, and they confirm the one prediction this file makes — stage **C**
+accounts for 0 of the 402 observed mature losses.
 
 The directory is named `item19` because Danilo's brief named it so; the
 `future_work.md` item is numbered 20 (19 was already Front B).

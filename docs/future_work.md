@@ -1490,7 +1490,7 @@ was never measured.
 
 ---
 
-## 20. Mature detection — the `prominence_relative` × `mature_amplitude_fraction` trade-off — **gate declared 2026-09-17, measurement pending**
+## 20. Mature detection — the `prominence_relative` × `mature_amplitude_fraction` trade-off — **part 1 closed, gate FAIL, premise CONFIRMED, 2026-09-17**
 
 > Danilo's brief commissioned this front as "Item 19". Item 19 on this branch is
 > already Front B (`distance` removed), and item 18 is claimed by the unmerged
@@ -1581,24 +1581,72 @@ ajuste posterior.
 
 </details>
 
-### (b) Status — blocked before stage 1, waiting on the `params-10` file
+### (b) Result — gate FAIL, 0 of 45 cells; the trade-off is real
 
-Branch: `research/item19-mature-prominence`, from `develop-v2.1` @ `5120856`
-(the expected tip).
+Branch `research/item19-mature-prominence`, from `develop-v2.1` @ `5120856`.
+`params-10` versioned and verified against the declared sha256
+`c14755e3…047902d7`. Measured in the conda `cyclophaser` environment against the
+working tree, not the published 1.7.3. No package code changed. The test split
+was never read. Full write-up and tables:
+`research/labels/diagnostics/item19/REPORT.md`.
 
-`research/labels/configs/cyclophaser_params-10.yaml` is to be versioned byte for
-byte from the file Danilo supplies, and checked against the declared sha256
-`c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7`. **The file
-was not supplied with the brief and does not exist anywhere in the repository or
-in any branch's history**, so stages 1 and 2 have not been run. Nothing was
-measured, nothing was scored, and the test split was not touched.
+**Stage 1, `params-10`, train (47 series).** Sequence 30/47 (real 18/35,
+synthetic 12/12); mature within ±6 at both ends 32/47; 2 series with no mature; 9
+with more than one mature block. The constant modal-sequence baseline scores
+16/47, so the detector beats it by 14 series. `20160735` produces **four** mature
+blocks (3, 8, 13 and 8 steps) where the label has one of 33.
 
-It is not reconstructable to the byte: `params-9` already carries
-`prominence_relative=0.30` and `mature_amplitude_fraction=0.95`, and the likely
-difference is only the now-removed `distance` key, but the config carries a
-`metadata.timestamp` that cannot be guessed. Measuring against a rebuilt config
-and calling the result `params-10` would break the front's own rule that every
-table names the config it used.
+The quantity `prominence_relative` compares is
+`scipy.signal.peak_prominences` (`determine_periods.py:188`) on the filtered
+vorticity, normalised at `:203-208` by the maximum over the surviving interior
+set **per series and per extremum type**. The two distributions the front asked
+about **overlap**: `20160735`'s three spurious candidates run 0.3037–0.5709,
+the 32 valleys that generate a label-matching mature across the split run
+0.3074–1.0000, and the shared band holds 2 of 3 spurious and 1 of 32 true values.
+
+**Stage 2, the 45-cell grid.** **No cell meets all six criteria.** Criterion (b) —
+`20160735` reduced to one mature within ±6 — is met in exactly **2 cells**,
+`prominence_relative=0.60` with `mature_amplitude_fraction` 0.85 or 0.90, and both
+fail (a′), (c), (d) and (f): `20191014` and `scfcf1387` lose their mature outright,
+`scfcf1387` stops matching its sequence, and the synthetic score drops 12 → 11.
+`params-10` itself scores 5/6, failing only (b). **The declared prediction was
+FAIL and the measurement is FAIL.**
+
+**Where the matures are lost.** In every informative cell (`maf < 1.00`) the
+answer is **A — the prominence filter**: 2 of 2 series (`20191014` at
+`prominence_relative ≥ 0.45`, `scfcf1387` at `≥ 0.55`) lose the flanking z peak
+their valley needed, so no candidate is formed (`find_stages.py:261-262`). **B 0,
+C 0, D 0.** C is 0 structurally, as item 20's pre-measurement provenance note
+already established. The `maf = 1.00` column is degenerate (window collapses to
+the valley) and is reported apart.
+
+**Consequence for the declared next step.** The declared condition is met — the
+lost matures disappear in the prominence filter — so the ≥ 7-step duration floor
+is the mechanism to try, with no new rule to declare. Two carries: it is a **new**
+mechanism in the `amplitude` arm, and the deliberate decision against such a floor
+at `find_stages.py:288-302` has to be revisited explicitly; and it must **not** be
+measured at `params-10`'s `mature_amplitude_fraction=0.95`, where 11 of the 32
+correct matures are already shorter than 7 steps. At 0.90 only 2 are.
+
+### (c) OPEN — `mature_amplitude_fraction=1.0` raises `IndexError`
+
+A documented-legal value (`0 < maf ≤ 1`, validated `find_stages.py:242-245`) that
+crashes: floating-point round-off puts `z[z_valley]` a part in 1e20 above
+`level_prev = z_peak − 1.0 × (z_peak − z_valley)`, so the valley counts as a
+violation and `find_stages.py:152` indexes one past the end. 2 of 47 training
+series hit it. The forward side (`find_stages.py:160`) has the mirror defect and
+is worse because it is **silent**: it wraps to `index[-1]` and returns
+`next_z_peak`, a maximally wrong window, instead of raising. Not fixed — this
+front changes no package code.
+
+### (d) OPEN — `mature_amplitude_fraction=0.90` is free improvement, unclaimed
+
+Holding everything else at `params-10`, 0.95 → 0.90 raises matures within ±6 of
+their label from **32/47 to 38/47**, leaves the sequence at 30/47 and the
+synthetics at 12/12, and moves no incipient boundary. Not pursued here because it
+does not fix `20160735`. It bears directly on item 19(a) — the mature window is
+squeezed from both sides — and is the cheapest unclaimed gain the grid turned up.
+
 
 ---
 
