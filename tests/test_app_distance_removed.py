@@ -58,11 +58,37 @@ class TestDistanceControlRemoved:
                      and "mature" not in lab.lower()]
         assert not offenders, f"distance widget still rendered: {offenders}"
 
-    def test_no_distance_session_state(self):
+    # Every session_state key the distance control owned at ab7f244, the commit
+    # this front branched from (`git show ab7f244:tools/calibration_app/app.py`
+    # — _DEFAULTS:190-191, the widget keys at 1790/1800 and the import block at
+    # 555-561 all use these two and no others).
+    _OLD_DISTANCE_KEYS = ("extrema_distance_enabled", "extrema_distance_val")
+
+    # Keys that must still be present. Without these the test above could pass
+    # simply because session_state was empty or the app failed to build its
+    # sidebar — a vacuous green.
+    _STILL_PRESENT_KEYS = ("extrema_prominence_enabled", "length_scale",
+                           "mature_method")
+
+    @pytest.mark.parametrize("key", _OLD_DISTANCE_KEYS)
+    def test_no_distance_session_state(self, key):
+        """Uses only AppTest's public `in` on session_state.
+
+        NOT `at.session_state.filtered_state`: that is a Streamlit internal, and
+        reading it raises KeyError on streamlit 1.64. environment.yml pins only
+        `streamlit>=1.30`, so a fresh environment installs the newest release and
+        a test reaching into private API turns the suite red for a reason that
+        has nothing to do with this package.
+        """
         at = _app()
-        keys = [k for k in at.session_state.filtered_state
-                if "distance" in k and "mature" not in k]
-        assert not keys, f"distance session_state survives: {keys}"
+        assert key not in at.session_state, f"distance session_state survives: {key}"
+
+    @pytest.mark.parametrize("key", _STILL_PRESENT_KEYS)
+    def test_session_state_probe_is_not_vacuous(self, key):
+        """The positive control for the test above: `in` must find a live key."""
+        at = _app()
+        assert key in at.session_state, (
+            f"{key} missing — the removal check above proves nothing")
 
     def test_source_has_no_distance_defaults(self):
         src = APP_PY.read_text()
