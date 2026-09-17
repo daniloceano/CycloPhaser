@@ -1490,6 +1490,118 @@ was never measured.
 
 ---
 
+## 20. Mature detection — the `prominence_relative` × `mature_amplitude_fraction` trade-off — **gate declared 2026-09-17, measurement pending**
+
+> Danilo's brief commissioned this front as "Item 19". Item 19 on this branch is
+> already Front B (`distance` removed), and item 18 is claimed by the unmerged
+> `research/v3-topology-proxy` branch, so the front is registered here as **item
+> 20**. It is the same front; the number is the only thing that changed.
+
+This front picks up item 19(c) — the real cause of short matures was never
+addressed. The symptom: the mature phase comes out short or fragmented. Under
+`params-10` (`prominence_relative=0.30`, `mature_amplitude_fraction=0.95`),
+`20160735` has short troughs detected as mature where the manual label carries a
+single mature of 33 steps, 145 → 178. Raising `prominence_relative` cleans that
+case up but, by construction, also makes it harder to accept true extrema in
+other series — so a single scalar adjustment may not be able to separate the two
+effects. Part 1 of the front measures, **on the train split only**, whether any
+combination of the two parameters fixes `20160735` without any training series
+losing its mature. The trade-off is to be confirmed or refuted with numbers
+before any new mechanism is proposed.
+
+Out of scope, already decided: `distance` is gone (item 19) and `length_scale` is
+not to be touched; mature follows the human label (item 15 / 17); the asserted
+boundary margin is a fixed 6 (item 17(d)). `20150377` and `20206498` are in the
+**test** split and stay out of this front.
+
+### (a) Gate — declared before any measurement, config `params-10`
+
+Stage 1 is descriptive, on the train split (35 real + 12 synthetic = 47 series).
+Stage 2 is a grid over `prominence_relative` {0.20, 0.25, …, 0.60} ×
+`mature_amplitude_fraction` {0.80, 0.85, …, 1.00} — 45 cells — with every other
+parameter held at `params-10`.
+
+**PASS** if at least one cell satisfies all of the following simultaneously:
+
+- **(a′)** no training series that has a mature under `params-10` ends up with
+  no mature;
+- **(b)** `20160735` has exactly one mature, with |Δstart| ≤ 6 (label 145) and
+  |Δend| ≤ 6 (label 178);
+- **(c)** no training series that gets the full phase sequence right under
+  `params-10` stops getting it right (checked series by series);
+- **(d)** `20191014` and `20203947`: the sequence does not get worse, and the sum
+  of |Δ| over the mature boundaries does not increase;
+- **(e)** the incipient boundary is identical to `params-10` in every series;
+- **(f)** the sequence score over the 12 synthetics does not drop.
+
+**FAIL** otherwise. **Declared prediction: FAIL.**
+
+**Next step if FAIL, declared now:** replace the height filter with a duration
+filter — a mature candidate is accepted only if it sustains the window for ≥ 7
+steps, the floor from the item-15 decision — *if* stage 1 shows that the lost
+matures disappear in the prominence filter. If they disappear in the amplitude
+window instead, a window rule will be declared before any test is run.
+
+**Exposure on the record:** the 16 test cases were inspected visually under
+`params-10` in the calibration app (bad cases `20150377` and `20206498`), and the
+label for `20150377` was read during the split check. `20150377` will be scored
+as a test result after the mechanism is chosen, with no adjustment afterwards.
+
+<details>
+<summary>Gate as Danilo wrote it (Portuguese, verbatim)</summary>
+
+```
+Portão Item 19 (declarado antes da medição, config params-10):
+Etapa 1 descritiva no treino (35 reais + 12 sintéticos).
+Etapa 2: grade prominence_relative {0.20,0.25,...,0.60} ×
+mature_amplitude_fraction {0.80,0.85,...,1.00} (45 células), demais
+parâmetros = params-10.
+PASS se existir ao menos uma célula com, simultaneamente:
+(a') nenhuma série de treino com mature sob params-10 fica sem mature;
+(b) 20160735 com exatamente uma mature, |Δinício| ≤ 6 (rótulo 145) e
+    |Δfim| ≤ 6 (rótulo 178);
+(c) nenhuma série de treino que acerta a sequência completa sob
+    params-10 deixa de acertar (série a série);
+(d) 20191014 e 20203947: sequência não piora e soma de |Δ| das
+    fronteiras da mature não aumenta;
+(e) fronteira do incipient idêntica a params-10 em todas as séries;
+(f) pontuação de sequência dos 12 sintéticos não cai.
+FAIL caso contrário. Previsão declarada: FAIL.
+Próximo passo se FAIL (declarado agora): substituir o filtro por altura
+por um filtro por duração (candidato a mature só aceito se sustentar a
+janela por ≥ 7 passos, piso da decisão E), SE a etapa 1 mostrar que as
+matures perdidas somem no filtro de proeminência; se somem na janela de
+amplitude, uma regra de janela será declarada antes de qualquer teste.
+Exposição registrada: os 16 casos de teste foram inspecionados
+visualmente com params-10 no app (bad cases 20150377 e 20206498), e o
+rótulo de 20150377 foi lido durante a checagem do split. 20150377 será
+avaliado como resultado de teste depois do mecanismo escolhido, sem
+ajuste posterior.
+```
+
+</details>
+
+### (b) Status — blocked before stage 1, waiting on the `params-10` file
+
+Branch: `research/item19-mature-prominence`, from `develop-v2.1` @ `5120856`
+(the expected tip).
+
+`research/labels/configs/cyclophaser_params-10.yaml` is to be versioned byte for
+byte from the file Danilo supplies, and checked against the declared sha256
+`c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7`. **The file
+was not supplied with the brief and does not exist anywhere in the repository or
+in any branch's history**, so stages 1 and 2 have not been run. Nothing was
+measured, nothing was scored, and the test split was not touched.
+
+It is not reconstructable to the byte: `params-9` already carries
+`prominence_relative=0.30` and `mature_amplitude_fraction=0.95`, and the likely
+difference is only the now-removed `distance` key, but the config carries a
+`metadata.timestamp` that cannot be guessed. Measuring against a rebuilt config
+and calling the result `params-10` would break the front's own rule that every
+table names the config it used.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
