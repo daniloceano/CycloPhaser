@@ -1942,9 +1942,9 @@ Declared before running; every number below is the measured one.
 
 | item | verdict | measured |
 |---|---|---|
-| (a) app suite, no regression | **PASS** | 1193 passed / **0 failed** (base 1130 + 63 new) |
+| (a) app suite, no regression | **PASS** | 1198 passed / **0 failed** (base 1130 + 68 new) |
 | (b) `cyclophaser/` diff empty | **PASS** | empty |
-| (c) Benchmark tab under AppTest, public API only | **PASS** | 30 tests; swap positive control AND the unlabelled-row positive control |
+| (c) Benchmark tab under AppTest, public API only | **PASS** | 35 tests; swap positive control AND the unlabelled-row positive control |
 | (d) sidebar verified by automatic test | **PASS** | 33 tests; 28/28 public parameters mapped, no duplicate key |
 | (e) snapshot isolated + hashed + env confirmed | **PASS** | 2 files, 0 failures, app env editable-only |
 | (f) Danilo's visual checkpoint | **OPEN** | figures in `docs/_images/item5/` |
@@ -2051,6 +2051,13 @@ same isolated procedure and in the same session as 1.9.4 — `v2.0.0.json`,
 sha256 `944b51d8…`, 63 series, 0 failures — and both have always been offered in
 the tab's snapshot selector. What the review saw was the selector in its unopened
 state, showing `—`; it was not a missing artefact.
+
+**A third defect, reported by Danilo:** the `Run` button was disabled with no
+explanation. It now names each unmet precondition — separately, so it never
+cites a condition already satisfied — in the button's tooltip and beside it, and
+section 4's empty state names the same blocker. Five regression tests cover the
+four states, including that the sentence keeps "2 · Data" readable (`.capitalize()`
+lowercased the rest and printed "2 · data").
 
 ### Also done
 

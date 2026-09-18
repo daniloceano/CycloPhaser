@@ -675,13 +675,36 @@ def render() -> None:
         fp = _fingerprint(cols, selected, ref_name)
         stale = (K_RESULTS in st.session_state
                  and st.session_state.get(K_FINGERPRINT) != fp)
+        # A disabled control must say what is blocking it. Both preconditions
+        # are named explicitly rather than left for the user to infer from a
+        # greyed-out button, and the same sentence is used as the button's
+        # tooltip (a tooltip still shows on a disabled Streamlit button) and as
+        # the message beside it.
+        blockers = []
+        if not cols:
+            blockers.append("add at least one configuration above")
+        if not selected:
+            blockers.append("select at least one cyclone in **2 · Data**")
+        # `.capitalize()` would lowercase the rest of the sentence and turn
+        # "2 · Data" into "2 · data"; only the first character should change.
+        why = None
+        if blockers:
+            why = " and ".join(blockers) + " to run."
+            why = why[0].upper() + why[1:]
+
         r1, r2 = st.columns([1, 3])
         with r1:
-            run_clicked = st.button("Run", key="bench_run", type="primary",
-                                    use_container_width=True,
-                                    disabled=not (cols and selected))
+            run_clicked = st.button(
+                "Run", key="bench_run", type="primary",
+                use_container_width=True, disabled=bool(blockers),
+                help=(why.replace("**", "") if why else
+                      "Run every configuration over every selected cyclone. "
+                      "Nothing recomputes on edit; this is the only thing that "
+                      "produces results."))
         with r2:
-            if stale:
+            if blockers:
+                st.info(why, icon="ℹ️")
+            elif stale:
                 st.warning("Results out of date — configuration or selection "
                            "changed since the last run.", icon="⚠️")
             elif K_RESULTS not in st.session_state:
@@ -718,7 +741,18 @@ def render() -> None:
     names = st.session_state.get("_bench_run_names", [])
     with st.expander("4 · Results", expanded=True):
         if not results:
-            st.info("No results yet — press **Run** in section 3.")
+            if not cols and not selected:
+                st.info("No results yet — add a configuration and select "
+                        "cyclones in sections 2 and 3, then press **Run**.")
+            elif not cols:
+                st.info("No results yet — add at least one configuration in "
+                        "**3 · Configurations**, then press **Run**.")
+            elif not selected:
+                st.info("No results yet — select at least one cyclone in "
+                        "**2 · Data**, then press **Run**.")
+            else:
+                st.info("No results yet — press **Run** in **3 · "
+                        "Configurations**.")
             return
 
         scored_ids = bc.scoreable(run_ids, labels)

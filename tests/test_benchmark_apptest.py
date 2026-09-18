@@ -519,3 +519,57 @@ def test_switching_back_to_validation_drops_the_unlabelled_rows():
     assert unlabelled not in at.session_state["bench_selected_ids"], (
         "an unlabelled track survived the switch into Validation mode")
     assert labelled in at.session_state["bench_selected_ids"]
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# a disabled control must say what is blocking it
+# ══════════════════════════════════════════════════════════════════════════
+
+def _run_blocked_message(at) -> str | None:
+    for i in at.info:
+        if "to run." in i.value:
+            return i.value
+    return None
+
+
+def test_run_is_disabled_and_explains_itself_when_nothing_is_set_up():
+    at = _app()
+    assert _widget(at, "button", "bench_run").disabled
+    msg = _run_blocked_message(at)
+    assert msg, "Run is disabled with no explanation"
+    assert "configuration" in msg and "cyclone" in msg, msg
+
+
+def test_run_names_the_missing_configuration():
+    at = _app()
+    _select(at, ["20150069"])
+    assert _widget(at, "button", "bench_run").disabled
+    msg = _run_blocked_message(at)
+    assert msg and "configuration" in msg, msg
+    assert "cyclone" not in msg, (
+        f"names a blocker that is already satisfied: {msg}")
+
+
+def test_run_names_the_missing_selection():
+    at = _app()
+    _add_config_column(at, CFG_B)
+    assert _widget(at, "button", "bench_run").disabled
+    msg = _run_blocked_message(at)
+    assert msg and "cyclone" in msg, msg
+    assert "configuration" not in msg, (
+        f"names a blocker that is already satisfied: {msg}")
+
+
+def test_run_is_enabled_once_both_preconditions_are_met():
+    at = _app()
+    _select(at, ["20150069"])
+    _add_config_column(at, CFG_B)
+    assert not _widget(at, "button", "bench_run").disabled
+    assert _run_blocked_message(at) is None, "still explaining a blocker"
+
+
+def test_the_blocked_message_keeps_the_section_name_readable():
+    """`.capitalize()` would lowercase the rest and print '2 · data'."""
+    at = _app()
+    msg = _run_blocked_message(at)
+    assert "2 · Data" in msg, msg
