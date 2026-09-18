@@ -1942,10 +1942,10 @@ Declared before running; every number below is the measured one.
 
 | item | verdict | measured |
 |---|---|---|
-| (a) app suite, no regression | **PASS** | 1200 passed / **0 failed** (base 1130 + 70 new) |
+| (a) app suite, no regression | **PASS** | 1204 passed / **0 failed** (base 1130 + 74 new) |
 | (b) `cyclophaser/` diff empty | **PASS** | empty |
 | (c) Benchmark tab under AppTest, public API only | **PASS** | 37 tests; three positive controls — swapped columns, unlabelled row scored, mode leak |
-| (d) sidebar verified by automatic test | **PASS** | 33 tests; 28/28 public parameters mapped, no duplicate key |
+| (d) sidebar verified by automatic test | **PASS** | 35 tests; 28/28 public parameters mapped, no duplicate key, group numbers agree with their captions |
 | (e) snapshot isolated + hashed + env confirmed | **PASS** | 2 files, 0 failures, app env editable-only |
 | (f) Danilo's visual checkpoint | **OPEN** | figures in `docs/_images/item5/` |
 
@@ -2075,6 +2075,36 @@ prune would produce — and requires the guard to reject it again; a companion
 test asserts Exploration does keep and run that same id, so the check is
 reacting to the mode rather than to an id that could never be selected.
 Confirmed to fail with the pruning removed.
+
+**Corrections before closing (2026-09-18).**
+
+*The eight added configs were wrongly normalised.* They had been written without
+`metadata.cyclones_used` on the stated grounds that the three pre-existing files
+were trimmed that way. That was **wrong** — it came from reading only the first
+three lines of `params-9`; all three pre-existing files carry the full 51-entry
+block, and their versioned hashes are the hashes of the files WITH it. The
+directory had ended up with two formats. The eight were restored as the app
+exports them, reproduced through the app's own
+`yaml.dump(..., default_flow_style=False, allow_unicode=True, sort_keys=False)`,
+and all eight match the independently verified target hashes exactly. The three
+pre-existing files were **not** touched: normalising them would have changed the
+hash of `params-10`, which `item19_core` pins as a frozen instrument.
+
+*The sidebar numbering contradicted itself.* "8 · Incipient" sat above a caption
+reading "Step 9". The group is now **9 · Incipient**, and **8 is skipped** with a
+one-line note that step 8 (`post_process_periods`) takes no parameter — the
+numbering promises execution order, so closing the gap would have been the wrong
+repair. `tests/test_sidebar_coverage.py` now asserts every header number equals
+the step its own caption cites, and that the set of numbers is exactly
+`1-7, 9`; both confirmed to fail with the header reverted to 8.
+
+*The baseline card was diffed against itself.* With the manual label as the
+reference, the first configuration column becomes the parameter baseline, and
+its own card printed "No parameter differs from params-1" — true, and readable
+only as a claim about the configuration. That card is now labelled
+**Parameter baseline** and renders no diff; a companion test asserts the
+non-baseline card still reports its differences, so the fix cannot pass by
+suppressing every diff.
 
 ### Also done
 

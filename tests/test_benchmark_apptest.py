@@ -635,3 +635,29 @@ def test_the_mode_leak_guard_is_sensitive():
     assert any(unlabelled in col["series"] for col in _loaded(at)), (
         "Exploration did not run the uploaded track, so the Validation "
         "assertion proves nothing")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# the baseline card must not be diffed against itself
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_the_parameter_baseline_card_is_labelled_not_diffed_against_itself():
+    """With the manual label as reference, the first config column becomes the
+    parameter baseline. Diffing it against itself printed "No parameter differs
+    from params-1" on params-1's own card — true, and unreadable as anything but
+    a claim about the configuration."""
+    at = _two_column_app(n_cyclones=1, run=False)
+    assert at.session_state["bench_reference"] == "Manual label"
+    caps = [c.value for c in at.caption]
+    assert any("Parameter baseline" in c for c in caps), (
+        "the baseline column is not labelled as the baseline")
+    assert not any("No parameter differs from **params-1**" in c for c in caps), (
+        "the baseline card is still being diffed against itself")
+
+
+def test_a_non_baseline_card_still_shows_its_differences():
+    """Guards the test above from passing by suppressing every diff."""
+    at = _two_column_app(n_cyclones=1, run=False)
+    caps = [c.value for c in at.caption]
+    assert any("Differs from **params-1**" in c for c in caps), (
+        "the non-baseline column stopped reporting its differences")

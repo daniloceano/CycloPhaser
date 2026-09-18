@@ -221,7 +221,7 @@ def _short(sha: str) -> str:
 
 
 def _render_card(col: dict, spec: bc.ColumnSpec, ref_doc: dict,
-                 ref_name: str) -> None:
+                 ref_name: str, is_baseline: bool = False) -> None:
     """One collapsed configuration card: name, short hash, what DIFFERS."""
     h = spec.header()
     sha = h["config_sha256"]
@@ -238,6 +238,13 @@ def _render_card(col: dict, spec: bc.ColumnSpec, ref_doc: dict,
 
     if spec.snapshot is not None:
         st.caption("Frozen published wheel — no parameters of its own to diff.")
+    elif is_baseline:
+        # This column IS the parameter baseline, so diffing it against itself
+        # would always print "no parameter differs" — a true statement that
+        # reads as a finding about the configuration rather than about which
+        # column the others are being measured from.
+        st.caption(f"**Parameter baseline** — the other cards' differences are "
+                   f"measured from this column.")
     else:
         diffs = bc.config_differences(spec.doc, ref_doc)
         if not diffs:
@@ -665,7 +672,9 @@ def render() -> None:
             card_cols = st.columns(len(cols))
             for i, col in enumerate(cols):
                 with card_cols[i]:
-                    _render_card(col, specs[i], base_doc, base_label)
+                    _render_card(col, specs[i], base_doc, base_label,
+                                 is_baseline=(base_col is not None
+                                              and col["cid"] == base_col["cid"]))
         else:
             specs = []
             st.info("No columns yet — add at least one above.")

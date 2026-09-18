@@ -1821,8 +1821,15 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("8 · Incipient")
-    st.caption("Step 9 — `find_incipient_period`, the LAST to run, after `post_process_periods` (step 8, no parameter).")
+    # Numbered 9, not 8: these groups promise the detector's execution order, so
+    # the header has to carry the step number it actually is. Step 8 is
+    # `post_process_periods`, which takes no parameter and therefore has no
+    # group — the gap is the honest rendering of that, and renumbering to close
+    # the sequence would make the header disagree with its own caption.
+    st.caption("Step 8 — `post_process_periods`: gap-filling and singleton "
+               "removal. No parameter, so no controls.")
+    st.header("9 · Incipient")
+    st.caption("Step 9 — `find_incipient_period`, the LAST to run, after `post_process_periods`.")
     with st.expander("Incipient — method and thresholds", expanded=False):
         incipient_method = st.radio(
             "incipient_method",
