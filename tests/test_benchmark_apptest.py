@@ -573,3 +573,65 @@ def test_the_blocked_message_keeps_the_section_name_readable():
     at = _app()
     msg = _run_blocked_message(at)
     assert "2 · Data" in msg, msg
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# the mode leak — with its own positive control
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_forcing_an_unlabelled_row_back_into_a_validation_run_is_rejected():
+    """POSITIVE CONTROL for the mode leak.
+
+    Validation is presented as scored against the manual labels. An uploaded
+    track carries no label, so if one survives in a Validation selection it
+    reaches a run that claims to be scored and is not.
+
+    The ordinary path is checked first (switching modes prunes it). Then the
+    leak is FORCED — the id is written straight back into the selection, which
+    is what a stale rerun or a future refactor that drops the pruning would
+    produce — and the guard is required to reject it again. Without the forced
+    half, this test would pass on an implementation that pruned once by accident
+    and never again.
+    """
+    at, labelled, unlabelled = _unlabelled_app()
+    labels = bc.labels_for_display()
+    assert unlabelled not in labels, "the fixture is not actually unlabelled"
+
+    # ordinary path: switching to Validation prunes the unlabelled track
+    _widget(at, "radio", "bench_mode").set_value("Validation")
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    assert unlabelled not in at.session_state["bench_selected_ids"]
+
+    # FORCE the leak back into the selection
+    at.session_state["bench_selected_ids"] = [labelled, unlabelled]
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    assert unlabelled not in at.session_state["bench_selected_ids"], (
+        "an unlabelled track survived in a Validation selection — it would "
+        "enter a run presented as scored")
+
+    # and it must not reach the results of a Validation run either
+    _run(at)
+    for col in _loaded(at):
+        assert unlabelled not in col["series"], (
+            f"column {col['name']} ran the unlabelled track in Validation mode")
+
+    # the second line of defence is independent of the pruning: even given both
+    # ids, nothing scoreable comes back for the unlabelled one
+    assert bc.scoreable([labelled, unlabelled], labels) == [labelled]
+
+
+def test_the_mode_leak_guard_is_sensitive():
+    """The assertion above must be able to fail.
+
+    In Exploration the very same id IS kept and IS run — so the check is
+    reacting to the mode, not to an id that could never be selected at all.
+    """
+    at, labelled, unlabelled = _unlabelled_app()
+    assert unlabelled in at.session_state["bench_selected_ids"], (
+        "Exploration did not keep the uploaded track, so the Validation "
+        "assertion proves nothing")
+    assert any(unlabelled in col["series"] for col in _loaded(at)), (
+        "Exploration did not run the uploaded track, so the Validation "
+        "assertion proves nothing")
