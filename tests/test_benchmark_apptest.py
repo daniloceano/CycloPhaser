@@ -3,7 +3,7 @@
 `filtered_state` and the rest of AppTest's internals are deliberately NOT used:
 they broke on a Streamlit upgrade during Front B. Everything here goes through
 the documented surface — `at.session_state`, the typed widget collections, and
-`at.button`/`at.multiselect`/`at.selectbox` interactions.
+`at.button` / `at.multiselect` / `at.selectbox` / `at.radio` interactions.
 
 What is covered, and why each one is here rather than assumed:
 
@@ -12,14 +12,20 @@ What is covered, and why each one is here rather than assumed:
   with the same ids, or the side-by-side reading is a lie.
 * **The manual-label overlay is opt-in, both ways** — a display toggle that
   sticks ON is how a blind label stops being blind.
-* **No column contaminates another.** This is the one that needs a POSITIVE
-  CONTROL, because "the columns are independent" is trivially satisfied by a
-  broken implementation that gives every column the same answer. So the test
-  first proves the two configurations are actually distinguishable on the
-  selected series, then pins each column's output to the configuration that
-  column claims — which is precisely the assertion that fails if the two are
-  swapped. `test_swapping_the_columns_would_fail_the_pin` states that property
-  explicitly by performing the swap and asserting the pin rejects it.
+* **No column contaminates another.** This needs a POSITIVE CONTROL, because
+  "the columns are independent" is trivially satisfied by a broken
+  implementation that gives every column the same answer. So the tests first
+  prove the two configurations are distinguishable on the selected series, then
+  pin each column's output to the configuration it claims — the assertion that
+  fails if the two are swapped — and `test_swapping_the_columns_would_fail_the_pin`
+  performs the swap and requires the pin to reject it.
+* **A row without a manual label never produces a scoring number**, in either
+  mode. This gets its own positive control too
+  (`test_the_unlabelled_guard_would_catch_a_leak`), because "no score appeared"
+  is also what a metric that silently returns zero looks like.
+
+Results are produced by an explicit **Run**; nothing recomputes on edit. Every
+helper below therefore runs before asserting on results.
 """
 
 from __future__ import annotations
@@ -59,6 +65,10 @@ def _widget(at, kind, key):
     raise AssertionError(f"no {kind} with key {key!r}")
 
 
+def _has(at, kind, key) -> bool:
+    return any(w.key == key for w in getattr(at, kind))
+
+
 def _add_config_column(at, filename):
     _widget(at, "selectbox", "bench_pick_config").set_value(filename)
     at.run()
@@ -68,9 +78,15 @@ def _add_config_column(at, filename):
     return at
 
 
-def _select_cyclones(at, n=3):
-    ms = _widget(at, "multiselect", "bench_ids_widget")
-    ms.set_value(list(ms.options[:n]))
+def _select(at, ids):
+    _widget(at, "multiselect", "bench_ids_widget").set_value(list(ids))
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    return at
+
+
+def _run(at):
+    _widget(at, "button", "bench_run").click()
     at.run()
     assert not at.exception, [str(e) for e in at.exception]
     return at
@@ -82,11 +98,14 @@ def _loaded(at):
     return at.session_state["bench_last_results"]
 
 
-def _two_column_app(n_cyclones=3) -> AppTest:
+def _two_column_app(n_cyclones=3, run=True) -> AppTest:
     at = _app()
-    _select_cyclones(at, n_cyclones)
+    ms = _widget(at, "multiselect", "bench_ids_widget")
+    _select(at, list(ms.options[:n_cyclones]))
     _add_config_column(at, CFG_A)
     _add_config_column(at, CFG_B)
+    if run:
+        _run(at)
     return at
 
 
@@ -106,6 +125,7 @@ def test_a_third_column_is_added_on_demand_without_disturbing_the_first_two():
     at = _two_column_app()
     before = [dict(c["series"]) for c in _loaded(at)]
     _add_config_column(at, "cyclophaser_params-5.yaml")
+    _run(at)
     after = _loaded(at)
     assert len(after) == 3
     for i in (0, 1):
@@ -125,10 +145,111 @@ def test_every_column_reports_on_exactly_the_selected_cyclones():
 
 def test_changing_the_selection_repoints_every_column_together():
     at = _two_column_app(n_cyclones=2)
-    _select_cyclones(at, 5)
+    ms = _widget(at, "multiselect", "bench_ids_widget")
+    _select(at, list(ms.options[:5]))
+    _run(at)
     selected = at.session_state["bench_selected_ids"]
     for col in _loaded(at):
         assert list(col["series"]) == list(selected)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# nothing recomputes on edit — Run is explicit
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_no_results_exist_before_run():
+    at = _app()
+    ms = _widget(at, "multiselect", "bench_ids_widget")
+    _select(at, list(ms.options[:2]))
+    _add_config_column(at, CFG_A)
+    assert "bench_last_results" not in at.session_state, (
+        "results appeared without Run being pressed")
+
+
+def test_editing_a_column_after_a_run_marks_the_results_out_of_date():
+    at = _two_column_app()
+    fp_before = at.session_state["bench_results_fingerprint"]
+    cid = at.session_state["bench_columns"][0]["cid"]
+    _widget(at, "text_area", f"bench_edit_{cid}").set_value(
+        (bc.CONFIGS_DIR / CFG_B).read_text())
+    at.run()
+    _widget(at, "button", f"bench_apply_{cid}").click()
+    at.run()
+    # the stored results are the OLD ones; the fingerprint no longer matches
+    assert at.session_state["bench_results_fingerprint"] == fp_before
+    assert any("out of date" in w.value for w in at.warning), (
+        "no out-of-date warning after the configuration changed")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# mode
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_default_mode_is_validation():
+    at = _app()
+    assert at.session_state["bench_mode"] == "Validation"
+
+
+def test_exploration_mode_switches_and_persists():
+    at = _app()
+    _widget(at, "radio", "bench_mode").set_value("Exploration")
+    at.run()
+    assert at.session_state["bench_mode"] == "Exploration"
+    assert not at.exception, [str(e) for e in at.exception]
+
+
+def test_cyclone_upload_is_offered_only_in_exploration_mode():
+    """Validation restricts the selectable sources to the labelled ones."""
+    at = _app()
+    assert not _has(at, "file_uploader", "bench_data_upload"), (
+        "Validation mode offers an unlabelled data source")
+    _widget(at, "radio", "bench_mode").set_value("Exploration")
+    at.run()
+    assert _has(at, "file_uploader", "bench_data_upload"), (
+        "Exploration mode does not offer the cyclone upload")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# the reference column
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_reference_defaults_to_the_manual_label_when_labels_exist():
+    at = _two_column_app()
+    assert at.session_state["bench_reference"] == "Manual label"
+
+
+def test_reference_can_be_pointed_at_a_configuration_column():
+    at = _two_column_app()
+    ref = _widget(at, "selectbox", "bench_reference")
+    assert "params-11" in ref.options
+    ref.set_value("params-11")
+    at.run()
+    assert at.session_state["bench_reference"] == "params-11"
+    assert not at.exception, [str(e) for e in at.exception]
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# figure layout
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_figure_layout_defaults_to_side_by_side_and_switches_to_stacked():
+    at = _two_column_app(n_cyclones=2)
+    assert at.session_state["bench_figure_layout"] == "Side by side"
+    _widget(at, "radio", "bench_figure_layout").set_value("Stacked")
+    at.run()
+    assert at.session_state["bench_figure_layout"] == "Stacked"
+    assert not at.exception, [str(e) for e in at.exception]
+
+
+def test_figure_layout_does_not_change_any_result():
+    """Both arrangements show the same data."""
+    at = _two_column_app(n_cyclones=2)
+    before = [dict(c["series"]) for c in _loaded(at)]
+    _widget(at, "radio", "bench_figure_layout").set_value("Stacked")
+    at.run()
+    after = _loaded(at)
+    for i, col in enumerate(after):
+        assert col["series"] == before[i]
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -142,12 +263,10 @@ def test_manual_label_overlay_is_off_by_default():
 
 def test_manual_label_overlay_switches_on_and_back_off():
     at = _two_column_app()
-    cb = _widget(at, "checkbox", "bench_show_labels")
-    cb.set_value(True)
+    _widget(at, "checkbox", "bench_show_labels").set_value(True)
     at.run()
     assert at.session_state["bench_show_labels"] is True
     assert not at.exception, [str(e) for e in at.exception]
-
     _widget(at, "checkbox", "bench_show_labels").set_value(False)
     at.run()
     assert at.session_state["bench_show_labels"] is False
@@ -155,13 +274,11 @@ def test_manual_label_overlay_switches_on_and_back_off():
 
 
 def test_toggling_the_label_overlay_does_not_change_any_column_result():
-    """A display switch must not move a measurement."""
     at = _two_column_app()
     before = [dict(c["series"]) for c in _loaded(at)]
     _widget(at, "checkbox", "bench_show_labels").set_value(True)
     at.run()
-    after = _loaded(at)
-    for i, col in enumerate(after):
+    for i, col in enumerate(_loaded(at)):
         assert col["series"] == before[i], (
             f"column {i} moved when the label overlay was switched on")
 
@@ -185,12 +302,7 @@ def _expected_for(filename, ids):
 
 
 def test_the_two_configurations_are_actually_distinguishable():
-    """Guards the test below from being vacuous.
-
-    If params-1 and params-11 happened to agree on every selected series, the
-    'each column matches its own config' assertion would also hold after a swap
-    and would prove nothing. So this is asserted first, separately.
-    """
+    """Guards the test below from being vacuous."""
     at = _two_column_app()
     ids = at.session_state["bench_selected_ids"]
     a, b = _loaded(at)
@@ -201,7 +313,6 @@ def test_the_two_configurations_are_actually_distinguishable():
 
 
 def test_each_column_carries_its_own_configuration_not_its_neighbours():
-    """The pin: column i's output is what config i produces, run independently."""
     at = _two_column_app()
     ids = at.session_state["bench_selected_ids"]
     a, b = _loaded(at)
@@ -210,49 +321,36 @@ def test_each_column_carries_its_own_configuration_not_its_neighbours():
 
 
 def test_swapping_the_columns_would_fail_the_pin():
-    """POSITIVE CONTROL — the test above must reject swapped columns.
-
-    Without this, 'each column matches its own config' could be passing for the
-    wrong reason. Here the swap is performed deliberately and the same
-    comparison is required to reject it.
-    """
+    """POSITIVE CONTROL — the pin must reject swapped columns."""
     at = _two_column_app()
     ids = at.session_state["bench_selected_ids"]
     a, b = _loaded(at)
-    exp_a = _expected_for(CFG_A, ids)
-    exp_b = _expected_for(CFG_B, ids)
-
-    # the correct pairing holds ...
+    exp_a, exp_b = _expected_for(CFG_A, ids), _expected_for(CFG_B, ids)
     assert a["series"] == exp_a and b["series"] == exp_b
-    # ... and the swapped one does not.
     assert not (a["series"] == exp_b and b["series"] == exp_a), (
         "swapped columns satisfied the pin — the pin cannot detect contamination")
 
 
 def test_editing_one_column_leaves_the_other_untouched():
-    """Editing marks only the edited column, and moves only its result."""
     at = _two_column_app()
     before = [dict(c["series"]) for c in _loaded(at)]
     cid = at.session_state["bench_columns"][0]["cid"]
-
-    edited_yaml = (bc.CONFIGS_DIR / CFG_B).read_text()
-    _widget(at, "text_area", f"bench_edit_{cid}").set_value(edited_yaml)
+    _widget(at, "text_area", f"bench_edit_{cid}").set_value(
+        (bc.CONFIGS_DIR / CFG_B).read_text())
     at.run()
     _widget(at, "button", f"bench_apply_{cid}").click()
     at.run()
-    assert not at.exception, [str(e) for e in at.exception]
-
+    _run(at)
     cols = at.session_state["bench_columns"]
     assert cols[0]["edited"] is True, "the edited column is not marked edited"
     assert cols[1]["edited"] is False, "the untouched column was marked edited"
-
     after = _loaded(at)
     assert after[1]["series"] == before[1], "the untouched column's result moved"
-    assert after[0]["series"] == _expected_for(CFG_B, at.session_state["bench_selected_ids"])
+    assert after[0]["series"] == _expected_for(
+        CFG_B, at.session_state["bench_selected_ids"])
 
 
 def test_an_edited_column_reports_edited_instead_of_a_source_hash():
-    """Header item 1: a session edit must not keep advertising the file's hash."""
     at = _two_column_app()
     cid = at.session_state["bench_columns"][0]["cid"]
     _widget(at, "text_area", f"bench_edit_{cid}").set_value(
@@ -271,7 +369,153 @@ def test_removing_a_column_leaves_the_others_intact():
     cid = at.session_state["bench_columns"][0]["cid"]
     _widget(at, "button", f"bench_del_{cid}").click()
     at.run()
-    assert not at.exception, [str(e) for e in at.exception]
+    _run(at)
     remaining = _loaded(at)
     assert len(remaining) == 1
     assert remaining[0]["series"] == before
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# no label, no score — with its own positive control
+# ══════════════════════════════════════════════════════════════════════════
+
+def _unlabelled_app() -> tuple[AppTest, str, str]:
+    """Exploration mode with one uploaded (unlabelled) track beside a labelled one.
+
+    All 63 bundled records are labelled, so the only way to obtain an unlabelled
+    row is the Exploration upload — which is exactly the path this exercises.
+    The uploaded series is injected through `bench_extra_series`, the same
+    session-state entry the file uploader writes to.
+    """
+    series, _src = bc.load_all_series()
+    labelled = sorted(s for s in series if not s.startswith("s"))[0]
+    at = _app()
+    _widget(at, "radio", "bench_mode").set_value("Exploration")
+    at.run()
+    at.session_state["bench_extra_series"] = {
+        "uploaded_track": [float(x) for x in series[labelled].values]}
+    at.run()
+    _select(at, [labelled, "uploaded_track"])
+    _add_config_column(at, CFG_B)
+    _run(at)
+    return at, labelled, "uploaded_track"
+
+
+def test_the_uploaded_row_really_has_no_label():
+    """Guards the two tests below from being vacuous."""
+    labels = bc.labels_for_display()
+    assert "uploaded_track" not in labels
+
+
+def test_an_unlabelled_row_is_computed_but_never_scored():
+    at, labelled, unlabelled = _unlabelled_app()
+    col = _loaded(at)[0]
+    # it IS run and shown ...
+    assert unlabelled in col["series"], "the unlabelled row was not computed"
+    assert col["series"][unlabelled], "the unlabelled row produced no phases"
+    # ... and it is NOT scored.
+    labels = bc.labels_for_display()
+    assert bc.scoreable([labelled, unlabelled], labels) == [labelled]
+    assert bc.unscoreable([labelled, unlabelled], labels) == [unlabelled]
+
+
+def test_scoring_counts_only_the_labelled_rows():
+    at, labelled, unlabelled = _unlabelled_app()
+    labels = bc.labels_for_display()
+    runs = {sid: {"runs": [tuple(r) for r in v], "starts": None}
+            for sid, v in _loaded(at)[0]["series"].items() if v}
+    for sid in runs:
+        runs[sid]["starts"] = [(p, a) for p, a, _ in runs[sid]["runs"]]
+    seq = bc.sequence_metrics(runs, labels, [labelled, unlabelled])
+    mat = bc.mature_metrics(runs, labels, [labelled, unlabelled])
+    assert seq["n_series"] == 1, (
+        f"sequence metric scored {seq['n_series']} series over one labelled row")
+    assert mat["n"] <= 1, (
+        f"mature metric scored {mat['n']} series over one labelled row")
+    assert all(r["id"] != unlabelled for r in mat["rows"]), (
+        "the unlabelled row appears in the mature rows")
+
+
+def test_the_unlabelled_guard_would_catch_a_leak():
+    """POSITIVE CONTROL — the assertions above must be able to fail.
+
+    "No score appeared" is also what a metric that silently returns zero looks
+    like. So the same call is repeated against a labels dict that DOES carry the
+    unlabelled id: the count must then rise to 2, proving the guard above is
+    measuring the gate and not an empty code path.
+    """
+    at, labelled, unlabelled = _unlabelled_app()
+    labels = dict(bc.labels_for_display())
+    runs = {sid: {"runs": [tuple(r) for r in v], "starts": None}
+            for sid, v in _loaded(at)[0]["series"].items() if v}
+    for sid in runs:
+        runs[sid]["starts"] = [(p, a) for p, a, _ in runs[sid]["runs"]]
+
+    assert bc.sequence_metrics(runs, labels, [labelled, unlabelled])["n_series"] == 1
+
+    # now pretend the unlabelled row had a label after all
+    leaked = dict(labels[labelled])
+    leaked["id"] = unlabelled
+    labels[unlabelled] = leaked
+    assert bc.sequence_metrics(runs, labels, [labelled, unlabelled])["n_series"] == 2, (
+        "the sequence metric did not react to an extra label — the guard above "
+        "would pass even if unlabelled rows were being scored")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# the configuration cards belong INSIDE section 3
+# ══════════════════════════════════════════════════════════════════════════
+
+def _section(at, prefix):
+    for e in at.expander:
+        if e.label.startswith(prefix):
+            return e
+    raise AssertionError(f"no section starting {prefix!r}; "
+                         f"have {[e.label for e in at.expander]}")
+
+
+def test_configuration_cards_render_inside_section_three():
+    """The defect this replaced: cards rendered BELOW the section, so collapsing
+    '3 · Configurations' hid the section and left the cards orphaned on screen.
+
+    A card's own controls must be descendants of that section — then collapsing
+    it hides them, which is what a collapse is supposed to mean.
+    """
+    at = _two_column_app(n_cyclones=1, run=False)
+    sec3 = _section(at, "3 · Configurations")
+    inside = {b.key for b in sec3.button if b.key}
+    for col in at.session_state["bench_columns"]:
+        cid = col["cid"]
+        assert f"bench_del_{cid}" in inside, (
+            f"column {col['name']}'s Remove button renders outside section 3")
+        assert f"bench_apply_{cid}" in inside, (
+            f"column {col['name']}'s Apply button renders outside section 3")
+
+
+def test_run_button_lives_in_section_three_and_results_in_section_four():
+    at = _two_column_app(n_cyclones=1)
+    assert "bench_run" in {b.key for b in _section(at, "3 · Config").button if b.key}
+    sec4 = _section(at, "4 · Results")
+    assert any(r.key == "bench_figure_layout" for r in sec4.radio), (
+        "the figure-layout control is not inside section 4")
+
+
+def test_the_individual_pill_list_is_collapsed_by_default():
+    """Section 2 shows a summary line and shortcuts; the 63 pills sit behind a
+    closed drop-down rather than filling the section."""
+    at = _app()
+    chooser = _section(at, "Choose individually")
+    assert any(m.key == "bench_ids_widget" for m in chooser.multiselect)
+
+
+def test_switching_back_to_validation_drops_the_unlabelled_rows():
+    """Validation offers labelled sources only, so an uploaded track selected in
+    Exploration must not be carried into a run that claims to be scored."""
+    at, labelled, unlabelled = _unlabelled_app()
+    assert unlabelled in at.session_state["bench_selected_ids"]
+    _widget(at, "radio", "bench_mode").set_value("Validation")
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    assert unlabelled not in at.session_state["bench_selected_ids"], (
+        "an unlabelled track survived the switch into Validation mode")
+    assert labelled in at.session_state["bench_selected_ids"]

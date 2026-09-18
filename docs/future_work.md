@@ -1942,9 +1942,9 @@ Declared before running; every number below is the measured one.
 
 | item | verdict | measured |
 |---|---|---|
-| (a) app suite, no regression | **PASS** | 1176 passed / **0 failed** (base 1130 + 46 new) |
+| (a) app suite, no regression | **PASS** | 1193 passed / **0 failed** (base 1130 + 63 new) |
 | (b) `cyclophaser/` diff empty | **PASS** | empty |
-| (c) Benchmark tab under AppTest, public API only | **PASS** | 13 tests, incl. the swap positive control |
+| (c) Benchmark tab under AppTest, public API only | **PASS** | 30 tests; swap positive control AND the unlabelled-row positive control |
 | (d) sidebar verified by automatic test | **PASS** | 33 tests; 28/28 public parameters mapped, no duplicate key |
 | (e) snapshot isolated + hashed + env confirmed | **PASS** | 2 files, 0 failures, app env editable-only |
 | (f) Danilo's visual checkpoint | **OPEN** | figures in `docs/_images/item5/` |
@@ -1991,6 +1991,66 @@ them snap open and shut on every rerun — both are now statically open.
 The five mandatory header items are all still present; four of them moved into a
 `Provenance` drop-down and the pre-filter-fix warning stayed visible, because it
 is the one that stops a column being misread as history.
+
+### Second adjustment pass — modes, reference column, reading order (2026-09-18)
+
+Six adjustments, all complementary to the delivery above; nothing already
+delivered was rewritten.
+
+**Mode is not independent state.** `Validation` / `Exploration` filter what is
+selectable and what is emphasised. Whether a number is produced is decided per
+row by the existence of a manual label, in `benchmark_core.scoreable`, which
+every scoring path now routes through. **A row without a label produces no
+scoring number in either mode.** All 63 bundled records are labelled, so the
+unlabelled case arrives only through Exploration's cyclone upload — which is
+what the new positive control drives. Switching back to Validation drops
+uploaded tracks from the selection rather than carrying them into a run that
+claims to be scored.
+
+**Exploration measures against the reference column, not against truth.** Four
+measures, labelled `relative to reference` and never as accuracy: sequences
+changed; boundary displacement (median, max) for the cyclones whose sequence
+matches; phases appeared/disappeared per type; cyclones refusing an incipient
+phase. Displacement is computed only where the sequence matches, for the same
+reason `score_phase_sequences` refuses to pair across a mismatch.
+
+**Reading order.** A status line, then `1 Mode → 2 Data → 3 Configurations →
+4 Results`. Section 2 shows a summary line plus six shortcuts (All real, All
+synthetic, Train, Test, Invert, Clear) with the 63 pills behind a closed
+drop-down. Section 3's cards show **only the parameters that differ from the
+reference** — the eleven YAMLs share ~15 identical parameters — with the full
+config behind `Provenance`. An explicit **Run**; nothing recomputes on edit, and
+a fingerprint of (columns × selection × reference) flags results **out of date**
+instead of replacing them silently.
+
+**Defect fixed, as specified:** the configuration cards rendered OUTSIDE section
+2, below it, so collapsing the section hid the section and left the cards
+orphaned. They now render inside section 3, and
+`test_configuration_cards_render_inside_section_three` asserts it through the
+public API (`at.expander[...].button`) — confirmed to fail when the cards are
+moved back out.
+
+**Two further defects found while doing this**, neither in the brief:
+
+* the run/staleness message in section 3 renders above the run itself, so on the
+  click's own pass it still said "nothing has been run yet" while section 4
+  already showed results. The run now re-renders once; results are in session
+  state, so nothing recomputes.
+* `expanded` was derived from state on the Data and Configurations panels, which
+  made them snap open and shut on every rerun, and made adding a second column
+  require reopening the panel. Both are static now.
+
+**Text.** The opening paragraph and the leakage-rule block are gone as walls of
+text; both are redistributed as tooltips and short captions attached to what
+they govern — the two instruments on the scoring panel, the `bad_cases_count`
+veto on Provenance, the leakage rule on the test block. Per-cell wording is now
+`mature start +4 steps, end -5 steps (margin 6)`.
+
+**Question answered: yes, the published 2.0.0 snapshot was generated**, in the
+same isolated procedure and in the same session as 1.9.4 — `v2.0.0.json`,
+sha256 `944b51d8…`, 63 series, 0 failures — and both have always been offered in
+the tab's snapshot selector. What the review saw was the selector in its unopened
+state, showing `—`; it was not a missing artefact.
 
 ### Also done
 

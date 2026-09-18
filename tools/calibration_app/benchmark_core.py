@@ -374,6 +374,24 @@ def load_all_series() -> tuple[dict[str, pd.Series], dict[str, str]]:
     return {**real, **synth}, source
 
 
+def parse_cyclone_csv(data) -> pd.Series:
+    """One uploaded cyclone track → a raw vorticity Series.
+
+    Same format the rest of the app reads: ';'-delimited, a `time` index and a
+    `min_max_zeta_850` column. An uploaded track carries NO manual label, which
+    is the point of allowing it only in Exploration mode — it can be compared
+    against the reference column, and it can never be scored.
+    """
+    import io as _io
+    if isinstance(data, bytes):
+        data = data.decode("utf-8")
+    df = pd.read_csv(_io.StringIO(data), sep=";", index_col="time",
+                     parse_dates=True)
+    if "min_max_zeta_850" not in df.columns:
+        raise ValueError("missing column 'min_max_zeta_850'")
+    return df["min_max_zeta_850"].astype("float64")
+
+
 def split_membership() -> dict[str, str]:
     """{series_id: 'train'|'test'} from the frozen split."""
     sp = read_split()
@@ -386,7 +404,8 @@ def split_membership() -> dict[str, str]:
 def sequence_metrics(results: dict[str, dict], labels: dict[str, dict],
                      ids) -> dict:
     """`score_phase_sequences` over the given ids. Named instrument, no blending."""
-    records = [labels[s] for s in ids if s in labels]
+    ids = scoreable(ids, labels)          # no label, no score — see `scoreable`
+    records = [labels[s] for s in ids]
     detected = {s: results[s]["starts"] for s in ids
                 if s in results and results[s]["starts"] is not None}
     if not records:
@@ -407,7 +426,7 @@ def mature_metrics(results: dict[str, dict], labels: dict[str, dict], ids) -> di
     """
     n = hit = 0
     rows = []
-    for sid in ids:
+    for sid in scoreable(ids, labels):     # no label, no score — see `scoreable`
         rec, res = labels.get(sid), results.get(sid)
         if rec is None or res is None or res["runs"] is None:
             continue
@@ -462,6 +481,128 @@ def metrics_by_split(results: dict[str, dict], labels: dict[str, dict],
             "mature": mature_metrics(results, labels, test_ids),
         },
     }
+
+
+# ── the scoring gate: no label, no score ──────────────────────────────────────
+def scoreable(ids, labels: dict[str, dict]) -> list[str]:
+    """The subset of `ids` that carries a manual label.
+
+    **Every** scoring path goes through this. A row without a label must never
+    produce a scoring number, in any mode — there is nothing to be right or
+    wrong against, and a number computed anyway would be read as one. The mode
+    selector filters what is SELECTABLE and what is emphasised; whether a given
+    row is scored is decided here, row by row, by the existence of its label.
+
+    All 63 bundled records happen to be labelled today, so the unlabelled case
+    arrives through the Exploration mode's cyclone upload. That is exactly the
+    path `tests/test_benchmark_apptest.py` drives for its positive control.
+    """
+    return [s for s in ids if s in labels]
+
+
+def unscoreable(ids, labels: dict[str, dict]) -> list[str]:
+    """The complement of `scoreable` — rows that must stay out of every metric."""
+    return [s for s in ids if s not in labels]
+
+
+# ── Exploration mode: measured against the reference COLUMN, not against truth ─
+REFERENCE_METRIC_LABEL = "relative to reference"
+
+
+def _starts_excluding_first(runs) -> list[tuple[str, int]]:
+    return [(p, a) for p, a, _ in runs][1:]
+
+
+def refused_incipient(runs) -> bool:
+    """The detector declined an incipient phase: step 0 is already something else."""
+    return not runs or runs[0][0] != "incipient"
+
+
+def reference_metrics(col: dict[str, dict], ref: dict[str, dict], ids) -> dict:
+    """Four measures of one column AGAINST THE REFERENCE COLUMN.
+
+    There is no ground truth on this path, so nothing here is a hit rate and
+    nothing here is an accuracy. Every number answers "how far is this column
+    from the reference", and the UI labels the whole block
+    `relative to reference` for that reason. A column compared against itself
+    returns all zeros, which is the correct reading, not a perfect score.
+
+    1. cyclones whose phase SEQUENCE differs from the reference;
+    2. for those whose sequence MATCHES, boundary displacement in timesteps —
+       median and max (pairing boundaries across a sequence mismatch would
+       compare two different transitions, the same reason
+       `score_phase_sequences` refuses it);
+    3. phases that appeared or disappeared, counted per phase type;
+    4. cyclones that refused an incipient phase.
+    """
+    n_seq_changed = 0
+    shifts: list[int] = []
+    appeared: dict[str, int] = {}
+    disappeared: dict[str, int] = {}
+    n_refused = 0
+    n_compared = 0
+
+    for sid in ids:
+        a, b = col.get(sid), ref.get(sid)
+        if not a or not b or a.get("runs") is None or b.get("runs") is None:
+            continue
+        n_compared += 1
+        ra, rb = a["runs"], b["runs"]
+        if refused_incipient(ra):
+            n_refused += 1
+
+        seq_a = [p for p, _, _ in ra]
+        seq_b = [p for p, _, _ in rb]
+        if seq_a != seq_b:
+            n_seq_changed += 1
+            for phase in set(seq_a) | set(seq_b):
+                delta = seq_a.count(phase) - seq_b.count(phase)
+                if delta > 0:
+                    appeared[phase] = appeared.get(phase, 0) + delta
+                elif delta < 0:
+                    disappeared[phase] = disappeared.get(phase, 0) - delta
+        else:
+            for (_, ia), (_, ib) in zip(_starts_excluding_first(ra),
+                                        _starts_excluding_first(rb)):
+                shifts.append(abs(ia - ib))
+
+    shifts_sorted = sorted(shifts)
+    median = None
+    if shifts_sorted:
+        mid = len(shifts_sorted) // 2
+        median = (float(shifts_sorted[mid]) if len(shifts_sorted) % 2
+                  else (shifts_sorted[mid - 1] + shifts_sorted[mid]) / 2)
+
+    return {
+        "label": REFERENCE_METRIC_LABEL,
+        "n_compared": n_compared,
+        "n_sequence_changed": n_seq_changed,
+        "n_boundaries_compared": len(shifts),
+        "shift_median": median,
+        "shift_max": max(shifts_sorted) if shifts_sorted else None,
+        "appeared": appeared,
+        "disappeared": disappeared,
+        "n_refused_incipient": n_refused,
+    }
+
+
+# ── which parameters actually differ between two configs ──────────────────────
+def config_differences(doc: dict, ref_doc: dict) -> dict[str, tuple]:
+    """{'section.key': (this_value, reference_value)} for keys that DIFFER.
+
+    The eleven calibration YAMLs share roughly fifteen identical parameters;
+    printing all of them on a column card buries the two or three that actually
+    separate one configuration from another.
+    """
+    out: dict[str, tuple] = {}
+    for section in ("filter_params", "phase_params"):
+        a = dict(doc.get(section) or {})
+        b = dict(ref_doc.get(section) or {})
+        for k in sorted(set(a) | set(b)):
+            va, vb = a.get(k, "—"), b.get(k, "—")
+            if va != vb:
+                out[f"{section}.{k}"] = (va, vb)
+    return out
 
 
 def labels_for_display() -> dict[str, dict]:

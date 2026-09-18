@@ -176,6 +176,55 @@ labelled block and are never added into the train one. Manual labels are opt-in.
 Frozen reference columns come from `research/snapshots/` (see that directory's
 README): the tab **reads files** and never runs a published version live.
 
+### Modes, reference column and Run
+
+**Reading order.** A one-line status bar (configs · cyclones · ground-truth
+badge · reference column), then four numbered sections, each an expander:
+**1 Mode → 2 Data → 3 Configurations → 4 Results**. Each section owns everything
+it governs — the configuration cards render inside section 3, so collapsing the
+section hides them.
+
+**Mode is not independent state.** `Validation` and `Exploration` filter what is
+selectable and what is emphasised; they never decide whether a number is
+produced. That is decided per cyclone by whether it carries a manual label, in
+`benchmark_core.scoreable`. A row with no label yields no scoring number in
+either mode.
+
+* **Validation** — only labelled sources selectable (51 real + 12 synthetic);
+  scoring panel visible. Switching back from Exploration drops any uploaded
+  track from the selection rather than carrying it into a scored run.
+* **Exploration** — every source selectable, cyclone uploads included; scoring
+  panel collapsed. If labelled rows are in the selection, a note offers to score
+  those rows only.
+
+**Without ground truth**, each column is measured against the **reference
+column**, never against truth, and the block is labelled `relative to reference`.
+Four measures: cyclones whose phase sequence changed; boundary displacement in
+timesteps (median and max) for those whose sequence matches; phases that
+appeared or disappeared, per type; and cyclones that refused an incipient phase.
+Boundary displacement is computed only where the sequence matches — pairing
+boundaries across a mismatch would compare two different transitions.
+
+**Reference column** is chosen explicitly. It defaults to the manual label when
+one exists, otherwise the first configuration column. The manual label has no
+parameters, so the card diffs fall back to the first configuration column as
+their parameter baseline, and the card says so.
+
+**A card shows only the parameters that DIFFER from the reference.** The eleven
+YAMLs share roughly fifteen identical parameters; listing all of them hides the
+two or three that separate one configuration from another. The full
+configuration sits behind the card's `Provenance` drop-down.
+
+**Nothing recomputes on edit.** Results come from an explicit **Run**. A
+fingerprint of (columns × selection × reference) is stored with them; when it
+stops matching, the results are flagged **out of date** instead of being
+silently replaced.
+
+**Figures** come in two arrangements over the same data: `Side by side`
+(default) and `Stacked`, which puts the panels on a shared x axis and a shared y
+scale so a boundary that moved is read straight down the figure. The choice is
+kept in session state.
+
 ## Sidebar order
 
 The controls are grouped by the order in which the detector actually **executes**,
