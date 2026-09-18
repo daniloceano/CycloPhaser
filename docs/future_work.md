@@ -1971,6 +1971,27 @@ was confirmed to fail when a widget key was removed.
   attributes nothing. Zero padding remains a plausible, unmeasured explanation;
   isolating it needs a one-parameter-at-a-time run this front did not do.
 
+### Interface pass after Danilo's review (2026-09-18)
+
+Danilo reviewed the figures and asked for three things before approving, all
+applied: the tab was **in Portuguese and is now entirely in English** (tab,
+sidebar group headers and captions, column headers, warnings, and the two
+cross-cutting parameter notes); the phase **colour key moved from the top of the
+tab to immediately above the first figure**, since a key the reader has to
+scroll back to is not a key; and **"Aggregates" became a table in a drop-down**
+— rows are measurements, columns are configurations, train open by default and
+the frozen test split collapsed beside it, matching the `Edit` / `Provenance`
+pattern already in the tab.
+
+Two things were fixed while doing it: the column-count label lagged one behind
+(an add did not rerun, so the panel said "1 column" with two on screen), and the
+`Cyclones` / `Configurations` panels derived `expanded` from state, which made
+them snap open and shut on every rerun — both are now statically open.
+
+The five mandatory header items are all still present; four of them moved into a
+`Provenance` drop-down and the pre-filter-fix warning stayed visible, because it
+is the one that stops a column being misread as history.
+
 ### Also done
 
 `research/labels/configs/` now holds all **eleven** configurations

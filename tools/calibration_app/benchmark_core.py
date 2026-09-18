@@ -86,14 +86,17 @@ PV_KEYS = ("use_filter", "replace_endpoints_with_lowpass", "use_smoothing",
 SEQUENCE_INSTRUMENT = "evaluate_against_labels.py / score_phase_sequences"
 MATURE_INSTRUMENT = f"item19_core.pair_by_overlap (margin {MATURE_MARGIN})"
 
-# The exact wording the header shows for a config written before the filter fix.
+# The header's wording for a config written before the filter fix. Short line
+# first, full reasoning second: the short line has to survive being skimmed.
+PRE_FILTER_FIX_SHORT = (
+    "Pre-filter-fix config — this column shows a result nobody saw at the time.")
 PRE_FILTER_FIX_WARNING = (
-    "config anterior à correção do filtro — este YAML não traz `boundary_padding`. "
-    "Ele foi exportado quando `use_filter: true` era lido como a janela inteira 1 "
-    "(bool é subclasse de int), de modo que o filtro Lanczos NUNCA era aplicado. "
-    "A mesma linha hoje aplica o filtro (janela = len(série)//2). Esta coluna "
-    "mostra, portanto, um resultado que nunca foi visto na época — não é histórico."
-)
+    "This YAML carries no `boundary_padding`, which dates it to before the filter "
+    "fix. It was exported when `use_filter: true` was read as the integer window "
+    "1 (bool is a subclass of int), so the Lanczos filter was NEVER applied. The "
+    "same line applies the filter today (window = len(series)//2). This column is "
+    "therefore a re-run under current code, not a historical record of what that "
+    "configuration produced.")
 
 
 # ── provenance ────────────────────────────────────────────────────────────────
@@ -189,9 +192,9 @@ def historical_bad_cases(doc: dict) -> dict | None:
         "bad_cases_count": ev.get("bad_cases_count"),
         "total_cyclones": ev.get("total_cyclones"),
         "timestamp": (doc.get("metadata") or {}).get("timestamp"),
-        "note": "anotação histórica — marcação visual feita na época desta "
-                "configuração, com outro conhecimento do problema. NÃO é métrica "
-                "de comparação entre colunas.",
+        "note": "Historical annotation — a visual mark made at the time of this "
+                "configuration, with different knowledge of the problem. NOT a "
+                "metric, and not comparable between columns.",
     }
 
 
@@ -224,25 +227,29 @@ class ColumnSpec:
                 "ignored": [],
                 "defaulted": {},
                 "pre_filter_fix": True,
+                "pre_filter_fix_short": (
+                    f"Frozen reference — published {snap['cyclophaser_version']}, "
+                    "package defaults."),
                 "pre_filter_fix_warning": (
-                    "coluna de referência congelada: "
-                    f"cyclophaser {snap['cyclophaser_version']} publicada, rodada "
-                    "com os DEFAULTS do pacote daquela versão, em ambiente isolado. "
-                    "Aquela versão não tem `boundary_padding` — a convolução do "
-                    "filtro preenche com zeros."),
+                    f"Frozen reference column: cyclophaser "
+                    f"{snap['cyclophaser_version']} as published, run with that "
+                    "release's package DEFAULTS in an isolated environment. That "
+                    "release has no `boundary_padding` — its filter convolution "
+                    "pads with zeros."),
                 "historical": None,
                 "frozen_snapshot": snap,
             }
         audit = signature_audit(self.doc)
         return {
-            "config_sha256": ("editado na sessão" if self.edited
+            "config_sha256": ("edited in session" if self.edited
                               else (self.source_sha256 or "—")),
-            "config_sha256_display": ("editado na sessão" if self.edited
+            "config_sha256_display": ("edited in session" if self.edited
                                       else (self.source_sha256 or "—")[:12]),
             "code_commit": git_head(),
             "ignored": audit["ignored"],
             "defaulted": audit["defaulted"],
             "pre_filter_fix": audit["pre_filter_fix"],
+            "pre_filter_fix_short": PRE_FILTER_FIX_SHORT,
             "pre_filter_fix_warning": audit["pre_filter_fix_warning"],
             "historical": historical_bad_cases(self.doc),
             "frozen_snapshot": None,
@@ -324,7 +331,7 @@ def snapshot_series(snapshot: dict, sid: str) -> dict:
         return {"error": "not in snapshot", "runs": None, "starts": None, "z": None}
     if rec.get("error"):
         # Recorded as a failure at snapshot time, carried through as one.
-        return {"error": f"falha registrada no snapshot: "
+        return {"error": f"failure recorded in the snapshot: "
                          f"{rec['error'].splitlines()[-1]}",
                 "runs": None, "starts": None, "z": None}
     runs = [(p, a, b) for p, a, b in rec["phases"]]

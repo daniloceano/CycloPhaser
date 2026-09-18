@@ -134,81 +134,82 @@ Os mesmos helpers alimentam o renderizador Plotly do app e o render estático
 matplotlib de conferência em
 `research/app_layer_inspector/gen_inspector_figures.py`.
 
-## Aba Benchmark
+## Benchmark tab
 
-Compara N configurações lado a lado, sobre os ciclones que você escolher,
-alinhadas por ciclone. Cada coluna é criada a partir do estado atual da sidebar,
-de um YAML enviado, de um arquivo de `research/labels/configs/` (os onze) ou de
-um snapshot congelado de versão publicada, e continua editável na própria aba.
+Compares N configurations side by side, over the cyclones you choose, aligned by
+cyclone. A column is created from the current sidebar state, an uploaded YAML, a
+file in `research/labels/configs/` (all eleven) or a frozen published-version
+snapshot, and stays editable in the tab itself.
 
-**Cabeçalho de cada coluna** — cinco itens, sempre:
+**Each column's header** — one identity line (source hash · running commit), the
+pre-filter-fix warning when it applies, and a `Provenance` drop-down holding all
+five mandatory items:
 
-1. sha256 do YAML de origem, ou `editado na sessão` se foi alterado;
-2. commit do código que está rodando (`git rev-parse HEAD`). **Não** o campo
-   `metadata.cyclophaser_version`: ele diz `2.0.0` nos onze arquivos e não
-   distingue nada;
-3. chaves presentes no YAML e ignoradas pela assinatura atual (`distance`);
-4. chaves ausentes preenchidas pelo default atual, com o valor;
-5. aviso **"config anterior à correção do filtro"** quando falta
-   `boundary_padding`. Não é cosmético: os YAMLs de v1 a v5 trazem
-   `use_filter: true`, e no código daquela época `True` era lido como a janela
-   inteira 1 (bool é subclasse de int), de modo que o filtro **nunca** era
-   aplicado. A mesma linha hoje aplica o filtro. Sem o aviso, a coluna mostra um
-   resultado que ninguém viu na época e o apresenta como histórico.
+1. sha256 of the source YAML, or `edited in session` if it was changed;
+2. the commit of the code actually running (`git rev-parse HEAD`). **Not**
+   `metadata.cyclophaser_version`: it reads `2.0.0` in all eleven files and
+   distinguishes nothing;
+3. keys present in the YAML and ignored by the current signature (`distance`);
+4. keys absent from the YAML and filled by the current default, with the value;
+5. the **"pre-filter-fix config"** warning when `boundary_padding` is missing.
+   This is not cosmetic: the v1–v5 YAMLs carry `use_filter: true`, and in the
+   code of that period `True` was read as the integer window 1 (bool is a
+   subclass of int), so the Lanczos filter was **never** applied. The same line
+   applies the filter today. Without the warning the column shows a result
+   nobody saw at the time and presents it as history.
 
-**Os dois medidores** aparecem sempre, cada um com o nome do instrumento:
-sequência de fases por `evaluate_against_labels.py / score_phase_sequences`
-(só os inícios, `tolerance_idx` por rótulo, recusa parear quando a sequência não
-bate) e pareamento do maduro por `item19_core.pair_by_overlap` (maior
-sobreposição, as duas pontas, margem fixa 6). São instrumentos diferentes e
-nunca são somados.
+**Both measurements** are always shown, each named by its instrument: the phase
+sequence from `evaluate_against_labels.py / score_phase_sequences` (starts only,
+`tolerance_idx` per label, refuses to pair when the sequence does not match) and
+the mature pairing from `item19_core.pair_by_overlap` (largest overlap, both
+ends, fixed margin 6). They are different instruments and are never summed.
 
-**`evaluation.bad_cases_count` não é placar.** Aparece só como anotação
-histórica rotulada: são marcações visuais feitas em épocas diferentes, com
-conhecimento diferente do problema (v5 e v6 marcam 0; v9 marca 6).
+**`evaluation.bad_cases_count` is not a score.** It appears only as a labelled
+historical annotation under `Provenance`: these were visual marks made at
+different times with different knowledge of the problem (v5 and v6 record 0; v9
+records 6).
 
-**Vazamento.** Todo número agregado é calculado sobre o split de treino.
-Agregados envolvendo os 16 ciclones reais do split de teste congelado aparecem
-em bloco separado, rotulado, e nunca somados ao de treino. Os rótulos manuais
-são opt-in.
+**Leakage.** Every aggregate is computed over the train split. Aggregates
+involving the 16 real cyclones of the frozen test split appear in a separate,
+labelled block and are never added into the train one. Manual labels are opt-in.
 
-Colunas de referência congeladas vêm de `research/snapshots/` (ver o README de
-lá): a aba **lê arquivos**, nunca roda uma versão publicada ao vivo.
+Frozen reference columns come from `research/snapshots/` (see that directory's
+README): the tab **reads files** and never runs a published version live.
 
-## Ordem da sidebar
+## Sidebar order
 
-Os controles são agrupados pela ordem em que o detector **executa**, não por
-nome de fase:
+The controls are grouped by the order in which the detector actually **executes**,
+not by phase name:
 
-| grupo | etapa | função |
+| group | step | function |
 |---|---|---|
-| 1 Filtro Lanczos | 1 | `process_vorticity` |
-| 2 Suavização Savitzky-Golay | 2 | `process_vorticity` |
-| 3 Filtragem de extremos | 3 | `find_peaks_valleys(z)` |
-| 4 Intensificação | 4 | `find_intensification_period` |
-| 5 Decaimento | 5 | `find_decay_period` |
-| 6 Maduro | 6 | `find_mature_stage` |
+| 1 Lanczos Filter | 1 | `process_vorticity` |
+| 2 Savitzky-Golay Smoothing | 2 | `process_vorticity` |
+| 3 Extrema Filtering | 3 | `find_peaks_valleys(z)` |
+| 4 Intensification | 4 | `find_intensification_period` |
+| 5 Decay | 5 | `find_decay_period` |
+| 6 Mature | 6 | `find_mature_stage` |
 | 7 Residual | 7 | `find_residual_period` |
-| 8 Incipiente | 9 | `find_incipient_period` |
+| 8 Incipient | 9 | `find_incipient_period` |
 
-A etapa 8, `post_process_periods`, não tem parâmetro.
+Step 8, `post_process_periods`, takes no parameter.
 
-Duas consequências de ler a ordem real em vez de supô-la: a **filtragem de
-extremos é a etapa 3** — roda antes de todas as fases, e os extremos que
-sobrevivem ali são os que todas elas enxergam — e
-`decay_tail_amplitude_fraction` é lido por `find_residual_period`
-(`find_stages.py:588`), não por `find_decay_period`, por isso está sob Residual.
+Two consequences of reading the real order instead of assuming it: **extrema
+filtering is step 3** — it runs before every stage, and the extrema that survive
+there are the ones all of them see — and `decay_tail_amplitude_fraction` is read
+by `find_residual_period` (`find_stages.py:588`), not by `find_decay_period`,
+which is why it sits under Residual.
 
-Dois parâmetros atravessam grupos e trazem nota no próprio widget:
-`length_scale` (escala os limiares de comprimento de intensificação e
-decaimento, `find_stages.py:387`, e muda fases detectadas em 20160735, 20191014
-e 20203947 sob params-9) e `boundary_padding` (é parâmetro de filtro, mas
-governa o incipiente: com `reflect` nenhuma série recusa incipiente, 0/51; com
-`edge`, 33/51 recusam).
+Two parameters span groups and carry a note in their own widget: `length_scale`
+(scales the intensification and decay duration thresholds,
+`find_stages.py:387`, and changes detected phases on 20160735, 20191014 and
+20203947 under params-9) and `boundary_padding` (a filter parameter that governs
+the incipient phase: under `reflect` no series refuses an incipient phase, 0/51;
+under `edge`, 33/51 refuse).
 
-A cobertura desse layout é verificada por teste automático, não a olho:
-`tests/test_sidebar_coverage.py` enumera a assinatura pública do pacote e exige
-que cada parâmetro tenha controle e que nenhuma chave de widget se repita.
+This layout's coverage is verified by an automatic test, not by eye:
+`tests/test_sidebar_coverage.py` enumerates the package's public signature and
+requires every parameter to have a control and no widget key to repeat.
 
 ## Escopo atual (Etapa 1)
 

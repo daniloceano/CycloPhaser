@@ -261,7 +261,7 @@ def test_an_edited_column_reports_edited_instead_of_a_source_hash():
     _widget(at, "button", f"bench_apply_{cid}").click()
     at.run()
     captions = [c.value for c in at.caption]
-    assert any("editado na sessão" in c for c in captions), (
+    assert any("edited in session" in c for c in captions), (
         "no column advertises itself as edited")
 
 

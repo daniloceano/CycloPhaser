@@ -1354,8 +1354,8 @@ with st.sidebar:
     # it sits under Residual and not under Decay.
     # ══════════════════════════════════════════════════════════════════════
 
-    st.header("1 · Filtro Lanczos")
-    st.caption("Etapa 1 — `process_vorticity`. Roda antes de tudo; tudo abaixo enxerga a série já filtrada.")
+    st.header("1 · Lanczos Filter")
+    st.caption("Step 1 — `process_vorticity`. Runs before everything; every group below sees the filtered series.")
     use_filter = st.checkbox(
         "Apply Lanczos filter", value=_DEFAULTS["use_filter"], key="use_filter",
         help=(
@@ -1412,12 +1412,13 @@ with st.sidebar:
             "Pass it to reproduce results from before this default changed.\n\n"
             "**edge** — pads with the edge value repeated. Between the two "
             "(median 0.50), changes marginally fewer phase sequences.\n\n"
-            "**Atravessa grupos.** É parâmetro de FILTRO (etapa 1), mas governa "
-            "o INCIPIENTE (etapa 9): o incipiente é lido na borda inicial, que é "
-            "exatamente o que este controle reescreve. Medido no conjunto de 51: "
-            "com `reflect` nenhuma série recusa incipiente (0/51); com `edge`, "
-            "33/51 recusam. Mudar aqui muda a etapa 9 sem tocar em nenhum "
-            "controle dela.\n\n"
+            "**Spans groups.** This is a FILTER parameter (step 1), but it "
+            "governs the INCIPIENT phase (step 9): the incipient phase is read "
+            "at the leading edge, which is exactly what this control rewrites. "
+            "Measured on the 51-track set: under `reflect` no series refuses an "
+            "incipient phase (0/51); under `edge`, 33/51 refuse. Changing it "
+            "here changes step 9 without touching any of step 9's own "
+            "controls.\n\n"
             "Changing this alters the smoothed signal near the boundaries, so a "
             "calibrated parameter set must be re-validated before it is trusted "
             "in a new mode."
@@ -1450,8 +1451,8 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("2 · Suavização Savitzky-Golay")
-    st.caption("Etapa 2 — `process_vorticity`, sobre a saída do Lanczos.")
+    st.header("2 · Savitzky-Golay Smoothing")
+    st.caption("Step 2 — `process_vorticity`, over the Lanczos output.")
     _sm_mode = st.selectbox(
         "use_smoothing", _SM_OPTS,
         index=_SM_OPTS.index(_DEFAULTS["sm_mode"]), key="sm_mode",
@@ -1533,8 +1534,8 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("3 · Filtragem de extremos")
-    st.caption("Etapa 3 — `find_peaks_valleys(z)`. Roda ANTES de todas as fases: os extremos que sobrevivem aqui são os que todas as etapas abaixo enxergam.")
+    st.header("3 · Extrema Filtering")
+    st.caption("Step 3 — `find_peaks_valleys(z)`. Runs BEFORE every stage: the extrema that survive here are the ones all the steps below see.")
     with st.expander("Prominence filtering (advanced)", expanded=False):
         st.caption(
             "Optional post-processing for the detected peaks/valleys. "
@@ -1599,8 +1600,8 @@ with st.sidebar:
 
 
     st.divider()
-    st.header("Escala dos limiares (atravessa as etapas 4–6)")
-    st.caption("Parâmetro transversal: não pertence a uma etapa só.")
+    st.header("Threshold scale (spans steps 4-6)")
+    st.caption("Cross-cutting parameter: it does not belong to a single step.")
     # `mature_method`'s own radio renders further down, so its current value is
     # read from session_state here. Under "amplitude" length_scale stops scaling
     # the MATURE window (find_stages.find_mature_stage reads it but only uses it
@@ -1620,12 +1621,12 @@ with st.sidebar:
         key="length_scale",
         horizontal=True,
         help=(
-            "**Atravessa grupos.** Escala os limiares de COMPRIMENTO da "
-            "intensificação (etapa 4) e do decaimento (etapa 5) — "
-            "`find_stages.py:387` — e, através da checagem de vizinhança "
-            "intensificação/maduro/decaimento, chega a mudar as fases "
-            "detectadas: 20160735, 20191014 e 20203947 sob params-9. Por isso "
-            "fica acima das etapas 4-6 e não dentro de uma delas.\n\n"
+            "**Spans groups.** It scales the DURATION thresholds of "
+            "intensification (step 4) and decay (step 5) — `find_stages.py:387` "
+            "— and, through the intensification/mature/decay neighbour check, it "
+            "can change the detected phases outright: 20160735, 20191014 and "
+            "20203947 under params-9. That is why it sits above steps 4-6 rather "
+            "than inside one of them.\n\n"
             "Controls what length the duration thresholds of the "
             "intensification, decay and mature groups below are fractions *of*. "
             "**global** (default): thresholds are measured against the whole "
@@ -1653,8 +1654,8 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("4 · Intensificação")
-    st.caption("Etapa 4 — `find_intensification_period`, a primeira fase a ser escrita.")
+    st.header("4 · Intensification")
+    st.caption("Step 4 — `find_intensification_period`, the first phase written.")
     thr_int_len = st.slider(
         "Min. intensification length", 0.01, 0.30, step=0.005,
         value=_DEFAULTS["thr_int_len"], key="thr_int_len",
@@ -1665,7 +1666,7 @@ with st.sidebar:
             "lower values allow brief intensification episodes."
         ),
     )
-    with st.expander("Advanced — intensificação", expanded=False):
+    with st.expander("Advanced — intensification", expanded=False):
         thr_int_gap = st.slider(
             "Max. intensification gap", 0.01, 0.30, step=0.005,
             value=_DEFAULTS["thr_int_gap"], key="thr_int_gap",
@@ -1678,8 +1679,8 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("5 · Decaimento")
-    st.caption("Etapa 5 — `find_decay_period`. Pode sobrescrever passos já marcados como intensificação na etapa 4.")
+    st.header("5 · Decay")
+    st.caption("Step 5 — `find_decay_period`. May overwrite timesteps step 4 already labelled intensification.")
     thr_dec_len = st.slider(
         "Min. decay length", 0.01, 0.30, step=0.005,
         value=_DEFAULTS["thr_dec_len"], key="thr_dec_len",
@@ -1689,7 +1690,7 @@ with st.sidebar:
             "Higher values eliminate short decay episodes."
         ),
     )
-    with st.expander("Advanced — decaimento", expanded=False):
+    with st.expander("Advanced — decay", expanded=False):
         thr_dec_gap = st.slider(
             "Max. decay gap", 0.01, 0.30, step=0.005,
             value=_DEFAULTS["thr_dec_gap"], key="thr_dec_gap",
@@ -1702,8 +1703,8 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("6 · Maduro")
-    st.caption("Etapa 6 — `find_mature_stage`.")
+    st.header("6 · Mature")
+    st.caption("Step 6 — `find_mature_stage`.")
     mature_method = st.radio(
         "Mature stage method",
         options=["derivative", "amplitude"],
@@ -1773,7 +1774,7 @@ with st.sidebar:
     st.divider()
 
     st.header("7 · Residual")
-    st.caption("Etapa 7 — `find_residual_period`. É esta função que lê `decay_tail_amplitude_fraction` (find_stages.py:588), e não `find_decay_period`.")
+    st.caption("Step 7 — `find_residual_period`. This is the function that reads `decay_tail_amplitude_fraction` (find_stages.py:588), not `find_decay_period`.")
     with st.expander("Extend decay over a flat tail (advanced)", expanded=False):
         st.caption(
             "Compensates for an artifact of the prominence filter above: on a "
@@ -1820,9 +1821,9 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("8 · Incipiente")
-    st.caption("Etapa 9 — `find_incipient_period`, a ÚLTIMA a rodar, depois do `post_process_periods` (etapa 8, sem parâmetro).")
-    with st.expander("Incipiente — método e limiares", expanded=False):
+    st.header("8 · Incipient")
+    st.caption("Step 9 — `find_incipient_period`, the LAST to run, after `post_process_periods` (step 8, no parameter).")
+    with st.expander("Incipient — method and thresholds", expanded=False):
         incipient_method = st.radio(
             "incipient_method",
             options=["geometric", "plateau"],

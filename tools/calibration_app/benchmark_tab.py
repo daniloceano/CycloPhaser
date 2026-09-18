@@ -5,14 +5,20 @@ See that module's docstring for the three structural rules (code commit as
 provenance, `bad_cases_count` never a score, `item19_core.CONFIG` never
 repointed) and for the leakage rule on aggregates.
 
-Two interface choices worth stating, because they were decisions rather than
-defaults:
+Layout decisions worth stating, because they were decisions rather than defaults:
 
 * **A column is edited as YAML text.** The alternative — a full widget tree per
   column — multiplies every sidebar control by the number of columns, and the
   point of this tab is to hold several configurations on screen at once. A text
   area also keeps "what is this column running" answerable by reading one thing,
   which is the property the header exists to guarantee.
+* **The header is one visible line plus a Provenance drop-down.** All five
+  mandatory items are still there; stacking them as five captions per column
+  buried the figures under a wall of small text. The one item that stays visible
+  is the pre-filter-fix warning, because it is the one that stops a column being
+  misread as history.
+* **The colour legend sits immediately above the first figure**, not at the top
+  of the tab — a key the reader has to scroll back to is not a key.
 * **Column state lives in explicit `st.session_state` entries**, not in widget-key
   memory. A widget with a stable key loses its value across an `st.rerun()` issued
   earlier in the same script run, which this tab does on every add/remove.
@@ -26,6 +32,7 @@ from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
+import pandas as pd
 import streamlit as st
 import yaml
 
@@ -123,116 +130,198 @@ def _cell_png(values_tuple: tuple, runs_tuple: tuple, title: str) -> bytes:
 
 
 def _legend() -> None:
+    """Phase colour key. Rendered next to the figures it explains."""
     st.markdown(
-        " ".join(
-            f"<span style='background:{c};padding:1px 7px;border-radius:3px;"
-            f"font-size:11px;color:#111'>{p}</span>"
-            for p, c in PHASE_COLORS.items()),
+        "<div style='margin:2px 0 6px 0'>"
+        + " ".join(
+            f"<span style='background:{c};padding:2px 9px;border-radius:3px;"
+            f"font-size:11px;color:#111;margin-right:4px'>{p}</span>"
+            for p, c in PHASE_COLORS.items())
+        + "</div>",
         unsafe_allow_html=True)
 
 
 # ── header rendering ──────────────────────────────────────────────────────────
+def _short(sha: str) -> str:
+    return sha[:12] if sha and len(sha) == 64 else (sha or "—")
+
+
 def _render_header(col: dict, spec: bc.ColumnSpec) -> None:
+    """One visible identity line, the warning if it applies, then a drop-down.
+
+    All five mandatory header items are present: 1 and 2 on the visible line and
+    repeated in full inside Provenance, 3 4 and 5 inside it — except the
+    pre-filter-fix warning, which also stays visible.
+    """
     h = spec.header()
     st.markdown(f"**{col['name']}**")
-    st.caption(f"1 · sha256 do YAML: `{h['config_sha256_display']}`")
-    st.caption(f"2 · commit do código: `{h['code_commit'][:12] if len(h['code_commit']) == 40 else h['code_commit']}`")
 
-    if h["ignored"]:
-        st.caption("3 · chaves ignoradas pela assinatura atual: "
-                   + ", ".join(f"`{k}`" for k in h["ignored"]))
-    else:
-        st.caption("3 · chaves ignoradas: nenhuma")
-
-    if h["defaulted"]:
-        with st.expander(f"4 · {len(h['defaulted'])} chave(s) no default atual",
-                         expanded=False):
-            for k, v in h["defaulted"].items():
-                st.caption(f"`{k}` = `{v!r}`")
-    else:
-        st.caption("4 · nenhuma chave ausente")
+    sha = h["config_sha256"]
+    sha_txt = sha if sha in ("editado na sessão", "edited in session") else _short(sha)
+    commit = h["code_commit"]
+    commit_txt = commit[:12] if len(commit) == 40 else commit
+    st.caption(f"`{sha_txt}` · code `{commit_txt}`")
 
     if h["pre_filter_fix"]:
-        st.warning(h["pre_filter_fix_warning"], icon="⚠️")
+        st.warning(h.get("pre_filter_fix_short") or h["pre_filter_fix_warning"],
+                   icon="⚠️")
 
-    if h.get("historical"):
-        hist = h["historical"]
-        with st.expander("anotação histórica (NÃO é métrica)", expanded=False):
+    n_extra = len(h["ignored"]) + len(h["defaulted"])
+    with st.expander(f"Provenance ({n_extra} note(s))" if n_extra else "Provenance",
+                     expanded=False):
+        st.caption(f"**1 · source YAML sha256** — `{sha_txt}`")
+        st.caption(f"**2 · running code commit** — `{commit_txt}` "
+                   "(not `metadata.cyclophaser_version`, which reads 2.0.0 in "
+                   "every one of the eleven files)")
+        if h["ignored"]:
+            st.caption("**3 · keys ignored by the current signature** — "
+                       + ", ".join(f"`{k}`" for k in h["ignored"]))
+        else:
+            st.caption("**3 · keys ignored by the current signature** — none")
+        if h["defaulted"]:
+            st.caption(f"**4 · keys absent, filled by the current default** "
+                       f"({len(h['defaulted'])})")
+            st.dataframe(
+                pd.DataFrame({"default in use": {k: repr(v)
+                                                 for k, v in h["defaulted"].items()}}),
+                use_container_width=True)
+        else:
+            st.caption("**4 · keys absent, filled by the current default** — none")
+        if h["pre_filter_fix"]:
+            st.caption("**5 · pre-filter-fix warning**")
+            st.caption(h["pre_filter_fix_warning"])
+        else:
+            st.caption("**5 · pre-filter-fix warning** — not applicable "
+                       "(`boundary_padding` is present)")
+
+        if h.get("historical"):
+            hist = h["historical"]
+            st.divider()
+            st.caption("**Historical annotation — not a metric**")
             st.caption(hist["note"])
             st.caption(f"`evaluation.bad_cases_count` = {hist['bad_cases_count']} "
-                       f"de {hist['total_cyclones']} — {hist['timestamp']}")
+                       f"of {hist['total_cyclones']} · {hist['timestamp']}")
             if hist["bad_cases"]:
                 st.caption(", ".join(str(b) for b in hist["bad_cases"]))
 
-    if h.get("frozen_snapshot"):
-        snap = h["frozen_snapshot"]
-        with st.expander("snapshot congelado", expanded=False):
-            st.caption(f"{snap['label']}")
-            st.caption(f"gerado {snap['generated']} · python {snap['python']}")
-            st.caption(f"parâmetros: {snap['parameters']}")
+        if h.get("frozen_snapshot"):
+            snap = h["frozen_snapshot"]
+            st.divider()
+            st.caption("**Frozen snapshot**")
+            st.caption(snap["label"])
+            st.caption(f"generated {snap['generated']} · python {snap['python']}")
+            st.caption(f"parameters: {snap['parameters']}")
 
 
-def _render_metrics(block: dict, kind: str) -> None:
-    """Both measurements, each named by its instrument. Never blended."""
-    seq, mat = block["sequence"], block["mature"]
-    st.caption(f"**{kind}** — {len(block['ids'])} série(s)")
-    st.caption(f"_sequência_ · {seq['instrument']}")
-    if seq.get("n_series"):
-        rate = seq["sequence_match_rate"]
-        st.caption(f"  sequência: {seq['n_sequence_match']}/{seq['n_series']}"
-                   + (f" ({100 * rate:.0f}%)" if rate is not None else ""))
-        br = seq.get("boundary_hit_rate")
-        st.caption(f"  fronteiras: {seq['n_boundaries_hit']}/{seq['n_boundaries']}"
-                   + (f" ({100 * br:.0f}%)" if br is not None else ""))
-    else:
-        st.caption("  — sem rótulos nesta seleção")
-    st.caption(f"_maduro_ · {mat['instrument']}")
-    if mat["n"]:
-        st.caption(f"  pareado: {mat['n_hit']}/{mat['n']}"
-                   + (f" ({100 * mat['hit_rate']:.0f}%)"
-                      if mat["hit_rate"] is not None else ""))
-    else:
-        st.caption("  — sem rótulo de maduro nesta seleção")
+# ── the summary table ─────────────────────────────────────────────────────────
+def _pct(x) -> str:
+    return "—" if x is None else f"{100 * x:.0f}%"
+
+
+def _summary_frame(metrics_per_column: list[dict], names: list[str],
+                   split: str) -> pd.DataFrame:
+    """Rows = measurements, columns = configurations — the tab's own alignment."""
+    data: dict[str, dict[str, str]] = {}
+    for name, m in zip(names, metrics_per_column):
+        blk = m[split]
+        seq, mat = blk["sequence"], blk["mature"]
+        n_series = seq.get("n_series") or 0
+        data[name] = {
+            "Series": str(len(blk["ids"])),
+            "Sequence match": (f"{seq['n_sequence_match']}/{n_series}"
+                               if n_series else "—"),
+            "Sequence match rate": (_pct(seq["sequence_match_rate"])
+                                    if n_series else "—"),
+            "Boundaries within margin": (f"{seq['n_boundaries_hit']}/"
+                                         f"{seq['n_boundaries']}"
+                                         if seq.get("n_boundaries") else "—"),
+            "Boundary hit rate": (_pct(seq.get("boundary_hit_rate"))
+                                  if seq.get("n_boundaries") else "—"),
+            "Mature paired": f"{mat['n_hit']}/{mat['n']}" if mat["n"] else "—",
+            "Mature hit rate": _pct(mat["hit_rate"]) if mat["n"] else "—",
+        }
+    return pd.DataFrame(data)
+
+
+def _render_summary(metrics_per_column: list[dict], names: list[str]) -> None:
+    st.markdown("#### Summary")
+    st.caption(
+        "Leakage rule: every aggregate here is computed over the TRAIN split. "
+        "The test block is separate, labelled, and never added into the train "
+        "one."
+    )
+    train_n = len(metrics_per_column[0]["train"]["ids"]) if metrics_per_column else 0
+    test_n = len(metrics_per_column[0]["test"]["ids"]) if metrics_per_column else 0
+
+    with st.expander(f"Train split — {train_n} series", expanded=True):
+        if train_n:
+            st.dataframe(_summary_frame(metrics_per_column, names, "train"),
+                         use_container_width=True)
+            st.caption(
+                f"Sequence rows · {bc.SEQUENCE_INSTRUMENT}  \n"
+                f"Mature rows · {bc.MATURE_INSTRUMENT}  \n"
+                "Two different instruments. Reported side by side, never summed."
+            )
+        else:
+            st.caption("No train-split cyclone in the current selection.")
+
+    with st.expander(f"Test split (frozen) — {test_n} series", expanded=False):
+        if test_n:
+            st.caption(
+                "⚠️ Frozen test split. Shown on request; never combined with the "
+                "train numbers above.")
+            st.dataframe(_summary_frame(metrics_per_column, names, "test"),
+                         use_container_width=True)
+        else:
+            st.caption("No test-split cyclone in the current selection.")
 
 
 # ── the tab ───────────────────────────────────────────────────────────────────
 def render() -> None:
     _init_state()
-    st.subheader("Benchmark — N configurações sobre os mesmos ciclones")
+    st.subheader("Benchmark — N configurations over the same cyclones")
     st.caption(
-        "Cada coluna é uma configuração independente, rodada sobre os ciclones "
-        "escolhidos abaixo e alinhada por ciclone. Os dois medidores aparecem "
-        "sempre, cada um com o nome do instrumento que o produziu — são "
-        "instrumentos diferentes e não são somados. "
-        "`evaluation.bad_cases_count` do YAML nunca é usado como placar: aparece "
-        "apenas como anotação histórica rotulada."
+        "Each column is an independent configuration, run over the cyclones "
+        "selected below and aligned by cyclone. Both measurements are always "
+        "shown, each named by the instrument that produced it — they are "
+        "different instruments and are never summed. The YAML's own "
+        "`evaluation.bad_cases_count` is never used as a score: it appears only "
+        "as a labelled historical annotation, under each column's Provenance."
     )
 
     series_all, source_of = bc.load_all_series()
     membership = bc.split_membership()
     labels = bc.labels_for_display()
 
-    # ── cyclone selection ─────────────────────────────────────────────────────
+    # ── 1 · cyclone selection ─────────────────────────────────────────────────
     ids_sorted = sorted(series_all, key=lambda s: (source_of[s], s))
-    with st.expander("Ciclones", expanded=True):
+    # Every add/remove reruns, so this count is always the settled one.
+    n_cols_now = len(st.session_state[K_COLUMNS])
+    # `expanded` is forced on every rerun, so a value derived from state would
+    # make these panels snap open and shut under the user as they work. Both are
+    # therefore statically open: adding columns and changing the selection are
+    # the two repeated actions in this tab.
+    with st.expander(
+            f"1 · Cyclones — {len(st.session_state[K_IDS])} selected",
+            expanded=True):
         c1, c2, c3 = st.columns(3)
         with c1:
-            if st.button("Todos os reais (51)", key="bench_pick_real",
+            if st.button("All real (51)", key="bench_pick_real",
                          use_container_width=True):
                 st.session_state[K_IDS] = [s for s in ids_sorted
                                            if source_of[s] == "real"]
         with c2:
-            if st.button("Todos os sintéticos (12)", key="bench_pick_synth",
+            if st.button("All synthetic (12)", key="bench_pick_synth",
                          use_container_width=True):
                 st.session_state[K_IDS] = [s for s in ids_sorted
                                            if source_of[s] == "synthetic"]
         with c3:
-            if st.button("Limpar", key="bench_pick_none",
+            if st.button("Clear", key="bench_pick_none",
                          use_container_width=True):
                 st.session_state[K_IDS] = []
         selected = st.multiselect(
-            "Seleção livre — qualquer subconjunto dos 63 registros "
-            "(51 reais + 12 sintéticos). Sem vínculo com o split treino/teste.",
+            "Free selection — any subset of the 63 records (51 real + 12 "
+            "synthetic). Not tied to the train/test split.",
             options=ids_sorted,
             default=st.session_state[K_IDS],
             key="bench_ids_widget",
@@ -241,35 +330,40 @@ def render() -> None:
         st.session_state[K_IDS] = list(selected)
 
         st.checkbox(
-            "Mostrar rótulos manuais na primeira coluna", key=K_LABELS,
-            help="Opt-in. Desenha o rótulo humano ao lado da primeira coluna, "
-                 "sobre os 63 registros que têm rótulo.",
+            "Show manual labels as a first column", key=K_LABELS,
+            help="Opt-in. Draws the human label beside the first column, for "
+                 "the records that carry one.",
         )
 
-    # ── column management ─────────────────────────────────────────────────────
-    with st.expander("Colunas", expanded=True):
+    # ── 2 · columns ───────────────────────────────────────────────────────────
+    with st.expander(f"2 · Configurations — {n_cols_now} column(s)",
+                     expanded=True):
         st.caption(
-            "⚠️ **Custo:** cada coluna roda o detector inteiro sobre cada "
-            f"ciclone selecionado. Agora: {len(st.session_state[K_COLUMNS])} "
-            f"coluna(s) × {len(selected)} ciclone(s) = "
-            f"{len(st.session_state[K_COLUMNS]) * len(selected)} execuções "
-            "(cacheadas por par config×ciclone)."
+            f"Each column runs the whole detector over every selected cyclone. "
+            f"Now: {n_cols_now} column(s) × {len(selected)} cyclone(s) = "
+            f"{n_cols_now * len(selected)} run(s), cached per "
+            "config × cyclone pair."
         )
         a1, a2 = st.columns(2)
         with a1:
-            if st.button("+ coluna do estado atual da sidebar",
+            st.markdown("**From the sidebar**")
+            if st.button("Add column from current sidebar state",
                          key="bench_add_sidebar", use_container_width=True):
                 doc = _sidebar_doc()
                 st.session_state[K_COLUMNS].append(_new_column(
                     f"sidebar #{st.session_state[K_NEXT_ID]}", doc, "sidebar",
-                    "estado atual da sidebar",
+                    "current sidebar state",
                     bc.sha256_text(yaml.safe_dump(doc, sort_keys=True))))
+                st.rerun()
         with a2:
+            st.markdown("**From a saved configuration**")
             cfgs = bc.available_configs()
             pick = st.selectbox(
-                "de research/labels/configs/", options=["—"] + [p.name for p in cfgs],
+                "research/labels/configs/",
+                options=["—"] + [p.name for p in cfgs],
                 key="bench_pick_config")
-            if st.button("+ coluna do arquivo selecionado", key="bench_add_config",
+            if st.button("Add column from the selected file",
+                         key="bench_add_config",
                          use_container_width=True, disabled=(pick == "—")):
                 path = next(p for p in cfgs if p.name == pick)
                 text = path.read_text()
@@ -277,47 +371,52 @@ def render() -> None:
                     path.stem.replace("cyclophaser_params-", "params-"),
                     bc.load_config_text(text), "configs", path.name,
                     bc.sha256_text(text)))
+                st.rerun()
 
-        up = st.file_uploader("+ coluna de um YAML enviado", type=["yaml", "yml"],
-                              key="bench_upload")
-        if up is not None:
-            text = up.getvalue().decode("utf-8")
-            sha = bc.sha256_text(text)
-            if st.session_state.get("_bench_upload_sha") != sha:
-                try:
-                    st.session_state[K_COLUMNS].append(_new_column(
-                        Path(up.name).stem, bc.load_config_text(text),
-                        "upload", up.name, sha))
-                    st.session_state["_bench_upload_sha"] = sha
-                except Exception as exc:
-                    st.error(f"YAML inválido: {exc}")
-
-        snaps = bc.available_snapshots()
-        if snaps:
-            s1, s2 = st.columns(2)
-            with s1:
-                spick = st.selectbox("snapshot congelado",
+        b1, b2 = st.columns(2)
+        with b1:
+            st.markdown("**From an uploaded YAML**")
+            up = st.file_uploader("Upload a configuration", type=["yaml", "yml"],
+                                  key="bench_upload", label_visibility="collapsed")
+            if up is not None:
+                text = up.getvalue().decode("utf-8")
+                sha = bc.sha256_text(text)
+                if st.session_state.get("_bench_upload_sha") != sha:
+                    try:
+                        st.session_state[K_COLUMNS].append(_new_column(
+                            Path(up.name).stem, bc.load_config_text(text),
+                            "upload", up.name, sha))
+                        st.session_state["_bench_upload_sha"] = sha
+                        st.rerun()
+                    except Exception as exc:
+                        st.error(f"Invalid YAML: {exc}")
+        with b2:
+            st.markdown("**From a frozen published version**")
+            snaps = bc.available_snapshots()
+            if snaps:
+                spick = st.selectbox("research/snapshots/",
                                      options=["—"] + [p.stem for p in snaps],
                                      key="bench_pick_snapshot")
-            with s2:
-                if st.button("+ coluna de referência", key="bench_add_snapshot",
+                if st.button("Add reference column", key="bench_add_snapshot",
                              use_container_width=True, disabled=(spick == "—")):
                     path = next(p for p in snaps if p.stem == spick)
                     st.session_state[K_COLUMNS].append(_new_column(
-                        f"publicada {path.stem}", {}, "snapshot", path.name,
+                        f"published {path.stem}", {}, "snapshot", path.name,
                         bc.sha256_text(path.read_text()), snapshot_path=str(path)))
+                    st.rerun()
+            else:
+                st.caption("No snapshot files found in research/snapshots/.")
 
     cols = st.session_state[K_COLUMNS]
     if not cols:
-        st.info("Nenhuma coluna ainda. Adicione ao menos uma acima.")
+        st.info("No columns yet — add at least one under **2 · Configurations**.")
         return
     if not selected:
-        st.info("Nenhum ciclone selecionado.")
+        st.info("No cyclones selected — pick some under **1 · Cyclones**.")
         return
 
-    _legend()
-
-    # ── per-column headers and editors ────────────────────────────────────────
+    # ── column headers ────────────────────────────────────────────────────────
+    st.divider()
     specs: list[bc.ColumnSpec] = []
     header_cols = st.columns(len(cols))
     for i, col in enumerate(cols):
@@ -326,22 +425,22 @@ def render() -> None:
             specs.append(spec)
             _render_header(col, spec)
             if col["origin"] != "snapshot":
-                with st.expander("editar", expanded=False):
+                with st.expander("Edit", expanded=False):
                     new_text = st.text_area(
                         "config (YAML)", value=col["yaml_text"], height=200,
                         key=f"bench_edit_{col['cid']}",
                         label_visibility="collapsed")
-                    if st.button("aplicar", key=f"bench_apply_{col['cid']}"):
+                    if st.button("Apply", key=f"bench_apply_{col['cid']}"):
                         try:
                             bc.load_config_text(new_text)
                         except Exception as exc:
-                            st.error(f"YAML inválido: {exc}")
+                            st.error(f"Invalid YAML: {exc}")
                         else:
                             if new_text != col["yaml_text"]:
                                 col["yaml_text"] = new_text
                                 col["edited"] = True
                             st.rerun()
-            if st.button("remover", key=f"bench_del_{col['cid']}"):
+            if st.button("Remove", key=f"bench_del_{col['cid']}"):
                 st.session_state[K_COLUMNS] = [
                     c for c in st.session_state[K_COLUMNS] if c["cid"] != col["cid"]]
                 st.rerun()
@@ -366,31 +465,18 @@ def render() -> None:
         for col, spec, per_col in zip(cols, specs, results)
     ]
 
-    # ── aggregates, train and test in separate blocks ─────────────────────────
+    # ── summary ───────────────────────────────────────────────────────────────
     st.divider()
-    st.markdown("#### Agregados")
-    st.caption(
-        "Regra de vazamento: todo número agregado abaixo é calculado sobre o "
-        "split de TREINO. O bloco de teste é separado, rotulado, e nunca somado "
-        "ao de treino."
-    )
-    agg_cols = st.columns(len(cols))
-    for i, col in enumerate(cols):
-        with agg_cols[i]:
-            st.markdown(f"**{col['name']}**")
-            m = bc.metrics_by_split(results[i], labels, selected, membership)
-            _render_metrics(m["train"], "TREINO")
-            if m["test"]["ids"]:
-                st.caption("— — —")
-                _render_metrics(m["test"], "TESTE (split congelado)")
+    metrics = [bc.metrics_by_split(r, labels, selected, membership) for r in results]
+    _render_summary(metrics, [c["name"] for c in cols])
 
     # ── aligned grid ──────────────────────────────────────────────────────────
     st.divider()
-    st.markdown("#### Por ciclone")
+    st.markdown("#### Per cyclone")
+    _legend()
     show_labels = st.session_state[K_LABELS]
     for sid in selected:
-        st.markdown(f"**{sid}** · {source_of[sid]} · split "
-                    f"{membership.get(sid, '—')}")
+        st.markdown(f"**{sid}** · {source_of[sid]} · {membership.get(sid, '—')} split")
         values = tuple(float(x) for x in series_all[sid].values)
         row = st.columns(len(cols) + (1 if show_labels else 0))
         off = 0
@@ -398,10 +484,10 @@ def render() -> None:
             with row[0]:
                 rec = labels.get(sid)
                 if rec is None:
-                    st.caption("sem rótulo manual")
+                    st.caption("no manual label")
                 else:
                     runs = bc.label_runs_for(rec)
-                    st.image(_cell_png(values, tuple(runs), "rótulo manual"),
+                    st.image(_cell_png(values, tuple(runs), "manual label"),
                              use_container_width=True)
             off = 1
         for i, col in enumerate(cols):
@@ -417,15 +503,15 @@ def render() -> None:
                     seq_ok = ([p for p, _ in res["starts"]]
                               == [bc.normalize_phase(p["phase"])
                                   for p in rec["phases"]])
-                    st.caption(f"sequência: {'bate' if seq_ok else 'difere'}")
+                    st.caption(f"sequence: {'match' if seq_ok else 'differs'}")
                     mm = bc.mature_metrics({sid: res}, labels, [sid])
                     if mm["rows"]:
                         r = mm["rows"][0]
                         if r["d_start"] is None:
-                            st.caption("maduro: sem par")
+                            st.caption("mature: no pair")
                         else:
                             st.caption(
-                                f"maduro Δ={r['d_start']:+d}/{r['d_end']:+d} "
-                                f"({'ok' if r['hit'] else 'fora'} de "
+                                f"mature Δ={r['d_start']:+d}/{r['d_end']:+d} "
+                                f"({'within' if r['hit'] else 'outside'} "
                                 f"{bc.MATURE_MARGIN})")
         st.divider()
