@@ -1647,7 +1647,8 @@ ground. It strengthens the FAIL (a third series is damaged at `pr = 0.60`) and i
 is a lesson for the next gate's wording.
 
 **How much weight the two counted losses carry.** `20191014`'s mature under
-`params-10` is at 135–137 against a label of 43–69 — wrong by 92 steps — so losing
+`params-10` is at 135–137 [**corrected: 135–139**, see 20(a)] against a label
+of 43–69 — wrong by 92 steps — so losing
 it is not clearly a regression. Stripped of that case, the FAIL rests on
 `scfcf1387` alone, which fails (a′), (c) and (f) on its own. One series is enough
 to fail the gate as declared, and `scfcf1387` is the cleanest possible case, but
@@ -1670,7 +1671,7 @@ is worse because it is **silent**: it wraps to `index[-1]` and returns
 `next_z_peak`, a maximally wrong window, instead of raising. Not fixed — this
 front changes no package code.
 
-### (d) OPEN — `mature_amplitude_fraction=0.90` is free improvement, unclaimed
+### (d) ~~OPEN~~ **CLOSED by 20(a) below, 2026-09-17** — `mature_amplitude_fraction=0.90` is free improvement, unclaimed
 
 Holding everything else at `params-10`, 0.95 → 0.90 raises matures within ±6 of
 their label from **32/47 to 38/47**, leaves the sequence at 30/47 and the
@@ -1678,6 +1679,120 @@ synthetics at 12/12, and moves no incipient boundary. Not pursued here because i
 does not fix `20160735`. It bears directly on item 19(a) — the mature window is
 squeezed from both sides — and is the cheapest unclaimed gain the grid turned up.
 
+
+### 20(a) — `mature_amplitude_fraction` 0.95 → 0.90 — **closed, gate PASS, 2026-09-17**
+
+Closes 20(d) above, which registered this cell as the cheapest unclaimed gain the
+item-20 grid turned up. Confirmed in isolation, with its own gate declared before
+measurement.
+
+**What changed, and why.** `mature_amplitude_fraction` 0.95 → 0.90, in the
+calibration config only. The parameter sets the fraction of each side's
+peak-to-valley amplitude a timestep must still cover to count as mature, so 0.95
+admitted only the deepest 5% of the cycle and produced a window systematically
+too short against the manual label — train medians: start +2, end −2, duration
+−5. 0.90 doubles the accepted band and extends the window at both ends.
+`prominence_relative` stays at 0.30. No other parameter is touched, and no line
+of `cyclophaser/` changes.
+
+**Gate, declared before measurement, measured with the instruments the
+step-3 ruling assigns** — (a) and (e) with `pair_by_overlap`
+(`research/labels/diagnostics/item19/item19_core.py:130`, both ends, fixed margin
+6), (b) with `evaluate_against_labels.py` / `score_phase_sequences`:
+
+| | predicted | measured | |
+|---|---|---|---|
+| (a) matures within ±6 at both ends | 38/47, M95 ⊆ M90 | **38/47**, `M95 − M90` = **∅** | PASS |
+| (b) sequence | 30/47, S90 = S95 | **30/47**, both differences **∅** | PASS |
+| (c) synthetics | 12/12 unchanged | **12/12 → 12/12** | PASS |
+| (d) incipient boundaries | identical case by case | **0 of 47 differ** | PASS |
+| (e) `20205386` | boundary stays within ±6 | **YES both configs** (60–62 → 60–63) | PASS |
+| (f) suite, package diff | 1130 passed, 0 failed; empty diff | **1130 passed, 0 failed**; diff **empty** | PASS |
+| (g) clean run, no degenerate window | 47/47, no 1-step mature, none ending on the next z peak | **47/47**, **0 and 0** | PASS |
+
+**The six series that join**, nominally: `20150436`, `20160735`, `20170342`,
+`20180628`, `20180733`, `20207822`. None leaves — `M95 − M90` is empty, so the
+gain is strictly additive over the nominal set, not a net total hiding a swap.
+
+**Caveat, and it is the important line in this subsection: 38/47 is a
+best-block metric, not a cleanliness metric.** `pair_by_overlap` pairs the
+detected block with the largest overlap against the label, so a series can count
+as a hit while remaining fragmented. `20160735` is exactly that case: at 0.90 it
+emits four mature blocks — 5, 12, **32** and 12 steps — and enters the 38 because
+the 32-step block at 150–181 matches the 33-step label at 145–177 (Δ +5 / +4).
+The detector still produces four matures where the label has one. `20203947`
+is fragmented the same way, four blocks of 6, 7, 8 and 8 steps, and does *not*
+reach the 38. So **38/47 means "the best mature is in the right place", not "the
+detection is clean"** — and that is precisely why the sequence score is pinned at
+30/47 on both sides of the change. Any reading of 38/47 as a detection-quality
+number is wrong.
+
+**Accepted limitation of the instrument.** `pair_by_overlap` scores only
+`lab_mat[0]` (`item19_core.py:187`), so the second labelled mature of
+`20203947`, `s6b542eee` and `sbd6c6920` is never scored, in **either**
+configuration. Both totals — 32/47 and 38/47 — are over 47 **series**, not 47
+matures. This belongs to 20b/20c, not to this front.
+
+**Corroboration from outside the gate.** `evaluate_against_labels.py` on both
+configs, over the same 30 sequence-matching series on each side: mature start hit
+56.7% → **73.3%** (MAE 2.23 → 1.73), decay start 65.6% → **93.8%** (MAE 2.62 →
+1.41), all boundaries 61/89 → **75/89**. The decay gain follows mechanically from
+the mature window extending forward — the mature→decay boundary lands closer to
+the label. The two runs' output differs in the mature and decay lines and nowhere
+else; the incipient block is byte-identical, which is an independent confirmation
+of (d).
+
+**Side effect that moves the starting point for 20b and 20c.** In `20160735` the
+true block grows from 13 to 32 steps while the spurious ones grow too, so the
+largest-spurious / true ratio falls to 12/32 = **0.375** — below any genuine
+ratio in the labels. A depth rule (20b) or a duration floor (20c) calibrated
+against the `params-10` window is calibrated against the wrong window; both must
+be re-derived on the 0.90 window.
+
+**`20180733` changed category.** It now hits the mature boundary (two blocks,
+paired 135–146 against label 129–150) but its sequence is still wrong. It is one
+of the three problem-C cases (a `residual` where the label continues in `decay`).
+This does **not** resolve C; it moves C's starting point, and C should be
+re-diagnosed on 0.90 rather than on `params-10`.
+
+**`CHANGELOG.md` deliberately not touched.** A recorded decision, not an
+omission: the CHANGELOG describes the package, and no package line changed in
+this front.
+
+#### Two corrections to the earlier record
+
+1. **`20191014`'s mature under `params-10` is 135–139, not 135–137.** The
+   five-step window is what the detector produces; under `params-11` it is
+   134–140. The figure 135–137 appears in the item-20 documents and is wrong.
+   The case still misses by ~92 steps against a label starting at 43 in both
+   configurations — unchanged in kind, and not a regression of this front — but
+   the recorded number was incorrect.
+2. **The repository has two measuring instruments with different definitions of
+   "a correct mature", and until now no document said which governs what.**
+   `score_phase_sequences` scores only series whose whole phase sequence matches
+   exactly, compares phase **starts** only, and uses each label's own
+   `tolerance_idx`; `pair_by_overlap` scores **all** series, compares **both
+   ends**, and uses a fixed margin of 6. They are not interchangeable, and a gate
+   stated in one instrument's numbers cannot be checked with the other — front
+   20a was halted at its step 3 for exactly this reason before the ruling arrived
+   (`research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md`). **Open debt:
+   pick the governing instrument per quantity and say so in one place.** To be
+   resolved in the repository clean-up front, alongside the `expected_starts_idx`
+   removal.
+
+**Reproduced in two environments**, which is worth stating because this code has
+shown version sensitivity elsewhere: python 3.12.14 / numpy 2.5.3 / scipy 1.18.0,
+and independently on numpy 2.4.4 / scipy 1.17.1 from a clean clone with a
+separate driver — 32/47, 38/47, `M95 − M90` empty, S90 = S95, 12/12, 0 of 47
+incipient boundaries moved, `20205386` 60–62 → 60–63, zero pairing ties, zero
+one-step matures, and the same six series joining. The numbers are robust to that
+version difference, unlike `mature_amplitude_fraction = 1.00`, whose `IndexError`
+reproduces on one and not the other (20(c) above).
+
+**Artifacts.** Config `research/labels/configs/cyclophaser_params-11.yaml`,
+sha256 `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420`.
+Report, tables T1–T8, raw record and both evaluation outputs in
+`research/labels/diagnostics/item20a/`.
 
 ### 20(e) — candidate mechanisms not yet measured
 

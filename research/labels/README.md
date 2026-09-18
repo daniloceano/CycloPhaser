@@ -46,6 +46,36 @@ The labelling UI itself is `tools/calibration_app/label_tab.py`, reached through
 the **Label** display mode of the calibration app. Tests are in
 `tests/test_manual_labels.py`.
 
+## Reference configuration
+
+**Current calibration reference: `research/labels/configs/cyclophaser_params-11.yaml`**
+(sha256 `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420`).
+It is `params-10` with `mature_amplitude_fraction` 0.90 instead of 0.95, closed
+by front 20(a) with a PASS gate. **Future fronts measure against this config.**
+
+`cyclophaser_params-9.yaml` and `cyclophaser_params-10.yaml` are historical.
+They are kept intact and are never rewritten: earlier fronts' numbers were
+produced with them, and editing one retroactively would invalidate the record it
+anchors.
+
+**This is not the package default.** `mature_amplitude_fraction` in
+`cyclophaser/` remains **0.95** and did not change in front 20(a) — that front
+touched no package line. Moving the default is a public-API decision, deferred
+until after fronts 20b and 20c.
+
+**`research/labels/diagnostics/item19/item19_core.py` keeps its `CONFIG`
+pointing at `params-10` on purpose.** It is the frozen measuring instrument of
+items 19 and 20, and the 32/47 and 38/47 figures were produced with it in that
+state. Do not "fix" that pointer — repointing it at `params-11` would silently
+redefine the baseline every later front compares against.
+
+Two instruments score matures and they are **not** interchangeable:
+`evaluate_against_labels.py` / `score_phase_sequences` scores only series whose
+whole phase sequence matches, compares phase **starts**, and uses each label's
+own `tolerance_idx`; `item19_core.pair_by_overlap` scores **all** series,
+compares **both ends**, and uses a fixed margin of 6. Which one governs which
+quantity is open debt — see item 20(a) in `docs/future_work.md`.
+
 ## Workflow
 
 **1 — the split (already done; do not redraw).**
