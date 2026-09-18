@@ -134,6 +134,82 @@ Os mesmos helpers alimentam o renderizador Plotly do app e o render estático
 matplotlib de conferência em
 `research/app_layer_inspector/gen_inspector_figures.py`.
 
+## Aba Benchmark
+
+Compara N configurações lado a lado, sobre os ciclones que você escolher,
+alinhadas por ciclone. Cada coluna é criada a partir do estado atual da sidebar,
+de um YAML enviado, de um arquivo de `research/labels/configs/` (os onze) ou de
+um snapshot congelado de versão publicada, e continua editável na própria aba.
+
+**Cabeçalho de cada coluna** — cinco itens, sempre:
+
+1. sha256 do YAML de origem, ou `editado na sessão` se foi alterado;
+2. commit do código que está rodando (`git rev-parse HEAD`). **Não** o campo
+   `metadata.cyclophaser_version`: ele diz `2.0.0` nos onze arquivos e não
+   distingue nada;
+3. chaves presentes no YAML e ignoradas pela assinatura atual (`distance`);
+4. chaves ausentes preenchidas pelo default atual, com o valor;
+5. aviso **"config anterior à correção do filtro"** quando falta
+   `boundary_padding`. Não é cosmético: os YAMLs de v1 a v5 trazem
+   `use_filter: true`, e no código daquela época `True` era lido como a janela
+   inteira 1 (bool é subclasse de int), de modo que o filtro **nunca** era
+   aplicado. A mesma linha hoje aplica o filtro. Sem o aviso, a coluna mostra um
+   resultado que ninguém viu na época e o apresenta como histórico.
+
+**Os dois medidores** aparecem sempre, cada um com o nome do instrumento:
+sequência de fases por `evaluate_against_labels.py / score_phase_sequences`
+(só os inícios, `tolerance_idx` por rótulo, recusa parear quando a sequência não
+bate) e pareamento do maduro por `item19_core.pair_by_overlap` (maior
+sobreposição, as duas pontas, margem fixa 6). São instrumentos diferentes e
+nunca são somados.
+
+**`evaluation.bad_cases_count` não é placar.** Aparece só como anotação
+histórica rotulada: são marcações visuais feitas em épocas diferentes, com
+conhecimento diferente do problema (v5 e v6 marcam 0; v9 marca 6).
+
+**Vazamento.** Todo número agregado é calculado sobre o split de treino.
+Agregados envolvendo os 16 ciclones reais do split de teste congelado aparecem
+em bloco separado, rotulado, e nunca somados ao de treino. Os rótulos manuais
+são opt-in.
+
+Colunas de referência congeladas vêm de `research/snapshots/` (ver o README de
+lá): a aba **lê arquivos**, nunca roda uma versão publicada ao vivo.
+
+## Ordem da sidebar
+
+Os controles são agrupados pela ordem em que o detector **executa**, não por
+nome de fase:
+
+| grupo | etapa | função |
+|---|---|---|
+| 1 Filtro Lanczos | 1 | `process_vorticity` |
+| 2 Suavização Savitzky-Golay | 2 | `process_vorticity` |
+| 3 Filtragem de extremos | 3 | `find_peaks_valleys(z)` |
+| 4 Intensificação | 4 | `find_intensification_period` |
+| 5 Decaimento | 5 | `find_decay_period` |
+| 6 Maduro | 6 | `find_mature_stage` |
+| 7 Residual | 7 | `find_residual_period` |
+| 8 Incipiente | 9 | `find_incipient_period` |
+
+A etapa 8, `post_process_periods`, não tem parâmetro.
+
+Duas consequências de ler a ordem real em vez de supô-la: a **filtragem de
+extremos é a etapa 3** — roda antes de todas as fases, e os extremos que
+sobrevivem ali são os que todas elas enxergam — e
+`decay_tail_amplitude_fraction` é lido por `find_residual_period`
+(`find_stages.py:588`), não por `find_decay_period`, por isso está sob Residual.
+
+Dois parâmetros atravessam grupos e trazem nota no próprio widget:
+`length_scale` (escala os limiares de comprimento de intensificação e
+decaimento, `find_stages.py:387`, e muda fases detectadas em 20160735, 20191014
+e 20203947 sob params-9) e `boundary_padding` (é parâmetro de filtro, mas
+governa o incipiente: com `reflect` nenhuma série recusa incipiente, 0/51; com
+`edge`, 33/51 recusam).
+
+A cobertura desse layout é verificada por teste automático, não a olho:
+`tests/test_sidebar_coverage.py` enumera a assinatura pública do pacote e exige
+que cada parâmetro tenha controle e que nenhuma chave de widget se repita.
+
 ## Escopo atual (Etapa 1)
 
 - Upload de 1 arquivo CSV

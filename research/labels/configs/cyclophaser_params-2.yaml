@@ -1,0 +1,34 @@
+metadata:
+  timestamp: '2026-07-16T22:03:20.763373+00:00'
+  cyclophaser_version: 2.0.0
+filter_params:
+  use_filter: true
+  cutoff_low: 168
+  cutoff_high: 24
+  replace_endpoints_with_lowpass: 0
+  use_smoothing: 31
+  use_smoothing_twice: false
+  savgol_polynomial: 3
+phase_params:
+  threshold_intensification_length: 0.075
+  threshold_intensification_gap: 0.075
+  threshold_mature_distance: 0.18
+  threshold_mature_length: 0.15
+  threshold_decay_length: 0.075
+  threshold_decay_gap: 0.075
+  threshold_incipient_length: 0.4
+  length_scale: local
+evaluation:
+  total_cyclones: 51
+  bad_cases_count: 9
+  bad_cases_percent: 17.6
+  bad_cases:
+  - '20150646'
+  - '20180608'
+  - '20180733'
+  - '20190639'
+  - '20191014'
+  - '20203373'
+  - '20203947'
+  - '20206498'
+  - '20207822'
