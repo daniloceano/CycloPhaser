@@ -2133,6 +2133,153 @@ throughout.
 
 ---
 
+## 23. Front 20(c) — proportional duration floor for `mature` — **stage 1 gate FAIL (premise), front closed, 2026-09-21**
+
+Branch `research/item20c-duration-ratio`, commit `83fcd59`, pushed, **not
+merged** (stage 1 was measurement only; there is nothing to merge into the
+package). **No line of `cyclophaser/` was touched** — `git diff develop-v2.1 --
+cyclophaser/` is empty.
+
+### The question
+
+The detector emits more than one `mature` block on series whose manual label has
+one, which breaks the phase sequence even when the principal mature is correctly
+placed. Proposal: reject a mature block whose **duration**, as a fraction of an
+**anchor** block's duration in the same series, falls below a floor — a
+plausibility rule per valley, never a cap on the number of matures, since a
+cyclone can genuinely have several.
+
+Stage 1 asked only whether such a floor exists. It does not.
+
+### Answer — FAIL, and structurally, not by tuning
+
+Under `params-12` (sha256 `39262f45…7ebec3`; `mature_amplitude_fraction` 0.90
+and `mature_min_depth` 0.80 both frozen, neither swept), **7 of the 47 train
+series** emit more than one mature block: `20150656`, `20180628`, `20180733`,
+`20203947`, `20205386` (three blocks), and the synthetics `s6b542eee`,
+`sbd6c6920`.
+
+**In `20205386` the anchor is itself a spurious block, under both implementable
+definitions.** Anchor A (block of the deepest valley, D1 = 1.0000 at v82) picks
+`(80,85)`; anchor B (longest block) picks `(36,42)`. Neither matches the label.
+The label-matched block `(60,63)` is the **shortest** of the three, duration 4.
+A proportional floor never rejects its own anchor, so criterion (a) is
+unreachable under A and B alike; under A the other spurious block is *longer*
+than the anchor (ratio 1.167), so no floor reaches it either. The rule points
+the wrong way: the block a duration floor most wants to discard is the one the
+label calls correct.
+
+This is the mechanism that was **predicted before measuring** (Danilo and
+Claude): "FAIL of premise; in 20205386 anchor A probably lands on a spurious
+block". Confirmed, unadjusted.
+
+| criterion | anchor A | anchor B |
+|---|---|---|
+| (a) removes both spurious blocks of `20205386` | **FAIL** | **FAIL** |
+| (b) cuts no label-matched block in any of the 47 | PASS, `r ≤ 0.6667` | PASS, `r ≤ 0.5714` |
+| (c) preserves both detected blocks of `20203947` | PASS | PASS |
+| (d) removes no block of the 12 synthetics | PASS | PASS |
+| (e) generalises beyond `20205386` | PASS (`20150656`, `20180628`) | PASS (same two) |
+
+Anchor C (label-matched) was diagnostic only and never counted toward the
+verdict; its band is empty too (`r > 1.7500` to clear `20205386` against
+`r ≤ 1.0000` to keep the synthetics).
+
+### The anchors disagree — the central measurement
+
+They diverge in **4 of the 7** series: `20180733` (A≠B), `20203947` (C≠A=B),
+`20205386` (**all three differ**), `s6b542eee` (A≠B=C).
+
+### Numbers worth not re-deriving
+
+* **A cost-free floor does exist**, it simply does not do the job it was
+  proposed for: `r ∈ (0.5333, 0.6667]` under anchor A (`(0.5333, 0.5714]` under
+  B) removes the spurious second blocks of `20150656` and `20180628` and cuts
+  nothing label-matched in any of the 47. It does not touch `20205386`,
+  `20180733` or `20203947`. Recorded as a smaller separate candidate; **not**
+  proposed — it fails this gate, rests on two series, and its downstream
+  boundary effect is unmeasured.
+* **The 0.48 ceiling in the premise does not apply.** `20203947`'s two
+  *labelled* matures have durations 23 and 11 (ratio 0.4783), but its two
+  *detected* blocks are both duration 8 — **detected ratio exactly 1.000**.
+  Labelled duration ratios do not transfer to detected ones. The real ceiling is
+  `20205386`'s own true block at 0.667 (A) / 0.571 (B).
+* `20180733`'s spurious block is **longer** than the true one (13 vs 12): no
+  duration rule in either direction separates that pair.
+* Both synthetics are *correct* — each genuinely has two labelled matures, all
+  four blocks match, both already pass the sequence test, and every ratio is
+  exactly 1.000.
+
+### Method note — attribution was verified, not assumed
+
+`get_periods` does not report which `z_valley` generated which block, and the
+blocks it returns have already passed through `find_residual_period`,
+`post_process_periods` and `find_incipient_period`. The pipeline was therefore
+replayed step by step with the real package functions, recording each eligible
+valley's window from the real `_amplitude_mature_bounds`, and **the replayed
+`periods` column was asserted equal to the single-call `get_periods` output on
+47/47 series** before any per-block statistic was read. `pair_by_overlap` came
+from the frozen `item19_core.py`; that module's `CONFIG` still points at
+`params-10` and was not used — `params-12` was loaded independently.
+
+Duration convention, declared before measuring: `end − start + 1`. Depth
+`D1 = (z_max − z_valley)/(z_max − z_min)` on `df['z'] = vorticity_smoothed2`,
+never the raw series.
+
+### Latent defects `find_stages.py:152` / `:159`-`:160` — 0 firings
+
+Independently re-confirmed by **recomputing the trigger on every valley**, not
+by absence of an exception — the same conclusion item 22 reached, by the same
+reasoning reached independently. Substituting the level definition gives an
+identity, `margin ≡ −(1 − mature_amplitude_fraction) · amplitude` (verified
+numerically to a relative error of **3.67e-16**), which collapses the trigger to
+a **sign test**: either defect can fire only if the amplitude is `≤ 0`, i.e.
+only if a valley's z sits at or above its own bounding peak's z.
+
+Of **81** z-valleys in the 47 series, **59** reach the window code (the other 22
+lack a bounding peak and hit the `continue` at `find_stages.py:328`-`329`) and
+**52** are eligible after the 0.80 depth floor. All 59 were checked, not just
+the 52. **0/59** firings of each defect; `min amplitude_prev = +5.116e-06`,
+`min amplitude_next = +2.353e-07`, both strictly positive. Nearest to the sign
+flip: `20205386` v61 and `20181046` v26. Both defects remain unfixed.
+
+### Baseline, unmoved
+
+Mature boundary within ±6 **38/47**; sequence **31/47**; synthetics **12/12**;
+`series_sha256` **47/47**; suite **1205 passed, 0 failed**. Of the 16 sequence
+failures only 5 are multi-mature-block series, so fragmentation of `mature` is a
+minority cause of sequence mismatch on this split.
+
+One instrument note, not a divergence: 38/47 is the item 19/20 convention
+(`pair_by_overlap` against the **first** labelled mature only). A per-block scan
+across *all* labels finds **39** series with a matched block; the one-series
+difference is `20203947`, which matches on L1. Both are right for their own
+instrument.
+
+### Still open
+
+* **`20205386` is unexplained.** All three of its valleys clear the 0.80 depth
+  floor and its true valley is neither the deepest nor the one generating the
+  longest block. **Neither depth (item 22 stage 1) nor duration (here)
+  separates it.** A future front needs a different discriminator; composite
+  depth×duration scores were out of scope and remain unmeasured.
+* **Whether removing a block displaces a surviving block's boundary is not
+  measured** — it requires an implementation. `find_mature_stage` writes into
+  `periods`, which `find_residual_period`, `post_process_periods` and
+  `find_incipient_period` then read. This is the 20(b)/`20205386` lesson (watch
+  the boundary, not the presence) and would have been stage 2's first check.
+* `20170409` and `20190639` each miss the fixed margin 6 by a single step
+  (Δend −7, Δstart +7). Unrelated to this front; noted because they sit exactly
+  at the instrument's edge.
+* `20160735`'s remaining defect (two false intensification/decay cycles filling
+  the gap before mature) was out of scope and is untouched.
+
+Artefacts: `research/labels/diagnostics/item20c/` — `REPORT.md`,
+`item20c_measure.py`, `item20c_anchors.py`, `item20c_facts.json`,
+`item20c_tables.md`.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
