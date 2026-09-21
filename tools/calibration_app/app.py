@@ -184,6 +184,7 @@ _DEFAULTS: dict = {
     "length_scale":      "global",
     "mature_method":              "derivative",
     "mature_amplitude_fraction":  0.90,
+    "mature_min_depth":           0.00,
     "extrema_prominence_enabled":     False,
     "extrema_prominence_mode":        "relative",   # 'relative' | 'absolute'
     "extrema_prominence_rel_val":     0.10,         # fraction (relative mode)
@@ -326,6 +327,7 @@ _YAML_PHASE_MAP: dict = {
     "length_scale":                     ("length_scale", _parse_length_scale),
     "mature_method":                    ("mature_method", _parse_mature_method),
     "mature_amplitude_fraction":        ("mature_amplitude_fraction", float),
+    "mature_min_depth":                 ("mature_min_depth", float),
     "incipient_method":                 ("incipient_method", _parse_incipient_method),
     "incipient_plateau_tau":            ("incipient_plateau_tau", float),
     "incipient_plateau_signal":         ("incipient_plateau_signal", _parse_incipient_signal),
@@ -347,6 +349,13 @@ _YAML_PHASE_MAP: dict = {
 # simply wasn't in use.
 _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative",
                               "decay_tail_amplitude_fraction",
+                              # mature_min_depth is optional for the same
+                              # backward-compatibility reason: params-1..11 were
+                              # all exported before the depth floor existed and
+                              # must still import without a "missing key"
+                              # warning, falling back to the 0.0 default (which
+                              # is a no-op).
+                              "mature_min_depth",
                               # The incipient_* keys are optional for the same
                               # backward-compatibility reason as boundary_padding
                               # below: every YAML exported before the plateau
@@ -426,6 +435,7 @@ _PARAM_WIDGET_KEYS: dict[str, tuple[str, ...]] = {
     "threshold_mature_length":        ("thr_mat_len",),
     "threshold_mature_distance":      ("thr_mat_dist",),
     "mature_amplitude_fraction":      ("mature_amplitude_fraction",),
+    "mature_min_depth":               ("mature_min_depth",),
     # step 7 — residual
     "decay_tail_amplitude_fraction":  ("decay_tail_enabled",
                                        "decay_tail_fraction_val"),
@@ -456,7 +466,12 @@ _NON_PARAMETER_ARGS = frozenset({"zeta_df", "vorticity", "plot", "plot_steps",
 
 
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
-_REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP)
+# A key in _YAML_PHASE_MAP is APPLIED on import; being in _OPTIONAL_PHASE_YAML_KEYS
+# only keeps it out of the "unknown key" list. A parameter that must be both
+# applied when present and not reported missing when absent therefore has to be
+# subtracted here explicitly -- which is what every config exported before
+# mature_min_depth existed (params-1..11) needs.
+_REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP) - {"mature_min_depth"}
 
 
 # ── Pure helper functions ─────────────────────────────────────────────────────────
@@ -1770,6 +1785,25 @@ with st.sidebar:
     else:
         mature_amplitude_fraction = _DEFAULTS["mature_amplitude_fraction"]
 
+    mature_min_depth = st.slider(
+        "Mature minimum depth", 0.00, 1.00, step=0.01,
+        value=_DEFAULTS["mature_min_depth"], key="mature_min_depth",
+        help=(
+            "Depth floor deciding which vorticity valleys may generate a mature "
+            "phase at all. A valley qualifies when its normalised depth "
+            "`D1 = (z_max - z_valley) / (z_max - z_min)` reaches this value — 1.0 "
+            "at the series minimum, 0.0 at its maximum. Raise it to stop shallow "
+            "dips from emitting spurious mature blocks. This is NOT a cap on how "
+            "many mature phases may be detected: every valley clearing the floor "
+            "still produces its own block, since a cyclone can genuinely have more "
+            "than one mature stage. Unlike the prominence filter above (which is "
+            "the *smaller of a valley's two climbs* and feeds every phase), this "
+            "acts inside mature detection only and cannot move an incipient, decay "
+            "or residual boundary. Applies to both mature stage methods. "
+            "0.00 (default) admits every valley and changes nothing."
+        ),
+    )
+
 
     st.divider()
 
@@ -2001,6 +2035,7 @@ _PHASE_PARAMS = dict(
     length_scale=length_scale,
     mature_method=mature_method,
     mature_amplitude_fraction=mature_amplitude_fraction,
+    mature_min_depth=mature_min_depth,
     decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
     incipient_method=incipient_method,
     incipient_plateau_tau=incipient_plateau_tau,

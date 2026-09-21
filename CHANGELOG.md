@@ -9,6 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+**`mature_min_depth` — an opt-in depth floor on which valleys may generate a
+mature phase.**
+
+`get_periods` and `determine_periods` accept a new `mature_min_depth` float in
+`[0, 1]`. A z-valley is allowed to generate a mature block only when its
+normalised depth
+
+```
+D1 = (z_max - z[valley]) / (z_max - z_min)
+```
+
+measured on the series' own `z`, is at least this value — `1.0` at the series
+minimum, `0.0` at its maximum. It applies to both `mature_method` values, since
+it decides which valleys are *eligible*, not how the window around one is sized.
+
+It is **not** a cap on the number of mature phases. Every valley clearing the
+floor still produces its own block; a cyclone can genuinely have more than one
+mature stage, and the rule is deliberately built to preserve that.
+
+Why this is not part of the existing prominence filter: `prominence_relative` is
+the *smaller of a valley's two climbs*, which is a different quantity from depth,
+and it is applied in `find_peaks_valleys`, whose output feeds every phase.
+`mature_min_depth` is applied inside `find_mature_stage` alone and so cannot move
+an incipient, decay or residual boundary.
+
+A series whose z range is zero or non-finite has no depth scale; the floor is
+skipped for that series and a `UserWarning` says so rather than the filter being
+silently ignored.
+
+**Default `0.0` is a no-op**: every valley has `D1 >= 0` by construction, so the
+filter admits all of them and the phase output is unchanged from prior versions.
+
 ### Removed
 
 **`distance` extrema filter removed from the package and the calibration app.**

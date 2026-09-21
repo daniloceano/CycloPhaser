@@ -732,6 +732,7 @@ def get_periods(vorticity,
                 length_scale: str = "global",
                 mature_method: str = "derivative",
                 mature_amplitude_fraction: float = 0.90,
+                mature_min_depth: float = 0.0,
                 decay_tail_amplitude_fraction: float = None,
                 incipient_method: str = "geometric",
                 incipient_plateau_tau: float = 0.20,
@@ -964,6 +965,22 @@ def get_periods(vorticity,
             side's peak-to-valley amplitude a timestep's z must still reach to
             count as mature. Only used when ``mature_method="amplitude"``.
             Default 0.90.
+        mature_min_depth (float, optional): Depth floor in [0, 1] deciding which
+            z_valleys may generate a mature block at all. A valley qualifies when
+            its normalised depth ``D1 = (z_max - z[valley]) / (z_max - z_min)``,
+            measured on the series' own ``z``, is at least this value - 1.0 at the
+            series minimum, 0.0 at its maximum. Unlike ``prominence_relative``,
+            which is the SMALLER of a valley's two climbs and is applied in
+            ``find_peaks_valleys`` where it feeds every phase, this floor is
+            applied inside ``find_mature_stage`` alone and therefore cannot move
+            an incipient, decay or residual boundary. It applies to both
+            ``mature_method`` values, and it is not a cap on the number of mature
+            phases: every valley clearing the floor still produces its own block,
+            deliberately, since a cyclone can have more than one mature stage. A
+            series whose z range is zero or non-finite has no depth scale; the
+            floor is skipped for it and a ``UserWarning`` says so. See
+            ``find_stages.find_mature_stage``. Default 0.0 admits every valley and
+            reproduces the exact behaviour of all versions prior to this option.
         decay_tail_amplitude_fraction (float, optional): Fraction (0, 1] of the
             cycle's peak-to-valley amplitude. See the "decay_tail_amplitude_fraction
             note" above and ``find_stages.find_residual_period`` for the full
@@ -1045,6 +1062,7 @@ def get_periods(vorticity,
         "length_scale": length_scale,
         "mature_method": mature_method,
         "mature_amplitude_fraction": mature_amplitude_fraction,
+        "mature_min_depth": mature_min_depth,
         "decay_tail_amplitude_fraction": decay_tail_amplitude_fraction,
         "incipient_method": incipient_method,
         "incipient_plateau_tau": incipient_plateau_tau,
@@ -1134,6 +1152,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                             length_scale: str = "global",
                       mature_method: str = "derivative",
                       mature_amplitude_fraction: float = 0.90,
+                      mature_min_depth: float = 0.0,
                       decay_tail_amplitude_fraction: float = None,
                       incipient_method: str = "geometric",
                       incipient_plateau_tau: float = 0.20,
@@ -1306,6 +1325,22 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             side's peak-to-valley amplitude a timestep's z must still reach to
             count as mature. Only used when ``mature_method="amplitude"``.
             Default 0.90.
+        mature_min_depth (float, optional): Depth floor in [0, 1] deciding which
+            z_valleys may generate a mature block at all. A valley qualifies when
+            its normalised depth ``D1 = (z_max - z[valley]) / (z_max - z_min)``,
+            measured on the series' own ``z``, is at least this value - 1.0 at the
+            series minimum, 0.0 at its maximum. Unlike ``prominence_relative``,
+            which is the SMALLER of a valley's two climbs and is applied in
+            ``find_peaks_valleys`` where it feeds every phase, this floor is
+            applied inside ``find_mature_stage`` alone and therefore cannot move
+            an incipient, decay or residual boundary. It applies to both
+            ``mature_method`` values, and it is not a cap on the number of mature
+            phases: every valley clearing the floor still produces its own block,
+            deliberately, since a cyclone can have more than one mature stage. A
+            series whose z range is zero or non-finite has no depth scale; the
+            floor is skipped for it and a ``UserWarning`` says so. See
+            ``find_stages.find_mature_stage``. Default 0.0 admits every valley and
+            reproduces the exact behaviour of all versions prior to this option.
 
         decay_tail_amplitude_fraction (float, optional): Fraction (0, 1] of the
             cycle's peak-to-valley amplitude that the NaN tail after the last
@@ -1403,6 +1438,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         length_scale=length_scale,
         mature_method=mature_method,
         mature_amplitude_fraction=mature_amplitude_fraction,
+        mature_min_depth=mature_min_depth,
         decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
         incipient_method=incipient_method,
         incipient_plateau_tau=incipient_plateau_tau,

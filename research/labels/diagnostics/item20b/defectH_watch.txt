@@ -1,0 +1,21 @@
+DEFECT H WATCH (find_stages.py:982 - unconditional incipient overwrite)
+==============================================================================
+For every series where the floor removed a mature block, does the
+incipient overwrite [t0, boundary) cover any part of the removed range?
+If it does, the phase shown as the fill-in is the overwrite, not what
+the detector actually put there, and the fill-in reading is unsafe.
+
+20160735: incipient boundary None -> None; removed [(7, 11), (53, 64), (224, 235)]
+    block 7-11: incipient overwrite reaches index n/a -> does not reach it, fill-in is genuine
+    block 53-64: incipient overwrite reaches index n/a -> does not reach it, fill-in is genuine
+    block 224-235: incipient overwrite reaches index n/a -> does not reach it, fill-in is genuine
+20170794: incipient boundary None -> None; removed [(159, 167)]
+    block 159-167: incipient overwrite reaches index n/a -> does not reach it, fill-in is genuine
+20191014: incipient boundary 9 -> 9; removed [(134, 140)]
+    block 134-140: incipient overwrite reaches index 9 -> does not reach it, fill-in is genuine
+20203947: incipient boundary 12 -> 12; removed [(58, 63), (87, 93)]
+    block 58-63: incipient overwrite reaches index 12 -> does not reach it, fill-in is genuine
+    block 87-93: incipient overwrite reaches index 12 -> does not reach it, fill-in is genuine
+
+VERDICT: no removed block is touched by the incipient overwrite; every
+         fill-in reported in EXTRA 1 is the detector's own output.

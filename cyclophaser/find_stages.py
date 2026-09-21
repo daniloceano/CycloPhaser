@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 from scipy.signal import savgol_filter
@@ -194,6 +196,20 @@ def find_mature_stage(df, **args_periods):
               each side's peak-to-valley amplitude a timestep's z must still
               reach to count as mature. Default 0.90. Only used when
               mature_method="amplitude".
+            - 'mature_min_depth' (float, optional): Depth floor in [0, 1] on
+              which z_valleys may generate a mature block at all. A valley
+              qualifies when its normalised depth
+              ``D1 = (z_max - z[valley]) / (z_max - z_min)``, measured on this
+              series' own ``df['z']``, is >= this value: 1.0 at the series
+              minimum, 0.0 at its maximum. Applies to BOTH mature_method
+              values — it decides which valleys are eligible, not how the
+              window around one is sized. Default 0.0 admits every valley and
+              reproduces the previous behaviour exactly. A series whose z range
+              is zero or non-finite has no depth scale; the floor is skipped
+              for it and a UserWarning says so. Note this is NOT a cap on the
+              number of mature phases: any number of valleys may clear the
+              floor, which is deliberate — a cyclone can genuinely have more
+              than one mature stage.
             - 'threshold_mature_length' (float): Minimum length for a mature
               stage, as a fraction of a length that depends on 'length_scale'.
               Only used when mature_method="derivative" — see the note below.
@@ -236,6 +252,7 @@ def find_mature_stage(df, **args_periods):
     length_scale = args_periods.get('length_scale', 'global')
     mature_method = args_periods.get('mature_method', 'derivative')
     mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction', 0.90)
+    mature_min_depth = args_periods.get('mature_min_depth', 0.0)
 
     if mature_method not in ('derivative', 'amplitude'):
         raise ValueError(f"mature_method must be 'derivative' or 'amplitude', got {mature_method!r}.")
@@ -243,9 +260,59 @@ def find_mature_stage(df, **args_periods):
         raise ValueError(
             f"mature_amplitude_fraction must be in (0, 1], got {mature_amplitude_fraction!r}."
         )
+    if not 0 <= mature_min_depth <= 1:
+        raise ValueError(
+            f"mature_min_depth must be in [0, 1], got {mature_min_depth!r}."
+        )
 
     z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
+
+    # --- mature_min_depth: a per-valley depth floor on eligibility -----------
+    # Only valleys deep enough relative to their own series may generate a
+    # mature block. Depth is the normalised drop
+    #
+    #     D1 = (z_max - z[valley]) / (z_max - z_min)
+    #
+    # on the SAME series the rest of this function reads (df['z']), so D1 = 1
+    # at the series minimum and 0 at its maximum. Computing it per valley is
+    # arithmetically identical to normalising the series to [0, 1] first, and
+    # leaves every other phase untouched — nothing here writes to 'z' or to
+    # 'z_peaks_valleys', so intensification, decay, residual and incipient see
+    # exactly the same input they saw before.
+    #
+    # This is deliberately NOT part of the prominence filter in
+    # find_peaks_valleys. Prominence is the SMALLER of the two climbs out of a
+    # valley, which is a different quantity from depth, and that filter feeds
+    # every phase — moving this there would silently change incipient, decay
+    # and residual too. The floor acts here and only here: on which valleys
+    # find_mature_stage is allowed to build a window around.
+    #
+    # It is independent of mature_method: eligibility of a valley is a separate
+    # question from how the window around it is sized, so the floor applies to
+    # "derivative" and "amplitude" alike.
+    #
+    # Default 0.0 disables the rule: every valley has D1 >= 0 by construction,
+    # so the filter below is a no-op and the function reproduces its previous
+    # behaviour exactly.
+    if mature_min_depth > 0 and len(z_valleys) > 0:
+        z_all = df['z'].to_numpy(dtype=float)
+        z_max, z_min = np.nanmax(z_all), np.nanmin(z_all)
+        z_range = z_max - z_min
+        if not np.isfinite(z_range) or z_range <= 0:
+            # A flat or non-finite series has no depth scale, so D1 is
+            # undefined. The rule is skipped for this series rather than
+            # guessed at — and it says so, because silently ignoring a
+            # requested filter is worse than not offering it.
+            warnings.warn(
+                "mature_min_depth was requested but the z range of this series "
+                f"is {z_range!r}, so the normalised valley depth D1 is undefined. "
+                "The depth floor is NOT applied to this series.",
+                UserWarning,
+            )
+        else:
+            depth = (z_max - df.loc[z_valleys, 'z'].to_numpy(dtype=float)) / z_range
+            z_valleys = z_valleys[depth >= mature_min_depth]
 
     series_length = df.index[-1] - df.index[0]
     dt = df.index[1] - df.index[0]
