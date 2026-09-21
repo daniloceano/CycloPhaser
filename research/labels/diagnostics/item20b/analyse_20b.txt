@@ -1,0 +1,145 @@
+numpy 2.5.3  scipy 1.18.0  pandas 3.0.5
+params-11 sha256 24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420
+real train 35   synthetic train 12
+mature_amplitude_fraction = 0.9
+
+wrote /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/item20b/depth_table.csv (46 generating valleys)
+
+==============================================================================
+SANITY CHECK - 20160735 must emit four mature blocks of 5, 12, 32, 12
+==============================================================================
+blocks     [(7, 11), (53, 64), (150, 181), (224, 235)]
+durations  [5, 12, 32, 12]
+labelled   [(145, 177, 33)]
+series_sha256 verified against the label: True
+VERDICT: REPRODUCED
+
+==============================================================================
+SERIES FEEDING MATURE DETECTION
+==============================================================================
+determine_periods.py:1017  df['z'] = vorticity.vorticity_smoothed2   (FILTERED)
+find_stages._amplitude_mature_bounds reads df.at[..., 'z'] only.
+find_peaks_valleys is also called on df['z'], so the valleys are the
+filtered series' valleys too.
+
+filter: use_filter=True cutoff_low=168 cutoff_high=18 use_smoothing=False -> band-pass, the mean level is removed
+
+mean of FILTERED z, over the 35 real train series:
+   min -6.518493e-05   max -1.695117e-05   mean -3.828874e-05
+   max |mean| 6.518493e-05
+mean of RAW zeta (df['z_unfil']), same 35, for contrast:
+   min -9.374030e-05   max -3.852004e-05   mean -6.310788e-05
+
+|mean of filtered z| / series range, worst case: 280.6027%
+
+==============================================================================
+SIGN GUARD
+==============================================================================
+series with z_min >= 0 : 0  []
+generating valleys with z_valley > 0 : 0
+
+==============================================================================
+LATENT DEFECTS OF _amplitude_mature_bounds (active check)
+==============================================================================
+check performed: the triggering CONDITION is recomputed for every
+valley (amp_prev < 0 / amp_next < 0), not inferred from 'no exception'
+- the :160 one returns a wrong window silently and would never raise.
+
+:152 (violations_prev[-1]+1 overruns -> IndexError)  fired: 0
+:160 (violations_next[0]-1 wraps to index[-1])        fired: 0
+
+(checked over all 47 train series, real + synthetic, every valley that
+ find_mature_stage evaluates - not only the generating ones.)
+
+==============================================================================
+MEASUREMENT A - the generating-valley table
+==============================================================================
+generating valleys measured : 46  over 35 real train series
+   TRUE     (block overlaps a labelled mature) : 32
+   SPURIOUS (block overlaps none)              : 14
+   series emitting more than one block: 7  {'20150656': 2, '20160735': 4, '20170794': 2, '20180628': 2, '20180733': 2, '20203947': 4, '20205386': 3}
+   series with NO labelled mature : 2 ['20171179', '20181046']
+   series with NO detected block  : 1 ['20170760']
+
+==============================================================================
+SEPARABILITY TEST
+==============================================================================
+
+--- GLOBAL (35 real train series): 46 valleys (32 true / 14 spurious)
+  D1: min(TRUE) = 0.8805   max(SPURIOUS) = 1.0000   separates? NO   (gap -0.1195)
+  D2: min(TRUE) = 0.9272   max(SPURIOUS) = 1.0000   separates? NO   (gap -0.0728)
+
+--- 20160735 ALONE: 4 valleys (1 true / 3 spurious)
+  D1: min(TRUE) = 1.0000   max(SPURIOUS) = 0.7077   separates? YES   (gap +0.2923)
+  D2: min(TRUE) = 1.0000   max(SPURIOUS) = 0.6808   separates? YES   (gap +0.3192)
+
+==============================================================================
+THE VALLEYS THAT CAUSE THE OVERLAP (named)
+==============================================================================
+
+D1: lowest TRUE is 20205386 valley 61 at 0.8805
+     SPURIOUS at or above it: 5
+         20171179 v45   D1=1.0000 block 36-48 (13 steps) relprom=1.0
+         20181046 v26   D1=1.0000 block 19-26 (8 steps) relprom=1.0
+         20205386 v82   D1=1.0000 block 80-85 (6 steps) relprom=1.0
+         20180628 v72   D1=0.9980 block 70-75 (6 steps) relprom=0.33733522667861165
+         20180733 v37   D1=0.9303 block 31-43 (13 steps) relprom=0.7431865530294189
+
+D2: lowest TRUE is 20205386 valley 61 at 0.9272
+     SPURIOUS at or above it: 4
+         20171179 v45   D2=1.0000 block 36-48 (13 steps) relprom=1.0
+         20181046 v26   D2=1.0000 block 19-26 (8 steps) relprom=1.0
+         20205386 v82   D2=1.0000 block 80-85 (6 steps) relprom=1.0
+         20180628 v72   D2=0.9984 block 70-75 (6 steps) relprom=0.33733522667861165
+
+==============================================================================
+MEASUREMENT B - baseline for the multi-mature cases
+==============================================================================
+claimed by the prompt : ['20203947', 's6b542eee', 'sbd6c6920']
+actually >1 labelled mature among the 35 REAL train series : ['20203947']
+   20203947: real train
+   s6b542eee: synthetic train
+   sbd6c6920: synthetic train
+
+   20203947  detected blocks [(58, 63), (87, 93), (129, 136), (181, 188)]
+     labelled mature #1: 122-144 (23 steps)  ->  DETECTED by [(129, 136)]
+     labelled mature #2: 178-188 (11 steps)  [UNSURE]  ->  DETECTED by [(181, 188)]
+
+==============================================================================
+MEASUREMENT C - is the generating valley the series' deepest valley?
+==============================================================================
+cases whose mature matches the label (+/-6 both ends, params-11):
+   over all 47 train series      : 38
+   over the 35 real train series : 27
+
+--- all 47 train: 38 cases
+   generating valley is the deepest of ALL valley candidates : 36
+   ... the deepest of the SURVIVING valleys                  : 36
+   ... at relative prominence exactly 1.0000 (item 19's proxy): 36
+   generating valley could not be attributed                 : 0
+   EXCEPTIONS (not on the deepest valley): 2
+       20205386  valley 61  D1=0.8805  D2=0.9272  relprom=0.30736218980658475  (deepest valley is 82)
+      s6b542eee  valley 16  D1=0.9999  D2=0.9999  relprom=0.9760874578115777  (deepest valley is 48)
+
+--- 35 real train only: 27 cases
+   generating valley is the deepest of ALL valley candidates : 26
+   ... the deepest of the SURVIVING valleys                  : 26
+   ... at relative prominence exactly 1.0000 (item 19's proxy): 26
+   generating valley could not be attributed                 : 0
+   EXCEPTIONS (not on the deepest valley): 1
+       20205386  valley 61  D1=0.8805  D2=0.9272  relprom=0.30736218980658475  (deepest valley is 82)
+
+note: item 19 reported '30 of 32' using relative prominence == 1.0000
+as the stand-in for 'deepest valley'. Both columns are given above
+because they are not the same quantity - prominence is the SMALLER of
+the two climbs out of a valley, not the valley's depth.
+
+==============================================================================
+SIX ENTRIES NEW SINCE 20a (named in the brief), one line each
+==============================================================================
+   20150436: matches_label=True  d=(-2,-5)  gen valley=66  deepest=66  DEEPEST
+   20160735: matches_label=True  d=(5,4)  gen valley=159  deepest=159  DEEPEST
+   20170342: matches_label=True  d=(1,-2)  gen valley=46  deepest=46  DEEPEST
+   20180628: matches_label=True  d=(-1,-6)  gen valley=37  deepest=37  DEEPEST
+   20180733: matches_label=True  d=(6,-4)  gen valley=140  deepest=140  DEEPEST
+   20207822: matches_label=True  d=(2,-2)  gen valley=51  deepest=51  DEEPEST

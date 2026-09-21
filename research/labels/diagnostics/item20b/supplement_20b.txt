@@ -1,0 +1,50 @@
+==============================================================================
+(1) DC CONTENT OF df['z'] (= vorticity_smoothed2 = the Lanczos output)
+==============================================================================
+cyclophaser/lanczos_filter.py documents this directly: at
+window_length_lanczo = len(series)//2 the band-pass kernel does NOT
+reject DC - sum(weights) has a documented median of 0.629. So the
+filtered series keeps most of the raw mean rather than losing it.
+
+effective DC gain  mean(z)/mean(zeta), over the 35 real train series:
+   min 0.2408   median 0.6542   max 0.8343
+   -> the filtered series is NOT zero-mean; it keeps 65% of the raw mean (median)
+
+|mean(z)| / (z_max - z_min), same 35 series:
+   min 0.36   median 0.93   max 2.81
+   -> the offset is 0.9x the series' own peak-to-peak range (median): z sits well below zero and oscillates about that offset.
+
+spread of the gain across series: max-min = 0.5935
+   the gain depends on window_length_lanczo = len(series)//2, so it is
+   SERIES-DEPENDENT: the baseline D2 measures |z| against is a different
+   fraction of the physical zero in each series.
+
+==============================================================================
+(2a) SEPARABILITY, SPLIT BY SUB-POPULATION
+==============================================================================
+series with zero labelled matures: ['20171179', '20181046']
+Every block they emit is SPURIOUS by the brief's rule, but it is a
+different failure (a mature where the human saw none) from the
+fragmentation 20(b) targets, so the cut is worth naming.
+
+--- ALL 46 valleys (the headline figure): 32 true / 14 spurious
+    D1: min(TRUE)=0.8805  max(SPURIOUS)=1.0000  separates? NO   (worst spurious: 20171179 v45)
+    D2: min(TRUE)=0.9272  max(SPURIOUS)=1.0000  separates? NO   (worst spurious: 20171179 v45)
+
+--- excluding the 2 series with no labelled mature: 32 true / 12 spurious
+    D1: min(TRUE)=0.8805  max(SPURIOUS)=1.0000  separates? NO   (worst spurious: 20205386 v82)
+    D2: min(TRUE)=0.9272  max(SPURIOUS)=1.0000  separates? NO   (worst spurious: 20205386 v82)
+
+==============================================================================
+(2b) D2 RECOMPUTED ON THE RAW SERIES (df['z_unfil'])
+==============================================================================
+The brief's concern was that a zero-mean filtered series would make
+D2's zero an artefact. It is not zero-mean - but its zero is still the
+physical zero times a series-dependent gain, so here is D2 measured
+against physical zero instead, at the same valley positions.
+
+D2_raw: min(TRUE)=0.9533   max(SPURIOUS)=0.9999   separates? NO
+        worst spurious: 20181046 v26
+
+=> measuring depth against physical zero instead of the filtered
+   zero does not create a separation either.
