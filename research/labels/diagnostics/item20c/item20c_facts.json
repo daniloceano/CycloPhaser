@@ -1,0 +1,1925 @@
+{
+  "config_sha256": "39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3",
+  "numpy": "2.5.3",
+  "scipy": "1.18.0",
+  "pandas": "3.0.5",
+  "duration_convention": "end - start + 1",
+  "baseline": {
+    "mature_within_margin": 38,
+    "seq_match": 31,
+    "synth_seq_match": 12,
+    "sha_ok": "47/47"
+  },
+  "incipient": {
+    "20150069": null,
+    "20150436": 20,
+    "20150528": null,
+    "20150532": null,
+    "20150656": null,
+    "20160587": null,
+    "20160735": null,
+    "20170154": 6,
+    "20170342": null,
+    "20170409": 6,
+    "20170520": null,
+    "20170760": null,
+    "20170794": null,
+    "20171179": null,
+    "20180170": 8,
+    "20180263": null,
+    "20180300": null,
+    "20180608": 38,
+    "20180628": null,
+    "20180733": null,
+    "20180759": 4,
+    "20181046": null,
+    "20190325": 9,
+    "20190397": 2,
+    "20190639": 13,
+    "20190870": 10,
+    "20190879": null,
+    "20191014": 9,
+    "20191104": null,
+    "20191155": 1,
+    "20201245": null,
+    "20202023": null,
+    "20203947": 12,
+    "20205386": 4,
+    "20207822": null,
+    "s0596ea57": 10,
+    "s46657891": 3,
+    "s4e7ff65c": 5,
+    "s5b8aa46f": null,
+    "s5dcc0f79": 5,
+    "s6b1e8245": 2,
+    "s6b542eee": 2,
+    "s8001f17b": null,
+    "s9ddbc53c": 4,
+    "sbceec644": 2,
+    "sbd6c6920": 4,
+    "scfcf1387": 2
+  },
+  "defects": {
+    "valleys_in_series": 81,
+    "valleys_checked": 59,
+    "valleys_eligible": 52,
+    "worst_margin_152": -5.116068679971212e-07,
+    "worst_margin_159": -2.3527994469241405e-08,
+    "min_amp_prev": 5.116068679971205e-06,
+    "min_amp_next": 2.3527994469242083e-07,
+    "identity_max_rel_error": 3.669056373691848e-16,
+    "fires_152": [],
+    "fires_159": [],
+    "closest_to_firing": {
+      "by_152": [
+        [
+          "20205386",
+          61,
+          true,
+          -5.116068679971212e-07,
+          -4.702389679910732e-07,
+          -4.543805974905562e-05,
+          -4.0321991069084414e-05,
+          -4.073567006914486e-05
+        ],
+        [
+          "20180170",
+          39,
+          true,
+          -5.348375590405948e-07,
+          -1.6996558402880614e-06,
+          -3.5411397765675713e-05,
+          -3.0063022175269775e-05,
+          -1.841483936279505e-05
+        ],
+        [
+          "20205386",
+          82,
+          true,
+          -8.269281846246345e-07,
+          -1.5299180692556394e-06,
+          -4.900495191539121e-05,
+          -4.073567006914486e-05,
+          -3.3705771222834804e-05
+        ],
+        [
+          "20160735",
+          9,
+          false,
+          -1.1932555557239115e-06,
+          -1.1656020849392137e-06,
+          -1.2818079543917018e-05,
+          -8.855239866779032e-07,
+          -1.1620586945248775e-06
+        ],
+        [
+          "20190639",
+          92,
+          true,
+          -1.1937678400624946e-06,
+          -4.8566502071531765e-06,
+          -5.593404723649799e-05,
+          -4.3996368835873055e-05,
+          -7.367545164966198e-06
+        ],
+        [
+          "20203947",
+          61,
+          false,
+          -1.297135069754946e-06,
+          -1.037837500370182e-06,
+          -1.6765715985318363e-05,
+          -3.7943652877689166e-06,
+          -6.387340981616531e-06
+        ],
+        [
+          "20203947",
+          90,
+          false,
+          -1.3102339671361951e-06,
+          -9.212278911730279e-07,
+          -1.9489680652978484e-05,
+          -6.387340981616531e-06,
+          -1.0277401741248195e-05
+        ],
+        [
+          "20180628",
+          72,
+          true,
+          -1.3851511576563799e-06,
+          -4.093398007784814e-06,
+          -8.130926809836984e-05,
+          -6.745775652180599e-05,
+          -4.037528802052163e-05
+        ]
+      ],
+      "by_159": [
+        [
+          "20181046",
+          26,
+          true,
+          -2.2745349974484343e-06,
+          -2.3527994469241405e-08,
+          -4.220533076631099e-05,
+          -1.9459980791826615e-05,
+          -4.197005082161857e-05
+        ],
+        [
+          "20171179",
+          45,
+          true,
+          -3.728852090084657e-06,
+          -3.8128861616562994e-07,
+          -6.0497374966877826e-05,
+          -2.320885406603132e-05,
+          -5.668448880522155e-05
+        ],
+        [
+          "20205386",
+          61,
+          true,
+          -5.116068679971212e-07,
+          -4.702389679910732e-07,
+          -4.543805974905562e-05,
+          -4.0321991069084414e-05,
+          -4.073567006914486e-05
+        ],
+        [
+          "20205386",
+          41,
+          true,
+          -2.5926763180825836e-06,
+          -4.765155893669094e-07,
+          -4.5087146962753474e-05,
+          -1.9160383781927664e-05,
+          -4.0321991069084414e-05
+        ],
+        [
+          "20170154",
+          41,
+          true,
+          -4.3839516059672925e-06,
+          -5.200914615988486e-07,
+          -5.453202796993579e-05,
+          -1.0692511910262874e-05,
+          -4.9331113353947294e-05
+        ],
+        [
+          "20180263",
+          30,
+          true,
+          -3.4799327779229408e-06,
+          -8.376191527597007e-07,
+          -5.226084551192054e-05,
+          -1.7461517732691152e-05,
+          -4.388465398432353e-05
+        ],
+        [
+          "20203947",
+          90,
+          false,
+          -1.3102339671361951e-06,
+          -9.212278911730279e-07,
+          -1.9489680652978484e-05,
+          -6.387340981616531e-06,
+          -1.0277401741248195e-05
+        ],
+        [
+          "20203947",
+          61,
+          false,
+          -1.297135069754946e-06,
+          -1.037837500370182e-06,
+          -1.6765715985318363e-05,
+          -3.7943652877689166e-06,
+          -6.387340981616531e-06
+        ]
+      ]
+    }
+  },
+  "series": [
+    {
+      "id": "20150069",
+      "pop": "real",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 29,
+          "end": 44,
+          "duration": 16,
+          "valley_idx": 37,
+          "D1": 1.0,
+          "attrib_overlap": 16,
+          "matched_label": 0,
+          "d_start": 0,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": 0,
+          "near_d_end": -1,
+          "near_overlap": 16
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          29,
+          45
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20150436",
+      "pop": "real",
+      "n": 112,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 58,
+          "end": 73,
+          "duration": 16,
+          "valley_idx": 66,
+          "D1": 1.0,
+          "attrib_overlap": 16,
+          "matched_label": 0,
+          "d_start": -2,
+          "d_end": -5,
+          "near_label": 0,
+          "near_d_start": -2,
+          "near_d_end": -5,
+          "near_overlap": 14
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          60,
+          78
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20150528",
+      "pop": "real",
+      "n": 51,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 28,
+          "end": 36,
+          "duration": 9,
+          "valley_idx": 33,
+          "D1": 1.0,
+          "attrib_overlap": 9,
+          "matched_label": 0,
+          "d_start": -1,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": -1,
+          "near_d_end": -1,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          29,
+          37
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20150532",
+      "pop": "real",
+      "n": 107,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 33,
+          "end": 42,
+          "duration": 10,
+          "valley_idx": 40,
+          "D1": 1.0,
+          "attrib_overlap": 10,
+          "matched_label": 0,
+          "d_start": -2,
+          "d_end": 1,
+          "near_label": 0,
+          "near_d_start": -2,
+          "near_d_end": 1,
+          "near_overlap": 7
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          35,
+          41
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20150656",
+      "pop": "real",
+      "n": 160,
+      "n_blocks": 2,
+      "blocks": [
+        {
+          "start": 34,
+          "end": 48,
+          "duration": 15,
+          "valley_idx": 42,
+          "D1": 1.0,
+          "attrib_overlap": 15,
+          "matched_label": 0,
+          "d_start": 0,
+          "d_end": -4,
+          "near_label": 0,
+          "near_d_start": 0,
+          "near_d_end": -4,
+          "near_overlap": 15
+        },
+        {
+          "start": 140,
+          "end": 147,
+          "duration": 8,
+          "valley_idx": 143,
+          "D1": 0.8351,
+          "attrib_overlap": 8,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": null,
+          "near_d_start": null,
+          "near_d_end": null,
+          "near_overlap": 0
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          34,
+          52
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20160587",
+      "pop": "real",
+      "n": 79,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 50,
+          "end": 65,
+          "duration": 16,
+          "valley_idx": 56,
+          "D1": 1.0,
+          "attrib_overlap": 16,
+          "matched_label": 0,
+          "d_start": -1,
+          "d_end": 2,
+          "near_label": 0,
+          "near_d_start": -1,
+          "near_d_end": 2,
+          "near_overlap": 13
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          51,
+          63
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20160735",
+      "pop": "real",
+      "n": 259,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 150,
+          "end": 181,
+          "duration": 32,
+          "valley_idx": 159,
+          "D1": 1.0,
+          "attrib_overlap": 32,
+          "matched_label": 0,
+          "d_start": 5,
+          "d_end": 4,
+          "near_label": 0,
+          "near_d_start": 5,
+          "near_d_end": 4,
+          "near_overlap": 28
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          145,
+          177
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20170154",
+      "pop": "real",
+      "n": 124,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 35,
+          "end": 43,
+          "duration": 9,
+          "valley_idx": 41,
+          "D1": 1.0,
+          "attrib_overlap": 9,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": 0,
+          "near_d_start": 4,
+          "near_d_end": -33,
+          "near_overlap": 9
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          31,
+          76
+        ]
+      ],
+      "lab_unsure": [
+        true
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20170342",
+      "pop": "real",
+      "n": 146,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 39,
+          "end": 67,
+          "duration": 29,
+          "valley_idx": 46,
+          "D1": 1.0,
+          "attrib_overlap": 29,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": -2,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": -2,
+          "near_overlap": 29
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          38,
+          69
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20170409",
+      "pop": "real",
+      "n": 169,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 60,
+          "end": 66,
+          "duration": 7,
+          "valley_idx": 64,
+          "D1": 1.0,
+          "attrib_overlap": 7,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": 0,
+          "near_d_start": 5,
+          "near_d_end": -7,
+          "near_overlap": 7
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          55,
+          73
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20170520",
+      "pop": "real",
+      "n": 58,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 26,
+          "end": 35,
+          "duration": 10,
+          "valley_idx": 31,
+          "D1": 1.0,
+          "attrib_overlap": 10,
+          "matched_label": 0,
+          "d_start": -1,
+          "d_end": 0,
+          "near_label": 0,
+          "near_d_start": -1,
+          "near_d_end": 0,
+          "near_overlap": 9
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          27,
+          35
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20170760",
+      "pop": "real",
+      "n": 59,
+      "n_blocks": 0,
+      "blocks": [],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          26,
+          39
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20170794",
+      "pop": "real",
+      "n": 224,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 37,
+          "end": 48,
+          "duration": 12,
+          "valley_idx": 42,
+          "D1": 1.0,
+          "attrib_overlap": 12,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": -4,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": -4,
+          "near_overlap": 12
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          36,
+          52
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20171179",
+      "pop": "real",
+      "n": 62,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 36,
+          "end": 48,
+          "duration": 13,
+          "valley_idx": 45,
+          "D1": 1.0,
+          "attrib_overlap": 13,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": null,
+          "near_d_start": null,
+          "near_d_end": null,
+          "near_overlap": 0
+        }
+      ],
+      "n_labels": 0,
+      "lab_mature": [],
+      "lab_unsure": [],
+      "seq_match": false
+    },
+    {
+      "id": "20180170",
+      "pop": "real",
+      "n": 69,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 36,
+          "end": 48,
+          "duration": 13,
+          "valley_idx": 39,
+          "D1": 1.0,
+          "attrib_overlap": 13,
+          "matched_label": 0,
+          "d_start": 2,
+          "d_end": 6,
+          "near_label": 0,
+          "near_d_start": 2,
+          "near_d_end": 6,
+          "near_overlap": 7
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          34,
+          42
+        ]
+      ],
+      "lab_unsure": [
+        true
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20180263",
+      "pop": "real",
+      "n": 57,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 25,
+          "end": 33,
+          "duration": 9,
+          "valley_idx": 30,
+          "D1": 1.0,
+          "attrib_overlap": 9,
+          "matched_label": 0,
+          "d_start": 0,
+          "d_end": -2,
+          "near_label": 0,
+          "near_d_start": 0,
+          "near_d_end": -2,
+          "near_overlap": 9
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          25,
+          35
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20180300",
+      "pop": "real",
+      "n": 59,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 14,
+          "end": 26,
+          "duration": 13,
+          "valley_idx": 20,
+          "D1": 1.0,
+          "attrib_overlap": 13,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": 1,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": 1,
+          "near_overlap": 12
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          13,
+          25
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20180608",
+      "pop": "real",
+      "n": 117,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 62,
+          "end": 70,
+          "duration": 9,
+          "valley_idx": 66,
+          "D1": 1.0,
+          "attrib_overlap": 9,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": -3,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": -3,
+          "near_overlap": 9
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          61,
+          73
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20180628",
+      "pop": "real",
+      "n": 94,
+      "n_blocks": 2,
+      "blocks": [
+        {
+          "start": 29,
+          "end": 40,
+          "duration": 12,
+          "valley_idx": 37,
+          "D1": 1.0,
+          "attrib_overlap": 12,
+          "matched_label": 0,
+          "d_start": -1,
+          "d_end": -6,
+          "near_label": 0,
+          "near_d_start": -1,
+          "near_d_end": -6,
+          "near_overlap": 11
+        },
+        {
+          "start": 70,
+          "end": 75,
+          "duration": 6,
+          "valley_idx": 72,
+          "D1": 0.998,
+          "attrib_overlap": 6,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": null,
+          "near_d_start": null,
+          "near_d_end": null,
+          "near_overlap": 0
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          30,
+          46
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20180733",
+      "pop": "real",
+      "n": 257,
+      "n_blocks": 2,
+      "blocks": [
+        {
+          "start": 31,
+          "end": 43,
+          "duration": 13,
+          "valley_idx": 37,
+          "D1": 0.9303,
+          "attrib_overlap": 13,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": null,
+          "near_d_start": null,
+          "near_d_end": null,
+          "near_overlap": 0
+        },
+        {
+          "start": 135,
+          "end": 146,
+          "duration": 12,
+          "valley_idx": 140,
+          "D1": 1.0,
+          "attrib_overlap": 12,
+          "matched_label": 0,
+          "d_start": 6,
+          "d_end": -4,
+          "near_label": 0,
+          "near_d_start": 6,
+          "near_d_end": -4,
+          "near_overlap": 12
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          129,
+          150
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20180759",
+      "pop": "real",
+      "n": 88,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 28,
+          "end": 47,
+          "duration": 20,
+          "valley_idx": 34,
+          "D1": 1.0,
+          "attrib_overlap": 20,
+          "matched_label": 0,
+          "d_start": -3,
+          "d_end": 2,
+          "near_label": 0,
+          "near_d_start": -3,
+          "near_d_end": 2,
+          "near_overlap": 15
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          31,
+          45
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20181046",
+      "pop": "real",
+      "n": 30,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 19,
+          "end": 26,
+          "duration": 8,
+          "valley_idx": 26,
+          "D1": 1.0,
+          "attrib_overlap": 8,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": null,
+          "near_d_start": null,
+          "near_d_end": null,
+          "near_overlap": 0
+        }
+      ],
+      "n_labels": 0,
+      "lab_mature": [],
+      "lab_unsure": [],
+      "seq_match": false
+    },
+    {
+      "id": "20190325",
+      "pop": "real",
+      "n": 167,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 100,
+          "end": 105,
+          "duration": 6,
+          "valley_idx": 103,
+          "D1": 1.0,
+          "attrib_overlap": 6,
+          "matched_label": 0,
+          "d_start": 5,
+          "d_end": -4,
+          "near_label": 0,
+          "near_d_start": 5,
+          "near_d_end": -4,
+          "near_overlap": 6
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          95,
+          109
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20190397",
+      "pop": "real",
+      "n": 56,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 28,
+          "end": 42,
+          "duration": 15,
+          "valley_idx": 38,
+          "D1": 1.0,
+          "attrib_overlap": 15,
+          "matched_label": 0,
+          "d_start": -6,
+          "d_end": 1,
+          "near_label": 0,
+          "near_d_start": -6,
+          "near_d_end": 1,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          34,
+          41
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20190639",
+      "pop": "real",
+      "n": 180,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 88,
+          "end": 104,
+          "duration": 17,
+          "valley_idx": 92,
+          "D1": 1.0,
+          "attrib_overlap": 17,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": 0,
+          "near_d_start": 7,
+          "near_d_end": -1,
+          "near_overlap": 17
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          81,
+          105
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20190870",
+      "pop": "real",
+      "n": 129,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 35,
+          "end": 50,
+          "duration": 16,
+          "valley_idx": 41,
+          "D1": 1.0,
+          "attrib_overlap": 16,
+          "matched_label": 0,
+          "d_start": -2,
+          "d_end": -3,
+          "near_label": 0,
+          "near_d_start": -2,
+          "near_d_end": -3,
+          "near_overlap": 14
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          37,
+          53
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20190879",
+      "pop": "real",
+      "n": 79,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 28,
+          "end": 38,
+          "duration": 11,
+          "valley_idx": 34,
+          "D1": 1.0,
+          "attrib_overlap": 11,
+          "matched_label": 0,
+          "d_start": -2,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": -2,
+          "near_d_end": -1,
+          "near_overlap": 9
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          30,
+          39
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20191014",
+      "pop": "real",
+      "n": 206,
+      "n_blocks": 0,
+      "blocks": [],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          43,
+          68
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20191104",
+      "pop": "real",
+      "n": 118,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 27,
+          "end": 41,
+          "duration": 15,
+          "valley_idx": 35,
+          "D1": 1.0,
+          "attrib_overlap": 15,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": -2,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": -2,
+          "near_overlap": 15
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          26,
+          43
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20191155",
+      "pop": "real",
+      "n": 93,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 30,
+          "end": 48,
+          "duration": 19,
+          "valley_idx": 40,
+          "D1": 1.0,
+          "attrib_overlap": 19,
+          "matched_label": 0,
+          "d_start": -3,
+          "d_end": 2,
+          "near_label": 0,
+          "near_d_start": -3,
+          "near_d_end": 2,
+          "near_overlap": 14
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          33,
+          46
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20201245",
+      "pop": "real",
+      "n": 98,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 37,
+          "end": 53,
+          "duration": 17,
+          "valley_idx": 46,
+          "D1": 1.0,
+          "attrib_overlap": 17,
+          "matched_label": 0,
+          "d_start": -3,
+          "d_end": 2,
+          "near_label": 0,
+          "near_d_start": -3,
+          "near_d_end": 2,
+          "near_overlap": 12
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          40,
+          51
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "20202023",
+      "pop": "real",
+      "n": 78,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 54,
+          "end": 64,
+          "duration": 11,
+          "valley_idx": 60,
+          "D1": 1.0,
+          "attrib_overlap": 11,
+          "matched_label": 0,
+          "d_start": -2,
+          "d_end": 0,
+          "near_label": 0,
+          "near_d_start": -2,
+          "near_d_end": 0,
+          "near_overlap": 9
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          56,
+          64
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20203947",
+      "pop": "real",
+      "n": 242,
+      "n_blocks": 2,
+      "blocks": [
+        {
+          "start": 129,
+          "end": 136,
+          "duration": 8,
+          "valley_idx": 132,
+          "D1": 1.0,
+          "attrib_overlap": 8,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": 0,
+          "near_d_start": 7,
+          "near_d_end": -8,
+          "near_overlap": 8
+        },
+        {
+          "start": 181,
+          "end": 188,
+          "duration": 8,
+          "valley_idx": 185,
+          "D1": 0.9422,
+          "attrib_overlap": 8,
+          "matched_label": 1,
+          "d_start": 3,
+          "d_end": 0,
+          "near_label": 1,
+          "near_d_start": 3,
+          "near_d_end": 0,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 2,
+      "lab_mature": [
+        [
+          122,
+          144
+        ],
+        [
+          178,
+          188
+        ]
+      ],
+      "lab_unsure": [
+        false,
+        true
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20205386",
+      "pop": "real",
+      "n": 100,
+      "n_blocks": 3,
+      "blocks": [
+        {
+          "start": 36,
+          "end": 42,
+          "duration": 7,
+          "valley_idx": 41,
+          "D1": 0.8687,
+          "attrib_overlap": 7,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": null,
+          "near_d_start": null,
+          "near_d_end": null,
+          "near_overlap": 0
+        },
+        {
+          "start": 60,
+          "end": 63,
+          "duration": 4,
+          "valley_idx": 61,
+          "D1": 0.8805,
+          "attrib_overlap": 4,
+          "matched_label": 0,
+          "d_start": 4,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": 4,
+          "near_d_end": -1,
+          "near_overlap": 4
+        },
+        {
+          "start": 80,
+          "end": 85,
+          "duration": 6,
+          "valley_idx": 82,
+          "D1": 1.0,
+          "attrib_overlap": 6,
+          "matched_label": null,
+          "d_start": null,
+          "d_end": null,
+          "near_label": null,
+          "near_d_start": null,
+          "near_d_end": null,
+          "near_overlap": 0
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          56,
+          64
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": false
+    },
+    {
+      "id": "20207822",
+      "pop": "real",
+      "n": 162,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 46,
+          "end": 68,
+          "duration": 23,
+          "valley_idx": 51,
+          "D1": 1.0,
+          "attrib_overlap": 23,
+          "matched_label": 0,
+          "d_start": 2,
+          "d_end": -2,
+          "near_label": 0,
+          "near_d_start": 2,
+          "near_d_end": -2,
+          "near_overlap": 23
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          44,
+          70
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s0596ea57",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 0,
+      "blocks": [],
+      "n_labels": 0,
+      "lab_mature": [],
+      "lab_unsure": [],
+      "seq_match": true
+    },
+    {
+      "id": "s46657891",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 26,
+          "end": 39,
+          "duration": 14,
+          "valley_idx": 32,
+          "D1": 1.0,
+          "attrib_overlap": 14,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": -1,
+          "near_overlap": 14
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          25,
+          40
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s4e7ff65c",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 21,
+          "end": 35,
+          "duration": 15,
+          "valley_idx": 27,
+          "D1": 1.0,
+          "attrib_overlap": 15,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": 0,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": 0,
+          "near_overlap": 15
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          20,
+          35
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s5b8aa46f",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 24,
+          "end": 31,
+          "duration": 8,
+          "valley_idx": 27,
+          "D1": 1.0,
+          "attrib_overlap": 8,
+          "matched_label": 0,
+          "d_start": 2,
+          "d_end": 0,
+          "near_label": 0,
+          "near_d_start": 2,
+          "near_d_end": 0,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          22,
+          31
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s5dcc0f79",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 18,
+          "end": 25,
+          "duration": 8,
+          "valley_idx": 21,
+          "D1": 1.0,
+          "attrib_overlap": 8,
+          "matched_label": 0,
+          "d_start": 2,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": 2,
+          "near_d_end": -1,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          16,
+          26
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s6b1e8245",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 35,
+          "end": 45,
+          "duration": 11,
+          "valley_idx": 40,
+          "D1": 1.0,
+          "attrib_overlap": 11,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": 0,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": 0,
+          "near_overlap": 11
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          34,
+          45
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s6b542eee",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 2,
+      "blocks": [
+        {
+          "start": 12,
+          "end": 19,
+          "duration": 8,
+          "valley_idx": 16,
+          "D1": 0.9999,
+          "attrib_overlap": 8,
+          "matched_label": 0,
+          "d_start": 0,
+          "d_end": 1,
+          "near_label": 0,
+          "near_d_start": 0,
+          "near_d_end": 1,
+          "near_overlap": 7
+        },
+        {
+          "start": 44,
+          "end": 51,
+          "duration": 8,
+          "valley_idx": 48,
+          "D1": 1.0,
+          "attrib_overlap": 8,
+          "matched_label": 1,
+          "d_start": 1,
+          "d_end": 0,
+          "near_label": 1,
+          "near_d_start": 1,
+          "near_d_end": 0,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 2,
+      "lab_mature": [
+        [
+          12,
+          18
+        ],
+        [
+          43,
+          51
+        ]
+      ],
+      "lab_unsure": [
+        false,
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s8001f17b",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 26,
+          "end": 39,
+          "duration": 14,
+          "valley_idx": 32,
+          "D1": 1.0,
+          "attrib_overlap": 14,
+          "matched_label": 0,
+          "d_start": 0,
+          "d_end": 0,
+          "near_label": 0,
+          "near_d_start": 0,
+          "near_d_end": 0,
+          "near_overlap": 14
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          26,
+          39
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "s9ddbc53c",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 18,
+          "end": 25,
+          "duration": 8,
+          "valley_idx": 21,
+          "D1": 1.0,
+          "attrib_overlap": 8,
+          "matched_label": 0,
+          "d_start": 0,
+          "d_end": 0,
+          "near_label": 0,
+          "near_d_start": 0,
+          "near_d_end": 0,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          18,
+          25
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "sbceec644",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 20,
+          "end": 35,
+          "duration": 16,
+          "valley_idx": 27,
+          "D1": 1.0,
+          "attrib_overlap": 16,
+          "matched_label": 0,
+          "d_start": -1,
+          "d_end": 2,
+          "near_label": 0,
+          "near_d_start": -1,
+          "near_d_end": 2,
+          "near_overlap": 13
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          21,
+          33
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "sbd6c6920",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 2,
+      "blocks": [
+        {
+          "start": 14,
+          "end": 20,
+          "duration": 7,
+          "valley_idx": 17,
+          "D1": 1.0,
+          "attrib_overlap": 7,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": -1,
+          "near_overlap": 7
+        },
+        {
+          "start": 45,
+          "end": 51,
+          "duration": 7,
+          "valley_idx": 48,
+          "D1": 0.9922,
+          "attrib_overlap": 7,
+          "matched_label": 1,
+          "d_start": 2,
+          "d_end": -1,
+          "near_label": 1,
+          "near_d_start": 2,
+          "near_d_end": -1,
+          "near_overlap": 7
+        }
+      ],
+      "n_labels": 2,
+      "lab_mature": [
+        [
+          13,
+          21
+        ],
+        [
+          43,
+          52
+        ]
+      ],
+      "lab_unsure": [
+        false,
+        false
+      ],
+      "seq_match": true
+    },
+    {
+      "id": "scfcf1387",
+      "pop": "synthetic",
+      "n": 66,
+      "n_blocks": 1,
+      "blocks": [
+        {
+          "start": 30,
+          "end": 37,
+          "duration": 8,
+          "valley_idx": 33,
+          "D1": 1.0,
+          "attrib_overlap": 8,
+          "matched_label": 0,
+          "d_start": 1,
+          "d_end": -1,
+          "near_label": 0,
+          "near_d_start": 1,
+          "near_d_end": -1,
+          "near_overlap": 8
+        }
+      ],
+      "n_labels": 1,
+      "lab_mature": [
+        [
+          29,
+          38
+        ]
+      ],
+      "lab_unsure": [
+        false
+      ],
+      "seq_match": true
+    }
+  ],
+  "no_match_census": {
+    "blocks_but_no_match": [
+      "20170154",
+      "20170409",
+      "20171179",
+      "20181046",
+      "20190639"
+    ],
+    "no_detected_block": [
+      "20170760",
+      "20191014",
+      "s0596ea57"
+    ],
+    "no_labelled_mature": [
+      "20171179",
+      "20181046",
+      "s0596ea57"
+    ]
+  }
+}
