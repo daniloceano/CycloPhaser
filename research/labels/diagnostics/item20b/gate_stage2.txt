@@ -1,0 +1,144 @@
+numpy 2.5.3  scipy 1.18.0  pandas 3.0.5
+cyclophaser_params-11.yaml  sha256 24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420
+cyclophaser_params-12.yaml  sha256 39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3
+train: 35 real + 12 synthetic = 47
+
+params-12 mature_min_depth = 0.8
+
+##############################################################################
+#  mature_min_depth = 0.80   <-- CANDIDATE (params-12)
+##############################################################################
+
+(a) 20160735 blocks [(150, 181)]  durations [32]
+    base was [(7, 11), (53, 64), (150, 181), (224, 235)] [5, 12, 32, 12]
+    -> PASS
+(b) 20203947 labelled 122-144 -> [(129, 136)]
+(b) 20203947 labelled 178-188 [UNSURE] -> [(181, 188)]
+    blocks now [(129, 136), (181, 188)] (base [(58, 63), (87, 93), (129, 136), (181, 188)])
+    -> PASS
+
+(c) sequence 31/47   (base params-11 = 30/47, floor 30) -> PASS
+    gained: ['20170794']
+    lost  : []
+
+(d) synthetic SEQUENCE 12/12  (base 12/12)  <- the gate quantity
+    synthetic mature-boundary +/-6: 11/12 (base 11/12)
+       the one miss is s0596ea57, which has no labelled and no
+       detected mature - vacuous at baseline and unchanged here
+    min D1 over synthetic generating valleys = 0.9922  (all >= 0.80? True)
+    -> PASS
+
+(e) mature boundary 38/47  (base 38/47, floor 38)
+    incipient boundary changed on: NONE
+    20205386 paired block: base (60, 63) (valley [61]) -> now (60, 63) (valley [61])
+    20205386 all blocks: base [(36, 42), (60, 63), (80, 85)] -> now [(36, 42), (60, 63), (80, 85)]
+    -> PASS
+    mature-boundary gained [] / lost []
+
+(f) latent defects fired (active check): :152 = 0, :160 = 0
+    z-range guard triggered on: NONE
+    -> PASS (suite run separately)
+
+=== GATE AT 0.80: PASS ===
+
+------------------------------------------------------------------------------
+EXTRA 1 - FILL-IN: what occupies each removed mature block
+------------------------------------------------------------------------------
+
+  20160735  (label match: True -> True;  sequence: False -> False)
+     removed 7-11 (5 steps) -> now ['decay', 'intensification']
+        intensification  0-8
+        decay            9-21
+     removed 53-64 (12 steps) -> now ['decay', 'intensification']
+        intensification  22-58
+        decay            59-121
+     removed 224-235 (12 steps) -> now ['residual']
+        residual         211-258
+
+  20170794  (label match: True -> True;  sequence: False -> True)
+     removed 159-167 (9 steps) -> now ['residual']
+        residual         119-223
+
+  20191014  (label match: False -> False;  sequence: False -> False)
+     removed 134-140 (7 steps) -> now ['decay', 'intensification']
+        intensification  124-136
+        decay            137-205
+
+  20203947  (label match: False -> False;  sequence: False -> False)
+     removed 58-63 (6 steps) -> now ['decay', 'intensification']
+        intensification  12-60
+        decay            61-74
+     removed 87-93 (7 steps) -> now ['decay', 'intensification']
+        intensification  75-89
+        decay            90-106
+
+------------------------------------------------------------------------------
+EXTRA 2 - DENOMINATOR ROBUSTNESS: is z_max an isolated spike?
+------------------------------------------------------------------------------
+  gap = (z_max - 2nd highest surviving peak) / (z_max - z_min)
+  A large gap means D1's denominator rests on a single point.
+
+  over the 35 real: min 0.0052  median 0.3035  max 0.9897
+  series with gap > 0.30 (flagged):
+     20181046  gap 0.9897   generating-valley D1 ['1.0000']
+     20171179  gap 0.8977   generating-valley D1 ['1.0000']
+     20180263  gap 0.7593   generating-valley D1 ['1.0000']
+     20180170  gap 0.6853   generating-valley D1 ['1.0000']
+     20170760  gap 0.6597   generating-valley D1 []
+     20190397  gap 0.6556   generating-valley D1 ['1.0000']
+     20190325  gap 0.5431   generating-valley D1 ['1.0000']
+     20202023  gap 0.4913   generating-valley D1 ['1.0000']
+     20205386  gap 0.4874   generating-valley D1 ['0.8687', '0.8805', '1.0000']
+     20170154  gap 0.4703   generating-valley D1 ['1.0000']
+     20150656  gap 0.4379   generating-valley D1 ['1.0000', '0.8351']
+     20170520  gap 0.4168   generating-valley D1 ['1.0000']
+     20150436  gap 0.3871   generating-valley D1 ['1.0000']
+     20180628  gap 0.3505   generating-valley D1 ['1.0000', '0.9980']
+     20190879  gap 0.3368   generating-valley D1 ['1.0000']
+     20150069  gap 0.3234   generating-valley D1 ['1.0000']
+     20150528  gap 0.3229   generating-valley D1 ['1.0000']
+     20180733  gap 0.3035   generating-valley D1 ['0.9303', '1.0000']
+     20160587  gap 0.3021   generating-valley D1 ['1.0000']
+
+  top 5 by gap:
+     20181046  0.9897
+     20171179  0.8977
+     20180263  0.7593
+     20180170  0.6853
+     20170760  0.6597
+
+##############################################################################
+#  mature_min_depth = 0.85   <-- DIAGNOSTIC ONLY
+##############################################################################
+
+(a) 20160735 blocks [(150, 181)]  durations [32]
+    base was [(7, 11), (53, 64), (150, 181), (224, 235)] [5, 12, 32, 12]
+    -> PASS
+(b) 20203947 labelled 122-144 -> [(129, 136)]
+(b) 20203947 labelled 178-188 [UNSURE] -> [(181, 188)]
+    blocks now [(129, 136), (181, 188)] (base [(58, 63), (87, 93), (129, 136), (181, 188)])
+    -> PASS
+
+(c) sequence 32/47   (base params-11 = 30/47, floor 30) -> PASS
+    gained: ['20150656', '20170794']
+    lost  : []
+
+(d) synthetic SEQUENCE 12/12  (base 12/12)  <- the gate quantity
+    synthetic mature-boundary +/-6: 11/12 (base 11/12)
+       the one miss is s0596ea57, which has no labelled and no
+       detected mature - vacuous at baseline and unchanged here
+    min D1 over synthetic generating valleys = 0.9922  (all >= 0.85? True)
+    -> PASS
+
+(e) mature boundary 38/47  (base 38/47, floor 38)
+    incipient boundary changed on: NONE
+    20205386 paired block: base (60, 63) (valley [61]) -> now (60, 63) (valley [61])
+    20205386 all blocks: base [(36, 42), (60, 63), (80, 85)] -> now [(36, 42), (60, 63), (80, 85)]
+    -> PASS
+    mature-boundary gained [] / lost []
+
+(f) latent defects fired (active check): :152 = 0, :160 = 0
+    z-range guard triggered on: NONE
+    -> PASS (suite run separately)
+
+=== GATE AT 0.85: PASS ===

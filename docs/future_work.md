@@ -1990,6 +1990,149 @@ left the tab unable to span the history it exists to show. `params-10` is
 
 ---
 
+## 22. Front 20(b) — `mature_min_depth`, a depth floor on mature detection — **stage 1 gate FAIL (premise), stage 2 closed, PASS, merged 2026-09-21**
+
+Branch `research/item20b-depth-rule`. Two stages with opposite results, and both
+matter: the separability premise the front was built on is **false**, and the
+rule built on it nonetheless passes its gate. Authorised by Danilo at 0.80.
+
+### Stage 1 — does valley depth separate true matures from spurious ones? **FAIL**
+
+Measured over the 46 valleys that generate a mature block across the 35 real
+train series under `params-11` (32 true, 14 spurious), with two depth
+definitions: `D1 = (z_max - z_valley) / (z_max - z_min)` and
+`D2 = |z_valley| / |z_min|`.
+
+| | min(TRUE) | max(SPURIOUS) | separates? |
+|---|---|---|---|
+| D1 | 0.8805 | **1.0000** | **NO** |
+| D2 | 0.9272 | **1.0000** | **NO** |
+
+**It is the premise that fails, not the threshold.** Three spurious valleys are
+their own series' deepest point (`20171179` v45, `20181046` v26, `20205386` v82,
+all at exactly 1.0000), so the spurious population reaches the ceiling and no
+threshold can sit above it. The decisive case is **`20205386`, where depth orders
+the valleys backwards inside one series**: the true valley 61 (0.8805) sits
+between a spurious 41 (0.8687) and a spurious 82 (1.0000). The FAIL survives
+excluding the two series with no labelled mature, and survives recomputing D2
+against physical zero on the raw series. **Do not re-run this as a sweep** — a
+sweep cannot change it.
+
+Restricted to `20160735` alone, both D1 and D2 **do** separate, cleanly
+(+0.2923 / +0.3192). The motivating case is as favourable as hoped; the other 34
+refuse.
+
+Three corrections to the record came out of stage 1:
+
+* **The series feeding mature detection is the FILTERED `z`
+  (`vorticity_smoothed2`), and its mean is NOT ≈ 0.** It keeps a median **65 %**
+  of the raw mean, because the Lanczos band-pass does not reject DC at
+  `window = len//2` (`sum(weights)` median 0.629 — documented in
+  `lanczos_filter.py`). The offset is a median 0.93× the series' own range. The
+  baseline still is not physical zero: the DC gain varies **0.2408–0.8343**
+  across series, so `|z|` ratios are not on a common baseline between series.
+* **`s6b542eee` and `sbd6c6920` are SYNTHETIC**, not real train series. Among the
+  35 real, exactly **one** (`20203947`) has more than one labelled mature, and
+  both of its labelled matures are already detected under `params-11`.
+* **The "deepest valley" recount is 36 of 38 under `params-11`, not 30 of 32.**
+  The old figure was `params-10` **and** used `prominence_relative == 1.0` as a
+  *stand-in* for depth — prominence is the smaller of a valley's two climbs, not
+  its depth. They agree here (36 either way) but are not the same quantity.
+  Exceptions: `20205386` and synthetic `s6b542eee`. All six entries new since
+  front 20(a) sit on their series' deepest valley.
+
+### Stage 2 — the rule, implemented anyway at the fixed floor 0.80. **Gate PASS**
+
+`mature_min_depth`, a float in `[0, 1]`: a z-valley may generate a mature block
+only if its `D1` reaches the floor. The rule lives entirely in
+`find_stages.find_mature_stage`, as a filter on the valley list; it touches
+neither the extrema filter nor `prominence_relative`, so no other phase can move.
+It applies to both `mature_method` values, and it is **not a cap on the number of
+matures** — every valley clearing the floor still emits its own block.
+
+`research/labels/configs/cyclophaser_params-12.yaml` = `params-11` + `0.80`,
+sha256 `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3`.
+
+**Default 0.0 is a proven no-op**: the whole `periods` column of all 47 train
+series, hashed against a clean `develop-v2.1` worktree — package defaults
+`b01b16b6…` and `params-11` `b65551009b…` byte-identical across both trees, and
+an explicit `0.0` equal to an absent key.
+
+| criterion | 0.80 (merged) | 0.85 (diagnostic) |
+|---|---|---|
+| (a) `20160735` | 4 blocks → **1**, `(150,181)` | same |
+| (b) `20203947` | both labelled matures kept | same |
+| (c) sequence | **31**/47 (base 30) | 32/47 |
+| (d) synthetic sequence | 12/12, min D1 0.9922 | same |
+| (e) mature boundary | 38/47, incipient unchanged, no displacement | same |
+| (f) suite / latent defects | 1205 passed, 0 failed; `:152`/`:160` 0 | same |
+
+Both floors pass; **0.80 is the merged value, by Danilo's decision.**
+
+### What the rule does NOT fix — read before building on it
+
+* **`20205386` is completely unchanged.** All three of its valleys clear 0.80, so
+  both spurious blocks survive. The series stage 1 identified as the one that
+  refuses depth still refuses it.
+* **`20160735` still fails its sequence.** Its four blocks correctly became one,
+  and the sequence still does not match the label. Removing the spurious matures
+  was necessary but not sufficient for the case that motivated the front.
+* **The margin rests on one sample.** 30 of 32 true valleys are at `D1 = 1.0000`
+  *exactly* — they ARE the series minimum, so a spiky `z_max` cannot flip them.
+  But `20205386` v61 (0.8805), the only true valley that is not its series'
+  minimum, lives in a series whose `z_max` sits **0.4874** of the range above the
+  next peak; under an adverse denominator its D1 falls to 0.7669 and it would be
+  **cut**, losing a true mature. The 0.08 margin is propped up by a single point.
+
+### Collateral, deliberate
+
+* **`determine_periods.py` carries plumbing only** — signature default,
+  `args_periods` entry, docstrings, in `get_periods` and the `determine_periods`
+  wrapper. No logic. It was unavoidable: `get_periods` takes no `**kwargs` and
+  builds `args_periods` from an explicit literal, and every calibration driver
+  filters `phase_params` against its signature, so without a signature entry the
+  parameter is dropped before reaching `find_stages` and `params-12` would
+  silently behave as `params-11`.
+* **`tools/calibration_app/app.py` declares the parameter**, because
+  `tests/test_sidebar_coverage.py::test_every_public_parameter_is_declared`
+  enforces exact signature coverage in both directions and failed until it did.
+  On import the key is applied when present but not reported missing when absent,
+  which needed an explicit subtraction from `_REQUIRED_PHASE_YAML_KEYS`:
+  membership of `_OPTIONAL_PHASE_YAML_KEYS` only suppresses the "unknown key"
+  warning, it does **not** make a key optional — a key must be in
+  `_YAML_PHASE_MAP` to be applied at all, and `_REQUIRED` is derived from that
+  map. `params-1` … `params-11` all import clean.
+
+### Fill-in and defect H
+
+Seven blocks removed across five series. **No series lost a label match or a
+sequence match**; one gained a sequence (`20170794`). Five vacated ranges are
+closed over by the neighbouring intensification/decay; two become **residual**
+(`20160735` 211–258 and `20170794` 119–223) — a real change in how those tails
+are described, even at no cost on either metric.
+
+Defect H (`find_stages.py:982`, unconditional incipient overwrite) was checked
+**actively**: the overwrite reaches index 9 and 12 in the two series that have
+one, and the earliest removed block starts at 7 in a series whose overwrite is
+`None`. **No removed block is touched**, so every fill-in reading is the
+detector's own output, not the overwrite masking it.
+
+### Still open
+
+* The two latent defects of `_amplitude_mature_bounds` — `find_stages.py:152`
+  (loud `IndexError`) and `:159`/`:160` (**silent** wrong window) — remain
+  unfixed. Both fired **0** times here, checked by recomputing `amp_prev < 0` /
+  `amp_next < 0` for every valley rather than by absence of an exception.
+* Whether `20205386` and `20160735`'s sequence want a different instrument
+  altogether. Stage 1 says it will not be depth.
+
+Artefacts: `research/labels/diagnostics/item20b/` — `REPORT.md` (stage 1),
+`REPORT_stage2.md`, `depth_table.csv`, the drivers, and before/after figures for
+`20160735` and `20205386`. `item19_core.py` and `params-11.yaml` untouched
+throughout.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

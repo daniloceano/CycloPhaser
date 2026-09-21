@@ -1,0 +1,30 @@
+DENOMINATOR ROBUSTNESS - is D1 hostage to a single point (z_max)?
+==============================================================================
+D1 = (z_max - z_valley) / (z_max - z_min). z_max is one sample. If it is
+an isolated spike, every D1 in that series is governed by it.
+
+KEY POINT FIRST: 30 of the 32 TRUE generating valleys sit at D1 = 1.0000
+exactly - they ARE the series minimum, so their D1 is 1 for ANY finite
+denominator. The denominator can only change a verdict for valleys near
+the floor. Those are enumerated below, with D1 recomputed using the 2nd
+highest surviving peak as z_max (the most adverse reasonable alternative).
+
+    series     v       D1   D1_alt    shift     gap  verdict at 0.80
+------------------------------------------------------------------------------
+  20160735     9   0.3833   0.3336  -0.0497  0.0746  cut -> cut
+  20203947    61   0.4016   0.3494  -0.0522  0.0803  cut -> cut
+  20203947    90   0.4860   0.4411  -0.0449  0.0803  cut -> cut
+  20160735   228   0.5133   0.4741  -0.0392  0.0746  cut -> cut
+  20170794   163   0.6065   0.5956  -0.0108  0.0268  cut -> cut
+  20191014   137   0.6421   0.5252  -0.1169  0.2463  cut -> cut
+  20160735    59   0.7077   0.6841  -0.0236  0.0746  cut -> cut
+  20150656   143   0.8351   0.7066  -0.1285  0.4379  KEPT -> cut  <-- VERDICT FLIPS
+  20205386    41   0.8687   0.7439  -0.1248  0.4874  KEPT -> cut  <-- VERDICT FLIPS
+  20205386    61   0.8805   0.7669  -0.1136  0.4874  KEPT -> cut  <-- VERDICT FLIPS
+  20180733    37   0.9303   0.8999  -0.0304  0.3035  KEPT -> KEPT
+  20203947   185   0.9422   0.9372  -0.0050  0.0803  KEPT -> KEPT
+  20180628    72   0.9980   0.9969  -0.0011  0.3505  KEPT -> KEPT
+
+The two TRUE valleys that are not at D1=1.0000:
+   20203947 v185: D1 0.9422 -> 0.9372 under the adverse denominator (still above the 0.80 floor)
+   20205386 v61: D1 0.8805 -> 0.7669 under the adverse denominator (FALLS BELOW the 0.80 floor)
