@@ -134,6 +134,132 @@ Os mesmos helpers alimentam o renderizador Plotly do app e o render estático
 matplotlib de conferência em
 `research/app_layer_inspector/gen_inspector_figures.py`.
 
+## Benchmark tab
+
+Compares N configurations side by side, over the cyclones you choose, aligned by
+cyclone. A column is created from the current sidebar state, an uploaded YAML, a
+file in `research/labels/configs/` (all eleven) or a frozen published-version
+snapshot, and stays editable in the tab itself.
+
+**Each column's header** — one identity line (source hash · running commit), the
+pre-filter-fix warning when it applies, and a `Provenance` drop-down holding all
+five mandatory items:
+
+1. sha256 of the source YAML, or `edited in session` if it was changed;
+2. the commit of the code actually running (`git rev-parse HEAD`). **Not**
+   `metadata.cyclophaser_version`: it reads `2.0.0` in all eleven files and
+   distinguishes nothing;
+3. keys present in the YAML and ignored by the current signature (`distance`);
+4. keys absent from the YAML and filled by the current default, with the value;
+5. the **"pre-filter-fix config"** warning when `boundary_padding` is missing.
+   This is not cosmetic: the v1–v5 YAMLs carry `use_filter: true`, and in the
+   code of that period `True` was read as the integer window 1 (bool is a
+   subclass of int), so the Lanczos filter was **never** applied. The same line
+   applies the filter today. Without the warning the column shows a result
+   nobody saw at the time and presents it as history.
+
+**Both measurements** are always shown, each named by its instrument: the phase
+sequence from `evaluate_against_labels.py / score_phase_sequences` (starts only,
+`tolerance_idx` per label, refuses to pair when the sequence does not match) and
+the mature pairing from `item19_core.pair_by_overlap` (largest overlap, both
+ends, fixed margin 6). They are different instruments and are never summed.
+
+**`evaluation.bad_cases_count` is not a score.** It appears only as a labelled
+historical annotation under `Provenance`: these were visual marks made at
+different times with different knowledge of the problem (v5 and v6 record 0; v9
+records 6).
+
+**Leakage.** Every aggregate is computed over the train split. Aggregates
+involving the 16 real cyclones of the frozen test split appear in a separate,
+labelled block and are never added into the train one. Manual labels are opt-in.
+
+Frozen reference columns come from `research/snapshots/` (see that directory's
+README): the tab **reads files** and never runs a published version live.
+
+### Modes, reference column and Run
+
+**Reading order.** A one-line status bar (configs · cyclones · ground-truth
+badge · reference column), then four numbered sections, each an expander:
+**1 Mode → 2 Data → 3 Configurations → 4 Results**. Each section owns everything
+it governs — the configuration cards render inside section 3, so collapsing the
+section hides them.
+
+**Mode is not independent state.** `Validation` and `Exploration` filter what is
+selectable and what is emphasised; they never decide whether a number is
+produced. That is decided per cyclone by whether it carries a manual label, in
+`benchmark_core.scoreable`. A row with no label yields no scoring number in
+either mode.
+
+* **Validation** — only labelled sources selectable (51 real + 12 synthetic);
+  scoring panel visible. Switching back from Exploration drops any uploaded
+  track from the selection rather than carrying it into a scored run.
+* **Exploration** — every source selectable, cyclone uploads included; scoring
+  panel collapsed. If labelled rows are in the selection, a note offers to score
+  those rows only.
+
+**Without ground truth**, each column is measured against the **reference
+column**, never against truth, and the block is labelled `relative to reference`.
+Four measures: cyclones whose phase sequence changed; boundary displacement in
+timesteps (median and max) for those whose sequence matches; phases that
+appeared or disappeared, per type; and cyclones that refused an incipient phase.
+Boundary displacement is computed only where the sequence matches — pairing
+boundaries across a mismatch would compare two different transitions.
+
+**Reference column** is chosen explicitly. It defaults to the manual label when
+one exists, otherwise the first configuration column. The manual label has no
+parameters, so the card diffs fall back to the first configuration column as
+their parameter baseline, and the card says so.
+
+**A card shows only the parameters that DIFFER from the reference.** The eleven
+YAMLs share roughly fifteen identical parameters; listing all of them hides the
+two or three that separate one configuration from another. The full
+configuration sits behind the card's `Provenance` drop-down.
+
+**Nothing recomputes on edit.** Results come from an explicit **Run**. A
+fingerprint of (columns × selection × reference) is stored with them; when it
+stops matching, the results are flagged **out of date** instead of being
+silently replaced.
+
+**Figures** come in two arrangements over the same data: `Side by side`
+(default) and `Stacked`, which puts the panels on a shared x axis and a shared y
+scale so a boundary that moved is read straight down the figure. The choice is
+kept in session state.
+
+## Sidebar order
+
+The controls are grouped by the order in which the detector actually **executes**,
+not by phase name:
+
+| group | step | function |
+|---|---|---|
+| 1 Lanczos Filter | 1 | `process_vorticity` |
+| 2 Savitzky-Golay Smoothing | 2 | `process_vorticity` |
+| 3 Extrema Filtering | 3 | `find_peaks_valleys(z)` |
+| 4 Intensification | 4 | `find_intensification_period` |
+| 5 Decay | 5 | `find_decay_period` |
+| 6 Mature | 6 | `find_mature_stage` |
+| 7 Residual | 7 | `find_residual_period` |
+| 8 Incipient | 9 | `find_incipient_period` |
+
+Step 8, `post_process_periods`, takes no parameter.
+
+Two consequences of reading the real order instead of assuming it: **extrema
+filtering is step 3** — it runs before every stage, and the extrema that survive
+there are the ones all of them see — and `decay_tail_amplitude_fraction` is read
+by `find_residual_period` (`find_stages.py:588`), not by `find_decay_period`,
+which is why it sits under Residual.
+
+Two parameters span groups and carry a note in their own widget: `length_scale`
+(scales the intensification and decay duration thresholds,
+`find_stages.py:387`, and changes detected phases on 20160735, 20191014 and
+20203947 under params-9) and `boundary_padding` (a filter parameter that governs
+the incipient phase: under `reflect` no series refuses an incipient phase, 0/51;
+under `edge`, 33/51 refuse).
+
+This layout's coverage is verified by an automatic test, not by eye:
+`tests/test_sidebar_coverage.py` enumerates the package's public signature and
+requires every parameter to have a control and no widget key to repeat.
+
 ## Escopo atual (Etapa 1)
 
 - Upload de 1 arquivo CSV

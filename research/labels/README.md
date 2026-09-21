@@ -46,6 +46,41 @@ The labelling UI itself is `tools/calibration_app/label_tab.py`, reached through
 the **Label** display mode of the calibration app. Tests are in
 `tests/test_manual_labels.py`.
 
+## The eleven calibration configurations
+
+`research/labels/configs/` holds all eleven configurations produced during the
+calibration, **each exactly as the calibration app exported it** — including
+`metadata.cyclones_used` with its 51 entries. They are the Benchmark tab's
+config source, and the tab spans the whole history only because all eleven are
+here; `params-1` to `-8` were added by front 21 (`docs/future_work.md`).
+
+| File | sha256 | |
+|---|---|---|
+| `cyclophaser_params-1.yaml` | `5e4bdeb86f4ab184b8b20bc42df35f49cd7b583a1589b8e68fd7a020dc63a988` | historical |
+| `cyclophaser_params-2.yaml` | `fe0e57319fcda15b7d2d047b1b09e62e61d7fd7890846a4fc4f090ea6aaa29c1` | historical |
+| `cyclophaser_params-3.yaml` | `a71d9417314ad95311e4e29ff7fd927cdc0ebbb8288c78134eae7defc491f32c` | historical |
+| `cyclophaser_params-4.yaml` | `892a464cd7394d6dd9b5a9690b0fc81ee76daa1b34d3979e2b2d363ac6526cbd` | historical |
+| `cyclophaser_params-5.yaml` | `e574ceeb039d88e1b65810d615d2136f486084b702b4542333ec6b7fa844b072` | historical |
+| `cyclophaser_params-6.yaml` | `b0cf47d9dfd54960cdfc52a5a5054afa5b5a622caa6f90621dc4d49bd97ad841` | historical |
+| `cyclophaser_params-7.yaml` | `02cf6a6afa9ff34ab53b527b5f14f288e87d641375876739f5135b22702f2316` | historical |
+| `cyclophaser_params-8.yaml` | `ce9fdace1ebb88071a27d196736c3ac53123f0873095d6910ff86c78b4b3ca61` | historical |
+| `cyclophaser_params-9.yaml` | `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` | historical |
+| `cyclophaser_params-10.yaml` | `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` | **frozen instrument** — `item19_core.CONFIG` |
+| `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | **current calibration reference** |
+
+**Do not normalise or reformat any of them.** A configuration's identity here is
+its file hash: the Benchmark tab shows that hash as a column's provenance, and
+rewriting a file — even to strip a block that looks redundant — silently
+repoints every record that cites it. This nearly happened during front 21: the
+eight added files were first written without `metadata.cyclones_used`, on the
+mistaken belief that the pre-existing three were trimmed that way. They are not,
+and the directory briefly carried two formats. The eight were restored to the
+app's own export format and verified against independently computed hashes.
+
+`params-10` is the strictest case: `item19_core.CONFIG` pins it as a frozen
+measuring instrument, so changing its bytes would redefine the baseline that
+items 19 and 20 were measured against. It must not be touched for any reason.
+
 ## Reference configuration
 
 **Current calibration reference: `research/labels/configs/cyclophaser_params-11.yaml`**

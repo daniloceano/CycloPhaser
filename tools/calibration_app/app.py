@@ -32,6 +32,7 @@ from cyclophaser.plots import plot_all_periods, plot_didactic
 # strategy the data paths below use, and for the same reason).
 if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
+import benchmark_tab  # noqa: E402
 import label_tab  # noqa: E402
 import layer_inspector as li  # noqa: E402
 from inspector_plotly import build_inspector_figure  # noqa: E402
@@ -382,6 +383,77 @@ _REMOVED_PHASE_YAML_KEYS = {
     "distance": ("distance removido: redundante com prominence_relative — "
                  "ver research/inert_params/REPORT_inertia_sweep.md"),
 }
+
+# ── Public parameter → sidebar widget key(s) ─────────────────────────────────────
+# Every parameter of the package's public signature (process_vorticity +
+# get_periods) and the sidebar widget key(s) that carry it. Declared here, next
+# to the other YAML/widget maps, because tests/test_sidebar_coverage.py reads it
+# and fails if the signature and the sidebar ever drift: a parameter added to
+# the package with no control, or a control silently lost in a layout change,
+# is exactly what a by-eye check of a 600-line sidebar does not catch.
+#
+# A value is a TUPLE because some parameters are a group of widgets rather than
+# one: `use_smoothing` is a mode selector plus a window slider (the package
+# takes one polymorphic argument, the sidebar splits it), and the two prominence
+# parameters are a shared enable/mode pair plus one value widget each.
+_PARAM_WIDGET_KEYS: dict[str, tuple[str, ...]] = {
+    # process_vorticity — steps 1 and 2
+    "use_filter":                     ("use_filter",),
+    "cutoff_low":                     ("cutoff_low",),
+    "cutoff_high":                    ("cutoff_high",),
+    "boundary_padding":               ("boundary_padding",),
+    "replace_endpoints_with_lowpass": ("replace_endpoints",),
+    "use_smoothing":                  ("sm_mode", "sm_val"),
+    "use_smoothing_twice":            ("sm2_mode", "sm2_val"),
+    "savgol_polynomial":              ("savgol_poly",),
+    # get_periods — step 3, the extrema filter
+    "prominence":                     ("extrema_prominence_enabled",
+                                       "extrema_prominence_mode",
+                                       "extrema_prominence_val"),
+    "prominence_relative":            ("extrema_prominence_enabled",
+                                       "extrema_prominence_mode",
+                                       "extrema_prominence_rel_val"),
+    # cross-cutting over steps 4-6
+    "length_scale":                   ("length_scale",),
+    # step 4 — intensification
+    "threshold_intensification_length": ("thr_int_len",),
+    "threshold_intensification_gap":    ("thr_int_gap",),
+    # step 5 — decay
+    "threshold_decay_length":         ("thr_dec_len",),
+    "threshold_decay_gap":            ("thr_dec_gap",),
+    # step 6 — mature
+    "mature_method":                  ("mature_method",),
+    "threshold_mature_length":        ("thr_mat_len",),
+    "threshold_mature_distance":      ("thr_mat_dist",),
+    "mature_amplitude_fraction":      ("mature_amplitude_fraction",),
+    # step 7 — residual
+    "decay_tail_amplitude_fraction":  ("decay_tail_enabled",
+                                       "decay_tail_fraction_val"),
+    # step 9 — incipient
+    "incipient_method":               ("incipient_method",),
+    "threshold_incipient_length":     ("thr_inc_len",),
+    "incipient_plateau_tau":          ("incipient_plateau_tau",),
+    "incipient_plateau_signal":       ("incipient_plateau_signal",),
+    "incipient_plateau_crossing":     ("incipient_plateau_crossing",),
+    "incipient_plateau_k":            ("incipient_plateau_k",),
+    "incipient_smooth_window":        ("incipient_smooth_window",),
+    "incipient_smooth_polyorder":     ("incipient_smooth_polyorder",),
+}
+
+# Widget keys that legitimately serve more than one parameter. Only the extrema
+# pair: one enable checkbox and one mode radio choose WHICH of `prominence` and
+# `prominence_relative` is live — they are mutually exclusive in the package, so
+# a second enable/mode pair would be able to express a state the package cannot
+# accept. Any OTHER shared key is an accident and the coverage test says so.
+_SHARED_SELECTOR_KEYS = frozenset({"extrema_prominence_enabled",
+                                   "extrema_prominence_mode"})
+
+# Signature parameters that are not calibration parameters and therefore have no
+# widget: the series itself and the three plotting/export switches the app drives
+# on its own.
+_NON_PARAMETER_ARGS = frozenset({"zeta_df", "vorticity", "plot", "plot_steps",
+                                 "export_dict"})
+
 
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
 _REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP)
@@ -1256,8 +1328,34 @@ with st.sidebar:
     )
     st.divider()
 
-    # --- Lanczos filter ---
-    st.header("Lanczos Filter")
+
+    # ══════════════════════════════════════════════════════════════════════
+    # The groups below follow the order in which the detector actually runs,
+    # not the order the phases are named in.  Read off the source, not assumed:
+    #
+    #   process_vorticity (determine_periods.py)
+    #     1. Lanczos band-pass          use_filter, cutoff_low, cutoff_high,
+    #                                   boundary_padding, replace_endpoints_with_lowpass
+    #     2. Savitzky-Golay             use_smoothing, use_smoothing_twice,
+    #                                   savgol_polynomial
+    #   get_periods (determine_periods.py:1026-1066)
+    #     3. find_peaks_valleys(z)      prominence, prominence_relative
+    #     4. find_intensification_period
+    #     5. find_decay_period
+    #     6. find_mature_stage
+    #     7. find_residual_period       decay_tail_amplitude_fraction
+    #     8. post_process_periods       (no parameter)
+    #     9. find_incipient_period      incipient_*, threshold_incipient_length
+    #
+    # Two consequences of reading the real order rather than the phase names:
+    # the extrema filter is step 3 — it runs BEFORE every stage and its output
+    # is what all of them see — and decay_tail_amplitude_fraction is read by
+    # find_residual_period (find_stages.py:588), not by find_decay_period, so
+    # it sits under Residual and not under Decay.
+    # ══════════════════════════════════════════════════════════════════════
+
+    st.header("1 · Lanczos Filter")
+    st.caption("Step 1 — `process_vorticity`. Runs before everything; every group below sees the filtered series.")
     use_filter = st.checkbox(
         "Apply Lanczos filter", value=_DEFAULTS["use_filter"], key="use_filter",
         help=(
@@ -1314,6 +1412,13 @@ with st.sidebar:
             "Pass it to reproduce results from before this default changed.\n\n"
             "**edge** — pads with the edge value repeated. Between the two "
             "(median 0.50), changes marginally fewer phase sequences.\n\n"
+            "**Spans groups.** This is a FILTER parameter (step 1), but it "
+            "governs the INCIPIENT phase (step 9): the incipient phase is read "
+            "at the leading edge, which is exactly what this control rewrites. "
+            "Measured on the 51-track set: under `reflect` no series refuses an "
+            "incipient phase (0/51); under `edge`, 33/51 refuse. Changing it "
+            "here changes step 9 without touching any of step 9's own "
+            "controls.\n\n"
             "Changing this alters the smoothed signal near the boundaries, so a "
             "calibrated parameter set must be re-validated before it is trusted "
             "in a new mode."
@@ -1323,9 +1428,31 @@ with st.sidebar:
         ),
     )
 
+    with st.expander("Advanced — Lanczos", expanded=False):
+        replace_endpoints = st.slider(
+            "Replace endpoints with lowpass (timesteps) — DEPRECATED", 0, 48, step=1,
+            value=_DEFAULTS["replace_endpoints"], key="replace_endpoints",
+            disabled=not use_filter,
+            help=(
+                "**Deprecated — leave at 0.** Replaces the first and last 5% of the filtered "
+                "series with a simple low-pass estimate. It was a palliative for the Lanczos "
+                "zero-padding boundary artifact, which `boundary_padding` now fixes at its "
+                "source — and it applies the same zero-padded convolution internally.\n\n"
+                "Combined with `boundary_padding=reflect` it is actively harmful: both filters "
+                "carry full amplitude at the edge, so the 5% splice becomes a visible step. "
+                "Measured: **28 of 51** calibration tracks opened with a spurious `decay` phase "
+                "with this at 24, against **0/51** with it at 0.\n\n"
+                "Default: 0 (was 24 up to v2.0.0)."
+                + ("" if use_filter else
+                   " **Inactive**: only applied when `use_filter` is on "
+                   "(`if use_filter and replace_endpoints_with_lowpass:`).")
+            ),
+        )
+
     st.divider()
-    # --- Savgol smoothing ---
-    st.header("Savgol Smoothing")
+
+    st.header("2 · Savitzky-Golay Smoothing")
+    st.caption("Step 2 — `process_vorticity`, over the Lanczos output.")
     _sm_mode = st.selectbox(
         "use_smoothing", _SM_OPTS,
         index=_SM_OPTS.index(_DEFAULTS["sm_mode"]), key="sm_mode",
@@ -1387,26 +1514,7 @@ with st.sidebar:
     else:
         use_smoothing_twice = "auto"
 
-    with st.expander("Advanced options", expanded=False):
-        replace_endpoints = st.slider(
-            "Replace endpoints with lowpass (timesteps) — DEPRECATED", 0, 48, step=1,
-            value=_DEFAULTS["replace_endpoints"], key="replace_endpoints",
-            disabled=not use_filter,
-            help=(
-                "**Deprecated — leave at 0.** Replaces the first and last 5% of the filtered "
-                "series with a simple low-pass estimate. It was a palliative for the Lanczos "
-                "zero-padding boundary artifact, which `boundary_padding` now fixes at its "
-                "source — and it applies the same zero-padded convolution internally.\n\n"
-                "Combined with `boundary_padding=reflect` it is actively harmful: both filters "
-                "carry full amplitude at the edge, so the 5% splice becomes a visible step. "
-                "Measured: **28 of 51** calibration tracks opened with a spurious `decay` phase "
-                "with this at 24, against **0/51** with it at 0.\n\n"
-                "Default: 0 (was 24 up to v2.0.0)."
-                + ("" if use_filter else
-                   " **Inactive**: only applied when `use_filter` is on "
-                   "(`if use_filter and replace_endpoints_with_lowpass:`).")
-            ),
-        )
+    with st.expander("Advanced — Savgol", expanded=False):
         savgol_poly = st.slider(
             "Savgol polynomial degree", 2, 5, step=1,
             value=_DEFAULTS["savgol_poly"], key="savgol_poly",
@@ -1423,9 +1531,77 @@ with st.sidebar:
             ),
         )
 
+
     st.divider()
-    # --- Phase detection thresholds ---
-    st.header("Phase Detection")
+
+    st.header("3 · Extrema Filtering")
+    st.caption("Step 3 — `find_peaks_valleys(z)`. Runs BEFORE every stage: the extrema that survive here are the ones all the steps below see.")
+    with st.expander("Prominence filtering (advanced)", expanded=False):
+        st.caption(
+            "Optional post-processing for the detected peaks/valleys. "
+            "Boundary extrema (first and last points) are always preserved. "
+            "Leave disabled to use the default CycloPhaser behaviour."
+        )
+        _prom_enabled = st.checkbox(
+            "Enable prominence filter", value=_DEFAULTS["extrema_prominence_enabled"],
+            key="extrema_prominence_enabled",
+            help=(
+                "Remove interior extrema that are not sufficiently prominent. "
+                "Boundary extrema are always preserved regardless of this setting."
+            ),
+        )
+        if _prom_enabled:
+            _prom_mode = st.radio(
+                "Prominence mode",
+                options=["relative", "absolute"],
+                index=0,
+                format_func=lambda x: (
+                    "Relative (recommended)" if x == "relative" else "Absolute"
+                ),
+                key="extrema_prominence_mode",
+                horizontal=True,
+                help=(
+                    "Relative adapts to each cyclone's intensity — no re-tuning needed "
+                    "across weak and strong systems. Absolute uses a fixed threshold in "
+                    "the same units as the smoothed vorticity."
+                ),
+            )
+            if _prom_mode == "relative":
+                _rel_val = st.slider(
+                    "Fraction of dominant prominence",
+                    min_value=0.00, max_value=0.50, step=0.01,
+                    value=_DEFAULTS["extrema_prominence_rel_val"],
+                    key="extrema_prominence_rel_val",
+                    help=(
+                        "Fraction of the cyclone's strongest extremum's prominence; "
+                        "adapts to each cyclone's intensity (recommended mode). "
+                        "E.g.: 0.10 keeps only extrema with prominence ≥ 10% "
+                        "of the dominant extremum."
+                    ),
+                )
+                extrema_prominence          = None
+                extrema_prominence_relative = float(_rel_val)
+            else:
+                _abs_val = st.number_input(
+                    "Absolute prominence threshold", min_value=0.0,
+                    value=_DEFAULTS["extrema_prominence_val"],
+                    format="%.2e", key="extrema_prominence_val",
+                    help=(
+                        "Minimum prominence in the same units as the smoothed vorticity "
+                        "series. Requires re-tuning for datasets of different magnitudes."
+                    ),
+                )
+                extrema_prominence          = float(_abs_val)
+                extrema_prominence_relative = None
+        else:
+            extrema_prominence          = None
+            extrema_prominence_relative = None
+
+
+
+    st.divider()
+    st.header("Threshold scale (spans steps 4-6)")
+    st.caption("Cross-cutting parameter: it does not belong to a single step.")
     # `mature_method`'s own radio renders further down, so its current value is
     # read from session_state here. Under "amplitude" length_scale stops scaling
     # the MATURE window (find_stages.find_mature_stage reads it but only uses it
@@ -1445,8 +1621,14 @@ with st.sidebar:
         key="length_scale",
         horizontal=True,
         help=(
-            "Controls what length the five sliders below (and the two in "
-            "'Advanced thresholds') are fractions *of*. "
+            "**Spans groups.** It scales the DURATION thresholds of "
+            "intensification (step 4) and decay (step 5) — `find_stages.py:387` "
+            "— and, through the intensification/mature/decay neighbour check, it "
+            "can change the detected phases outright: 20160735, 20191014 and "
+            "20203947 under params-9. That is why it sits above steps 4-6 rather "
+            "than inside one of them.\n\n"
+            "Controls what length the duration thresholds of the "
+            "intensification, decay and mature groups below are fractions *of*. "
             "**global** (default): thresholds are measured against the whole "
             "series length — unchanged from v2.0.0. "
             "**local**: thresholds are measured against each individual life "
@@ -1469,6 +1651,11 @@ with st.sidebar:
                "'amplitude'. It is therefore left enabled on purpose.")
         ),
     )
+
+    st.divider()
+
+    st.header("4 · Intensification")
+    st.caption("Step 4 — `find_intensification_period`, the first phase written.")
     thr_int_len = st.slider(
         "Min. intensification length", 0.01, 0.30, step=0.005,
         value=_DEFAULTS["thr_int_len"], key="thr_int_len",
@@ -1479,6 +1666,21 @@ with st.sidebar:
             "lower values allow brief intensification episodes."
         ),
     )
+    with st.expander("Advanced — intensification", expanded=False):
+        thr_int_gap = st.slider(
+            "Max. intensification gap", 0.01, 0.30, step=0.005,
+            value=_DEFAULTS["thr_int_gap"], key="thr_int_gap",
+            help=(
+                "Maximum gap between two consecutive intensification segments that allows "
+                "them to be merged into a single continuous segment. Expressed as a fraction "
+                "of total series length. Gaps larger than this keep the segments separate."
+            ),
+        )
+
+    st.divider()
+
+    st.header("5 · Decay")
+    st.caption("Step 5 — `find_decay_period`. May overwrite timesteps step 4 already labelled intensification.")
     thr_dec_len = st.slider(
         "Min. decay length", 0.01, 0.30, step=0.005,
         value=_DEFAULTS["thr_dec_len"], key="thr_dec_len",
@@ -1488,6 +1690,21 @@ with st.sidebar:
             "Higher values eliminate short decay episodes."
         ),
     )
+    with st.expander("Advanced — decay", expanded=False):
+        thr_dec_gap = st.slider(
+            "Max. decay gap", 0.01, 0.30, step=0.005,
+            value=_DEFAULTS["thr_dec_gap"], key="thr_dec_gap",
+            help=(
+                "Maximum gap between consecutive decay segments for merging. "
+                "Analogous to the intensification gap. Useful when the cyclone shows brief "
+                "recoveries during decay that should not fragment the phase."
+            ),
+        )
+
+    st.divider()
+
+    st.header("6 · Mature")
+    st.caption("Step 6 — `find_mature_stage`.")
     mature_method = st.radio(
         "Mature stage method",
         options=["derivative", "amplitude"],
@@ -1553,25 +1770,67 @@ with st.sidebar:
     else:
         mature_amplitude_fraction = _DEFAULTS["mature_amplitude_fraction"]
 
-    with st.expander("Advanced thresholds", expanded=False):
-        thr_int_gap = st.slider(
-            "Max. intensification gap", 0.01, 0.30, step=0.005,
-            value=_DEFAULTS["thr_int_gap"], key="thr_int_gap",
+
+    st.divider()
+
+    st.header("7 · Residual")
+    st.caption("Step 7 — `find_residual_period`. This is the function that reads `decay_tail_amplitude_fraction` (find_stages.py:588), not `find_decay_period`.")
+    with st.expander("Extend decay over a flat tail (advanced)", expanded=False):
+        st.caption(
+            "Compensates for an artifact of the prominence filter above: on a "
+            "single-cycle series, peaks and valleys are scored against SEPARATE "
+            "populations, so the largest interior peak always survives "
+            "prominence_relative filtering by construction — even when its "
+            "prominence is negligible — while the valley of the same ripple is "
+            "correctly rejected. This 'orphan' peak (no surviving valley after it) "
+            "truncates decay early; the flat tail left behind is then labelled "
+            "'residual' even though nothing in the vorticity indicates a genuine "
+            "re-intensification. Leave disabled to use the default CycloPhaser "
+            "behaviour."
+        )
+        _decay_tail_enabled = st.checkbox(
+            "Extend decay over a flat/plateau tail", value=_DEFAULTS["decay_tail_enabled"],
+            key="decay_tail_enabled",
             help=(
-                "Maximum gap between two consecutive intensification segments that allows "
-                "them to be merged into a single continuous segment. Expressed as a fraction "
-                "of total series length. Gaps larger than this keep the segments separate."
+                "If the tail right after the last decay block contains no "
+                "re-deepening larger than the fraction below (relative to the "
+                "cycle's own peak-to-valley amplitude), it is labelled 'decay' "
+                "instead of 'residual'. Never touches z_peaks_valleys or any "
+                "detected extrema, so the mature window is unaffected."
             ),
         )
-        thr_dec_gap = st.slider(
-            "Max. decay gap", 0.01, 0.30, step=0.005,
-            value=_DEFAULTS["thr_dec_gap"], key="thr_dec_gap",
-            help=(
-                "Maximum gap between consecutive decay segments for merging. "
-                "Analogous to the intensification gap. Useful when the cyclone shows brief "
-                "recoveries during decay that should not fragment the phase."
-            ),
-        )
+        if _decay_tail_enabled:
+            _decay_tail_val = st.slider(
+                "Fraction of cycle amplitude",
+                min_value=0.01, max_value=0.50, step=0.01,
+                value=_DEFAULTS["decay_tail_fraction_val"],
+                key="decay_tail_fraction_val",
+                help=(
+                    "Author's validated reference value is 0.05, confirmed safe "
+                    "over (0.0356, 0.0651] on the 51-track calibration set: below "
+                    "that, some spurious tails aren't absorbed; above it, genuine "
+                    "re-intensifications start being swallowed. A re-deepening at "
+                    "or above this fraction is left for the catch-all rule to mark "
+                    "'residual', as before."
+                ),
+            )
+            decay_tail_amplitude_fraction = float(_decay_tail_val)
+        else:
+            decay_tail_amplitude_fraction = None
+
+
+    st.divider()
+
+    # Numbered 9, not 8: these groups promise the detector's execution order, so
+    # the header has to carry the step number it actually is. Step 8 is
+    # `post_process_periods`, which takes no parameter and therefore has no
+    # group — the gap is the honest rendering of that, and renumbering to close
+    # the sequence would make the header disagree with its own caption.
+    st.caption("Step 8 — `post_process_periods`: gap-filling and singleton "
+               "removal. No parameter, so no controls.")
+    st.header("9 · Incipient")
+    st.caption("Step 9 — `find_incipient_period`, the LAST to run, after `post_process_periods`.")
+    with st.expander("Incipient — method and thresholds", expanded=False):
         incipient_method = st.radio(
             "incipient_method",
             options=["geometric", "plateau"],
@@ -1728,117 +1987,6 @@ with st.sidebar:
         incipient_plateau_signal, incipient_smooth_window,
         incipient_smooth_polyorder)
 
-    st.divider()
-    # --- Extrema filtering (optional) ---
-    st.header("Extrema Filtering")
-    with st.expander("Prominence filtering (advanced)", expanded=False):
-        st.caption(
-            "Optional post-processing for the detected peaks/valleys. "
-            "Boundary extrema (first and last points) are always preserved. "
-            "Leave disabled to use the default CycloPhaser behaviour."
-        )
-        _prom_enabled = st.checkbox(
-            "Enable prominence filter", value=_DEFAULTS["extrema_prominence_enabled"],
-            key="extrema_prominence_enabled",
-            help=(
-                "Remove interior extrema that are not sufficiently prominent. "
-                "Boundary extrema are always preserved regardless of this setting."
-            ),
-        )
-        if _prom_enabled:
-            _prom_mode = st.radio(
-                "Prominence mode",
-                options=["relative", "absolute"],
-                index=0,
-                format_func=lambda x: (
-                    "Relative (recommended)" if x == "relative" else "Absolute"
-                ),
-                key="extrema_prominence_mode",
-                horizontal=True,
-                help=(
-                    "Relative adapts to each cyclone's intensity — no re-tuning needed "
-                    "across weak and strong systems. Absolute uses a fixed threshold in "
-                    "the same units as the smoothed vorticity."
-                ),
-            )
-            if _prom_mode == "relative":
-                _rel_val = st.slider(
-                    "Fraction of dominant prominence",
-                    min_value=0.00, max_value=0.50, step=0.01,
-                    value=_DEFAULTS["extrema_prominence_rel_val"],
-                    key="extrema_prominence_rel_val",
-                    help=(
-                        "Fraction of the cyclone's strongest extremum's prominence; "
-                        "adapts to each cyclone's intensity (recommended mode). "
-                        "E.g.: 0.10 keeps only extrema with prominence ≥ 10% "
-                        "of the dominant extremum."
-                    ),
-                )
-                extrema_prominence          = None
-                extrema_prominence_relative = float(_rel_val)
-            else:
-                _abs_val = st.number_input(
-                    "Absolute prominence threshold", min_value=0.0,
-                    value=_DEFAULTS["extrema_prominence_val"],
-                    format="%.2e", key="extrema_prominence_val",
-                    help=(
-                        "Minimum prominence in the same units as the smoothed vorticity "
-                        "series. Requires re-tuning for datasets of different magnitudes."
-                    ),
-                )
-                extrema_prominence          = float(_abs_val)
-                extrema_prominence_relative = None
-        else:
-            extrema_prominence          = None
-            extrema_prominence_relative = None
-
-
-    st.divider()
-    # --- Decay-tail extension (optional) ---
-    st.header("Decay-Tail Handling")
-    with st.expander("Extend decay over a flat tail (advanced)", expanded=False):
-        st.caption(
-            "Compensates for an artifact of the prominence filter above: on a "
-            "single-cycle series, peaks and valleys are scored against SEPARATE "
-            "populations, so the largest interior peak always survives "
-            "prominence_relative filtering by construction — even when its "
-            "prominence is negligible — while the valley of the same ripple is "
-            "correctly rejected. This 'orphan' peak (no surviving valley after it) "
-            "truncates decay early; the flat tail left behind is then labelled "
-            "'residual' even though nothing in the vorticity indicates a genuine "
-            "re-intensification. Leave disabled to use the default CycloPhaser "
-            "behaviour."
-        )
-        _decay_tail_enabled = st.checkbox(
-            "Extend decay over a flat/plateau tail", value=_DEFAULTS["decay_tail_enabled"],
-            key="decay_tail_enabled",
-            help=(
-                "If the tail right after the last decay block contains no "
-                "re-deepening larger than the fraction below (relative to the "
-                "cycle's own peak-to-valley amplitude), it is labelled 'decay' "
-                "instead of 'residual'. Never touches z_peaks_valleys or any "
-                "detected extrema, so the mature window is unaffected."
-            ),
-        )
-        if _decay_tail_enabled:
-            _decay_tail_val = st.slider(
-                "Fraction of cycle amplitude",
-                min_value=0.01, max_value=0.50, step=0.01,
-                value=_DEFAULTS["decay_tail_fraction_val"],
-                key="decay_tail_fraction_val",
-                help=(
-                    "Author's validated reference value is 0.05, confirmed safe "
-                    "over (0.0356, 0.0651] on the 51-track calibration set: below "
-                    "that, some spurious tails aren't absorbed; above it, genuine "
-                    "re-intensifications start being swallowed. A re-deepening at "
-                    "or above this fraction is left for the catch-all rule to mark "
-                    "'residual', as before."
-                ),
-            )
-            decay_tail_amplitude_fraction = float(_decay_tail_val)
-        else:
-            decay_tail_amplitude_fraction = None
-
 # Bundle phase params
 _PHASE_PARAMS = dict(
     threshold_intensification_length=thr_int_len,
@@ -1865,6 +2013,25 @@ _PHASE_PARAMS = dict(
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
 ))
+
+# The sidebar's live state, in the same shape a calibration YAML uses, so the
+# Benchmark tab can spawn a column from "the current sidebar" without
+# re-deriving any of it. Written here, next to the values actually passed to the
+# detector, rather than rebuilt inside the tab: a second derivation would be one
+# more place for the column and the Calibration view to drift apart.
+st.session_state["_bench_live_config"] = {
+    "filter_params": {
+        "use_filter": use_filter,
+        "cutoff_low": cutoff_low,
+        "cutoff_high": cutoff_high,
+        "replace_endpoints_with_lowpass": replace_endpoints,
+        "use_smoothing": use_smoothing,
+        "use_smoothing_twice": use_smoothing_twice,
+        "savgol_polynomial": savgol_poly,
+        "boundary_padding": boundary_padding,
+    },
+    "phase_params": {k: v for k, v in _PHASE_PARAMS.items() if v is not None},
+}
 
 # ── File upload ──────────────────────────────────────────────────────────────────
 uploaded = st.file_uploader(
@@ -2135,7 +2302,7 @@ _ok_results = {n: r for n, r in all_results.items() if r["ok"]}
 _zip_bytes  = _build_zip(_ok_results, _build_yaml(cyclone_names))
 
 # ── Tabs ─────────────────────────────────────────────────────────────────────────
-tab_cal, tab_doc = st.tabs(["Calibration", "Documentation"])
+tab_cal, tab_bench, tab_doc = st.tabs(["Calibration", "Benchmark", "Documentation"])
 
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 1 — Calibration
@@ -2626,6 +2793,12 @@ with tab_cal:
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 2 — Documentation
 # ══════════════════════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════════════════════
+# TAB 2 — Benchmark
+# ══════════════════════════════════════════════════════════════════════════════════
+with tab_bench:
+    benchmark_tab.render()
+
 with tab_doc:
     st.header("CycloPhaser — Method Documentation")
     st.caption(
