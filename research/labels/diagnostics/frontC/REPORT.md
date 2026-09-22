@@ -81,13 +81,17 @@ Only two series change in total, as predicted. Figures:
 
 ## Divergences from the brief's expected numbers
 
-1. **The default-behaviour sha256 is `b01b16b6…`, not `b500d2e0…c4a5`.**
-   Not caused by this front. A `git worktree` of unmodified `develop-v2.1`,
-   run in this same environment, produces `b01b16b6…` too. The CHANGELOG value
-   was recorded under numpy 2.4.4 / scipy 1.17.1 / pandas 3.0.2 and is
-   **environment-dependent**, though written down as if absolute. The claim
-   that matters — this branch's default equals `develop-v2.1`'s default —
-   holds exactly.
+1. ~~**The default-behaviour sha256 is `b01b16b6…`, not `b500d2e0…c4a5`** —
+   the CHANGELOG value is environment-dependent.~~ **RETRACTED 2026-09-22 —
+   this was my error.** I compared the canonical digest against one produced by
+   a second generator I had written with a different blob layout
+   (`default_equivalence.py`: `sid` + `"|".join(periods)`, no separators; the
+   canonical `front_b/default_behaviour_hash.py`: `"<id>:<periods>"` lines
+   joined by `\n`). Different blobs, identical behaviour, different numbers —
+   and I blamed the libraries. Run with the canonical generator in this same
+   environment the digest is `b500d2e0…c4a5` at `17dc21f` **and** `7a87a10`:
+   the constant is not environment-dependent, and front C's default-neutrality
+   is confirmed by the canonical instrument. See `docs/future_work.md` item 24.
 
 2. **75 raw segments, not 68.** Both numbers are real and they count different
    things: **75** raw segments clear the duration test (the population the
@@ -125,6 +129,27 @@ Only two series change in total, as predicted. Figures:
 * The per-segment ordering test ships with a **positive control** (a floor above
   both segments must reject both), so "the block survived" cannot be confused
   with "the parameter was never wired in".
+
+### Epistemic standing of this gate — read before citing it
+
+This gate is **not** of the same kind as those in items 19–23.
+
+1. **Only the D2 distribution test was predictive**: "at most 3 segments fall in
+   `(0.02, 0.15]`", declared before the measurement; result **0 of 75**.
+2. **The gate metrics were not.** Sequence, mature, incipient, synthetics and
+   the changed-series set were re-read from a floor sweep measured *before* the
+   topological criterion for residual existed. Retrospective validation, not a
+   passed prediction.
+3. **Two earlier interventions failed first, the second on a mis-specified
+   criterion** — it demanded "fixing" `20160735` and `20170342`, which are
+   *correct* under the topological definition. A gate that fails on the wrong
+   criterion is not evidence against what it rejected.
+4. **The "destructive overwrite at `find_stages.py:726`, sibling of defect H"
+   diagnosis is WITHDRAWN.** Line 726 is inside `find_residual_period`; the
+   rule implements the physical definition and is correct.
+5. **`0.05` was chosen after the result was known.** Nothing predictive backs
+   that point inside `(0.0068, 0.1714]`; what is predictive is the window's
+   existence and width.
 
 ## Drivers
 

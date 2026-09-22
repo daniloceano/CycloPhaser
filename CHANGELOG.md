@@ -129,6 +129,22 @@ Default behaviour is unchanged: the phase output over the 47 training series at
 package defaults is byte-identical before and after
 (sha256 `b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5`).
 
+That digest is only meaningful together with the blob layout that defines it and
+the environment that produced it, so both are now recorded per run in
+`research/labels/diagnostics/front_b/default_behaviour_sha256.txt`. The value
+above was first written under numpy 2.4.4 / scipy 1.17.1 / pandas 3.0.2 and has
+since been reproduced **unchanged** under numpy 2.5.3 / scipy 1.18.0 /
+pandas 3.0.5 (python 3.12.14), at both `17dc21f` and `7a87a10`. It is therefore
+stable across every environment recorded so far — but that is a measured fact
+with two data points, not a guarantee, which is why the table exists.
+
+What the digest is *not* comparable against is a "default behaviour hash"
+computed with a different blob layout. Concatenating the same phase strings with
+different separators yields a different number over identical behaviour; such a
+mismatch says nothing about the code. Use
+`research/labels/diagnostics/front_b/default_behaviour_hash.py` rather than
+writing a second digest.
+
 See `docs/future_work.md` item 19 and
 `research/inert_params/REPORT_inertia_sweep.md`.
 

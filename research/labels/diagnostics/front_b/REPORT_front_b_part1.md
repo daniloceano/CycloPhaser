@@ -279,6 +279,15 @@ n_series : 47
 SHA256   : b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
 ```
 
+> **Added 2026-09-22, after the fact — not part of the front B record above.**
+> This digest is now recorded per run together with its environment (commit,
+> python, numpy, scipy, pandas) in `default_behaviour_sha256.txt`. The value
+> above stands: it was reproduced **unchanged** under numpy 2.5.3 / scipy 1.18.0
+> / pandas 3.0.5 at both `17dc21f` and `7a87a10`. Note also that a digest built
+> with a different blob layout is a different number over the same behaviour and
+> must not be compared against this one. Nothing in the front B record was
+> rewritten.
+
 ---
 
 ## Blockers and divergences
