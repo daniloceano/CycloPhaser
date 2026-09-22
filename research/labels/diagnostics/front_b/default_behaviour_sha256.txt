@@ -10,5 +10,51 @@ config  : cyclophaser PACKAGE DEFAULTS - get_periods(process_vorticity(df))
 format  : one line per id, '<id>:<periods joined by |>', lines joined
           with newline, no trailing newline; sha256 of the UTF-8 bytes.
 
-n_series: 47
+The digest depends on the code, the series AND the libraries that computed
+them, so each run is recorded below WITH its environment. Records are
+append-only: an earlier one is never rewritten or removed, because the
+table's whole value is showing the digest under several environments.
+
+A digest computed with any other blob layout is a different number over the
+same behaviour and must not be compared against these.
+
+--- record ---
 sha256  : b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+n_series: 47
+commit  : 4c0767c99ce2294a43b7b3095ba08026a7e805c3
+date    : 2026-09-16
+env     : UNKNOWN - not recorded at the time, and not recoverable.
+          (An earlier revision of this table listed numpy 2.4.4 / scipy 1.17.1
+          / pandas 3.0.2 here. Those were another machine's versions, carried
+          in by mistake; there is no evidence about what this run used. They
+          now appear as their own record below, where they belong.)
+--- record ---
+sha256  : b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+n_series: 47
+commit  : 7a87a109ffd9eac36f7921b90b62c556d1c19c1e
+date    : 2026-09-22
+python  : 3.12.14
+numpy   : 2.5.3
+scipy   : 1.18.0
+pandas  : 3.0.5
+--- record ---
+sha256  : b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+n_series: 47
+commit  : 17dc21f and 7a87a10 (same value at both)
+date    : 2026-09-22
+python  : 3.12.3
+numpy   : 2.4.4
+scipy   : 1.17.1
+pandas  : 3.0.2
+note    : measured with default_behaviour_hash.py in the independent
+          verification run, on a DIFFERENT machine from the 2.5.3 record
+          above. Reported by that run, not measured on this one.
+--- record ---
+sha256  : b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+n_series: 47
+commit  : a2842090833ec990c9586cbc15f5bfd3272ffee3
+date    : 2026-09-22
+python  : 3.12.14
+numpy   : 2.5.3
+scipy   : 1.18.0
+pandas  : 3.0.5

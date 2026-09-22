@@ -2245,14 +2245,48 @@ added precisely because 20(b)'s could not see `20191014` lose its only mature
 
 ### Three divergences from the commissioning brief — reported, not adjusted
 
-1. **The default-behaviour sha256 is `b01b16b6…752f`, not the CHANGELOG's
-   `b500d2e0…c4a5`.** Not caused by this front: a worktree of unmodified
-   `develop-v2.1`, run in the same environment, yields `b01b16b6…` too. The
-   recorded constant is **environment-dependent** (numpy 2.4.4 / scipy 1.17.1 /
-   pandas 3.0.2 when written; 2.5.3 / 1.18.0 / 3.0.5 here) but was written down
-   as absolute. The claim that matters — this branch's default equals
-   `develop-v2.1`'s — holds exactly. **Open: re-record that hash with its
-   library versions, or drop it as a portability claim it cannot support.**
+1. ~~**The default-behaviour sha256 is `b01b16b6…752f`, not the CHANGELOG's
+   `b500d2e0…c4a5`** — the recorded constant is environment-dependent.~~
+   **RETRACTED 2026-09-22. This was wrong, and it was my error.**
+
+   The digest I computed was not the digest the CHANGELOG records. I wrote a
+   second generator (`frontC/default_equivalence.py`) with a different blob
+   layout — `sid` concatenated with `"|".join(periods)` and no separator between
+   series — where the canonical generator
+   (`front_b/default_behaviour_hash.py`) builds `"<id>:<periods>"` lines joined
+   by `\n`. Two different blobs over identical behaviour give two different
+   numbers. I then attributed the disagreement to the library versions.
+
+   Run with the **canonical** generator in this environment (numpy 2.5.3 /
+   scipy 1.18.0 / pandas 3.0.5, python 3.12.14), the digest is
+   `b500d2e0…c4a5` — exactly the recorded value — at `17dc21f` (before this
+   front) **and** at `7a87a10` (after it). So the constant is *not*
+   environment-dependent across the two environments now on record, and front
+   C's default-neutrality is confirmed by the canonical instrument rather than
+   merely by a private one.
+
+   This is the [gate-instrument attribution trap] in its purest form: a second
+   instrument was built, disagreed with the first, and the environment was
+   blamed instead of the instrument. The corrective work
+   (`docs/frontC-hash-provenance`) adds per-run environment records to the
+   canonical `.txt` and states in the generator's own docstring that digests
+   from other layouts are not comparable.
+
+   **The failure was not only in building the second instrument.** In the
+   verification pass I ran the **canonical** generator in a second environment,
+   obtained the recorded constant `b500d2e0…c4a5` — and read that as
+   *confirming* the environment-dependence hypothesis. It was the opposite:
+   reproducing the recorded constant with the recorded instrument makes
+   environment-dependence the *least* likely explanation and points squarely at
+   a different instrument. Both halves of the disproof were in hand and the
+   wrong hypothesis survived because it had been supplied first. I went on to
+   recommend a two-row table carrying two different digests — which would have
+   written the falsehood into the very file created to prevent it.
+
+   The practice rule below exists because of that, not merely because of the
+   duplicate generator: **an anchoring hypothesis arriving with the task is
+   still a hypothesis, and evidence consistent with its negation must be scored
+   against it rather than folded into it.**
 
 2. **75 raw segments, not 68.** Both are real and count different things: 68 is
    the number of *stitched* blocks left after the gap merge. The D2 figures are
@@ -2268,6 +2302,59 @@ added precisely because 20(b)'s could not see `20191014` lose its only mature
    a purpose-built synthetic series with a positive control
    (`test_floor_is_per_segment_not_per_stitched_block`). **No real series
    currently exercises the distinction.**
+
+### Practice rule for any future gate that uses the default-behaviour hash
+
+Added 2026-09-22, out of the retraction above.
+
+A gate may **never** discharge "default behaviour unchanged" by comparing
+against a constant copied from a document. The baseline digest and the changed
+digest must be computed **on the same machine, in the same session, with the
+same generator**, and compared to each other. A written-down value is a record,
+not a control.
+
+Front C's own gate had exactly this defect: it compared a freshly computed
+number against a constant in the CHANGELOG, got a mismatch, and reached for the
+environment as the explanation. The right move — running the baseline commit
+through the same generator — is what eventually falsified it.
+
+Corollary: **one generator per quantity.** If a digest is needed, call
+`research/labels/diagnostics/front_b/default_behaviour_hash.py`. Writing a
+second one guarantees a mismatch that means nothing and costs a session to
+diagnose.
+
+### Epistemic standing of this front's gate — read before citing it
+
+Added 2026-09-22. The gate table above is **not** of the same kind as the gates
+in items 19–23, and citing it as though it were would credit it with predictive
+force it does not have.
+
+1. **Only the D2 distribution test was predictive.** The prediction — *at most 3
+   segments fall in `(0.02, 0.15]`* — was declared before the measurement
+   existed. The result was **0 of 75**. That is the one part of this front that
+   risked being wrong and was not.
+
+2. **The gate metrics were not predictive.** Sequence, mature, incipient,
+   synthetics and the set of changed series were re-read from a floor sweep
+   already measured **before the topological criterion for residual existed**.
+   Their agreement is retrospective validation, not a passed prediction.
+
+3. **Two earlier interventions were declared and failed first, and the second
+   failed on a mis-specified criterion.** It required "fixing" two residuals
+   held to be spurious — `20160735` and `20170342` — which under the topological
+   definition are **correct**. A gate that fails on the wrong criterion is not
+   evidence against the intervention it rejected.
+
+4. **The earlier diagnosis of a "destructive overwrite at `find_stages.py:726`,
+   sibling of defect H" is WITHDRAWN.** Line 726 sits in
+   `find_residual_period`, and that rule implements the physical definition
+   correctly. It is not a defect and must not be carried forward as one. (Defect
+   H itself, at `find_stages.py:982`, is a separate and still-open matter — see
+   item 22.)
+
+5. **`0.05` was chosen after the result was known.** Nothing predictive supports
+   that particular value inside `(0.0068, 0.1714]`. What is predictive is the
+   *existence and width of the window*; the point estimate inside it is not.
 
 ### Still open
 

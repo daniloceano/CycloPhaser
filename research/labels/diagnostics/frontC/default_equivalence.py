@@ -6,24 +6,55 @@ Same instrument as diagnostics/item20b/default_equivalence.py: hashes the whole
 at the reference configs. A summary statistic could coincide while the series
 differ; the full column cannot.
 
-What "unchanged" means here
----------------------------
-The claim under test is that this branch's DEFAULT output equals develop-v2.1's
-default output. The comparison that establishes that is cross-BRANCH, in one
-environment - not against a hash written down on another machine.
+*** CORRECTION, 2026-09-22 - READ THIS BEFORE USING ANY NUMBER BELOW ***
 
-CHANGELOG.md records b500d2e0...c4a5 for the package-defaults digest (front
-20(b), numpy 2.4.4 / scipy 1.17.1 / pandas 3.0.2). That value does NOT
-reproduce under numpy 2.5.3 / scipy 1.18.0 / pandas 3.0.5, and the reason is
-not this front: running this same digest on an unmodified develop-v2.1 worktree
-in this environment yields b01b16b6...752f, exactly what this branch yields.
-The recorded hash is environment-dependent and was written down as though
-absolute. See REPORT.md.
+This module computes a digest with its OWN blob layout:
 
-To reproduce the control:
+    sha256( concat over sorted ids of: sid + "|".join(periods) )
 
-    git worktree add /tmp/dev21 develop-v2.1
-    # copy control_A.py there and run it in the cyclophaser env
+with no separator between series and no ":" after the id. That is NOT the
+project's canonical default-behaviour digest, which is defined and produced by
+
+    research/labels/diagnostics/front_b/default_behaviour_hash.py
+
+as "<id>:<periods joined by |>" lines joined with "\n". Two different blobs over
+identical behaviour give two different numbers.
+
+This module's earlier docstring claimed that CHANGELOG's b500d2e0...c4a5 "does
+NOT reproduce" under numpy 2.5.3 / scipy 1.18.0 / pandas 3.0.5 and concluded the
+recorded hash was environment-dependent. **That conclusion was wrong.** It
+compared this layout's number against the canonical layout's number. Run with
+the canonical generator in that very environment, b500d2e0...c4a5 reproduces
+exactly, at 17dc21f and at 7a87a10 alike.
+
+The two full values, so neither has to be guessed at again:
+
+    canonical (front_b layout)   b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+    this module's layout         b01b16b6a86498d18509a0f3bcdac4c5a448615ae86a92c71899ed78aafc752f
+
+PROOF THAT THE DIFFERENCE IS LAYOUT, NOT LIBRARIES
+---------------------------------------------------
+Computed the 47 series' phase output ONCE, into a single in-memory dict, then
+hashed that one dict under both layouts in the same process:
+
+    python 3.12.14 / numpy 2.5.3 / scipy 1.18.0 / pandas 3.0.5
+      "<id>:<periods>" lines joined by "\n"   -> b500d2e0...c4a5
+      sid + "|".join(periods), concatenated   -> b01b16b6...752f
+
+One phase output, one interpreter, one set of libraries, two numbers. There is
+no library difference anywhere in that comparison, so the difference cannot be
+attributed to one. The independent verification run reports the same pair from
+a single output under python 3.12.3 / numpy 2.4.4 / scipy 1.17.1 / pandas 3.0.2
+- a second environment, same two constants.
+
+What remains valid here is only the RELATIVE comparison: within this module's
+own layout, a package-defaults run on this branch equals one on an unmodified
+develop-v2.1 worktree, and an explicit 0.0 equals an absent key. Those
+equalities are real. The absolute values below are meaningful only against each
+other.
+
+For any default-behaviour claim, use the canonical generator. See
+docs/future_work.md item 24.
 """
 from __future__ import annotations
 
@@ -47,7 +78,8 @@ from cyclophaser.determine_periods import get_periods, process_vorticity
 PV_KEYS = ("use_filter", "replace_endpoints_with_lowpass", "use_smoothing",
            "use_smoothing_twice", "savgol_polynomial", "cutoff_low",
            "cutoff_high", "boundary_padding")
-# Recorded by front 20(b) under numpy 2.4.4 / scipy 1.17.1 / pandas 3.0.2.
+# The CANONICAL digest (front_b layout). Listed here only to be explicit that
+# this module's numbers are NOT comparable with it - not as a target to match.
 CHANGELOG_DEFAULT_SHA = "b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5"
 # Measured on an unmodified develop-v2.1 worktree under numpy 2.5.3 /
 # scipy 1.18.0 / pandas 3.0.5 - the environment this front was run in.
@@ -89,8 +121,9 @@ def main():
     print(f"   sha256 = {a}")
     print(f"   develop-v2.1, same env  = {DEV21_DEFAULT_SHA}")
     print(f"   MATCH (this is the claim): {a == DEV21_DEFAULT_SHA}")
-    print(f"   CHANGELOG (front 20(b), other lib versions) = {CHANGELOG_DEFAULT_SHA}")
-    print(f"   match: {a == CHANGELOG_DEFAULT_SHA}  <- expected False here; see module docstring\n")
+    print(f"   canonical digest (DIFFERENT blob layout)    = {CHANGELOG_DEFAULT_SHA}")
+    print("   not compared: a different layout over the same behaviour is a\n"
+          "   different number. Use front_b/default_behaviour_hash.py.\n")
 
     b = digest(allser, {}, {"intensification_min_depth": 0.0})
     print("B. PACKAGE DEFAULTS + intensification_min_depth=0.0 passed EXPLICITLY")
