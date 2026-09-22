@@ -179,6 +179,7 @@ _DEFAULTS: dict = {
     "thr_mat_len":       0.030,
     "thr_mat_dist":      0.125,
     "thr_int_gap":       0.075,
+    "intensification_min_depth":  0.00,
     "thr_dec_gap":       0.075,
     "thr_inc_len":       0.400,
     "length_scale":      "global",
@@ -319,6 +320,7 @@ def _parse_decay_tail_amplitude_fraction(v) -> float:
 _YAML_PHASE_MAP: dict = {
     "threshold_intensification_length": ("thr_int_len",  float),
     "threshold_intensification_gap":    ("thr_int_gap",  float),
+    "intensification_min_depth":        ("intensification_min_depth", float),
     "threshold_mature_distance":        ("thr_mat_dist", float),
     "threshold_mature_length":          ("thr_mat_len",  float),
     "threshold_decay_length":           ("thr_dec_len",  float),
@@ -356,6 +358,12 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative",
                               # warning, falling back to the 0.0 default (which
                               # is a no-op).
                               "mature_min_depth",
+                              # intensification_min_depth is optional for the
+                              # same reason, one config later: params-1..12 all
+                              # predate the intensification depth floor and must
+                              # still import without a "missing key" warning,
+                              # falling back to the 0.0 default (a no-op).
+                              "intensification_min_depth",
                               # The incipient_* keys are optional for the same
                               # backward-compatibility reason as boundary_padding
                               # below: every YAML exported before the plateau
@@ -427,6 +435,7 @@ _PARAM_WIDGET_KEYS: dict[str, tuple[str, ...]] = {
     # step 4 — intensification
     "threshold_intensification_length": ("thr_int_len",),
     "threshold_intensification_gap":    ("thr_int_gap",),
+    "intensification_min_depth":        ("intensification_min_depth",),
     # step 5 — decay
     "threshold_decay_length":         ("thr_dec_len",),
     "threshold_decay_gap":            ("thr_dec_gap",),
@@ -471,7 +480,8 @@ _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
 # applied when present and not reported missing when absent therefore has to be
 # subtracted here explicitly -- which is what every config exported before
 # mature_min_depth existed (params-1..11) needs.
-_REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP) - {"mature_min_depth"}
+_REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP) - {"mature_min_depth",
+                                                    "intensification_min_depth"}
 
 
 # ── Pure helper functions ─────────────────────────────────────────────────────────
@@ -1691,6 +1701,23 @@ with st.sidebar:
                 "of total series length. Gaps larger than this keep the segments separate."
             ),
         )
+        intensification_min_depth = st.slider(
+            "Min. intensification depth", 0.00, 0.50, step=0.01,
+            value=_DEFAULTS["intensification_min_depth"],
+            key="intensification_min_depth",
+            help=(
+                "Depth floor on how much a candidate intensification segment must actually "
+                "deepen to be accepted at all. A segment qualifies when its normalised depth "
+                "`D2 = (z_peak - z_valley) / (z_max - z_min)` reaches this value — the drop "
+                "the segment itself achieves, as a fraction of the whole series' vorticity "
+                "range. Without it, a segment is accepted on duration alone, so a long flat "
+                "stretch is labelled intensification; step 7 then turns that phantom "
+                "intensification (having no mature after it) into residual to the end of the "
+                "series. Raise it to reject flat candidates. The floor is applied to each raw "
+                "segment before the gap merge above, not to the merged block. Default 0.00 "
+                "switches it off."
+            ),
+        )
 
     st.divider()
 
@@ -2025,6 +2052,7 @@ with st.sidebar:
 _PHASE_PARAMS = dict(
     threshold_intensification_length=thr_int_len,
     threshold_intensification_gap=thr_int_gap,
+    intensification_min_depth=intensification_min_depth,
     threshold_mature_distance=thr_mat_dist,
     threshold_mature_length=thr_mat_len,
     threshold_decay_length=thr_dec_len,

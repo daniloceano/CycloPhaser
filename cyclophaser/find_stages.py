@@ -437,6 +437,24 @@ def find_intensification_period(df, **args_periods):
             - 'threshold_intensification_gap' (float): Maximum gap allowed
               between consecutive intensification periods, as a fraction of a
               length that depends on 'length_scale'.
+            - 'intensification_min_depth' (float, optional): Depth floor in
+              [0, 1] on how much a candidate segment must actually deepen to
+              be accepted as intensification at all. A raw segment
+              (z_peak -> next z_valley) qualifies when its normalised depth
+
+                  D2 = (z[peak] - z[valley]) / (z_max - z_min)
+
+              measured on this series' own ``df['z']``, is >= this value.
+              D2 is the drop achieved by the segment itself as a fraction of
+              the whole series' z range, so it is 1.0 for a segment spanning
+              the series maximum down to its minimum, ~0 for an essentially
+              flat segment, and NEGATIVE for a segment that ends shallower
+              than it started. Default 0.0 admits every segment whose drop is
+              non-negative-or-larger, i.e. reproduces the previous behaviour
+              exactly, since the duration test was until now the only
+              criterion. A series whose z range is zero or non-finite has no
+              depth scale; the floor is skipped for it and a UserWarning says
+              so.
             - 'length_scale' (str, optional): 'global' (default) measures both
               thresholds above against the whole series length
               (df.index[-1]-df.index[0]), matching all versions prior to this
@@ -452,6 +470,12 @@ def find_intensification_period(df, **args_periods):
     threshold_intensification_length = args_periods['threshold_intensification_length']
     threshold_intensification_gap = args_periods['threshold_intensification_gap']
     length_scale = args_periods.get('length_scale', 'global')
+    intensification_min_depth = args_periods.get('intensification_min_depth', 0.0)
+
+    if not 0 <= intensification_min_depth <= 1:
+        raise ValueError(
+            f"intensification_min_depth must be in [0, 1], got {intensification_min_depth!r}."
+        )
 
     # Find z peaks and valleys
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
@@ -459,6 +483,62 @@ def find_intensification_period(df, **args_periods):
 
     length = df.index[-1] - df.index[0]
     dt = df.index[1] - df.index[0]
+
+    # --- intensification_min_depth: a per-segment depth floor -----------------
+    # Until this option existed, a candidate segment (a z_peak and the next
+    # z_valley) was accepted on DURATION alone: long enough, therefore
+    # intensification. Nothing asked whether it actually deepened. An
+    # essentially flat stretch that happens to be long enough is admitted, and
+    # that has a consequence far downstream: find_residual_period converts an
+    # intensification with no mature after it into residual all the way to the
+    # end of the series. That rule is correct — deepening with no subsequent
+    # mature is outside the cyclone's life cycle — but fed a spurious
+    # intensification it writes a spurious residual.
+    #
+    # The floor is the missing criterion, not a change to that rule. A segment
+    # qualifies when its normalised depth
+    #
+    #     D2 = (z[peak] - z[valley]) / (z_max - z_min)
+    #
+    # is >= intensification_min_depth, on the SAME series the rest of this
+    # function reads (df['z']). D2 is the fraction of the whole series' z range
+    # that the segment itself descends: ~0 for a flat stretch, negative for a
+    # segment ending shallower than it began, 1.0 for one spanning the series
+    # maximum down to its minimum.
+    #
+    # It is applied PER RAW SEGMENT, after the duration test and BEFORE the gap
+    # stitching below. That order is not incidental. Once two segments either
+    # side of a gap have been merged, the merged block's endpoints are the first
+    # segment's peak and the last segment's valley, and its D2 is a property of
+    # that merged span — which can be negative even where each component segment
+    # deepened, or positive where neither did. Judging after the stitch would
+    # measure a different quantity from the one this floor is defined on.
+    #
+    # Default 0.0 disables the rule outright: the guard below runs the floor
+    # ONLY when it is > 0, so on the default path no depth is computed and no
+    # segment can be rejected — the function reproduces its previous behaviour
+    # exactly. (0.0 is deliberately "off" rather than "accept D2 >= 0": a
+    # segment that ends shallower than it starts is still admitted by default,
+    # because changing that would be a behaviour change smuggled in under a
+    # default value.)
+    z_range = np.nan
+    apply_depth_floor = False
+    if intensification_min_depth > 0:
+        z_all = df['z'].to_numpy(dtype=float)
+        z_range = np.nanmax(z_all) - np.nanmin(z_all)
+        if not np.isfinite(z_range) or z_range <= 0:
+            # A flat or non-finite series has no depth scale, so D2 is
+            # undefined. The rule is skipped for this series rather than
+            # guessed at — and it says so, because silently ignoring a
+            # requested filter is worse than not offering it.
+            warnings.warn(
+                "intensification_min_depth was requested but the z range of this "
+                f"series is {z_range!r}, so the normalised segment depth D2 is "
+                "undefined. The depth floor is NOT applied to this series.",
+                UserWarning,
+            )
+        else:
+            apply_depth_floor = True
 
     # Find intensification periods between z peaks and valleys
     for z_peak in z_peaks:
@@ -472,6 +552,11 @@ def find_intensification_period(df, **args_periods):
             scale = (_local_cycle_scale(df, intensification_start, intensification_end)
                      if length_scale == 'local' else length)
             if intensification_end-intensification_start > scale * threshold_intensification_length:
+                if apply_depth_floor:
+                    depth = (float(df.at[intensification_start, 'z'])
+                             - float(df.at[intensification_end, 'z'])) / z_range
+                    if depth < intensification_min_depth:
+                        continue
                 df.loc[intensification_start:intensification_end, 'periods'] = 'intensification'
 
     # Check if there are multiple blocks of consecutive intensification periods

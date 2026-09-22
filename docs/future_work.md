@@ -2131,6 +2131,57 @@ Artefacts: `research/labels/diagnostics/item20b/` — `REPORT.md` (stage 1),
 `20160735` and `20205386`. `item19_core.py` and `params-11.yaml` untouched
 throughout.
 
+### Recorded while working front C — findings, not open fronts
+
+Measured on `research/frontC-intensification-depth`; recorded here because they
+bear on 20(b) and on the residual/decay machinery generally. **None of these
+opens a front.**
+
+* **The 0.80 floor destroyed `20191014`'s only mature phase, and 20(b)'s gate
+  could not see it.** Under `params-11` the series has exactly one mature block,
+  `(134, 140)`; under `params-12` it has none — the sequence goes
+  `incipient / decay / intensification / decay`, with `intensification` widening
+  from `(124,133)` to `(124,136)` to fill the space. The 20(b) gate scored the
+  *boundary* of the 38 matures that already paired with a label, so a phase
+  ceasing to exist scored as nothing at all rather than as a loss. **Any future
+  gate over phase detection needs an explicit existence criterion alongside the
+  boundary one**; front C's own measurement carries one for this reason.
+
+* **The project's definition of `residual` is topological, not amplitude-based.**
+  Residual means *deepening with no subsequent mature stage*, which places it
+  outside the cyclone's life cycle — a transient interaction, or TRACK
+  contamination. Writing `residual` from that point to the end of the series is
+  therefore the **desired** behaviour of `find_residual_period`, not a defect to
+  be tuned away. Front C works by removing the spurious *intensification* that
+  triggers the rule, and deliberately leaves the rule untouched.
+
+* **`20160735` and `20170342` are genuinely ambiguous between decay and
+  residual.** Both readings are defensible under the definition above. The
+  current manual labels stay as they are; this is recorded so a future front
+  does not "discover" the ambiguity and relabel on one reading.
+
+* **`decay_tail_amplitude_fraction`'s documented calibration is not reproducible
+  under `params-12`.** The "safe window" `(0.0356, 0.0651]`, the 7 convert cases
+  and the 3 preserve cases written into
+  `tests/test_decay_tail_amplitude_fraction.py`'s docstrings were calibrated on
+  a **pre-correction** config (`use_filter=1`, `use_smoothing=31`, no
+  `boundary_padding`). Under `params-12` the parameter is **inert** on both
+  `20180733` and `20180654`: every value from 0.05 to 1.0 reproduces the config's
+  own output byte for byte (verified at 0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0).
+  Recalibrating it and rewriting those docstrings is **a front of its own, still
+  open** — front C did not touch that file or that parameter.
+
+* **4 of the 7 documented convert cases are in the frozen test split**:
+  `20150561`, `20160030`, `20180654`, `20203373`. (`20170409`, `20180759` and
+  `20207822` are train.) Anyone recalibrating the parameter above must reckon
+  with that before reading those four.
+
+* **`20180654` was measured and reported with Danilo's explicit authorisation** —
+  a declared spend of the test split, made because it is the second series the
+  intensification depth floor was designed for and the front could not be judged
+  without it. The threshold itself was chosen from the train split alone. This
+  authorisation is per-series and per-front; it sets no precedent.
+
 ---
 
 ## Note

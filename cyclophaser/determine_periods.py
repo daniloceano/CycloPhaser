@@ -733,6 +733,7 @@ def get_periods(vorticity,
                 mature_method: str = "derivative",
                 mature_amplitude_fraction: float = 0.90,
                 mature_min_depth: float = 0.0,
+                intensification_min_depth: float = 0.0,
                 decay_tail_amplitude_fraction: float = None,
                 incipient_method: str = "geometric",
                 incipient_plateau_tau: float = 0.20,
@@ -981,6 +982,41 @@ def get_periods(vorticity,
             floor is skipped for it and a ``UserWarning`` says so. See
             ``find_stages.find_mature_stage``. Default 0.0 admits every valley and
             reproduces the exact behaviour of all versions prior to this option.
+        intensification_min_depth (float, optional): Depth floor in [0, 1] on how
+            much a candidate intensification segment must actually deepen to be
+            accepted at all. A raw segment (a z_peak and the next z_valley)
+            qualifies when its normalised depth
+            ``D2 = (z[peak] - z[valley]) / (z_max - z_min)``, measured on the
+            series' own ``z``, is at least this value. D2 is the drop the segment
+            itself achieves as a fraction of the whole series' z range: ~0 for an
+            essentially flat stretch, negative for a segment ending shallower than
+            it began, 1.0 for one running from the series maximum to its minimum.
+            Before this option, a segment was accepted on
+            ``threshold_intensification_length`` alone - on DURATION, with no
+            depth criterion at all - so a long flat stretch was labelled
+            intensification, and ``find_residual_period`` then converted that
+            phantom intensification (having no mature after it) into residual to
+            the end of the series. The floor supplies the missing criterion; it
+            does not alter that residual rule.
+            The floor is applied PER RAW SEGMENT, after the duration test and
+            BEFORE gap stitching (``threshold_intensification_gap``): a stitched
+            block's D2 is a property of the merged span and can differ in sign
+            from every segment that composes it, so judging after the stitch would
+            measure a different quantity.
+            Measured separation on the 47 train series: of the 75 RAW segments
+            that clear the duration test, exactly one falls below 0.15 - the
+            spurious 20180733 segment, at D2 = 0.0068 - and the smallest
+            legitimate one sits at 0.1714. Nothing lies between them, so every
+            floor in (0.0068, 0.1714] selects the same segments; 0.05 is chosen
+            as a round value near the middle of that gap in log terms. (75 is
+            the population the floor judges. The 68 figure quoted elsewhere is
+            the count of STITCHED blocks left after the gap merge, which is a
+            different quantity and not the denominator here.)
+            A series whose z range is zero or non-finite has no depth scale; the
+            floor is skipped for it and a ``UserWarning`` says so. See
+            ``find_stages.find_intensification_period``. Default 0.0 switches the
+            floor off entirely and reproduces the exact behaviour of all versions
+            prior to this option.
         decay_tail_amplitude_fraction (float, optional): Fraction (0, 1] of the
             cycle's peak-to-valley amplitude. See the "decay_tail_amplitude_fraction
             note" above and ``find_stages.find_residual_period`` for the full
@@ -1063,6 +1099,7 @@ def get_periods(vorticity,
         "mature_method": mature_method,
         "mature_amplitude_fraction": mature_amplitude_fraction,
         "mature_min_depth": mature_min_depth,
+        "intensification_min_depth": intensification_min_depth,
         "decay_tail_amplitude_fraction": decay_tail_amplitude_fraction,
         "incipient_method": incipient_method,
         "incipient_plateau_tau": incipient_plateau_tau,
@@ -1153,6 +1190,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       mature_method: str = "derivative",
                       mature_amplitude_fraction: float = 0.90,
                       mature_min_depth: float = 0.0,
+                      intensification_min_depth: float = 0.0,
                       decay_tail_amplitude_fraction: float = None,
                       incipient_method: str = "geometric",
                       incipient_plateau_tau: float = 0.20,
@@ -1342,6 +1380,42 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             ``find_stages.find_mature_stage``. Default 0.0 admits every valley and
             reproduces the exact behaviour of all versions prior to this option.
 
+        intensification_min_depth (float, optional): Depth floor in [0, 1] on how
+            much a candidate intensification segment must actually deepen to be
+            accepted at all. A raw segment (a z_peak and the next z_valley)
+            qualifies when its normalised depth
+            ``D2 = (z[peak] - z[valley]) / (z_max - z_min)``, measured on the
+            series' own ``z``, is at least this value. D2 is the drop the segment
+            itself achieves as a fraction of the whole series' z range: ~0 for an
+            essentially flat stretch, negative for a segment ending shallower than
+            it began, 1.0 for one running from the series maximum to its minimum.
+            Before this option, a segment was accepted on
+            ``threshold_intensification_length`` alone - on DURATION, with no
+            depth criterion at all - so a long flat stretch was labelled
+            intensification, and ``find_residual_period`` then converted that
+            phantom intensification (having no mature after it) into residual to
+            the end of the series. The floor supplies the missing criterion; it
+            does not alter that residual rule.
+            The floor is applied PER RAW SEGMENT, after the duration test and
+            BEFORE gap stitching (``threshold_intensification_gap``): a stitched
+            block's D2 is a property of the merged span and can differ in sign
+            from every segment that composes it, so judging after the stitch would
+            measure a different quantity.
+            Measured separation on the 47 train series: of the 75 RAW segments
+            that clear the duration test, exactly one falls below 0.15 - the
+            spurious 20180733 segment, at D2 = 0.0068 - and the smallest
+            legitimate one sits at 0.1714. Nothing lies between them, so every
+            floor in (0.0068, 0.1714] selects the same segments; 0.05 is chosen
+            as a round value near the middle of that gap in log terms. (75 is
+            the population the floor judges. The 68 figure quoted elsewhere is
+            the count of STITCHED blocks left after the gap merge, which is a
+            different quantity and not the denominator here.)
+            A series whose z range is zero or non-finite has no depth scale; the
+            floor is skipped for it and a ``UserWarning`` says so. See
+            ``find_stages.find_intensification_period``. Default 0.0 switches the
+            floor off entirely and reproduces the exact behaviour of all versions
+            prior to this option.
+
         decay_tail_amplitude_fraction (float, optional): Fraction (0, 1] of the
             cycle's peak-to-valley amplitude that the NaN tail after the last
             decay block must dip below (relative to its own running maximum)
@@ -1439,6 +1513,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         mature_method=mature_method,
         mature_amplitude_fraction=mature_amplitude_fraction,
         mature_min_depth=mature_min_depth,
+        intensification_min_depth=intensification_min_depth,
         decay_tail_amplitude_fraction=decay_tail_amplitude_fraction,
         incipient_method=incipient_method,
         incipient_plateau_tau=incipient_plateau_tau,

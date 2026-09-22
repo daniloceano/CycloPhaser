@@ -11,6 +11,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+**`intensification_min_depth` — an opt-in depth floor on which candidate
+segments may be accepted as intensification.**
+
+`get_periods` and `determine_periods` accept a new `intensification_min_depth`
+float in `[0, 1]`. A raw candidate segment (a z-peak and the next z-valley) is
+accepted only when its normalised depth
+
+```
+D2 = (z[peak] - z[valley]) / (z_max - z_min)
+```
+
+measured on the series' own `z`, is at least this value. `D2` is the drop the
+segment itself achieves as a fraction of the whole series' z range: `~0` for an
+essentially flat stretch, negative for a segment ending shallower than it began,
+`1.0` for one running from the series maximum down to its minimum.
+
+**Why it was needed.** Until now a segment was accepted on
+`threshold_intensification_length` alone — on *duration*, with no depth
+criterion whatsoever — so a long flat stretch was labelled intensification.
+`find_residual_period` then converts an intensification block with no mature
+phase after it into `residual` to the end of the series. That rule is correct
+and is **not** changed here: it implements the project's physical definition of
+residual, namely that deepening with no subsequent mature stage lies outside the
+cyclone's life cycle (a transient interaction, or TRACK contamination). But fed
+a phantom intensification it faithfully wrote a phantom residual, over a stretch
+the manual label calls decay. The floor supplies the missing criterion, so the
+phantom segment never exists, the residual rule never fires on it, and the
+preceding decay extends over the tail.
+
+**Where it acts.** Per *raw segment*, after the duration test and **before** the
+gap stitching controlled by `threshold_intensification_gap`. A stitched block's
+endpoints are the first segment's peak and the last segment's valley, so its D2
+is a property of the merged span and can be far smaller than either component's
+— judging after the stitch would measure a different quantity from the one the
+parameter is defined on.
+
+**Calibration.** Over the 47 training series, 75 raw segments clear the duration
+test. Exactly one falls below 0.15 — 20180733's spurious segment, at
+`D2 = 0.0068` — and the smallest legitimate segment sits at `0.1714`. Nothing
+lies between them, so every floor in `(0.0068, 0.1714]` selects the same
+segments on that split. `research/labels/configs/cyclophaser_params-13.yaml`
+records the reference value `0.05`.
+
+A series whose z range is zero or non-finite has no depth scale; the floor is
+skipped for it and a `UserWarning` says so, rather than the request being
+silently ignored.
+
+**Default `0.0` switches the floor off entirely**, and is a strict no-op: the
+phase output over the 47 training series is byte-identical with the parameter
+absent and with `0.0` passed explicitly, and identical to `develop-v2.1`'s
+output for the same series in the same environment.
+
+See `docs/future_work.md` item 22 ("Recorded while working front C") and
+`research/labels/diagnostics/frontC/`.
+
 **`mature_min_depth` — an opt-in depth floor on which valleys may generate a
 mature phase.**
 
