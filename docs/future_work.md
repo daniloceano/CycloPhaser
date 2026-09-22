@@ -2131,6 +2131,155 @@ Artefacts: `research/labels/diagnostics/item20b/` — `REPORT.md` (stage 1),
 `20160735` and `20205386`. `item19_core.py` and `params-11.yaml` untouched
 throughout.
 
+### Recorded while working front C — findings, not open fronts
+
+Measured on `research/frontC-intensification-depth`; recorded here because they
+bear on 20(b) and on the residual/decay machinery generally. **None of these
+opens a front.**
+
+* **The 0.80 floor destroyed `20191014`'s only mature phase, and 20(b)'s gate
+  could not see it.** Under `params-11` the series has exactly one mature block,
+  `(134, 140)`; under `params-12` it has none — the sequence goes
+  `incipient / decay / intensification / decay`, with `intensification` widening
+  from `(124,133)` to `(124,136)` to fill the space. The 20(b) gate scored the
+  *boundary* of the 38 matures that already paired with a label, so a phase
+  ceasing to exist scored as nothing at all rather than as a loss. **Any future
+  gate over phase detection needs an explicit existence criterion alongside the
+  boundary one**; front C's own measurement carries one for this reason.
+
+* **The project's definition of `residual` is topological, not amplitude-based.**
+  Residual means *deepening with no subsequent mature stage*, which places it
+  outside the cyclone's life cycle — a transient interaction, or TRACK
+  contamination. Writing `residual` from that point to the end of the series is
+  therefore the **desired** behaviour of `find_residual_period`, not a defect to
+  be tuned away. Front C works by removing the spurious *intensification* that
+  triggers the rule, and deliberately leaves the rule untouched.
+
+* **`20160735` and `20170342` are genuinely ambiguous between decay and
+  residual.** Both readings are defensible under the definition above. The
+  current manual labels stay as they are; this is recorded so a future front
+  does not "discover" the ambiguity and relabel on one reading.
+
+* **`decay_tail_amplitude_fraction`'s documented calibration is not reproducible
+  under `params-12`.** The "safe window" `(0.0356, 0.0651]`, the 7 convert cases
+  and the 3 preserve cases written into
+  `tests/test_decay_tail_amplitude_fraction.py`'s docstrings were calibrated on
+  a **pre-correction** config (`use_filter=1`, `use_smoothing=31`, no
+  `boundary_padding`). Under `params-12` the parameter is **inert** on both
+  `20180733` and `20180654`: every value from 0.05 to 1.0 reproduces the config's
+  own output byte for byte (verified at 0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0).
+  Recalibrating it and rewriting those docstrings is **a front of its own, still
+  open** — front C did not touch that file or that parameter.
+
+* **4 of the 7 documented convert cases are in the frozen test split**:
+  `20150561`, `20160030`, `20180654`, `20203373`. (`20170409`, `20180759` and
+  `20207822` are train.) Anyone recalibrating the parameter above must reckon
+  with that before reading those four.
+
+* **`20180654` was measured and reported with Danilo's explicit authorisation** —
+  a declared spend of the test split, made because it is the second series the
+  intensification depth floor was designed for and the front could not be judged
+  without it. The threshold itself was chosen from the train split alone. This
+  authorisation is per-series and per-front; it sets no precedent.
+
+---
+
+## 24. Front C — `intensification_min_depth`, a depth floor on intensification detection — **closed, PASS, merged 2026-09-22**
+
+Numbered 24, not 23: front 20(c) claimed 23 on `research/item20c-duration-ratio`,
+which was still unmerged when this front closed.
+
+### The defect
+
+`find_intensification_period` accepted a candidate segment on **duration alone**
+(`threshold_intensification_length`). No criterion asked whether the segment
+deepened, so a long, essentially flat stretch was labelled intensification.
+`find_residual_period` then converted that phantom intensification — having no
+mature after it — into `residual` to the end of the series, over a stretch the
+manual label calls decay.
+
+`find_residual_period` is **correct and was not touched**. See the residual
+definition recorded under item 22: residual is decided topologically, so writing
+it from a deepening-without-mature to the end of the series is the intended
+behaviour. The fix removes the phantom *segment* that triggers the rule.
+
+### The rule
+
+A raw segment is accepted only when
+
+```
+D2 = (z[peak] - z[valley]) / (z_max - z_min)  >=  intensification_min_depth
+```
+
+applied **per raw segment**, after the duration test and **before** the gap
+stitching of `threshold_intensification_gap` — a stitched block's D2 is a
+property of the merged span, not of the segments the parameter is defined on.
+Default `0.0` switches it off. `params-13` = `params-12` + `0.05`.
+
+### Separation measured on TRAIN
+
+Of the **75 raw segments** that clear the duration test across the 47 train
+series, exactly one falls below 0.15 — 20180733's, at `D2 = 0.0068` — and the
+smallest legitimate one sits at `0.1714`. Nothing lies between, so **every floor
+in `(0.0068, 0.1714]` is equivalent on this split**; 0.05 was chosen from train
+alone.
+
+### Gate — PASS
+
+| metric | params-12 | params-13 |
+|---|---|---|
+| sequence | 31/47 | 31/47 |
+| mature within ±6 | 38/44 | 38/44 |
+| synthetic sequence | 12/12 | 12/12 |
+| incipient boundary identical | — | 47/47 |
+| series changed | — | 1 (train) |
+| phase existence lost | — | none |
+
+`20180733` (train): `residual 190-256` gone, `decay 147-189` → `147-256`.
+`20180654` (test, authorised): `residual 109-148` gone, `decay 83-108` → `83-148`.
+Only those two series change in the whole calibration set. Suite 1230 passed, 0 failed.
+
+Unlike 20(b)'s gate, this one carried an explicit **phase-existence** criterion —
+added precisely because 20(b)'s could not see `20191014` lose its only mature
+(item 22).
+
+### Three divergences from the commissioning brief — reported, not adjusted
+
+1. **The default-behaviour sha256 is `b01b16b6…752f`, not the CHANGELOG's
+   `b500d2e0…c4a5`.** Not caused by this front: a worktree of unmodified
+   `develop-v2.1`, run in the same environment, yields `b01b16b6…` too. The
+   recorded constant is **environment-dependent** (numpy 2.4.4 / scipy 1.17.1 /
+   pandas 3.0.2 when written; 2.5.3 / 1.18.0 / 3.0.5 here) but was written down
+   as absolute. The claim that matters — this branch's default equals
+   `develop-v2.1`'s — holds exactly. **Open: re-record that hash with its
+   library versions, or drop it as a portability claim it cannot support.**
+
+2. **75 raw segments, not 68.** Both are real and count different things: 68 is
+   the number of *stitched* blocks left after the gap merge. The D2 figures are
+   per-segment, so 75 is their denominator. The D2 values themselves reproduce
+   exactly.
+
+3. **`20180654`'s block has `D2 = +0.0025`, not −0.02%, and is not stitched.**
+   Under `params-12` neither series stitches at all — raw segments and the
+   blocks `find_intensification_period` leaves are identical on both — so the
+   brief's empirical case for judging before the stitch ("the merged block of
+   20180654 has a negative D2") **does not reproduce**. The pre-stitch ordering
+   was implemented as specified regardless, on principle, and is demonstrated by
+   a purpose-built synthetic series with a positive control
+   (`test_floor_is_per_segment_not_per_stitched_block`). **No real series
+   currently exercises the distinction.**
+
+### Still open
+
+* The `decay_tail_amplitude_fraction` recalibration (item 22) — untouched here.
+* Whether 0.05 stays, given the whole `(0.0068, 0.1714]` window is equivalent.
+
+Artefacts: `research/labels/diagnostics/frontC/` — `REPORT.md`, the four drivers
+(`measure_frontC.py`, `d2_separation.py`, `default_equivalence.py`,
+`report_test_series.py`), `make_figures.py`, `d2_segments.csv` and before/after
+figures for both series. `params-12` and
+`tests/test_decay_tail_amplitude_fraction.py` untouched throughout.
+
 ---
 
 ## Note

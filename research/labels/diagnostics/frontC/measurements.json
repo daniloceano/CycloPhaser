@@ -1,0 +1,5210 @@
+{
+ "changed": [
+  "20180733"
+ ],
+ "ref": {
+  "20150069": {
+   "id": "20150069",
+   "n": 66,
+   "runs": [
+    [
+     "intensification",
+     0,
+     28
+    ],
+    [
+     "mature",
+     29,
+     44
+    ],
+    [
+     "decay",
+     45,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150436": {
+   "id": "20150436",
+   "n": 112,
+   "runs": [
+    [
+     "incipient",
+     0,
+     19
+    ],
+    [
+     "intensification",
+     20,
+     57
+    ],
+    [
+     "mature",
+     58,
+     73
+    ],
+    [
+     "decay",
+     74,
+     111
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": -5,
+   "matches": true,
+   "incip_end": 20,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 56 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150528": {
+   "id": "20150528",
+   "n": 51,
+   "runs": [
+    [
+     "intensification",
+     0,
+     27
+    ],
+    [
+     "mature",
+     28,
+     36
+    ],
+    [
+     "decay",
+     37,
+     50
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 25 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150532": {
+   "id": "20150532",
+   "n": 107,
+   "runs": [
+    [
+     "intensification",
+     0,
+     32
+    ],
+    [
+     "mature",
+     33,
+     42
+    ],
+    [
+     "decay",
+     43,
+     106
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 53 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150656": {
+   "id": "20150656",
+   "n": 160,
+   "runs": [
+    [
+     "intensification",
+     0,
+     33
+    ],
+    [
+     "mature",
+     34,
+     48
+    ],
+    [
+     "decay",
+     49,
+     85
+    ],
+    [
+     "intensification",
+     86,
+     139
+    ],
+    [
+     "mature",
+     140,
+     147
+    ],
+    [
+     "decay",
+     148,
+     159
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 80 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20160587": {
+   "id": "20160587",
+   "n": 79,
+   "runs": [
+    [
+     "intensification",
+     0,
+     49
+    ],
+    [
+     "mature",
+     50,
+     65
+    ],
+    [
+     "decay",
+     66,
+     78
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 39 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20160735": {
+   "id": "20160735",
+   "n": 259,
+   "runs": [
+    [
+     "intensification",
+     0,
+     8
+    ],
+    [
+     "decay",
+     9,
+     21
+    ],
+    [
+     "intensification",
+     22,
+     58
+    ],
+    [
+     "decay",
+     59,
+     121
+    ],
+    [
+     "intensification",
+     122,
+     149
+    ],
+    [
+     "mature",
+     150,
+     181
+    ],
+    [
+     "decay",
+     182,
+     210
+    ],
+    [
+     "residual",
+     211,
+     258
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "decay",
+    "intensification",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 5,
+   "d_end": 4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 129 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170154": {
+   "id": "20170154",
+   "n": 124,
+   "runs": [
+    [
+     "incipient",
+     0,
+     5
+    ],
+    [
+     "intensification",
+     6,
+     34
+    ],
+    [
+     "mature",
+     35,
+     43
+    ],
+    [
+     "decay",
+     44,
+     123
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 4,
+   "d_end": -33,
+   "matches": false,
+   "incip_end": 6,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 62 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170342": {
+   "id": "20170342",
+   "n": 146,
+   "runs": [
+    [
+     "intensification",
+     0,
+     38
+    ],
+    [
+     "mature",
+     39,
+     67
+    ],
+    [
+     "decay",
+     68,
+     102
+    ],
+    [
+     "residual",
+     103,
+     145
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 73 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170409": {
+   "id": "20170409",
+   "n": 169,
+   "runs": [
+    [
+     "incipient",
+     0,
+     5
+    ],
+    [
+     "intensification",
+     6,
+     59
+    ],
+    [
+     "mature",
+     60,
+     66
+    ],
+    [
+     "decay",
+     67,
+     168
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 5,
+   "d_end": -7,
+   "matches": false,
+   "incip_end": 6,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 84 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170520": {
+   "id": "20170520",
+   "n": 58,
+   "runs": [
+    [
+     "intensification",
+     0,
+     25
+    ],
+    [
+     "mature",
+     26,
+     35
+    ],
+    [
+     "decay",
+     36,
+     57
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 29 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170760": {
+   "id": "20170760",
+   "n": 59,
+   "runs": [
+    [
+     "intensification",
+     0,
+     28
+    ],
+    [
+     "decay",
+     29,
+     58
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 29 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170794": {
+   "id": "20170794",
+   "n": 224,
+   "runs": [
+    [
+     "intensification",
+     0,
+     36
+    ],
+    [
+     "mature",
+     37,
+     48
+    ],
+    [
+     "decay",
+     49,
+     118
+    ],
+    [
+     "residual",
+     119,
+     223
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 112 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20171179": {
+   "id": "20171179",
+   "n": 62,
+   "runs": [
+    [
+     "intensification",
+     0,
+     35
+    ],
+    [
+     "mature",
+     36,
+     48
+    ],
+    [
+     "decay",
+     49,
+     61
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": false,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 31 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180170": {
+   "id": "20180170",
+   "n": 69,
+   "runs": [
+    [
+     "incipient",
+     0,
+     7
+    ],
+    [
+     "decay",
+     8,
+     21
+    ],
+    [
+     "intensification",
+     22,
+     35
+    ],
+    [
+     "mature",
+     36,
+     48
+    ],
+    [
+     "decay",
+     49,
+     68
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": 6,
+   "matches": true,
+   "incip_end": 8,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 34 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180263": {
+   "id": "20180263",
+   "n": 57,
+   "runs": [
+    [
+     "intensification",
+     0,
+     24
+    ],
+    [
+     "mature",
+     25,
+     33
+    ],
+    [
+     "decay",
+     34,
+     46
+    ],
+    [
+     "residual",
+     47,
+     56
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 28 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180300": {
+   "id": "20180300",
+   "n": 59,
+   "runs": [
+    [
+     "intensification",
+     0,
+     13
+    ],
+    [
+     "mature",
+     14,
+     26
+    ],
+    [
+     "decay",
+     27,
+     58
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 29 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180608": {
+   "id": "20180608",
+   "n": 117,
+   "runs": [
+    [
+     "incipient",
+     0,
+     37
+    ],
+    [
+     "intensification",
+     38,
+     61
+    ],
+    [
+     "mature",
+     62,
+     70
+    ],
+    [
+     "decay",
+     71,
+     116
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -3,
+   "matches": true,
+   "incip_end": 38,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 58 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180628": {
+   "id": "20180628",
+   "n": 94,
+   "runs": [
+    [
+     "intensification",
+     0,
+     28
+    ],
+    [
+     "mature",
+     29,
+     40
+    ],
+    [
+     "decay",
+     41,
+     60
+    ],
+    [
+     "intensification",
+     61,
+     69
+    ],
+    [
+     "mature",
+     70,
+     75
+    ],
+    [
+     "decay",
+     76,
+     93
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": -6,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 47 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180733": {
+   "id": "20180733",
+   "n": 257,
+   "runs": [
+    [
+     "intensification",
+     0,
+     30
+    ],
+    [
+     "mature",
+     31,
+     43
+    ],
+    [
+     "decay",
+     44,
+     100
+    ],
+    [
+     "intensification",
+     101,
+     134
+    ],
+    [
+     "mature",
+     135,
+     146
+    ],
+    [
+     "decay",
+     147,
+     189
+    ],
+    [
+     "residual",
+     190,
+     256
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 6,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 128 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180759": {
+   "id": "20180759",
+   "n": 88,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     27
+    ],
+    [
+     "mature",
+     28,
+     47
+    ],
+    [
+     "decay",
+     48,
+     87
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -3,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 44 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20181046": {
+   "id": "20181046",
+   "n": 30,
+   "runs": [
+    [
+     "intensification",
+     0,
+     18
+    ],
+    [
+     "mature",
+     19,
+     26
+    ],
+    [
+     "decay",
+     27,
+     29
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": false,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 15 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190325": {
+   "id": "20190325",
+   "n": 167,
+   "runs": [
+    [
+     "incipient",
+     0,
+     8
+    ],
+    [
+     "decay",
+     9,
+     87
+    ],
+    [
+     "intensification",
+     88,
+     99
+    ],
+    [
+     "mature",
+     100,
+     105
+    ],
+    [
+     "decay",
+     106,
+     166
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 5,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": 9,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 83 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190397": {
+   "id": "20190397",
+   "n": 56,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "intensification",
+     2,
+     27
+    ],
+    [
+     "mature",
+     28,
+     42
+    ],
+    [
+     "decay",
+     43,
+     55
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -6,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 28 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190639": {
+   "id": "20190639",
+   "n": 180,
+   "runs": [
+    [
+     "incipient",
+     0,
+     12
+    ],
+    [
+     "intensification",
+     13,
+     87
+    ],
+    [
+     "mature",
+     88,
+     104
+    ],
+    [
+     "decay",
+     105,
+     179
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 7,
+   "d_end": -1,
+   "matches": false,
+   "incip_end": 13,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 90 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190870": {
+   "id": "20190870",
+   "n": 129,
+   "runs": [
+    [
+     "incipient",
+     0,
+     9
+    ],
+    [
+     "intensification",
+     10,
+     34
+    ],
+    [
+     "mature",
+     35,
+     50
+    ],
+    [
+     "decay",
+     51,
+     128
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": -3,
+   "matches": true,
+   "incip_end": 10,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 64 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190879": {
+   "id": "20190879",
+   "n": 79,
+   "runs": [
+    [
+     "intensification",
+     0,
+     27
+    ],
+    [
+     "mature",
+     28,
+     38
+    ],
+    [
+     "decay",
+     39,
+     78
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 39 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20191014": {
+   "id": "20191014",
+   "n": 206,
+   "runs": [
+    [
+     "incipient",
+     0,
+     8
+    ],
+    [
+     "decay",
+     9,
+     123
+    ],
+    [
+     "intensification",
+     124,
+     136
+    ],
+    [
+     "decay",
+     137,
+     205
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": 9,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 103 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20191104": {
+   "id": "20191104",
+   "n": 118,
+   "runs": [
+    [
+     "intensification",
+     0,
+     26
+    ],
+    [
+     "mature",
+     27,
+     41
+    ],
+    [
+     "decay",
+     42,
+     117
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 59 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20191155": {
+   "id": "20191155",
+   "n": 93,
+   "runs": [
+    [
+     "incipient",
+     0,
+     0
+    ],
+    [
+     "intensification",
+     1,
+     29
+    ],
+    [
+     "mature",
+     30,
+     48
+    ],
+    [
+     "decay",
+     49,
+     92
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -3,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": 1,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 46 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20201245": {
+   "id": "20201245",
+   "n": 98,
+   "runs": [
+    [
+     "intensification",
+     0,
+     36
+    ],
+    [
+     "mature",
+     37,
+     53
+    ],
+    [
+     "decay",
+     54,
+     97
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -3,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 49 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20202023": {
+   "id": "20202023",
+   "n": 78,
+   "runs": [
+    [
+     "intensification",
+     0,
+     53
+    ],
+    [
+     "mature",
+     54,
+     64
+    ],
+    [
+     "decay",
+     65,
+     77
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 39 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20203947": {
+   "id": "20203947",
+   "n": 242,
+   "runs": [
+    [
+     "incipient",
+     0,
+     11
+    ],
+    [
+     "intensification",
+     12,
+     60
+    ],
+    [
+     "decay",
+     61,
+     74
+    ],
+    [
+     "intensification",
+     75,
+     89
+    ],
+    [
+     "decay",
+     90,
+     106
+    ],
+    [
+     "intensification",
+     107,
+     128
+    ],
+    [
+     "mature",
+     129,
+     136
+    ],
+    [
+     "decay",
+     137,
+     159
+    ],
+    [
+     "intensification",
+     160,
+     180
+    ],
+    [
+     "mature",
+     181,
+     188
+    ],
+    [
+     "decay",
+     189,
+     202
+    ],
+    [
+     "residual",
+     203,
+     241
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "decay",
+    "intensification",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 7,
+   "d_end": -8,
+   "matches": false,
+   "incip_end": 12,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 121 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20205386": {
+   "id": "20205386",
+   "n": 100,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     35
+    ],
+    [
+     "mature",
+     36,
+     42
+    ],
+    [
+     "decay",
+     43,
+     51
+    ],
+    [
+     "intensification",
+     52,
+     59
+    ],
+    [
+     "mature",
+     60,
+     63
+    ],
+    [
+     "decay",
+     64,
+     70
+    ],
+    [
+     "intensification",
+     71,
+     79
+    ],
+    [
+     "mature",
+     80,
+     85
+    ],
+    [
+     "decay",
+     86,
+     99
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 4,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 50 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20207822": {
+   "id": "20207822",
+   "n": 162,
+   "runs": [
+    [
+     "intensification",
+     0,
+     45
+    ],
+    [
+     "mature",
+     46,
+     68
+    ],
+    [
+     "decay",
+     69,
+     161
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 81 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s0596ea57": {
+   "id": "s0596ea57",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     9
+    ],
+    [
+     "intensification",
+     10,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "has_lab_mature": false,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": 10,
+   "phase_set": [
+    "incipient",
+    "intensification"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s46657891": {
+   "id": "s46657891",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     2
+    ],
+    [
+     "intensification",
+     3,
+     25
+    ],
+    [
+     "mature",
+     26,
+     39
+    ],
+    [
+     "decay",
+     40,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 3,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s4e7ff65c": {
+   "id": "s4e7ff65c",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     4
+    ],
+    [
+     "intensification",
+     5,
+     20
+    ],
+    [
+     "mature",
+     21,
+     35
+    ],
+    [
+     "decay",
+     36,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": 5,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s5b8aa46f": {
+   "id": "s5b8aa46f",
+   "n": 66,
+   "runs": [
+    [
+     "decay",
+     0,
+     11
+    ],
+    [
+     "intensification",
+     12,
+     23
+    ],
+    [
+     "mature",
+     24,
+     31
+    ],
+    [
+     "decay",
+     32,
+     47
+    ],
+    [
+     "residual",
+     48,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s5dcc0f79": {
+   "id": "s5dcc0f79",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     4
+    ],
+    [
+     "intensification",
+     5,
+     17
+    ],
+    [
+     "mature",
+     18,
+     25
+    ],
+    [
+     "decay",
+     26,
+     42
+    ],
+    [
+     "residual",
+     43,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 5,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s6b1e8245": {
+   "id": "s6b1e8245",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "decay",
+     2,
+     18
+    ],
+    [
+     "intensification",
+     19,
+     34
+    ],
+    [
+     "mature",
+     35,
+     45
+    ],
+    [
+     "decay",
+     46,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s6b542eee": {
+   "id": "s6b542eee",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "intensification",
+     2,
+     11
+    ],
+    [
+     "mature",
+     12,
+     19
+    ],
+    [
+     "decay",
+     20,
+     32
+    ],
+    [
+     "intensification",
+     33,
+     43
+    ],
+    [
+     "mature",
+     44,
+     51
+    ],
+    [
+     "decay",
+     52,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s8001f17b": {
+   "id": "s8001f17b",
+   "n": 66,
+   "runs": [
+    [
+     "decay",
+     0,
+     12
+    ],
+    [
+     "intensification",
+     13,
+     25
+    ],
+    [
+     "mature",
+     26,
+     39
+    ],
+    [
+     "decay",
+     40,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s9ddbc53c": {
+   "id": "s9ddbc53c",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     17
+    ],
+    [
+     "mature",
+     18,
+     25
+    ],
+    [
+     "decay",
+     26,
+     42
+    ],
+    [
+     "residual",
+     43,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "sbceec644": {
+   "id": "sbceec644",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "intensification",
+     2,
+     19
+    ],
+    [
+     "mature",
+     20,
+     35
+    ],
+    [
+     "decay",
+     36,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "sbd6c6920": {
+   "id": "sbd6c6920",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     13
+    ],
+    [
+     "mature",
+     14,
+     20
+    ],
+    [
+     "decay",
+     21,
+     32
+    ],
+    [
+     "intensification",
+     33,
+     44
+    ],
+    [
+     "mature",
+     45,
+     51
+    ],
+    [
+     "decay",
+     52,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "scfcf1387": {
+   "id": "scfcf1387",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "decay",
+     2,
+     16
+    ],
+    [
+     "intensification",
+     17,
+     29
+    ],
+    [
+     "mature",
+     30,
+     37
+    ],
+    [
+     "decay",
+     38,
+     52
+    ],
+    [
+     "residual",
+     53,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  }
+ },
+ "cand": {
+  "20150069": {
+   "id": "20150069",
+   "n": 66,
+   "runs": [
+    [
+     "intensification",
+     0,
+     28
+    ],
+    [
+     "mature",
+     29,
+     44
+    ],
+    [
+     "decay",
+     45,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150436": {
+   "id": "20150436",
+   "n": 112,
+   "runs": [
+    [
+     "incipient",
+     0,
+     19
+    ],
+    [
+     "intensification",
+     20,
+     57
+    ],
+    [
+     "mature",
+     58,
+     73
+    ],
+    [
+     "decay",
+     74,
+     111
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": -5,
+   "matches": true,
+   "incip_end": 20,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 56 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150528": {
+   "id": "20150528",
+   "n": 51,
+   "runs": [
+    [
+     "intensification",
+     0,
+     27
+    ],
+    [
+     "mature",
+     28,
+     36
+    ],
+    [
+     "decay",
+     37,
+     50
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 25 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150532": {
+   "id": "20150532",
+   "n": 107,
+   "runs": [
+    [
+     "intensification",
+     0,
+     32
+    ],
+    [
+     "mature",
+     33,
+     42
+    ],
+    [
+     "decay",
+     43,
+     106
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 53 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20150656": {
+   "id": "20150656",
+   "n": 160,
+   "runs": [
+    [
+     "intensification",
+     0,
+     33
+    ],
+    [
+     "mature",
+     34,
+     48
+    ],
+    [
+     "decay",
+     49,
+     85
+    ],
+    [
+     "intensification",
+     86,
+     139
+    ],
+    [
+     "mature",
+     140,
+     147
+    ],
+    [
+     "decay",
+     148,
+     159
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 80 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20160587": {
+   "id": "20160587",
+   "n": 79,
+   "runs": [
+    [
+     "intensification",
+     0,
+     49
+    ],
+    [
+     "mature",
+     50,
+     65
+    ],
+    [
+     "decay",
+     66,
+     78
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 39 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20160735": {
+   "id": "20160735",
+   "n": 259,
+   "runs": [
+    [
+     "intensification",
+     0,
+     8
+    ],
+    [
+     "decay",
+     9,
+     21
+    ],
+    [
+     "intensification",
+     22,
+     58
+    ],
+    [
+     "decay",
+     59,
+     121
+    ],
+    [
+     "intensification",
+     122,
+     149
+    ],
+    [
+     "mature",
+     150,
+     181
+    ],
+    [
+     "decay",
+     182,
+     210
+    ],
+    [
+     "residual",
+     211,
+     258
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "decay",
+    "intensification",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 5,
+   "d_end": 4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 129 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170154": {
+   "id": "20170154",
+   "n": 124,
+   "runs": [
+    [
+     "incipient",
+     0,
+     5
+    ],
+    [
+     "intensification",
+     6,
+     34
+    ],
+    [
+     "mature",
+     35,
+     43
+    ],
+    [
+     "decay",
+     44,
+     123
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 4,
+   "d_end": -33,
+   "matches": false,
+   "incip_end": 6,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 62 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170342": {
+   "id": "20170342",
+   "n": 146,
+   "runs": [
+    [
+     "intensification",
+     0,
+     38
+    ],
+    [
+     "mature",
+     39,
+     67
+    ],
+    [
+     "decay",
+     68,
+     102
+    ],
+    [
+     "residual",
+     103,
+     145
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 73 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170409": {
+   "id": "20170409",
+   "n": 169,
+   "runs": [
+    [
+     "incipient",
+     0,
+     5
+    ],
+    [
+     "intensification",
+     6,
+     59
+    ],
+    [
+     "mature",
+     60,
+     66
+    ],
+    [
+     "decay",
+     67,
+     168
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 5,
+   "d_end": -7,
+   "matches": false,
+   "incip_end": 6,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 84 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170520": {
+   "id": "20170520",
+   "n": 58,
+   "runs": [
+    [
+     "intensification",
+     0,
+     25
+    ],
+    [
+     "mature",
+     26,
+     35
+    ],
+    [
+     "decay",
+     36,
+     57
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 29 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170760": {
+   "id": "20170760",
+   "n": 59,
+   "runs": [
+    [
+     "intensification",
+     0,
+     28
+    ],
+    [
+     "decay",
+     29,
+     58
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 29 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20170794": {
+   "id": "20170794",
+   "n": 224,
+   "runs": [
+    [
+     "intensification",
+     0,
+     36
+    ],
+    [
+     "mature",
+     37,
+     48
+    ],
+    [
+     "decay",
+     49,
+     118
+    ],
+    [
+     "residual",
+     119,
+     223
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 112 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20171179": {
+   "id": "20171179",
+   "n": 62,
+   "runs": [
+    [
+     "intensification",
+     0,
+     35
+    ],
+    [
+     "mature",
+     36,
+     48
+    ],
+    [
+     "decay",
+     49,
+     61
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": false,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 31 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180170": {
+   "id": "20180170",
+   "n": 69,
+   "runs": [
+    [
+     "incipient",
+     0,
+     7
+    ],
+    [
+     "decay",
+     8,
+     21
+    ],
+    [
+     "intensification",
+     22,
+     35
+    ],
+    [
+     "mature",
+     36,
+     48
+    ],
+    [
+     "decay",
+     49,
+     68
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": 6,
+   "matches": true,
+   "incip_end": 8,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 34 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180263": {
+   "id": "20180263",
+   "n": 57,
+   "runs": [
+    [
+     "intensification",
+     0,
+     24
+    ],
+    [
+     "mature",
+     25,
+     33
+    ],
+    [
+     "decay",
+     34,
+     46
+    ],
+    [
+     "residual",
+     47,
+     56
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 28 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180300": {
+   "id": "20180300",
+   "n": 59,
+   "runs": [
+    [
+     "intensification",
+     0,
+     13
+    ],
+    [
+     "mature",
+     14,
+     26
+    ],
+    [
+     "decay",
+     27,
+     58
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 29 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180608": {
+   "id": "20180608",
+   "n": 117,
+   "runs": [
+    [
+     "incipient",
+     0,
+     37
+    ],
+    [
+     "intensification",
+     38,
+     61
+    ],
+    [
+     "mature",
+     62,
+     70
+    ],
+    [
+     "decay",
+     71,
+     116
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -3,
+   "matches": true,
+   "incip_end": 38,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 58 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180628": {
+   "id": "20180628",
+   "n": 94,
+   "runs": [
+    [
+     "intensification",
+     0,
+     28
+    ],
+    [
+     "mature",
+     29,
+     40
+    ],
+    [
+     "decay",
+     41,
+     60
+    ],
+    [
+     "intensification",
+     61,
+     69
+    ],
+    [
+     "mature",
+     70,
+     75
+    ],
+    [
+     "decay",
+     76,
+     93
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": -6,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 47 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180733": {
+   "id": "20180733",
+   "n": 257,
+   "runs": [
+    [
+     "intensification",
+     0,
+     30
+    ],
+    [
+     "mature",
+     31,
+     43
+    ],
+    [
+     "decay",
+     44,
+     100
+    ],
+    [
+     "intensification",
+     101,
+     134
+    ],
+    [
+     "mature",
+     135,
+     146
+    ],
+    [
+     "decay",
+     147,
+     256
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 6,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 128 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20180759": {
+   "id": "20180759",
+   "n": 88,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     27
+    ],
+    [
+     "mature",
+     28,
+     47
+    ],
+    [
+     "decay",
+     48,
+     87
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -3,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 44 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20181046": {
+   "id": "20181046",
+   "n": 30,
+   "runs": [
+    [
+     "intensification",
+     0,
+     18
+    ],
+    [
+     "mature",
+     19,
+     26
+    ],
+    [
+     "decay",
+     27,
+     29
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": false,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 15 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190325": {
+   "id": "20190325",
+   "n": 167,
+   "runs": [
+    [
+     "incipient",
+     0,
+     8
+    ],
+    [
+     "decay",
+     9,
+     87
+    ],
+    [
+     "intensification",
+     88,
+     99
+    ],
+    [
+     "mature",
+     100,
+     105
+    ],
+    [
+     "decay",
+     106,
+     166
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 5,
+   "d_end": -4,
+   "matches": true,
+   "incip_end": 9,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 83 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190397": {
+   "id": "20190397",
+   "n": 56,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "intensification",
+     2,
+     27
+    ],
+    [
+     "mature",
+     28,
+     42
+    ],
+    [
+     "decay",
+     43,
+     55
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -6,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 28 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190639": {
+   "id": "20190639",
+   "n": 180,
+   "runs": [
+    [
+     "incipient",
+     0,
+     12
+    ],
+    [
+     "intensification",
+     13,
+     87
+    ],
+    [
+     "mature",
+     88,
+     104
+    ],
+    [
+     "decay",
+     105,
+     179
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 7,
+   "d_end": -1,
+   "matches": false,
+   "incip_end": 13,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 90 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190870": {
+   "id": "20190870",
+   "n": 129,
+   "runs": [
+    [
+     "incipient",
+     0,
+     9
+    ],
+    [
+     "intensification",
+     10,
+     34
+    ],
+    [
+     "mature",
+     35,
+     50
+    ],
+    [
+     "decay",
+     51,
+     128
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": -3,
+   "matches": true,
+   "incip_end": 10,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 64 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20190879": {
+   "id": "20190879",
+   "n": 79,
+   "runs": [
+    [
+     "intensification",
+     0,
+     27
+    ],
+    [
+     "mature",
+     28,
+     38
+    ],
+    [
+     "decay",
+     39,
+     78
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 39 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20191014": {
+   "id": "20191014",
+   "n": 206,
+   "runs": [
+    [
+     "incipient",
+     0,
+     8
+    ],
+    [
+     "decay",
+     9,
+     123
+    ],
+    [
+     "intensification",
+     124,
+     136
+    ],
+    [
+     "decay",
+     137,
+     205
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": 9,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 103 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20191104": {
+   "id": "20191104",
+   "n": 118,
+   "runs": [
+    [
+     "intensification",
+     0,
+     26
+    ],
+    [
+     "mature",
+     27,
+     41
+    ],
+    [
+     "decay",
+     42,
+     117
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 59 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20191155": {
+   "id": "20191155",
+   "n": 93,
+   "runs": [
+    [
+     "incipient",
+     0,
+     0
+    ],
+    [
+     "intensification",
+     1,
+     29
+    ],
+    [
+     "mature",
+     30,
+     48
+    ],
+    [
+     "decay",
+     49,
+     92
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -3,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": 1,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 46 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20201245": {
+   "id": "20201245",
+   "n": 98,
+   "runs": [
+    [
+     "intensification",
+     0,
+     36
+    ],
+    [
+     "mature",
+     37,
+     53
+    ],
+    [
+     "decay",
+     54,
+     97
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -3,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 49 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20202023": {
+   "id": "20202023",
+   "n": 78,
+   "runs": [
+    [
+     "intensification",
+     0,
+     53
+    ],
+    [
+     "mature",
+     54,
+     64
+    ],
+    [
+     "decay",
+     65,
+     77
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -2,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 39 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20203947": {
+   "id": "20203947",
+   "n": 242,
+   "runs": [
+    [
+     "incipient",
+     0,
+     11
+    ],
+    [
+     "intensification",
+     12,
+     60
+    ],
+    [
+     "decay",
+     61,
+     74
+    ],
+    [
+     "intensification",
+     75,
+     89
+    ],
+    [
+     "decay",
+     90,
+     106
+    ],
+    [
+     "intensification",
+     107,
+     128
+    ],
+    [
+     "mature",
+     129,
+     136
+    ],
+    [
+     "decay",
+     137,
+     159
+    ],
+    [
+     "intensification",
+     160,
+     180
+    ],
+    [
+     "mature",
+     181,
+     188
+    ],
+    [
+     "decay",
+     189,
+     202
+    ],
+    [
+     "residual",
+     203,
+     241
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "decay",
+    "intensification",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 7,
+   "d_end": -8,
+   "matches": false,
+   "incip_end": 12,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 121 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20205386": {
+   "id": "20205386",
+   "n": 100,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     35
+    ],
+    [
+     "mature",
+     36,
+     42
+    ],
+    [
+     "decay",
+     43,
+     51
+    ],
+    [
+     "intensification",
+     52,
+     59
+    ],
+    [
+     "mature",
+     60,
+     63
+    ],
+    [
+     "decay",
+     64,
+     70
+    ],
+    [
+     "intensification",
+     71,
+     79
+    ],
+    [
+     "mature",
+     80,
+     85
+    ],
+    [
+     "decay",
+     86,
+     99
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 4,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 50 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "20207822": {
+   "id": "20207822",
+   "n": 162,
+   "runs": [
+    [
+     "intensification",
+     0,
+     45
+    ],
+    [
+     "mature",
+     46,
+     68
+    ],
+    [
+     "decay",
+     69,
+     161
+    ]
+   ],
+   "lab_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": -2,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 81 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s0596ea57": {
+   "id": "s0596ea57",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     9
+    ],
+    [
+     "intensification",
+     10,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification"
+   ],
+   "has_lab_mature": false,
+   "d_start": null,
+   "d_end": null,
+   "matches": false,
+   "incip_end": 10,
+   "phase_set": [
+    "incipient",
+    "intensification"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s46657891": {
+   "id": "s46657891",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     2
+    ],
+    [
+     "intensification",
+     3,
+     25
+    ],
+    [
+     "mature",
+     26,
+     39
+    ],
+    [
+     "decay",
+     40,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 3,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s4e7ff65c": {
+   "id": "s4e7ff65c",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     4
+    ],
+    [
+     "intensification",
+     5,
+     20
+    ],
+    [
+     "mature",
+     21,
+     35
+    ],
+    [
+     "decay",
+     36,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": 5,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s5b8aa46f": {
+   "id": "s5b8aa46f",
+   "n": 66,
+   "runs": [
+    [
+     "decay",
+     0,
+     11
+    ],
+    [
+     "intensification",
+     12,
+     23
+    ],
+    [
+     "mature",
+     24,
+     31
+    ],
+    [
+     "decay",
+     32,
+     47
+    ],
+    [
+     "residual",
+     48,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s5dcc0f79": {
+   "id": "s5dcc0f79",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     4
+    ],
+    [
+     "intensification",
+     5,
+     17
+    ],
+    [
+     "mature",
+     18,
+     25
+    ],
+    [
+     "decay",
+     26,
+     42
+    ],
+    [
+     "residual",
+     43,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 2,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 5,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s6b1e8245": {
+   "id": "s6b1e8245",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "decay",
+     2,
+     18
+    ],
+    [
+     "intensification",
+     19,
+     34
+    ],
+    [
+     "mature",
+     35,
+     45
+    ],
+    [
+     "decay",
+     46,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s6b542eee": {
+   "id": "s6b542eee",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "intensification",
+     2,
+     11
+    ],
+    [
+     "mature",
+     12,
+     19
+    ],
+    [
+     "decay",
+     20,
+     32
+    ],
+    [
+     "intensification",
+     33,
+     43
+    ],
+    [
+     "mature",
+     44,
+     51
+    ],
+    [
+     "decay",
+     52,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": 1,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s8001f17b": {
+   "id": "s8001f17b",
+   "n": 66,
+   "runs": [
+    [
+     "decay",
+     0,
+     12
+    ],
+    [
+     "intensification",
+     13,
+     25
+    ],
+    [
+     "mature",
+     26,
+     39
+    ],
+    [
+     "decay",
+     40,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": null,
+   "phase_set": [
+    "decay",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "s9ddbc53c": {
+   "id": "s9ddbc53c",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     17
+    ],
+    [
+     "mature",
+     18,
+     25
+    ],
+    [
+     "decay",
+     26,
+     42
+    ],
+    [
+     "residual",
+     43,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 0,
+   "d_end": 0,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "sbceec644": {
+   "id": "sbceec644",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "intensification",
+     2,
+     19
+    ],
+    [
+     "mature",
+     20,
+     35
+    ],
+    [
+     "decay",
+     36,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": -1,
+   "d_end": 2,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "sbd6c6920": {
+   "id": "sbd6c6920",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     3
+    ],
+    [
+     "intensification",
+     4,
+     13
+    ],
+    [
+     "mature",
+     14,
+     20
+    ],
+    [
+     "decay",
+     21,
+     32
+    ],
+    [
+     "intensification",
+     33,
+     44
+    ],
+    [
+     "mature",
+     45,
+     51
+    ],
+    [
+     "decay",
+     52,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "det_seq": [
+    "incipient",
+    "intensification",
+    "mature",
+    "decay",
+    "intensification",
+    "mature",
+    "decay"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 4,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  },
+  "scfcf1387": {
+   "id": "scfcf1387",
+   "n": 66,
+   "runs": [
+    [
+     "incipient",
+     0,
+     1
+    ],
+    [
+     "decay",
+     2,
+     16
+    ],
+    [
+     "intensification",
+     17,
+     29
+    ],
+    [
+     "mature",
+     30,
+     37
+    ],
+    [
+     "decay",
+     38,
+     52
+    ],
+    [
+     "residual",
+     53,
+     65
+    ]
+   ],
+   "lab_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "det_seq": [
+    "incipient",
+    "decay",
+    "intensification",
+    "mature",
+    "decay",
+    "residual"
+   ],
+   "has_lab_mature": true,
+   "d_start": 1,
+   "d_end": -1,
+   "matches": true,
+   "incip_end": 2,
+   "phase_set": [
+    "decay",
+    "incipient",
+    "intensification",
+    "mature",
+    "residual"
+   ],
+   "warnings": [
+    "use_filter=True is interpreted as 'auto' (Lanczos window = len(series)//2 = 33 timesteps). Prior to this fix, True was read as the integer 1, which reduced the Lanczos filter to a single tap (a scalar multiply) and effectively disabled it -- results obtained with use_filter=True on earlier versions were UNFILTERED. Pass use_filter='auto' to silence this warning, or an explicit integer to set the window length yourself."
+   ],
+   "sha_ok": true
+  }
+ }
+}
