@@ -27,6 +27,26 @@ compared this layout's number against the canonical layout's number. Run with
 the canonical generator in that very environment, b500d2e0...c4a5 reproduces
 exactly, at 17dc21f and at 7a87a10 alike.
 
+The two full values, so neither has to be guessed at again:
+
+    canonical (front_b layout)   b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+    this module's layout         b01b16b6a86498d18509a0f3bcdac4c5a448615ae86a92c71899ed78aafc752f
+
+PROOF THAT THE DIFFERENCE IS LAYOUT, NOT LIBRARIES
+---------------------------------------------------
+Computed the 47 series' phase output ONCE, into a single in-memory dict, then
+hashed that one dict under both layouts in the same process:
+
+    python 3.12.14 / numpy 2.5.3 / scipy 1.18.0 / pandas 3.0.5
+      "<id>:<periods>" lines joined by "\n"   -> b500d2e0...c4a5
+      sid + "|".join(periods), concatenated   -> b01b16b6...752f
+
+One phase output, one interpreter, one set of libraries, two numbers. There is
+no library difference anywhere in that comparison, so the difference cannot be
+attributed to one. The independent verification run reports the same pair from
+a single output under python 3.12.3 / numpy 2.4.4 / scipy 1.17.1 / pandas 3.0.2
+- a second environment, same two constants.
+
 What remains valid here is only the RELATIVE comparison: within this module's
 own layout, a package-defaults run on this branch equals one on an unmodified
 develop-v2.1 worktree, and an explicit 0.0 equals an absent key. Those

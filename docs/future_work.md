@@ -2272,6 +2272,22 @@ added precisely because 20(b)'s could not see `20191014` lose its only mature
    canonical `.txt` and states in the generator's own docstring that digests
    from other layouts are not comparable.
 
+   **The failure was not only in building the second instrument.** In the
+   verification pass I ran the **canonical** generator in a second environment,
+   obtained the recorded constant `b500d2e0…c4a5` — and read that as
+   *confirming* the environment-dependence hypothesis. It was the opposite:
+   reproducing the recorded constant with the recorded instrument makes
+   environment-dependence the *least* likely explanation and points squarely at
+   a different instrument. Both halves of the disproof were in hand and the
+   wrong hypothesis survived because it had been supplied first. I went on to
+   recommend a two-row table carrying two different digests — which would have
+   written the falsehood into the very file created to prevent it.
+
+   The practice rule below exists because of that, not merely because of the
+   duplicate generator: **an anchoring hypothesis arriving with the task is
+   still a hypothesis, and evidence consistent with its negation must be scored
+   against it rather than folded into it.**
+
 2. **75 raw segments, not 68.** Both are real and count different things: 68 is
    the number of *stitched* blocks left after the gap merge. The D2 figures are
    per-segment, so 75 is their denominator. The D2 values themselves reproduce
