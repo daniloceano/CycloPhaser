@@ -93,10 +93,33 @@ They are kept intact and are never rewritten: earlier fronts' numbers were
 produced with them, and editing one retroactively would invalidate the record it
 anchors.
 
-**This is not the package default.** `mature_amplitude_fraction` in
-`cyclophaser/` remains **0.95** and did not change in front 20(a) — that front
-touched no package line. Moving the default is a public-API decision, deferred
-until after fronts 20b and 20c.
+**Corrected 2026-09-21 (front 20c) — the previous text here was wrong.** It
+claimed that `mature_amplitude_fraction` in `cyclophaser/` "remains **0.95**" and
+that moving the default was "a public-API decision, deferred until after fronts
+20b and 20c". Both halves are false.
+
+**The package default is `0.90`, and always has been.** It was introduced at
+that value in `f38082f`, the same commit that added `mature_method="amplitude"`,
+and it has never held any other value:
+
+```
+$ git log -S 'mature_amplitude_fraction: float = 0.95' --all -- cyclophaser/
+(no output — this default never existed)
+
+$ grep -rn 'mature_amplitude_fraction: float' cyclophaser/
+cyclophaser/determine_periods.py:734:   mature_amplitude_fraction: float = 0.90,
+cyclophaser/determine_periods.py:1154:  mature_amplitude_fraction: float = 0.90,
+```
+
+The `0.95` was a **calibration-config** value — it is what `params-9` and
+`params-10` carry — and it was mistaken for the package default. `params-11` and
+`params-12` carry `0.9`, which is why front 20(a) changed a config and no package
+line: the config was moving **to** the package default, not away from it.
+
+**The deferred public-API decision does not exist.** There is nothing to defer:
+front 20(a) did not need to move a default, because the default was already 0.90.
+Do not treat this as pending work. `CHANGELOG.md` is correctly untouched — no
+package line changed in 20(a), 20(b) as regards this parameter, or 20(c).
 
 **`research/labels/diagnostics/item19/item19_core.py` keeps its `CONFIG`
 pointing at `params-10` on purpose.** It is the frozen measuring instrument of

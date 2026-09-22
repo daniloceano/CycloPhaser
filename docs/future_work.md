@@ -1757,7 +1757,30 @@ re-diagnosed on 0.90 rather than on `params-10`.
 
 **`CHANGELOG.md` deliberately not touched.** A recorded decision, not an
 omission: the CHANGELOG describes the package, and no package line changed in
-this front.
+this front. **Still correct** — re-checked 2026-09-21, see the third correction
+below.
+
+#### Correction added 2026-09-21 by front 20(c) — the package default is 0.90, and there is no deferred API decision
+
+`research/labels/README.md` carried the claim that "`mature_amplitude_fraction`
+in `cyclophaser/` remains **0.95**" and that "moving the default is a public-API
+decision, deferred until after fronts 20b and 20c". **Both halves are false**,
+and the text has been corrected in place.
+
+The package default is **0.90** and has never been anything else. It entered at
+that value in `f38082f`, the commit that introduced `mature_method="amplitude"`
+(`determine_periods.py:734` and `:1154`, both `= 0.90`).
+`git log -S 'mature_amplitude_fraction: float = 0.95' --all -- cyclophaser/`
+returns **nothing**: that default never existed. The 0.95 was the value carried
+by the calibration configs `params-9` and `params-10`, and was mistaken for the
+package's.
+
+Two consequences for the record. First, front 20(a) is better described than it
+was: it moved the **config** from 0.95 **to** the package default, rather than
+away from it — which is also why it needed no package line and no CHANGELOG
+entry. Second, **the deferred public-API decision does not exist and must not be
+carried as pending work** by 20(b), 20(c) or any successor. `CHANGELOG.md`
+remains correctly untouched.
 
 #### Two corrections to the earlier record
 
@@ -1804,8 +1827,9 @@ measurement (`REPORT.md` §3) shows that a duration floor on its own is no more
 separable — a floor high enough to clear `20160735`'s spurious blocks destroys
 between half and all of the correct matures at every amplitude fraction tested.
 
-**(i) A duration floor on mature candidates, measured over the window actually
-chosen — not over `params-10`.** This is the next step the item-20 gate declared
+**(i) ~~A duration floor on mature candidates, measured over the window actually
+chosen — not over `params-10`.~~ — RETIRED 2026-09-21 by front 20(c); see item
+23.** The original entry read: this is the next step the item-20 gate declared
 in advance, and the condition that triggers it was met (every informative loss is
 code A, the prominence filter). Part 1 measured only the un-measured version of
 it: "≥ 7 steps at `mature_amplitude_fraction=0.95`" removes one of `20160735`'s
@@ -1815,6 +1839,29 @@ settles on, the floor has to be calibrated **on that window**, and the numbers i
 mechanism in the `amplitude` arm — `threshold_mature_length`
 (`find_stages.py:304-312`) is unreachable there — so the deliberate decision
 against such a floor at `find_stages.py:288-302` has to be revisited explicitly.
+
+**Why it is retired, and what is withdrawn.** Front 20(c) made exactly the
+measurement this entry asked for — a **proportional** floor on the window
+actually chosen (`params-12`: `mature_amplitude_fraction = 0.90`,
+`mature_min_depth = 0.80`) — and it **failed on premise**. The reading that
+survived here, that *a proportional duration floor measured at
+`mature_amplitude_fraction = 0.90` is viable and only wants calibrating*, is
+**withdrawn**. The failure is structural, not a matter of finding the right
+number: in `20205386` the anchor block is itself spurious under both
+implementable anchor definitions, and across the five real multi-block series
+duration **anti-correlates** with veracity in two of them (`20205386`,
+`20180733`). No choice of floor repairs that.
+
+The `~0.45` figure this entry's successor inherited is additionally **orphaned**:
+it was derived from `20160735`'s four-block fragmentation under `params-11`, and
+front 20(b) reduced that series to a single block `(150,181)`. The evidence
+behind the number is gone.
+
+An **absolute** duration floor was already refuted by item 20 (at 0.90 it would
+demand ≥ 13 steps and destroy 19 of 38 correct matures). With the proportional
+form now refuted too, **duration is closed as a discriminator** on this split,
+in both forms. Candidates (ii), (iii) and (iv) below are untouched by this and
+remain open.
 
 **(ii) Absolute valley depth, as distinct from prominence.** `peak_prominences`
 returns the **smaller** of the two climbs from a valley to its bounding peaks, so
@@ -2173,6 +2220,17 @@ This is the mechanism that was **predicted before measuring** (Danilo and
 Claude): "FAIL of premise; in 20205386 anchor A probably lands on a spurious
 block". Confirmed, unadjusted.
 
+**And it is not a single awkward series.** `20180733` inverts duration against
+veracity just as plainly: its **spurious** block `(31,43)` runs **13** steps
+against the **12** of the true block `(135,146)`, which pairs with the mature
+label 129–150. So in **2 of the 5 real multi-block series** — `20205386`, where
+the true block is the shortest of three, and `20180733`, where the true block is
+the shorter of two — duration and veracity point in **opposite** directions.
+That is a property of the population, not an outlier, and it belongs to the
+verdict rather than to a list of loose ends: a duration-based rule is being
+asked to rank blocks on a quantity that anti-correlates with correctness in 40 %
+of the cases it exists to fix.
+
 | criterion | anchor A | anchor B |
 |---|---|---|
 | (a) removes both spurious blocks of `20205386` | **FAIL** | **FAIL** |
@@ -2190,15 +2248,30 @@ verdict; its band is empty too (`r > 1.7500` to clear `20205386` against
 They diverge in **4 of the 7** series: `20180733` (A≠B), `20203947` (C≠A=B),
 `20205386` (**all three differ**), `s6b542eee` (A≠B=C).
 
+**Instrument gap, recorded against this front's own measurement.** Anchor B
+(longest block) **ties** in **3 of the 7** series — `20203947` (8 and 8),
+`s6b542eee` (8 and 8), `sbd6c6920` (7 and 7) — and **no tie-break rule was
+declared before measuring**. The driver's `max()` resolves a tie at the **lowest
+index**, which is an implicit rule, not a stated one. One reported divergence is
+an artefact of it: **`s6b542eee`'s "A≠B" is not a real divergence**, only
+`max()` picking block 0 while anchor A picks block 1 on a D1 margin of
+0.9999 vs 1.0000. The other two ties resolve to the same block anchor A picks,
+so nothing else moves.
+
+**The verdict is unaffected**: all three tied pairs have ratio exactly 1.000, so
+no floor `r ≤ 1.0` touches them under either resolution, and criterion (a) fails
+on `20205386`, which has no tie. But any future attempt at a duration rule must
+**declare its tie-break rule before measuring** — on this split a tie is not
+rare, it is 43 % of the multi-block series.
+
 ### Numbers worth not re-deriving
 
 * **A cost-free floor does exist**, it simply does not do the job it was
   proposed for: `r ∈ (0.5333, 0.6667]` under anchor A (`(0.5333, 0.5714]` under
   B) removes the spurious second blocks of `20150656` and `20180628` and cuts
   nothing label-matched in any of the 47. It does not touch `20205386`,
-  `20180733` or `20203947`. Recorded as a smaller separate candidate; **not**
-  proposed — it fails this gate, rests on two series, and its downstream
-  boundary effect is unmeasured.
+  `20180733` or `20203947`. **Danilo's ruling, 2026-09-21: STOPPED backlog —
+  recorded, not implemented.** See the ruling below.
 * **The 0.48 ceiling in the premise does not apply.** `20203947`'s two
   *labelled* matures have durations 23 and 11 (ratio 0.4783), but its two
   *detected* blocks are both duration 8 — **detected ratio exactly 1.000**.
@@ -2209,6 +2282,53 @@ They diverge in **4 of the 7** series: `20180733` (A≠B), `20203947` (C≠A=B),
 * Both synthetics are *correct* — each genuinely has two labelled matures, all
   four blocks match, both already pass the sequence test, and every ratio is
   exactly 1.000.
+
+### Ruling on the window `(0.5333, 0.6667]` — stopped, not implemented
+
+Danilo's decision, 2026-09-21. The window is **backlog, halted**. It is not
+implemented by this front and is not handed to a follow-up as ready work. Three
+recorded reasons:
+
+1. **Its ceiling is set by the true mature of `20205386`.** The 0.6667 is not a
+   comfortable margin discovered in open space — it is exactly the ratio of the
+   one block in `20205386` that the label says is **correct**. The rule's safe
+   upper bound is pinned by the very block the front was trying not to destroy.
+2. **The 0.13 of slack rests on two points.** The floor side comes from
+   `20150656` (0.5333) and the ceiling from `20205386` (0.6667). Two series
+   define the entire usable interval; there is no third observation anywhere
+   inside it.
+3. **The sequence gain is unverifiable without implementing.** Removing a block
+   rewrites `periods`, which `find_residual_period`, `post_process_periods` and
+   `find_incipient_period` then read — the 20(b) fill-in lesson, where vacated
+   ranges were closed over by neighbours in five series and turned two tails
+   (`20160735` 211–258, `20170794` 119–223) into `residual`. Nothing here
+   predicts what `20150656` and `20180628` would become.
+
+**Reopening requires a NEW front with its premise redeclared.** Loosening this
+gate after seeing the result is **forbidden** — that is the whole point of
+declaring the gate in advance, and a floor rescued by relaxing criterion (a)
+after (a) failed would be a floor fitted to the answer.
+
+### The inherited `~0.45` candidate is orphaned — and retires a conclusion of item 20
+
+The proportional-floor figure of `~0.45` carried into this front came from
+`20160735` under `params-11`, where that series fragmented into four mature
+blocks (5/12/32/12 steps). **That data no longer exists.** Front 20(b)'s
+`mature_min_depth = 0.80` reduced `20160735` to a **single** block, `(150,181)`,
+32 steps, which pairs with its label 145–177 — measured again here under
+`params-12` and confirmed. The series that generated the number is no longer a
+member of the population the number was meant to describe.
+
+Consequently **item 20(e)(i) is retired**, not merely superseded: its standing
+claim was that a proportional duration floor remained a live candidate once
+measured "on the window actually chosen" rather than on `params-10`. That
+measurement has now been made, on the chosen window (`params-12`,
+`mature_amplitude_fraction = 0.90`, `mature_min_depth = 0.80`), and it **fails**
+— for a structural reason (the anchor is itself spurious; duration anti-
+correlates with veracity in 2 of 5) that no recalibration of the floor addresses.
+The conclusion that "a proportional duration floor measured at
+`mature_amplitude_fraction = 0.90` is viable" is **withdrawn**. See the amended
+20(e)(i) above.
 
 ### Method note — attribution was verified, not assumed
 
@@ -2256,21 +2376,54 @@ across *all* labels finds **39** series with a matched block; the one-series
 difference is `20203947`, which matches on L1. Both are right for their own
 instrument.
 
-### Still open
+### New backlog items opened by this front
 
-* **`20205386` is unexplained.** All three of its valleys clear the 0.80 depth
-  floor and its true valley is neither the deepest nor the one generating the
-  longest block. **Neither depth (item 22 stage 1) nor duration (here)
-  separates it.** A future front needs a different discriminator; composite
-  depth×duration scores were out of scope and remain unmeasured.
+Three, addressable as 23(i)–(iii). None is measured; none carries a proposed
+mechanism. Each needs a front with its own gate and prediction declared in
+advance, as items 19–22 did.
+
+**23(i) — `20205386` resists both instruments the project has built.** Its three
+mature blocks are `(36,42)`, `(60,63)` and `(80,85)`; only the middle one matches
+the label 56–64. **Depth does not separate them**: all three generating valleys
+clear `mature_min_depth = 0.80` (D1 = 0.8687, 0.8805, 1.0000), and the true one
+is *not* the deepest — item 22 stage 1 already failed on this series.
+**Duration does not separate them either**: the true block is the **shortest** of
+the three, so the anchor is spurious under both anchor definitions — item 23,
+here. Two independent scalar discriminators have now been refuted on the same
+series. A third front should not propose a third scalar without first saying why
+this one would differ; composite depth×duration scores, explicitly out of scope
+in both fronts, remain entirely unmeasured. This is the sharpest open case in the
+mature-detection line.
+
+**23(ii) — `20180733` has a spurious block longer than the true one.** Spurious
+`(31,43)`, **13** steps; true `(135,146)`, **12** steps, paired against label
+129–150. Any rule that ranks blocks by duration ranks this pair **backwards**,
+whichever direction the rule points. Together with `20205386` this makes **2 of
+the 5** real multi-block series duration-inverted. Note `20180733` is also one of
+the three problem-C cases (a `residual` where the label continues in `decay`,
+item 20(a)), so it is carrying two distinct defects and they should not be
+conflated.
+
+**23(iii) — `20170409` and `20190639` miss the mature boundary by exactly one
+step.** `20170409`: detected `(60,66)` against label 55–73, **Δend = −7** against
+the fixed margin **6**. `20190639`: detected `(88,104)` against label 81–105,
+**Δstart = +7**, same margin. Both are single-block series, so neither is touched
+by anything in this front — they are recorded because two of the nine misses in
+the 38/47 baseline sit **one step** outside the instrument's threshold, which is
+worth knowing before anyone reads 38/47 as nine qualitatively failed series. This
+is a question about the margin's calibration, **not** a licence to widen it: the
+margin is fixed at 6 by item 17(d) and moving it after seeing which series it
+excludes is exactly the move this project forbids.
+
+### Still open from elsewhere, untouched here
+
 * **Whether removing a block displaces a surviving block's boundary is not
   measured** — it requires an implementation. `find_mature_stage` writes into
   `periods`, which `find_residual_period`, `post_process_periods` and
   `find_incipient_period` then read. This is the 20(b)/`20205386` lesson (watch
   the boundary, not the presence) and would have been stage 2's first check.
-* `20170409` and `20190639` each miss the fixed margin 6 by a single step
-  (Δend −7, Δstart +7). Unrelated to this front; noted because they sit exactly
-  at the instrument's edge.
+* The two latent defects of `_amplitude_mature_bounds` (`find_stages.py:154`,
+  `:161`) remain unfixed; confirmed dormant on this split only.
 * `20160735`'s remaining defect (two false intensification/decay cycles filling
   the gap before mature) was out of scope and is untouched.
 

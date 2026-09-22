@@ -93,6 +93,19 @@ floor `r ≤ 1.0` leaves all four blocks untouched.
 **The anchors diverge in 4 of the 7 series: 20180733, 20203947, 20205386,
 s6b542eee.** In 20205386 all three point at three *different* blocks.
 
+**Instrument gap, recorded against this front's own measurement.** Anchor B
+ties in **3 of the 7** series — 20203947 (8 and 8), s6b542eee (8 and 8),
+sbd6c6920 (7 and 7) — and **no tie-break rule was declared before measuring**.
+The driver's `max()` breaks a tie at the lowest index, which is an implicit rule
+rather than a stated one, and one reported divergence is an artefact of it:
+**s6b542eee's "A≠B" is not a real divergence**, only `max()` taking block 0
+while anchor A takes block 1 on a D1 margin of 0.9999 vs 1.0000. The other two
+ties resolve to the block anchor A picks anyway. **The verdict is unaffected** —
+all three tied pairs have ratio exactly 1.000, so no floor `r ≤ 1.0` touches
+them under either resolution, and criterion (a) fails on 20205386, which has no
+tie. But a tie here is not rare (43 % of the multi-block series), so any future
+duration rule must declare its tie-break **before** measuring.
+
 ### Why this kills the rule
 
 The decisive fact is that in **20205386 the anchor is itself a spurious block**
@@ -116,6 +129,13 @@ synthetics' second blocks (1.000) and essentially everything else.
 Under 20205386 the rule is not merely badly tuned; it is **pointing the wrong
 way**. The block a duration floor most wants to discard is the one the label
 says is correct.
+
+**And 20205386 is not alone.** 20180733 inverts duration against veracity too:
+its spurious block (31,43) runs **13** steps against the **12** of the true
+block (135,146), label 129–150. So in **2 of the 5** real multi-block series
+duration and veracity point in opposite directions. The anti-correlation is a
+property of the population, not an outlier — which is why this is a failure of
+premise rather than of calibration.
 
 ---
 
@@ -278,7 +298,7 @@ remains out of scope for this front.
 This is the numpy 2.5.3 / scipy 1.18.0 side of the known divergence. The
 measurement was not repeated under numpy 2.4.4 / scipy 1.17.1.
 
-`git diff develop-v2.1 -- cyclophaser/` is **empty** — see §10.
+`git diff develop-v2.1 -- cyclophaser/` is **empty** — confirmed on the branch, and re-confirmed by the independent run in §10.
 
 ---
 
@@ -298,11 +318,15 @@ measurement was not repeated under numpy 2.4.4 / scipy 1.17.1.
    block from the spurious pair. A future front needs a different discriminator;
    composite depth×duration scores were explicitly out of scope here and remain
    unmeasured.
-3. **A cost-free floor at `r ∈ (0.5333, 0.6667]` is on the table** as a smaller,
-   separate proposal: it would clean up 20150656 and 20180628 at no measured
-   cost. It is *not* proposed here — it fails this front's gate, it rests on two
-   series, and its downstream boundary effect is unmeasured (item 1 above).
-   Recorded so the number is not lost.
+3. **The cost-free floor at `r ∈ (0.5333, 0.6667]` is STOPPED backlog** —
+   Danilo's ruling, 2026-09-21. It would clean up 20150656 and 20180628 at no
+   measured cost, but it is not implemented and is not handed on as ready work:
+   its ceiling is pinned by 20205386's own *true* mature (0.6667), its 0.13 of
+   slack is defined by exactly two series, and its sequence gain is
+   unverifiable without implementing (item 1 above — the 20(b) fill-in lesson).
+   **Reopening requires a new front with its premise redeclared; loosening this
+   gate after seeing the result is forbidden.** Recorded so the number is not
+   lost.
 4. **20180733** has a spurious block that is *longer* than the true one
    (13 vs 12) — no duration rule in either direction separates them.
 5. **20170409 and 20190639** each miss the fixed margin 6 by a single step
@@ -315,7 +339,48 @@ measurement was not repeated under numpy 2.4.4 / scipy 1.17.1.
 
 ---
 
-## 10. Files
+## 10. Independent verification
+
+The measurement above was reproduced independently, and the two runs agree.
+
+**What was done, and by whom.** The re-measurement was carried out by Claude
+**separately from the agent run that produced this report**, with a **driver
+written from scratch against the public API** — `process_vorticity` /
+`get_periods` — rather than by re-executing `item20c_measure.py`. Nothing was
+shared between the two: not the driver, not the block-attribution logic, not the
+anchor code. It was run under **numpy 2.4.4 / scipy 1.17.1**, against the
+**numpy 2.5.3 / scipy 1.18.0** of this report (§8) — the version pair with known
+behavioural divergence in this codebase, which is the reason a second
+environment is worth the trouble.
+
+**What it reproduced.**
+
+| | agreed |
+|---|---|
+| the set of series emitting more than one mature block | the same **7** |
+| `20205386` — every block boundary, every D1, every ratio | identical |
+| the cost-free window | `(0.5333, 0.6667]` |
+| `20203947` — detected duration ratio | **1.000** |
+
+It also confirmed, on the branch, the `params-12` sha256 and that
+`git diff develop-v2.1 -- cyclophaser/` is empty.
+
+**Scope of the claim, stated exactly.** The independent run is reported here as
+received; **this agent did not execute it** and cannot re-run it, because no
+numpy 2.4.4 / scipy 1.17.1 environment exists on this machine (the fixed rule
+confines runs to the dedicated `cyclophaser` env, which carries 2.5.3 / 1.18.0).
+What *is* verified from here is that the four quantities listed above match the
+values in §2–§4 of this report exactly. The environment and the independence of
+the driver rest on that report, not on a measurement made in this session, and
+are recorded on that basis rather than asserted as this front's own result.
+
+The practical consequence: the seven-series finding and the `20205386` numbers —
+the two facts the FAIL verdict rests on — are **not** artefacts of one numpy /
+scipy pair.
+
+---
+
+## 11. Files
 
 | file | what |
 |---|---|
