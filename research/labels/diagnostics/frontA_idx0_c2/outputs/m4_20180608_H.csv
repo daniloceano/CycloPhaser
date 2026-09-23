@@ -1,0 +1,3 @@
+tag,boundary,seq_pre_H,primeiro_bloco_pre_H,seq_pos_H,primeiro_bloco_pos_H,H_mascara
+sem forcar,38,decay>intensification>mature>decay,decay x11,incipient>intensification>mature>decay,incipient x38,True
+idx0 forcado a peak,38,intensification>mature>decay,intensification x62,incipient>intensification>mature>decay,incipient x38,False

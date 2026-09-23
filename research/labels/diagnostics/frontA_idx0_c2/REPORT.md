@@ -1,0 +1,352 @@
+# Front A / item 28 — conditional reclassification of the extremum at index 0 (rule C2), stage 1
+
+**Measurement only. Nothing under `cyclophaser/` or `tests/` was touched.** The
+one behavioural variant measured here — index 0 forced from `valley` to `peak`,
+commit `6060c6d` — lives as a local copy in `common.py` and is injected by an
+explicit replay of `get_periods`' body.
+
+Branch `frontA-idx0-c2`, cut from `develop-v2.1` @ `c714451` (working tree
+clean). Config `research/labels/configs/cyclophaser_params-13.yaml`,
+sha256 `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` —
+the signature filter dropped **no** key from `phase_params` (21 of 21 accepted).
+
+Environment: the dedicated `cyclophaser` conda env, never base.
+`sys.prefix` = `/Users/danilocoutodesouza/miniconda3/envs/cyclophaser`
+(python 3.12.14, numpy 2.5.3, scipy 1.18.0, pandas 3.0.5).
+`cyclophaser.__file__` = this checkout, asserted in-process before every script
+body (`common.provenance`), with the sha256 of the two modules actually loaded:
+
+| module | sha256 |
+|---|---|
+| `cyclophaser/determine_periods.py` | `2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9` |
+| `cyclophaser/find_stages.py` | `a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea` |
+
+No worktree was used, so `run_in_worktree.py` was not needed; the equivalent
+in-process assertion runs anyway.
+
+**Replay fidelity.** Every measurement is taken from a replay of `get_periods`'
+body, not from the function itself, so the intermediate states can be
+snapshotted. The unforced replay was compared with the real `get_periods`
+field by field on **63 of 63** series and matched on all of them. The H step of
+M4 is re-executed from the package's own `_incipient_plateau_rel` /
+`_incipient_plateau_boundary` and asserted equal to the replay's final column.
+
+**TEST split.** All 63 series were run through the detector, which includes the
+16 held-out tracks — the census is mechanical and reads no label. No TEST label
+was read, compared or printed anywhere in this front. `20206498` appears with
+its sequences only, as the brief directs.
+
+---
+
+## Headline
+
+**C2 as specified does not do the job it was commissioned for, and it is not a
+threshold problem.**
+
+- It fires on **4 of 63** series, not the predicted 5.
+- Of the 5 tracks whose index 0 is typed `valley` and that motivated the front,
+  C2 reaches **3**; the two it misses (`20180170`, `20180608`) are missed
+  because their E1 is a `peak`, i.e. by the rule's own definition.
+- On the two train-split series where C2 fires, the resulting sequence is
+  **still wrong** against the label — 0 sequence matches gained.
+- The one real track where forcing index 0 to `peak` *does* buy a sequence
+  match (`20180170`) is exactly one C2 does **not** fire on.
+- The `peak->valley` branch, predicted dead, fires on one train track
+  (`20190639`) and **breaks** it: a series that currently matches its label
+  sequence acquires a spurious opening `decay`.
+
+Net effect of C2 at params-13 on the train split: **0 gained, 1 lost.**
+
+---
+
+## M1 — how the prominence of index 0 is computed
+
+**The package does not compute one.** `_refine_extrema`
+(`cyclophaser/determine_periods.py:180-181`) splits the candidates into
+
+```python
+boundary = {i for i in (0, N - 1) if i in set(candidates)}
+interior = np.array([i for i in candidates if i not in boundary])
+```
+
+and only `interior` is ever passed to `peak_prominences`
+(`determine_periods.py:188`). Index 0 is then re-added unconditionally in
+the returned union (`determine_periods.py:212`). No prominence value for index 0
+exists anywhere in the pipeline, and no threshold is ever applied to it.
+
+The number Front A reported as "prominence 0.0" is what
+`peak_prominences(signed, [0])` returns when asked anyway. Measured on all 63
+series, in both sign conventions:
+
+| quantity | result |
+|---|---|
+| `peak_prominences(z, [0])` == 0.0 | **63 / 63** |
+| `peak_prominences(-z, [0])` == 0.0 | **63 / 63** |
+| largest absolute value seen | 0.0 |
+
+This is structural, not empirical: scipy's base search cannot cross the array
+edge, so for index 0 the left base **is** index 0, the height above it is 0, and
+the prominence is 0.0 for any data whatsoever. It is confirmed here as a
+measured fact on the 63 series *and* as a property of the algorithm.
+
+**Correction this forces onto the record:** a prominence of 0.0 at index 0 is
+**not** evidence that the extremum is an artefact. It is what the formula
+returns at a boundary, for a real extremum and a spurious one alike, and the
+package never reads it. Any argument of the form "index 0's prominence is 0.0,
+therefore it is spurious" is void — including the one in Front A's original
+write-up. Every column in `outputs/m2_c2_table.csv` named `prom_idx0_*` is a
+re-derivation of that constant, kept only to close the question.
+
+Outputs: `outputs/m2_c2_table.csv`, `outputs/m1_m2_census.log`.
+
+---
+
+## M2 — where C2 would fire
+
+For each series: the type of index 0 in the **final** z extremum list — the
+column `find_stages` consumes, after the prominence filter and after the
+boundary exception — the next extremum E1 in that same list, and the C2
+decision, exactly as the brief defines it.
+
+Full 63-row table: **`outputs/m2_c2_table.csv`**.
+
+Index 0 is in the final list on 63 of 63 series (no boundary plateau was ever
+collapsed away from it, and no series has a tie that puts it in both
+populations). Its type:
+
+| type of index 0 | series |
+|---|---|
+| `peak` | 52 |
+| `valley` | 11 |
+
+The C2 decision:
+
+| branch | series |
+|---|---|
+| alternating types → does not fire | 52 |
+| `peak`/`peak`, E1 not strictly higher → does not fire | 7 |
+| **fires, `valley->peak`** | **3** |
+| **fires, `peak->valley`** | **1** |
+| E1 does not exist / index 0 absent | 0 |
+
+The 4 firings:
+
+| id | source | split | idx0 | E1 | E1 type | z[0] | z[E1] | z[E1]−z[0] | branch |
+|---|---|---|---|---|---|---|---|---|---|
+| 20190325 | real | train | valley | 64 | valley | −3.0e−06 | −2.68e−05 | −2.4e−05 | valley→peak |
+| 20191014 | real | train | valley | 52 | valley | −2.0e−06 | −4.91e−05 | −4.7e−05 | valley→peak |
+| 20206498 | real | **test** | valley | 40 | valley | −1.6e−05 | −4.29e−05 | −2.7e−05 | valley→peak |
+| 20190639 | real | train | peak | 25 | peak | −9.0e−06 | +6.90e−07 | +1.0e−05 | **peak→valley** |
+
+The 5 Front A targets:
+
+| id | idx0 | E1 | E1 type | C2 fires | why |
+|---|---|---|---|---|---|
+| 20180170 | valley | 21 | **peak** | **no** | alternating types |
+| 20180608 | valley | 10 | **peak** | **no** | alternating types |
+| 20190325 | valley | 64 | valley | yes | valley→peak |
+| 20191014 | valley | 52 | valley | yes | valley→peak |
+| 20206498 | valley | 40 | valley | yes | valley→peak |
+
+All 12 synthetic series: **C2 fires on none of them**. The four genuine-decay
+cases (`DItMD_noisy`, `DItMD_residual_noisy`, `IcDItMD_noisy`,
+`IcDItMD_residual_noisy`) all have index 0 typed `valley` with E1 a `peak`, so
+the rule declines on exactly the population it was designed to protect.
+
+### Two facts the brief's problem statement did not anticipate
+
+1. **Under params-13 only 4 of the 5 targets still open with a spurious decay.**
+   `20180608`'s final sequence is `incipient>intensification>mature>decay` — the
+   artefact is present inside the pipeline but invisible in the output. M4
+   explains why.
+2. **A leading decay does not require a `valley` at index 0.** `20170756` (test
+   split) opens with decay while its index 0 is typed `peak`. Index-0 typing is
+   one route to the symptom, not the only one.
+
+---
+
+## M3 — forcing index 0 to `peak` under params-13
+
+The `6060c6d` variant re-measured at the current tip under params-13, on the 5
+targets and the 4 genuine-decay synthetics. Where C2 fires on `valley->peak`,
+these rows **are** what C2 would produce.
+
+Two channels were measured, because `6060c6d` patched `find_peaks_valleys`
+itself and so hit z, dz and dz2, while C2 is defined on the z list alone. The
+two are **identical on 9 of 9** series: under params-13
+(`incipient_method: plateau`) nothing reads `dz_peaks_valleys`, so the
+distinction does not exist at this config. Measured, not assumed.
+
+| id / case | label | base (params-13) | forced | changed | seq. match base → forced |
+|---|---|---|---|---|---|
+| 20180170 | Ic>It>M>D | Ic>**D**>It>M>D | Ic>It>M>D | yes | ✗ → **✓** |
+| 20180608 | Ic>It>M>D | Ic>It>M>D | Ic>It>M>D | **no** | ✓ → ✓ |
+| 20190325 | Ic>It>M>D | Ic>**D**>It>M>D | Ic>It>**D**>It>M>D | yes | ✗ → ✗ |
+| 20191014 | It>M>D | Ic>**D**>It>D | **Ic**>It>M>D>**R** | yes | ✗ → ✗ |
+| 20206498 | *test — not read* | Ic>D>It>D | Ic>It>D>It>D | yes | — |
+| DItMD_noisy | D>It>M>D | D>It>M>D | **It>M>D** | yes | ✓ → ✗ |
+| DItMD_residual_noisy | D>It>M>D>R | D>It>M>D>R | **It>M>D>R** | yes | ✓ → ✗ |
+| IcDItMD_noisy | Ic>D>It>M>D | Ic>D>It>M>D | **Ic>It>M>D** | yes | ✓ → ✗ |
+| IcDItMD_residual_noisy | Ic>D>It>M>D>R | Ic>D>It>M>D>R | **Ic>It>M>D>R** | yes | ✓ → ✗ |
+
+Scored series (8; `20206498` excluded): sequence match **5/8 → 2/8**.
+
+Two readings matter:
+
+- **Front A's M7 refutation reproduces at params-13.** All four genuine-decay
+  synthetics currently match their label sequence and all four regress when
+  index 0 is forced. This is the damage C2's conditional is meant to avoid —
+  and it does avoid it, since it fires on none of them.
+- **The only gain is on a track C2 cannot reach.** `20180170` goes from mismatch
+  to match, and C2 does not fire there. Note also that all three of that track's
+  scoreable boundaries are flagged `unsure` by the labeller (the
+  `intensification` start is off by 12 steps), so the gain is a *sequence* match
+  with no boundary evidence behind it.
+
+Figure: `outputs/m3_force_peak.png` (per series: lower band = base, upper band =
+forced). Table: `outputs/m3_force_peak.csv`. Log: `outputs/m3_force_peak.log`.
+
+### Addendum — what the `peak->valley` branch does where it fires
+
+Predicted dead (P4), it fires on `20190639` (train). The mirror operation —
+index 0 forced to `valley`, which no version of the package has ever contained —
+was measured on that track:
+
+| | sequence | matches label sequence |
+|---|---|---|
+| label | `incipient>intensification>mature>decay` | — |
+| base | `incipient>intensification>mature>decay` | **yes** |
+| C2 `peak->valley` applied | `incipient>`**`decay`**`>intensification>mature>decay` | **no** |
+
+C2's second branch manufactures precisely the artefact the front exists to
+remove. Table: `outputs/m2b_peak_to_valley.csv`.
+
+---
+
+## M4 — 20180608: does the incipient overwrite (H) mask the effect?
+
+H is `find_stages.py:1134`, inside the `incipient_method="plateau"` branch:
+
+```python
+if boundary > 0:
+    df.iloc[:boundary, df.columns.get_loc('periods')] = 'incipient'
+```
+
+It overwrites `[0, boundary)` with `incipient` **after** every other phase has
+been assigned, so a spurious `decay` block opening at index 0 reaches the output
+only if it extends past `boundary`.
+
+On `20180608`, `boundary = 38` in both variants:
+
+| | sequence **before** H | first block before H | sequence **after** H (= final) |
+|---|---|---|---|
+| base | `decay>intensification>mature>decay` | `decay` × **11** | `incipient>intensification>mature>decay` |
+| index 0 forced to `peak` | `intensification>mature>decay` | `intensification` × 62 | `incipient>intensification>mature>decay` |
+
+**H masks it completely.** The spurious `decay` block is 11 steps long and H
+overwrites the first 38, so the artefact is fully present inside the pipeline
+and fully invisible in the output. The two final outputs are identical step by
+step: at params-13 the Front A variant is a **no-op** on `20180608`.
+
+This is why the brief's "5 tracks open with spurious decay" is a params-9
+statement. At params-13 the count is 4, and the fifth is masked rather than
+fixed — the mechanical defect is untouched. Any future config that shortens
+`boundary` on this track re-exposes it.
+
+Figure: `outputs/m4_20180608_H.png` (four panels: before/after H × base/forced).
+Step-by-step head of the series: `outputs/m4_20180608_head.csv`. Summary:
+`outputs/m4_20180608_H.csv`.
+
+---
+
+## M5 — does `boundary` depend on the phase map?
+
+**No.** Two independent checks, both clean.
+
+*Static.* The plateau branch computes the boundary at
+`find_stages.py:1121-1130`:
+
+```python
+rel      = _incipient_plateau_rel(df, signal, smooth_window, smooth_polyorder)
+boundary = _incipient_plateau_boundary(rel, tau, crossing, k)
+```
+
+- `_incipient_plateau_rel` (`find_stages.py:951-989`) — the only string
+  subscripts on the frame in its whole body are `'dz'` and `'z_unfil'`
+  (`find_stages.py:976` and `:979`). It never reads `'periods'`.
+- `_incipient_plateau_boundary` (`find_stages.py:992-1035`) — no frame access at
+  all; a pure function of `(rel, tau, crossing, k)`.
+- `'periods'` first appears in that branch at `find_stages.py:1134`, the
+  **write**. `'dz_peaks_valleys'` is read only by the geometric branch
+  (`find_stages.py:1155`, `:1164`), which params-13 does not take.
+
+*Measured.* `boundary` recomputed on all 63 series with and without index 0
+forced — forcing changes `z_peaks_valleys` and therefore the phase map:
+**identical on 63/63**. Table: `outputs/m5_boundary_independence.csv`.
+
+So the incipient boundary is upstream of everything this front touches: no
+reclassification of index 0 can move it, and H's masking power is fixed
+independently of the artefact it masks.
+
+---
+
+## Declared predictions
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| **P1** | prominence of index 0 = 0.0 by construction, 63/63 | 63/63 in both sign conventions — and the package computes none at all | **CONFIRMED** (with the correction above) |
+| **P2** | on the 4 genuine-decay synthetics E1 = `peak`, C2 does not fire (4/4) | 4/4 E1 = `peak`, 0/4 fire | **CONFIRMED** |
+| **P3** | on the 5 targets E1 = deeper `valley`, C2 fires (5/5) | **3/5**; `20180170` and `20180608` have E1 = `peak` | **REFUTED** |
+| **P4** | C2 fires on exactly 5/63; `peak->valley` on 0/63 | **4/63**; `peak->valley` on **1/63** (`20190639`) | **REFUTED** (both clauses) |
+| **P5** | `boundary` does not depend on the phase map | static + 63/63 measured | **CONFIRMED** |
+
+The confidence ordering inside P3 was also wrong in its detail: the two misses
+are `20180170` (not flagged as doubtful) and `20180608` (flagged), while
+`20191014` (flagged) does fire.
+
+---
+
+## Which pre-declared retreat applies
+
+Neither, cleanly. Reported, not executed.
+
+- **(a) — "any of the 4 synthetics fires → go to C1".** Does **not** apply:
+  0 of 4 fire. C2's conditional protects the genuine-decay population exactly as
+  designed.
+- **(e) — "FAIL only in the `peak->valley` branch → next stage tests
+  unidirectional C2".** Applies to the *damage* but not to the *failure*. The
+  only harm C2 does is in that branch (`20190639`), so dropping it removes the
+  loss — but the surviving `valley->peak` branch fires on 2 scoreable train
+  series and converts **neither** into a sequence match. Unidirectional C2 is
+  therefore a rule with no measured benefit rather than a corrected rule, and
+  "FAIL by (e)" understates what was measured.
+
+The reason is visible in M2 and is not a threshold: C2 discriminates on the
+**type of E1**, and the type of E1 does not separate the spurious openings from
+the genuine ones. On the 5 targets it splits 3/2 with the wrong member on each
+side — it misses the one track (`20180170`) where the correction is worth a
+sequence match, and reaches two where the correction is not enough.
+
+That is the argument for **C1** (relative depth `D1 = (z_max − z[0]) / (z_max −
+z_min)`), whose discriminant is the *magnitude* of the opening excursion rather
+than the type of the next extremum — and it is exactly the "magnitude lead"
+Front A's closing report recorded and did not pursue. C1 is reached here by
+measurement, not by rule (a). Note `20180608` warns that a fix measured on the
+final output alone will look like a no-op there: any future gate on this front
+should be read **before** H, not after it.
+
+**C3** (relative size of the rise to the next peak) remains recorded only.
+
+---
+
+## Files
+
+| file | what |
+|---|---|
+| `common.py` | provenance assert, the local `6060c6d` copy (+ its mirror), the verified replay |
+| `m1_m2_census.py` | M1 + M2 over 63 series |
+| `m3_force_peak.py` | M3 over the 9 series, both force channels, + figure |
+| `m2b_peak_to_valley.py` | M2 addendum: the `peak->valley` branch on `20190639` |
+| `m4_20180608_H.py` | M4: before/after H, base and forced, + figure |
+| `m5_boundary_independence.py` | M5: static + measured |
+| `outputs/` | every table, log and figure above |

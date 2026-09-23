@@ -1,0 +1,33 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+config: research/labels/configs/cyclophaser_params-13.yaml
+  sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+
+--------------------------------------------------------------------------
+  id                        : 20190639
+  n_steps                   : 180
+  seq_base                  : incipient>intensification>mature>decay
+  seq_forcado_valley_all    : incipient>decay>intensification>mature>decay
+  seq_forcado_valley_z_only : incipient>decay>intensification>mature>decay
+  all_==_z_only             : True
+  mudou                     : True
+  rotulo                    : incipient>intensification>mature>decay
+  bate_base                 : True
+  bate_forcado              : False
+  detalhe_base              : intensification@25±5: det 13 (err 12, FORA); mature@81±6: det 88 (err 7, FORA); decay@106±8: det 105 (err 1, ok)
+  detalhe_forcado           : sequencia diferente
+--------------------------------------------------------------------------
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.csv

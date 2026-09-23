@@ -2915,6 +2915,117 @@ items 5 and 12.
 
 ---
 
+## 28. Front A — conditional reclassification of index 0 (C2, bidirectional) — **OPEN, stage 1 (measurement) done, 2026-09-23**
+
+Branch `frontA-idx0-c2`, from `develop-v2.1` @ `c714451`. **Measurement only** —
+nothing under `cyclophaser/` or `tests/` was touched, and no parameter moved.
+Config params-13 (sha256 `c1ab8ce0…6e483973`), dedicated `cyclophaser` env,
+`cyclophaser.__file__` asserted in-process before every script body. Full
+write-up, tables and figures:
+`research/labels/diagnostics/frontA_idx0_c2/REPORT.md`.
+
+Every number below comes from a replay of `get_periods`' body whose output was
+compared field by field with the real `get_periods` on **63/63** series before
+any attribution was made.
+
+### The rule measured
+
+C2, bidirectional, on the FINAL z extremum list (after the prominence filter and
+the boundary exception), with E1 the extremum immediately after index 0:
+index 0 `valley` + E1 `valley` strictly deeper → valley→peak; index 0 `peak` +
+E1 `peak` strictly higher → peak→valley; anything else → no trigger.
+
+### Result — C2 as specified does not work, and not for want of a threshold
+
+- Fires on **4 of 63** series: `valley->peak` on `20190325`, `20191014`,
+  `20206498` (test), and `peak->valley` on `20190639`.
+- Of the 5 tracks whose index 0 is typed `valley`, C2 reaches 3. It misses
+  `20180170` and `20180608` because their E1 is a `peak` — by the rule's own
+  definition, not by a margin.
+- On the 2 scoreable firings it changes the sequence and **neither becomes a
+  match** against the label.
+- The only track where forcing index 0 to `peak` buys a sequence match
+  (`20180170`, and with all three boundaries flagged `unsure`) is one C2 does
+  **not** fire on.
+- The `peak->valley` branch fires on `20190639` and **breaks** it: a track whose
+  sequence currently matches its label acquires a spurious opening `decay`.
+
+Net at params-13 on TRAIN: **0 gained, 1 lost.** The discriminant — the *type*
+of E1 — does not separate spurious openings from genuine ones; on the 5 targets
+it splits 3/2 with the wrong member on each side.
+
+### Predictions declared before measuring
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| P1 | prominence of index 0 = 0.0 by construction, 63/63 | 63/63, both sign conventions | CONFIRMED |
+| P2 | the 4 genuine-decay synthetics do not fire | 0/4 fire (E1 = `peak` on all four) | CONFIRMED |
+| P3 | the 5 targets fire, 5/5 | **3/5** | REFUTED |
+| P4 | 5/63 fire; `peak->valley` 0/63 | **4/63**; `peak->valley` **1/63** | REFUTED |
+| P5 | `boundary` does not depend on the phase map | static reading + 63/63 measured | CONFIRMED |
+
+### The correction P1 forces onto the record
+
+**A prominence of 0.0 at index 0 is not evidence of an artefact.** The package
+computes no prominence for index 0 at all: `_refine_extrema` puts 0 and N−1 in
+`boundary` and passes only `interior` to `peak_prominences`
+(`determine_periods.py:180-181`, `:188`), re-adding them unconditionally at
+`:212`. The 0.0 that Front A reported is what `peak_prominences` returns when
+asked anyway, and it is 0.0 for **any** data because scipy's base search cannot
+cross the array edge. Confirmed on 63/63 series and as a property of the
+algorithm. Any argument of the form "index 0's prominence is 0.0, therefore the
+extremum is spurious" is void, including Front A's own.
+
+### Two facts that change how this front must be gated
+
+**The incipient overwrite H masks the artefact on `20180608`.**
+`find_stages.py:1134` overwrites `[0, boundary)` with `incipient` after all
+other phases are assigned. On `20180608`, `boundary = 38` and the spurious
+`decay` block is 11 steps: fully present inside the pipeline, fully invisible in
+the output. The Front A variant is a measured **no-op** on that track at
+params-13. So "5 tracks open with spurious decay" is a params-9 statement; at
+params-13 it is 4, and the fifth is masked, not fixed. **Any future gate on this
+front must read the phase map BEFORE H, not the final output** — a real fix will
+otherwise score as no change there, and a config that shortens `boundary` will
+re-expose the defect.
+
+**A leading `decay` does not require a `valley` at index 0.** `20170756` (test
+split) opens with decay while its index 0 is typed `peak`. Index-0 typing is one
+route to the symptom, not the only one — so the symptom count is not an upper
+bound on what this front can fix, nor a lower bound on what remains after it.
+
+### M5 — the incipient boundary is upstream of all of this
+
+`_incipient_plateau_rel` (`find_stages.py:951-989`) reads only `'dz'` and
+`'z_unfil'`; `_incipient_plateau_boundary` (`:992-1035`) is pure in
+`(rel, tau, crossing, k)`; `'periods'` first appears in that branch at `:1134`,
+as a write. Measured: `boundary` is identical with and without index 0 forced on
+**63/63** series. No reclassification of index 0 can move the incipient
+boundary.
+
+### Which pre-declared retreat applies — neither, cleanly
+
+- **(a)** (a synthetic fires → go to C1) does **not** apply: 0/4 fire.
+- **(e)** (FAIL only in `peak->valley` → try unidirectional C2) applies to the
+  *damage* but not to the *failure*: dropping the second branch removes the one
+  loss, but the surviving `valley->peak` branch converts 0 of its 2 scoreable
+  firings into a match. Unidirectional C2 is a rule with no measured benefit,
+  not a corrected rule.
+
+The measurement points at **C1** (relative depth
+`D1 = (z_max − z[0]) / (z_max − z_min)`), whose discriminant is the magnitude of
+the opening excursion rather than the type of E1 — the "magnitude lead" Front A
+recorded and did not pursue. Reached here by measurement, not by rule (a).
+**C3** stays recorded only.
+
+### Still open
+
+Danilo's decision on the next stage: C1, unidirectional C2 as a null-effect
+sanity step, or close the front. Stage 1 is pushed, **not merged**, and opens no
+PR.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

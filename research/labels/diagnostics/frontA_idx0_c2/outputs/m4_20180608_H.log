@@ -1,0 +1,87 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+config: research/labels/configs/cyclophaser_params-13.yaml
+  sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+
+track 20180608, n=117
+
+H re-executada confere com o final do replay: True
+  [sem forcar]
+    boundary (H overwrites [0, 38))      : 38
+    sequencia ANTES de H                        : decay>intensification>mature>decay
+    primeiro bloco ANTES de H                   : decay x11
+    sequencia DEPOIS de H (= saida final)       : incipient>intensification>mature>decay
+    primeiro bloco DEPOIS de H                  : incipient x38
+    H mascara o primeiro bloco?                 : True   (bloco 11 passos <= boundary 38)
+
+H re-executada confere com o final do replay: True
+  [idx0 forcado a peak]
+    boundary (H overwrites [0, 38))      : 38
+    sequencia ANTES de H                        : intensification>mature>decay
+    primeiro bloco ANTES de H                   : intensification x62
+    sequencia DEPOIS de H (= saida final)       : incipient>intensification>mature>decay
+    primeiro bloco DEPOIS de H                  : incipient x38
+    H mascara o primeiro bloco?                 : False   (bloco 62 passos <= boundary 38)
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.csv
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_head.csv
+
+ idx         z z_pv_base z_pv_forcado      pre_H_base      pos_H_base   pre_H_forcado   pos_H_forcado
+   0 -0.000033    valley         peak           decay       incipient intensification       incipient
+   1 -0.000033       NaN          NaN           decay       incipient intensification       incipient
+   2 -0.000032       NaN          NaN           decay       incipient intensification       incipient
+   3 -0.000032       NaN          NaN           decay       incipient intensification       incipient
+   4 -0.000031       NaN          NaN           decay       incipient intensification       incipient
+   5 -0.000031       NaN          NaN           decay       incipient intensification       incipient
+   6 -0.000031       NaN          NaN           decay       incipient intensification       incipient
+   7 -0.000030       NaN          NaN           decay       incipient intensification       incipient
+   8 -0.000030       NaN          NaN           decay       incipient intensification       incipient
+   9 -0.000030       NaN          NaN           decay       incipient intensification       incipient
+  10 -0.000030      peak         peak           decay       incipient intensification       incipient
+  11 -0.000030       NaN          NaN intensification       incipient intensification       incipient
+  12 -0.000030       NaN          NaN intensification       incipient intensification       incipient
+  13 -0.000031       NaN          NaN intensification       incipient intensification       incipient
+  14 -0.000031       NaN          NaN intensification       incipient intensification       incipient
+  15 -0.000032       NaN          NaN intensification       incipient intensification       incipient
+  16 -0.000032       NaN          NaN intensification       incipient intensification       incipient
+  17 -0.000033       NaN          NaN intensification       incipient intensification       incipient
+  18 -0.000033       NaN          NaN intensification       incipient intensification       incipient
+  19 -0.000034       NaN          NaN intensification       incipient intensification       incipient
+  20 -0.000034       NaN          NaN intensification       incipient intensification       incipient
+  21 -0.000035       NaN          NaN intensification       incipient intensification       incipient
+  22 -0.000036       NaN          NaN intensification       incipient intensification       incipient
+  23 -0.000036       NaN          NaN intensification       incipient intensification       incipient
+  24 -0.000036       NaN          NaN intensification       incipient intensification       incipient
+  25 -0.000037       NaN          NaN intensification       incipient intensification       incipient
+  26 -0.000037       NaN          NaN intensification       incipient intensification       incipient
+  27 -0.000037       NaN          NaN intensification       incipient intensification       incipient
+  28 -0.000037       NaN          NaN intensification       incipient intensification       incipient
+  29 -0.000036       NaN          NaN intensification       incipient intensification       incipient
+  30 -0.000036       NaN          NaN intensification       incipient intensification       incipient
+  31 -0.000036       NaN          NaN intensification       incipient intensification       incipient
+  32 -0.000035       NaN          NaN intensification       incipient intensification       incipient
+  33 -0.000035       NaN          NaN intensification       incipient intensification       incipient
+  34 -0.000035       NaN          NaN intensification       incipient intensification       incipient
+  35 -0.000034       NaN          NaN intensification       incipient intensification       incipient
+  36 -0.000034       NaN          NaN intensification       incipient intensification       incipient
+  37 -0.000034      peak         peak intensification       incipient intensification       incipient
+  38 -0.000034       NaN          NaN intensification intensification intensification intensification
+  39 -0.000034       NaN          NaN intensification intensification intensification intensification
+  40 -0.000034       NaN          NaN intensification intensification intensification intensification
+  41 -0.000035       NaN          NaN intensification intensification intensification intensification
+  42 -0.000035       NaN          NaN intensification intensification intensification intensification
+  43 -0.000036       NaN          NaN intensification intensification intensification intensification
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.png

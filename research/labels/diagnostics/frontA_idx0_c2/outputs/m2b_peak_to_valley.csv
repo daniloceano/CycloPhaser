@@ -1,0 +1,2 @@
+id,n_steps,seq_base,seq_forcado_valley_all,seq_forcado_valley_z_only,all_==_z_only,mudou,rotulo,bate_base,bate_forcado,detalhe_base,detalhe_forcado
+20190639,180,incipient>intensification>mature>decay,incipient>decay>intensification>mature>decay,incipient>decay>intensification>mature>decay,True,True,incipient>intensification>mature>decay,True,False,"intensification@25±5: det 13 (err 12, FORA); mature@81±6: det 88 (err 7, FORA); decay@106±8: det 105 (err 1, ok)",sequencia diferente

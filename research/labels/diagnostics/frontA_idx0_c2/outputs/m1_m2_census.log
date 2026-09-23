@@ -1,0 +1,78 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+config: research/labels/configs/cyclophaser_params-13.yaml
+  sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+  process_vorticity kwargs: {'use_filter': True, 'cutoff_low': 168, 'cutoff_high': 18, 'replace_endpoints_with_lowpass': 0, 'use_smoothing': False, 'use_smoothing_twice': False, 'savgol_polynomial': 3, 'boundary_padding': 'edge'}
+  get_periods kwargs (21): {'threshold_intensification_length': 0.075, 'threshold_intensification_gap': 0.075, 'threshold_mature_distance': 0.18, 'threshold_mature_length': 0.15, 'threshold_decay_length': 0.075, 'threshold_decay_gap': 0.075, 'threshold_incipient_length': 0.4, 'prominence_relative': 0.3, 'mature_amplitude_fraction': 0.9, 'mature_min_depth': 0.8, 'intensification_min_depth': 0.05, 'decay_tail_amplitude_fraction': 0.3, 'incipient_plateau_tau': 0.2, 'incipient_plateau_k': 5, 'incipient_smooth_window': 5.0, 'incipient_smooth_polyorder': 3.0, 'length_scale': 'local', 'mature_method': 'amplitude', 'incipient_method': 'plateau', 'incipient_plateau_signal': 'vorticity', 'incipient_plateau_crossing': 'sustained'}
+  phase_params keys dropped in memory by the signature filter: []
+
+loaded 51 real tracks + 12 synthetic series
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m2_c2_table.csv (63 rows)
+
+==========================================================================
+M1 — prominence of index 0
+==========================================================================
+  peak_prominences(z, [0])   == 0.0 in 63/63 series
+  peak_prominences(-z, [0])  == 0.0 in 63/63 series
+  max |value| observed       : 0.000e+00
+  (the package itself computes NO prominence for index 0: see
+   determine_periods.py:180-181 — `boundary` is excluded from `interior`,
+   and only `interior` reaches peak_prominences at :188)
+
+==========================================================================
+M2 — where C2 fires
+==========================================================================
+idx0_tipo_final
+peak      52
+valley    11
+
+  C2 fires in 4/63 series
+C2_ramo
+alternating types                    52
+peak/peak, E1 not strictly higher     7
+valley->peak                          3
+peak->valley                          1
+
+      id fonte caso  split idx0_tipo_final  E1_idx E1_tipo        z0          z_E1  z_E1_menos_z0      C2_ramo
+20190325  real      treino          valley      64  valley -0.000003 -2.675813e-05      -0.000024 valley->peak
+20190639  real      treino            peak      25    peak -0.000009  6.896962e-07       0.000010 peak->valley
+20191014  real      treino          valley      52  valley -0.000002 -4.908321e-05      -0.000047 valley->peak
+20206498  real       teste          valley      40  valley -0.000016 -4.292391e-05      -0.000027 valley->peak
+
+  the 5 Front A targets:
+      id  split idx0_tipo_final  E1_idx E1_tipo        z0      z_E1  z_E1_menos_z0  C2_dispara           C2_ramo
+20180170 treino          valley      21    peak -0.000028 -0.000030      -0.000002       False alternating types
+20180608 treino          valley      10    peak -0.000033 -0.000030       0.000003       False alternating types
+20190325 treino          valley      64  valley -0.000003 -0.000027      -0.000024        True      valley->peak
+20191014 treino          valley      52  valley -0.000002 -0.000049      -0.000047        True      valley->peak
+20206498  teste          valley      40  valley -0.000016 -0.000043      -0.000027        True      valley->peak
+
+  the 12 synthetic series:
+       id                   caso idx0_tipo_final  E1_idx E1_tipo  z_E1_menos_z0  C2_dispara           C2_ramo
+s0596ea57     IcIt_observational          valley       4    peak   1.057580e-06       False alternating types
+s46657891              quase_ItD            peak      32  valley  -6.459160e-04       False alternating types
+s4e7ff65c             ItMD_clean          valley       1    peak   3.041304e-07       False alternating types
+s5b8aa46f   DItMD_residual_noisy          valley      11    peak   5.584850e-04       False alternating types
+s5dcc0f79  IcItMD_residual_clean            peak      21  valley  -7.017349e-04       False alternating types
+s6b1e8245          IcDItMD_noisy          valley      18    peak   6.562260e-04       False alternating types
+s6b542eee        ItMD_ItMD_noisy            peak      16  valley  -6.770231e-04       False alternating types
+s8001f17b            DItMD_noisy          valley      12    peak   5.682077e-04       False alternating types
+s9ddbc53c  IcItMD_residual_noisy            peak      21  valley  -7.012890e-04       False alternating types
+sbceec644             ItMD_noisy            peak      27  valley  -6.596873e-04       False alternating types
+sbd6c6920      IcItMD_ItMD_noisy            peak      17  valley  -7.248043e-04       False alternating types
+scfcf1387 IcDItMD_residual_noisy          valley      16    peak   6.561275e-04       False alternating types
+
+replay == get_periods on 63/63 series (field by field).

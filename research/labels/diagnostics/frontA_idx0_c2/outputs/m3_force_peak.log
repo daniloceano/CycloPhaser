@@ -1,0 +1,106 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+config: research/labels/configs/cyclophaser_params-13.yaml
+  sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+  get_periods kwargs (21)
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.csv
+
+--------------------------------------------------------------------------
+20180170 (real, n=69)
+  rotulo            : incipient>intensification>mature>decay
+  base (params-13)  : incipient>decay>intensification>mature>decay
+  forcado (all)     : incipient>intensification>mature>decay
+  forcado (z_only)  : incipient>intensification>mature>decay   [all == z_only: True]
+  mudou             : True
+  bate base         : False  | sequencia diferente
+  bate forcado      : True  | intensification@20±1: det 8 (err 12, unsure); mature@34±1: det 36 (err 2, unsure); decay@43±1: det 49 (err 6, unsure)
+--------------------------------------------------------------------------
+20180608 (real, n=117)
+  rotulo            : incipient>intensification>mature>decay
+  base (params-13)  : incipient>intensification>mature>decay
+  forcado (all)     : incipient>intensification>mature>decay
+  forcado (z_only)  : incipient>intensification>mature>decay   [all == z_only: True]
+  mudou             : False
+  bate base         : True  | intensification@37±1: det 38 (err 1, ok); mature@61±2: det 62 (err 1, ok); decay@74±2: det 71 (err 3, FORA)
+  bate forcado      : True  | intensification@37±1: det 38 (err 1, ok); mature@61±2: det 62 (err 1, ok); decay@74±2: det 71 (err 3, FORA)
+--------------------------------------------------------------------------
+20190325 (real, n=167)
+  rotulo            : incipient>intensification>mature>decay
+  base (params-13)  : incipient>decay>intensification>mature>decay
+  forcado (all)     : incipient>intensification>decay>intensification>mature>decay
+  forcado (z_only)  : incipient>intensification>decay>intensification>mature>decay   [all == z_only: True]
+  mudou             : True
+  bate base         : False  | sequencia diferente
+  bate forcado      : False  | sequencia diferente
+--------------------------------------------------------------------------
+20191014 (real, n=206)
+  rotulo            : intensification>mature>decay
+  base (params-13)  : incipient>decay>intensification>decay
+  forcado (all)     : incipient>intensification>mature>decay>residual
+  forcado (z_only)  : incipient>intensification>mature>decay>residual   [all == z_only: True]
+  mudou             : True
+  bate base         : False  | sequencia diferente
+  bate forcado      : False  | sequencia diferente
+--------------------------------------------------------------------------
+20206498 (real, n=133)
+  rotulo            : <split de teste: nao lido>
+  base (params-13)  : incipient>decay>intensification>decay
+  forcado (all)     : incipient>intensification>decay>intensification>decay
+  forcado (z_only)  : incipient>intensification>decay>intensification>decay   [all == z_only: True]
+  mudou             : True
+--------------------------------------------------------------------------
+s8001f17b (sintetico — DItMD_noisy, n=66)
+  rotulo            : decay>intensification>mature>decay
+  base (params-13)  : decay>intensification>mature>decay
+  forcado (all)     : intensification>mature>decay
+  forcado (z_only)  : intensification>mature>decay   [all == z_only: True]
+  mudou             : True
+  bate base         : True  | intensification@11±2: det 13 (err 2, ok); mature@26±2: det 26 (err 0, ok); decay@40±3: det 40 (err 0, ok)
+  bate forcado      : False  | sequencia diferente
+--------------------------------------------------------------------------
+s5b8aa46f (sintetico — DItMD_residual_noisy, n=66)
+  rotulo            : decay>intensification>mature>decay>residual
+  base (params-13)  : decay>intensification>mature>decay>residual
+  forcado (all)     : intensification>mature>decay>residual
+  forcado (z_only)  : intensification>mature>decay>residual   [all == z_only: True]
+  mudou             : True
+  bate base         : True  | intensification@11±2: det 12 (err 1, ok); mature@22±1: det 24 (err 2, FORA); decay@32±1: det 32 (err 0, ok); residual@49±2: det 48 (err 1, ok)
+  bate forcado      : False  | sequencia diferente
+--------------------------------------------------------------------------
+s6b1e8245 (sintetico — IcDItMD_noisy, n=66)
+  rotulo            : incipient>decay>intensification>mature>decay
+  base (params-13)  : incipient>decay>intensification>mature>decay
+  forcado (all)     : incipient>intensification>mature>decay
+  forcado (z_only)  : incipient>intensification>mature>decay   [all == z_only: True]
+  mudou             : True
+  bate base         : True  | decay@3±1: det 2 (err 1, ok); intensification@18±2: det 19 (err 1, ok); mature@34±2: det 35 (err 1, ok); decay@46±2: det 46 (err 0, ok)
+  bate forcado      : False  | sequencia diferente
+--------------------------------------------------------------------------
+scfcf1387 (sintetico — IcDItMD_residual_noisy, n=66)
+  rotulo            : incipient>decay>intensification>mature>decay>residual
+  base (params-13)  : incipient>decay>intensification>mature>decay>residual
+  forcado (all)     : incipient>intensification>mature>decay>residual
+  forcado (z_only)  : incipient>intensification>mature>decay>residual   [all == z_only: True]
+  mudou             : True
+  bate base         : True  | decay@3±1: det 2 (err 1, ok); intensification@16±3: det 17 (err 1, ok); mature@29±2: det 30 (err 1, ok); decay@39±2: det 38 (err 1, ok); residual@54±3: det 53 (err 1, ok)
+  bate forcado      : False  | sequencia diferente
+--------------------------------------------------------------------------
+
+scored (label read): 8 series
+  sequence match, base    : 5/8
+  sequence match, forced  : 2/8
+all == z_only on 9/9 series
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.png

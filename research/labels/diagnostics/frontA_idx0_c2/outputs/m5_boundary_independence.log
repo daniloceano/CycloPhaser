@@ -1,0 +1,38 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+config: research/labels/configs/cyclophaser_params-13.yaml
+  sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+
+==========================================================================
+M5 (1) — static reading
+==========================================================================
+  _incipient_plateau_rel  (find_stages.py:951-989)
+    string subscript keys: ['dz', 'z_unfil']
+    reads 'periods'      : False
+  _incipient_plateau_boundary  (find_stages.py:992-1035)
+    string subscript keys: []
+    reads 'periods'      : False
+    call site  find_stages.py:951: def _incipient_plateau_rel(df, signal, smooth_window=0, smooth_polyorder=3):
+    call site  find_stages.py:992: def _incipient_plateau_boundary(rel, tau, crossing, k):
+    call site  find_stages.py:1121: rel = _incipient_plateau_rel(
+    call site  find_stages.py:1125: boundary = _incipient_plateau_boundary(
+    call site  find_stages.py:1134: df.iloc[:boundary, df.columns.get_loc('periods')] = 'incipient'
+  find_incipient_period (find_stages.py:1038-) plateau branch keys: ['dz_peaks_valleys', 'periods', 'threshold_incipient_length']
+
+==========================================================================
+M5 (2) — measured
+==========================================================================
+  boundary identical with and without index 0 forced: 63/63
+  wrote research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.csv
