@@ -394,6 +394,136 @@ should be read **before** H, not after it.
 
 ---
 
+# Stage 2 — rule C2' as default behaviour (`reclassify_index0`)
+
+**This stage changes the package.** Branch `frontA-idx0-c2`, continuing from
+stage 1. Gate: **PASS** — Q1 to Q8 confirmed, suite green.
+
+## What was implemented
+
+`reclassify_index0`, a bool on `get_periods` and `determine_periods`,
+**default True**. On the final z extremum list, with E1 the next extremum after
+index 0 **of either type**: a `valley` at index 0 with `z[E1] < z[0]` strictly
+becomes a `peak`; a `peak` with `z[E1] > z[0]` strictly becomes a `valley`; a
+tie or a missing E1 changes nothing. Only index 0 is touched.
+
+Dropping C2's same-type restriction is the whole point: C2 reached 3 of the 5
+motivating tracks and missed `20180170`, the one worth a sequence match, purely
+because its E1 is a peak (stage 1, M2).
+
+| where | what |
+|---|---|
+| `determine_periods.py` | `_reclassify_index0` (the rule), the `reclassify_index0` keyword on `find_peaks_valleys` (**default False**), `get_periods` and `determine_periods` (**default True**) |
+| | applied to `z` only — the two derivative calls pass `reclassify_index0=False` explicitly |
+| `research/labels/configs/cyclophaser_params-14.yaml` | params-13 + `reclassify_index0: true` |
+| `tools/calibration_app/app.py` | sidebar checkbox (section 3, on by default), YAML import/export, `_PARAM_WIDGET_KEYS` |
+| `tools/calibration_app/layer_inspector.py` | `build_working_frame` and `mature_lens` follow the pipeline |
+| `tests/test_reclassify_index0.py` | 14 tests |
+| `CHANGELOG.md` | change-of-default entry |
+
+**The default asymmetry is deliberate.** `find_peaks_valleys` keeps the old
+behaviour unless asked; the two pipeline entry points apply the rule. The rule
+is a statement about the vorticity series a life cycle is read from, not a
+property of extremum detection in general.
+
+## The gate
+
+Measured with `stage2_reference.py`, which fingerprints the `periods` column
+per series (sha256, not a sequence summary) for a **named** cyclophaser tree and
+hard-asserts in-process which package it imported. Three runs: `develop-v2.1 @
+c714451` in a pinned `git worktree`, and the working tree with the flag forced
+off and on.
+
+| tree | `determine_periods.py` sha256 |
+|---|---|
+| c714451 (reference) | `2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9` |
+| working tree | `5e11f622e264d66f5f84973c9bf59cc10fd6820c63f4e8c433c4ceacef8f3442` |
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| **Q1** | `False` == c714451, 63/63 | 63/63 identical `periods` sha256 | **CONFIRMED** |
+| **Q2** | fires on exactly 5/63; the other 58 byte-identical | fires on exactly those 5; 58 byte-identical; **0 of 12 synthetics** | **CONFIRMED** |
+| **Q3** | `20180170` → `Ic>It>M>D`, matches the label | exactly that, and it matches | **CONFIRMED** |
+| **Q4** | `20190325` → `Ic>It>D>It>M>D` | exactly that | **CONFIRMED** |
+| **Q5** | `20191014` → `Ic>It>M>D>R` | exactly that | **CONFIRMED** |
+| **Q6** | `20190639` blocks exactly as ruled | `incipient[0,13) decay[13,26) intensification[26,88) mature[88,105) decay[105,180)` | **CONFIRMED** |
+| **Q7** | `20180608` unchanged, before and after H | final output identical; before H, `decay[0,11) intensification[11,62) mature[62,71) decay[71,117)` **both ways**; boundary 38 both ways | **CONFIRMED** |
+| **Q8** | incipient `boundary` identical, 63/63 | 63/63 | **CONFIRMED** |
+| **Q9** | suite green | see below | **CONFIRMED** |
+
+Q7 is worth reading twice: on `20180608` the rule does **not** fire — its E1 is
+a peak at `z[10] = -3.0e-5`, higher than `z[0] = -3.3e-5`, so neither branch
+applies — and the opening `decay[0,11)` survives inside the pipeline exactly as
+stage 1 found it. H masks it, as before. **The one target the front never
+reached is still unreached**; the change is that this is now visible in a
+measurement rather than hidden behind H.
+
+`20206498` is in the frozen TEST split: its sequence is reported
+(`Ic>D>It>D` → `Ic>It>D>It>D`) and its label was not read.
+
+Table (63 rows): `outputs/stage2_table.csv`. Figures for the 5 changed series:
+`outputs/stage2_changed_series.png`. Log: `outputs/stage2_gate.log`.
+
+## Sequence-match count, and the exception
+
+Over the 62 label-carrying series: **42 → 42**. That counter charges
+`20190639` as a loss and credits `20180170` as a gain. Per Danilo's ruling of
+2026-09-23, `20190639` is scored by its blocks (Q6) and not by
+`score_phase_sequences`, which refuses to pair boundaries once an extra phase
+appears. Read that way the change is **+1 sequence match and one accepted
+reclassification**. `manual_labels.yaml` was not edited.
+
+## The CI reference baselines did not need updating — and why
+
+The brief provided for a separate commit updating them. It was not needed, and
+the reason is a measurement, not the absence of a failure: under the **package's
+own defaults** — where `prominence` and `prominence_relative` are both None —
+`determine_periods(series)` is **identical with and without the rule on all 64**
+series tried (51 calibration tracks, 12 synthetic series, the packaged example
+file). `outputs/stage2_defaults_check.csv`.
+
+That is not a coincidence, and it is the most useful thing this stage learned:
+
+**Rule C2' can only fire where something has already removed the extremum
+between index 0 and E1.** Raw `argrelextrema` output alternates, so the
+extremum right after a valley at index 0 is a peak the series rose to, which
+cannot lie below index 0 — and symmetrically for a peak. What breaks the
+alternation is the prominence filter. On `20190639` it deletes the `valley@9`
+and leaves two consecutive peaks; on `20180170` it deletes the early bumps and
+leaves a peak at index 21 already below `z[0]`.
+
+So: **the new default bites only when a prominence filter is in use.** Every
+CI baseline runs without one, which is why they are untouched, and any user
+running package defaults sees no change at all. This also sets the scope of the
+change honestly — it is a change to the *calibrated* configuration, not to the
+out-of-the-box one.
+
+Measured on this corpus (0 of 64 under no filtering) and argued from the
+alternation property; not proved in general — a plateau collapse is a second way
+to break alternation and was not exercised here.
+
+## Suite
+
+Run in the dedicated `cyclophaser` env, `-m "not browser"`. The only failures
+the change produced anywhere in the suite were 6 in
+`test_mature_lens_accepted_extrema_are_the_detector_s`, and they were correct
+failures: the Inspector's lens was still reading index 0 the old way while
+`get_periods` had moved. Fixed by having `mature_lens` apply the rule to its
+ACCEPTED set (the pipeline's) and by excluding index 0 from the REJECTED sets,
+which keeps "rejected" meaning "rejected by prominence" now that a boundary
+extremum's kind can change. Browser tests are not run here, by standing rule.
+
+## Deviations from the brief, declared
+
+1. **No separate CI-hash commit** (brief item 5): nothing to update. Measured
+   above.
+2. **`params-14.yaml` differs from params-13 in two lines, not one**: the new
+   key and `metadata.timestamp` (2026-09-22 → 2026-09-23). No detector
+   parameter differs. A config's timestamp records when it was made, and
+   copying a date the file does not have would be the worse error.
+
+---
+
 ## Files
 
 | file | what |
@@ -404,4 +534,20 @@ should be read **before** H, not after it.
 | `m2b_peak_to_valley.py` | M2 addendum: the `peak->valley` branch on `20190639` |
 | `m4_20180608_H.py` | M4: before/after H, base and forced, + figure |
 | `m5_boundary_independence.py` | M5: static + measured |
+| `fig_20190639.py` | the accepted reclassification, drawn |
+| **stage 2** | |
+| `stage2_reference.py` | per-series `periods` fingerprint for a NAMED tree (worktree-safe) |
+| `stage2_gate.py` | Q1-Q8, the 63-row table, the figures |
+| `stage2_defaults_check.py` | the rule under the package's own defaults (64/64 unchanged) |
 | `outputs/` | every table, log and figure above |
+
+**Stage 1's scripts are a frozen record — do not re-run them against the new
+default.** Their replay builds the extrema itself, through `find_peaks_valleys`
+with no flag (so: the rule off), and then asserts the replay equals
+`get_periods`. `get_periods` now applies the rule, so on the 5 series where it
+fires that assertion is now FALSE — verified: `replay_ok=False` for `20180170`
+and `20190639`, `True` for a series the rule leaves alone. That is the check
+doing its job, not a defect, but it means their `replay_ok` no longer reads as
+"this replay is the pipeline" unless `reclassify_index0=False` is passed
+through. `stage2_gate.py` is the one to extend; its own replay (Q7) passes the
+flag explicitly and was verified against `get_periods` both ways.

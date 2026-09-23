@@ -2915,7 +2915,15 @@ items 5 and 12.
 
 ---
 
-## 28. Front A — conditional reclassification of index 0 (C2, bidirectional) — **OPEN, stage 1 (measurement) done, 2026-09-23**
+## 28. Front A — conditional reclassification of index 0 — stage 1 measurement (C2, **FAIL**) and stage 2 (C2', **shipped as default behaviour**, gate PASS) — 2026-09-23
+
+Stage 1 measured rule C2 and failed it. Stage 2 implemented the rule **without**
+C2's same-type restriction (C2') as the package's default, on Danilo's
+instruction. The two verdicts stand side by side on purpose: stage 1's FAIL is
+not retracted by stage 2's PASS, and the section "What stage 2 corrects in the
+stage 1 record" below says exactly which stage 1 statements do not survive.
+
+### Stage 1 — rule C2 (E1 must share index 0's type) — **FAIL**
 
 Branch `frontA-idx0-c2`, from `develop-v2.1` @ `c714451`. **Measurement only** —
 nothing under `cyclophaser/` or `tests/` was touched, and no parameter moved.
@@ -3049,11 +3057,101 @@ the opening excursion rather than the type of E1 — the "magnitude lead" Front 
 recorded and did not pursue. Reached here by measurement, not by rule (a).
 **C3** stays recorded only.
 
-### Still open
+### Stage 1's verdict, as it stood
 
-Danilo's decision on the next stage: C1, unidirectional C2 as a null-effect
-sanity step, or close the front. Stage 1 is pushed, **not merged**, and opens no
-PR.
+FAIL. (e) failed on its own terms *before* the ruling on `20190639`, because it
+presupposes the second branch is where the harm is; the ruling then removed the
+harm and left the rule with no measured benefit either way. The acceptance of
+`20190639` is dated 2026-09-23 and counts from stage 2 onward — it is not
+retroactive evidence for stage 1.
+
+---
+
+### Stage 2 — rule C2' as default behaviour (`reclassify_index0`) — **gate PASS**
+
+Same branch. **This stage changes `cyclophaser/`.** Full write-up:
+`research/labels/diagnostics/frontA_idx0_c2/REPORT.md`.
+
+C2' drops C2's same-type restriction: E1 is the next extremum in the final list
+**of either type**. That is the whole difference, and it is what reaches
+`20180170` — the one track worth a sequence match, which C2 missed because its
+E1 is a peak.
+
+`reclassify_index0` is a bool on `get_periods` and `determine_periods`,
+**default True**; `find_peaks_valleys` accepts it too but defaults to False, so
+a direct caller of that function is not silently changed. Applied to `z` alone.
+`params-14` = params-13 + the key. The calibration app carries a sidebar
+control, and the Benchmark tab can therefore compare with and without it.
+
+#### Gate
+
+Fingerprints are the sha256 of the `periods` column per series, taken for a
+NAMED cyclophaser tree (`stage2_reference.py` asserts in-process which package
+it imported): `develop-v2.1 @ c714451` in a pinned worktree, and the working
+tree with the flag forced each way.
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| Q1 | `False` == c714451, 63/63 | 63/63 | CONFIRMED |
+| Q2 | fires on exactly 5/63, other 58 byte-identical | exactly those 5; 58 identical; 0 of 12 synthetics | CONFIRMED |
+| Q3 | `20180170` → `Ic>It>M>D`, matches label | yes | CONFIRMED |
+| Q4 | `20190325` → `Ic>It>D>It>M>D` | yes | CONFIRMED |
+| Q5 | `20191014` → `Ic>It>M>D>R` | yes | CONFIRMED |
+| Q6 | `20190639` blocks as ruled | `incipient[0,13) decay[13,26) intensification[26,88) mature[88,105) decay[105,180)` | CONFIRMED |
+| Q7 | `20180608` unchanged before and after H | identical both ways; before H `decay[0,11) …`; boundary 38 | CONFIRMED |
+| Q8 | boundary identical, 63/63 | 63/63 | CONFIRMED |
+| Q9 | suite green | green | CONFIRMED |
+
+Sequence match over the 62 label-carrying series: 42 → 42 by the raw counter;
+**+1 with one accepted reclassification** once `20190639` is read by its blocks
+(Q6), per the declared exception. `manual_labels.yaml` untouched.
+
+#### The finding that matters most
+
+**C2' can only fire where something has already removed the extremum between
+index 0 and E1.** Raw `argrelextrema` output alternates, so the extremum right
+after a valley at index 0 is a peak the series rose to, which cannot lie below
+index 0 — symmetrically for a peak. What breaks the alternation is the
+prominence filter: on `20190639` it deletes `valley@9`, on `20180170` the early
+bumps.
+
+Consequence, measured: under the **package's own defaults** (no prominence
+filter) the output is identical with and without the rule on **64 of 64** series
+— the 51 tracks, the 12 synthetics and the packaged example. So **the CI
+reference baselines needed no update at all** (the brief's separate commit for
+that was not needed), and a user on package defaults sees no change. This is a
+change to the *calibrated* configuration, not to the out-of-the-box one.
+
+#### What stage 2 corrects in the stage 1 record
+
+1. **"0 gained / the measurement points at C1" is superseded, and the reasoning
+   that produced it was too narrow.** On `20190325` and `20191014` the rule does
+   remove the spurious opening `decay`; their sequences stay wrong because of
+   defects elsewhere in those series, which is a different failure from "the
+   rule does not work". Counting only whole-sequence matches hid that.
+2. **A ceiling, now stated: any comparator that retypes index 0 produces
+   exactly the M3 result wherever it fires, so the maximum sequence-match gain
+   on TRAIN is +1 (`20180170`) — C1 included.** C1 is therefore **dropped**: it
+   cannot beat a ceiling it shares. C3 stays recorded only.
+3. **`20190639`'s firing is not the index-0 artefact.** It comes from
+   `prominence_relative = 0.3` deleting `valley@9`. The improvement is accepted;
+   the mechanism is distinct and is sensitive to the filter's threshold, so it
+   should not be cited as evidence about index-0 typing.
+4. **Stage 1's scripts are frozen.** Their replay builds extrema with the rule
+   off and asserts equality with `get_periods`; that assertion is now False on
+   the 5 firing series. Do not re-run them as a check on current behaviour.
+
+#### Provenance of the decision
+
+The default was set on Danilo's instruction, taken in full knowledge that C2'
+was chosen **after** seeing stage 1's table, and that `20190639` was accepted
+**after** seeing what the rule did to it. No part of this was validated on the
+held-out TEST split; `20206498` was run and reported mechanically, and its label
+was never read.
+
+#### Still open
+
+Merge authorisation. Stage 2 is pushed, **not merged**, and opens no PR.
 
 ---
 

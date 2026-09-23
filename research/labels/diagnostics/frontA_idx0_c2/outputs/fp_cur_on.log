@@ -1,0 +1,20 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd            : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  worktree       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix     : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser    : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 5e11f622e264d66f5f84973c9bf59cc10fd6820c63f4e8c433c4ceacef8f3442
+  ASSERT OK: package loads from the named worktree.
+==========================================================================
+config: research/labels/configs/cyclophaser_params-14.yaml
+  sha256: acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e
+  keys dropped by the signature filter: []
+  get_periods accepts reclassify_index0: True
+  reclassify_index0 in this run: True
+loaded 63 series
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.json (63 series)
