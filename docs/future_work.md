@@ -655,6 +655,13 @@ regardless of what was already assigned there:
 cyclophaser/find_stages.py:982:        df.iloc[:boundary, df.columns.get_loc('periods')] = 'incipient'
 ```
 
+> **Line-number correction, 2026-09-23 (item 27).** That citation is against
+> `887c628`. The same statement sits at **`find_stages.py:1134`** on the current
+> `develop-v2.1`. The line moved; the defect did not — it is still
+> unconditional, and item 27 re-observed it masking `20180608` (incipient
+> boundary 38 vs a leading decay block of 11). Prefer `:1134` when reading the
+> current tree; `:982` remains correct for anything quoting `887c628`.
+
 Observed case: `20180608` — the incipient boundary happens to consume the
 entire spurious decay block produced by the index-0 artefact, so the final
 output looks correct (opens with `intensification`) even though the
@@ -2650,7 +2657,7 @@ environment against the working tree (`sys.prefix` = the env,
 
 ---
 
-## 27. Front A′ — re-verification of Front A under the correct detector — **closed, gate PASS, item 13 does not materialise for Front A, 2026-09-23**
+## 27. Front A′ — re-verification of Front A under the correct detector — **closed, gate PASS, merged 2026-09-23** (merge `f1c88ab`)
 
 **Measurement only.** No line of `cyclophaser/` or `tests/` was changed.
 Branch `research/frontA-reverify` from `develop-v2.1` tip `558eb5d`.
@@ -2745,10 +2752,55 @@ Frozen test split respected: the 16 test reals enter only the mechanical census;
 every `evaluate_against_labels.py` run omitted `--test`. No correction to A, no
 repository clean-up, no reopening of B, C, D, E, G or the refusal front.
 
-### Status
+### Closing (2026-09-23)
 
-Branch pushed, **not merged**. Merging needs Danilo's explicit authorisation.
+Merged into `develop-v2.1` as **`f1c88ab`** (`--no-ff`, no PR, authorised by
+Danilo). Suite after the merge, in the dedicated `cyclophaser` conda environment
+against the working tree (`sys.prefix` = the env, `cyclophaser.__file__` = this
+repo): **1230 passed, 0 failed**, under `-m "not browser"` — the browser module
+is not run, per `CLAUDE.md`. `git diff 558eb5d HEAD -- cyclophaser/ tests/` is
+**empty**: the merge carries 32 files, all of them documentation and
+diagnostics.
+
+**The defect A described remains. This front confirmed the diagnosis; it did
+not correct it.** Nothing in item 27 changed detector behaviour, and nothing in
+it was meant to. Index 0 is still typed `valley` on those 5 tracks with
+prominence 0.0, the spurious leading decay block is still produced, and
+`20180608`'s is still masked rather than repaired. What is now settled is only
+that those observations describe *this repository's code* — not that any of them
+has been fixed. Item 8 stays open on its own terms.
+
+**Independent verification.** A second, independent pass reproduced this front's
+result on a different interpreter stack (**numpy 2.4.4 / scipy 1.17.1**, against
+this front's 2.5.3 / 1.18.0): step 1a byte-identical; steps 1b and 2 reproduced
+through its own driver rather than this front's scripts; and `20191014`'s lost
+`mature` independently attributed to `mature_min_depth`. Two conclusions follow
+that a single pass could not license: the A numbers are **stable across that
+numpy/scipy step**, so the gate result is not an artefact of one environment; and
+the 1b/2 findings do not depend on `census_tip.py` being correct, since a
+separate implementation reaches them.
+
 Item 13 remains **OPEN** for the front named "E", which is still unidentified.
+Front A is struck from it.
+
+### Backlog raised by this front
+
+**The dedicated `cyclophaser` conda environment is itself a shadowing vector for
+worktree work.** It carries an editable install
+(`__editable___cyclophaser_2_0_0_finder`) whose `MAPPING` points at the **main**
+checkout, so a measurement run inside a worktree can silently resolve
+`cyclophaser` to the main tree instead. Today its `install()` *appends* to
+`sys.meta_path`, landing after `PathFinder`, so a `sys.path` entry still wins —
+but that is setuptools' current codegen, not a guarantee, and it is not
+something a future run should rely on without checking.
+
+**Rule: every measurement run inside a worktree must assert
+`cyclophaser.__file__` in-process, before the script body, and fail loudly if it
+resolves outside the worktree.** Asserting the environment is not enough, and
+neither is setting `sys.path` — both were correct here while the resolution still
+had to be proved. `research/labels/diagnostics/frontA_reverify/run_in_worktree.py`
+is the working template. This extends, and does not replace, the CWD lesson of
+items 5 and 12.
 
 ---
 
