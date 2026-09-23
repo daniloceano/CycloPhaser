@@ -1,0 +1,14 @@
+==========================================================================
+PER-TRACK DIFF vs FRONT A (6060c6d artifacts) — STEP 2 — tip + params-13 (current state)
+==========================================================================
+
+--- idx0_inventory (M: idx0 type + leading decay block) ---
+  no differences across 51 track(s) x 8 field(s)
+
+--- idx0b_prominence (M: prominence of the index-0 extremum) ---
+  no differences across 5 track(s) x 5 field(s)
+
+--- idx0_final_stage (final-output cross-check, all 51) ---
+  no differences across 51 track(s) x 3 field(s)
+
+TOTAL differences vs A: 0
