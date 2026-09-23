@@ -1,0 +1,27 @@
+re-derivation check at tau=0.2: 35/35 boundaries reproduced
+
+sweep: tau in [0.2, 0.8], step 0.0005  ->  1201 values
+
+==============================================================================
+Per series — the FULL set of tau at which it lands within tolerance
+==============================================================================
+  id           N_lab  tol  head_min   tau interval(s) that hit
+  20160587        26    1  0.207669   NEVER — no tau in the swept range
+  20160735        19    5  0.461140   NEVER — no tau in the swept range
+  20171179        11    1  0.217839   [0.2180, 0.2660]
+  20180628         9    1  0.412693   [0.4510, 0.4775]
+  20181046         9    1  0.449635   [0.4500, 0.7585]
+  20202023        11    1  0.287663   NEVER — no tau in the swept range
+
+==============================================================================
+The strong form of the claim
+==============================================================================
+  max simultaneously within tolerance, over ALL 1201 tau: 2 of 6
+  attained on tau in [0.4510, 0.4775] (54 grid points)
+  tau values reaching >= 3 of 6: 0  ->  G1 UNREACHABLE by tau
+
+  This holds with conditions (ii) [spare the 14] and (iii) [spare the
+  11] ABANDONED. G1 therefore fails on its own terms, independently of
+  G3 — no trade-off against the negatives can rescue it.
+
+wrote research/labels/diagnostics/frontRefusal/tau_sweep.json

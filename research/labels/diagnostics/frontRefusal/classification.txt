@@ -1,0 +1,45 @@
+==============================================================================
+DEFECT I (item 8(d)) — sign(z[1]-z[0]) disagrees between raw and filtered
+==============================================================================
+  over the 35 real TRAIN series: 6 members
+    20180170  d_raw=-6.941000e-07  d_filt=+2.895711e-09  cell=AMB
+    20180608  d_raw=-7.251000e-07  d_filt=+2.876968e-07  cell=TP
+    20180759  d_raw=+1.407000e-07  d_filt=-1.063380e-07  cell=TP
+    20190325  d_raw=-1.027000e-06  d_filt=+2.660896e-07  cell=TP
+    20190397  d_raw=+5.531000e-07  d_filt=-2.679362e-07  cell=TP
+    20191014  d_raw=-1.955900e-06  d_filt=+1.321667e-07  cell=FP
+
+  the published figure is 7 of 51. The other 1 lie in the TEST split,
+  which this stage does not load, so the full list of 7 is NOT produced here.
+  That does not weaken the intersection below: all 6 refusals are TRAIN series
+  and defect I was evaluated on every one of the 35 real TRAIN series, so the
+  intersection is complete as computed.
+
+  intersection with the 6 refusals: 0 (empty)
+
+==============================================================================
+SIGNS AT t0 — the 6 refusals
+==============================================================================
+  id               d_raw[t0]     d_filt[t0]         dz[t0]  filt vs raw  dz vs raw  defI
+  20160587     -1.141700e-06  -3.020764e-07  -3.020764e-07         same       same False
+  20160735     -2.056000e-06  -1.627716e-06  -1.627716e-06         same       same False
+  20171179     -1.256000e-06  -4.161747e-07  -4.161747e-07         same       same False
+  20180628     -2.415200e-06  -7.444173e-07  -7.444173e-07         same       same False
+  20181046     -2.819500e-06  -6.927554e-07  -6.927554e-07         same       same False
+  20202023     -3.026950e-06  -8.285764e-07  -8.285764e-07         same       same False
+
+==============================================================================
+CLASSIFICATION — categories and precedence declared before the data
+==============================================================================
+  id            R  head_min   margin  N_lab     n p_in[0]            M1   M2   M3  -> cause
+  20160587     R1  0.207669   0.0383     26    79 intensification  False True False        M2
+  20160735     R1  0.461140   1.3057     19   259 intensification  False False True        M3
+  20171179     R1  0.217839   0.0892     11    62 intensification  False True False        M2
+  20180628     R1  0.412693   1.0635      9    94 intensification  False False True        M3
+  20181046     R1  0.449635   1.2482      9    30 intensification  False False True        M3
+  20202023     R1  0.287663   0.4383     11    78 intensification  False False True        M3
+
+  counts by precedence (M1 > M2 > M3): {'M2': 2, 'M3': 4}
+  largest group = 4/6 (M3)  ->  VERDICT: COMUM
+
+wrote research/labels/diagnostics/frontRefusal/classification.json
