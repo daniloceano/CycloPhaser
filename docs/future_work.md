@@ -1080,7 +1080,7 @@ recorded here so it is not ambiguous again:**
 
 ---
 
-## 13. Open risk — earlier fronts may have run against the shadowed cyclophaser 1.7.3, not this repo (**Front A cleared 2026-09-23 — see item 27**; still OPEN for "Front E")
+## 13. Open risk — earlier fronts may have run against the shadowed cyclophaser 1.7.3, not this repo — **CLOSED 2026-09-23** (Front A by item 27; "Front E" by provenance, below)
 
 > **2026-09-23 — Front A is cleared.** Front A′ (item 27) reproduced A's
 > measurements against `887c628`'s `cyclophaser/` in a worktree, with the
@@ -1091,9 +1091,110 @@ recorded here so it is not ambiguous again:**
 > reasoning are this repository's code. Related: the env A's scripts name,
 > `south_atlantic_cyclone_extremes`, carries **no cyclophaser at all**, so it
 > had no wheel to shadow with; `lorenz`, the env this item names, does carry
-> 1.7.3. **This item stays OPEN** solely for the unidentified "Front E".
+> 1.7.3. ~~**This item stays OPEN** solely for the unidentified "Front E".~~
+> **Superseded the same day — "Front E" is closed too, below.**
 
-**Status: OPEN for "Front E" only.** Flagged 2026-09-11, not yet checked. Item 12 established
+### Closing of the "Front E" residue — 2026-09-23
+
+**Status: CLOSED.** Decided by Danilo, who approved this route explicitly
+("Aprovo a rota 3 e o merge"). No new measurement was taken to close it, and
+none is needed: the number at issue was already reproduced, under proof of
+provenance, by item 27.
+
+**Identification.** "Front E" is the **synthetic `mature` score of 58.3% under
+`mature_method=amplitude`** (`mature_amplitude_fraction: 0.95`), named in the
+CircleCI/dedicated-environment front (item 12) as supporting evidence for
+problem E, the meaning of "mature". It was named there alongside the refutation
+of `fix/idx0-boundary-extremum-type` — which is Front A, already cleared by
+item 27.
+
+**What an attempt to close it by the originally planned argument found.** The
+plan was to show that `mature_method` could not have reached a shadowed 1.7.3,
+by locating the script that produced the pair "baseline 8.3% → 58.3%" and
+inspecting how it passed the parameter. That attempt **failed at its first
+step, and is recorded here rather than discarded**:
+
+- **The pair does not exist in this repository.** Searched across tracked files,
+  ignored files, and every blob of every ref (`git rev-list --all`). There is no
+  8.3% paired with a 58.3% anywhere, and no package-defaults evaluation run is
+  recorded at all. Every synthetic `mature` rate on record is 53.8%, 58.3% or
+  84.6% (params-9, -10, -11, -13).
+- **The only 8.3% in the repository is a different quantity from a different
+  front**: `Reader T 1/12 ( 8.3%)` — the topology-proxy *reader* baseline of
+  Front B, at `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:257`
+  and `topology_run_gate_excerpt.txt:21`. It is not a `mature_method` baseline.
+  Do not re-pair these two numbers; they never belonged together.
+- **The call path is therefore not determinable.** With no identified script,
+  there is no line to cite, and the planned argument could not be sustained.
+
+**The route that does close it: direct provenance of the number itself.** The
+only recorded synthetic `mature` 58.3% is
+`research/labels/diagnostics/fix_eval_before.txt:35` at commit `6060c6d`:
+
+```
+      mature            12   58.3%   2.00      3
+```
+
+produced by Front A, under `cyclophaser_params-9.yaml`
+(sha256 `0c3ec559…9f63`, `mature_method: amplitude`,
+`mature_amplitude_fraction: 0.95`). **Item 27's step 1a regenerated that file
+and it came back identical — 57 lines, 0 differing, sha256
+`064c2386…38de`** — in a process that asserted `cyclophaser.__file__` inside a
+worktree pinned to `887c628` before running anything. `compare_1a.py` compares
+that report **in full, line by line**, not merely the two counts it also
+asserts; line 35 is inside that comparison. Gate verdict: PASS.
+
+So the provenance of the 58.3% is proved directly. It was produced by this
+repository's code, not by the published 1.7.3 — which is exactly what item 13
+asked about, reached without needing the script, the call path, or the missing
+baseline.
+
+**Beware the near-miss.** `fix_eval_after.txt:31`, in the same commit, reads
+`sequence 7 of 12 match ( 58.3%)` — the synthetic *whole-sequence* match rate
+**after** the refuted idx0 edit. 7/12 is also 58.3%. That is **a different
+quantity**, and item 27 did **not** reproduce it: step 1a regenerated only the
+`before` state, the refuted edit never having been merged. The figure this item
+closes on is the `mature` phase hit rate in `fix_eval_before.txt`, not that one.
+
+**Weight of this number in the decision about problem E.** None. **The decision
+on the meaning of "mature" rests on Danilo's visual review of the 12 synthetic
+cases**, not on the 58.3%. That figure is historical supporting evidence and
+carries no weight in the decision — which is why proving its provenance settles
+the item rather than reopening a calibration question. See also the ruling
+recorded for the synthetic `incipient` ground truth: on the synthetics, the
+manual label wins.
+
+**Supporting record — the 1.7.3 API surface**, raised during the failed attempt
+and kept because it is independently useful. Wheel `cyclophaser-1.7.3-py3-none-any.whl`
+from PyPI, sha256 `73396776a00249f22e2a63e266e3b08b07d17ed1cd11f4ec4f83d26ae750038d`,
+unpacked outside the repository:
+
+- `get_periods(vorticity, plot=False, plot_steps=False, export_dict=False, periods_args=None)`
+  — five parameters, as the earlier forensics stated.
+- `determine_periods(series, x, plot, plot_steps, export_dict, process_vorticity_args, periods_args)`.
+- `default_args` holds only the seven threshold keys, and `periods_args` is
+  merged by `default_args.update(periods_args)` — **an unknown key is absorbed
+  silently, with no error**.
+- **`mature_method` does not appear in any file of the 1.7.3 package.**
+
+The consequence is worth stating because it generalises beyond this item: under
+1.7.3 `mature_method` is inert *either way* — as a named argument it raises
+`TypeError` and the run dies; through `periods_args` it is swallowed and never
+read. **No score difference can be attributed to `mature_method` under 1.7.3.**
+`research/snapshots/README.md` records the same absence for 1.9.4 and 2.0.0.
+
+**Status of the whole item: CLOSED.** Front A cleared by item 27; the "Front E"
+residue closed here. Nothing remains open under item 13.
+
+### Original text, kept as the historical record
+
+> Everything below is the item **as it was written on 2026-09-11**, preserved so
+> the reasoning that raised the risk is not lost. It is **superseded** by the two
+> closings above: where it says "Front E" is unidentified and nothing has been
+> checked, that was true when written and is no longer true. Read it as history,
+> not as status.
+
+**Status when opened: OPEN.** Flagged 2026-09-11, not yet checked. Item 12 established
 that, before its fix, `import cyclophaser` in conda env "lorenz" resolved to
 the non-editable, installed **1.7.3** package or to this repository depending
 on the launch directory (repo root → repo; elsewhere, e.g. `/tmp` → 1.7.3).
@@ -1122,7 +1223,11 @@ repository's code as of the commit that front used. This item exists so
 that risk is not lost, not as a verdict that either front's findings are
 wrong. For Front A that check has now been done and it came back clean
 (item 27); for "Front E" nothing has been checked, because the front has
-not been identified.
+not been identified. *(Superseded 2026-09-23: "Front E" was identified and
+closed by provenance — see "Closing of the 'Front E' residue" above. The
+launch directory was never recovered for either front, and did not need to
+be: item 27 settled Front A by reproduction, and the 58.3% by the same
+reproduction.)*
 
 ---
 
