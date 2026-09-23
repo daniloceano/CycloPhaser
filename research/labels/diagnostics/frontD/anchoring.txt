@@ -1,0 +1,64 @@
+============================================================================================
+STEP 2 — anchoring test on C1 only   (margin fixed at 6)
+============================================================================================
+
+20190397  (real)   L = N_det = 2   N_lab = 8   tolerance_idx = 1 (info only)
+  (a) |N_det - N_lab| = 6 <= 6 ?  PASS
+  (b) filtered-series global min at idx 38, max at idx 0
+       k  N_det_cut  abs_end  time?  edge?  removed chunk holds
+       1          1        2   True   True  global max
+  (b) reading: indistinguishable (both)
+  VERDICT: INCONCLUSIVE
+
+20191155  (real)   L = N_det = 1   N_lab = 0   tolerance_idx = 0 (info only)
+  (a) |N_det - N_lab| = 1 <= 6 ?  PASS
+  (b) not applicable: L = 1, no valid k
+  (b) reading: n/a (L=1)
+  VERDICT: INCONCLUSIVE
+
+s46657891  (synthetic)   L = N_det = 3   N_lab = 3   tolerance_idx = 1 (info only)
+  (a) |N_det - N_lab| = 0 <= 6 ?  PASS
+  (b) filtered-series global min at idx 32, max at idx 0
+       k  N_det_cut  abs_end  time?  edge?  removed chunk holds
+       1          2        3   True   True  global max
+       2          1        3   True  False  global max
+  (b) reading: time-anchored
+  VERDICT: REAL SHORT PHASE
+
+s6b1e8245  (synthetic)   L = N_det = 2   N_lab = 3   tolerance_idx = 1 (info only)
+  (a) |N_det - N_lab| = 1 <= 6 ?  PASS
+  (b) filtered-series global min at idx 40, max at idx 18
+       k  N_det_cut  abs_end  time?  edge?  removed chunk holds
+       1          1        2   True   True  neither extremum
+  (b) reading: indistinguishable (both)
+  VERDICT: INCONCLUSIVE
+
+s6b542eee  (synthetic)   L = N_det = 2   N_lab = 2   tolerance_idx = 1 (info only)
+  (a) |N_det - N_lab| = 0 <= 6 ?  PASS
+  (b) filtered-series global min at idx 48, max at idx 32
+       k  N_det_cut  abs_end  time?  edge?  removed chunk holds
+       1          1        2   True   True  neither extremum
+  (b) reading: indistinguishable (both)
+  VERDICT: INCONCLUSIVE
+
+sbceec644  (synthetic)   L = N_det = 2   N_lab = 3   tolerance_idx = 1 (info only)
+  (a) |N_det - N_lab| = 1 <= 6 ?  PASS
+  (b) filtered-series global min at idx 27, max at idx 0
+       k  N_det_cut  abs_end  time?  edge?  removed chunk holds
+       1          1        2   True   True  global max
+  (b) reading: indistinguishable (both)
+  VERDICT: INCONCLUSIVE
+
+scfcf1387  (synthetic)   L = N_det = 2   N_lab = 3   tolerance_idx = 1 (info only)
+  (a) |N_det - N_lab| = 1 <= 6 ?  PASS
+  (b) filtered-series global min at idx 33, max at idx 16
+       k  N_det_cut  abs_end  time?  edge?  removed chunk holds
+       1          1        2   True   True  neither extremum
+  (b) reading: indistinguishable (both)
+  VERDICT: INCONCLUSIVE
+
+REAL C1 verdicts: {'INCONCLUSIVE': 2}
+
+SYNTHETIC C1 verdicts: {'REAL SHORT PHASE': 1, 'INCONCLUSIVE': 4}
+
+wrote /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontD/anchoring.json

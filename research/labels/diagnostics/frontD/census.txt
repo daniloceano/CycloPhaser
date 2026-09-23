@@ -1,0 +1,74 @@
+config: cyclophaser_params-13.yaml
+process_vorticity kwargs: {'use_filter': True, 'cutoff_low': 168, 'cutoff_high': 18, 'replace_endpoints_with_lowpass': 0, 'use_smoothing': False, 'use_smoothing_twice': False, 'savgol_polynomial': 3, 'boundary_padding': 'edge'}
+get_periods kwargs: {'threshold_intensification_length': 0.075, 'threshold_intensification_gap': 0.075, 'threshold_mature_distance': 0.18, 'threshold_mature_length': 0.15, 'threshold_decay_length': 0.075, 'threshold_decay_gap': 0.075, 'threshold_incipient_length': 0.4, 'prominence_relative': 0.3, 'mature_amplitude_fraction': 0.9, 'mature_min_depth': 0.8, 'intensification_min_depth': 0.05, 'decay_tail_amplitude_fraction': 0.3, 'incipient_plateau_tau': 0.2, 'incipient_plateau_k': 5, 'incipient_smooth_window': 5.0, 'incipient_smooth_polyorder': 3.0, 'length_scale': 'local', 'mature_method': 'amplitude', 'incipient_method': 'plateau', 'incipient_plateau_signal': 'vorticity', 'incipient_plateau_crossing': 'sustained'}
+
+'short' floor = min(N_lab) over real train series with N_lab>0 = 4   (over 17 such series)
+
+====================================================================================
+CENSUS — TRAIN · REAL (35)
+====================================================================================
+id           src           n  N_det  N_lab kind        tol   |d|  defI  class
+20150069     real         66      0      0 none          0     0    no     C3
+20150436     real        112     20     16 boundary      4     4    no      —
+20150528     real         51      0      0 none          0     0    no     C3
+20150532     real        107      0      0 none          0     0    no     C3
+20150656     real        160      0      0 none          0     0    no     C3
+20160587     real         79      0     26 boundary      1    26    no     C2
+20160735     real        259      0     19 boundary      5    19    no     C2
+20170154     real        124      6      6 boundary      2     0    no      —
+20170342     real        146      0      0 none          0     0    no     C3
+20170409     real        169      6      6 boundary      2     0    no      —
+20170520     real         58      0      0 none          0     0    no     C3
+20170760     real         59      0    amb ambiguous     0     —    no      —
+20170794     real        224      0      0 none          0     0    no     C3
+20171179     real         62      0     11 boundary      1    11    no     C2
+20180170     real         69      8    amb ambiguous     1     —   yes      —
+20180263     real         57      0      0 none          0     0    no     C3
+20180300     real         59      0      0 none          0     0    no     C3
+20180608     real        117     38     37 boundary      1     1   yes      —
+20180628     real         94      0      9 boundary      1     9    no     C2
+20180733     real        257      0      0 none          0     0    no     C3
+20180759     real         88      4      4 boundary      1     0   yes      —
+20181046     real         30      0      9 boundary      1     9    no     C2
+20190325     real        167      9     10 boundary      1     1   yes      —
+20190397     real         56      2      8 boundary      1     6   yes     C1
+20190639     real        180     13     25 boundary      5    12    no      —
+20190870     real        129     10     12 boundary      2     2    no      —
+20190879     real         79      0      0 none          0     0    no     C3
+20191014     real        206      9      0 none          0     9   yes      —
+20191104     real        118      0      0 none          0     0    no     C3
+20191155     real         93      1      0 none          0     1    no     C1
+20201245     real         98      0      0 none          0     0    no     C3
+20202023     real         78      0     11 boundary      1    11    no     C2
+20203947     real        242     12     38 boundary      5    26    no      —
+20205386     real        100      4      5 boundary      1     1    no      —
+20207822     real        162      0      0 none          0     0    no     C3
+
+  C1 (short detected incipient)       2  ['20190397', '20191155']
+  C2 (N_det=0, N_lab>0: refusal)      6  ['20160587', '20160735', '20171179', '20180628', '20181046', '20202023']
+  C3 (N_det=0, N_lab=0: agreed)      14  ['20150069', '20150528', '20150532', '20150656', '20170342', '20170520', '20170794', '20180263', '20180300', '20180733', '20190879', '20191104', '20201245', '20207822']
+  neither                            13
+
+====================================================================================
+CENSUS — TRAIN · SYNTHETIC (12)
+====================================================================================
+id           src           n  N_det  N_lab kind        tol   |d|  defI  class
+s0596ea57    synthetic    66     10     14 boundary      3     4   n/a      —
+s46657891    synthetic    66      3      3 boundary      1     0    no     C1
+s4e7ff65c    synthetic    66      5      5 boundary      1     0   n/a      —
+s5b8aa46f    synthetic    66      0      0 none          0     0    no     C3
+s5dcc0f79    synthetic    66      5      4 boundary      1     1   n/a      —
+s6b1e8245    synthetic    66      2      3 boundary      1     1    no     C1
+s6b542eee    synthetic    66      2      2 boundary      1     0    no     C1
+s8001f17b    synthetic    66      0      0 none          0     0    no     C3
+s9ddbc53c    synthetic    66      4      3 boundary      1     1    no      —
+sbceec644    synthetic    66      2      3 boundary      1     1    no     C1
+sbd6c6920    synthetic    66      4      5 boundary      1     1    no      —
+scfcf1387    synthetic    66      2      3 boundary      1     1   yes     C1
+
+  C1 (short detected incipient)       5  ['s46657891', 's6b1e8245', 's6b542eee', 'sbceec644', 'scfcf1387']
+  C2 (N_det=0, N_lab>0: refusal)      0  []
+  C3 (N_det=0, N_lab=0: agreed)       2  ['s5b8aa46f', 's8001f17b']
+  neither                             5
+
+wrote /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontD/census.json

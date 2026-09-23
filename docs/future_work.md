@@ -2369,6 +2369,149 @@ figures for both series. `params-12` and
 
 ---
 
+## 25. Front D — stage 0 census, then closed with no mechanism — **closed, 2026-09-23**
+
+Branch `research/frontD-stage0-census`, from `develop-v2.1` @ `f901b76`. Nothing
+in `cyclophaser/` changed and no parameter moved; this stage only asks whether
+the short-incipient symptom that motivated front D exists in the **training**
+set. Full write-up, tables and figures:
+`research/labels/diagnostics/frontD/REPORT.md`.
+
+`params-13` verified against the declared sha256 `c1ab8ce0…6e483973`, and all 63
+frozen series (51 real + 12 synthetic) verified against the `series_sha256`
+recorded in `manual_labels.yaml` — 63/63 match. Measured in the dedicated
+`cyclophaser` conda environment against the working tree, not the installed
+2.0.0 wheel.
+
+**Census (train, params-13).** "Short" was defined before the cases were listed
+as `0 < N_det < min(N_lab)` over the real train series with a labelled incipient
+phase; that floor is **4**. Counts — real: **C1 = 2** (`20190397`, `20191155`),
+**C2 = 6** (`20160587`, `20160735`, `20171179`, `20180628`, `20181046`,
+`20202023`), **C3 = 14**; synthetic: **C1 = 5**, **C2 = 0**, **C3 = 2**. The
+symptom does exist in TRAIN, but among the reals the *refusal* (C2, 6/35) is
+three times as common as the short detection (C1, 2/35). Declared predictions
+**P1 (C1 ≥ 2) and P2 (C2 ≥ 2) both CORRECT**; P1 landed exactly on its boundary.
+
+**Step 2 verdicts: ARTEFACT 0, REAL SHORT PHASE 1, INCONCLUSIVE 6.** Two
+findings about the *instrument*, not the data, that any continuation must handle
+first:
+
+1. **The anchoring test cannot discriminate at `L = 2`**, and 5 of the 7 C1
+   series have `L = 2`. With only `k = 1` valid, `N_det_cut = 1` satisfies
+   "time-anchored" (`abs_end = 2 = L`, within ±1) and "edge-anchored"
+   (`|N_det_cut − L| = 1 ≤ 1`) *simultaneously, by arithmetic*. The only series
+   that discriminated, `s46657891`, did so because `L = 3` admits a second cut.
+2. **`ARTEFACT` was unreachable on TRAIN**: it requires criterion (a) to fail,
+   and all 7 C1 series passed (a). Zero artefacts means "no short detection is
+   also far from its label", not "the anchoring test cleared them".
+
+Also recorded: on `20191155` the label says there is **no** incipient phase
+(`N_lab = 0`) and the detector produced one of length 1, which the frozen rule
+scores as a 1-step timing error rather than as the refusal-type disagreement it
+is. Not adjusted — the rule was frozen before measurement.
+
+**Divergence from the commissioning brief.** The brief asked for
+`evaluate_against_labels.py`'s output "including the constant baseline line".
+**That script computes no baseline of any kind** (verified by reading it and by
+`grep -i baseline` at `f901b76`); the "constant modal-sequence baseline" of item
+19 is a different quantity, about the phase *sequence*, from that front's own
+diagnostics. The evaluator was run unmodified and its output attached verbatim;
+the constant baseline was computed separately in
+`research/labels/diagnostics/frontD/constant_baseline.py` and is attributed to
+that file. On train it gives best-constant 10 → 6/17 (real) and 4 → 12/27 (all),
+against the detector's 8/17 and 17/27 — the detector beats it on every split.
+
+**Exposure on the record:** `20160030` — exposição visual da saída do detector
+sob `params-13` (ausência de incipient), por Danilo, set/2026, durante a abertura
+da frente D. Nenhuma medição.
+
+Stage 0 proposes no mechanism and no parameter change, by instruction. Open
+items handed forward are listed in §9 of the front's REPORT.md. `20150646`, the
+case that motivated front D, is in the TEST split and was not read.
+
+### Closing — later reading and corrections (2026-09-23)
+
+Stage 0's execution was verified independently by the technical lead: evaluator
+and constant-baseline outputs reproduced identically; `census.json` differed only
+by floating-point noise in the 15th–16th digit of `d_filt_t0`, with no change of
+sign or of any count. **The execution is correct; the defect is in the DESIGN of
+the step-2 criterion, which came from the brief.** Nothing measured was revised —
+the corrections below sit *alongside* the original numbers and verdicts. Full
+text: §10 of `research/labels/diagnostics/frontD/REPORT.md`.
+
+**1. ARTEFACT was unreachable BY CONSTRUCTION, not merely "on TRAIN".** By
+arithmetic, with no reference to the data: "short" means `N_det ∈ {1,2,3}`, the
+hypothesis is `N_lab = 0`, so `|N_det − N_lab| ≤ 3 < 6` and criterion (a) *always
+passes*. ARTEFACT required (a) to **fail**, i.e. `N_lab ≥ N_det + 7` — a label
+whose incipient phase is at least 7 steps **longer** than the detection, the
+opposite of the hypothesis. The fixed margin (6) exceeds the "short" floor (4),
+making the two criteria mutually exclusive on the population the test selects.
+**Had `20150646` been spent directly on this test, the verdict would have been
+INCONCLUSIVE or REAL SHORT PHASE regardless of the truth.** It was not spent.
+
+**2. The anchoring test (b) discriminates only at `L = 3`.** With `k < L` and ±1
+tolerances: `L = 1` has no valid `k`; `L = 2` collapses both hypotheses onto the
+single `k = 1` observation; only `L = 3`, via `k = 2`, discriminates — and since
+"short" caps `L` at 3, that is the only discriminating case in the whole
+population. The sole REAL SHORT PHASE verdict (`s46657891`) is **weak**: its
+filtered series' global maximum sits at index 0, so *both* cuts removed it,
+changing the normalisation every relative threshold is measured against.
+
+**3. Attribution.** The step-2 defect — margin 6 above the "short" floor 4, and
+`k < L` with ±1 — is in the **brief's design, written by the technical lead**;
+the execution followed the frozen rule correctly. The premise that
+`evaluate_against_labels.py` already carried a constant baseline was likewise an
+error of the brief.
+
+**4. `20191155` reclassified on later reading.** The original row stands
+(`N_det=1`, `N_lab=0`, `|Δ|=1`, C1, INCONCLUSIVE). It is a **categorical**
+disagreement — detector has an incipient, label says the series has none — not a
+1-step timing error. The evaluator already counts it that way; only the brief's
+criterion (a) subtracted the two as if phase existence and phase end were one
+quantity.
+
+**5. The 2×2 of the real TRAIN series** (2 ambiguous labels excluded; 33 remain;
+counts verified against `census.json`):
+
+| | label HAS incipient | label has NO incipient |
+|---|---:|---:|
+| detector HAS incipient | 11 | **2** — `20191155` (L=1), `20191014` (L=9) |
+| detector has NO incipient | **6** (refusal) | 14 |
+
+Symptom D proper — a *short* incipient where the label has none — is **1 real
+series** (`20191155`). `20191014` is an incipient where the label has none but is
+**not short** (L=9), already a front-A bad case. `20190397`, the other C1, is a
+**different** symptom: the label's incipient runs to 8 and the detector closes it
+at 2 — ending too early, not existing spuriously. **The dominant incipient
+failure in TRAIN is refusal: 6 of the 17** real series whose label has one.
+
+**6. Predictions, unadjusted.** P1 stays **correct** (`C1 = 2` under the frozen
+definition), with the note that C1 mixed two symptoms and symptom D proper has 1
+real series. P2 stays **correct** (`C2 = 6`). The prediction "`20150646` will
+give ARTEFACT" is recorded as **DECLARED, NO VALID TEST** — the criterion could
+not produce ARTEFACT for any input — and counts as neither hit nor miss.
+
+**7. Closing state.** Front D is **closed with no mechanism and no parameter
+change**. `20150646` was **not measured and not spent**: the test split still
+holds 16 series, of which only `20180654` has been spent (front C). The
+artefact-vs-real-phase criterion was **not redesigned** — the training population
+does not justify it, symptom D proper being one real series at `L = 1`, where the
+anchoring test has no valid cut at all.
+
+**8. Proposed to orchestration — proposals only, no work opened.**
+
+* **(a) A new front on incipient refusal**: 6 of 17 real train series
+  (`20160587`, `20160735`, `20171179`, `20180628`, `20181046`, `20202023`). The
+  training population suffices without touching the test split; `20160030`
+  (test) stays out.
+* **(b) Make the constant baseline a standing output of
+  `evaluate_against_labels.py`** — it exists today only in
+  `research/labels/diagnostics/frontD/constant_baseline.py`.
+* **(c) Repository hygiene**: the committed `.txt` outputs embed absolute local
+  paths (`/Users/…`) in a public repository.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
