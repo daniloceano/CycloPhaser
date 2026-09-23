@@ -2512,7 +2512,7 @@ anchoring test has no valid cut at all.
 
 ---
 
-## 26. Front "incipient refusal" — stage 1 diagnosis: one path, no separable threshold — **closed, diagnostic only, no parameter change, 2026-09-23** (merge `MERGE_HASH_PENDING`)
+## 26. Front "incipient refusal" — stage 1 diagnosis: one path, no separable threshold — **closed, diagnostic only, no parameter change, 2026-09-23** (merge `1287aa2`)
 
 Branch `research/incipient-refusal-stage1`, from `develop-v2.1` @ `559dd64`.
 Nothing in `cyclophaser/` or `tests/` was touched and no parameter moved. The
@@ -2625,6 +2625,12 @@ M3 series from the 14 agreed-nones, which on the decisive statistic are
 indistinguishable. Never a search over values, and never a loosened gate. The
 two M2 series recoverable at no cost (τ ∈ (0.2178, 0.2312], which spares all 14)
 yield at most **+1** within tolerance — below G1 — and are not pursued.
+
+Merged into `develop-v2.1` as `1287aa2` (`--no-ff`, no PR, authorised by Danilo)
+on 2026-09-23. Suite after the merge, in the dedicated `cyclophaser` conda
+environment against the working tree (`sys.prefix` = the env,
+`cyclophaser.__file__` = this repo): **1230 passed, 0 failed**, under
+`-m "not browser"` — the browser module is not run, per `CLAUDE.md`.
 
 ---
 
