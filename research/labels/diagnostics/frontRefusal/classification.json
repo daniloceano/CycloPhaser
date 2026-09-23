@@ -1,0 +1,60 @@
+{
+  "defect_I_train": [
+    "20180170",
+    "20180608",
+    "20180759",
+    "20190325",
+    "20190397",
+    "20191014"
+  ],
+  "intersection_with_six": [],
+  "per_series": {
+    "20160587": {
+      "margin": 0.03834455279457791,
+      "M1": false,
+      "M2": true,
+      "M3": false,
+      "cause": "M2"
+    },
+    "20160735": {
+      "margin": 1.3057000885150578,
+      "M1": false,
+      "M2": false,
+      "M3": true,
+      "cause": "M3"
+    },
+    "20171179": {
+      "margin": 0.0891964019110196,
+      "M1": false,
+      "M2": true,
+      "M3": false,
+      "cause": "M2"
+    },
+    "20180628": {
+      "margin": 1.0634652801213214,
+      "M1": false,
+      "M2": false,
+      "M3": true,
+      "cause": "M3"
+    },
+    "20181046": {
+      "margin": 1.2481725157693615,
+      "M1": false,
+      "M2": false,
+      "M3": true,
+      "cause": "M3"
+    },
+    "20202023": {
+      "margin": 0.4383160641536696,
+      "M1": false,
+      "M2": false,
+      "M3": true,
+      "cause": "M3"
+    }
+  },
+  "counts": {
+    "M2": 2,
+    "M3": 4
+  },
+  "verdict": "COMUM"
+}

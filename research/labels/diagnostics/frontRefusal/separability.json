@@ -1,0 +1,8 @@
+{
+  "need_i_tau_gt": 0.2876632128307339,
+  "keep_tn_tau_le": 0.23122948834987417,
+  "keep_tp_tau_gt": 0.17708032119920925,
+  "range_exists": false,
+  "refusals_recoverable_before_first_TN_flips": 2,
+  "recovered_within_tolerance_if_all_recovered": 2
+}

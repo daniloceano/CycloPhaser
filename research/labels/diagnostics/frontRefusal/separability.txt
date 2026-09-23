@@ -1,0 +1,115 @@
+re-derivation check: boundary_at(tau=0.2) reproduces the stored boundary on 35/35 series
+
+==============================================================================
+The decisive statistic per group — head_min = min(rel[0:k]), k=5
+refused  <=>  head_min >= tau   (tau = 0.2 in params-13)
+==============================================================================
+
+  REFUSAL (6):
+    20160587  head_min = 0.207669   rel(tau) margin = +0.0383
+    20171179  head_min = 0.217839   rel(tau) margin = +0.0892
+    20202023  head_min = 0.287663   rel(tau) margin = +0.4383
+    20180628  head_min = 0.412693   rel(tau) margin = +1.0635
+    20181046  head_min = 0.449635   rel(tau) margin = +1.2482
+    20160735  head_min = 0.461140   rel(tau) margin = +1.3057
+
+  TN (14):
+    20180263  head_min = 0.231229   rel(tau) margin = +0.1561
+    20170794  head_min = 0.247438   rel(tau) margin = +0.2372
+    20150656  head_min = 0.249824   rel(tau) margin = +0.2491
+    20150528  head_min = 0.250195   rel(tau) margin = +0.2510
+    20170520  head_min = 0.339388   rel(tau) margin = +0.6969
+    20191104  head_min = 0.342176   rel(tau) margin = +0.7109
+    20150069  head_min = 0.368554   rel(tau) margin = +0.8428
+    20150532  head_min = 0.483727   rel(tau) margin = +1.4186
+    20190879  head_min = 0.488685   rel(tau) margin = +1.4434
+    20201245  head_min = 0.534281   rel(tau) margin = +1.6714
+    20207822  head_min = 0.556185   rel(tau) margin = +1.7809
+    20180733  head_min = 0.613920   rel(tau) margin = +2.0696
+    20170342  head_min = 0.659159   rel(tau) margin = +2.2958
+    20180300  head_min = 0.716760   rel(tau) margin = +2.5838
+
+  TP (11):
+    20150436  head_min = 0.024887   rel(tau) margin = -0.8756
+    20190397  head_min = 0.030304   rel(tau) margin = -0.8485
+    20190870  head_min = 0.034314   rel(tau) margin = -0.8284
+    20190325  head_min = 0.037687   rel(tau) margin = -0.8116
+    20170154  head_min = 0.067682   rel(tau) margin = -0.6616
+    20180608  head_min = 0.069311   rel(tau) margin = -0.6534
+    20180759  head_min = 0.092007   rel(tau) margin = -0.5400
+    20205386  head_min = 0.096385   rel(tau) margin = -0.5181
+    20170409  head_min = 0.097995   rel(tau) margin = -0.5100
+    20190639  head_min = 0.175235   rel(tau) margin = -0.1238
+    20203947  head_min = 0.177080   rel(tau) margin = -0.1146
+
+  FP (2):
+    20191014  head_min = 0.022490   rel(tau) margin = -0.8875
+    20191155  head_min = 0.169169   rel(tau) margin = -0.1542
+
+  AMB (2):
+    20180170  head_min = 0.160852   rel(tau) margin = -0.1957
+    20170760  head_min = 0.458137   rel(tau) margin = +1.2907
+
+==============================================================================
+SEPARABILITY — the three conditions, as inequalities on tau
+==============================================================================
+  raising tau shortens the 'above' mask, breaks the run at 0 and so
+  CREATES an incipient phase; lowering tau removes one.
+
+  (i)  >=3 of the 6 recovered  needs tau >  0.287663  (3rd smallest refusal head_min)
+  (ii) all 14 TN still refused needs tau <= 0.231229  (smallest TN head_min, 20180263)
+  (iii) no TP becomes refused  needs tau >  0.177080  (largest TP head_min, 20203947)
+
+  (i) AND (iii):  tau > 0.287663
+  (ii):           tau <= 0.231229
+
+  VERDICT: NO RANGE EXISTS
+  blocked by these TN series, whose head_min sits BELOW the tau needed for (i) (0.287663):
+    20180263  head_min = 0.231229
+    20170794  head_min = 0.247438
+    20150656  head_min = 0.249824
+    20150528  head_min = 0.250195
+
+==============================================================================
+How far a tau move gets before it costs a TN — the interleaving
+==============================================================================
+    head_min  group     id      (ascending: tau must EXCEED this to flip the series)
+    0.207669  REFUSAL   20160587
+    0.217839  REFUSAL   20171179
+    0.231229  TN        20180263
+    0.247438  TN        20170794
+    0.249824  TN        20150656
+    0.250195  TN        20150528
+    0.287663  REFUSAL   20202023
+    0.339388  TN        20170520
+    0.342176  TN        20191104
+    0.368554  TN        20150069
+    0.412693  REFUSAL   20180628
+    0.449635  REFUSAL   20181046
+    0.461140  REFUSAL   20160735
+    0.483727  TN        20150532
+    0.488685  TN        20190879
+    0.534281  TN        20201245
+    0.556185  TN        20207822
+    0.613920  TN        20180733
+    0.659159  TN        20170342
+    0.716760  TN        20180300
+
+  refusals recoverable before the first TN flips: 2 of 6
+
+==============================================================================
+IF a tau existed — would the recovered series land within tolerance?
+This IS calculable without the detector, for the reason in the module docstring.
+==============================================================================
+  id           N_lab  tol  min tau to recover  N_det at that tau  |err|  within tol
+  20160587        26    1            0.207669                  5     21          no
+  20171179        11    1            0.217839                 11      0         yes
+  20202023        11    1            0.287663                 42     31          no
+  20180628         9    1            0.412693                  1      8          no
+  20181046         9    1            0.449635                  9      0         yes
+  20160735        19    5            0.461140                  1     18          no
+
+  even ignoring (ii) and (iii) entirely — i.e. recovering ALL SIX at its own
+  minimum tau — 2 of 6 would land within its label's tolerance.
+
+wrote research/labels/diagnostics/frontRefusal/separability.json

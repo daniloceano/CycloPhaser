@@ -2512,6 +2512,74 @@ anchoring test has no valid cut at all.
 
 ---
 
+## 26. Front "incipient refusal" — stage 1 diagnosis: one path, no separable threshold — **closed, diagnostic only, 2026-09-23**
+
+Branch `research/incipient-refusal-stage1`, from `develop-v2.1` @ `559dd64`.
+Nothing in `cyclophaser/` or `tests/` was touched and no parameter moved. The
+TEST split was never loaded (enforced in code, not asserted). Full write-up,
+tables and six figures: `research/labels/diagnostics/frontRefusal/REPORT.md`.
+
+Commissioned from item 25's proposal 8(a): under `incipient_method="plateau"`
+and `params-13` (sha256 `c1ab8ce0…6e483973`), the detector produces no
+`incipient` phase on 6 of the 17 real TRAIN series whose label says there is one
+— `20160587`, `20160735`, `20171179`, `20180628`, `20181046`, `20202023`. The
+2×2 (11 / 2 / 6 / 14) and the 8/17 boundary rate were reproduced before anything
+else was measured. The tolerance `evaluate_against_labels.py` applies is the
+**per-label `tolerance_idx`** (`research/labels/labels_core.py:692`), not the
+fixed 6 of the synthetic pytest timing test — two different instruments.
+
+**One refusal path.** Four exist in the code (R1 run-starts-at-0
+`find_stages.py:1035`; R2 no-run-anywhere `:1030–1035`; R3 `k > n` `:1025–1028`;
+R4 flat probe `:986–988`). **All 6 refusals and all 14 agreed-nones are R1**;
+R2–R4 fire on nothing in the real TRAIN split. A fifth site, the unconditional
+`fillna('incipient')` at `find_stages.py:1102`, is **inert here** — the leading
+NaN run is 0 on all 35 real TRAIN series — so the plateau boundary *is* the
+detector's leading-incipient count. Both facts are asserted per series by a
+replay checked against `get_periods`, and re-derived independently in
+`separability.py` (35/35).
+
+**Cause: COMUM, M3 = 4/6** (genuine disagreement), M2 = 2 (near miss, `20160587`
+at 3.8% and `20171179` at 8.9% relative margin), **M1 = 0**, M4 = 0.
+
+**Defect I (item 8(d)) is not the mechanism.** Re-measured over the 35 real
+TRAIN series: 6 members (`20180170`, `20180608`, `20180759`, `20190325`,
+`20190397`, `20191014`) — the 7th of the published 7/51 is in TEST and was not
+read, which does not weaken the result because every refusal is a TRAIN series.
+**Intersection with the 6 refusals: empty.** Every defect-I member on TRAIN is a
+series the detector *did* label. The edge-artefact hypothesis for refusal should
+be retired unless re-opened with new evidence.
+
+**Separability: none.** With R1 the only path, the decision reduces to
+`head_min = min(rel[0:k]) >= tau`, in which `tau` is the only knob. Recovering
+≥3 of the 6 needs `tau > 0.287663`; sparing all 14 agreed-nones needs
+`tau <= 0.231229`. Four TN series lie between them (`20180263`, `20170794`,
+`20150656`, `20150528`) — the two populations **interleave** on the decisive
+statistic. At most 2 of 6 recover before the first TN flips.
+
+**Stage 2's own gate G1 is unreachable by a `tau` move, and this is known before
+stage 2 runs.** Ignoring the sparing conditions entirely and recovering all six
+at each one's minimum `tau`, only **2 of 6** would land inside its label's
+tolerance (`20171179`, `20181046`); the others overshoot badly (`20202023`
+N_det 42 against a label of 11; `20160735` and `20180628` collapse to 1).
+
+**Predictions scored: P1 WRONG** (verdict COMUM, not PARCIAL/HETEROGÊNEO),
+**P2 WRONG** (defect-I intersection empty), **P3 CORRECT** (no separable
+threshold). Two of three were wrong in the same direction — the refusals were
+expected to be edge artefacts or near misses and are mostly neither.
+
+**Unmeasured, and the obvious next question:** `incipient_plateau_k`, the probe
+smoothing (`incipient_smooth_window`/`_polyorder`) and
+`incipient_plateau_signal` were all held at their `params-13` values. The
+arithmetic above holds only at k = 5, window 5, signal `vorticity`, crossing
+`sustained`. Whether any of those separates the populations is not known.
+
+Also noted: item 25's proposal 8(c) (committed `.txt` outputs embedding absolute
+`/Users/…` paths) was honoured for this front's own outputs — its three scripts
+print repo-relative paths — but the pre-existing files under
+`research/labels/diagnostics/` were left alone; that clean-up is still open.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

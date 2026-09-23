@@ -1,0 +1,61 @@
+config: research/labels/configs/cyclophaser_params-13.yaml
+config sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+process_vorticity kwargs: {'use_filter': True, 'cutoff_low': 168, 'cutoff_high': 18, 'replace_endpoints_with_lowpass': 0, 'use_smoothing': False, 'use_smoothing_twice': False, 'savgol_polynomial': 3, 'boundary_padding': 'edge'}
+get_periods kwargs: {'threshold_intensification_length': 0.075, 'threshold_intensification_gap': 0.075, 'threshold_mature_distance': 0.18, 'threshold_mature_length': 0.15, 'threshold_decay_length': 0.075, 'threshold_decay_gap': 0.075, 'threshold_incipient_length': 0.4, 'prominence_relative': 0.3, 'mature_amplitude_fraction': 0.9, 'mature_min_depth': 0.8, 'intensification_min_depth': 0.05, 'decay_tail_amplitude_fraction': 0.3, 'incipient_plateau_tau': 0.2, 'incipient_plateau_k': 5, 'incipient_smooth_window': 5.0, 'incipient_smooth_polyorder': 3.0, 'length_scale': 'local', 'mature_method': 'amplitude', 'incipient_method': 'plateau', 'incipient_plateau_signal': 'vorticity', 'incipient_plateau_crossing': 'sustained'}
+
+series_sha256 verified: 47/47 train labels match
+
+replay verified against get_periods on all 35 real train series
+
+================================================================================================
+2x2 on the 33 non-ambiguous real TRAIN series (+ 2 ambiguous)
+================================================================================================
+  TP        11  ['20150436', '20170154', '20170409', '20180608', '20180759', '20190325', '20190397', '20190639', '20190870', '20203947', '20205386']
+  FP         2  ['20191014', '20191155']
+  REFUSAL    6  ['20160587', '20160735', '20171179', '20180628', '20181046', '20202023']
+  TN        14  ['20150069', '20150528', '20150532', '20150656', '20170342', '20170520', '20170794', '20180263', '20180300', '20180733', '20190879', '20191104', '20201245', '20207822']
+  AMB        2  ['20170760', '20180170']
+
+  refusal set matches front D's C2 exactly: ['20160587', '20160735', '20171179', '20180628', '20181046', '20202023']
+
+========================================================================================================================
+PER-SERIES — real TRAIN, params-13
+========================================================================================================================
+id          cell        n  N_det  N_lab  tol   R  bnd  head_min  best_run p_in[0]          lead_nan  defI
+20160587    REFUSAL    79      0     26    1  R1    0  0.207669  0.576173 intensification         0    no
+20160735    REFUSAL   259      0     19    5  R1    0  0.461140  0.753072 intensification         0    no
+20171179    REFUSAL    62      0     11    1  R1    0  0.217839  0.453862 intensification         0    no
+20180628    REFUSAL    94      0      9    1  R1    0  0.412693  0.724685 intensification         0    no
+20181046    REFUSAL    30      0      9    1  R1    0  0.449635  0.758585 intensification         0    no
+20202023    REFUSAL    78      0     11    1  R1    0  0.287663  0.719437 intensification         0    no
+20150069    TN         66      0      0    0  R1    0  0.368554  0.544147 intensification         0    no
+20150436    TP        112     20     16    4   -   20  0.024887  0.750902 intensification         0    no
+20150528    TN         51      0      0    0  R1    0  0.250195  0.819342 intensification         0    no
+20150532    TN        107      0      0    0  R1    0  0.483727  0.483727 intensification         0    no
+20150656    TN        160      0      0    0  R1    0  0.249824  0.720836 intensification         0    no
+20170154    TP        124      6      6    2   -    6  0.067682  0.712859 intensification         0    no
+20170342    TN        146      0      0    0  R1    0  0.659159  0.659159 intensification         0    no
+20170409    TP        169      6      6    2   -    6  0.097995  0.680292 intensification         0    no
+20170520    TN         58      0      0    0  R1    0  0.339388  0.768808 intensification         0    no
+20170760    AMB        59      0    amb    0  R1    0  0.458137  0.603016 intensification         0    no
+20170794    TN        224      0      0    0  R1    0  0.247438  0.712051 intensification         0    no
+20180170    AMB        69      8    amb    1   -    8  0.160852  0.657361 decay                   0   yes
+20180263    TN         57      0      0    0  R1    0  0.231229  0.613010 intensification         0    no
+20180300    TN         59      0      0    0  R1    0  0.716760  0.716760 intensification         0    no
+20180608    TP        117     38     37    1   -   38  0.069311  0.749238 decay                   0   yes
+20180733    TN        257      0      0    0  R1    0  0.613920  0.792810 intensification         0    no
+20180759    TP         88      4      4    1   -    4  0.092007  0.545307 intensification         0   yes
+20190325    TP        167      9     10    1   -    9  0.037687  0.576606 decay                   0   yes
+20190397    TP         56      2      8    1   -    2  0.030304  0.738085 intensification         0   yes
+20190639    TP        180     13     25    5   -   13  0.175235  0.838509 intensification         0    no
+20190870    TP        129     10     12    2   -   10  0.034314  0.679774 intensification         0    no
+20190879    TN         79      0      0    0  R1    0  0.488685  0.803060 intensification         0    no
+20191014    FP        206      9      0    0   -    9  0.022490  0.607744 decay                   0   yes
+20191104    TN        118      0      0    0  R1    0  0.342176  0.596480 intensification         0    no
+20191155    FP         93      1      0    0   -    1  0.169169  0.607480 intensification         0    no
+20201245    TN         98      0      0    0  R1    0  0.534281  0.584357 intensification         0    no
+20203947    TP        242     12     38    5   -   12  0.177080  0.457245 intensification         0    no
+20205386    TP        100      4      5    1   -    4  0.096385  0.522734 intensification         0    no
+20207822    TN        162      0      0    0  R1    0  0.556185  0.605851 intensification         0    no
+
+wrote research/labels/diagnostics/frontRefusal/refusal.json
