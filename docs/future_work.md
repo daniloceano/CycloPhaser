@@ -2915,6 +2915,67 @@ items 5 and 12.
 
 ---
 
+## 28. Calibration app — the Inspector tab rejected the two depth parameters — **fixed, 2026-09-23**
+
+Reported from the app: loading any cyclone (`20180170` in the report) and opening
+**Inspector** raised
+
+```
+KeyError: not stage-detection parameters: ['intensification_min_depth', 'mature_min_depth']
+```
+
+### Cause
+
+`tools/calibration_app/layer_inspector.py` keeps `_ARGS_PERIODS_DEFAULTS`, a
+transcription of the `args_periods` dict `get_periods` hands to the six stage
+functions, and `build_args_periods` **rejects** any key not in it — deliberately,
+because a typo'd threshold falling back to a default would make the ribbon and
+the ledgers explain a different run from the one on screen.
+
+`mature_min_depth` (front 20(b), item 22) and `intensification_min_depth`
+(front C, item 24) were added to `get_periods`, to `find_mature_stage` /
+`find_intensification_period`, and to the app's sidebar — but not to this dict.
+The Inspector tab forwards the whole sidebar `_PHASE_PARAMS` bundle into
+`build_args_periods`, so the guard fired on every track. Nothing in the
+detection path was affected: the failure is confined to the inspector view, and
+the two parameters were reaching the detector correctly all along.
+
+The sidebar-coverage test (`tests/test_sidebar_coverage.py`) reads the package
+signature and so caught neither omission — it pins that a *widget* exists, not
+that the inspector accepts what the widget produces.
+
+### Fix
+
+Both keys added to `_ARGS_PERIODS_DEFAULTS` at the package default `0.0`, in
+`get_periods`' own order.
+
+Two guards added to `tests/test_layer_inspector.py`, both verified to FAIL
+against the unfixed dict:
+
+* `test_args_periods_defaults_are_the_package_signature` — the dict must equal
+  `inspect.signature(get_periods)` minus the six non-stage parameters
+  (`vorticity`, the three output switches, the two prominence filters), values
+  included. A future phase parameter now fails at one obvious line instead of
+  in the app.
+* `test_build_args_periods_accepts_every_phase_param_the_app_forwards` — the
+  handoff that actually broke: the keyword names are read out of app.py's
+  `_PHASE_PARAMS` with `ast` (importing the module would execute Streamlit
+  calls) and each must be accepted.
+
+### Verification
+
+`20180170` under **params-13** — the configuration that sets both floors
+non-zero (`mature_min_depth: 0.8`, `intensification_min_depth: 0.05`) — runs the
+full Inspector computation (working frame, ribbon, both ledgers, mature ledger),
+and ribbon step 6 still equals `get_periods`' own `periods` column. That is the
+load-bearing check: it shows the two values are reaching the stage functions,
+not merely that the `KeyError` is gone.
+
+Suite on the fix branch, dedicated `cyclophaser` env, `-m "not browser"`:
+**1232 passed, 0 failed.**
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

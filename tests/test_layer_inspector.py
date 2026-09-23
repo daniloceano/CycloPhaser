@@ -31,7 +31,9 @@ entirely fidelity tests against the package itself:
    an addition, not a change.
 """
 
+import ast
 import hashlib
+import inspect
 import io
 import sys
 import warnings
@@ -487,6 +489,62 @@ def test_build_args_periods_rejects_a_non_parameter():
     ribbon and the ledgers explain a different run from the one on screen."""
     with pytest.raises(KeyError):
         li.build_args_periods(threshold_intensification_lenght=0.075)
+
+
+# Everything get_periods takes that is NOT forwarded to the stage functions in
+# its args_periods dict: the input itself, the three output switches, and the
+# two prominence filters (which build_working_frame consumes instead).
+_NOT_STAGE_PARAMS = {"vorticity", "plot", "plot_steps", "export_dict",
+                     "prominence", "prominence_relative"}
+
+
+def test_args_periods_defaults_are_the_package_signature():
+    """_ARGS_PERIODS_DEFAULTS must carry EVERY stage parameter get_periods has,
+    at the package's own default.
+
+    This is the drift the dict exists to prevent, and it drifted anyway: the
+    phase parameters ``mature_min_depth`` and ``intensification_min_depth``
+    were added to the package (and to the app's sidebar) without being added
+    here, so the app's Inspector tab raised ``KeyError: not stage-detection
+    parameters`` for every track as soon as either slider was declared. Reading
+    the expected set off ``inspect.signature`` rather than restating it means a
+    future parameter fails here, at one obvious line, instead of in the app.
+    """
+    expected = {name: param.default
+                for name, param in inspect.signature(get_periods).parameters.items()
+                if name not in _NOT_STAGE_PARAMS}
+    assert li._ARGS_PERIODS_DEFAULTS == expected
+
+
+def test_build_args_periods_accepts_every_phase_param_the_app_forwards():
+    """Pin the handoff that actually broke, not only the dict.
+
+    The Inspector tab builds ``_PHASE_PARAMS`` from the sidebar and forwards it
+    — minus the two prominence filters, which are a working-frame concern —
+    into ``build_args_periods``. So every key of that dict must be accepted
+    here. The names are read out of app.py's source with ``ast`` because
+    importing the module executes Streamlit calls at import time.
+    """
+    src = (REPO_ROOT / "tools" / "calibration_app" / "app.py").read_text()
+    tree = ast.parse(src)
+    forwarded = None
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Assign)
+                and any(getattr(t, "id", None) == "_PHASE_PARAMS" for t in node.targets)
+                and isinstance(node.value, ast.Call)):
+            forwarded = [kw.arg for kw in node.value.keywords if kw.arg]
+    assert forwarded, "app.py no longer builds _PHASE_PARAMS as dict(...)"
+
+    # The exclusion the Inspector tab itself applies, restated here.
+    forwarded = [k for k in forwarded
+                 if k not in ("prominence", "prominence_relative")]
+    assert "mature_min_depth" in forwarded
+    assert "intensification_min_depth" in forwarded
+
+    args = li.build_args_periods(**{k: li._ARGS_PERIODS_DEFAULTS[k]
+                                    for k in forwarded
+                                    if k in li._ARGS_PERIODS_DEFAULTS})
+    assert set(forwarded) - set(args) == set()
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -143,6 +143,8 @@ _ARGS_PERIODS_DEFAULTS = {
     "length_scale": "global",
     "mature_method": "derivative",
     "mature_amplitude_fraction": 0.90,
+    "mature_min_depth": 0.0,
+    "intensification_min_depth": 0.0,
     "decay_tail_amplitude_fraction": None,
     "incipient_method": "geometric",
     "incipient_plateau_tau": 0.20,
