@@ -52,10 +52,62 @@ threshold problem.**
 - The one real track where forcing index 0 to `peak` *does* buy a sequence
   match (`20180170`) is exactly one C2 does **not** fire on.
 - The `peak->valley` branch, predicted dead, fires on one train track
-  (`20190639`) and **breaks** it: a series that currently matches its label
-  sequence acquires a spurious opening `decay`.
+  (`20190639`): the sequence gains a `decay` block over `[13, 26)` and stops
+  matching the label. **The maintainer ruled this change acceptable on
+  2026-09-23** — see "Maintainer ruling" below — so it is a reclassification,
+  not a loss.
 
-Net effect of C2 at params-13 on the train split: **0 gained, 1 lost.**
+Net effect of C2 at params-13 on the train split, after that ruling: **0 gained
+by the sequence metric, 0 lost.** C2 is harmless and does not reach the case
+that motivated the front.
+
+---
+
+## Maintainer ruling — `20190639` (2026-09-23)
+
+Danilo inspected the figure and **accepted C2's change on this track**: with the
+`decay` arriving after the `incipient`, the opening was ambiguous, and the new
+reading is a reclassification rather than a regression.
+
+What the change actually is:
+
+| | blocks |
+|---|---|
+| label | `incipient[0,25)` `intensification[25,81)` `mature[81,106)` `decay[106,180)` |
+| base | `incipient[0,13)` `intensification[13,88)` `mature[88,105)` `decay[105,180)` |
+| C2 | `incipient[0,13)` **`decay[13,26)`** `intensification[26,88)` `mature[88,105)` `decay[105,180)` |
+
+`mature` and the final `decay` do not move. The `intensification` start moves
+from **13 (error 12, outside the label's ±5)** to **26 (error 1, inside it)**.
+What C2 adds is a 13-step `decay` over `[13, 26)`, a stretch where the vorticity
+does weaken before the real deepening and which the label calls `incipient`.
+H's `boundary` is 13 with and without C2, so H covers `[0, 13)` and leaves
+`[13, 26)` exposed.
+
+**Mechanism, and why this firing is not about index 0 at all.** The z candidates
+before the prominence filter are `peak@0`, `valley@9`, `peak@25`; under
+`prominence_relative = 0.3` the `valley@9` is removed, leaving two consecutive
+peaks. So on this track C2's `peak->valley` branch keys on *a valley the
+prominence filter deleted*, not on a mistyped index 0. Measured, not inferred
+(`fig_20190639.py`).
+
+### Two consequences
+
+1. **The verdict on the rule does not change.** C2 still converts 0 of its
+   `valley->peak` firings into a match and still misses `20180170`, the one
+   track where the correction is worth a sequence match. The ruling removes the
+   loss, not the absence of a gain.
+2. **The sequence metric will keep calling this track a mismatch.**
+   `manual_labels.yaml` says `incipient[0,25)`, and `score_phase_sequences`
+   refuses to pair any boundary once an extra phase appears — so any future gate
+   scoring C2 (or C1, if it moves this track the same way) reads `20190639` as a
+   loss, against the maintainer's own judgement. Either the label is revisited
+   or a gate on this front must state that this track is scored against a label
+   the maintainer has superseded. **`manual_labels.yaml` was not touched** — it
+   is the maintainer's file and relabelling is his call.
+
+Figure: `outputs/fig_20190639_c2.png`. Blocks and per-boundary errors:
+`outputs/fig_20190639_blocks.csv`, `outputs/fig_20190639_boundaries.csv`.
 
 ---
 
@@ -314,12 +366,15 @@ Neither, cleanly. Reported, not executed.
   0 of 4 fire. C2's conditional protects the genuine-decay population exactly as
   designed.
 - **(e) — "FAIL only in the `peak->valley` branch → next stage tests
-  unidirectional C2".** Applies to the *damage* but not to the *failure*. The
-  only harm C2 does is in that branch (`20190639`), so dropping it removes the
-  loss — but the surviving `valley->peak` branch fires on 2 scoreable train
-  series and converts **neither** into a sequence match. Unidirectional C2 is
-  therefore a rule with no measured benefit rather than a corrected rule, and
-  "FAIL by (e)" understates what was measured.
+  unidirectional C2".** Does **not** apply, and after the maintainer ruling it
+  applies even less than it did when this section was first written. (e)
+  presupposes that the `peak->valley` branch is where the harm is; the one
+  firing of that branch was inspected and **accepted**, so there is no harm to
+  retreat from. Dropping the branch would drop the only change C2 makes that the
+  maintainer endorses, while the surviving `valley->peak` branch fires on 2
+  scoreable train series and converts **neither** into a sequence match.
+  Unidirectional C2 is therefore a strictly worse version of a rule that already
+  has no measured benefit.
 
 The reason is visible in M2 and is not a threshold: C2 discriminates on the
 **type of E1**, and the type of E1 does not separate the spurious openings from

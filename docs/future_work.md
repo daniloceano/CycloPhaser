@@ -2947,12 +2947,42 @@ E1 `peak` strictly higher → peak→valley; anything else → no trigger.
 - The only track where forcing index 0 to `peak` buys a sequence match
   (`20180170`, and with all three boundaries flagged `unsure`) is one C2 does
   **not** fire on.
-- The `peak->valley` branch fires on `20190639` and **breaks** it: a track whose
-  sequence currently matches its label acquires a spurious opening `decay`.
+- The `peak->valley` branch fires on `20190639`: the sequence gains a `decay`
+  block over `[13, 26)` and stops matching the label. **Danilo inspected it and
+  ruled the change acceptable (2026-09-23)** — a reclassification, not a
+  regression; see below.
 
-Net at params-13 on TRAIN: **0 gained, 1 lost.** The discriminant — the *type*
-of E1 — does not separate spurious openings from genuine ones; on the 5 targets
-it splits 3/2 with the wrong member on each side.
+Net at params-13 on TRAIN, after that ruling: **0 gained by the sequence metric,
+0 lost.** C2 is harmless and still does not reach the case that motivated the
+front. The discriminant — the *type* of E1 — does not separate spurious openings
+from genuine ones; on the 5 targets it splits 3/2 with the wrong member on each
+side.
+
+### Maintainer ruling — `20190639` (2026-09-23)
+
+| | blocks |
+|---|---|
+| label | `incipient[0,25)` `intensification[25,81)` `mature[81,106)` `decay[106,180)` |
+| base | `incipient[0,13)` `intensification[13,88)` `mature[88,105)` `decay[105,180)` |
+| C2 | `incipient[0,13)` **`decay[13,26)`** `intensification[26,88)` `mature[88,105)` `decay[105,180)` |
+
+`mature` and the final `decay` do not move; the `intensification` start goes
+from 13 (error 12, outside the label's ±5) to 26 (error 1, inside it). The cost
+is a 13-step `decay` over `[13, 26)` — a stretch where the vorticity does weaken
+before the real deepening, and which the label calls `incipient`. Danilo:
+"com esse decay após Ic, era ambíguo" — accepted.
+
+**This firing is not about index 0.** The z candidates before the prominence
+filter are `peak@0`, `valley@9`, `peak@25`; `prominence_relative = 0.3` removes
+the `valley@9`, leaving two consecutive peaks. C2's second branch keys on a
+valley the prominence filter deleted.
+
+**Consequence for any future gate.** `manual_labels.yaml` still says
+`incipient[0,25)`, and `score_phase_sequences` refuses to pair boundaries once
+an extra phase appears — so a gate scoring C2 or C1 reads `20190639` as a loss,
+against the maintainer's own judgement. Either the label is revisited or the
+gate states that this track is scored against a superseded label.
+`manual_labels.yaml` was **not** touched; relabelling is the maintainer's call.
 
 ### Predictions declared before measuring
 
@@ -3006,11 +3036,12 @@ boundary.
 ### Which pre-declared retreat applies — neither, cleanly
 
 - **(a)** (a synthetic fires → go to C1) does **not** apply: 0/4 fire.
-- **(e)** (FAIL only in `peak->valley` → try unidirectional C2) applies to the
-  *damage* but not to the *failure*: dropping the second branch removes the one
-  loss, but the surviving `valley->peak` branch converts 0 of its 2 scoreable
-  firings into a match. Unidirectional C2 is a rule with no measured benefit,
-  not a corrected rule.
+- **(e)** (FAIL only in `peak->valley` → try unidirectional C2) does **not**
+  apply: it presupposes the second branch is where the harm is, and that
+  branch's one firing was inspected and accepted. Dropping it would remove the
+  only change C2 makes that the maintainer endorses, while the surviving
+  `valley->peak` branch converts 0 of its 2 scoreable firings into a match —
+  a strictly worse version of a rule that already has no measured benefit.
 
 The measurement points at **C1** (relative depth
 `D1 = (z_max − z[0]) / (z_max − z_min)`), whose discriminant is the magnitude of
