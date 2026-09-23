@@ -1186,6 +1186,12 @@ read. **No score difference can be attributed to `mature_method` under 1.7.3.**
 **Status of the whole item: CLOSED.** Front A cleared by item 27; the "Front E"
 residue closed here. Nothing remains open under item 13.
 
+Merged into `develop-v2.1` as **`3465e81`** (`--no-ff`, no PR, authorised by
+Danilo). Suite after the merge, in the dedicated `cyclophaser` conda environment
+against the working tree: **1230 passed, 0 failed**, under `-m "not browser"`.
+`git diff 40649c7 HEAD -- cyclophaser/ tests/` is **empty** — the merge touches
+`docs/future_work.md` and nothing else.
+
 ### Original text, kept as the historical record
 
 > Everything below is the item **as it was written on 2026-09-11**, preserved so
