@@ -313,3 +313,76 @@ expected to be an edge artefact or a near miss, and they are mostly neither.
    masking anything in this split.
 
 Nothing here proposes a mechanism or a parameter change, by instruction.
+
+---
+
+## Fechamento / Closing (2026-09-23)
+
+### Independent verification
+
+The branch was pulled and `diagnose.py`, `classify.py`, `separability.py` and
+`evaluate_against_labels.py` (params-13) were re-run independently. The
+evaluator's output is **identical**. The JSONs differ only in the 15th–16th
+decimal place — floating-point noise — with no change of sign, of any count, or
+of either verdict.
+
+The sign at t0 was checked again separately: **all six deepen**, the raw and the
+filtered derivative both negative (table in step 2). So M3 here means
+*intensification already under way at t0*, not weakening. The refusals are not
+series the detector mistook for decaying.
+
+### The τ claim, strengthened — and one detail of it corrected
+
+Step 4's tolerance table evaluated each series only at **its own** minimum
+recovering τ. That is the weakest form of the claim: it says nothing about
+whether some *other* τ would put a different series inside its tolerance. The
+strong form is now settled by a full sweep — τ ∈ [0.20, 0.80], step 0.0005, 1201
+values, with conditions (ii) *spare the 14* and (iii) *spare the 11* **abandoned
+entirely** (`tau_sweep.py`, `tau_sweep.txt`, `tau_sweep.json`):
+
+> **Maximum 2 of 6 within tolerance at ANY τ. No τ reaches 3.**
+> **G1 is unreachable by τ, independently of G3** — no trade-off against the
+> negatives can rescue it.
+
+The *complete* set of τ at which each series lands inside its label's tolerance:
+
+| id | N_lab | tol | head_min | τ interval(s) that hit |
+|---|---|---|---|---|
+| `20171179` | 11 | 1 | 0.217839 | [0.2180, 0.2660] |
+| `20181046` | 9 | 1 | 0.449635 | [0.4500, 0.7585] |
+| `20180628` | 9 | 1 | 0.412693 | **[0.4510, 0.4775]** |
+| `20160587` | 26 | 1 | 0.207669 | never |
+| `20160735` | 19 | 5 | 0.461140 | never |
+| `20202023` | 11 | 1 | 0.287663 | never |
+
+**Correction to the closing brief as issued.** The brief recorded "as outras
+quatro nunca" — the other four never. It is **three**, not four. `20180628` does
+hit, on τ ∈ [0.4510, 0.4775]. Verified directly: at τ = 0.4500 it gives
+N_det = 1; at τ = 0.4510 `rel[5] = 0.4507` falls below τ, breaking the leading
+run, so the first sustained run of k = 5 starts at index 8 and N_det = 8 against
+a label of 9 with tolerance ±1; by τ = 0.4780 it jumps to N_det = 21.
+
+The maximum of 2/6 is attained exactly on τ ∈ [0.4510, 0.4775], where `20180628`
+and `20181046` coincide. **The conclusion is unchanged, and the corrected fact
+makes it stronger rather than weaker**: that second hit is a 0.027-wide knife
+edge sitting between N_det = 1 and N_det = 21. It is not a tuning target, and
+reporting it as an unreachable case would have overstated the robustness of the
+only interval where two series hit at once.
+
+### Closing decision
+
+**Danilo, 2026-09-23: no stage 2. The front closes with no parameter change.**
+
+The unmeasured parameters — `incipient_plateau_k`, the probe smoothing
+(`incipient_smooth_window` / `incipient_smooth_polyorder`) and
+`incipient_plateau_signal` — go to the backlog, not into a follow-up stage.
+
+**Re-opening requires a NEW front with a declared premise**: an argument for
+*why* the parameter in question would separate the four M3 series from the 14
+agreed-nones, which on the decisive statistic (`head_min`) are indistinguishable
+— they interleave, as the ascending table in step 4 shows. Never a search over
+values. Never a loosened gate.
+
+The two M2 series recoverable at no cost — τ ∈ (0.2178, 0.2312], the only
+interval that spares all 14 — yield at most **+1** within tolerance, below G1.
+Not pursued.

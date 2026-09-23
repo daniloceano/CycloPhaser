@@ -2512,7 +2512,7 @@ anchoring test has no valid cut at all.
 
 ---
 
-## 26. Front "incipient refusal" — stage 1 diagnosis: one path, no separable threshold — **closed, diagnostic only, 2026-09-23**
+## 26. Front "incipient refusal" — stage 1 diagnosis: one path, no separable threshold — **closed, diagnostic only, no parameter change, 2026-09-23** (merge `MERGE_HASH_PENDING`)
 
 Branch `research/incipient-refusal-stage1`, from `develop-v2.1` @ `559dd64`.
 Nothing in `cyclophaser/` or `tests/` was touched and no parameter moved. The
@@ -2577,6 +2577,54 @@ Also noted: item 25's proposal 8(c) (committed `.txt` outputs embedding absolute
 `/Users/…` paths) was honoured for this front's own outputs — its three scripts
 print repo-relative paths — but the pre-existing files under
 `research/labels/diagnostics/` were left alone; that clean-up is still open.
+
+### Closing (2026-09-23)
+
+**Independent verification.** Branch pulled; `diagnose.py`, `classify.py`,
+`separability.py` and `evaluate_against_labels.py` (params-13) re-run. The
+evaluator's output is identical; the JSONs differ only in the 15th–16th decimal
+place, i.e. floating-point noise, with no change of sign, count or verdict. The
+sign at t0 was checked separately: all six **deepen** — the raw and the filtered
+derivative are both negative — so M3 here means *intensification already under
+way*, not weakening.
+
+**Claim strengthened, and one detail of it corrected.** The tolerance table in
+step 4 evaluated each series only at ITS OWN minimum recovering τ, which is the
+weakest form of the claim. A full sweep — τ ∈ [0.20, 0.80], step 0.0005, 1201
+values, conditions (ii) and (iii) abandoned entirely — now settles the strong
+form (`tau_sweep.py`, `tau_sweep.txt`, `tau_sweep.json`):
+
+> **Maximum 2 of 6 within tolerance at ANY τ; no τ reaches 3. G1 is unreachable
+> by τ, independently of G3** — no trade-off against the negatives can rescue it.
+
+Per series, the *complete* set of τ that lands inside the label's tolerance:
+
+| id | τ interval(s) that hit |
+|---|---|
+| `20171179` | [0.2180, 0.2660] |
+| `20181046` | [0.4500, 0.7585] |
+| `20180628` | **[0.4510, 0.4775]** |
+| `20160587`, `20160735`, `20202023` | never, anywhere in the range |
+
+**Correction to the closing brief as issued.** It recorded "the other four
+never". It is **three**, not four: `20180628` does hit, on τ ∈ [0.4510, 0.4775]
+(N_det = 8 against a label of 9, tolerance ±1). Verified directly — at τ =
+0.4500 it gives N_det = 1, at 0.4510 `rel[5] = 0.4507` drops below τ and breaks
+the leading run so the first sustained run starts at index 8, and by τ = 0.4780
+it jumps to N_det = 21. The maximum of 2/6 is attained exactly on
+τ ∈ [0.4510, 0.4775], where `20180628` and `20181046` coincide. **The conclusion
+is unchanged and is now stronger, not weaker**: the second hit is a 0.027-wide
+knife edge between N_det = 1 and N_det = 21, which is not a tuning target.
+
+**Closing decision (Danilo, 2026-09-23): no stage 2.** The front closes with no
+parameter change. The unmeasured parameters — `incipient_plateau_k`, the probe
+smoothing (`incipient_smooth_window` / `_polyorder`) and
+`incipient_plateau_signal` — go to the backlog. **Re-opening requires a NEW
+front with a declared premise** for *why* that parameter would separate the four
+M3 series from the 14 agreed-nones, which on the decisive statistic are
+indistinguishable. Never a search over values, and never a loosened gate. The
+two M2 series recoverable at no cost (τ ∈ (0.2178, 0.2312], which spares all 14)
+yield at most **+1** within tolerance — below G1 — and are not pursued.
 
 ---
 
