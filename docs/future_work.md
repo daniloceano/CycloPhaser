@@ -2369,6 +2369,68 @@ figures for both series. `params-12` and
 
 ---
 
+## 25. Front D — stage 0, incipient census on TRAIN — **diagnostic only, no merge, 2026-09-23**
+
+Branch `research/frontD-stage0-census`, from `develop-v2.1` @ `f901b76`. Nothing
+in `cyclophaser/` changed and no parameter moved; this stage only asks whether
+the short-incipient symptom that motivated front D exists in the **training**
+set. Full write-up, tables and figures:
+`research/labels/diagnostics/frontD/REPORT.md`.
+
+`params-13` verified against the declared sha256 `c1ab8ce0…6e483973`, and all 63
+frozen series (51 real + 12 synthetic) verified against the `series_sha256`
+recorded in `manual_labels.yaml` — 63/63 match. Measured in the dedicated
+`cyclophaser` conda environment against the working tree, not the installed
+2.0.0 wheel.
+
+**Census (train, params-13).** "Short" was defined before the cases were listed
+as `0 < N_det < min(N_lab)` over the real train series with a labelled incipient
+phase; that floor is **4**. Counts — real: **C1 = 2** (`20190397`, `20191155`),
+**C2 = 6** (`20160587`, `20160735`, `20171179`, `20180628`, `20181046`,
+`20202023`), **C3 = 14**; synthetic: **C1 = 5**, **C2 = 0**, **C3 = 2**. The
+symptom does exist in TRAIN, but among the reals the *refusal* (C2, 6/35) is
+three times as common as the short detection (C1, 2/35). Declared predictions
+**P1 (C1 ≥ 2) and P2 (C2 ≥ 2) both CORRECT**; P1 landed exactly on its boundary.
+
+**Step 2 verdicts: ARTEFACT 0, REAL SHORT PHASE 1, INCONCLUSIVE 6.** Two
+findings about the *instrument*, not the data, that any continuation must handle
+first:
+
+1. **The anchoring test cannot discriminate at `L = 2`**, and 5 of the 7 C1
+   series have `L = 2`. With only `k = 1` valid, `N_det_cut = 1` satisfies
+   "time-anchored" (`abs_end = 2 = L`, within ±1) and "edge-anchored"
+   (`|N_det_cut − L| = 1 ≤ 1`) *simultaneously, by arithmetic*. The only series
+   that discriminated, `s46657891`, did so because `L = 3` admits a second cut.
+2. **`ARTEFACT` was unreachable on TRAIN**: it requires criterion (a) to fail,
+   and all 7 C1 series passed (a). Zero artefacts means "no short detection is
+   also far from its label", not "the anchoring test cleared them".
+
+Also recorded: on `20191155` the label says there is **no** incipient phase
+(`N_lab = 0`) and the detector produced one of length 1, which the frozen rule
+scores as a 1-step timing error rather than as the refusal-type disagreement it
+is. Not adjusted — the rule was frozen before measurement.
+
+**Divergence from the commissioning brief.** The brief asked for
+`evaluate_against_labels.py`'s output "including the constant baseline line".
+**That script computes no baseline of any kind** (verified by reading it and by
+`grep -i baseline` at `f901b76`); the "constant modal-sequence baseline" of item
+19 is a different quantity, about the phase *sequence*, from that front's own
+diagnostics. The evaluator was run unmodified and its output attached verbatim;
+the constant baseline was computed separately in
+`research/labels/diagnostics/frontD/constant_baseline.py` and is attributed to
+that file. On train it gives best-constant 10 → 6/17 (real) and 4 → 12/27 (all),
+against the detector's 8/17 and 17/27 — the detector beats it on every split.
+
+**Exposure on the record:** `20160030` — exposição visual da saída do detector
+sob `params-13` (ausência de incipient), por Danilo, set/2026, durante a abertura
+da frente D. Nenhuma medição.
+
+Stage 0 proposes no mechanism and no parameter change, by instruction. Open
+items handed forward are listed in §9 of the front's REPORT.md. `20150646`, the
+case that motivated front D, is in the TEST split and was not read.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

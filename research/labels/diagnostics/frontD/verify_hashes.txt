@@ -1,0 +1,83 @@
+==========================================================================
+1. params-13 config, file sha256
+==========================================================================
+  declared  c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+  measured  c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+  -> MATCH
+
+==========================================================================
+2. frozen synthetic series (tests/synthetic/data/*.csv)
+==========================================================================
+  s0596ea57    value 78ae091842bc862a…  vs label 78ae091842bc862a…  MATCH
+  s46657891    value e0fe1e0a85981d76…  vs label e0fe1e0a85981d76…  MATCH
+  s4e7ff65c    value 8ef970c54d89f95e…  vs label 8ef970c54d89f95e…  MATCH
+  s5b8aa46f    value 4dbf8e04ab28e815…  vs label 4dbf8e04ab28e815…  MATCH
+  s5dcc0f79    value 9454fe8e2b34a814…  vs label 9454fe8e2b34a814…  MATCH
+  s6b1e8245    value c3f0600e92b645f8…  vs label c3f0600e92b645f8…  MATCH
+  s6b542eee    value 6ad904a1a64da31f…  vs label 6ad904a1a64da31f…  MATCH
+  s8001f17b    value 284cd8141059530a…  vs label 284cd8141059530a…  MATCH
+  s9ddbc53c    value af5e3fb08414abc3…  vs label af5e3fb08414abc3…  MATCH
+  sbceec644    value 0443afab2618323d…  vs label 0443afab2618323d…  MATCH
+  sbd6c6920    value eb4f2989b87146a7…  vs label eb4f2989b87146a7…  MATCH
+  scfcf1387    value f315cb99c45350c4…  vs label f315cb99c45350c4…  MATCH
+  -> 12 match, 0 mismatch, 0 unlabelled
+
+==========================================================================
+3. real calibration tracks (tests/calibration_data/*.csv)
+==========================================================================
+  20150069     value 7231f13dd9089637…  vs label 7231f13dd9089637…  MATCH
+  20150377     value 50b48d08248d413e…  vs label 50b48d08248d413e…  MATCH
+  20150436     value cd5783d0e292257c…  vs label cd5783d0e292257c…  MATCH
+  20150528     value 3e77c71c694eb00b…  vs label 3e77c71c694eb00b…  MATCH
+  20150532     value 16ea01913e2f1028…  vs label 16ea01913e2f1028…  MATCH
+  20150561     value 19c749b21df94fb3…  vs label 19c749b21df94fb3…  MATCH
+  20150646     value 4bc733a2b043577b…  vs label 4bc733a2b043577b…  MATCH
+  20150656     value ef2fbd35f71ee080…  vs label ef2fbd35f71ee080…  MATCH
+  20150746     value bd773cf2f40ff850…  vs label bd773cf2f40ff850…  MATCH
+  20160030     value f8e42d49faa79972…  vs label f8e42d49faa79972…  MATCH
+  20160587     value 474ceebdf61e5cc9…  vs label 474ceebdf61e5cc9…  MATCH
+  20160735     value 9f1be0b84b1c6fc9…  vs label 9f1be0b84b1c6fc9…  MATCH
+  20170154     value 73cc56cddca17020…  vs label 73cc56cddca17020…  MATCH
+  20170225     value 70fc5fc2361328b0…  vs label 70fc5fc2361328b0…  MATCH
+  20170342     value 4526fc062295fcbc…  vs label 4526fc062295fcbc…  MATCH
+  20170409     value cceb45f7f0210c9d…  vs label cceb45f7f0210c9d…  MATCH
+  20170520     value fa77671f026a1558…  vs label fa77671f026a1558…  MATCH
+  20170587     value 596fec2d327a1312…  vs label 596fec2d327a1312…  MATCH
+  20170756     value e078b746d8d03d9b…  vs label e078b746d8d03d9b…  MATCH
+  20170760     value 039378c51cfcaa87…  vs label 039378c51cfcaa87…  MATCH
+  20170794     value 23958fd4d07daa40…  vs label 23958fd4d07daa40…  MATCH
+  20170899     value d05240d5559b65db…  vs label d05240d5559b65db…  MATCH
+  20171179     value bc2fd3aa62d0e8b5…  vs label bc2fd3aa62d0e8b5…  MATCH
+  20180129     value 9b0d81186af87feb…  vs label 9b0d81186af87feb…  MATCH
+  20180170     value 973acda6e116b414…  vs label 973acda6e116b414…  MATCH
+  20180263     value e13175eff293a3b4…  vs label e13175eff293a3b4…  MATCH
+  20180300     value 500077620bfd6579…  vs label 500077620bfd6579…  MATCH
+  20180608     value 98dfcca3c33b414c…  vs label 98dfcca3c33b414c…  MATCH
+  20180628     value 430d29e4f2c29e09…  vs label 430d29e4f2c29e09…  MATCH
+  20180654     value 5c49beb6631237f9…  vs label 5c49beb6631237f9…  MATCH
+  20180733     value e0cfafac0ac6a007…  vs label e0cfafac0ac6a007…  MATCH
+  20180759     value 1040eea4c4ea584a…  vs label 1040eea4c4ea584a…  MATCH
+  20181046     value 1bb422386093f44f…  vs label 1bb422386093f44f…  MATCH
+  20190325     value 9d30120f4f65621a…  vs label 9d30120f4f65621a…  MATCH
+  20190397     value ea92fc7775a334f2…  vs label ea92fc7775a334f2…  MATCH
+  20190639     value 9f71c04387d09d90…  vs label 9f71c04387d09d90…  MATCH
+  20190691     value 8e105dd352f03d4a…  vs label 8e105dd352f03d4a…  MATCH
+  20190870     value d0923e385d0484c3…  vs label d0923e385d0484c3…  MATCH
+  20190879     value 3ec9b0cb10d15207…  vs label 3ec9b0cb10d15207…  MATCH
+  20191014     value 9008e9adf81a9c59…  vs label 9008e9adf81a9c59…  MATCH
+  20191104     value 24b8c3613208bd18…  vs label 24b8c3613208bd18…  MATCH
+  20191155     value e4f05296d0be8d53…  vs label e4f05296d0be8d53…  MATCH
+  20201245     value 44762e2bc4155e4e…  vs label 44762e2bc4155e4e…  MATCH
+  20202023     value 74b40c9013988415…  vs label 74b40c9013988415…  MATCH
+  20203373     value eddfe286fd0d0d4e…  vs label eddfe286fd0d0d4e…  MATCH
+  20203389     value 01df44255cb3ef0b…  vs label 01df44255cb3ef0b…  MATCH
+  20203947     value 8f0b177c58e8d6b5…  vs label 8f0b177c58e8d6b5…  MATCH
+  20204655     value c8c5afe16e8e6a54…  vs label c8c5afe16e8e6a54…  MATCH
+  20205386     value 2416aa6fd73ca516…  vs label 2416aa6fd73ca516…  MATCH
+  20206498     value ca36de3232f3e7cf…  vs label ca36de3232f3e7cf…  MATCH
+  20207822     value fa7a2f7c6fe64ec9…  vs label fa7a2f7c6fe64ec9…  MATCH
+  -> 51 match, 0 mismatch, 0 unlabelled
+
+==========================================================================
+OVERALL: PASS — safe to measure
+==========================================================================

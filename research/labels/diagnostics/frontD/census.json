@@ -1,0 +1,1594 @@
+{
+  "floor": 4,
+  "config": "cyclophaser_params-13.yaml",
+  "rows": [
+    {
+      "id": "20150069",
+      "source": "real",
+      "n_steps": 66,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.0416999999999977e-06,
+      "d_filt_t0": -1.0738499374341687e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          29
+        ],
+        [
+          "decay",
+          45
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20150436",
+      "source": "real",
+      "n_steps": 112,
+      "N_det": 20,
+      "N_lab": 16,
+      "label_kind": "boundary",
+      "tolerance_idx": 4,
+      "abs_diff": 4,
+      "defect_I": false,
+      "d_raw_t0": -7.857000000000016e-07,
+      "d_filt_t0": -8.889421238718287e-08,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          20
+        ],
+        [
+          "mature",
+          58
+        ],
+        [
+          "decay",
+          74
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20150528",
+      "source": "real",
+      "n_steps": 51,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -1.0316000000000055e-06,
+      "d_filt_t0": -7.116153357620979e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          28
+        ],
+        [
+          "decay",
+          37
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20150532",
+      "source": "real",
+      "n_steps": 107,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.447400000000003e-06,
+      "d_filt_t0": -9.282851319713058e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          33
+        ],
+        [
+          "decay",
+          43
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20150656",
+      "source": "real",
+      "n_steps": 160,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.045899999999997e-06,
+      "d_filt_t0": -1.7641443988635803e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          34
+        ],
+        [
+          "decay",
+          49
+        ],
+        [
+          "intensification",
+          86
+        ],
+        [
+          "mature",
+          140
+        ],
+        [
+          "decay",
+          148
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20160587",
+      "source": "real",
+      "n_steps": 79,
+      "N_det": 0,
+      "N_lab": 26,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 26,
+      "defect_I": false,
+      "d_raw_t0": -1.1416999999999996e-06,
+      "d_filt_t0": -3.02076365727247e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          50
+        ],
+        [
+          "decay",
+          66
+        ]
+      ],
+      "class": "C2"
+    },
+    {
+      "id": "20160735",
+      "source": "real",
+      "n_steps": 259,
+      "N_det": 0,
+      "N_lab": 19,
+      "label_kind": "boundary",
+      "tolerance_idx": 5,
+      "abs_diff": 19,
+      "defect_I": false,
+      "d_raw_t0": -2.056000000000002e-06,
+      "d_filt_t0": -1.6277156231611592e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "decay",
+          9
+        ],
+        [
+          "intensification",
+          22
+        ],
+        [
+          "decay",
+          59
+        ],
+        [
+          "intensification",
+          122
+        ],
+        [
+          "mature",
+          150
+        ],
+        [
+          "decay",
+          182
+        ],
+        [
+          "residual",
+          211
+        ]
+      ],
+      "class": "C2"
+    },
+    {
+      "id": "20170154",
+      "source": "real",
+      "n_steps": 124,
+      "N_det": 6,
+      "N_lab": 6,
+      "label_kind": "boundary",
+      "tolerance_idx": 2,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -8.21400000000002e-07,
+      "d_filt_t0": -2.3013145308991868e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          6
+        ],
+        [
+          "mature",
+          35
+        ],
+        [
+          "decay",
+          44
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20170342",
+      "source": "real",
+      "n_steps": 146,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -3.1703000000000025e-06,
+      "d_filt_t0": -1.1978387828707194e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          39
+        ],
+        [
+          "decay",
+          68
+        ],
+        [
+          "residual",
+          103
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20170409",
+      "source": "real",
+      "n_steps": 169,
+      "N_det": 6,
+      "N_lab": 6,
+      "label_kind": "boundary",
+      "tolerance_idx": 2,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -8.298000000000018e-07,
+      "d_filt_t0": -2.528260550157151e-08,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          6
+        ],
+        [
+          "mature",
+          60
+        ],
+        [
+          "decay",
+          67
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20170520",
+      "source": "real",
+      "n_steps": 58,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -1.6720000000000003e-06,
+      "d_filt_t0": -1.0739838445113272e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          26
+        ],
+        [
+          "decay",
+          36
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20170760",
+      "source": "real",
+      "n_steps": 59,
+      "N_det": 0,
+      "N_lab": null,
+      "label_kind": "ambiguous",
+      "tolerance_idx": 0,
+      "abs_diff": null,
+      "defect_I": false,
+      "d_raw_t0": -2.0286999999999963e-06,
+      "d_filt_t0": -1.1688840871022728e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "decay",
+          29
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20170794",
+      "source": "real",
+      "n_steps": 224,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.0938000000000036e-06,
+      "d_filt_t0": -1.2794018782850183e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          37
+        ],
+        [
+          "decay",
+          49
+        ],
+        [
+          "residual",
+          119
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20171179",
+      "source": "real",
+      "n_steps": 62,
+      "N_det": 0,
+      "N_lab": 11,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 11,
+      "defect_I": false,
+      "d_raw_t0": -1.2560000000000063e-06,
+      "d_filt_t0": -4.161746606697171e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          36
+        ],
+        [
+          "decay",
+          49
+        ]
+      ],
+      "class": "C2"
+    },
+    {
+      "id": "20180170",
+      "source": "real",
+      "n_steps": 69,
+      "N_det": 8,
+      "N_lab": null,
+      "label_kind": "ambiguous",
+      "tolerance_idx": 1,
+      "abs_diff": null,
+      "defect_I": true,
+      "d_raw_t0": -6.941000000000041e-07,
+      "d_filt_t0": 2.8957110844837135e-09,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "decay",
+          8
+        ],
+        [
+          "intensification",
+          22
+        ],
+        [
+          "mature",
+          36
+        ],
+        [
+          "decay",
+          49
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20180263",
+      "source": "real",
+      "n_steps": 57,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -5.677899999999999e-06,
+      "d_filt_t0": -9.17699466718993e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          25
+        ],
+        [
+          "decay",
+          34
+        ],
+        [
+          "residual",
+          47
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20180300",
+      "source": "real",
+      "n_steps": 59,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -6.125700000000001e-06,
+      "d_filt_t0": -2.3713326137467884e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          14
+        ],
+        [
+          "decay",
+          27
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20180608",
+      "source": "real",
+      "n_steps": 117,
+      "N_det": 38,
+      "N_lab": 37,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": true,
+      "d_raw_t0": -7.250999999999975e-07,
+      "d_filt_t0": 2.8769678446762063e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          38
+        ],
+        [
+          "mature",
+          62
+        ],
+        [
+          "decay",
+          71
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20180628",
+      "source": "real",
+      "n_steps": 94,
+      "N_det": 0,
+      "N_lab": 9,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 9,
+      "defect_I": false,
+      "d_raw_t0": -2.4152e-06,
+      "d_filt_t0": -7.444173213708146e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          29
+        ],
+        [
+          "decay",
+          41
+        ],
+        [
+          "intensification",
+          61
+        ],
+        [
+          "mature",
+          70
+        ],
+        [
+          "decay",
+          76
+        ]
+      ],
+      "class": "C2"
+    },
+    {
+      "id": "20180733",
+      "source": "real",
+      "n_steps": 257,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.2988000000000025e-06,
+      "d_filt_t0": -9.372612015748513e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          31
+        ],
+        [
+          "decay",
+          44
+        ],
+        [
+          "intensification",
+          101
+        ],
+        [
+          "mature",
+          135
+        ],
+        [
+          "decay",
+          147
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20180759",
+      "source": "real",
+      "n_steps": 88,
+      "N_det": 4,
+      "N_lab": 4,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 0,
+      "defect_I": true,
+      "d_raw_t0": 1.406999999999968e-07,
+      "d_filt_t0": -1.063380231859175e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          4
+        ],
+        [
+          "mature",
+          28
+        ],
+        [
+          "decay",
+          48
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20181046",
+      "source": "real",
+      "n_steps": 30,
+      "N_det": 0,
+      "N_lab": 9,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 9,
+      "defect_I": false,
+      "d_raw_t0": -2.819499999999999e-06,
+      "d_filt_t0": -6.92755359898917e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          19
+        ],
+        [
+          "decay",
+          27
+        ]
+      ],
+      "class": "C2"
+    },
+    {
+      "id": "20190325",
+      "source": "real",
+      "n_steps": 167,
+      "N_det": 9,
+      "N_lab": 10,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": true,
+      "d_raw_t0": -1.0270000000000022e-06,
+      "d_filt_t0": 2.6608957218443905e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "decay",
+          9
+        ],
+        [
+          "intensification",
+          88
+        ],
+        [
+          "mature",
+          100
+        ],
+        [
+          "decay",
+          106
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20190397",
+      "source": "real",
+      "n_steps": 56,
+      "N_det": 2,
+      "N_lab": 8,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 6,
+      "defect_I": true,
+      "d_raw_t0": 5.530999999999998e-07,
+      "d_filt_t0": -2.6793615830133334e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          2
+        ],
+        [
+          "mature",
+          28
+        ],
+        [
+          "decay",
+          43
+        ]
+      ],
+      "class": "C1"
+    },
+    {
+      "id": "20190639",
+      "source": "real",
+      "n_steps": 180,
+      "N_det": 13,
+      "N_lab": 25,
+      "label_kind": "boundary",
+      "tolerance_idx": 5,
+      "abs_diff": 12,
+      "defect_I": false,
+      "d_raw_t0": -1.2262999999999987e-06,
+      "d_filt_t0": -7.084140163218097e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          13
+        ],
+        [
+          "mature",
+          88
+        ],
+        [
+          "decay",
+          105
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20190870",
+      "source": "real",
+      "n_steps": 129,
+      "N_det": 10,
+      "N_lab": 12,
+      "label_kind": "boundary",
+      "tolerance_idx": 2,
+      "abs_diff": 2,
+      "defect_I": false,
+      "d_raw_t0": -1.049000000000003e-06,
+      "d_filt_t0": -1.2488075748394448e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          10
+        ],
+        [
+          "mature",
+          35
+        ],
+        [
+          "decay",
+          51
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20190879",
+      "source": "real",
+      "n_steps": 79,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.4470000000000055e-06,
+      "d_filt_t0": -1.3896799950771257e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          28
+        ],
+        [
+          "decay",
+          39
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20191014",
+      "source": "real",
+      "n_steps": 206,
+      "N_det": 9,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 9,
+      "defect_I": true,
+      "d_raw_t0": -1.955899999999996e-06,
+      "d_filt_t0": 1.3216669441309127e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "decay",
+          9
+        ],
+        [
+          "intensification",
+          124
+        ],
+        [
+          "decay",
+          137
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20191104",
+      "source": "real",
+      "n_steps": 118,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -7.2471000000000005e-06,
+      "d_filt_t0": -1.551837834331599e-06,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          27
+        ],
+        [
+          "decay",
+          42
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20191155",
+      "source": "real",
+      "n_steps": 93,
+      "N_det": 1,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 1,
+      "defect_I": false,
+      "d_raw_t0": -1.2557000000000022e-06,
+      "d_filt_t0": -6.83129693765342e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          1
+        ],
+        [
+          "mature",
+          30
+        ],
+        [
+          "decay",
+          49
+        ]
+      ],
+      "class": "C1"
+    },
+    {
+      "id": "20201245",
+      "source": "real",
+      "n_steps": 98,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.293459999999998e-06,
+      "d_filt_t0": -9.668932664515066e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          37
+        ],
+        [
+          "decay",
+          54
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "20202023",
+      "source": "real",
+      "n_steps": 78,
+      "N_det": 0,
+      "N_lab": 11,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 11,
+      "defect_I": false,
+      "d_raw_t0": -3.02695e-06,
+      "d_filt_t0": -8.285764447815392e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          54
+        ],
+        [
+          "decay",
+          65
+        ]
+      ],
+      "class": "C2"
+    },
+    {
+      "id": "20203947",
+      "source": "real",
+      "n_steps": 242,
+      "N_det": 12,
+      "N_lab": 38,
+      "label_kind": "boundary",
+      "tolerance_idx": 5,
+      "abs_diff": 26,
+      "defect_I": false,
+      "d_raw_t0": -4.209409999999998e-06,
+      "d_filt_t0": -1.0185153307626168e-06,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          12
+        ],
+        [
+          "decay",
+          61
+        ],
+        [
+          "intensification",
+          75
+        ],
+        [
+          "decay",
+          90
+        ],
+        [
+          "intensification",
+          107
+        ],
+        [
+          "mature",
+          129
+        ],
+        [
+          "decay",
+          137
+        ],
+        [
+          "intensification",
+          160
+        ],
+        [
+          "mature",
+          181
+        ],
+        [
+          "decay",
+          189
+        ],
+        [
+          "residual",
+          203
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20205386",
+      "source": "real",
+      "n_steps": 100,
+      "N_det": 4,
+      "N_lab": 5,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": false,
+      "d_raw_t0": -4.4242000000000245e-07,
+      "d_filt_t0": -4.573982170122649e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          4
+        ],
+        [
+          "mature",
+          36
+        ],
+        [
+          "decay",
+          43
+        ],
+        [
+          "intensification",
+          52
+        ],
+        [
+          "mature",
+          60
+        ],
+        [
+          "decay",
+          64
+        ],
+        [
+          "intensification",
+          71
+        ],
+        [
+          "mature",
+          80
+        ],
+        [
+          "decay",
+          86
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "20207822",
+      "source": "real",
+      "n_steps": 162,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -2.1015399999999995e-06,
+      "d_filt_t0": -9.768880892036168e-07,
+      "detected_sequence": [
+        [
+          "intensification",
+          0
+        ],
+        [
+          "mature",
+          46
+        ],
+        [
+          "decay",
+          69
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "s0596ea57",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 10,
+      "N_lab": 14,
+      "label_kind": "boundary",
+      "tolerance_idx": 3,
+      "abs_diff": 4,
+      "defect_I": null,
+      "d_raw_t0": 0.0,
+      "d_filt_t0": 3.15126981180873e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          10
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "s46657891",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 3,
+      "N_lab": 3,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -1.9261093311212317e-06,
+      "d_filt_t0": -3.1196434919638922e-06,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          3
+        ],
+        [
+          "mature",
+          26
+        ],
+        [
+          "decay",
+          40
+        ]
+      ],
+      "class": "C1"
+    },
+    {
+      "id": "s4e7ff65c",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 5,
+      "N_lab": 5,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 0,
+      "defect_I": null,
+      "d_raw_t0": 0.0,
+      "d_filt_t0": 3.0413037468676377e-07,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          5
+        ],
+        [
+          "mature",
+          21
+        ],
+        [
+          "decay",
+          36
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "s5b8aa46f",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": 7.75000597165004e-05,
+      "d_filt_t0": 4.7449180128481005e-05,
+      "detected_sequence": [
+        [
+          "decay",
+          0
+        ],
+        [
+          "intensification",
+          12
+        ],
+        [
+          "mature",
+          24
+        ],
+        [
+          "decay",
+          32
+        ],
+        [
+          "residual",
+          48
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "s5dcc0f79",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 5,
+      "N_lab": 4,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": null,
+      "d_raw_t0": 0.0,
+      "d_filt_t0": -1.072313806657308e-06,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          5
+        ],
+        [
+          "mature",
+          18
+        ],
+        [
+          "decay",
+          26
+        ],
+        [
+          "residual",
+          43
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "s6b1e8245",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 2,
+      "N_lab": 3,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": false,
+      "d_raw_t0": 1.4427303349421336e-05,
+      "d_filt_t0": 1.4072660811236416e-05,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "decay",
+          2
+        ],
+        [
+          "intensification",
+          19
+        ],
+        [
+          "mature",
+          35
+        ],
+        [
+          "decay",
+          46
+        ]
+      ],
+      "class": "C1"
+    },
+    {
+      "id": "s6b542eee",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 2,
+      "N_lab": 2,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": -3.990091265004594e-06,
+      "d_filt_t0": -2.5683836733560048e-05,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          2
+        ],
+        [
+          "mature",
+          12
+        ],
+        [
+          "decay",
+          20
+        ],
+        [
+          "intensification",
+          33
+        ],
+        [
+          "mature",
+          44
+        ],
+        [
+          "decay",
+          52
+        ]
+      ],
+      "class": "C1"
+    },
+    {
+      "id": "s8001f17b",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 0,
+      "N_lab": 0,
+      "label_kind": "none",
+      "tolerance_idx": 0,
+      "abs_diff": 0,
+      "defect_I": false,
+      "d_raw_t0": 9.65054321118709e-05,
+      "d_filt_t0": 4.631907376006757e-05,
+      "detected_sequence": [
+        [
+          "decay",
+          0
+        ],
+        [
+          "intensification",
+          13
+        ],
+        [
+          "mature",
+          26
+        ],
+        [
+          "decay",
+          40
+        ]
+      ],
+      "class": "C3"
+    },
+    {
+      "id": "s9ddbc53c",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 4,
+      "N_lab": 3,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": false,
+      "d_raw_t0": -2.1515218975918832e-05,
+      "d_filt_t0": -2.2345427098150077e-06,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          4
+        ],
+        [
+          "mature",
+          18
+        ],
+        [
+          "decay",
+          26
+        ],
+        [
+          "residual",
+          43
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "sbceec644",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 2,
+      "N_lab": 3,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": false,
+      "d_raw_t0": -7.54741680063097e-06,
+      "d_filt_t0": -5.9197193673546475e-06,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          2
+        ],
+        [
+          "mature",
+          20
+        ],
+        [
+          "decay",
+          36
+        ]
+      ],
+      "class": "C1"
+    },
+    {
+      "id": "sbd6c6920",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 4,
+      "N_lab": 5,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": false,
+      "d_raw_t0": -7.354534644318981e-05,
+      "d_filt_t0": -9.471009614735743e-06,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "intensification",
+          4
+        ],
+        [
+          "mature",
+          14
+        ],
+        [
+          "decay",
+          21
+        ],
+        [
+          "intensification",
+          33
+        ],
+        [
+          "mature",
+          45
+        ],
+        [
+          "decay",
+          52
+        ]
+      ],
+      "class": "\u2014"
+    },
+    {
+      "id": "scfcf1387",
+      "source": "synthetic",
+      "n_steps": 66,
+      "N_det": 2,
+      "N_lab": 3,
+      "label_kind": "boundary",
+      "tolerance_idx": 1,
+      "abs_diff": 1,
+      "defect_I": true,
+      "d_raw_t0": -2.6478694659107715e-06,
+      "d_filt_t0": 1.934963274571877e-05,
+      "detected_sequence": [
+        [
+          "incipient",
+          0
+        ],
+        [
+          "decay",
+          2
+        ],
+        [
+          "intensification",
+          17
+        ],
+        [
+          "mature",
+          30
+        ],
+        [
+          "decay",
+          38
+        ],
+        [
+          "residual",
+          53
+        ]
+      ],
+      "class": "C1"
+    }
+  ]
+}

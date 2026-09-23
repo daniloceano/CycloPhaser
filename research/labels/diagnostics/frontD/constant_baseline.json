@@ -1,0 +1,47 @@
+{
+  "real": {
+    "best_constant": 10,
+    "n_boundary": 17,
+    "n_hit": 6,
+    "hit_rate": 0.35294117647058826,
+    "mae": 7.529411764705882,
+    "worst": 28,
+    "detector": {
+      "n_hit": 8,
+      "n_boundary": 17,
+      "hit_rate": 0.47058823529411764,
+      "mae": 4.818181818181818,
+      "worst": 26
+    }
+  },
+  "synthetic": {
+    "best_constant": 4,
+    "n_boundary": 10,
+    "n_hit": 8,
+    "hit_rate": 0.8,
+    "mae": 1.9,
+    "worst": 10,
+    "detector": {
+      "n_hit": 9,
+      "n_boundary": 10,
+      "hit_rate": 0.9,
+      "mae": 1.0,
+      "worst": 4
+    }
+  },
+  "all": {
+    "best_constant": 4,
+    "n_boundary": 27,
+    "n_hit": 12,
+    "hit_rate": 0.4444444444444444,
+    "mae": 7.518518518518518,
+    "worst": 34,
+    "detector": {
+      "n_hit": 17,
+      "n_boundary": 27,
+      "hit_rate": 0.6296296296296297,
+      "mae": 3.0,
+      "worst": 26
+    }
+  }
+}
