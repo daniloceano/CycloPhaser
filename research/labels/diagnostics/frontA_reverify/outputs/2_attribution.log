@@ -1,0 +1,42 @@
+delta mature_amplitude_fraction: 0.95 -> 0.9
+delta mature_min_depth: 0.0 -> 0.8  (params-9 omits it; get_periods default shown)
+delta intensification_min_depth: 0.0 -> 0.05  (params-9 omits it; get_periods default shown)
+
+all-three variant reproduces the params-13 census: YES on all 5
+
+20180170
+     params-9 baseline                      incipient>decay>intensification>mature>decay  (V=sim)
+     only mature_amplitude_fraction=0.9     incipient>decay>intensification>mature>decay  (V=sim)
+     only mature_min_depth=0.8              incipient>decay>intensification>mature>decay  (V=sim)
+     only intensification_min_depth=0.05    incipient>decay>intensification>mature>decay  (V=sim)
+     all three (== params-13)               incipient>decay>intensification>mature>decay  (V=sim)
+
+20180608
+     params-9 baseline                      incipient>intensification>mature>decay  (V=nao)
+     only mature_amplitude_fraction=0.9     incipient>intensification>mature>decay  (V=nao)
+     only mature_min_depth=0.8              incipient>intensification>mature>decay  (V=nao)
+     only intensification_min_depth=0.05    incipient>intensification>mature>decay  (V=nao)
+     all three (== params-13)               incipient>intensification>mature>decay  (V=nao)
+
+20190325
+     params-9 baseline                      incipient>decay>intensification>mature>decay  (V=sim)
+     only mature_amplitude_fraction=0.9     incipient>decay>intensification>mature>decay  (V=sim)
+     only mature_min_depth=0.8              incipient>decay>intensification>mature>decay  (V=sim)
+     only intensification_min_depth=0.05    incipient>decay>intensification>mature>decay  (V=sim)
+     all three (== params-13)               incipient>decay>intensification>mature>decay  (V=sim)
+
+20191014   <-- CHANGES
+     params-9 baseline                      incipient>decay>intensification>mature>decay  (V=sim)
+     only mature_amplitude_fraction=0.9     incipient>decay>intensification>mature>decay  (V=sim)
+   * only mature_min_depth=0.8              incipient>decay>intensification>decay  (V=sim)
+     only intensification_min_depth=0.05    incipient>decay>intensification>mature>decay  (V=sim)
+   * all three (== params-13)               incipient>decay>intensification>decay  (V=sim)
+
+20206498
+     params-9 baseline                      incipient>decay>intensification>decay  (V=sim)
+     only mature_amplitude_fraction=0.9     incipient>decay>intensification>decay  (V=sim)
+     only mature_min_depth=0.8              incipient>decay>intensification>decay  (V=sim)
+     only intensification_min_depth=0.05    incipient>decay>intensification>decay  (V=sim)
+     all three (== params-13)               incipient>decay>intensification>decay  (V=sim)
+
+wrote /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontA_reverify/outputs/step2_attribution.csv

@@ -1,0 +1,57 @@
+==========================================================================
+Incipient boundary vs manual labels   (63 usable label(s))
+config: /Users/danilocoutodesouza/Downloads/cyclophaser_params-9.yaml
+==========================================================================
+
+  TRAIN · real   (35 labelled)
+   ── incipient boundary ──
+    boundary labels    17   hit within margin   8  ( 47.1%)
+    raw distance      MAE   4.82   worst     26   (over 11 comparable)
+    refusal           detector found no incipient phase on 6 of those 17
+                      label says none:  16, detector agreed on 14 ( 87.5%)
+                      label ambiguous:   2, detector found none on 1
+   ── whole phase sequence ──
+    sequence          18 of 35 match ( 51.4%); 17 differ in phases or order
+    boundaries        26 of 43 within their own margin ( 60.5%)
+    not sure          2 boundary/ies the labeller declined to place, excluded from the rate above
+      phase              n   hit    MAE  worst
+      intensification    8   75.0%   3.12     12
+      mature            17   58.8%   2.35      9
+      decay             17   58.8%   3.59     11
+      residual           1    0.0%   3.00      3
+
+  TRAIN · synthetic   (12 labelled)
+   ── incipient boundary ──
+    boundary labels    10   hit within margin   9  ( 90.0%)
+    raw distance      MAE   1.00   worst      4   (over 10 comparable)
+    refusal           detector found no incipient phase on 0 of those 10
+                      label says none:   2, detector agreed on 2 (100.0%)
+                      label ambiguous:   0, detector found none on 0
+   ── whole phase sequence ──
+    sequence          11 of 12 match ( 91.7%); 1 differ in phases or order
+    boundaries        32 of 42 within their own margin ( 76.2%)
+      phase              n   hit    MAE  worst
+      intensification   13   92.3%   0.92      4
+      mature            12   58.3%   2.00      3
+      decay             14   71.4%   1.50      3
+      residual           3  100.0%   1.33      2
+
+  TRAIN · ALL   (47 labelled)
+   ── incipient boundary ──
+    boundary labels    27   hit within margin  17  ( 63.0%)
+    raw distance      MAE   3.00   worst     26   (over 21 comparable)
+    refusal           detector found no incipient phase on 6 of those 27
+                      label says none:  18, detector agreed on 16 ( 88.9%)
+                      label ambiguous:   2, detector found none on 1
+   ── whole phase sequence ──
+    sequence          29 of 47 match ( 61.7%); 18 differ in phases or order
+    boundaries        58 of 85 within their own margin ( 68.2%)
+    not sure          2 boundary/ies the labeller declined to place, excluded from the rate above
+      phase              n   hit    MAE  worst
+      intensification   21   85.7%   1.76     12
+      mature            29   58.6%   2.21      9
+      decay             31   64.5%   2.65     11
+      residual           4   75.0%   1.75      3
+
+  TEST split held out (16 series). Pass --test to score it, once.
+

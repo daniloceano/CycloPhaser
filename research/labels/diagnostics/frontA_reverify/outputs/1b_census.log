@@ -1,0 +1,46 @@
+==========================================================================
+PROVENANCE
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+config: /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/configs/cyclophaser_params-9.yaml
+  sha256: 0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63
+  process_vorticity kwargs: {'use_filter': True, 'cutoff_low': 168, 'cutoff_high': 18, 'replace_endpoints_with_lowpass': 0, 'use_smoothing': False, 'use_smoothing_twice': False, 'savgol_polynomial': 3, 'boundary_padding': 'edge'}
+  get_periods kwargs (19): {'threshold_intensification_length': 0.075, 'threshold_intensification_gap': 0.075, 'threshold_mature_distance': 0.18, 'threshold_mature_length': 0.15, 'threshold_decay_length': 0.075, 'threshold_decay_gap': 0.075, 'threshold_incipient_length': 0.4, 'prominence_relative': 0.3, 'mature_amplitude_fraction': 0.95, 'decay_tail_amplitude_fraction': 0.3, 'incipient_plateau_tau': 0.2, 'incipient_plateau_k': 5, 'incipient_smooth_window': 5.0, 'incipient_smooth_polyorder': 3.0, 'length_scale': 'local', 'mature_method': 'amplitude', 'incipient_method': 'plateau', 'incipient_plateau_signal': 'vorticity', 'incipient_plateau_crossing': 'sustained'}
+  phase_params keys DROPPED in memory by the signature filter: ['distance']
+loaded 51 real tracks
+
+/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontA_reverify/census_tip.py:273: PeakPropertyWarning: some peaks have a prominence of 0
+  "idx0_prominence": (round(float(peak_prominences(-z.values, [0])[0][0]), 6)
+/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontA_reverify/census_tip.py:273: PeakPropertyWarning: some peaks have a prominence of 0
+  "idx0_prominence": (round(float(peak_prominences(-z.values, [0])[0][0]), 6)
+/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontA_reverify/census_tip.py:273: PeakPropertyWarning: some peaks have a prominence of 0
+  "idx0_prominence": (round(float(peak_prominences(-z.values, [0])[0][0]), 6)
+/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontA_reverify/census_tip.py:273: PeakPropertyWarning: some peaks have a prominence of 0
+  "idx0_prominence": (round(float(peak_prominences(-z.values, [0])[0][0]), 6)
+/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontA_reverify/census_tip.py:273: PeakPropertyWarning: some peaks have a prominence of 0
+  "idx0_prominence": (round(float(peak_prominences(-z.values, [0])[0][0]), 6)
+idx0_tipo counts: {'peak': np.int64(46), 'valley': np.int64(5)}
+decai_no_idx0 counts: {'nao': np.int64(46), 'sim': np.int64(5)}
+
+(V) table for A's 5 tracks:
+track_id  split idx0_tipo  idx0_prominence  decai_comprimento_passos  leading_incipient_len_final                        sequencia_fases_final primeira_fase_nao_incipiente_saida_final V_ocorre replay_equals_get_periods
+20180170 treino    valley              0.0                        22                            8 incipient>decay>intensification>mature>decay                                    decay      sim                       sim
+20180608 treino    valley              0.0                        11                           38       incipient>intensification>mature>decay                          intensification      nao                       sim
+20190325 treino    valley              0.0                        88                            9 incipient>decay>intensification>mature>decay                                    decay      sim                       sim
+20191014 treino    valley              0.0                       124                            9 incipient>decay>intensification>mature>decay                                    decay      sim                       sim
+20206498  teste    valley              0.0                        77                            9        incipient>decay>intensification>decay                                    decay      sim                       sim
+
+(V) occurs on 4 of 5
+
+replay == get_periods on all 51 tracks
+
+wrote 4 files to /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/frontA_reverify/outputs with tag 'step1b_params9'

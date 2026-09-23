@@ -1073,9 +1073,20 @@ recorded here so it is not ambiguous again:**
 
 ---
 
-## 13. Open risk — earlier fronts may have run against the shadowed cyclophaser 1.7.3, not this repo (OPEN, not investigated)
+## 13. Open risk — earlier fronts may have run against the shadowed cyclophaser 1.7.3, not this repo (**Front A cleared 2026-09-23 — see item 27**; still OPEN for "Front E")
 
-**Status: OPEN.** Flagged 2026-09-11, not yet checked. Item 12 established
+> **2026-09-23 — Front A is cleared.** Front A′ (item 27) reproduced A's
+> measurements against `887c628`'s `cyclophaser/` in a worktree, with the
+> loaded package asserted in-process: **990 fields compared, 0 divergences**,
+> and `fix_state_before.json` byte-identical. The mechanical census is also
+> unchanged at the current tip under both params-9 and params-13 (0 per-track
+> differences). A's line numbers and its `argrelextrema`/`mode='clip'`
+> reasoning are this repository's code. Related: the env A's scripts name,
+> `south_atlantic_cyclone_extremes`, carries **no cyclophaser at all**, so it
+> had no wheel to shadow with; `lorenz`, the env this item names, does carry
+> 1.7.3. **This item stays OPEN** solely for the unidentified "Front E".
+
+**Status: OPEN for "Front E" only.** Flagged 2026-09-11, not yet checked. Item 12 established
 that, before its fix, `import cyclophaser` in conda env "lorenz" resolved to
 the non-editable, installed **1.7.3** package or to this repository depending
 on the launch directory (repo root → repo; elsewhere, e.g. `/tmp` → 1.7.3).
@@ -1083,23 +1094,28 @@ Any analysis run from "lorenz" in a directory where that resolved to 1.7.3
 was measuring a **different version of the detector than this repository's**,
 silently, with no error.
 
-**At risk, named so far:** Front A (item 8, "index-0 boundary extremum
-type") — its investigation cites specific line numbers in
+**At risk, named so far:** **Front A (item 8, "index-0 boundary extremum
+type") — CLEARED by item 27 on 2026-09-23.** As originally written:
+Front A — its investigation cites specific line numbers in
 `cyclophaser/determine_periods.py` (`find_peaks_valleys`, lines 122-123) and
 draws conclusions about `argrelextrema`'s `mode='clip'` behaviour; if it was
 launched from a directory where the import shadowed to 1.7.3, those line
-numbers and that behaviour may not be this repository's code at all. A
+numbers and that behaviour may not be this repository's code at all.
+*That conditional is now settled: item 27 proved the import did resolve to
+this repository, and the line numbers and behaviour are this code's.* A
 second front, referred to as "Front E," was also named as at risk in the
 same message that opened this item, but is **not identified** in this file,
 in `docs/`, or in project memory as of this writing — which front "E" refers
 to needs to come from Danilo directly before it can be checked.
 
-**Not yet done:** determining, for each at-risk front, which directory/
+**Not yet done (for "Front E"; done for Front A, item 27):** determining, for each at-risk front, which directory/
 environment it was actually launched from, and if it cannot be determined,
 whether the front's conclusions change under a re-run against this
 repository's code as of the commit that front used. This item exists so
 that risk is not lost, not as a verdict that either front's findings are
-wrong — nothing about their correctness has been checked yet.
+wrong. For Front A that check has now been done and it came back clean
+(item 27); for "Front E" nothing has been checked, because the front has
+not been identified.
 
 ---
 
@@ -2631,6 +2647,108 @@ on 2026-09-23. Suite after the merge, in the dedicated `cyclophaser` conda
 environment against the working tree (`sys.prefix` = the env,
 `cyclophaser.__file__` = this repo): **1230 passed, 0 failed**, under
 `-m "not browser"` — the browser module is not run, per `CLAUDE.md`.
+
+---
+
+## 27. Front A′ — re-verification of Front A under the correct detector — **closed, gate PASS, item 13 does not materialise for Front A, 2026-09-23**
+
+**Measurement only.** No line of `cyclophaser/` or `tests/` was changed.
+Branch `research/frontA-reverify` from `develop-v2.1` tip `558eb5d`.
+Full record: `research/labels/diagnostics/frontA_reverify/REPORT.md`.
+
+### The question
+
+Item 13 flagged that Front A's measurements (2026-09-09, base `887c628`, config
+`params-9`) might have run against the **published cyclophaser 1.7.3 wheel**
+rather than this checkout — which would void A's documented mechanical cause
+(index 0 typed `valley` on 5 tracks, prominence 0.0) and its "A does not block
+v2.1" conclusion. The front separates **environment**, **code drift** and
+**config drift**.
+
+### Step 1a — gate — **PASS**
+
+A `git worktree` outside the repo at `6060c6d`, with `cyclophaser/` restored to
+`887c628` (`git diff 887c628 -- cyclophaser/` empty). Every original A script run
+through a wrapper that, in the same process and before the script body, imports
+`cyclophaser`, prints the resolved paths and module digests, and **hard-asserts**
+they live inside the worktree. CWD = the worktree throughout.
+
+Comparison was field-by-field and typed, never whole-file sha256. Against the
+criterion declared before measuring — categoricals and integers identical,
+index-0 prominence exactly `0.0`, other floats within 1e-9 relative,
+`fix_eval` 8/17 and 14/16 exact — **990 fields compared, 0 divergences.**
+`fix_state_before.json` additionally came back byte-identical
+(`a31391ce…c87e`).
+
+**A's numbers were produced by this repository's code. Its mechanical cause
+stands as recorded.**
+
+### Steps 1b and 2 — diagnostics
+
+At the tip, with `params-9` (where `distance` is dropped **in memory** by
+`load_config`'s existing `inspect.signature` filter — the YAML is untouched) and
+then with `params-13`:
+
+- **(M) identical in every case.** Per-track diff against A's `6060c6d`
+  artifacts: **0 differences** across `idx0_inventory` (51×8),
+  `idx0b_prominence` (5×5) and `idx0_final_stage` (51×3) — under *both* configs.
+  46 peak / 5 valley; prominence exactly `0.0` on all five.
+- Incipient boundary on TRAIN under params-9 at the tip: **8 of 17 (47.1%)**,
+  refusal agreement **14 of 16** — identical to A.
+- **(V) 4 of 5 under params-13, identical to A.** `20180608` remains the sole
+  exception by A's own mechanism: incipient boundary 38 vs leading decay block
+  11, so the unconditional overwrite at `find_stages.py:1134` (tip; `:982` at
+  `887c628`) consumes the whole block. Unchanged, not repaired.
+- The replay used to snapshot `periods` after `find_decay_period` was verified
+  against the real `get_periods` on **all 51 tracks, both configs** — per the
+  practice rule recorded under item 24.
+
+### The one behavioural difference found anywhere
+
+`20191014`'s sequence loses its `mature` between params-9 and params-13
+(`incipient>decay>intensification>mature>decay` → `incipient>decay>intensification>decay`).
+Flipping one key at a time from params-9 — only three keys can differ at the tip,
+`distance` being inert there — attributes it to **`mature_min_depth=0.80` alone**,
+the known deliberate collateral of front 20(b) (item 22). The all-three variant
+reproduces the params-13 census on all 5 tracks, which is what licenses reading
+the single-key rows as attribution. **Its V does not flip**: the phase lost is
+mid-sequence, while V reads the first non-incipient phase, still `decay`.
+Attribution only; no correction proposed.
+
+### Findings worth keeping
+
+- **The env A's scripts name, `south_atlantic_cyclone_extremes`, has no
+  cyclophaser installed at all** — no package, no `dist-info`, absent from
+  `pip list`. There is no wheel there to shadow with. The env item 13 actually
+  names, `lorenz`, *does* carry **1.7.3** non-editably: the vector is real, but
+  it is not the env A used. This is the env's state today, not on 2026-09-09 —
+  evidence, not proof. The 1a gate is what settles it.
+- **The dedicated `cyclophaser` env is itself a shadowing vector for worktree
+  work.** It carries an editable install whose `MAPPING` points at the *main*
+  checkout. Its `install()` appends to `sys.meta_path`, landing after
+  `PathFinder`, so a `sys.path` entry still wins — but that is setuptools'
+  current codegen, not a guarantee. **Any future worktree measurement must assert
+  `cyclophaser.__file__`, never assume it.**
+- `import cyclophaser.determine_periods` binds the *function* of that name, which
+  the package `__init__` rebinds over the submodule; it has no `__file__`. The
+  module object is reachable only via `sys.modules['cyclophaser.determine_periods']`.
+  (Already recorded under item 26; it bit again here.)
+- Step 1a ran the original code under a **different** interpreter stack from the
+  original (python 3.12.14 / numpy 2.5.3 / scipy 1.18.0 vs 3.11.15 / 2.4.6 /
+  1.17.1). Had it failed, env drift and shadowing would not have been separable.
+  It passed — which also shows A's numbers are stable across that step.
+
+### Scope
+
+Frozen test split respected: the 16 test reals enter only the mechanical census;
+`20206498` also enters (V), exactly as in A. No test label was read or scored —
+every `evaluate_against_labels.py` run omitted `--test`. No correction to A, no
+repository clean-up, no reopening of B, C, D, E, G or the refusal front.
+
+### Status
+
+Branch pushed, **not merged**. Merging needs Danilo's explicit authorisation.
+Item 13 remains **OPEN** for the front named "E", which is still unidentified.
 
 ---
 

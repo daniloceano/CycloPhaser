@@ -1,0 +1,31 @@
+==========================================================================
+PROVENANCE (same process, before the script body runs)
+==========================================================================
+  cwd                  : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/afca1d9c-67bc-4d09-92e0-27235a0dfe30/scratchpad/wt_6060c6d
+  worktree             : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/afca1d9c-67bc-4d09-92e0-27235a0dfe30/scratchpad/wt_6060c6d
+  script               : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/afca1d9c-67bc-4d09-92e0-27235a0dfe30/scratchpad/wt_6060c6d/research/labels/diagnostics/build_final_output_check.py
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/afca1d9c-67bc-4d09-92e0-27235a0dfe30/scratchpad/wt_6060c6d/cyclophaser/__init__.py
+  cyclophaser.__version__: <none>
+  determine_periods.py : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/afca1d9c-67bc-4d09-92e0-27235a0dfe30/scratchpad/wt_6060c6d/cyclophaser/determine_periods.py
+    sha256             : 1061fb5560ef1494da4548f60f033c7f2e5563f82fed32db3f48917326588f6a
+  find_stages.py       : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/afca1d9c-67bc-4d09-92e0-27235a0dfe30/scratchpad/wt_6060c6d/cyclophaser/find_stages.py
+    sha256             : bff7ddbb032a537b8fc54bfaed28890be4ed3310c8db858e4fb614cd2301d3f5
+  sys.meta_path:
+    [0] <_distutils_hack.DistutilsMetaFinder object at 0x10b774aa0>
+    [1] <class '_frozen_importlib.BuiltinImporter'>
+    [2] <class '_frozen_importlib.FrozenImporter'>
+    [3] <class '_frozen_importlib_external.PathFinder'>
+    [4] <class '__editable___cyclophaser_2_0_0_finder._EditableFinder'>
+    [5] <six._SixMetaPathImporter object at 0x16fb30980>
+  ASSERT OK: package and both modules load from the worktree.
+==========================================================================
+track_id  split  decai_comprimento_passos  incipient_boundary bloco_sobrevive primeira_fase_nao_incipiente_saida_final primeira_fase_nao_incipiente_rotulo
+20180170 treino                        22                   8             sim                                    decay                     intensification
+20180608 treino                        11                  38             nao                          intensification                     intensification
+20190325 treino                        88                   9             sim                                    decay                     intensification
+20191014 treino                       124                   9             sim                                    decay                     intensification
+20206498  teste                        77                   9             sim                                    decay                                    
+
+wrote /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/afca1d9c-67bc-4d09-92e0-27235a0dfe30/scratchpad/wt_6060c6d/research/labels/diagnostics/final_output_check.csv

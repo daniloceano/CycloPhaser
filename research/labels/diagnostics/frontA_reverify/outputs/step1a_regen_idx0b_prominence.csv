@@ -1,0 +1,6 @@
+track_id,idx0_prominence_computed_diagnostically,max_interior_prominence_z,prominence_relative_threshold_cfg,would_survive_relative_filter_on_its_own_merit,steps_to_next_surviving_extremum
+20180170,0.0,7e-06,0.3,False,21
+20180608,0.0,4.1e-05,0.3,False,10
+20190325,0.0,1.5e-05,0.3,False,64
+20191014,0.0,4.7e-05,0.3,False,52
+20206498,0.0,1.5e-05,0.3,False,40

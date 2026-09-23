@@ -1,0 +1,26 @@
+track_id,variant,sequencia_fases,primeira_fase_nao_incipiente,V_ocorre
+20180170,params-9 baseline,incipient>decay>intensification>mature>decay,decay,sim
+20180170,only mature_amplitude_fraction=0.9,incipient>decay>intensification>mature>decay,decay,sim
+20180170,only mature_min_depth=0.8,incipient>decay>intensification>mature>decay,decay,sim
+20180170,only intensification_min_depth=0.05,incipient>decay>intensification>mature>decay,decay,sim
+20180170,all three (== params-13),incipient>decay>intensification>mature>decay,decay,sim
+20180608,params-9 baseline,incipient>intensification>mature>decay,intensification,nao
+20180608,only mature_amplitude_fraction=0.9,incipient>intensification>mature>decay,intensification,nao
+20180608,only mature_min_depth=0.8,incipient>intensification>mature>decay,intensification,nao
+20180608,only intensification_min_depth=0.05,incipient>intensification>mature>decay,intensification,nao
+20180608,all three (== params-13),incipient>intensification>mature>decay,intensification,nao
+20190325,params-9 baseline,incipient>decay>intensification>mature>decay,decay,sim
+20190325,only mature_amplitude_fraction=0.9,incipient>decay>intensification>mature>decay,decay,sim
+20190325,only mature_min_depth=0.8,incipient>decay>intensification>mature>decay,decay,sim
+20190325,only intensification_min_depth=0.05,incipient>decay>intensification>mature>decay,decay,sim
+20190325,all three (== params-13),incipient>decay>intensification>mature>decay,decay,sim
+20191014,params-9 baseline,incipient>decay>intensification>mature>decay,decay,sim
+20191014,only mature_amplitude_fraction=0.9,incipient>decay>intensification>mature>decay,decay,sim
+20191014,only mature_min_depth=0.8,incipient>decay>intensification>decay,decay,sim
+20191014,only intensification_min_depth=0.05,incipient>decay>intensification>mature>decay,decay,sim
+20191014,all three (== params-13),incipient>decay>intensification>decay,decay,sim
+20206498,params-9 baseline,incipient>decay>intensification>decay,decay,sim
+20206498,only mature_amplitude_fraction=0.9,incipient>decay>intensification>decay,decay,sim
+20206498,only mature_min_depth=0.8,incipient>decay>intensification>decay,decay,sim
+20206498,only intensification_min_depth=0.05,incipient>decay>intensification>decay,decay,sim
+20206498,all three (== params-13),incipient>decay>intensification>decay,decay,sim

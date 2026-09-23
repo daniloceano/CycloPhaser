@@ -1,0 +1,6 @@
+track_id,split,idx0_tipo,idx0_prominence,decai_comprimento_passos,leading_incipient_len_final,sequencia_fases_final,primeira_fase_nao_incipiente_saida_final,V_ocorre,replay_equals_get_periods
+20180170,treino,valley,0.0,22,8,incipient>decay>intensification>mature>decay,decay,sim,sim
+20180608,treino,valley,0.0,11,38,incipient>intensification>mature>decay,intensification,nao,sim
+20190325,treino,valley,0.0,88,9,incipient>decay>intensification>mature>decay,decay,sim,sim
+20191014,treino,valley,0.0,124,9,incipient>decay>intensification>decay,decay,sim,sim
+20206498,teste,valley,0.0,77,9,incipient>decay>intensification>decay,decay,sim,sim
