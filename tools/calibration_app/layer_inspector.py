@@ -177,6 +177,7 @@ def build_args_periods(**overrides) -> dict:
 def build_working_frame(vorticity,
                         prominence=None,
                         prominence_relative=None,
+                        reclassify_index0=True,
                         ) -> pd.DataFrame:
     """Reproduce ``get_periods``' internal frame, field for field.
 
@@ -199,6 +200,12 @@ def build_working_frame(vorticity,
             ``vorticity_smoothed2``, ``dz_dt_smoothed2``, ``dz_dt2_smoothed2``).
         prominence, prominence_relative: the z-extrema filter
             settings, forwarded to ``find_peaks_valleys`` verbatim.
+        reclassify_index0: rule C2' on the first point. **Default True, like
+            ``get_periods``' own default and unlike ``find_peaks_valleys``'** —
+            this function exists to reproduce the pipeline, so its default has
+            to be the pipeline's, or the ribbon would show a run the app is not
+            making. Applied to ``z`` only, exactly as ``get_periods`` applies
+            it.
 
     Returns:
         pd.DataFrame indexed by time with columns z, z_unfil, dz, dz2,
@@ -216,9 +223,10 @@ def build_working_frame(vorticity,
     df['z_peaks_valleys'] = find_peaks_valleys(df['z'],
                                                prominence=prominence,
                                                prominence_relative=prominence_relative,
+                                               reclassify_index0=reclassify_index0,
                                                )
-    df['dz_peaks_valleys'] = find_peaks_valleys(df['dz'])
-    df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'])
+    df['dz_peaks_valleys'] = find_peaks_valleys(df['dz'], reclassify_index0=False)
+    df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'], reclassify_index0=False)
 
     df['periods'] = np.nan
     df['periods'] = df['periods'].astype('object')
@@ -676,6 +684,7 @@ def _effective_threshold(signed_data: np.ndarray,
 def mature_lens(z: pd.Series,
                 prominence=None,
                 prominence_relative=None,
+                reclassify_index0=True,
                 ) -> dict:
     """Accepted/rejected z extrema under the current extrema-filter settings.
 
@@ -684,6 +693,15 @@ def mature_lens(z: pd.Series,
            ``vorticity_smoothed2``), indexed as in the working frame.
         prominence, prominence_relative: the extrema-filter
            parameters, passed through to ``find_peaks_valleys`` verbatim.
+        reclassify_index0: rule C2' on the first point — default True, like
+           ``get_periods``. The ACCEPTED sets have to be the pipeline's, or the
+           lens would mark index 0 as a kind the detector no longer sees. It is
+           applied to the accepted sets only: the candidate population is what
+           the prominence filter was handed, and the rule runs after that
+           filter, not before it. Index 0 is excluded from the rejected sets
+           for the same reason it always was — a boundary extremum is never
+           dropped by prominence — which is what keeps "rejected" meaning
+           "rejected BY PROMINENCE" once its kind can change.
 
     Returns:
         dict with, for each of 'peak' and 'valley':
@@ -706,13 +724,16 @@ def mature_lens(z: pd.Series,
     candidates = find_peaks_valleys(z)
     accepted = find_peaks_valleys(z, prominence=prominence,
                                   prominence_relative=prominence_relative,
+                                  reclassify_index0=reclassify_index0,
                                   )
 
     out = {"n": n, "boundary": tuple(i for i in (0, n - 1) if n > 0)}
+    edges = {0, n - 1}
     for kind, signed in (("peak", data), ("valley", -data)):
         cand = _label_positions(candidates, kind)
         acc = _label_positions(accepted, kind)
-        rej = np.array(sorted(set(cand.tolist()) - set(acc.tolist())), dtype=int)
+        rej = np.array(sorted(set(cand.tolist()) - set(acc.tolist()) - edges),
+                       dtype=int)
 
         interior = np.array([i for i in cand if i not in (0, n - 1)], dtype=int)
         prom_vals, threshold = _effective_threshold(
