@@ -679,6 +679,19 @@ series' sign and that one happens to still read the same way despite the
 disagreement). This is the underlying mechanism behind both routes 3 and 4
 above, and behind item 3c's `r(t₀)` measurements for `boundary_padding`.
 
+**Backlog addition, 2026-09-24 — `20180608` is handed to this item by item 28.**
+Stage 2 of front A shipped `reclassify_index0` (rule C2') and measured that it
+**cannot reach `20180608`**: in the filtered series the valley at index 0 is
+legitimate — `z` rises monotonically from `z[0] = -3.285e-5` to the peak at
+index 10 — so the rule correctly declines. Its spurious opening `decay[0,11)`
+comes from the filtered curve starting at a minimum and rising while the raw
+series deepens (`sign(z_raw[1]-z_raw[0]) = -1` vs
+`sign(z_filt[1]-z_filt[0]) = +1`), i.e. from **this** defect. No
+reclassification rule of any kind fixes it; a change to the filter's edge
+treatment would. Today H (`find_stages.py:1134`) masks it, with
+`boundary = 38` against an 11-step block, so it is invisible in the output and
+free — until a config shortens that boundary below 11. See item 28.
+
 ### (e) ⚠️ The synthetic suite does not represent the real tracks at the t0 boundary
 
 **The 12 synthetic cases (`tests/synthetic/cases.py`) are not evidence about
@@ -3102,9 +3115,18 @@ tree with the flag forced each way.
 | Q8 | boundary identical, 63/63 | 63/63 | CONFIRMED |
 | Q9 | suite green | green | CONFIRMED |
 
-Sequence match over the 62 label-carrying series: 42 → 42 by the raw counter;
-**+1 with one accepted reclassification** once `20190639` is read by its blocks
-(Q6), per the declared exception. `manual_labels.yaml` untouched.
+Sequence match, **TRAIN only (47 series): 31/47 → 31/47** by the raw counter;
+**32/47** once `20190639` is read by its blocks (Q6), per the declared
+exception — +1 match and one accepted reclassification. `manual_labels.yaml`
+untouched.
+
+> **Correction, 2026-09-24.** This was first recorded as "62 label-carrying
+> series: 42 → 42", which had read the labels of 15 held-out TEST tracks into an
+> aggregate. Fixed at the source: `stage2_gate.py` reads labels for TRAIN only,
+> the table's test rows carry no label and no match column, and no test
+> aggregate remains in the repo. The TEST split is still run — Q1, Q2, Q7 and Q8
+> are mechanical and need all 63 series — and `20206498`'s sequence is still
+> reported; what is gone is every comparison against a test label.
 
 #### The finding that matters most
 
@@ -3137,9 +3159,26 @@ change to the *calibrated* configuration, not to the out-of-the-box one.
    `prominence_relative = 0.3` deleting `valley@9`. The improvement is accepted;
    the mechanism is distinct and is sensitive to the filter's threshold, so it
    should not be cited as evidence about index-0 typing.
+
 4. **Stage 1's scripts are frozen.** Their replay builds extrema with the rule
    off and asserts equality with `get_periods`; that assertion is now False on
    the 5 firing series. Do not re-run them as a check on current behaviour.
+5. **`20180608` is not reachable by C2', and the reason reassigns it to another
+   defect.** Measured at params-14: in the FILTERED series the valley at index 0
+   is **legitimate** — `z` rises monotonically from `z[0] = -3.285e-5` to the
+   peak at index 10 (`-3.005e-5`), so E1 is higher than index 0 and C2' declines
+   on both branches, correctly. The opening `decay[0,11)` is therefore not an
+   index-0 typing artefact at all: it is the filtered curve genuinely starting at
+   a minimum and rising, while the RAW series is deepening
+   (`sign(z_raw[1]-z_raw[0]) = -1` against `sign(z_filt[1]-z_filt[0]) = +1`).
+   That disagreement is **defect I, item 8(d)** — Lanczos boundary padding under
+   `boundary_padding='edge'` flipping the sign at t0, 7 of 51 real tracks — and
+   `20180608` is a listed member of it (`research/labels/diagnostics/frontRefusal/REPORT.md`,
+   "Defect I"). **`20180608` is hereby moved off this front's ledger and onto
+   item 8(d)'s backlog.** No reclassification rule of any kind can reach it;
+   what would is a change to the filter's edge treatment. H continues to mask it
+   in the final output, so it costs nothing today and will reappear on any
+   config that shortens the incipient `boundary` below 11.
 
 #### Provenance of the decision
 

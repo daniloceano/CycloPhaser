@@ -52,6 +52,19 @@ the other 58, the 12 synthetic series included:
 manual label that says 25 ± 5, at the cost of calling `[13, 26)` decay where the
 label says incipient. Reviewed and accepted as a reclassification.
 
+**When it can fire at all — read this before assuming your results moved.**
+The rule needs an extremum to have been *removed* between index 0 and E1.
+Raw `argrelextrema` output alternates, so the extremum right after a valley at
+index 0 is a peak the series rose to and cannot lie below it; symmetrically for
+a peak. What breaks that alternation is the prominence filter. **With
+`prominence` and `prominence_relative` both None — which is what the package
+defaults give you — the rule never fires: measured identical output with and
+without it on all 64 series tried** (51 calibration tracks, 12 synthetic series,
+the packaged example file;
+`research/labels/diagnostics/frontA_idx0_c2/stage2_defaults_check.py`). So this
+change affects only configurations that use a prominence filter, and no CI
+reference baseline moved.
+
 **Compatibility.** This is a change of default behaviour: a config that does not
 carry the key now runs *with* the rule. To reproduce any earlier release — or
 any calibration config from params-1 to params-13, all of which predate the rule

@@ -466,12 +466,23 @@ Table (63 rows): `outputs/stage2_table.csv`. Figures for the 5 changed series:
 
 ## Sequence-match count, and the exception
 
-Over the 62 label-carrying series: **42 → 42**. That counter charges
-`20190639` as a loss and credits `20180170` as a gain. Per Danilo's ruling of
-2026-09-23, `20190639` is scored by its blocks (Q6) and not by
-`score_phase_sequences`, which refuses to pair boundaries once an extra phase
-appears. Read that way the change is **+1 sequence match and one accepted
-reclassification**. `manual_labels.yaml` was not edited.
+**TRAIN only — 47 series: 31/47 → 31/47.** That counter charges `20190639` as a
+loss and credits `20180170` as a gain. Per Danilo's ruling of 2026-09-23,
+`20190639` is scored by its blocks (Q6) and not by `score_phase_sequences`,
+which refuses to pair boundaries once an extra phase appears. Read that way:
+**32/47 — +1 sequence match and one accepted reclassification.**
+`manual_labels.yaml` was not edited.
+
+**Correction (2026-09-24).** The first version of this section reported
+"62 label-carrying series: 42 → 42", which had read the labels of 15 held-out
+TEST tracks and folded them into an aggregate. A per-series "does it match" for
+a held-out series is a score, and 15 of them are a score of the test set. The
+gate now reads labels for TRAIN series only; the test rows of
+`outputs/stage2_table.csv` carry `<teste: nao lido>` and no match column, and
+no test aggregate remains anywhere in the repo. The TEST split is still **run**
+— Q1, Q2, Q7 and Q8 are mechanical and need all 63 series — and `20206498`'s
+sequence is still reported, which the brief allows; what is gone is every
+comparison against a test label.
 
 ## The CI reference baselines did not need updating — and why
 

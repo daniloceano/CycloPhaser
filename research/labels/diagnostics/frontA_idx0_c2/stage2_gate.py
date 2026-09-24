@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import A_TARGET_IDS, TEST_ONLY_EXAMINE, provenance, sha256_of  # noqa: E402
+from common import A_TARGET_IDS, provenance, sha256_of  # noqa: E402
 
 from labels_core import (  # noqa: E402
     PHASE_COLORS, load_real_series, load_synthetic_series, normalize_phase,
@@ -178,8 +178,14 @@ def main() -> int:
     for sid in ids:
         r, o, n = ref["records"][sid], off["records"][sid], on["records"][sid]
         changed = o["periods_sha256"] != n["periods_sha256"]
+        # Labels are read for TRAIN series only. The frozen TEST split is run
+        # through the detector — Q1, Q2, Q7 and Q8 are mechanical and need every
+        # series — but no test label is opened, printed, written to the table or
+        # added into any count. A per-series "does it match" for a held-out
+        # series is a score, and 16 of them are a score of the test set.
+        is_train = split_of.get(sid) == "treino"
         rec = labels.get(sid)
-        scoreable = sid not in TEST_ONLY_EXAMINE and rec is not None
+        scoreable = is_train and rec is not None
         if scoreable and rec["series_sha256"] != series_sha256(allser[sid]):
             raise SystemExit(f"{sid}: stale label")
         rows.append({
@@ -196,8 +202,9 @@ def main() -> int:
                      "") if changed else "",
             "seq_False": o["sequencia"],
             "seq_True": n["sequencia"],
-            "rotulo": ("<teste: nao lido>" if sid in TEST_ONLY_EXAMINE
-                       else (label_seq(rec) if rec else "<sem rotulo>")),
+            "rotulo": (label_seq(rec) if scoreable
+                       else ("<teste: nao lido>" if not is_train
+                             else "<sem rotulo>")),
             "bate_False": "",
             "bate_True": "",
         })
@@ -286,12 +293,16 @@ def main() -> int:
     print(f"  Q1-Q8: {'PASS' if all_ok else 'FAIL'}  (Q9 = a suíte, rodada à parte)")
     print()
 
-    scored = tab[tab["bate_False"] != ""]
-    print(f"  acerto de sequência (rótulo lido, {len(scored)} séries): "
-          f"False {int((scored['bate_False'] == True).sum())} -> "
-          f"True {int((scored['bate_True'] == True).sum())}")
-    print("  (20190639 é avaliado pelos blocos de Q6 por decisão do Danilo, não por "
-          "este contador)")
+    scored = tab[(tab["split"] == "treino") & (tab["bate_False"] != "")]
+    n_off = int((scored["bate_False"] == True).sum())
+    n_on = int((scored["bate_True"] == True).sum())
+    print(f"  acerto de sequência — TREINO apenas ({len(scored)} séries): "
+          f"False {n_off}/{len(scored)} -> True {n_on}/{len(scored)}")
+    excepted = n_on + int(
+        ((scored["id"] == "20190639") & (scored["bate_True"] == False)).sum())
+    print(f"  com a exceção declarada para 20190639 (avaliado pelos blocos de Q6, "
+          f"decisão do Danilo): {excepted}/{len(scored)}")
+    print("  o split de TESTE não é pontuado aqui e seus rótulos não são lidos.")
     print()
     print(tab[tab["dispara"]][["id", "split", "ramo", "seq_False", "seq_True",
                                "rotulo", "bate_False", "bate_True"]].to_string(index=False))

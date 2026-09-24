@@ -37,8 +37,9 @@ PORTÃO — Q1 a Q8
 
   Q1-Q8: PASS  (Q9 = a suíte, rodada à parte)
 
-  acerto de sequência (rótulo lido, 62 séries): False 42 -> True 42
-  (20190639 é avaliado pelos blocos de Q6 por decisão do Danilo, não por este contador)
+  acerto de sequência — TREINO apenas (47 séries): False 31/47 -> True 31/47
+  com a exceção declarada para 20190639 (avaliado pelos blocos de Q6, decisão do Danilo): 32/47
+  o split de TESTE não é pontuado aqui e seus rótulos não são lidos.
 
       id  split       ramo                                    seq_False                                                     seq_True                                 rotulo bate_False bate_True
 20180170 treino vale->pico incipient>decay>intensification>mature>decay                       incipient>intensification>mature>decay incipient>intensification>mature>decay      False      True
