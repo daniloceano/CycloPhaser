@@ -76,6 +76,12 @@ from labels_core import (load_real_series, load_synthetic_series,  # noqa: E402
 from item19_core import MARGIN as MATURE_MARGIN  # noqa: E402
 from item19_core import pair_by_overlap  # noqa: E402
 
+# Sibling app modules, resolved next to this file like the paths above.
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+import track_io  # noqa: E402
+from package_args import package_use_filter  # noqa: E402
+
 CONFIGS_DIR = _REPO / "research" / "labels" / "configs"
 SNAPSHOT_DIR = _REPO / "research" / "snapshots"
 
@@ -306,6 +312,8 @@ def run_series(pv: dict, gp: dict, values) -> dict:
     A raised exception is recorded, never swallowed: a column that cannot be
     computed on a series must say so in that cell rather than silently skip it.
     """
+    if "use_filter" in pv:          # the YAML's bool → the package's value
+        pv = {**pv, "use_filter": package_use_filter(pv["use_filter"])}
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -374,22 +382,22 @@ def load_all_series() -> tuple[dict[str, pd.Series], dict[str, str]]:
     return {**real, **synth}, source
 
 
-def parse_cyclone_csv(data) -> pd.Series:
+def parse_cyclone_csv(data, fmt: "track_io.CustomFormat | None" = None) -> pd.Series:
     """One uploaded cyclone track → a raw vorticity Series.
 
-    Same format the rest of the app reads: ';'-delimited, a `time` index and a
-    `min_max_zeta_850` column. An uploaded track carries NO manual label, which
-    is the point of allowing it only in Exploration mode — it can be compared
-    against the reference column, and it can never be scored.
+    Read by `track_io.read_track`, the one reader the rest of the app uses: the
+    standard layout (';'-delimited, `time` and `min_max_zeta_850`) recognised by
+    content, or `fmt` for any other layout, validated either way. An uploaded
+    track carries NO manual label, which is the point of allowing it only in
+    Exploration mode — it can be compared against the reference column, and it
+    can never be scored.
+
+    Raises:
+        track_io.TrackFormatError: with the cause, for a file that cannot be used.
     """
-    import io as _io
-    if isinstance(data, bytes):
-        data = data.decode("utf-8")
-    df = pd.read_csv(_io.StringIO(data), sep=";", index_col="time",
-                     parse_dates=True)
-    if "min_max_zeta_850" not in df.columns:
-        raise ValueError("missing column 'min_max_zeta_850'")
-    return df["min_max_zeta_850"].astype("float64")
+    if isinstance(data, str):
+        data = data.encode("utf-8")
+    return track_io.read_track(data, fmt)
 
 
 def split_membership() -> dict[str, str]:

@@ -3207,6 +3207,103 @@ C1 is dropped on the ceiling argument; C3 remains recorded only.
 
 ---
 
+## 29. Calibration app — flexible track reading + `use_filter` translation — **gate PASS (with the (a) premise refuted), pushed, NOT merged, 2026-09-24**
+
+Branch `feat/app-flexible-track-reader`, from `develop-v2.1` @ `d45ae49`. App
+only: `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser`
+env throughout, `sys.prefix` and `cyclophaser.__file__` checked; the baseline
+suite ran in a separate detached worktree of `develop-v2.1` that resolved its
+own `cyclophaser`.
+
+### The two problems
+
+1. Both cyclone upload fields declared `type=["csv"]`, so Streamlit's browser
+   filter turned away `.txt` files with identical content, and the app read a
+   track in three duplicated bare `read_csv` calls with no validation.
+2. The "Apply Lanczos filter" checkbox gives a bool; `process_vorticity` warns on
+   `use_filter=True`, so the grid showed that warning once per cyclone, asking
+   the user to change a value they never typed.
+
+### What was done
+
+* `tools/calibration_app/track_io.py` — `read_track(data, fmt=None)`, the single
+  reader. The standard layout is recognised from the first line (`;`, `time`,
+  `min_max_zeta_850`) and read by the unchanged `read_csv` call; a non-standard
+  file is refused unless a `CustomFormat` is given, in which case it is
+  normalised to standard bytes (vorticity tokens verbatim) and read by the same
+  call. Every path ends in one validation (DatetimeIndex, strictly increasing,
+  no duplicates, float64, no NaN, ≥ 2 points).
+* `track_format_ui.py` — the custom-format controls (off by default), the
+  mandatory preview and a per-file confirmation checkbox whose key hashes the
+  file bytes and the format (changing either clears it). Shared by the
+  Calibration and Benchmark → Exploration uploaders; the Benchmark reads the
+  same session-state keys, so the configuration was simple to share.
+* `package_args.package_use_filter` — `True → 'auto'`, everything else
+  unchanged, applied at the three calls into the package: `app.py`
+  `_run_process_vorticity`, `app.py` `_label_overlays`, `benchmark_core.run_series`.
+  The YAML export/import and the grid display code are untouched.
+
+### Added beyond the brief (for review)
+
+* **Year-first date rule.** Measured during the work: pandas 3's
+  `parse_dates=True` does NOT leave day-first dates as text — it infers the
+  layout from the first value, and reads `05/01/2015` as **1 May, with no
+  warning** (only `13/01/…` triggers the `dayfirst` warning). Validation alone
+  does not catch it (the misread dates still increase). So both paths now
+  require year-first dates (`YYYY-MM-DD…`) unless an explicit strftime format is
+  given. All 64 bundled series are year-first; bit-identity is unaffected. A
+  standard-layout file with day-first dates, previously accepted (possibly
+  misread), is now refused with a pointer to the custom format.
+* **Magnitude warning** in the preview: |ζ| > 1e-2 s⁻¹ flags a probable wrong
+  column (a latitude read as vorticity gives ≈ 50).
+
+### Gate — predictions declared before measurement
+
+| | prediction | result |
+|---|---|---|
+| (a) real `.txt` read by the new reader ≡ `.csv` copy by the old path | identical | **premise refuted** — see below |
+| (b) custom synthetic ≡ original; negatives raise | — | PASS |
+| (c) `help=` on upload + custom widgets | — | PASS |
+| (d-2)(i) filtered_vorticity, vorticity_smoothed2, phase map | 128/128 | **128/128** (and 128/128 on the Benchmark path) |
+| (d-2)(ii) grid messages "use_filter=True is interpreted" | 0 | **0** (59 on `develop-v2.1`, same state) |
+| (d-2)(iii) YAML export | identical | byte-identical in 3 states (timestamp line masked) |
+| (d-2)(iv) package test for the True warning | passes | passes (`tests/test_use_filter_bool.py`) |
+| (d-2)(v) grid display region | empty diff | empty diff (44 lines) |
+| (e) suite | 1348 passed, 0 failed | **1348 passed, 0 failed** (before: 1245 passed, 0 failed; +103 new tests) |
+
+**(a) — premise refuted.** The real tracks used for (a) (444 files from another
+local project; their path is deliberately not recorded here) all have the header
+`time;Lat;Lon`: **position-only, no vorticity column**. They are not in the
+standard layout, and no layout can make them a vorticity track. Per the brief's
+fallback: the standard path refuses them with the message "not the standard
+track layout … enable 'Custom track format'"; the custom path parses their
+`1979-02-19-2100` dates correctly (year-first, inferred) and refuses them for the
+missing vorticity column. The old path, on a `.csv` copy, failed with a bare
+`KeyError: 'min_max_zeta_850'`. The bit-identity oracle could not be run on them;
+the standard-path identity is instead pinned on all 64 bundled series
+(`tests/test_track_io.py`), and the custom-path identity on a synthetic
+rewrite of `20150069` in (b).
+
+**The (d-2)(i) population** is 51 real tracks in `tests/calibration_data` (not
+52), 12 frozen synthetics and `example_file.csv` = 64 series; × params-14 and the
+app defaults (with the filter on in both) = 128.
+
+**(f) qualitative.** 51 real + 12 synthetic + 2 accepted uploads (standard `.txt`,
+custom `.txt`) + 2 refused real `.txt`, AppTest, same machine: first load of the
+63 bundled series ≈ 29.7 s (≈ 28.8 s on `develop-v2.1`), rerun after a slider
+change ≈ 29.6 s (≈ 29.0 s before), cache-hit rerun ≈ 0.8 s. No freeze, no
+exception. The cost is detection, not reading.
+
+### Open
+
+* A user CAN still pick a wrong column in the custom format (e.g. `Lat` as
+  vorticity); the preview then shows the magnitude warning and nothing is used
+  without the explicit confirmation. Not an error by design.
+* The browser tests were not run (fixed rule); the new UI has no browser test.
+* Merge awaits Danilo's authorisation.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

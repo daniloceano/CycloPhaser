@@ -35,7 +35,10 @@ if str(Path(__file__).parent) not in sys.path:
 import benchmark_tab  # noqa: E402
 import label_tab  # noqa: E402
 import layer_inspector as li  # noqa: E402
+import track_format_ui  # noqa: E402
+import track_io  # noqa: E402
 from inspector_plotly import build_inspector_figure  # noqa: E402
+from package_args import package_use_filter  # noqa: E402
 
 # CycloPhaser version (read from setup.py at import time)
 try:
@@ -1195,13 +1198,13 @@ def _run_process_vorticity(
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
     boundary_padding,
 ):
-    df_raw = pd.read_csv(io.BytesIO(file_bytes), sep=";", index_col="time", parse_dates=True)
-    series = df_raw["min_max_zeta_850"]
+    series = track_io.read_track(file_bytes)
     zeta_df = pd.DataFrame({"zeta": series}); zeta_df.index = series.index
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         vort = process_vorticity(
-            zeta_df, use_filter=use_filter, cutoff_low=cutoff_low, cutoff_high=cutoff_high,
+            zeta_df, use_filter=package_use_filter(use_filter),
+            cutoff_low=cutoff_low, cutoff_high=cutoff_high,
             use_smoothing=use_smoothing, use_smoothing_twice=use_smoothing_twice,
             replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
             boundary_padding=boundary_padding,
@@ -1249,7 +1252,8 @@ def _label_overlays(values: pd.Series) -> dict[str, dict]:
     """
     zeta_df = pd.DataFrame({"zeta": values})
     vort = process_vorticity(
-        zeta_df, use_filter=use_filter, cutoff_low=cutoff_low, cutoff_high=cutoff_high,
+        zeta_df, use_filter=package_use_filter(use_filter),
+        cutoff_low=cutoff_low, cutoff_high=cutoff_high,
         use_smoothing=use_smoothing, use_smoothing_twice=use_smoothing_twice,
         replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
         boundary_padding=boundary_padding,
@@ -2156,9 +2160,17 @@ st.session_state["_bench_live_config"] = {
 
 # ── File upload ──────────────────────────────────────────────────────────────────
 uploaded = st.file_uploader(
-    "Upload cyclone CSV(s) (format: ';'-delimited, column 'min_max_zeta_850')",
-    type=["csv"], accept_multiple_files=True,
+    "Upload cyclone track(s) — .csv or .txt, ';'-delimited with columns 'time' "
+    "and 'min_max_zeta_850' (or a custom format, below)",
+    type=["csv", "txt"], accept_multiple_files=True, key="track_upload",
+    help=track_format_ui.UPLOAD_HELP,
 )
+# Every upload is validated here, and a non-standard one is previewed and must
+# be confirmed; what comes out is standard-layout bytes, so nothing downstream
+# knows or cares which layout the file arrived in. See track_io.
+_custom_fmt = track_format_ui.format_controls()
+_uploaded_tracks = track_format_ui.accept_uploads(uploaded, _custom_fmt,
+                                                  confirm_prefix="track_custom_ok_")
 
 _calib_data_files = sorted(_CALIBRATION_DATA_DIR.glob("*.csv")) if _CALIBRATION_DATA_DIR.is_dir() else []
 load_all_test_cyclones = st.checkbox(
@@ -2319,15 +2331,15 @@ if _synth_files:
     _wanted = ((set(_clean_ids) if load_synthetic_clean else set())
                | (set(_noisy_ids) if load_synthetic_noisy else set()))
     files.update({k: v for k, v in _synth_files.items() if k in _wanted})
-if uploaded:
-    files.update({Path(f.name).stem: f.getvalue() for f in uploaded})
+if _uploaded_tracks:
+    files.update(_uploaded_tracks)
 if not files:
     files = {"example_file": _EXAMPLE.read_bytes()}
     st.caption(f"No file uploaded — using `{_EXAMPLE.name}` as default.")
-elif load_all_test_cyclones and uploaded:
+elif load_all_test_cyclones and _uploaded_tracks:
     st.caption(
         f"Combined {len(_calib_data_files)} bundled test cyclone(s) with "
-        f"{len(uploaded)} uploaded file(s) — {len(files)} total (uploads take "
+        f"{len(_uploaded_tracks)} uploaded file(s) — {len(files)} total (uploads take "
         "precedence on ID collision)."
     )
 
@@ -2357,9 +2369,7 @@ def _gt_boundary_iso(name: str, file_bytes: bytes) -> str | None:
     if idx is None:
         return None
     try:
-        d = pd.read_csv(io.BytesIO(file_bytes), sep=";", index_col="time",
-                        parse_dates=True)
-        return d.index[int(idx)].isoformat()
+        return track_io.read_track(file_bytes).index[int(idx)].isoformat()
     except Exception:
         return None
 
