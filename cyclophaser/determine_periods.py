@@ -828,7 +828,8 @@ def get_periods(vorticity,
                 incipient_plateau_crossing: str = "single",
                 incipient_plateau_k: int = 3,
                 incipient_smooth_window: int = 0,
-                incipient_smooth_polyorder: int = 3) -> pd.DataFrame:
+                incipient_smooth_polyorder: int = 3,
+                incipient_scale: str = "global") -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -1178,6 +1179,10 @@ def get_periods(vorticity,
         raise ValueError(
             "incipient_smooth_polyorder must be >= 1, got "
             f"{incipient_smooth_polyorder!r}.")
+    # EXPERIMENT (exp/pre-peak-normalization): scale of the incipient plateau
+    # normaliser and of intensification_min_depth. "global" = unchanged.
+    if incipient_scale not in ("global", "pre_peak"):
+        raise ValueError(f"incipient_scale must be 'global' or 'pre_peak', got {incipient_scale!r}.")
 
     # Extract smoothed vorticity and derivatives
     z = vorticity.vorticity_smoothed2
@@ -1235,6 +1240,7 @@ def get_periods(vorticity,
         "incipient_plateau_k": incipient_plateau_k,
         "incipient_smooth_window": incipient_smooth_window,
         "incipient_smooth_polyorder": incipient_smooth_polyorder,
+        "incipient_scale": incipient_scale,
     }
 
     # Detect different stages of cyclone lifecycle

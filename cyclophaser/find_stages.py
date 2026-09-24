@@ -526,6 +526,9 @@ def find_intensification_period(df, **args_periods):
     if intensification_min_depth > 0:
         z_all = df['z'].to_numpy(dtype=float)
         z_range = np.nanmax(z_all) - np.nanmin(z_all)
+        # EXPERIMENT: "pre_peak" measures D2 against |z[0] - z[i_pk]|.
+        if args_periods.get('incipient_scale', 'global') == 'pre_peak':
+            z_range = abs(z_all[0] - z_all[_pre_peak_index(df)])
         if not np.isfinite(z_range) or z_range <= 0:
             # A flat or non-finite series has no depth scale, so D2 is
             # undefined. The rule is skipped for this series rather than
@@ -948,7 +951,12 @@ def _smooth_incipient_probe(x, window, polyorder):
     return savgol_filter(x, w, int(polyorder), mode="nearest")
 
 
-def _incipient_plateau_rel(df, signal, smooth_window=0, smooth_polyorder=3):
+def _pre_peak_index(df):
+    """EXPERIMENT: index of the global intensity peak (argmin of df['z'])."""
+    return int(np.nanargmin(np.asarray(df['z'], dtype=float)))
+
+
+def _incipient_plateau_rel(df, signal, smooth_window=0, smooth_polyorder=3, scale="global"):
     """Normalised slope profile rel(t) used by the plateau incipient rule.
 
     Args:
@@ -983,7 +991,14 @@ def _incipient_plateau_rel(df, signal, smooth_window=0, smooth_polyorder=3):
             f"incipient_plateau_signal must be 'derivative' or 'vorticity', got {signal!r}.")
 
     a = np.abs(v)
-    amax = np.nanmax(a) if a.size else 0.0
+    # EXPERIMENT: "pre_peak" normalises by the largest slope over [0, i_pk]
+    # (the stretch before the global intensity peak) instead of the whole
+    # series; i_pk == 0 has no pre-peak stretch and falls back to "global".
+    ipk = _pre_peak_index(df) if scale == "pre_peak" else 0
+    if ipk > 0:
+        amax = np.nanmax(a[:ipk + 1])
+    else:
+        amax = np.nanmax(a) if a.size else 0.0
     if not np.isfinite(amax) or amax <= 0:
         return np.zeros_like(a)
     return a / amax
@@ -1121,7 +1136,8 @@ def find_incipient_period(df, **args_periods):
         rel = _incipient_plateau_rel(
             df, args_periods.get('incipient_plateau_signal', 'derivative'),
             args_periods.get('incipient_smooth_window', 0),
-            args_periods.get('incipient_smooth_polyorder', 3))
+            args_periods.get('incipient_smooth_polyorder', 3),
+            args_periods.get('incipient_scale', 'global'))
         boundary = _incipient_plateau_boundary(
             rel,
             args_periods.get('incipient_plateau_tau', 0.20),
