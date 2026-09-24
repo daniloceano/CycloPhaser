@@ -1,0 +1,32 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+config: research/labels/configs/cyclophaser_params-13.yaml
+  sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+
+track 20190639, n=180, incipient boundary (H) = 13
+  rotulo : incipient[0,25) intensification[25,81) mature[81,106) decay[106,180)
+  base   : incipient[0,13) intensification[13,88) mature[88,105) decay[105,180)
+  C2     : incipient[0,13) decay[13,26) intensification[26,88) mature[88,105) decay[105,180)
+
+           fase  rotulo  tol  base  erro_base  C2  erro_C2  unsure
+intensification      25    5    13         12  26        1   False
+         mature      81    6    88          7  88        7   False
+          decay     106    8   105          1  13       93   False
+
+  (first occurrence of each phase name; the sequence metric refuses to
+   pair anything at all once an extra phase appears)
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_blocks.csv
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_c2.png

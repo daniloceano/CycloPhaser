@@ -190,6 +190,11 @@ _DEFAULTS: dict = {
     "extrema_prominence_mode":        "relative",   # 'relative' | 'absolute'
     "extrema_prominence_rel_val":     0.10,         # fraction (relative mode)
     "extrema_prominence_val":         1e-6,         # absolute threshold
+    # Rule C2' on index 0 — ON by default, matching the package's own default
+    # since front A / item 28. A config exported before params-14 carries no
+    # such key, so importing one leaves this ON: absence means "the current
+    # default", exactly as the package treats it.
+    "reclassify_index0":              True,
     "incipient_method":               "geometric",
     "incipient_plateau_tau":          0.20,
     "incipient_plateau_signal":       "derivative",
@@ -300,6 +305,24 @@ def _parse_prominence(v) -> float:
     return v
 
 
+def _parse_reclassify_index0(v) -> bool:
+    """Validating bool converter for reclassify_index0.
+
+    A checkbox cannot hold anything but True/False, so a hand-edited YAML value
+    of `1`, `"true"` or `"no"` has to become one of the two before it reaches
+    session_state — and anything that is not recognisably a boolean must raise,
+    so it is reported as a conversion error rather than silently coerced (a bare
+    `bool("false")` is True, which would turn the rule ON from a file that says
+    off)."""
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)) and v in (0, 1):
+        return bool(v)
+    if isinstance(v, str) and v.strip().lower() in ("true", "false", "yes", "no", "on", "off", "1", "0"):
+        return v.strip().lower() in ("true", "yes", "on", "1")
+    raise ValueError(f"reclassify_index0 must be a boolean, got {v!r}")
+
+
 def _parse_decay_tail_amplitude_fraction(v) -> float:
     """Validating converter for decay_tail_amplitude_fraction — same rationale
     as _parse_prominence_relative: the sidebar slider is bounded to
@@ -337,6 +360,7 @@ _YAML_PHASE_MAP: dict = {
     "incipient_plateau_k":              ("incipient_plateau_k", lambda v: int(float(v))),
     "incipient_smooth_window":          ("incipient_smooth_window", lambda v: int(float(v))),
     "incipient_smooth_polyorder":       ("incipient_smooth_polyorder", lambda v: int(float(v))),
+    "reclassify_index0":                ("reclassify_index0", _parse_reclassify_index0),
 }
 # The extrema-filtering parameters (prominence / prominence_relative)
 # and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
@@ -376,7 +400,16 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative",
                               "incipient_plateau_crossing",
                               "incipient_plateau_k",
                               "incipient_smooth_window",
-                              "incipient_smooth_polyorder"}
+                              "incipient_smooth_polyorder",
+                              # reclassify_index0 is optional for the same
+                              # backward-compatibility reason: params-1..13 all
+                              # predate rule C2' and must still import without a
+                              # "missing key" warning. Note what the fallback
+                              # means here, though — unlike the keys above, the
+                              # fallback is not a no-op: absence leaves the rule
+                              # ON, because that is the package default a config
+                              # without the key now runs under.
+                              "reclassify_index0"}
 
 # boundary_padding is OPTIONAL on import for the same reason as the optional
 # phase keys above, but for a backward-compatibility reason rather than a
@@ -390,6 +423,11 @@ _OPTIONAL_FILTER_YAML_KEYS = {"boundary_padding"}
 # rather than coerced through float().
 _PHASE_ENUM_KEYS = ("length_scale", "mature_method", "incipient_method",
                     "incipient_plateau_signal", "incipient_plateau_crossing")
+
+# phase_params entries that are booleans: exported as-is, like the enums, and
+# for the same reason — float(True) is 1.0, which round-trips into a YAML that
+# says `1.0` where the package expects a bool.
+_PHASE_BOOL_KEYS = ("reclassify_index0",)
 
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
 _REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
@@ -430,6 +468,7 @@ _PARAM_WIDGET_KEYS: dict[str, tuple[str, ...]] = {
     "prominence_relative":            ("extrema_prominence_enabled",
                                        "extrema_prominence_mode",
                                        "extrema_prominence_rel_val"),
+    "reclassify_index0":              ("reclassify_index0",),
     # cross-cutting over steps 4-6
     "length_scale":                   ("length_scale",),
     # step 4 — intensification
@@ -715,8 +754,10 @@ def _build_yaml(cyclone_names) -> str:
         "phase_params": {
             **{k: (int(v) if k in ("incipient_plateau_k",) else float(v))
                for k, v in _PHASE_PARAMS.items()
-               if v is not None and k not in _PHASE_ENUM_KEYS},
+               if v is not None and k not in _PHASE_ENUM_KEYS
+               and k not in _PHASE_BOOL_KEYS},
             **{k: _PHASE_PARAMS[k] for k in _PHASE_ENUM_KEYS},
+            **{k: bool(_PHASE_PARAMS[k]) for k in _PHASE_BOOL_KEYS},
         },
         "evaluation": _compute_evaluation(cyclone_names),
     }
@@ -875,7 +916,7 @@ def _inspector_working_frame(
     use_filter, cutoff_low, cutoff_high,
     use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
     boundary_padding,
-    prominence, prominence_relative,
+    prominence, prominence_relative, reclassify_index0,
 ) -> pd.DataFrame:
     """The frame get_periods builds internally, ready for the stage functions.
 
@@ -889,7 +930,8 @@ def _inspector_working_frame(
         boundary_padding,
     )
     return li.build_working_frame(vort, prominence=prominence,
-                                  prominence_relative=prominence_relative)
+                                  prominence_relative=prominence_relative,
+                                  reclassify_index0=reclassify_index0)
 
 
 def _stage_frame_after_decay(work: pd.DataFrame, args_periods: dict) -> pd.DataFrame:
@@ -1561,6 +1603,21 @@ with st.sidebar:
 
     st.header("3 · Extrema Filtering")
     st.caption("Step 3 — `find_peaks_valleys(z)`. Runs BEFORE every stage: the extrema that survive here are the ones all the steps below see.")
+    reclassify_index0 = st.checkbox(
+        "Reclassify the extremum at index 0",
+        value=_DEFAULTS["reclassify_index0"],
+        key="reclassify_index0",
+        help=(
+            "Decide the type of the first point by comparing it with the next "
+            "extremum that survives filtering, instead of with the single "
+            "difference z[1] - z[0]. Index 0 is always marked as an extremum "
+            "(argrelextrema compares it against itself), so that one difference "
+            "used to decide whether a life cycle opens with intensification or "
+            "with decay. Uncheck to reproduce params-13 and every earlier "
+            "config, which predate this rule."
+        ),
+    )
+
     with st.expander("Prominence filtering (advanced)", expanded=False):
         st.caption(
             "Optional post-processing for the detected peaks/valleys. "
@@ -2060,6 +2117,7 @@ _PHASE_PARAMS = dict(
     threshold_incipient_length=thr_inc_len,
     prominence=extrema_prominence,
     prominence_relative=extrema_prominence_relative,
+    reclassify_index0=reclassify_index0,
     length_scale=length_scale,
     mature_method=mature_method,
     mature_amplitude_fraction=mature_amplitude_fraction,
@@ -2724,10 +2782,12 @@ with tab_cal:
                         use_smoothing, use_smoothing_twice, replace_endpoints,
                         savgol_poly, boundary_padding,
                         extrema_prominence, extrema_prominence_relative,
+                        reclassify_index0,
                     )
                 _args_periods = li.build_args_periods(
                     **{k: v for k, v in _PHASE_PARAMS.items()
-                       if k not in ("prominence", "prominence_relative")})
+                       if k not in ("prominence", "prominence_relative",
+                                    "reclassify_index0")})
                 if _show_ribbon:
                     _ribbon = li.pipeline_ribbon(_work, **_args_periods)
                 if _show_ledger:
@@ -2742,7 +2802,8 @@ with tab_cal:
                         "lens": li.mature_lens(
                             _res["df_result"]["z"],
                             prominence=extrema_prominence,
-                            prominence_relative=extrema_prominence_relative),
+                            prominence_relative=extrema_prominence_relative,
+                            reclassify_index0=reclassify_index0),
                         "records": _mature_records,
                     }
                 if _show_incipient:

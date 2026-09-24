@@ -1,0 +1,20 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd            : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  worktree       : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/a41b9389-9389-472c-93d7-d1c529dc2255/scratchpad/wt-c714451
+  sys.executable : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix     : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser    : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/a41b9389-9389-472c-93d7-d1c529dc2255/scratchpad/wt-c714451/cyclophaser/__init__.py
+  determine_periods.py : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/a41b9389-9389-472c-93d7-d1c529dc2255/scratchpad/wt-c714451/cyclophaser/determine_periods.py
+    sha256             : 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+  ASSERT OK: package loads from the named worktree.
+==========================================================================
+config: research/labels/configs/cyclophaser_params-13.yaml
+  sha256: c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973
+  keys dropped by the signature filter: []
+  get_periods accepts reclassify_index0: False
+  reclassify_index0 in this run: <absent>
+loaded 63 series
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.json (63 series)

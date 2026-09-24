@@ -1,0 +1,51 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 5e11f622e264d66f5f84973c9bf59cc10fd6820c63f4e8c433c4ceacef8f3442
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+reference : /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/a41b9389-9389-472c-93d7-d1c529dc2255/scratchpad/wt-c714451/cyclophaser/__init__.py
+  determine_periods sha256 2c6eaae8494a54e972fef087076a5df677f46bad4ca5d4a219ce97aee77b1cb9
+current   : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  determine_periods sha256 5e11f622e264d66f5f84973c9bf59cc10fd6820c63f4e8c433c4ceacef8f3442
+config    : research/labels/configs/cyclophaser_params-14.yaml  sha256 acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_table.csv (63 rows)
+
+==========================================================================
+PORTÃO — Q1 a Q8
+==========================================================================
+  Q1: CONFIRMADA — False == c714451 em 63/63 séries (sha256 do periods)
+  Q2: CONFIRMADA — dispara em 5/63: ['20180170', '20190325', '20190639', '20191014', '20206498']; esperado ['20180170', '20190325', '20190639', '20191014', '20206498']; sintéticos que disparam: nenhum; 58 séries byte-idênticas entre False e True
+  Q3: CONFIRMADA — 20180170: incipient>intensification>mature>decay  | bate rótulo: True
+  Q4: CONFIRMADA — 20190325: incipient>intensification>decay>intensification>mature>decay
+  Q5: CONFIRMADA — 20191014: incipient>intensification>mature>decay>residual
+  Q6: CONFIRMADA — 20190639: incipient>decay>intensification>mature>decay
+        blocos: incipient[0,13) decay[13,26) intensification[26,88) mature[88,105) decay[105,180)
+  Q7: CONFIRMADA — 20180608: saída final idêntica entre False e True: True
+        flag=False: replay==get_periods True; boundary=38; ANTES de H decay[0,11) intensification[11,62) mature[62,71) decay[71,117); DEPOIS incipient>intensification>mature>decay
+        flag=True: replay==get_periods True; boundary=38; ANTES de H decay[0,11) intensification[11,62) mature[62,71) decay[71,117); DEPOIS incipient>intensification>mature>decay
+  Q8: CONFIRMADA — boundary idêntico entre False e True em 63/63
+
+  Q1-Q8: PASS  (Q9 = a suíte, rodada à parte)
+
+  acerto de sequência — TREINO apenas (47 séries): False 31/47 -> True 31/47
+  com a exceção declarada para 20190639 (avaliado pelos blocos de Q6, decisão do Danilo): 32/47
+  o split de TESTE não é pontuado aqui e seus rótulos não são lidos.
+
+      id  split       ramo                                    seq_False                                                     seq_True                                 rotulo bate_False bate_True
+20180170 treino vale->pico incipient>decay>intensification>mature>decay                       incipient>intensification>mature>decay incipient>intensification>mature>decay      False      True
+20190325 treino vale->pico incipient>decay>intensification>mature>decay incipient>intensification>decay>intensification>mature>decay incipient>intensification>mature>decay      False     False
+20190639 treino pico->vale       incipient>intensification>mature>decay                 incipient>decay>intensification>mature>decay incipient>intensification>mature>decay       True     False
+20191014 treino vale->pico        incipient>decay>intensification>decay              incipient>intensification>mature>decay>residual           intensification>mature>decay      False     False
+20206498  teste vale->pico        incipient>decay>intensification>decay        incipient>intensification>decay>intensification>decay                      <teste: nao lido>                     
+
+wrote research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_changed_series.png

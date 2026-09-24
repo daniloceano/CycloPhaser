@@ -57,7 +57,77 @@ def _collapse_plateaux(indices):
     return np.array(collapsed, dtype=indices.dtype)
 
 
-def find_peaks_valleys(series, prominence=None, prominence_relative=None):
+def _reclassify_index0(data, peaks, valleys):
+    """Rule C2' — retype index 0 against the next surviving extremum.
+
+    Index 0 is ALWAYS an extremum: ``argrelextrema`` runs with ``mode='clip'``
+    and non-strict comparators, so it compares ``data[0]`` against itself and
+    the test passes whatever the data does (see the NOTE in
+    ``find_peaks_valleys``). Its TYPE then falls out of the sign of
+    ``data[1] - data[0]`` alone — one boundary finite difference, taken on a
+    smoothed series whose first sample is the one the smoother had least
+    information about. Measured on the 51 calibration tracks plus the 12
+    synthetic series, that single difference types index 0 as a ``valley`` on
+    11 of 63 and opens the life cycle with a spurious ``decay`` on several of
+    them (research/labels/diagnostics/frontA_idx0_c2/REPORT.md).
+
+    This rule replaces that one-sample decision with a comparison against E1,
+    the next extremum still standing in the FINAL list — i.e. after the
+    prominence filter and after the boundary exception, so it reads the same
+    extrema the stage functions will read:
+
+      * index 0 typed ``valley`` while ``data[E1] < data[0]`` strictly: E1 is
+        deeper, so index 0 is not a minimum of anything and becomes ``peak``;
+      * index 0 typed ``peak`` while ``data[E1] > data[0]`` strictly: E1 is
+        higher, so index 0 becomes ``valley``;
+      * a tie, or no E1 at all: nothing changes. A tie is exactly the case the
+        boundary difference cannot resolve either, and inventing an answer
+        there would be the defect this rule exists to remove.
+
+    E1 is taken WITHOUT a type restriction. Requiring E1 to share index 0's
+    type was measured first (rule C2, stage 1 of the same front) and reached
+    only 3 of the 5 tracks that motivated the change: it missed the two whose
+    E1 is a peak, including ``20180170``, the one track where the correction is
+    worth a full sequence match.
+
+    Only index 0 is touched. No other extremum is created, removed or retyped,
+    and neither array is reordered.
+
+    Args:
+        data:    the series values the extrema were detected on.
+        peaks:   surviving peak indices (sorted).
+        valleys: surviving valley indices (sorted).
+
+    Returns:
+        (peaks, valleys), possibly with index 0 moved from one to the other.
+    """
+    if len(data) < 2:
+        return peaks, valleys
+
+    in_peaks = 0 in peaks
+    in_valleys = 0 in valleys
+    if in_peaks == in_valleys:
+        # Index 0 is either absent from both (a boundary plateau whose
+        # collapsed representative sits elsewhere) or — which the overlap
+        # removal in find_peaks_valleys rules out — in both. Nothing to retype.
+        return peaks, valleys
+
+    others = [i for i in np.concatenate((peaks, valleys)) if i > 0]
+    if not others:
+        return peaks, valleys
+    e1 = int(min(others))
+
+    if in_valleys and data[e1] < data[0]:
+        valleys = valleys[valleys != 0]
+        peaks = np.sort(np.append(peaks, 0)).astype(peaks.dtype)
+    elif in_peaks and data[e1] > data[0]:
+        peaks = peaks[peaks != 0]
+        valleys = np.sort(np.append(valleys, 0)).astype(valleys.dtype)
+    return peaks, valleys
+
+
+def find_peaks_valleys(series, prominence=None, prominence_relative=None,
+                       reclassify_index0=False):
     """Find peaks, valleys, and zero locations in a pandas Series.
 
     Uses argrelextrema with np.greater_equal / np.less_equal so that a flat
@@ -105,6 +175,15 @@ def find_peaks_valleys(series, prominence=None, prominence_relative=None):
                              removes any interior extremum whose prominence is
                              below 10 % of the most prominent one.  Default None
                              disables relative filtering (no-op).
+        reclassify_index0:   bool. Apply rule C2' to index 0 after filtering —
+                             see ``_reclassify_index0``. **Default False here,
+                             while ``get_periods`` and ``determine_periods``
+                             default it to True.** The asymmetry is deliberate:
+                             the rule is a statement about the vorticity series
+                             a cyclone life cycle is read from, not a property
+                             of extremum detection in general, so the pipeline
+                             turns it on and a direct caller of this function
+                             keeps the historical behaviour unless it asks.
 
     Returns:
         result: pandas Series with NaN, 'peak', 'valley', or 0 at each position
@@ -134,6 +213,13 @@ def find_peaks_valleys(series, prominence=None, prominence_relative=None):
     if prominence is not None or prominence_relative is not None:
         peaks   = _refine_extrema(data,  data, peaks,   prominence, prominence_relative, N)
         valleys = _refine_extrema(data, -data, valleys, prominence, prominence_relative, N)
+
+    # Rule C2' on index 0. Applied HERE, after refinement, because the rule is
+    # defined against the next extremum that actually survives into the list the
+    # stage functions read — filtering first and retyping second is what makes
+    # "the next extremum" the same object downstream.
+    if reclassify_index0:
+        peaks, valleys = _reclassify_index0(data, peaks, valleys)
 
     # Build result series
     result = pd.Series(index=series.index, dtype=object)
@@ -729,6 +815,7 @@ def get_periods(vorticity,
                 threshold_incipient_length: float = 0.4,
                 prominence: float = None,
                 prominence_relative: float = None,
+                reclassify_index0: bool = True,
                 length_scale: str = "global",
                 mature_method: str = "derivative",
                 mature_amplitude_fraction: float = 0.90,
@@ -945,6 +1032,37 @@ def get_periods(vorticity,
             and strong systems without re-tuning. Example: 0.10 keeps only
             z-extrema whose prominence is ≥ 10 % of the dominant extremum's
             prominence. Default None (no-op).
+        reclassify_index0 (bool, optional): Rule C2' — retype the extremum at
+            index 0 against the next extremum that survives the filters, instead
+            of leaving its type to the single boundary difference
+            ``z[1] - z[0]``. If index 0 is typed ``valley`` and the next
+            surviving extremum is strictly deeper, index 0 becomes a ``peak``;
+            if it is typed ``peak`` and the next one is strictly higher, it
+            becomes a ``valley``; a tie, or no next extremum, changes nothing.
+            The next extremum is taken whatever its own type.
+
+            **It cannot fire unless an extremum between index 0 and the next one
+            has already been removed**, which in practice means a prominence
+            filter is active: raw ``argrelextrema`` output alternates, so the
+            extremum right after a valley at index 0 is a peak the series rose
+            to and cannot lie below it. With ``prominence`` and
+            ``prominence_relative`` both None — the package defaults — the rule
+            is a measured no-op: identical output with and without it on all 64
+            series tried (51 calibration tracks, 12 synthetic series, the
+            packaged example). It therefore changes results only for
+            configurations that filter extrema by prominence.
+
+            **Default True — this is a change of default behaviour.** Index 0 is
+            an extremum only because ``argrelextrema`` runs with ``mode='clip'``
+            and compares it against itself, so its type was decided by one
+            finite difference on the least-informed sample of the smoothed
+            series; on the calibration set that opened several life cycles with
+            a ``decay`` that the vorticity does not support. Set it to False to
+            reproduce the behaviour of every version before this one (and of any
+            calibration config exported before it, params-1 to params-13 —
+            params-14 is the first that states it). Applied to ``z`` only: no
+            stage function reads index 0's type in ``dz``/``dz2``. Measured in
+            research/labels/diagnostics/frontA_idx0_c2/REPORT.md.
         length_scale (str, optional): "global" (default) or "local". See the
             "length_scale note" above. Default "global" reproduces the exact
             behaviour of all versions prior to this option.
@@ -1077,11 +1195,20 @@ def get_periods(vorticity,
     # bumps irrelevant to the life cycle.  Applying them to dz would discard the
     # low-amplitude early dz valleys that find_incipient_period relies on to
     # locate the incipient/intensification boundary.
+    #
+    # `reclassify_index0` is likewise applied to z ALONE, and the two derivative
+    # calls pass it off explicitly rather than by omission. The rule's evidence
+    # is about the vorticity series: nothing downstream reads index 0's type in
+    # dz or dz2 — the geometric incipient rule looks for the next dz extremum in
+    # `df[1:]`, which excludes index 0 by construction, and dz2's extrema are not
+    # read by any stage function at all (measured, front A / item 28). Retyping
+    # them would therefore change only what the plots draw, on no evidence.
     df['z_peaks_valleys']   = find_peaks_valleys(df['z'],
                                                   prominence=prominence,
-                                                  prominence_relative=prominence_relative)
-    df['dz_peaks_valleys']  = find_peaks_valleys(df['dz'])
-    df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'])
+                                                  prominence_relative=prominence_relative,
+                                                  reclassify_index0=reclassify_index0)
+    df['dz_peaks_valleys']  = find_peaks_valleys(df['dz'], reclassify_index0=False)
+    df['dz2_peaks_valleys'] = find_peaks_valleys(df['dz2'], reclassify_index0=False)
 
     # Initialize periods column
     df['periods'] = np.nan
@@ -1186,6 +1313,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       threshold_incipient_length: float = 0.4,
                       prominence: float = None,
                       prominence_relative: float = None,
+                      reclassify_index0: bool = True,
                             length_scale: str = "global",
                       mature_method: str = "derivative",
                       mature_amplitude_fraction: float = 0.90,
@@ -1342,6 +1470,37 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         incipient_smooth_polyorder (int, optional): Polynomial order of that
             Savitzky-Golay pass. Default is 3. A window at or below this order cannot
             define the fit and is skipped (no smoothing).
+        reclassify_index0 (bool, optional): Rule C2' — retype the extremum at
+            index 0 against the next extremum that survives the filters, instead
+            of leaving its type to the single boundary difference
+            ``z[1] - z[0]``. If index 0 is typed ``valley`` and the next
+            surviving extremum is strictly deeper, index 0 becomes a ``peak``;
+            if it is typed ``peak`` and the next one is strictly higher, it
+            becomes a ``valley``; a tie, or no next extremum, changes nothing.
+            The next extremum is taken whatever its own type.
+
+            **It cannot fire unless an extremum between index 0 and the next one
+            has already been removed**, which in practice means a prominence
+            filter is active: raw ``argrelextrema`` output alternates, so the
+            extremum right after a valley at index 0 is a peak the series rose
+            to and cannot lie below it. With ``prominence`` and
+            ``prominence_relative`` both None — the package defaults — the rule
+            is a measured no-op: identical output with and without it on all 64
+            series tried (51 calibration tracks, 12 synthetic series, the
+            packaged example). It therefore changes results only for
+            configurations that filter extrema by prominence.
+
+            **Default True — this is a change of default behaviour.** Index 0 is
+            an extremum only because ``argrelextrema`` runs with ``mode='clip'``
+            and compares it against itself, so its type was decided by one
+            finite difference on the least-informed sample of the smoothed
+            series; on the calibration set that opened several life cycles with
+            a ``decay`` that the vorticity does not support. Set it to False to
+            reproduce the behaviour of every version before this one (and of any
+            calibration config exported before it, params-1 to params-13 —
+            params-14 is the first that states it). Applied to ``z`` only: no
+            stage function reads index 0's type in ``dz``/``dz2``. Measured in
+            research/labels/diagnostics/frontA_idx0_c2/REPORT.md.
         length_scale (str, optional): "global" (default) or "local". Controls what
             length ``threshold_intensification_length``, ``threshold_intensification_gap``,
             ``threshold_mature_length``, ``threshold_decay_length`` and
@@ -1509,6 +1668,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         threshold_incipient_length=threshold_incipient_length,
         prominence=prominence,
         prominence_relative=prominence_relative,
+        reclassify_index0=reclassify_index0,
         length_scale=length_scale,
         mature_method=mature_method,
         mature_amplitude_fraction=mature_amplitude_fraction,

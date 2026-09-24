@@ -1,0 +1,452 @@
+{
+ "worktree": "/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser",
+ "cyclophaser": "/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py",
+ "determine_periods_sha256": "5e11f622e264d66f5f84973c9bf59cc10fd6820c63f4e8c433c4ceacef8f3442",
+ "config": "research/labels/configs/cyclophaser_params-14.yaml",
+ "config_sha256": "acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e",
+ "set_flag": "on",
+ "accepts_flag": true,
+ "records": {
+  "20150069": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 66,
+   "periods_sha256": "60ab4adcd26a4f3001188096b6b18c4c41668284f59a5547d4c3a55b4d26a348",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20150377": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 113,
+   "periods_sha256": "b4ad9751a845641867eac053457bc1814323cfc769536c34b42b49355391b96b",
+   "sequencia": "incipient>intensification>decay"
+  },
+  "20150436": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 112,
+   "periods_sha256": "9859edf576d49804c0a99c833749ce5c9e07fa7790c779a4b133ae3a2e5eca90",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20150528": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 51,
+   "periods_sha256": "80e4d8c76d9b0fc9072144e17f3ae05ba4ea6da68997693faabe1e0f42d407d4",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20150532": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 107,
+   "periods_sha256": "5b9b7ceeee1a068aa9cc8cfbe09c6ec834132b2337c908abc0cfe1e6dfafcc6a",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20150561": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 146,
+   "periods_sha256": "ef310e52760d6fdd817ee45d1b5dd5ad1ac0a72f51458f7823ea2d30797e7567",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20150646": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 130,
+   "periods_sha256": "378cf30b3feaa2a2535419556825549f203878b8bd563c9a15306b0b5c6b3d7e",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20150656": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 160,
+   "periods_sha256": "e88fb31d14b8c907f68b60c8bd0c86159879558ed4f3aa0f5f5e879155e55436",
+   "sequencia": "intensification>mature>decay>intensification>mature>decay"
+  },
+  "20150746": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 71,
+   "periods_sha256": "58707c3322421abde7ce315c43991eb5ce6a3f6f87a2dc49f2d10ddba3ab7060",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20160030": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 153,
+   "periods_sha256": "78dbcb715d59bcc91f373c37708db136d820bbd894e5d24f3bc9eb8a1e7c6167",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20160587": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 79,
+   "periods_sha256": "236dc8c204daf425aed0c54ea036912bf0d64d57af90f84730a9460c1d89b62a",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20160735": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 259,
+   "periods_sha256": "7b977fae53d962d7e4c2e28114de3126dcc71213ec38c4dd8598f11bfd41b949",
+   "sequencia": "intensification>decay>intensification>decay>intensification>mature>decay>residual"
+  },
+  "20170154": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 124,
+   "periods_sha256": "11254c28ba73d77032ec272ca1df168fde2e0c5278d9b689548530103559ec73",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20170225": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 31,
+   "periods_sha256": "43b304555ef0e1a38ffc171a1e8f86f0198d6c0ca2734c3aa64906d3666e865a",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20170342": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 146,
+   "periods_sha256": "1dd2388bfcfb3eb92d56012e1f1f59f3a53b86b62bb6801f147983385cfa5d2b",
+   "sequencia": "intensification>mature>decay>residual"
+  },
+  "20170409": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 169,
+   "periods_sha256": "5babe4f38ca8f1f135b0a046bd38e1323463a648ca6b7433d3214160900275ab",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20170520": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 58,
+   "periods_sha256": "1fc16400d676ad849d2e4aadbddc7a7c411e46b4a85b76c3dedb402a0a20d086",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20170587": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 68,
+   "periods_sha256": "9b6f75ff0f108cea11c27361dd879a9e25496e05628baa7d161d49a3839e6033",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20170756": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 65,
+   "periods_sha256": "410c8203ae4d2c13354aeea186e2fe122dfa703d9363bcda88264e6a547be9ca",
+   "sequencia": "incipient>decay"
+  },
+  "20170760": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 59,
+   "periods_sha256": "fb932639902539f522690b3f6e60273be7387a5b5cb6a1d2443b7e410c5d0394",
+   "sequencia": "intensification>decay"
+  },
+  "20170794": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 224,
+   "periods_sha256": "6b25d0e9dc3ffe3ac2a97d96df7b9cfbd77dd2029fdb49049046638e7fd3bbb0",
+   "sequencia": "intensification>mature>decay>residual"
+  },
+  "20170899": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 52,
+   "periods_sha256": "79209ef4d1e6fd2762c693658aa649a773d38dd85cba7012f478a69a993b2e60",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20171179": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 62,
+   "periods_sha256": "74b90d0721478c765b8e3feba0386d205842fec43fd8ea7d608266395728e8da",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20180129": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 60,
+   "periods_sha256": "a2f09cc433e4fa1117c0b2eac0ec2ea28e039e278230d63d0cfcafac825f3f40",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20180170": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 69,
+   "periods_sha256": "b87f89e098bb3a2a38a4335c42d5f6cbddd5f7fd4e79227c36c136231bb0df74",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20180263": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 57,
+   "periods_sha256": "f82d1217b905ee111f7cd4f23daf4609b3049d0698dceb62315b7f8275936b10",
+   "sequencia": "intensification>mature>decay>residual"
+  },
+  "20180300": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 59,
+   "periods_sha256": "b53fe8a289bab91981a4077173d1968cdfeb046d620644778b2875a665df8e7e",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20180608": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 117,
+   "periods_sha256": "27d533638a59eb2c45b66ee2560c1d0980581010472f06ae5cdb1a6decee66d2",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20180628": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 94,
+   "periods_sha256": "7791b3514e5a14a5800fd62d92d5a41299d4e8ec19d94894450f08713293294c",
+   "sequencia": "intensification>mature>decay>intensification>mature>decay"
+  },
+  "20180654": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 149,
+   "periods_sha256": "4c21e16f4cf46a6c4b8a99c8145b2a444975b46da8fd079879551b7604b6a41b",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20180733": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 257,
+   "periods_sha256": "6e3d337919d9e2a5219b743b08ec866252ca0fa1a5d6b007d5b8042fdd01744e",
+   "sequencia": "intensification>mature>decay>intensification>mature>decay"
+  },
+  "20180759": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 88,
+   "periods_sha256": "fb584edf38f5a0b930ae89057b83dbc50974cb8580cc52d9a7231802609317b3",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20181046": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 30,
+   "periods_sha256": "57fc81f88d38cb95e6c56c48a7f3406547614c464661752891757d78803b38da",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20190325": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 167,
+   "periods_sha256": "49fb098319fb6522b72f9fbed02bc2c589c6fda52914e57ac9fbc980fe33f0fa",
+   "sequencia": "incipient>intensification>decay>intensification>mature>decay"
+  },
+  "20190397": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 56,
+   "periods_sha256": "56c845431280537579f1fac8e2db42de094a93e1ec7ce670d0f58986ef5cc3d0",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20190639": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 180,
+   "periods_sha256": "33e077dbc7218713b7d527bb610436599d13998de4fcc8b9aaf192a2f2976d7f",
+   "sequencia": "incipient>decay>intensification>mature>decay"
+  },
+  "20190691": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 123,
+   "periods_sha256": "1c9dd068e21847643f477f1626842c15e8993e10d575dabb493fbecfd1a7e09b",
+   "sequencia": "intensification>mature>decay>intensification>mature>decay"
+  },
+  "20190870": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 129,
+   "periods_sha256": "4ae257a57af704a6a1574db8a428f0f9534a26c2ebe2d8dc9592a2adec5775b3",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20190879": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 79,
+   "periods_sha256": "3d3410bde79b55e5b953bde96ff427e71f901d9d14a3e5ff9ccfebf1f615c12a",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20191014": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 206,
+   "periods_sha256": "c88a0fc58252ab8972584ee65e74f9c5f93f7db31ce70500d52d1c38b3906319",
+   "sequencia": "incipient>intensification>mature>decay>residual"
+  },
+  "20191104": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 118,
+   "periods_sha256": "8f53e54b8c1bb5633505f7082dbcd69b4aa553b4bba10f0b4af664e0ea8b453c",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20191155": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 93,
+   "periods_sha256": "2a4d2d7b8dff7065314a1be8a380f31dd838a939b8f9503845a485ae8846672e",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20201245": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 98,
+   "periods_sha256": "a3d65e8e270dfb00d3e56b9369cac520bad1fcae9242ed6670ecb9463fa06062",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20202023": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 78,
+   "periods_sha256": "3406b697936be912fea70b367c985bd892b14ca9539500203476520a3813bff0",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20203373": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 79,
+   "periods_sha256": "7569848d05902aa11679236ee7f0daeca7eba8ab162949cbaad6a33a51037c5e",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20203389": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 95,
+   "periods_sha256": "78fe5629bb269ac0d3a6eaa3d6ccdfa893bff0167d6f49c78c48ce9244d16dd9",
+   "sequencia": "intensification>mature>decay"
+  },
+  "20203947": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 242,
+   "periods_sha256": "e0034accf6e68de57a197712c280b8b0ed903a8238bd7f9323112280213d362f",
+   "sequencia": "incipient>intensification>decay>intensification>decay>intensification>mature>decay>intensification>mature>decay>residual"
+  },
+  "20204655": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 57,
+   "periods_sha256": "88c8e492d072470612d376a53d9d8837624372436f679eee662c6bb76a520d25",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "20205386": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 100,
+   "periods_sha256": "cf4a7f1f532bd6691d576f70e97a510f20208af9ff68c8952fad1aaee5d23b17",
+   "sequencia": "incipient>intensification>mature>decay>intensification>mature>decay>intensification>mature>decay"
+  },
+  "20206498": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 133,
+   "periods_sha256": "e006d1a75cb658845ded34350f59b63e906d26fd86254a32fb73b11087d5decb",
+   "sequencia": "incipient>intensification>decay>intensification>decay"
+  },
+  "20207822": {
+   "fonte": "real",
+   "caso": "",
+   "n_steps": 162,
+   "periods_sha256": "1130aa1c511086a2db45c1cd668b8347b2015da66c9743dc1c7691563f5b205a",
+   "sequencia": "intensification>mature>decay"
+  },
+  "s0596ea57": {
+   "fonte": "sintetico",
+   "caso": "IcIt_observational",
+   "n_steps": 66,
+   "periods_sha256": "236ee910eb94ad6540244b1468c652ba7ba306d509e0b00419dae242809b89dc",
+   "sequencia": "incipient>intensification"
+  },
+  "s46657891": {
+   "fonte": "sintetico",
+   "caso": "quase_ItD",
+   "n_steps": 66,
+   "periods_sha256": "e40ac757f9af105c1cd078261b208a7a0a8459087c71a40c9669633d59c38021",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "s4e7ff65c": {
+   "fonte": "sintetico",
+   "caso": "ItMD_clean",
+   "n_steps": 66,
+   "periods_sha256": "1cde2e7a89c4ec5054d0b8447994fa8c0d3771a9011cc081c9b62333b7d93931",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "s5b8aa46f": {
+   "fonte": "sintetico",
+   "caso": "DItMD_residual_noisy",
+   "n_steps": 66,
+   "periods_sha256": "7e115de7baa6eebd67871129b65586ffe2f1c34149c81593a5c35c1040ac4ca9",
+   "sequencia": "decay>intensification>mature>decay>residual"
+  },
+  "s5dcc0f79": {
+   "fonte": "sintetico",
+   "caso": "IcItMD_residual_clean",
+   "n_steps": 66,
+   "periods_sha256": "d0b438746b48913a2412e3cf495da834d32f80d3ecfecaff8927c50b6428a26e",
+   "sequencia": "incipient>intensification>mature>decay>residual"
+  },
+  "s6b1e8245": {
+   "fonte": "sintetico",
+   "caso": "IcDItMD_noisy",
+   "n_steps": 66,
+   "periods_sha256": "e356067979ee2c1d028ddf4a833c3ab5594954586d5f7d6592758de2db68860d",
+   "sequencia": "incipient>decay>intensification>mature>decay"
+  },
+  "s6b542eee": {
+   "fonte": "sintetico",
+   "caso": "ItMD_ItMD_noisy",
+   "n_steps": 66,
+   "periods_sha256": "5efe12399bbe4df180900764791465c09b81f1a6069e2702702feb2972600a13",
+   "sequencia": "incipient>intensification>mature>decay>intensification>mature>decay"
+  },
+  "s8001f17b": {
+   "fonte": "sintetico",
+   "caso": "DItMD_noisy",
+   "n_steps": 66,
+   "periods_sha256": "1076790cb34e4cea1b52ad99e37be4f0b23c6bea73cbc90917379487767c38cc",
+   "sequencia": "decay>intensification>mature>decay"
+  },
+  "s9ddbc53c": {
+   "fonte": "sintetico",
+   "caso": "IcItMD_residual_noisy",
+   "n_steps": 66,
+   "periods_sha256": "b90754fbe678965efb4a7fc1ac0e14ca4f5ab01e9114b07887ecd3c222d46936",
+   "sequencia": "incipient>intensification>mature>decay>residual"
+  },
+  "sbceec644": {
+   "fonte": "sintetico",
+   "caso": "ItMD_noisy",
+   "n_steps": 66,
+   "periods_sha256": "0a59f8e4b9b4e648fbbfdaeb4076eee6c69cf78d5faeae56eabe33b389906678",
+   "sequencia": "incipient>intensification>mature>decay"
+  },
+  "sbd6c6920": {
+   "fonte": "sintetico",
+   "caso": "IcItMD_ItMD_noisy",
+   "n_steps": 66,
+   "periods_sha256": "d6115f610c69556d755c898dd7b64eefbdea62615abd1f01ddccd34634a82d54",
+   "sequencia": "incipient>intensification>mature>decay>intensification>mature>decay"
+  },
+  "scfcf1387": {
+   "fonte": "sintetico",
+   "caso": "IcDItMD_residual_noisy",
+   "n_steps": 66,
+   "periods_sha256": "9b3395e3efb05ce329df404e0e5541f8d512fc13ce34af51a937b6eab27fb6d7",
+   "sequencia": "incipient>decay>intensification>mature>decay>residual"
+  }
+ }
+}

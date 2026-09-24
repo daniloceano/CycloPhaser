@@ -1,0 +1,64 @@
+id,fonte,caso,split,alvo_A,n_steps,sha_igual_ref_vs_False,dispara,ramo,seq_False,seq_True,rotulo,bate_False,bate_True
+20150069,real,,treino,False,66,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20150377,real,,teste,False,113,True,False,,incipient>intensification>decay,incipient>intensification>decay,<teste: nao lido>,,
+20150436,real,,treino,False,112,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+20150528,real,,treino,False,51,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20150532,real,,treino,False,107,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20150561,real,,teste,False,146,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20150646,real,,teste,False,130,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,<teste: nao lido>,,
+20150656,real,,treino,False,160,True,False,,intensification>mature>decay>intensification>mature>decay,intensification>mature>decay>intensification>mature>decay,intensification>mature>decay>residual,False,False
+20150746,real,,teste,False,71,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20160030,real,,teste,False,153,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20160587,real,,treino,False,79,True,False,,intensification>mature>decay,intensification>mature>decay,incipient>intensification>mature>decay,False,False
+20160735,real,,treino,False,259,True,False,,intensification>decay>intensification>decay>intensification>mature>decay>residual,intensification>decay>intensification>decay>intensification>mature>decay>residual,incipient>intensification>mature>decay,False,False
+20170154,real,,treino,False,124,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+20170225,real,,teste,False,31,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,<teste: nao lido>,,
+20170342,real,,treino,False,146,True,False,,intensification>mature>decay>residual,intensification>mature>decay>residual,intensification>mature>decay,False,False
+20170409,real,,treino,False,169,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+20170520,real,,treino,False,58,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20170587,real,,teste,False,68,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20170756,real,,teste,False,65,True,False,,incipient>decay,incipient>decay,<teste: nao lido>,,
+20170760,real,,treino,False,59,True,False,,intensification>decay,intensification>decay,intensification>mature>decay,False,False
+20170794,real,,treino,False,224,True,False,,intensification>mature>decay>residual,intensification>mature>decay>residual,intensification>mature>decay>residual,True,True
+20170899,real,,teste,False,52,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20171179,real,,treino,False,62,True,False,,intensification>mature>decay,intensification>mature>decay,incipient>intensification,False,False
+20180129,real,,teste,False,60,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20180170,real,,treino,True,69,True,True,vale->pico,incipient>decay>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,False,True
+20180263,real,,treino,False,57,True,False,,intensification>mature>decay>residual,intensification>mature>decay>residual,intensification>mature>decay>residual,True,True
+20180300,real,,treino,False,59,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20180608,real,,treino,True,117,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+20180628,real,,treino,False,94,True,False,,intensification>mature>decay>intensification>mature>decay,intensification>mature>decay>intensification>mature>decay,incipient>intensification>mature>decay>residual,False,False
+20180654,real,,teste,False,149,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20180733,real,,treino,False,257,True,False,,intensification>mature>decay>intensification>mature>decay,intensification>mature>decay>intensification>mature>decay,intensification>mature>decay,False,False
+20180759,real,,treino,False,88,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+20181046,real,,treino,False,30,True,False,,intensification>mature>decay,intensification>mature>decay,incipient>intensification,False,False
+20190325,real,,treino,True,167,True,True,vale->pico,incipient>decay>intensification>mature>decay,incipient>intensification>decay>intensification>mature>decay,incipient>intensification>mature>decay,False,False
+20190397,real,,treino,False,56,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+20190639,real,,treino,False,180,True,True,pico->vale,incipient>intensification>mature>decay,incipient>decay>intensification>mature>decay,incipient>intensification>mature>decay,True,False
+20190691,real,,teste,False,123,True,False,,intensification>mature>decay>intensification>mature>decay,intensification>mature>decay>intensification>mature>decay,<teste: nao lido>,,
+20190870,real,,treino,False,129,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+20190879,real,,treino,False,79,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20191014,real,,treino,True,206,True,True,vale->pico,incipient>decay>intensification>decay,incipient>intensification>mature>decay>residual,intensification>mature>decay,False,False
+20191104,real,,treino,False,118,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20191155,real,,treino,False,93,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,intensification>mature>decay,False,False
+20201245,real,,treino,False,98,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+20202023,real,,treino,False,78,True,False,,intensification>mature>decay,intensification>mature>decay,incipient>intensification>mature>decay,False,False
+20203373,real,,teste,False,79,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,<teste: nao lido>,,
+20203389,real,,teste,False,95,True,False,,intensification>mature>decay,intensification>mature>decay,<teste: nao lido>,,
+20203947,real,,treino,False,242,True,False,,incipient>intensification>decay>intensification>decay>intensification>mature>decay>intensification>mature>decay>residual,incipient>intensification>decay>intensification>decay>intensification>mature>decay>intensification>mature>decay>residual,incipient>intensification>mature>decay>intensification>mature>decay>residual,False,False
+20204655,real,,teste,False,57,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,<teste: nao lido>,,
+20205386,real,,treino,False,100,True,False,,incipient>intensification>mature>decay>intensification>mature>decay>intensification>mature>decay,incipient>intensification>mature>decay>intensification>mature>decay>intensification>mature>decay,incipient>intensification>mature>decay>residual,False,False
+20206498,real,,teste,True,133,True,True,vale->pico,incipient>decay>intensification>decay,incipient>intensification>decay>intensification>decay,<teste: nao lido>,,
+20207822,real,,treino,False,162,True,False,,intensification>mature>decay,intensification>mature>decay,intensification>mature>decay,True,True
+s0596ea57,sintetico,IcIt_observational,treino,False,66,True,False,,incipient>intensification,incipient>intensification,incipient>intensification,True,True
+s46657891,sintetico,quase_ItD,treino,False,66,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+s4e7ff65c,sintetico,ItMD_clean,treino,False,66,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+s5b8aa46f,sintetico,DItMD_residual_noisy,treino,False,66,True,False,,decay>intensification>mature>decay>residual,decay>intensification>mature>decay>residual,decay>intensification>mature>decay>residual,True,True
+s5dcc0f79,sintetico,IcItMD_residual_clean,treino,False,66,True,False,,incipient>intensification>mature>decay>residual,incipient>intensification>mature>decay>residual,incipient>intensification>mature>decay>residual,True,True
+s6b1e8245,sintetico,IcDItMD_noisy,treino,False,66,True,False,,incipient>decay>intensification>mature>decay,incipient>decay>intensification>mature>decay,incipient>decay>intensification>mature>decay,True,True
+s6b542eee,sintetico,ItMD_ItMD_noisy,treino,False,66,True,False,,incipient>intensification>mature>decay>intensification>mature>decay,incipient>intensification>mature>decay>intensification>mature>decay,incipient>intensification>mature>decay>intensification>mature>decay,True,True
+s8001f17b,sintetico,DItMD_noisy,treino,False,66,True,False,,decay>intensification>mature>decay,decay>intensification>mature>decay,decay>intensification>mature>decay,True,True
+s9ddbc53c,sintetico,IcItMD_residual_noisy,treino,False,66,True,False,,incipient>intensification>mature>decay>residual,incipient>intensification>mature>decay>residual,incipient>intensification>mature>decay>residual,True,True
+sbceec644,sintetico,ItMD_noisy,treino,False,66,True,False,,incipient>intensification>mature>decay,incipient>intensification>mature>decay,incipient>intensification>mature>decay,True,True
+sbd6c6920,sintetico,IcItMD_ItMD_noisy,treino,False,66,True,False,,incipient>intensification>mature>decay>intensification>mature>decay,incipient>intensification>mature>decay>intensification>mature>decay,incipient>intensification>mature>decay>intensification>mature>decay,True,True
+scfcf1387,sintetico,IcDItMD_residual_noisy,treino,False,66,True,False,,incipient>decay>intensification>mature>decay>residual,incipient>decay>intensification>mature>decay>residual,incipient>decay>intensification>mature>decay>residual,True,True

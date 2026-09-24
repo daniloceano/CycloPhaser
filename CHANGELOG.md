@@ -9,6 +9,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — default behaviour
+
+**`reclassify_index0` — the type of the extremum at index 0 is now decided
+against the next surviving extremum, not against `z[1] - z[0]`. Default `True`.**
+
+`get_periods` and `determine_periods` accept a new `reclassify_index0` bool,
+**on by default**. On the final z extremum list — after the prominence filter
+and after the boundary exception — let E1 be the extremum immediately after
+index 0, **of either type**:
+
+* index 0 typed `valley` and `z[E1] < z[0]` strictly → index 0 becomes `peak`;
+* index 0 typed `peak` and `z[E1] > z[0]` strictly → index 0 becomes `valley`;
+* a tie, or no E1 → nothing changes.
+
+Only index 0 is touched; no other extremum is created, removed or retyped, and
+the rule is applied to `z` alone (no stage function reads index 0's type in
+`dz`/`dz2`).
+
+**Why.** Index 0 is always an extremum: `argrelextrema` runs with `mode='clip'`
+and non-strict comparators, so it compares `data[0]` against itself and the test
+passes whatever the data does. Its *type* then came from the single difference
+`z[1] - z[0]` — one finite difference on the sample the smoother had least
+information about. Measured over the 51 calibration tracks and the 12 synthetic
+series, that typed index 0 as a `valley` on 11 of 63 and opened the life cycle
+with a `decay` the vorticity does not support on several of them.
+
+**What moves.** Under the calibration reference (params-13 + the rule =
+params-14) the output changes on 5 of those 63 series and is byte-identical on
+the other 58, the 12 synthetic series included:
+
+| series | before | after |
+|---|---|---|
+| 20180170 | `Ic > D > It > M > D` | `Ic > It > M > D` (now matches its manual label) |
+| 20190325 | `Ic > D > It > M > D` | `Ic > It > D > It > M > D` |
+| 20191014 | `Ic > D > It > D` | `Ic > It > M > D > R` |
+| 20190639 | `Ic > It > M > D` | `Ic > D > It > M > D` |
+| 20206498 | `Ic > D > It > D` | `Ic > It > D > It > D` |
+
+`20190639` is the `peak->valley` branch and the one case where the rule *adds* a
+`decay` block: it moves the `intensification` start from 13 to 26 against a
+manual label that says 25 ± 5, at the cost of calling `[13, 26)` decay where the
+label says incipient. Reviewed and accepted as a reclassification.
+
+**When it can fire at all — read this before assuming your results moved.**
+The rule needs an extremum to have been *removed* between index 0 and E1.
+Raw `argrelextrema` output alternates, so the extremum right after a valley at
+index 0 is a peak the series rose to and cannot lie below it; symmetrically for
+a peak. What breaks that alternation is the prominence filter. **With
+`prominence` and `prominence_relative` both None — which is what the package
+defaults give you — the rule never fires: measured identical output with and
+without it on all 64 series tried** (51 calibration tracks, 12 synthetic series,
+the packaged example file;
+`research/labels/diagnostics/frontA_idx0_c2/stage2_defaults_check.py`). So this
+change affects only configurations that use a prominence filter, and no CI
+reference baseline moved.
+
+**Compatibility.** This is a change of default behaviour: a config that does not
+carry the key now runs *with* the rule. To reproduce any earlier release — or
+any calibration config from params-1 to params-13, all of which predate the rule
+— pass `reclassify_index0=False`. `research/labels/configs/cyclophaser_params-14.yaml`
+is the first config that states it. `find_peaks_valleys` also accepts the flag
+but **defaults to False**, so a direct caller of that function keeps the
+historical behaviour: the rule is a statement about the vorticity series a life
+cycle is read from, not a property of extremum detection in general.
+
+The calibration app carries a sidebar control for it ("Reclassify the extremum
+at index 0", section 3), on by default.
+
+Measured in full — 63-series table, figures, and the gate this change was
+required to pass — in
+`research/labels/diagnostics/frontA_idx0_c2/REPORT.md` and
+`docs/future_work.md` item 28.
+
 ### Added
 
 **`intensification_min_depth` — an opt-in depth floor on which candidate

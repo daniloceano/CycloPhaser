@@ -679,6 +679,19 @@ series' sign and that one happens to still read the same way despite the
 disagreement). This is the underlying mechanism behind both routes 3 and 4
 above, and behind item 3c's `r(t₀)` measurements for `boundary_padding`.
 
+**Backlog addition, 2026-09-24 — `20180608` is handed to this item by item 28.**
+Stage 2 of front A shipped `reclassify_index0` (rule C2') and measured that it
+**cannot reach `20180608`**: in the filtered series the valley at index 0 is
+legitimate — `z` rises monotonically from `z[0] = -3.285e-5` to the peak at
+index 10 — so the rule correctly declines. Its spurious opening `decay[0,11)`
+comes from the filtered curve starting at a minimum and rising while the raw
+series deepens (`sign(z_raw[1]-z_raw[0]) = -1` vs
+`sign(z_filt[1]-z_filt[0]) = +1`), i.e. from **this** defect. No
+reclassification rule of any kind fixes it; a change to the filter's edge
+treatment would. Today H (`find_stages.py:1134`) masks it, with
+`boundary = 38` against an 11-step block, so it is invisible in the output and
+free — until a config shortens that boundary below 11. See item 28.
+
 ### (e) ⚠️ The synthetic suite does not represent the real tracks at the t0 boundary
 
 **The 12 synthetic cases (`tests/synthetic/cases.py`) are not evidence about
@@ -2912,6 +2925,272 @@ neither is setting `sys.path` — both were correct here while the resolution st
 had to be proved. `research/labels/diagnostics/frontA_reverify/run_in_worktree.py`
 is the working template. This extends, and does not replace, the CWD lesson of
 items 5 and 12.
+
+---
+
+## 28. Front A — conditional reclassification of index 0 — stage 1 measurement (C2, **FAIL**) and stage 2 (C2', **shipped as default behaviour**, gate PASS) — 2026-09-23
+
+Stage 1 measured rule C2 and failed it. Stage 2 implemented the rule **without**
+C2's same-type restriction (C2') as the package's default, on Danilo's
+instruction. The two verdicts stand side by side on purpose: stage 1's FAIL is
+not retracted by stage 2's PASS, and the section "What stage 2 corrects in the
+stage 1 record" below says exactly which stage 1 statements do not survive.
+
+### Stage 1 — rule C2 (E1 must share index 0's type) — **FAIL**
+
+Branch `frontA-idx0-c2`, from `develop-v2.1` @ `c714451`. **Measurement only** —
+nothing under `cyclophaser/` or `tests/` was touched, and no parameter moved.
+Config params-13 (sha256 `c1ab8ce0…6e483973`), dedicated `cyclophaser` env,
+`cyclophaser.__file__` asserted in-process before every script body. Full
+write-up, tables and figures:
+`research/labels/diagnostics/frontA_idx0_c2/REPORT.md`.
+
+Every number below comes from a replay of `get_periods`' body whose output was
+compared field by field with the real `get_periods` on **63/63** series before
+any attribution was made.
+
+### The rule measured
+
+C2, bidirectional, on the FINAL z extremum list (after the prominence filter and
+the boundary exception), with E1 the extremum immediately after index 0:
+index 0 `valley` + E1 `valley` strictly deeper → valley→peak; index 0 `peak` +
+E1 `peak` strictly higher → peak→valley; anything else → no trigger.
+
+### Result — C2 as specified does not work, and not for want of a threshold
+
+- Fires on **4 of 63** series: `valley->peak` on `20190325`, `20191014`,
+  `20206498` (test), and `peak->valley` on `20190639`.
+- Of the 5 tracks whose index 0 is typed `valley`, C2 reaches 3. It misses
+  `20180170` and `20180608` because their E1 is a `peak` — by the rule's own
+  definition, not by a margin.
+- On the 2 scoreable firings it changes the sequence and **neither becomes a
+  match** against the label.
+- The only track where forcing index 0 to `peak` buys a sequence match
+  (`20180170`, and with all three boundaries flagged `unsure`) is one C2 does
+  **not** fire on.
+- The `peak->valley` branch fires on `20190639`: the sequence gains a `decay`
+  block over `[13, 26)` and stops matching the label. **Danilo inspected it and
+  ruled the change acceptable (2026-09-23)** — a reclassification, not a
+  regression; see below.
+
+Net at params-13 on TRAIN, after that ruling: **0 gained by the sequence metric,
+0 lost.** C2 is harmless and still does not reach the case that motivated the
+front. The discriminant — the *type* of E1 — does not separate spurious openings
+from genuine ones; on the 5 targets it splits 3/2 with the wrong member on each
+side.
+
+### Maintainer ruling — `20190639` (2026-09-23)
+
+| | blocks |
+|---|---|
+| label | `incipient[0,25)` `intensification[25,81)` `mature[81,106)` `decay[106,180)` |
+| base | `incipient[0,13)` `intensification[13,88)` `mature[88,105)` `decay[105,180)` |
+| C2 | `incipient[0,13)` **`decay[13,26)`** `intensification[26,88)` `mature[88,105)` `decay[105,180)` |
+
+`mature` and the final `decay` do not move; the `intensification` start goes
+from 13 (error 12, outside the label's ±5) to 26 (error 1, inside it). The cost
+is a 13-step `decay` over `[13, 26)` — a stretch where the vorticity does weaken
+before the real deepening, and which the label calls `incipient`. Danilo:
+"com esse decay após Ic, era ambíguo" — accepted.
+
+**This firing is not about index 0.** The z candidates before the prominence
+filter are `peak@0`, `valley@9`, `peak@25`; `prominence_relative = 0.3` removes
+the `valley@9`, leaving two consecutive peaks. C2's second branch keys on a
+valley the prominence filter deleted.
+
+**Consequence for any future gate.** `manual_labels.yaml` still says
+`incipient[0,25)`, and `score_phase_sequences` refuses to pair boundaries once
+an extra phase appears — so a gate scoring C2 or C1 reads `20190639` as a loss,
+against the maintainer's own judgement. Either the label is revisited or the
+gate states that this track is scored against a superseded label.
+`manual_labels.yaml` was **not** touched; relabelling is the maintainer's call.
+
+### Predictions declared before measuring
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| P1 | prominence of index 0 = 0.0 by construction, 63/63 | 63/63, both sign conventions | CONFIRMED |
+| P2 | the 4 genuine-decay synthetics do not fire | 0/4 fire (E1 = `peak` on all four) | CONFIRMED |
+| P3 | the 5 targets fire, 5/5 | **3/5** | REFUTED |
+| P4 | 5/63 fire; `peak->valley` 0/63 | **4/63**; `peak->valley` **1/63** | REFUTED |
+| P5 | `boundary` does not depend on the phase map | static reading + 63/63 measured | CONFIRMED |
+
+### The correction P1 forces onto the record
+
+**A prominence of 0.0 at index 0 is not evidence of an artefact.** The package
+computes no prominence for index 0 at all: `_refine_extrema` puts 0 and N−1 in
+`boundary` and passes only `interior` to `peak_prominences`
+(`determine_periods.py:180-181`, `:188`), re-adding them unconditionally at
+`:212`. The 0.0 that Front A reported is what `peak_prominences` returns when
+asked anyway, and it is 0.0 for **any** data because scipy's base search cannot
+cross the array edge. Confirmed on 63/63 series and as a property of the
+algorithm. Any argument of the form "index 0's prominence is 0.0, therefore the
+extremum is spurious" is void, including Front A's own.
+
+### Two facts that change how this front must be gated
+
+**The incipient overwrite H masks the artefact on `20180608`.**
+`find_stages.py:1134` overwrites `[0, boundary)` with `incipient` after all
+other phases are assigned. On `20180608`, `boundary = 38` and the spurious
+`decay` block is 11 steps: fully present inside the pipeline, fully invisible in
+the output. The Front A variant is a measured **no-op** on that track at
+params-13. So "5 tracks open with spurious decay" is a params-9 statement; at
+params-13 it is 4, and the fifth is masked, not fixed. **Any future gate on this
+front must read the phase map BEFORE H, not the final output** — a real fix will
+otherwise score as no change there, and a config that shortens `boundary` will
+re-expose the defect.
+
+**A leading `decay` does not require a `valley` at index 0.** `20170756` (test
+split) opens with decay while its index 0 is typed `peak`. Index-0 typing is one
+route to the symptom, not the only one — so the symptom count is not an upper
+bound on what this front can fix, nor a lower bound on what remains after it.
+
+### M5 — the incipient boundary is upstream of all of this
+
+`_incipient_plateau_rel` (`find_stages.py:951-989`) reads only `'dz'` and
+`'z_unfil'`; `_incipient_plateau_boundary` (`:992-1035`) is pure in
+`(rel, tau, crossing, k)`; `'periods'` first appears in that branch at `:1134`,
+as a write. Measured: `boundary` is identical with and without index 0 forced on
+**63/63** series. No reclassification of index 0 can move the incipient
+boundary.
+
+### Which pre-declared retreat applies — neither, cleanly
+
+- **(a)** (a synthetic fires → go to C1) does **not** apply: 0/4 fire.
+- **(e)** (FAIL only in `peak->valley` → try unidirectional C2) does **not**
+  apply: it presupposes the second branch is where the harm is, and that
+  branch's one firing was inspected and accepted. Dropping it would remove the
+  only change C2 makes that the maintainer endorses, while the surviving
+  `valley->peak` branch converts 0 of its 2 scoreable firings into a match —
+  a strictly worse version of a rule that already has no measured benefit.
+
+The measurement points at **C1** (relative depth
+`D1 = (z_max − z[0]) / (z_max − z_min)`), whose discriminant is the magnitude of
+the opening excursion rather than the type of E1 — the "magnitude lead" Front A
+recorded and did not pursue. Reached here by measurement, not by rule (a).
+**C3** stays recorded only.
+
+### Stage 1's verdict, as it stood
+
+FAIL. (e) failed on its own terms *before* the ruling on `20190639`, because it
+presupposes the second branch is where the harm is; the ruling then removed the
+harm and left the rule with no measured benefit either way. The acceptance of
+`20190639` is dated 2026-09-23 and counts from stage 2 onward — it is not
+retroactive evidence for stage 1.
+
+---
+
+### Stage 2 — rule C2' as default behaviour (`reclassify_index0`) — **gate PASS**
+
+Same branch. **This stage changes `cyclophaser/`.** Full write-up:
+`research/labels/diagnostics/frontA_idx0_c2/REPORT.md`.
+
+C2' drops C2's same-type restriction: E1 is the next extremum in the final list
+**of either type**. That is the whole difference, and it is what reaches
+`20180170` — the one track worth a sequence match, which C2 missed because its
+E1 is a peak.
+
+`reclassify_index0` is a bool on `get_periods` and `determine_periods`,
+**default True**; `find_peaks_valleys` accepts it too but defaults to False, so
+a direct caller of that function is not silently changed. Applied to `z` alone.
+`params-14` = params-13 + the key. The calibration app carries a sidebar
+control, and the Benchmark tab can therefore compare with and without it.
+
+#### Gate
+
+Fingerprints are the sha256 of the `periods` column per series, taken for a
+NAMED cyclophaser tree (`stage2_reference.py` asserts in-process which package
+it imported): `develop-v2.1 @ c714451` in a pinned worktree, and the working
+tree with the flag forced each way.
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| Q1 | `False` == c714451, 63/63 | 63/63 | CONFIRMED |
+| Q2 | fires on exactly 5/63, other 58 byte-identical | exactly those 5; 58 identical; 0 of 12 synthetics | CONFIRMED |
+| Q3 | `20180170` → `Ic>It>M>D`, matches label | yes | CONFIRMED |
+| Q4 | `20190325` → `Ic>It>D>It>M>D` | yes | CONFIRMED |
+| Q5 | `20191014` → `Ic>It>M>D>R` | yes | CONFIRMED |
+| Q6 | `20190639` blocks as ruled | `incipient[0,13) decay[13,26) intensification[26,88) mature[88,105) decay[105,180)` | CONFIRMED |
+| Q7 | `20180608` unchanged before and after H | identical both ways; before H `decay[0,11) …`; boundary 38 | CONFIRMED |
+| Q8 | boundary identical, 63/63 | 63/63 | CONFIRMED |
+| Q9 | suite green | green | CONFIRMED |
+
+Sequence match, **TRAIN only (47 series): 31/47 → 31/47** by the raw counter;
+**32/47** once `20190639` is read by its blocks (Q6), per the declared
+exception — +1 match and one accepted reclassification. `manual_labels.yaml`
+untouched.
+
+> **Correction, 2026-09-24.** This was first recorded as "62 label-carrying
+> series: 42 → 42", which had read the labels of 15 held-out TEST tracks into an
+> aggregate. Fixed at the source: `stage2_gate.py` reads labels for TRAIN only,
+> the table's test rows carry no label and no match column, and no test
+> aggregate remains in the repo. The TEST split is still run — Q1, Q2, Q7 and Q8
+> are mechanical and need all 63 series — and `20206498`'s sequence is still
+> reported; what is gone is every comparison against a test label.
+
+#### The finding that matters most
+
+**C2' can only fire where something has already removed the extremum between
+index 0 and E1.** Raw `argrelextrema` output alternates, so the extremum right
+after a valley at index 0 is a peak the series rose to, which cannot lie below
+index 0 — symmetrically for a peak. What breaks the alternation is the
+prominence filter: on `20190639` it deletes `valley@9`, on `20180170` the early
+bumps.
+
+Consequence, measured: under the **package's own defaults** (no prominence
+filter) the output is identical with and without the rule on **64 of 64** series
+— the 51 tracks, the 12 synthetics and the packaged example. So **the CI
+reference baselines needed no update at all** (the brief's separate commit for
+that was not needed), and a user on package defaults sees no change. This is a
+change to the *calibrated* configuration, not to the out-of-the-box one.
+
+#### What stage 2 corrects in the stage 1 record
+
+1. **"0 gained / the measurement points at C1" is superseded, and the reasoning
+   that produced it was too narrow.** On `20190325` and `20191014` the rule does
+   remove the spurious opening `decay`; their sequences stay wrong because of
+   defects elsewhere in those series, which is a different failure from "the
+   rule does not work". Counting only whole-sequence matches hid that.
+2. **A ceiling, now stated: any comparator that retypes index 0 produces
+   exactly the M3 result wherever it fires, so the maximum sequence-match gain
+   on TRAIN is +1 (`20180170`) — C1 included.** C1 is therefore **dropped**: it
+   cannot beat a ceiling it shares. C3 stays recorded only.
+3. **`20190639`'s firing is not the index-0 artefact.** It comes from
+   `prominence_relative = 0.3` deleting `valley@9`. The improvement is accepted;
+   the mechanism is distinct and is sensitive to the filter's threshold, so it
+   should not be cited as evidence about index-0 typing.
+
+4. **Stage 1's scripts are frozen.** Their replay builds extrema with the rule
+   off and asserts equality with `get_periods`; that assertion is now False on
+   the 5 firing series. Do not re-run them as a check on current behaviour.
+5. **`20180608` is not reachable by C2', and the reason reassigns it to another
+   defect.** Measured at params-14: in the FILTERED series the valley at index 0
+   is **legitimate** — `z` rises monotonically from `z[0] = -3.285e-5` to the
+   peak at index 10 (`-3.005e-5`), so E1 is higher than index 0 and C2' declines
+   on both branches, correctly. The opening `decay[0,11)` is therefore not an
+   index-0 typing artefact at all: it is the filtered curve genuinely starting at
+   a minimum and rising, while the RAW series is deepening
+   (`sign(z_raw[1]-z_raw[0]) = -1` against `sign(z_filt[1]-z_filt[0]) = +1`).
+   That disagreement is **defect I, item 8(d)** — Lanczos boundary padding under
+   `boundary_padding='edge'` flipping the sign at t0, 7 of 51 real tracks — and
+   `20180608` is a listed member of it (`research/labels/diagnostics/frontRefusal/REPORT.md`,
+   "Defect I"). **`20180608` is hereby moved off this front's ledger and onto
+   item 8(d)'s backlog.** No reclassification rule of any kind can reach it;
+   what would is a change to the filter's edge treatment. H continues to mask it
+   in the final output, so it costs nothing today and will reappear on any
+   config that shortens the incipient `boundary` below 11.
+
+#### Provenance of the decision
+
+The default was set on Danilo's instruction, taken in full knowledge that C2'
+was chosen **after** seeing stage 1's table, and that `20190639` was accepted
+**after** seeing what the rule did to it. No part of this was validated on the
+held-out TEST split; `20206498` was run and reported mechanically, and its label
+was never read.
+
+#### Still open
+
+Merge authorisation. Stage 2 is pushed, **not merged**, and opens no PR.
 
 ---
 

@@ -1,0 +1,21 @@
+==========================================================================
+PROVENANCE (before any measurement)
+==========================================================================
+  cwd                  : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+  sys.executable       : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+  sys.prefix           : /Users/danilocoutodesouza/miniconda3/envs/cyclophaser
+  cyclophaser.__file__ : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+  version              : <none>
+  determine_periods.py : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/determine_periods.py
+    sha256             : 5e11f622e264d66f5f84973c9bf59cc10fd6820c63f4e8c433c4ceacef8f3442
+  find_stages.py       : /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/find_stages.py
+    sha256             : a0c65358c841a05e9d5c5ba958bb75cd9ff6c5c4c02002affc7aecbc8ec1c9ea
+  ASSERT OK: package loads from /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser
+==========================================================================
+
+==========================================================================
+Sob os DEFAULTS do pacote (filtro de proeminência desligado)
+==========================================================================
+  saída idêntica com e sem a regra : 64/64 séries
+  o default do pacote == regra ON  : 64/64 séries
+  wrote research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.csv
