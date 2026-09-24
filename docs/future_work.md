@@ -2928,7 +2928,7 @@ items 5 and 12.
 
 ---
 
-## 28. Front A — conditional reclassification of index 0 — stage 1 measurement (C2, **FAIL**) and stage 2 (C2', **shipped as default behaviour**, gate PASS) — 2026-09-23
+## 28. Front A — conditional reclassification of index 0 — stage 1 measurement (C2, **FAIL**) and stage 2 (C2', **shipped as default behaviour**, gate PASS) — **closed and merged 2026-09-24** (merge `e1dc17f`)
 
 Stage 1 measured rule C2 and failed it. Stage 2 implemented the rule **without**
 C2's same-type restriction (C2') as the package's default, on Danilo's
@@ -3188,9 +3188,22 @@ was chosen **after** seeing stage 1's table, and that `20190639` was accepted
 held-out TEST split; `20206498` was run and reported mechanically, and its label
 was never read.
 
-#### Still open
+#### Closing (2026-09-24)
 
-Merge authorisation. Stage 2 is pushed, **not merged**, and opens no PR.
+Merged into `develop-v2.1` as **`e1dc17f`**, on Danilo's authorisation, from
+`frontA-idx0-c2` @ `e97eb17`. `develop-v2.1` was verified to be still at
+`c714451` immediately before the merge, local and origin agreeing, so the merge
+is a straight fast-forwardable `--no-ff` of the branch the gate ran on. No PR
+was opened.
+
+Suite on the merged `develop-v2.1`, dedicated `cyclophaser` env
+(`cyclophaser.__file__` confirmed to be this checkout, `reclassify_index0`
+default confirmed True in the merged tree), `-m "not browser"`:
+**1245 passed, 0 failed**. Pushed.
+
+Nothing on this front is left open. `20180608`, its last unresolved target, was
+moved to item 8(d) — see correction 5 above and the backlog note in that item.
+C1 is dropped on the ceiling argument; C3 remains recorded only.
 
 ---
 
