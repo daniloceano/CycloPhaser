@@ -3207,7 +3207,7 @@ C1 is dropped on the ceiling argument; C3 remains recorded only.
 
 ---
 
-## 29. Calibration app — flexible track reading + `use_filter` translation — **gate PASS, merge authorised by Danilo 2026-09-24** (merge hash in "Closing" below)
+## 29. Calibration app — flexible track reading + `use_filter` translation — **closed, gate PASS, merged 2026-09-24** (merge `84b63ec`)
 
 Branch `feat/app-flexible-track-reader`, from `develop-v2.1` @ `d45ae49`. App
 only: `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser`
@@ -3360,6 +3360,20 @@ Also still true: a user CAN pick a wrong column in the custom format (e.g. `Lat`
 as vorticity) — the preview shows the magnitude warning and nothing is used
 without the explicit confirmation; and the new UI has no browser test (browser
 tests are run by hand, fixed rule).
+
+#### Closing (2026-09-24)
+
+Merged into `develop-v2.1` as **`84b63ec`**, on Danilo's authorisation, from
+`feat/app-flexible-track-reader` @ `ba9af46`. `develop-v2.1` was verified to be at
+`d45ae49` immediately before the merge, local and origin agreeing. No PR was
+opened. `git diff d45ae49 -- cyclophaser/` is empty.
+
+Suite on the merged `develop-v2.1`, dedicated `cyclophaser` env
+(`cyclophaser.__file__` confirmed to be this checkout), `-m "not browser"`:
+**1348 passed, 0 failed**. Pushed.
+
+The disposable branch `exp/pre-peak-normalization` (local only, not pushed)
+belongs to the maturation diagnostic that followed, not to this front.
 
 ---
 

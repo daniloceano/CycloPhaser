@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added — calibration app: flexible track reading (item 29)
+### Added — calibration app: flexible track reading (item 29, merge `84b63ec`)
 
 **One reader for every track, recognised by content; `.txt` accepted; an
 opt-in custom format; nothing accepted silently.** `cyclophaser/` is untouched.
@@ -35,7 +35,7 @@ opt-in custom format; nothing accepted silently.** `cyclophaser/` is untouched.
   1e-2 s⁻¹), and used only after an explicit confirmation. The Benchmark
   Exploration upload uses the same settings.
 
-### Fixed — calibration app: no `use_filter=True` warning per cyclone
+### Fixed — calibration app: no `use_filter=True` warning per cyclone (item 29, merge `84b63ec`)
 
 The "Apply Lanczos filter" checkbox yields a bool, and `process_vorticity`
 warns on `use_filter=True` — so the grid showed one copy of that warning per
