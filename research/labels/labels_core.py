@@ -46,6 +46,15 @@ LABELS_DIR = Path(__file__).resolve().parent
 SPLIT_PATH = LABELS_DIR / "split.yaml"
 LABELS_PATH = LABELS_DIR / "manual_labels.yaml"
 
+# Item 30: 10 swell tracks drawn into the labelled set AFTER the split above was
+# frozen, recorded as a separate frozen block `batches: swell_item30` of
+# split.yaml (see research/labels/swell_item30/). Their files live one level
+# BELOW tests/calibration_data on purpose: every reader of that folder globs
+# "*.csv" non-recursively, so the 51 stay exactly 51 for all of them —
+# `load_real_series`, the benchmark, make_split, the tests, the Grid loader.
+SWELL_BATCH = "swell_item30"
+SWELL_BATCH_DATA_DIR = "tests/calibration_data/swell_item30"   # repo-relative
+
 # Seeds are frozen in code AND written into the artefacts they produce. Changing
 # either number invalidates the corresponding artefact, which is the point: a
 # split redrawn after seeing results is not a test set any more.
@@ -233,6 +242,49 @@ def load_synthetic_series(synthetic_dir: Path | None = None,
         series[oid] = df["min_max_zeta_850"].astype("float64")
         names[oid] = case_name
     return series, names
+
+
+def batch_membership(batch: str = SWELL_BATCH, split_doc: dict | None = None) -> dict[str, str]:
+    """{series_id: 'train'|'test'} of one frozen batch of split.yaml; {} if absent.
+
+    Kept apart from the top-level train/test on purpose: those two lists are
+    the 47/16 split, and every existing reader of them (benchmark, evaluator,
+    tests) must keep seeing exactly that population.
+    """
+    doc = split_doc if split_doc is not None else read_split()
+    blk = (doc.get("batches") or {}).get(batch)
+    if not blk:
+        return {}
+    out = {sid: "train" for sid in blk["train"]}
+    out.update({sid: "test" for sid in blk["test"]})
+    return out
+
+
+def load_batch_series(batch: str = SWELL_BATCH,
+                      split_doc: dict | None = None) -> dict[str, pd.Series]:
+    """The series of one frozen batch of split.yaml, as {id: raw vorticity Series}.
+
+    Same parser as `load_real_series` (pandas' default float parser), so a
+    label's `series_sha256` means the same thing for a batch series as for the
+    51. Each file's sha256 is checked against the one the batch block recorded
+    when it was drawn, and a mismatch raises: the file IS the series a label
+    will be written against, and a silently edited copy would void that label.
+    """
+    doc = split_doc if split_doc is not None else read_split()
+    blk = (doc.get("batches") or {}).get(batch)
+    if not blk:
+        return {}
+    d = REPO_ROOT / blk["data_dir"]
+    out = {}
+    for sid in sorted(blk["train"] + blk["test"]):
+        p = d / f"{sid}.csv"
+        got = hashlib.sha256(p.read_bytes()).hexdigest()
+        if got != blk["file_sha256"][sid]:
+            raise ValueError(f"{p} sha256 {got} != {blk['file_sha256'][sid]} "
+                             f"recorded in split.yaml batch {batch!r}")
+        df = pd.read_csv(p, sep=";", index_col="time", parse_dates=True)
+        out[sid] = df["min_max_zeta_850"].astype("float64")
+    return out
 
 
 # ── Piece 1: the frozen, stratified split ────────────────────────────────────
