@@ -3437,6 +3437,12 @@ all three `[TEST split — locked]`, with both save buttons disabled.
   config is identified by its parameter blocks, compared with
   `research/labels/configs/`, never by its file name.
 
+**Declared exposure (1 bit).** A verdict-consistency check run over the 3
+test records, before the "presence, hash and lock only" rule was applied,
+showed that 20111118's stored verdict differs from the one derived from its
+phases. That is what "Save ambiguous" writes, so the case was saved as
+ambiguous. No other test-label content was read.
+
 **Still open:** the batch is labelled in the tab, but no scorer reads it yet.
 `evaluate_against_labels.py` will list a batch label as a "series that no longer
 exists", and the benchmark will skip it because its population is the 63. Both

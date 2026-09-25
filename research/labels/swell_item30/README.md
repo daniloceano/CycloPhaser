@@ -181,3 +181,11 @@ stored verdict is the one derived from them. For the 3 test records (19930748,
 shows each as `[TEST split — locked]`, both save buttons are disabled, and the
 blocker says the case is in the TEST split. A batch train case, checked as a
 control, stays saveable.
+
+## Declared exposure — one bit from a test label
+
+Before the rule "presence, hash and lock only" was applied to the 3 test
+records, a verdict-consistency check was run over all 10. On **20111118**, the
+stored verdict differed from the one derived from its phases. That difference is
+what the tab's "Save ambiguous" button writes, so it reveals that the case was
+saved as ambiguous: **1 bit**. No other content of any test label was read.
