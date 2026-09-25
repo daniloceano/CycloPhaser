@@ -1026,12 +1026,30 @@ def test_ledger_accepted_set_is_the_package_mask_under_params_14(vort_cache, kin
 # Measured 2026-09-25 under params-14: on these tracks the floor changes what
 # the package writes (mask with the floor != mask with it at 0.0), so the
 # fidelity above genuinely covers a block the floor REMOVED, not only the 0.0
-# path. intensification_min_depth: 20180654 (41 steps), 20180733 (68 steps).
-# mature_min_depth removes a confirmed window on 20160735, 20170794, 20190325,
-# 20191014, 20203947 and 20206498; two are pinned here, both also in
-# MATURE_TRACKS.
-INTENSIFICATION_FLOOR_TRACKS = ["20180654", "20180733"]
-MATURE_FLOOR_TRACKS = ["20190325", "20206498"]
+# path. intensification_min_depth removes a block on 20180654 (41 steps) and
+# 20180733 (68 steps); mature_min_depth removes a confirmed window on 20160735,
+# 20170794, 20190325, 20191014, 20203947 and 20206498.
+#
+# Only TRAIN tracks of research/labels/split.yaml are pinned: 20180654 and
+# 20206498 are test tracks, and a test set whose members are singled out in the
+# suite is no longer held out. (The fidelity sweeps above do run over all 51 —
+# they read no label and score nothing.) 20170794 over 20191014 for the second
+# mature track: same structure (one D1 = 1.000 valley kept, one valley the
+# confirmation kept with the floor off, removed by it), but the larger margin
+# below 0.80 (D1 0.606 vs 0.642) and the larger removed window (9 vs 7 steps).
+INTENSIFICATION_FLOOR_TRACKS = ["20180733"]
+MATURE_FLOOR_TRACKS = ["20190325", "20170794"]
+
+
+def test_floor_tracks_pinned_here_are_train_tracks():
+    """Guards the SPLIT, not a copied id list: read split.yaml itself."""
+    split = yaml.safe_load(
+        (REPO_ROOT / "research" / "labels" / "split.yaml").read_text())
+    test_ids = {str(x) for x in split["test"]}
+    train_ids = {str(x) for x in split["train"]}
+    pinned = set(INTENSIFICATION_FLOOR_TRACKS) | set(MATURE_FLOOR_TRACKS)
+    assert pinned & test_ids == set()
+    assert pinned <= train_ids
 
 
 @pytest.mark.parametrize("track_id", INTENSIFICATION_FLOOR_TRACKS)
