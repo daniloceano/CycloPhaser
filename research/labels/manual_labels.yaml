@@ -1,7 +1,299 @@
 schema: 4
-updated: '2026-09-14T12:02:32+00:00'
-n_labels: 63
+updated: '2026-09-25T13:24:00+00:00'
+n_labels: 73
 labels:
+- id: '19790612'
+  source: real
+  series_sha256: dd2e556842a6e5d9c52a640fe95b0760edc1f6e92416e7babe7a84c3a559c0c0
+  labeled_at: '2026-09-25T13:13:51+00:00'
+  n_steps: 48
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: decay
+    start_idx: 13
+    tolerance_idx: 2
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 13
+  tolerance_idx: 2
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+- id: '19810854'
+  source: real
+  series_sha256: a6df1139a22a6efbd9d75072062cd05aaa0cf59ab88d24afd84fbcd2cebedf67
+  labeled_at: '2026-09-25T13:21:01+00:00'
+  n_steps: 72
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: intensification
+    start_idx: 3
+    tolerance_idx: 2
+    unsure: false
+  - phase: mature
+    start_idx: 52
+    tolerance_idx: 6
+    unsure: true
+  - phase: decay
+    start_idx: 65
+    tolerance_idx: 2
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 3
+  tolerance_idx: 2
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+- id: '19860380'
+  source: real
+  series_sha256: 9f96819b2ae709d22dbbead1aa8a0b9144272d0850a3e042ed9eee143f9feddf
+  labeled_at: '2026-09-25T13:16:05+00:00'
+  n_steps: 45
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: decay
+    start_idx: 14
+    tolerance_idx: 7
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 14
+  tolerance_idx: 7
+  open_unsure: false
+  close_unsure: false
+  overlays_shown:
+  - filtered_vorticity
+  - vorticity_smoothed2
+- id: '19870927'
+  source: real
+  series_sha256: 13632be40e0554526447a700d3250c443444c25cd9bc9303e69a96eb94b8091c
+  labeled_at: '2026-09-25T13:13:31+00:00'
+  n_steps: 92
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: decay
+    start_idx: 64
+    tolerance_idx: 5
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 64
+  tolerance_idx: 5
+  open_unsure: false
+  close_unsure: false
+  overlays_shown:
+  - filtered_vorticity
+  - vorticity_smoothed2
+- id: '19930748'
+  source: real
+  series_sha256: 386b991e7c738265164ae53de84c85a9379f0dad2696962ebdbbf590fcf8db66
+  labeled_at: '2026-09-25T13:22:10+00:00'
+  n_steps: 37
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: decay
+    start_idx: 6
+    tolerance_idx: 2
+    unsure: false
+  - phase: intensification
+    start_idx: 13
+    tolerance_idx: 3
+    unsure: false
+  - phase: mature
+    start_idx: 18
+    tolerance_idx: 1
+    unsure: false
+  - phase: decay
+    start_idx: 23
+    tolerance_idx: 2
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 6
+  tolerance_idx: 2
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+- id: '19940445'
+  source: real
+  series_sha256: b11104849a1611d54e890d1951a5d4453bf10377a1b2458e7bbb2cd80adef24f
+  labeled_at: '2026-09-25T13:20:29+00:00'
+  n_steps: 47
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: intensification
+    start_idx: 8
+    tolerance_idx: 2
+    unsure: false
+  - phase: mature
+    start_idx: 23
+    tolerance_idx: 1
+    unsure: true
+  - phase: decay
+    start_idx: 25
+    tolerance_idx: 1
+    unsure: true
+  - phase: intensification
+    start_idx: 32
+    tolerance_idx: 2
+    unsure: true
+  - phase: mature
+    start_idx: 35
+    tolerance_idx: 1
+    unsure: true
+  - phase: decay
+    start_idx: 38
+    tolerance_idx: 1
+    unsure: true
+  verdict:
+    kind: boundary
+    incipient_end_idx: 8
+  tolerance_idx: 2
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+- id: '19990549'
+  source: real
+  series_sha256: c0d71c05feb78ff0020489500d2acf426f70de3af6f45bbdcd081700e3e1ed6a
+  labeled_at: '2026-09-25T13:16:58+00:00'
+  n_steps: 108
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: intensification
+    start_idx: 8
+    tolerance_idx: 3
+    unsure: false
+  - phase: mature
+    start_idx: 75
+    tolerance_idx: 7
+    unsure: false
+  - phase: decay
+    start_idx: 95
+    tolerance_idx: 6
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 8
+  tolerance_idx: 3
+  open_unsure: false
+  close_unsure: false
+  overlays_shown:
+  - vorticity_smoothed2
+- id: '20050893'
+  source: real
+  series_sha256: 0bc69704929af577c9bc8eac813eedacbec031ad34326dae0d80c6d86088755a
+  labeled_at: '2026-09-25T13:14:50+00:00'
+  n_steps: 56
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: intensification
+    start_idx: 4
+    tolerance_idx: 1
+    unsure: false
+  - phase: mature
+    start_idx: 31
+    tolerance_idx: 6
+    unsure: false
+  - phase: decay
+    start_idx: 45
+    tolerance_idx: 5
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 4
+  tolerance_idx: 1
+  open_unsure: false
+  close_unsure: false
+  overlays_shown:
+  - vorticity_smoothed2
+- id: '20111118'
+  source: real
+  series_sha256: 13e810ea2251fefdc3431d509b7a93f7deaf0318130a4d56f7a1a0259eaeba85
+  labeled_at: '2026-09-25T13:18:18+00:00'
+  n_steps: 38
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: decay
+    start_idx: 3
+    tolerance_idx: 1
+    unsure: false
+  - phase: intensification
+    start_idx: 15
+    tolerance_idx: 1
+    unsure: false
+  - phase: decay
+    start_idx: 24
+    tolerance_idx: 1
+    unsure: false
+  verdict:
+    kind: ambiguous
+  tolerance_idx: 1
+  open_unsure: false
+  close_unsure: false
+  overlays_shown: []
+- id: '20120297'
+  source: real
+  series_sha256: 039026adf57aae01ee8bc58e95690e924071730a3297fb65c4011420eaab6422
+  labeled_at: '2026-09-25T13:24:00+00:00'
+  n_steps: 40
+  phases:
+  - phase: incipient
+    start_idx: 0
+    tolerance_idx: 5
+    unsure: false
+  - phase: intensification
+    start_idx: 2
+    tolerance_idx: 1
+    unsure: false
+  - phase: mature
+    start_idx: 5
+    tolerance_idx: 1
+    unsure: false
+  - phase: decay
+    start_idx: 9
+    tolerance_idx: 1
+    unsure: false
+  - phase: residual
+    start_idx: 18
+    tolerance_idx: 2
+    unsure: false
+  verdict:
+    kind: boundary
+    incipient_end_idx: 2
+  tolerance_idx: 1
+  open_unsure: false
+  close_unsure: false
+  overlays_shown:
+  - vorticity_smoothed2
 - id: '20150069'
   source: real
   series_sha256: 7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679ed3

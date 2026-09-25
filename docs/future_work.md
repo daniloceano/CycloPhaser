@@ -3417,6 +3417,26 @@ parameters, and neither floor touches them. This was established by reading the
 code, not by running it. Only the batch's labelling note is affected: R, and in
 fact all 10, were seen with the `params-14` detection before labelling.
 
+**Labels recorded (2026-09-25).** `manual_labels.yaml` gained exactly the 10
+batch records (63 → 73). The 63 earlier records are byte-identical, block by
+block, to `develop-v2.1`. For all 10, `series_sha256` equals the hash of the batch
+file, whose sha256 matches `split.yaml`. The 7 train records pass schema-4
+validation, with the stored verdict equal to the one derived from their phases.
+For the 3 test records only presence, hash and lock were checked; AppTest shows
+all three `[TEST split — locked]`, with both save buttons disabled.
+
+- **(a) Decision (Danilo):** the save-once exception for the batch's 3 test cases
+  is accepted. They were labellable once while unlabelled, and are locked from
+  then on.
+- **(b) Exposure:** the original TEST series **20203389** was among the 200 swell
+  tracks Danilo evaluated with detection in the Grid on 2026-09-24. Its label
+  predates that (all 63 were on file by 2026-09-14) and was not read. Any later
+  test result citing it should carry the caveat.
+- **(c) Name trap:** the app export `cyclophaser_params-11.yaml` (`6df2cc07…`)
+  holds **`params-14`'s values** (0.05 / 0.80 / `reclassify_index0` true). A
+  config is identified by its parameter blocks, compared with
+  `research/labels/configs/`, never by its file name.
+
 **Still open:** the batch is labelled in the tab, but no scorer reads it yet.
 `evaluate_against_labels.py` will list a batch label as a "series that no longer
 exists", and the benchmark will skip it because its population is the 63. Both

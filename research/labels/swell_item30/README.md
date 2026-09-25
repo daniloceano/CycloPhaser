@@ -131,14 +131,53 @@ above, whose parameters equal those of `params-14`. It was **not** the repo's
 went through that same evaluation, so the S and C cases were also seen with the
 detection, just without a bad mark.
 
+## Exposure of an already-labelled TEST series
+
+**20203389** is a TEST series of the original split. It was one of the 200 swell
+tracks that Danilo evaluated with the detection on screen in the Grid on
+2026-09-24. All 63 labels were already on file by then (on `develop-v2.1` the
+labels file header reads `updated: '2026-09-14…'`), so its label predates the
+exposure. It was excluded from the draw (step 0c), and **its label was not
+read** at any point in this front. The series itself, however, has now been
+seen with detector output. Any later reading of test results that cites 20203389 should say so.
+
+## Name trap: an export called `params-11` that holds `params-14`
+
+The app export `cyclophaser_params-11.yaml` (sha256 `6df2cc07…`), the file that
+holds the 15 bad marks, carries **`params-14`'s values**:
+`intensification_min_depth` 0.05, `mature_min_depth` 0.80,
+`reclassify_index0` true. Its filter and phase blocks are identical to
+`params-14`. The file's name is not its configuration. Before attributing a
+result to a configuration, compare the export's parameter blocks with
+`research/labels/configs/`; the file name is not evidence.
+
 ## Where the batch appears
 
-- **Label tab: yes.** The 10 are appended after the 63, whose order is unchanged,
-  and start unlabelled. The 3 test cases may be saved **once**, while they still
-  have no label; after that they are locked like every test case. The 16 test
-  cases of the original split stay locked.
+- **Label tab: yes.** The 10 are appended after the 63, whose order is unchanged.
+  The 3 test cases may be saved **once**, while they still have no label; after
+  that they are locked like every test case. The 16 test cases of the original
+  split stay locked.
+- **Decision (Danilo, 2026-09-25):** the save-once exception for the batch's 3
+  test cases is accepted. A test case that was drawn before anyone labelled it
+  must be labellable once, and it is locked from then on, overwrite included.
 - **Nowhere else.** The benchmark, `evaluate_against_labels.py`,
   `load_real_series`, `make_split` and the Grid's "load all test cyclones" all
   glob `tests/calibration_data/*.csv` non-recursively, so they still see 51 real
   series and 63 in total. Split × source is unchanged at 35 train real, 12 train
   synthetic and 16 test real, and so is the population hash.
+
+## Labels recorded (2026-09-25)
+
+`manual_labels.yaml` gained exactly 10 records, the ids of this batch
+(`n_labels` 63 → 73). Each of the 63 earlier records is byte-identical to its
+block on `develop-v2.1`; the only other change is the header (`updated`,
+`n_labels`). For every one of the 10, the record's `series_sha256` equals the
+hash of the batch file's values, and that file's own sha256 equals the one in
+`split.yaml`. All 10 show as labelled (not stale) in the tab.
+
+For the 7 train records, schema 4 is valid: the phases pass validation and the
+stored verdict is the one derived from them. For the 3 test records (19930748,
+19990549, 20111118), only presence, hash and lock were checked. The tab (AppTest)
+shows each as `[TEST split — locked]`, both save buttons are disabled, and the
+blocker says the case is in the TEST split. A batch train case, checked as a
+control, stays saveable.
