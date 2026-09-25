@@ -144,3 +144,93 @@ source:
   sbceec644: synthetic
   sbd6c6920: synthetic
   scfcf1387: synthetic
+batches:
+  swell_item30:
+    frozen: true
+    created: '2026-09-25T12:06:05+00:00'
+    seed: 20260925
+    rng: numpy.random.default_rng
+    rule: 'Seed 20260925, numpy.random.default_rng, one generator. Swell tracks already among
+      the 51 labelled real series leave every group first. Groups in order R, S, C, members
+      sorted by id: chosen = rng.choice(members, k, replace=False); order = rng.permutation(k);
+      train = chosen[order[:n_train]], test = the rest. (k, n_train, n_test): R (5, 4, 1),
+      S (3, 2, 1), C (2, 1, 1).'
+    draw_script: research/labels/swell_item30/draw_batch.py
+    groups_file: research/labels/swell_item30/groups_params11.yaml
+    groups_file_sha256: 382de59cff9d268bcafb4767155042f961ef5802fbd3af642bab0d465c985949
+    group_definition: R = marked bad AND plateau_boundary > peak_idx; S = good AND plateau_boundary
+      > peak_idx; C = good AND NOT plateau_boundary > peak_idx (repo params-11, see groups_file)
+    excluded_overlap:
+      '20180733': train
+      '20203389': test
+    group_sizes_after_exclusion:
+      R: 9
+      S: 10
+      C: 173
+    draw:
+      R:
+        n: 5
+        n_train: 4
+        n_test: 1
+      S:
+        n: 3
+        n_train: 2
+        n_test: 1
+      C:
+        n: 2
+        n_train: 1
+        n_test: 1
+    data_dir: tests/calibration_data/swell_item30
+    train:
+    - '19790612'
+    - '19810854'
+    - '19860380'
+    - '19870927'
+    - '19940445'
+    - '20050893'
+    - '20120297'
+    test:
+    - '19930748'
+    - '19990549'
+    - '20111118'
+    group:
+      '19790612': S
+      '19810854': S
+      '19860380': R
+      '19870927': R
+      '19930748': R
+      '19940445': R
+      '19990549': C
+      '20050893': C
+      '20111118': S
+      '20120297': R
+    source:
+      '19790612': real
+      '19810854': real
+      '19860380': real
+      '19870927': real
+      '19930748': real
+      '19940445': real
+      '19990549': real
+      '20050893': real
+      '20111118': real
+      '20120297': real
+    file_sha256:
+      '19790612': 95a49e85d8cffd879e63d400e9a0a4275a4fe876009acb8daddbf83de641427b
+      '19810854': c208fb247eaf70e4138d7cc48024c17d4de55bf9bdc7708cdfd19cd6c4f7f2b9
+      '19860380': 59545d588ad2e53d093d4ca14885c66919be3e791da2b880da74dc7d4ae3b1e7
+      '19870927': df3c7d9adbb6d3a95ea88f7dd28f147e8f2781119f4e98f00b90c5b40c6779d2
+      '19930748': fefaf36178432fcf6ada957854b80d412ef5239172e5fe46e23d8389958de246
+      '19940445': 3564f718b26c882dddfb3501af699ba771a931b57621bed86138e6154a6cbaa8
+      '19990549': 195e70486db6ac44ae7c5b3c91ad3734c624a365237fcdcc3d8fed313f630e27
+      '20050893': 9eeb455e7d3a1ffd227692c76f97a75da1cb4dc3489c3eea205c011df648afdd
+      '20111118': 5d501e8455aa68ba9391a604c9b7aa47f7f267017ae5e99223653f2cb68d53a2
+      '20120297': 257075ae7990c409f37914bd607a22eeb44d326a45a9d87b78c15db39fdcd5d4
+    labelling_note: Os casos do grupo R foram vistos por Danilo com a detecção antes da rotulagem;
+      rotulagem não cega nesses casos. A detecção em tela foi a do arquivo que o app exportou
+      como cyclophaser_params-11.yaml (sha256 6df2cc0721d080acc294d943a06e03fa0967fd7d91c81b9dccb48a347251f739),
+      cujos parâmetros de filtro e de fase são idênticos aos de params-14 (intensification_min_depth
+      0.05, mature_min_depth 0.80, reclassify_index0 true) — não os do params-11 do repo (24dd7f22…),
+      sob o qual os grupos foram calculados. A assinatura que define os grupos não lê esses
+      dois pisos. Os 200 tracks passaram pela mesma avaliação, então S e C também foram vistos
+      com detecção, sem a marca de ruim.

@@ -3377,6 +3377,52 @@ belongs to the maturation diagnostic that followed, not to this front.
 
 ---
 
+## 30. Plateau overwriting intensification — selection part: 10 swell tracks drawn for manual labelling — **done on branch `research/item30-plateau-overwrite`, NOT merged**
+
+The labelled set has no case where the incipient plateau ends after the intensity
+peak and overwrites the intensification. Without such cases, a fix could only be
+calibrated against visual marks. Ten tracks from the 200-track swell sample were
+therefore drawn into the labelled set by a seeded rule and split before
+labelling. No detector was run on the 10 and no figure was drawn. The full record
+is in `research/labels/swell_item30/README.md`.
+
+- **Groups.** They come from the maturation diagnostic of 2026-09-24
+  (`m1_baseline.csv`, repo `params-11`, package code of `d45ae49`). The signal is
+  `plateau_boundary > peak_idx`: R = bad with the signal (9), S = good with the
+  signal (10), C = the other good tracks (175). The lists were reconstructed
+  exactly from the saved CSV and match the lists printed in that session.
+- **Overlap exclusions.** 20180733 (train) and 20203389 (test) are already among
+  the 51, with byte-identical files. They were removed before the draw, leaving
+  group sizes of R 9, S 10 and C 173.
+- **Conversion** (`-1e-5 * vor42`). Measured on 20180733: max|Δ| 1.36e-20 (1 ulp),
+  ratio 1.000, same sign, lag 0.
+- **Draw.** Seed `20260925` with `numpy.random.default_rng`, pre-registered in
+  `659eb5e` before it was run. **Train:** 19860380, 19870927, 19940445, 20120297
+  (R); 19790612, 19810854 (S); 20050893 (C). **Test:** 19930748 (R), 20111118 (S),
+  19990549 (C). The batch is recorded as `batches: swell_item30` at the end of
+  `split.yaml`. The original 146 lines are byte-identical.
+- **Integration.** The series are in `tests/calibration_data/swell_item30/`, one
+  level down, so every non-recursive `*.csv` reader still sees 51 real series.
+  The label tab appends the 10 after the 63 without changing their order; the 3
+  test cases can be saved once while unlabelled and are locked after that.
+  The benchmark population is unchanged (35/12/16 by split × source, same
+  population hash).
+
+**Provenance finding: the 15 bad marks were not made under `params-11`.** The
+app export that holds them (named `cyclophaser_params-11.yaml`, sha256 `6df2cc07…`)
+has filter and phase parameters identical to `params-14`: floors 0.05 and 0.80.
+The diagnostic ran the repo's `params-11`, where the floors are 0.0. The groups
+are unaffected, because the signal reads only `z`, `z_unfil` and the plateau
+parameters, and neither floor touches them. This was established by reading the
+code, not by running it. Only the batch's labelling note is affected: R, and in
+fact all 10, were seen with the `params-14` detection before labelling.
+
+**Still open:** the batch is labelled in the tab, but no scorer reads it yet.
+`evaluate_against_labels.py` will list a batch label as a "series that no longer
+exists", and the benchmark will skip it because its population is the 63. Both
+stay that way until a front adds the batch to them. That front
+must keep the batch's 3 test cases out of any training aggregate.
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

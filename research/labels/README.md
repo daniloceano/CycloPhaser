@@ -224,6 +224,15 @@ labeller's own marks, and the palette. Nothing else can reach the screen.
 Each save rewrites `manual_labels.yaml` atomically (tmp + `os.replace`), so
 closing the tab cannot lose work.
 
+**2b — the item-30 swell batch (drawn, not yet labelled).** Ten swell tracks
+were drawn by a seeded rule (seed `20260925`) into a separate, frozen block,
+`batches: swell_item30`, appended to `split.yaml` (7 train, 3 test). The 47/16
+split above it is unchanged. Their series are in
+`tests/calibration_data/swell_item30/`, deliberately **below** the 51 so that no
+existing reader sees them. The Label tab queues them after the 63. See
+`swell_item30/README.md` for the rule, the provenance and why these labels are
+not blind.
+
 **3 — evaluation.**
 
 ```bash

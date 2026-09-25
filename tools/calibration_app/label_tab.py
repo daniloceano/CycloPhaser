@@ -30,7 +30,9 @@ Concretely, this module:
     setting can change what is on screen;
   * loads its own series straight from tests/calibration_data/ and
     tests/synthetic/cases.py, independently of whatever the rest of the app has
-    loaded, so the queue is always the same 63 series.
+    loaded, so the queue is always the same 63 series — followed by the
+    item-30 swell batch of split.yaml (tests/calibration_data/swell_item30/),
+    appended so it reshuffles none of the 63.
 
 Every bar and band drawn here comes from the LABELLER'S OWN marks. The phase
 palette is the project's standard one (blue incipient, amber intensification,
@@ -834,16 +836,33 @@ def _draw(sid: str, values: pd.Series, phases: list[dict],
 
 @st.cache_data(show_spinner=False)
 def _load_population():
-    """Every series to be labelled, as ({id: Series}, {id: source}).
+    """Every series to be labelled, as
+    ({id: Series}, {id: source}, [batch ids], batch error or None).
 
     Cached because it re-reads 51 CSVs and re-generates 12 synthetic series;
     nothing here depends on any app parameter, so one load per session is right.
+
+    The item-30 swell batch (split.yaml `batches: swell_item30`) is added on
+    top of the 63 as real series and its ids are returned apart, so the queue
+    can APPEND it rather than reshuffle the 63. A batch that cannot be loaded
+    — a file whose sha256 no longer matches the one recorded at the draw, or an
+    id that collides with one of the 63 — is left out and named, never loaded
+    half-way.
     """
     real = lc.load_real_series()
     synth, _names = lc.load_synthetic_series()
-    series = {**real, **synth}
-    sources = ({k: "real" for k in real} | {k: "synthetic" for k in synth})
-    return series, sources
+    try:
+        batch = lc.load_batch_series()
+        clash = sorted(set(batch) & (set(real) | set(synth)))
+        if clash:
+            raise ValueError(f"batch ids already in the population: {clash}")
+        batch_error = None
+    except Exception as exc:
+        batch, batch_error = {}, f"{type(exc).__name__}: {exc}"
+    series = {**real, **synth, **batch}
+    sources = ({k: "real" for k in real} | {k: "synthetic" for k in synth}
+               | {k: "real" for k in batch})
+    return series, sources, sorted(batch), batch_error
 
 
 def default_phases(n: int, tolerance: int) -> list[dict]:
@@ -1042,7 +1061,8 @@ def _case_status(values: pd.Series, rec: dict | None) -> str:
 
 def _case_navigation(queue: list[str], records: dict, series: dict,
                      sources: dict, synth_names: dict[str, str],
-                     test_ids: set, mode: str, pos: int) -> int:
+                     test_ids: set, mode: str, pos: int,
+                     batch_ids: frozenset = frozenset()) -> int:
     """The case picker: a dropdown to jump to ANY of the 63 cases directly,
     with status/split/frozen indicators, plus a filter for "not yet labelled".
 
@@ -1062,7 +1082,11 @@ def _case_navigation(queue: list[str], records: dict, series: dict,
         status = _case_status(series[sid], records.get(sid))
         tag = ""
         if sid in test_ids:
-            tag += "  [TEST split — locked]"
+            tag += ("  [TEST — first label only]"
+                    if sid in batch_ids and not records.get(sid)
+                    else "  [TEST split — locked]")
+        if sid in batch_ids:
+            tag += "  [swell batch]"
         if sources[sid] == "synthetic":
             tag += "  [frozen synthetic]"
             if mode == "inspect":
@@ -1204,17 +1228,26 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     label is actually written from (`_draw`, below) never receives it and
     never changes shape depending on it.
     """
-    series, sources = _load_population()
+    series, sources, batch_ids, batch_error = _load_population()
     if not series:
         st.error("No series found to label "
                  "(tests/calibration_data/ and tests/synthetic/cases.py are both empty).")
         return
+    if batch_error:
+        st.error(f"The item-30 swell batch could not be loaded ({batch_error}) — "
+                 "its cases are left out of the queue.")
 
-    queue = lc.build_queue(series.keys())
+    # The 63 keep exactly the order they have always had; the batch is shuffled
+    # on its own and appended, so adding it moves nothing already labelled.
+    batch_set = set(batch_ids)
+    queue = (lc.build_queue([k for k in series if k not in batch_set])
+             + lc.build_queue(batch_ids))
     records = lc.read_labels()
     n_total = len(queue)
     split_doc, split_error = _read_split()
-    test_ids = set(split_doc.get("test", [])) if split_doc else set()
+    batch_test_ids = ({s for s, m in lc.batch_membership(split_doc=split_doc).items()
+                       if m == "test"} & batch_set) if split_doc else set()
+    test_ids = (set(split_doc.get("test", [])) | batch_test_ids) if split_doc else set()
     synth_names = _load_synthetic_names()
 
     # Resume where the last session stopped. Stored in session state after the
@@ -1225,7 +1258,8 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     pos = int(st.session_state["lab_pos"]) % n_total
 
     pos = _case_navigation(queue, records, series, sources, synth_names,
-                          test_ids, st.session_state.get("_lab_mode", "inspect"), pos)
+                          test_ids, st.session_state.get("_lab_mode", "inspect"), pos,
+                          batch_ids=frozenset(batch_set))
     sid = queue[pos]
     mode = _mode_switch(sid)
     values = series[sid]
@@ -1246,6 +1280,12 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     key_open, key_close = f"_lab_open__{sid}", f"_lab_close__{sid}"
 
     existing = records.get(sid)
+    # A TEST case of the item-30 swell batch may be saved exactly once, while
+    # it has no label at all: it was drawn into test before anyone labelled it,
+    # and a test series nobody can label is not a test series. Any later save
+    # is an overwrite and is blocked like every other test case. The 16 test
+    # cases of the original split are untouched by this — none is in the batch.
+    test_first_label = is_test_case and sid in batch_test_ids and not existing
     stale = bool(existing) and existing.get("series_sha256") != lc.series_sha256(values)
     legacy = bool(existing) and lc.is_legacy_record(existing)
     usable_existing = existing if (existing and not stale and not legacy) else None
@@ -1294,7 +1334,10 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     st.markdown("#### Manual labelling — the **raw input series only**")
     st.caption(
         f"Mode: **{'Inspection' if mode == 'inspect' else 'Labelling'}**"
-        + ("  ·  🔒 TEST split — saving locked" if is_test_case else "")
+        + ("  ·  🔒 TEST split — saving locked"
+           if is_test_case and not test_first_label else "")
+        + ("  ·  🔓 TEST (swell batch) — first label only, then locked"
+           if test_first_label else "")
         + ("  ·  ❄️ frozen synthetic — saving needs double confirmation"
            if is_synthetic else "")
     )
@@ -1500,7 +1543,12 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
         st.session_state[key_sc2] = sc2
         synthetic_ok = sc1 and sc2
 
-    if is_test_case:
+    if test_first_label:
+        st.warning("This case is in the TEST part of the item-30 swell batch "
+                   "(research/labels/split.yaml). It has no label yet, so it can "
+                   "be saved ONCE — after that it is locked like every test "
+                   "case, overwrite included. Check the table before saving.")
+    elif is_test_case:
         st.error("This case is in the TEST split (research/labels/split.yaml) "
                  "— saving is BLOCKED, not just discouraged.")
 
@@ -1517,7 +1565,7 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     if split_error:
         blockers.append(f"{lc.SPLIT_PATH.name} could not be read; saving is "
                         "locked repo-wide until this is fixed")
-    elif is_test_case:
+    elif is_test_case and not test_first_label:
         blockers.append("this case is in the TEST split — saving is blocked, "
                         "not just discouraged")
     if problem:
