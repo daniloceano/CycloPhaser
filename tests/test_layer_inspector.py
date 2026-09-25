@@ -31,6 +31,7 @@ entirely fidelity tests against the package itself:
    an addition, not a change.
 """
 
+import ast
 import hashlib
 import io
 import sys
@@ -44,6 +45,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
+import yaml  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
@@ -852,3 +854,227 @@ def test_incipient_lead_never_precedes_the_crossing_index(vort_cache,
     assert lead >= lens["crossing_index"], (
         f"{track_id} ({crossing}, k={k}): lead={lead} < "
         f"crossing_index={lens['crossing_index']}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 7. The app's full parameter set reaches the inspector (item 30a)
+# ══════════════════════════════════════════════════════════════════════════════
+
+APP_PY = REPO_ROOT / "tools" / "calibration_app" / "app.py"
+PARAMS_14 = REPO_ROOT / "research" / "labels" / "configs" / "cyclophaser_params-14.yaml"
+
+# What the app routes to build_working_frame instead of build_args_periods —
+# the exclusion in the inspector block of app.py.
+_APP_EXTRA_KEYS = ("prominence", "prominence_relative", "reclassify_index0")
+
+# The app's own YAML converters for the three integer-valued keys (params-14
+# stores incipient_smooth_window as 5.0).
+_INT_KEYS = ("incipient_plateau_k", "incipient_smooth_window",
+             "incipient_smooth_polyorder")
+
+
+def _app_phase_param_keys() -> set:
+    """Keyword names of the app's ``_PHASE_PARAMS = dict(...)``, read by parsing
+    app.py — importing it would execute a Streamlit script. Read rather than
+    copied, so a key the app starts sending shows up here on its own."""
+    tree = ast.parse(APP_PY.read_text())
+    found = [node.value for node in ast.walk(tree)
+             if isinstance(node, ast.Assign)
+             and any(isinstance(t, ast.Name) and t.id == "_PHASE_PARAMS"
+                     for t in node.targets)]
+    assert len(found) == 1, f"expected one _PHASE_PARAMS assignment, got {len(found)}"
+    call = found[0]
+    assert isinstance(call, ast.Call) and call.func.id == "dict"
+    return {kw.arg for kw in call.keywords}
+
+
+def _params_14():
+    """(filter_params, phase_params) of params-14, phase values typed as the app
+    types them on import."""
+    cfg = yaml.safe_load(PARAMS_14.read_text())
+    phase = dict(cfg["phase_params"])
+    for k in _INT_KEYS:
+        phase[k] = int(float(phase[k]))
+    return dict(cfg["filter_params"]), phase
+
+
+def test_inspector_accepts_the_full_parameter_set_the_app_sends(vort_cache):
+    """The inspector path, called with every key the app hands build_args_periods.
+
+    Regression for item 30a: the app sends mature_min_depth and
+    intensification_min_depth on every run (default 0.0), and
+    build_args_periods rejected both, so the inspector failed for any track.
+    """
+    keys = _app_phase_param_keys() - set(_APP_EXTRA_KEYS)
+    pv, phase = _params_14()
+    args = li.build_args_periods(**{k: phase.get(k) for k in keys})
+    df = li.build_working_frame(
+        _vort(vort_cache, "20190325", key="p14", **pv),
+        prominence=phase.get("prominence"),
+        prominence_relative=phase.get("prominence_relative"),
+        reclassify_index0=phase["reclassify_index0"])
+    li.pipeline_ribbon(df, **args)
+    li.intensification_ledger(df, **args)
+    li.decay_ledger(df, **args)
+    after_decay = find_decay_period(
+        find_intensification_period(df.copy(deep=True), **args), **args)
+    li.mature_ledger(after_decay, **args)
+
+
+
+def _get_periods_args_block() -> dict:
+    """``{key: forwarded parameter name}`` of the ``args_periods = {...}`` block
+    inside ``get_periods``, read by parsing the package source — not a copied
+    list, so a key added to the package and not to the inspector fails here."""
+    import cyclophaser.find_stages as _fs  # a module, unlike cyclophaser.determine_periods
+    src = Path(_fs.__file__).with_name("determine_periods.py")
+    tree = ast.parse(src.read_text())
+    fns = [n for n in tree.body
+           if isinstance(n, ast.FunctionDef) and n.name == "get_periods"]
+    assert len(fns) == 1
+    blocks = [node.value for node in ast.walk(fns[0])
+              if isinstance(node, ast.Assign)
+              and any(isinstance(t, ast.Name) and t.id == "args_periods"
+                      for t in node.targets)
+              and isinstance(node.value, ast.Dict)]
+    assert len(blocks) == 1, f"expected one args_periods dict, got {len(blocks)}"
+    out = {}
+    for k, v in zip(blocks[0].keys, blocks[0].values):
+        assert isinstance(k, ast.Constant) and isinstance(v, ast.Name)
+        out[k.value] = v.id
+    return out
+
+
+def test_args_periods_defaults_have_exactly_get_periods_keys():
+    """Anti-recurrence for item 30a: the inspector's key set IS the package's."""
+    package = set(_get_periods_args_block())
+    mine = set(li._ARGS_PERIODS_DEFAULTS)
+    assert mine == package, (f"missing here: {sorted(package - mine)}; "
+                             f"unknown to the package: {sorted(mine - package)}")
+
+
+def test_args_periods_defaults_are_get_periods_defaults():
+    """...and each value is get_periods' own default for the parameter it forwards."""
+    import inspect
+    sig = inspect.signature(get_periods)
+    wrong = {k: (li._ARGS_PERIODS_DEFAULTS[k], sig.parameters[param].default)
+             for k, param in _get_periods_args_block().items()
+             if li._ARGS_PERIODS_DEFAULTS.get(k) != sig.parameters[param].default}
+    assert wrong == {}, f"(inspector, package) defaults differ: {wrong}"
+
+
+# ── Fidelity with the depth floors ACTIVE (params-14: intensification 0.05,
+#    mature 0.80). Every earlier fidelity test runs with both floors at 0.0, so
+#    none of them could see a ledger that ignored the floors.
+
+def _p14_frame_and_args(cache, track_id):
+    pv, phase = _params_14()
+    df = li.build_working_frame(
+        _vort(cache, track_id, key="p14", **pv),
+        **{k: phase.get(k) for k in _APP_EXTRA_KEYS})
+    args = li.build_args_periods(
+        **{k: v for k, v in phase.items() if k not in _APP_EXTRA_KEYS})
+    return df, args, phase
+
+
+def test_params_14_has_both_depth_floors_active():
+    """Guard for the tests below: if params-14 ever stopped setting the floors,
+    they would silently fall back to testing the 0.0 path again."""
+    _, phase = _params_14()
+    assert phase["intensification_min_depth"] > 0
+    assert phase["mature_min_depth"] > 0
+
+
+def test_ribbon_step_six_equals_get_periods_under_params_14(vort_cache):
+    pv, _ = _params_14()
+    divergences = []
+    for track_id in ALL_TRACKS:
+        df, args, phase = _p14_frame_and_args(vort_cache, track_id)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            df_result = get_periods(_vort(vort_cache, track_id, key="p14", **pv),
+                                    **phase)
+            steps = li.pipeline_ribbon(df, **args)
+        if not steps[-1][1].equals(df_result["periods"]):
+            divergences.append(track_id)
+    assert divergences == [], f"{len(divergences)} tracks diverge: {divergences[:5]}"
+
+
+@pytest.mark.parametrize("kind", ["intensification", "decay", "mature"])
+def test_ledger_accepted_set_is_the_package_mask_under_params_14(vort_cache, kind):
+    """Each ledger's accepted set == what the package writes, floors active."""
+    divergences = []
+    for track_id in ALL_TRACKS:
+        df, args, _ = _p14_frame_and_args(vort_cache, track_id)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            if kind == "mature":
+                after_decay = find_decay_period(
+                    find_intensification_period(df.copy(deep=True), **args), **args)
+                mine = li.mature_confirmed_mask(
+                    after_decay, li.mature_ledger(after_decay, **args))
+            else:
+                ledger_fn = (li.intensification_ledger if kind == "intensification"
+                             else li.decay_ledger)
+                mine = ledger_fn(df, **args)["mask"]
+            theirs = li.ledger_reference_mask(df, kind, **args)
+        if not np.array_equal(mine, theirs):
+            divergences.append((track_id, int((mine != theirs).sum())))
+    assert divergences == [], f"{len(divergences)} tracks diverge: {divergences[:5]}"
+
+
+# Measured 2026-09-25 under params-14: on these tracks the floor changes what
+# the package writes (mask with the floor != mask with it at 0.0), so the
+# fidelity above genuinely covers a block the floor REMOVED, not only the 0.0
+# path. intensification_min_depth: 20180654 (41 steps), 20180733 (68 steps).
+# mature_min_depth removes a confirmed window on 20160735, 20170794, 20190325,
+# 20191014, 20203947 and 20206498; two are pinned here, both also in
+# MATURE_TRACKS.
+INTENSIFICATION_FLOOR_TRACKS = ["20180654", "20180733"]
+MATURE_FLOOR_TRACKS = ["20190325", "20206498"]
+
+
+@pytest.mark.parametrize("track_id", INTENSIFICATION_FLOOR_TRACKS)
+def test_intensification_floor_removes_a_block_and_the_ledger_says_so(vort_cache,
+                                                                     track_id):
+    df, args, _ = _p14_frame_and_args(vort_cache, track_id)
+    off = dict(args, intensification_min_depth=0.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        assert not np.array_equal(
+            li.ledger_reference_mask(df, "intensification", **args),
+            li.ledger_reference_mask(df, "intensification", **off)), \
+            "the floor no longer changes this track — the test would not test it"
+        on_led = li.intensification_ledger(df, **args)["candidates"]
+        off_led = li.intensification_ledger(df, **off)["candidates"]
+    removed = [i for i, c in enumerate(on_led)
+               if c["reason"] == "below intensification_min_depth"]
+    assert removed
+    for i in removed:
+        c = on_led[i]
+        assert not c["accepted"]
+        assert c["duration"] > c["minimum"]      # it failed on depth, not duration
+        assert c["depth"] < args["intensification_min_depth"]
+        assert off_led[i]["accepted"]            # and with the floor off it is accepted
+
+
+@pytest.mark.parametrize("track_id", MATURE_FLOOR_TRACKS)
+def test_mature_floor_removes_a_window_and_the_ledger_says_so(vort_cache, track_id):
+    df, args, _ = _p14_frame_and_args(vort_cache, track_id)
+    off = dict(args, mature_min_depth=0.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        assert not np.array_equal(li.ledger_reference_mask(df, "mature", **args),
+                                  li.ledger_reference_mask(df, "mature", **off)), \
+            "the floor no longer changes this track — the test would not test it"
+        after_decay = find_decay_period(
+            find_intensification_period(df.copy(deep=True), **args), **args)
+        on_recs = {r["z_valley"]: r for r in li.mature_ledger(after_decay, **args)}
+        off_recs = {r["z_valley"]: r for r in li.mature_ledger(after_decay, **off)}
+    below = [v for v, r in on_recs.items() if r["reason"] == "below mature_min_depth"]
+    assert below
+    for v in below:
+        assert not on_recs[v]["written"] and not on_recs[v]["confirmed"]
+        assert on_recs[v]["depth"] < args["mature_min_depth"]
+    # At least one of them was a window the confirmation kept with the floor off.
+    assert any(off_recs[v]["confirmed"] for v in below)

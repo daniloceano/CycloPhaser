@@ -250,11 +250,19 @@ def _ledger_traces(fig, row, index, z, scale, ledger, colour, label):
             lo, hi = pos.get(rec["start"]), pos.get(rec["end"])
             if lo is None or hi is None:
                 continue
+            # A candidate removed by the depth floor PASSED the duration test
+            # (the package only checks depth after it), so its hover must not
+            # claim it was too short.
+            below_floor = rec.get("reason") == "below intensification_min_depth"
+            long_enough = accepted or below_floor
             note = (f"{label} {'ACCEPTED' if accepted else 'REJECTED'}<br>"
                     f"{rec['start']:%d/%m %Hh} → {rec['end']:%d/%m %Hh}<br>"
                     f"duration {_td(rec['duration'])} "
-                    f"{'>' if accepted else '≤'} minimum {_td(rec['minimum'])}<br>"
-                    f"scale {_td(rec['scale'])}")
+                    f"{'>' if long_enough else '≤'} minimum {_td(rec['minimum'])}<br>"
+                    f"scale {_td(rec['scale'])}"
+                    + (f"<br>depth D2 {rec['depth']:.3f}"
+                       if rec.get("depth") is not None else "")
+                    + ("<br>below intensification_min_depth" if below_floor else ""))
             xs.extend(list(index[lo:hi + 1]) + [None])
             ys.extend(list(z[lo:hi + 1]) + [None])
             texts.extend([note] * (hi - lo + 1) + [None])
