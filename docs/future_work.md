@@ -3377,6 +3377,76 @@ belongs to the maturation diagnostic that followed, not to this front.
 
 ---
 
+## 30a. Inspector — the two depth-floor parameters — **fixed on branch, awaiting Danilo's visual check; NOT merged**
+
+Branch `fix/inspector-depth-params`, from `develop-v2.1` @ `0f5bef5`. App only:
+`git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser` env,
+`cyclophaser.__file__` confirmed to be this checkout.
+
+### The defect
+
+`layer_inspector._ARGS_PERIODS_DEFAULTS` lacked `mature_min_depth` (front 20b)
+and `intensification_min_depth` (front C). The app sends both on every run
+(default 0.0), and `build_args_periods` rejects unknown keys, so the Inspector
+view showed `Inspector error: "not stage-detection parameters:
+['intensification_min_depth', 'mature_min_depth']"` for **every** track — since
+2026-09-21. Beneath that, `intensification_ledger` and `mature_ledger`
+reconstruct their criteria outside the package and ignored both floors, so
+adding the keys alone would have made the ledgers show as accepted blocks the
+package had removed. No existing fidelity test could see it: all of them ran
+with both floors at 0.0.
+
+**Positive control.** Before the fix, a new test that drives the inspector path
+with exactly the keys the app sends (read by parsing `app.py`'s
+`_PHASE_PARAMS`, minus the three extrema keys) failed with that `KeyError`; an
+AppTest of the real Inspector view, with the two keys removed, shows the same
+`Inspector error` (kept as a permanent test).
+
+### What was done
+
+* The two keys added, with defaults read from `get_periods`' signature (both
+  `0.0`, `determine_periods.py:822-823`).
+* Anti-recurrence: the key set of `_ARGS_PERIODS_DEFAULTS` is asserted EQUAL to
+  the keys of the `args_periods = {` block inside `get_periods`, parsed with
+  `ast` — and every value equal to `get_periods`' default for the parameter it
+  forwards (`inspect.signature`). Mutation-checked: removing a key fails it.
+* Ledgers. The package exposes **no callable** for either floor — both are
+  applied inline in `find_stages.py` — so only the depth arithmetic is
+  transcribed, in the package's order: D2 on an intensification candidate only
+  after it passed the duration test and before gap stitching; D1 on a valley
+  before its neighbouring peaks are looked up, for both mature methods; both
+  skipped where the z range is zero/non-finite. Removed candidates carry
+  `reason` "below intensification_min_depth" / "below mature_min_depth" and a
+  `depth` field. `ledger_reference_mask` gained `kind="mature"` (steps 1-3 by
+  the package) so all three ledgers share one oracle.
+* App: `Depth (D2)` / `Depth (D1)` columns, verdict "rejected: below
+  intensification_min_depth", captions updated; the Plotly hover no longer
+  claims a depth-rejected candidate was shorter than its minimum.
+
+### Fidelity with the floors active (params-14: 0.05 / 0.80), all 51 tracks
+
+Step 6 of the ribbon == `get_periods`; accepted set of each ledger
+(intensification, decay, mature) == the package's mask. The floor genuinely
+removes what the package writes on: **intensification** 20180654 (41 steps),
+20180733 (68 steps); **mature** (a window confirmed with the floor off)
+20160735, 20170794, 20190325, 20191014, 20203947, 20206498 — 20180654,
+20180733, 20190325, 20206498 are pinned by tests that first assert the floor
+still changes the package's mask. Mutation-checked: ledgers ignoring the floors
+fail 6 of the new tests.
+
+Limit: the app's default track (`example_file`) has intensification D2 of
+1.000 and 0.565, above the slider's 0.50 maximum, so the AppTest can exercise
+only the mature floor through the UI.
+
+Suite, dedicated env, `-m "not browser"`: **1348 passed, 0 failed** before →
+**1362 passed, 0 failed** after (+14 = the new tests: 12 in
+`test_layer_inspector.py`, 2 in the new `test_inspector_apptest.py`).
+
+**Stop before merge:** Danilo checks visually, opening in the Inspector one
+track from the repo and one from the swell set under params-14.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded
