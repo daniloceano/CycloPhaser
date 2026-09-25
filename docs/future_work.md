@@ -3377,6 +3377,115 @@ belongs to the maturation diagnostic that followed, not to this front.
 
 ---
 
+## 30a. Inspector — the two depth-floor parameters — **fixed on branch, awaiting Danilo's visual check; NOT merged**
+
+Branch `fix/inspector-depth-params`, from `develop-v2.1` @ `0f5bef5`. App only:
+`git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser` env,
+`cyclophaser.__file__` confirmed to be this checkout.
+
+### The defect
+
+`layer_inspector._ARGS_PERIODS_DEFAULTS` lacked `mature_min_depth` (front 20b)
+and `intensification_min_depth` (front C). The app sends both on every run
+(default 0.0), and `build_args_periods` rejects unknown keys, so the Inspector
+view showed `Inspector error: "not stage-detection parameters:
+['intensification_min_depth', 'mature_min_depth']"` for **every** track — since
+2026-09-21. Beneath that, `intensification_ledger` and `mature_ledger`
+reconstruct their criteria outside the package and ignored both floors, so
+adding the keys alone would have made the ledgers show as accepted blocks the
+package had removed. No existing fidelity test could see it: all of them ran
+with both floors at 0.0.
+
+**Positive control.** Before the fix, a new test that drives the inspector path
+with exactly the keys the app sends (read by parsing `app.py`'s
+`_PHASE_PARAMS`, minus the three extrema keys) failed with that `KeyError`; an
+AppTest of the real Inspector view, with the two keys removed, shows the same
+`Inspector error` (kept as a permanent test).
+
+### What was done
+
+* The two keys added, with defaults read from `get_periods`' signature (both
+  `0.0`, `determine_periods.py:822-823`).
+* Anti-recurrence: the key set of `_ARGS_PERIODS_DEFAULTS` is asserted EQUAL to
+  the keys of the `args_periods = {` block inside `get_periods`, parsed with
+  `ast` — and every value equal to `get_periods`' default for the parameter it
+  forwards (`inspect.signature`). Mutation-checked: removing a key fails it.
+* Ledgers. The package exposes **no callable** for either floor — both are
+  applied inline in `find_stages.py` — so only the depth arithmetic is
+  transcribed, in the package's order: D2 on an intensification candidate only
+  after it passed the duration test and before gap stitching; D1 on a valley
+  before its neighbouring peaks are looked up, for both mature methods; both
+  skipped where the z range is zero/non-finite. Removed candidates carry
+  `reason` "below intensification_min_depth" / "below mature_min_depth" and a
+  `depth` field. `ledger_reference_mask` gained `kind="mature"` (steps 1-3 by
+  the package) so all three ledgers share one oracle.
+* App: `Depth (D2)` / `Depth (D1)` columns, verdict "rejected: below
+  intensification_min_depth", captions updated; the Plotly hover no longer
+  claims a depth-rejected candidate was shorter than its minimum.
+
+### Fidelity with the floors active (params-14: 0.05 / 0.80), all 51 tracks
+
+Step 6 of the ribbon == `get_periods`; accepted set of each ledger
+(intensification, decay, mature) == the package's mask. These sweeps run over
+all 51 real tracks, test split included: they read no label and score nothing.
+The floor genuinely removes what the package writes on: **intensification**
+20180654 (41 steps), 20180733 (68 steps); **mature** (a window confirmed with
+the floor off) 20160735, 20170794, 20190325, 20191014, 20203947, 20206498.
+
+Pinned by tests that first assert the floor still changes the package's mask —
+**train tracks only**, guarded by a test that reads `split.yaml` itself:
+**20180733** (intensification), **20190325** and **20170794** (mature). The
+first pass pinned 20180654 and 20206498, both TEST tracks; replaced on
+2026-09-25 before the independent verification. 20170794 was chosen over
+20191014 (same structure: one D1 = 1.000 valley kept, one valley that the
+confirmation kept with the floor off, removed by it) for the larger margin below
+0.80 (D1 0.606 vs 0.642) and the larger removed window (9 vs 7 steps).
+Mutation check after the swap — ledgers that ignore the floors: **6 tests
+fail** — the two params-14 fidelity sweeps (intensification, mature), the three
+pinned-track tests, and the Inspector AppTest (5 of the 301 in
+`test_layer_inspector.py`, 1 of the 2 in `test_inspector_apptest.py`). Before
+the swap the same mutant failed 6 in `test_layer_inspector.py` alone (20180654
+was the sixth); the AppTest had not been mutation-run then.
+
+Pre-existing and out of scope: `MATURE_TRACKS` (front 20b-era fidelity tests,
+floors at 0.0) still lists 20206498, a test track.
+
+### History — an earlier, unmerged fix of the same defect
+
+The same defect was reported and fixed on 2026-09-23 on branch
+`fix/inspector-min-depth-params` (**`a2b639e`**, pushed, never merged). That fix
+added only the two keys to `_ARGS_PERIODS_DEFAULTS` and did not touch the
+ledgers — i.e. exactly the "keys alone" state in which the ledgers would show
+as accepted blocks the package removed. Its register entry is numbered **28**,
+a number since assigned to rule C2′ (item 28 above). **This branch (30a)
+supersedes it**; the old branch is kept, for a decision in the clean-up front.
+
+### Clean-up debt opened by this front
+
+* **"Depth (D2)" collides with a refuted D2.** The ledger column is named after
+  front C's intensification depth `D2 = (z[peak] − z[valley]) / (z_max − z_min)`
+  (item 24), and sits beside "Depth (D1)" — the mature depth of front 20b
+  (item 22). But item 22 also defines a `D2 = |z_valley| / |z_min|`, the
+  alternative valley depth that failed stage 1 and was not adopted. The same
+  label therefore names two different quantities in the register, one of them
+  refuted. Rename in the clean-up front (e.g. by what each measures, not by
+  index).
+
+Limit: the app's default track (`example_file`) has intensification D2 of
+1.000 and 0.565, above the slider's 0.50 maximum, so the AppTest can exercise
+only the mature floor through the UI.
+
+Suite, dedicated env, `-m "not browser"`: **1348 passed, 0 failed** before →
+**1362 passed, 0 failed** after (+14 = the new tests: 12 in
+`test_layer_inspector.py`, 2 in the new `test_inspector_apptest.py`). After the
+train-only swap, still **1362 passed, 0 failed** (one pinned parametrisation
+removed, the split guard added).
+
+**Stop before merge:** Danilo checks visually, opening in the Inspector one
+track from the repo and one from the swell set under params-14.
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

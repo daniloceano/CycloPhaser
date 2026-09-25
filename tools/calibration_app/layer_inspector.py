@@ -29,15 +29,21 @@ What lives here
     measured against, the minimum duration it had to clear, and the verdict —
     plus the inter-block gaps and their fill test. The union of the accepted
     candidates (and filled gaps) is required (and tested) to be identical to
-    the mask the package function itself produces.
+    the mask the package function itself produces. An intensification
+    candidate removed by ``intensification_min_depth`` is shown as rejected,
+    with that reason.
 
 ``mature_ledger``
     The candidate mature windows, whether each was written, and — for the ones
     that were written and then discarded — WHY the strict neighbour
     confirmation in ``find_mature_stage`` rejected them. Today a discarded
-    mature window vanishes without trace; this is the only part of the module
-    that reconstructs a criterion the package does not expose as a callable,
-    and it is pinned by a fidelity test against ``find_mature_stage`` itself.
+    mature window vanishes without trace. A valley that ``mature_min_depth``
+    makes ineligible is listed too, unwritten, with that reason.
+
+Criteria the package applies inline, with no callable to import — the mature
+window sizing, the neighbour confirmation and the two depth floors (D1, D2) —
+are transcribed, and every one of them is pinned by a fidelity test against
+the package function that applies it.
 
 ``mature_lens`` / ``incipient_lens`` / ``knee_index`` / ``_effective_threshold``
     Carried over unchanged from the pure half of the abandoned
@@ -132,6 +138,10 @@ STEP_NAMES = (
 # own defaults. build_args_periods() below fills this in, so a caller only has
 # to name what it wants to change — and so a new package parameter shows up
 # here as one entry rather than as a divergence between app and package.
+# The key set and the values are pinned against get_periods' own args_periods
+# block and signature by tests/test_layer_inspector.py: the two depth floors
+# were once missing here, and build_args_periods then rejected every run the
+# app made (item 30a).
 _ARGS_PERIODS_DEFAULTS = {
     "threshold_intensification_length": 0.075,
     "threshold_intensification_gap": 0.075,
@@ -143,6 +153,8 @@ _ARGS_PERIODS_DEFAULTS = {
     "length_scale": "global",
     "mature_method": "derivative",
     "mature_amplitude_fraction": 0.90,
+    "mature_min_depth": 0.0,
+    "intensification_min_depth": 0.0,
     "decay_tail_amplitude_fraction": None,
     "incipient_method": "geometric",
     "incipient_plateau_tau": 0.20,
@@ -475,9 +487,25 @@ def _positional_slice(index: pd.DatetimeIndex, start, end) -> slice:
     return slice(lo, hi)
 
 
+def _z_range(df: pd.DataFrame):
+    """``z_max - z_min`` of the working frame's ``z``, or None where the package
+    skips its depth floors (a flat or non-finite series has no depth scale).
+
+    Same ``nanmax``/``nanmin`` over ``df['z']`` as both floors in
+    ``find_stages``. The package warns when it skips a floor; this does not
+    repeat the warning, because the app's own run of the pipeline already
+    raised it for the same series.
+    """
+    z_all = df['z'].to_numpy(dtype=float)
+    z_range = np.nanmax(z_all) - np.nanmin(z_all)
+    if not np.isfinite(z_range) or z_range <= 0:
+        return None
+    return float(z_range)
+
+
 def _segment_ledger(df: pd.DataFrame, kind: str,
                     threshold_length: float, threshold_gap: float,
-                    length_scale: str) -> dict:
+                    length_scale: str, min_depth: float = 0.0) -> dict:
     """Shared body of ``intensification_ledger`` / ``decay_ledger``.
 
     Reconstructs, on the app side, the candidate loop of
@@ -487,22 +515,38 @@ def _segment_ledger(df: pd.DataFrame, kind: str,
     global series length, or ``_local_cycle_scale`` — imported from the
     package, never rewritten — under ``length_scale='local'``.
 
+    ``min_depth`` is ``intensification_min_depth`` (decay has no depth floor
+    and always passes 0.0). The package applies it inline — there is no
+    callable to import — so its one line of arithmetic is transcribed here:
+    ``D2 = (z[peak] - z[valley]) / (z_max - z_min)``, tested only on a
+    candidate that has ALREADY passed the duration test, and BEFORE the gap
+    stitching, exactly as ``find_intensification_period`` orders it. A
+    candidate below the floor is rejected with an explicit reason, so the
+    ledger never shows as accepted a block the package removed.
+
     The reconstruction is the risk in this module, so it is pinned by
     ``tests/test_layer_inspector.py``: the union of the accepted candidates and
     the filled gaps must equal, bit for bit, the mask the package function
     itself writes on a fresh frame, over 20+ tracks x several prominence
-    settings.
+    settings, and under params-14 with the depth floor active.
 
     Returns:
         dict with ``candidates`` (list of records), ``gaps`` (list of records)
         and ``mask`` (bool array over df.index, the union of everything
-        accepted — the same thing the package function marks).
+        accepted — the same thing the package function marks). Each record
+        carries ``reason`` ("" when accepted) and ``depth`` (D2 for an
+        intensification candidate when the series has a depth scale, else
+        None).
     """
     index = df.index
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
     z_valleys = df[df['z_peaks_valleys'] == 'valley'].index
     length = index[-1] - index[0]
     dt = index[1] - index[0]
+    # D2 is reported for every intensification candidate as a diagnostic, but
+    # the floor only ACTS when min_depth > 0 — the package's default is "off",
+    # not "accept D2 >= 0" (see find_intensification_period).
+    z_range = _z_range(df) if kind == "intensification" else None
 
     mask = np.zeros(len(index), dtype=bool)
     candidates = []
@@ -530,7 +574,13 @@ def _segment_ledger(df: pd.DataFrame, kind: str,
                  if length_scale == 'local' else length)
         minimum = scale * threshold_length
         duration = seg_end - seg_start
+        depth = (None if z_range is None else
+                 (float(df.at[seg_start, 'z']) - float(df.at[seg_end, 'z'])) / z_range)
         accepted = bool(duration > minimum)
+        reason = "" if accepted else "shorter than minimum"
+        if accepted and min_depth > 0 and depth is not None and depth < min_depth:
+            accepted = False
+            reason = "below intensification_min_depth"
         if accepted:
             mask[_positional_slice(index, seg_start, seg_end)] = True
         candidates.append({
@@ -541,7 +591,9 @@ def _segment_ledger(df: pd.DataFrame, kind: str,
             "duration": duration,
             "scale": scale,
             "minimum": minimum,
+            "depth": depth,
             "accepted": accepted,
+            "reason": reason,
             "to_series_end": to_series_end,
         })
 
@@ -570,7 +622,9 @@ def _segment_ledger(df: pd.DataFrame, kind: str,
             "duration": gap,
             "scale": gap_scale,
             "minimum": maximum,   # here a MAXIMUM: the gap is filled if below it
+            "depth": None,
             "accepted": filled,
+            "reason": "" if filled else "longer than maximum",
             "to_series_end": False,
         })
 
@@ -579,11 +633,16 @@ def _segment_ledger(df: pd.DataFrame, kind: str,
 
 def intensification_ledger(df, threshold_intensification_length=0.075,
                            threshold_intensification_gap=0.075,
-                           length_scale="global", **_ignored) -> dict:
+                           length_scale="global", intensification_min_depth=0.0,
+                           **_ignored) -> dict:
     """Candidate ledger for ``find_intensification_period`` (see ``_segment_ledger``)."""
+    if not 0 <= intensification_min_depth <= 1:
+        raise ValueError(
+            f"intensification_min_depth must be in [0, 1], got {intensification_min_depth!r}.")
     return _segment_ledger(df, "intensification",
                            threshold_intensification_length,
-                           threshold_intensification_gap, length_scale)
+                           threshold_intensification_gap, length_scale,
+                           min_depth=intensification_min_depth)
 
 
 def decay_ledger(df, threshold_decay_length=0.075, threshold_decay_gap=0.075,
@@ -600,8 +659,18 @@ def ledger_reference_mask(df: pd.DataFrame, kind: str, **args_periods) -> np.nda
     The oracle the ledger's fidelity test compares against — and the reason the
     ledger can be trusted to be showing the real criterion rather than a
     plausible-looking parallel one.
+
+    ``kind='mature'`` runs steps 1-2 first, because ``find_mature_stage`` in
+    isolation on a fresh frame would find no neighbours to confirm against;
+    the mask is then what step 3 leaves marked 'mature', i.e. the confirmed
+    windows ``mature_confirmed_mask`` must reproduce.
     """
     work = df.copy(deep=True)
+    if kind == "mature":
+        work = find_intensification_period(work, **args_periods)
+        work = find_decay_period(work, **args_periods)
+        work = find_mature_stage(work, **args_periods)
+        return (work['periods'] == kind).to_numpy()
     fn = find_intensification_period if kind == "intensification" else find_decay_period
     work = fn(work, **args_periods)
     return (work['periods'] == kind).to_numpy()
@@ -765,9 +834,15 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
 
       * the amplitude branch calls ``_amplitude_mature_bounds`` (the package's
         own function) rather than re-deriving it; only the derivative branch's
-        four lines of time-proportion arithmetic are transcribed;
+        four lines of time-proportion arithmetic are transcribed — and the
+        ``mature_min_depth`` eligibility test, which the package also applies
+        inline: ``D1 = (z_max - z[valley]) / (z_max - z_min)`` on ``df['z']``,
+        checked BEFORE a valley's neighbouring peaks are looked up, for both
+        mature methods. A valley below the floor gets a record with
+        ``written=False`` and the reason "below mature_min_depth";
       * the confirmed set is pinned by a fidelity test against
-        ``find_mature_stage``'s actual output on real tracks.
+        ``find_mature_stage``'s actual output on real tracks, including under
+        params-14 with the floor active.
 
     Reading the neighbours from the INPUT frame (the state after step 2) is
     equivalent to what the package does after writing the windows: a block's
@@ -781,15 +856,20 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
 
     Returns:
         list of records: ``start``/``end`` (window bounds), ``z_valley``,
-        ``written`` (passed the length floor and was written), ``confirmed``
-        (survived the neighbour check), ``reason`` (empty when confirmed),
-        ``prev_label``/``next_label``.
+        ``depth`` (the valley's D1, None when the series has no depth scale),
+        ``written`` (passed the depth floor and the length floor and was
+        written), ``confirmed`` (survived the neighbour check), ``reason``
+        (empty when confirmed), ``prev_label``/``next_label``.
     """
     threshold_mature_distance = args_periods['threshold_mature_distance']
     threshold_mature_length = args_periods['threshold_mature_length']
     length_scale = args_periods.get('length_scale', 'global')
     mature_method = args_periods.get('mature_method', 'derivative')
     mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction', 0.90)
+    mature_min_depth = args_periods.get('mature_min_depth', 0.0)
+    if not 0 <= mature_min_depth <= 1:
+        raise ValueError(
+            f"mature_min_depth must be in [0, 1], got {mature_min_depth!r}.")
 
     df = df_after_decay
     index = df.index
@@ -797,16 +877,30 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
     z_peaks = df[df['z_peaks_valleys'] == 'peak'].index
     series_length = index[-1] - index[0]
     dt = index[1] - index[0]
+    z_range = _z_range(df) if len(z_valleys) > 0 else None
+    z_max = float(np.nanmax(df['z'].to_numpy(dtype=float))) if z_range is not None else None
 
     records = []
     written_mask = np.zeros(len(index), dtype=bool)
 
     for z_valley in z_valleys:
+        depth = (None if z_range is None
+                 else (z_max - float(df.at[z_valley, 'z'])) / z_range)
+        # The package drops ineligible valleys before anything else looks at
+        # them, so this test comes first — ahead of the neighbouring-peak one.
+        if mature_min_depth > 0 and depth is not None and depth < mature_min_depth:
+            records.append({
+                "z_valley": z_valley, "start": z_valley, "end": z_valley,
+                "depth": depth, "written": False, "confirmed": False,
+                "reason": "below mature_min_depth",
+                "prev_label": None, "next_label": None,
+            })
+            continue
         next_z_peak = z_peaks[z_peaks > z_valley]
         previous_z_peak = z_peaks[z_peaks < z_valley]
         if len(previous_z_peak) == 0 or len(next_z_peak) == 0:
             records.append({
-                "z_valley": z_valley, "start": z_valley, "end": z_valley,
+                "z_valley": z_valley, "start": z_valley, "end": z_valley, "depth": depth,
                 "written": False, "confirmed": False,
                 "reason": "no z_peak on both sides",
                 "prev_label": None, "next_label": None,
@@ -826,7 +920,7 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
         mature_indexes = index[sl]
         if len(mature_indexes) == 0:
             records.append({
-                "z_valley": z_valley, "start": mature_start, "end": mature_end,
+                "z_valley": z_valley, "start": mature_start, "end": mature_end, "depth": depth,
                 "written": False, "confirmed": False,
                 "reason": "empty window (no timestep inside it)",
                 "prev_label": None, "next_label": None,
@@ -848,7 +942,7 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
         if written:
             written_mask[sl] = True
         records.append({
-            "z_valley": z_valley, "start": mature_start, "end": mature_end,
+            "z_valley": z_valley, "start": mature_start, "end": mature_end, "depth": depth,
             "written": written, "confirmed": False, "reason": reason,
             "prev_label": None, "next_label": None,
         })
