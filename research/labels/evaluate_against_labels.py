@@ -4,6 +4,7 @@
     python research/labels/evaluate_against_labels.py                 # TRAIN only
     python research/labels/evaluate_against_labels.py --config p.yaml # a calibration-app YAML
     python research/labels/evaluate_against_labels.py --test          # burns the test set
+    python research/labels/evaluate_against_labels.py --batch-train swell_item30  # + the batch's TRAIN, own block
 
 What is compared
 ----------------
@@ -65,9 +66,9 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from labels_core import (  # noqa: E402
-    first_blind_record, is_legacy_record, load_real_series, load_synthetic_series,
-    normalize_phase, read_labels, read_split, score_labels, score_phase_sequences,
-    series_sha256,
+    batch_membership, first_blind_record, is_legacy_record, load_batch_series,
+    load_real_series, load_synthetic_series, normalize_phase, read_labels,
+    read_split, score_labels, score_phase_sequences, series_sha256,
 )
 
 # get_periods' own defaults for everything the config YAML may omit.
@@ -215,7 +216,16 @@ def main(argv=None) -> int:
                          "did not exist yet) — cases where every saved version had "
                          "an overlay on screen are excluded, the same way a stale "
                          "or legacy one is.")
+    ap.add_argument("--batch-train", metavar="BATCH", default=None,
+                    help="also score the TRAIN part of this frozen batch of "
+                         "split.yaml (e.g. swell_item30), in its own block, never "
+                         "pooled with the 47. Every label that is not TRAIN (of "
+                         "the split or of the batch) is dropped by id right after "
+                         "reading, before any check reads it. Not combinable "
+                         "with --test.")
     args = ap.parse_args(argv)
+    if args.batch_train and args.test:
+        ap.error("--batch-train is train-only; it cannot be combined with --test")
 
     records = read_labels()
     if not records:
@@ -223,6 +233,15 @@ def main(argv=None) -> int:
               "Label the queue first: streamlit run tools/calibration_app/app.py, "
               "then choose the 'Label' display mode.")
         return 0
+
+    batch_train: set[str] = set()
+    if args.batch_train:
+        membership = batch_membership(args.batch_train)
+        if not membership:
+            ap.error(f"split.yaml has no batch {args.batch_train!r}")
+        batch_train = {sid for sid, m in membership.items() if m == "train"}
+        keep = set(read_split()["train"]) | batch_train
+        records = {sid: r for sid, r in records.items() if sid in keep}
 
     if args.against == "first-blind":
         never_blind = sorted(sid for sid, r in records.items()
@@ -243,6 +262,10 @@ def main(argv=None) -> int:
     synth, _names = load_synthetic_series()
     series = {**real, **synth}
     sources = {k: "real" for k in real} | {k: "synthetic" for k in synth}
+    if batch_train:
+        batch = load_batch_series(args.batch_train)
+        series |= {k: v for k, v in batch.items() if k in batch_train}
+        sources |= {k: "real" for k in batch_train}
 
     # A label written against different data is void, not merely suspect: the
     # boundary index refers to positions in a series that no longer exists.
@@ -269,6 +292,7 @@ def main(argv=None) -> int:
     groups = ["train"] + (["test"] if args.test else [])
     wanted = {sid for sid in usable
               if (sid in train and "train" in groups) or (sid in test and "test" in groups)}
+    wanted |= {sid for sid in usable if sid in batch_train}
     detected, detected_seqs = run_detector(
         {k: series[k] for k in sorted(wanted)}, pv, gp)
 
@@ -305,6 +329,17 @@ def main(argv=None) -> int:
             print(_fmt(m))
             print("   ── whole phase sequence ──")
             print(_fmt_phases(score_phase_sequences(sel_all, detected_seqs)))
+
+    if batch_train:
+        sel = [r for sid, r in sorted(usable.items()) if sid in batch_train]
+        if sel:
+            m = score_labels(sel, detected)
+            print(f"\n  BATCH {args.batch_train} · TRAIN   ({m['n_scored']} labelled; "
+                  "its own block, never pooled with the split)")
+            print("   ── incipient boundary ──")
+            print(_fmt(m))
+            print("   ── whole phase sequence ──")
+            print(_fmt_phases(score_phase_sequences(sel, detected_seqs)))
 
     if not args.test:
         print(f"\n  TEST split held out ({len(test)} series). "

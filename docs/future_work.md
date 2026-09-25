@@ -3443,11 +3443,37 @@ showed that 20111118's stored verdict differs from the one derived from its
 phases. That is what "Save ambiguous" writes, so the case was saved as
 ambiguous. No other test-label content was read.
 
-**Still open:** the batch is labelled in the tab, but no scorer reads it yet.
-`evaluate_against_labels.py` will list a batch label as a "series that no longer
-exists", and the benchmark will skip it because its population is the 63. Both
-stay that way until a front adds the batch to them. That front
-must keep the batch's 3 test cases out of any training aggregate.
+**Measurement part — gate and baseline under params-14 (2026-09-25).**
+Measurement only; `cyclophaser/` is untouched. Predictions were committed in
+`f01ca88` before anything ran. The full record is in
+`research/labels/diagnostics/item30/REPORT.md`. TEST series (16 + 3, plus
+20203389 in the swell) were excluded everywhere.
+
+- **Config comparison.** `params-11` and `params-14` are identical in filter and
+  `incipient_*` parameters.
+- **P1 CONFIRMED.** The boundary is identical in 196/196 tracks.
+- **P2 CONFIRMED.** The signal fires in 8/14 bad and 9/182 good tracks.
+- **P3 CONFIRMED (8/8).** H (`find_stages.py:1134`) erases the step-5
+  intensification before the boundary, exactly and nowhere else.
+- **P4 REFUTED (5/8).** In 3 tracks the whole mature is erased too, so the final
+  map reads `incipient > decay`.
+- **P5 REFUTED (2/9).** The intensification does not end at the global minimum.
+  In 7/9 good tracks the peak is at index 0–1 and only decay is erased.
+- **P6 REFUTED (2/4).** 19860380 and 19870927 are labelled `incipient > decay`,
+  so the erased "intensification" is not in the label.
+- **Census.** The signal fires in 0/35 of the split's real train series, which
+  confirms the batch premise. Away from the signal, H erases the leading part of
+  the intensification, mostly where the labels agree (incipient end within ±2
+  steps of the boundary in 7/10).
+- **Evaluator.** It gains `--batch-train`. Its default path is unchanged:
+  population hash and output are identical.
+- **Baseline under params-14.** Across the 47: sequence 31/47, incipient
+  boundary 17/27. Across the batch's 7: sequence 1/7, incipient boundary 3/7.
+
+**Still open:** the evaluator reads the batch's TRAIN part only under
+`--batch-train`, in a block of its own; the benchmark does not read the batch
+at all. Whatever reads the batch next must keep its 3 test cases out of any
+training aggregate.
 
 ## Note
 
