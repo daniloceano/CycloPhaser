@@ -3377,7 +3377,7 @@ belongs to the maturation diagnostic that followed, not to this front.
 
 ---
 
-## 30a. Inspector — the two depth-floor parameters — **fixed on branch, awaiting Danilo's visual check; NOT merged**
+## 30a. Inspector — the two depth-floor parameters — **closed, merged 2026-09-25** (merge `ad8daca`)
 
 Branch `fix/inspector-depth-params`, from `develop-v2.1` @ `0f5bef5`. App only:
 `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser` env,
@@ -3483,6 +3483,24 @@ removed, the split guard added).
 
 **Stop before merge:** Danilo checks visually, opening in the Inspector one
 track from the repo and one from the swell set under params-14.
+
+#### Closing (2026-09-25)
+
+Merged into `develop-v2.1` as **`ad8daca`** (`--no-ff`, parents `0f5bef5` and
+`52ecb04`), on Danilo's authorisation, from `fix/inspector-depth-params` @
+`52ecb04`. Immediately before the merge, `origin/fix/inspector-depth-params` was
+verified to be `52ecb04` and `develop-v2.1` to be `0f5bef5`, local and origin
+agreeing. No PR was opened. `git diff 0f5bef5 ad8daca -- cyclophaser/` is empty.
+
+The merge was made in a separate worktree of `develop-v2.1`, because the main
+checkout was on another front's branch (`research/item30-plateau-overwrite`) and
+was left untouched. Suite on `ad8daca` in that worktree, dedicated `cyclophaser`
+env, with `cyclophaser.__file__` and `layer_inspector.__file__` confirmed —
+inside pytest — to be that worktree's files, `-m "not browser"`:
+**1362 passed, 1 skipped, 0 failed**. Pushed.
+
+The superseded branch `fix/inspector-min-depth-params` (`a2b639e`) is still
+unmerged and kept; its fate belongs to the clean-up front.
 
 ---
 
