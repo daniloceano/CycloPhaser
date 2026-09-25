@@ -9,6 +9,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — calibration app: flexible track reading (item 29)
+
+**One reader for every track, recognised by content; `.txt` accepted; an
+opt-in custom format; nothing accepted silently.** `cyclophaser/` is untouched.
+
+* `tools/calibration_app/track_io.py` — `read_track(data, fmt=None)`, now the
+  only way the app reads a track (`_run_process_vorticity`, `_gt_boundary_iso`,
+  `benchmark_core.parse_cyclone_csv`). A file whose first line is
+  `;`-separated with `time` and `min_max_zeta_850` is read by the exact
+  `read_csv` call the app always used — bit-identical on all 64 bundled series.
+  Every path is then validated: DatetimeIndex, strictly increasing, no
+  duplicates, float64 vorticity with no NaN, at least 2 points; any failure is
+  an error naming the cause.
+* **Dates must be year-first** (`YYYY-MM-DD…`) unless an explicit date format is
+  given. `parse_dates=True` reads `05/01/2015` as 1 May without a warning; every
+  bundled track is already year-first.
+* Both upload fields (Calibration, Benchmark → Exploration) accept `.csv` and
+  `.txt`, with `help=` text describing the standard layout.
+* **Custom track format** (off by default): separator, header yes/no, date and
+  vorticity columns, optional strftime date format. A file read this way is
+  normalised to the standard layout, previewed (parsed rows, first/last date,
+  points, vorticity min/max; warnings for predominantly positive vorticity —
+  the package assumes the southern hemisphere — and for magnitudes above
+  1e-2 s⁻¹), and used only after an explicit confirmation. The Benchmark
+  Exploration upload uses the same settings.
+
+### Fixed — calibration app: no `use_filter=True` warning per cyclone
+
+The "Apply Lanczos filter" checkbox yields a bool, and `process_vorticity`
+warns on `use_filter=True` — so the grid showed one copy of that warning per
+cyclone, asking the user to change a value they never typed. The app now passes
+`'auto'` for `True` at its three calls into the package
+(`package_args.package_use_filter`); `'auto'` and `True` select the same window
+(`len(series)//2`), and filtered/smoothed series and phase maps are
+bit-identical (128/128: 64 series × params-14 and app defaults). The warning
+stays in the package for direct callers. The YAML export and import still carry
+a bool, byte-identical to before.
+
 ### Changed — default behaviour
 
 **`reclassify_index0` — the type of the extremum at index 0 is now decided

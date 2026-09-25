@@ -23,13 +23,36 @@ streamlit run app.py
 
 Abra http://localhost:8501 no navegador.
 
-## Formato do CSV
+## Formato do track
 
-- Separador: `;`
-- Coluna de índice: `time` (datetime)
-- Coluna de vorticidade: `min_max_zeta_850`
+Os dois campos de envio (Calibration e Benchmark → Exploration) aceitam `.csv`
+e `.txt`. O formato é reconhecido pelo **conteúdo**, nunca pela extensão
+(`track_io.py`, a única função de leitura do app).
 
-Compatível com o `example_file.csv` em `cyclophaser/example_data/`.
+**Formato padrão** — primeira linha com nomes de colunas separados por `;`,
+incluindo:
+
+- `time` — datas **ano primeiro** (`YYYY-MM-DD…`, ex. `2015-01-27 04:00:00` ou
+  `2008-08-15-2100`);
+- `min_max_zeta_850` — vorticidade relativa em 850 hPa (s⁻¹), convenção do
+  hemisfério sul (ciclônica = negativa).
+
+Outras colunas são ignoradas. Compatível com o `example_file.csv` em
+`cyclophaser/example_data/`.
+
+**Formato customizado** (opt-in, expander *Custom track format*, desligado por
+padrão) — separador (`auto`, `;`, `,`, tab, whitespace), linha de cabeçalho
+sim/não, coluna de data e de vorticidade (nome, ou número a partir de 1 sem
+cabeçalho) e formato de data strftime opcional. Datas que não começam pelo ano
+exigem o formato explícito: a inferência do pandas lê `05/01/2015` como 1º de
+maio sem aviso. Cada arquivo lido assim é mostrado numa pré-visualização
+(primeiras linhas, primeira/última data, nº de pontos, mín./máx. da
+vorticidade, avisos de sinal e de magnitude) e só é usado depois de confirmado.
+O arquivo é normalizado para o formato padrão; o resto do app não muda.
+
+**Validação, em qualquer caminho** — datas interpretadas, estritamente
+crescentes e sem duplicatas; vorticidade numérica float64 sem NaN; pelo menos
+2 pontos. Um arquivo que falha é recusado com a causa, nunca aceito em silêncio.
 
 ## Modos de exibição
 
@@ -262,7 +285,7 @@ requires every parameter to have a control and no widget key to repeat.
 
 ## Escopo atual (Etapa 1)
 
-- Upload de 1 arquivo CSV
+- Upload de tracks `.csv`/`.txt` (formato padrão ou customizado — ver "Formato do track")
 - Controle interativo de filtro Lanczos e suavização Savgol
 - Visualização de ζ original, filtrada, suavizada 1× e suavizada 2×
 - Cache automático: o filtro só re-executa quando os parâmetros mudam

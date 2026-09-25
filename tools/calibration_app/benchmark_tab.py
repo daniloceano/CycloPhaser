@@ -63,6 +63,7 @@ if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
 
 import benchmark_core as bc  # noqa: E402
+import track_format_ui  # noqa: E402
 
 PHASE_COLORS = {
     "incipient": "#65a1e6",
@@ -538,24 +539,29 @@ def render() -> None:
 
         if mode == "Exploration":
             up = st.file_uploader(
-                "Add cyclone CSV(s) — ';'-delimited, column 'min_max_zeta_850'",
-                type=["csv"], accept_multiple_files=True, key="bench_data_upload",
+                "Add cyclone track(s) — .csv or .txt, ';'-delimited with columns "
+                "'time' and 'min_max_zeta_850' (or the Calibration page's custom "
+                "format)",
+                type=["csv", "txt"], accept_multiple_files=True,
+                key="bench_data_upload",
                 help="Uploaded tracks carry no manual label, so they can be "
                      "compared against the reference column but are never "
-                     "scored.")
-            if up:
-                for f in up:
-                    name = Path(f.name).stem
-                    if name in st.session_state[K_EXTRA]:
-                        continue
-                    try:
-                        ser = bc.parse_cyclone_csv(f.getvalue())
-                    except Exception as exc:
-                        st.error(f"{f.name}: {exc}")
-                        continue
-                    st.session_state[K_EXTRA][name] = list(ser.values)
-                    st.session_state[K_IDS] = list(st.session_state[K_IDS]) + [name]
-                    st.rerun()
+                     "scored.\n\n" + track_format_ui.UPLOAD_HELP
+                     + "\n\nHere the custom format is the one set on the "
+                       "Calibration page, above the tabs.")
+            # Same validation, custom format and preview/confirmation as the
+            # Calibration uploader; only files not yet added are considered.
+            pending = [f for f in (up or [])
+                       if Path(f.name).stem not in st.session_state[K_EXTRA]]
+            accepted = track_format_ui.accept_uploads(
+                pending, track_format_ui.current_format(st.session_state),
+                confirm_prefix="bench_custom_ok_")
+            for name, data in accepted.items():
+                ser = bc.parse_cyclone_csv(data)
+                st.session_state[K_EXTRA][name] = list(ser.values)
+                st.session_state[K_IDS] = list(st.session_state[K_IDS]) + [name]
+            if accepted:
+                st.rerun()
 
         st.checkbox(
             "Show manual labels as a first column", key=K_LABELS,
