@@ -3207,7 +3207,7 @@ C1 is dropped on the ceiling argument; C3 remains recorded only.
 
 ---
 
-## 29. Calibration app — flexible track reading + `use_filter` translation — **gate PASS (with the (a) premise refuted), pushed, NOT merged, 2026-09-24**
+## 29. Calibration app — flexible track reading + `use_filter` translation — **gate PASS, merge authorised by Danilo 2026-09-24** (merge hash in "Closing" below)
 
 Branch `feat/app-flexible-track-reader`, from `develop-v2.1` @ `d45ae49`. App
 only: `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser`
@@ -3243,7 +3243,7 @@ own `cyclophaser`.
   `_run_process_vorticity`, `app.py` `_label_overlays`, `benchmark_core.run_series`.
   The YAML export/import and the grid display code are untouched.
 
-### Added beyond the brief (for review)
+### Added beyond the brief — decided by Danilo, 2026-09-24
 
 * **Year-first date rule.** Measured during the work: pandas 3's
   `parse_dates=True` does NOT leave day-first dates as text — it infers the
@@ -3254,8 +3254,12 @@ own `cyclophaser`.
   given. All 64 bundled series are year-first; bit-identity is unaffected. A
   standard-layout file with day-first dates, previously accepted (possibly
   misread), is now refused with a pointer to the custom format.
+  **Decision: ACCEPTED** — both paths keep the year-first requirement, for the
+  measured reason above (`05/01/2015` → 1 May, no warning).
 * **Magnitude warning** in the preview: |ζ| > 1e-2 s⁻¹ flags a probable wrong
-  column (a latitude read as vorticity gives ≈ 50).
+  column (a latitude read as vorticity gives ≈ 50). **Decision: ACCEPTED.**
+* **Per-file confirmation** of a custom-format file after its preview.
+  **Decision: ACCEPTED.**
 
 ### Gate — predictions declared before measurement
 
@@ -3271,11 +3275,13 @@ own `cyclophaser`.
 | (d-2)(v) grid display region | empty diff | empty diff (44 lines) |
 | (e) suite | 1348 passed, 0 failed | **1348 passed, 0 failed** (before: 1245 passed, 0 failed; +103 new tests) |
 
-**(a) — premise refuted.** The real tracks used for (a) (444 files from another
-local project; their path is deliberately not recorded here) all have the header
-`time;Lat;Lon`: **position-only, no vorticity column**. They are not in the
-standard layout, and no layout can make them a vorticity track. Per the brief's
-fallback: the standard path refuses them with the message "not the standard
+**(a) — premise refuted; the recorded prediction ("identical") was WRONG.** The
+real tracks used for (a) (444 files from another local project; their path is
+deliberately not recorded here) all have the header `time;Lat;Lon`:
+**position-only, no vorticity column**. They are not in the standard layout, and
+no layout can make them a vorticity track. (a) was therefore decided by the
+fallen-premise branch that the brief declared BEFORE the measurement, not by the
+bit-identity oracle: the standard path refuses them with the message "not the standard
 track layout … enable 'Custom track format'"; the custom path parses their
 `1979-02-19-2100` dates correctly (year-first, inferred) and refuses them for the
 missing vorticity column. The old path, on a `.csv` copy, failed with a bare
@@ -3283,6 +3289,28 @@ missing vorticity column. The old path, on a `.csv` copy, failed with a bare
 the standard-path identity is instead pinned on all 64 bundled series
 (`tests/test_track_io.py`), and the custom-path identity on a synthetic
 rewrite of `20150069` in (b).
+
+**(a) — second real dataset, with vorticity (measured before the merge).** 200
+per-cyclone tracks from a different real dataset (drawn with
+`random.Random(29).sample` over the sorted file list; data, source and location
+kept outside the repository). **None is in the standard layout**: the per-cyclone
+files are Parquet, and the text form is a `,`-separated table with `date` and
+`vor42` (relative vorticity, positive, in 1e-5 s⁻¹ — the TRACK convention).
+
+* Standard path: **200/200 refused with the cause** ("not the standard track
+  layout …"); the `develop-v2.1` reader failed on all 200 with a bare
+  `ValueError: 'time' is not in list`.
+* Custom format (`,`, `date`, `vor42`): **200/200 read, identical to an
+  independent oracle** (dates via `datetime.strptime`, values via `float()`,
+  compared bit for bit; no pandas, no `track_io`).
+* Plausibility warnings fired on all 200 — positive sign 200/200, |ζ| > 1e-2
+  200/200 — i.e. the reader reports, but does not convert, that convention. No
+  file was accepted with wrong data and no warning.
+* The Parquet files themselves are refused by both paths.
+
+The bit-for-bit identity of the STANDARD path is demonstrated on the 64
+versioned series (`tests/test_track_io.py`); neither real dataset contains a
+standard-layout file, so neither could test it.
 
 **The (d-2)(i) population** is 51 real tracks in `tests/calibration_data` (not
 52), 12 frozen synthetics and `example_file.csv` = 64 series; × params-14 and the
@@ -3294,13 +3322,44 @@ custom `.txt`) + 2 refused real `.txt`, AppTest, same machine: first load of the
 change ≈ 29.6 s (≈ 29.0 s before), cache-hit rerun ≈ 0.8 s. No freeze, no
 exception. The cost is detection, not reading.
 
-### Open
+**(f) with 200 real cyclones** (the second dataset converted to the standard
+layout as −1e-5 × `vor42`, a conversion Danilo confirmed; 200/200 accepted by the
+standard path with 0 plausibility warnings), filter on, app defaults, AppTest:
+first load **85.5 s**, rerun after a slider change **86.5 s**, cache-hit rerun
+**3.5 s**; no exception, no error, 0 "use_filter=True is interpreted" messages.
+The expectation of < 2 s for the cache hit was WRONG (3.5 s: 200 figures are
+still re-sent on every rerun). Time scales linearly with the detection cost
+(≈ 29 s for 63 series, ≈ 86 s for 200) — not a regression.
 
-* A user CAN still pick a wrong column in the custom format (e.g. `Lat` as
-  vorticity); the preview then shows the magnitude warning and nothing is used
-  without the explicit confirmation. Not an error by design.
-* The browser tests were not run (fixed rule); the new UI has no browser test.
-* Merge awaits Danilo's authorisation.
+**Independent verification (Claude, separate run).** New vs old reader 64/64
+bit-identical; `use_filter` True vs `'auto'` 64/64 identical (filtered_vorticity,
+vorticity_smoothed2, phase map), warning 64 vs 0; `cyclophaser/` diff empty. Under
+the versions pinned in `tools/calibration_app/requirements-app.txt` (streamlit
+1.58.0, pandas 2.3.3) the suite went 1222 → 1325 passed with the SAME set of
+failures before and after: 23 in `tests/test_benchmark_apptest.py`, which predate
+this front. In the dedicated `cyclophaser` env (streamlit 1.63, pandas 3.0.5)
+there are no failures (1245 → 1348 passed, 0 failed).
+
+### Backlog opened by this front
+
+1. **23 failures of `tests/test_benchmark_apptest.py` under the
+   `requirements-app.txt` versions** (streamlit 1.58.0, pandas 2.3.3); they pass
+   in the dedicated env. Check the real Benchmark tab in the deployed app.
+2. **Local paths containing a user name** in
+   `research/labels/diagnostics/frontA_idx0_c2/` — for the clean-up front.
+3. **Proposed new front: factor/sign in the custom format + reading Parquet.**
+   Motivated by real data with positive vorticity in 1e-5 s⁻¹ (the TRACK
+   convention), which the app today reads correctly but cannot convert. Proposed
+   oracle: a cyclone present in both datasets — compare `min_max_zeta_850` with
+   −1e-5 × `vor42`.
+4. **The refusal of a binary (Parquet) file is cryptic** ("'utf-8' codec can't
+   decode …"); detect the `PAR1` magic and say so.
+5. **With ~200 cyclones, every slider change costs ~1.5 min in the grid.**
+
+Also still true: a user CAN pick a wrong column in the custom format (e.g. `Lat`
+as vorticity) — the preview shows the magnitude warning and nothing is used
+without the explicit confirmation; and the new UI has no browser test (browser
+tests are run by hand, fixed rule).
 
 ---
 
