@@ -980,8 +980,13 @@ def _ledger_table(ledgers: dict, ribbon) -> pd.DataFrame:
                 "Duration": _fmt_td(rec["duration"]),
                 "Scale": _fmt_td(rec["scale"]),
                 ("Max. allowed" if is_gap else "Min. required"): _fmt_td(rec["minimum"]),
+                "Depth (D2)": ("" if rec.get("depth") is None
+                               else f"{rec['depth']:.3f}"),
                 "Verdict": ("filled" if rec["accepted"] else "left open") if is_gap
-                           else ("ACCEPTED" if rec["accepted"] else "rejected"),
+                           else ("ACCEPTED" if rec["accepted"] else
+                                 "rejected: below intensification_min_depth"
+                                 if rec.get("reason") == "below intensification_min_depth"
+                                 else "rejected"),
                 "Final label": "",
                 "_sort": rec["start"],
             }
@@ -1014,6 +1019,8 @@ def _mature_table(records: list) -> pd.DataFrame:
             "z valley": rec["z_valley"].strftime("%d/%m %Hh"),
             "Window": (f"{pd.Timestamp(rec['start']):%d/%m %Hh} → "
                        f"{pd.Timestamp(rec['end']):%d/%m %Hh}"),
+            "Depth (D1)": ("" if rec.get("depth") is None
+                           else f"{rec['depth']:.3f}"),
             "Written": "yes" if rec["written"] else "no",
             "Confirmed": "yes" if rec["confirmed"] else "no",
             "Previous neighbour": rec.get("prev_label") or "—",
@@ -2849,7 +2856,11 @@ with tab_cal:
                 st.caption(
                     "One row per segment the stage function tested. It is "
                     "accepted when **duration > minimum**, where the minimum "
-                    "is `scale × threshold`. Gaps run the other way: a gap "
+                    "is `scale × threshold`. An intensification candidate "
+                    "that is long enough is still rejected when its depth "
+                    "`D2 = (z_peak − z_valley) / (z_max − z_min)` is below "
+                    "`intensification_min_depth` (only when that floor is "
+                    "above 0). Gaps run the other way: a gap "
                     "**shorter** than its maximum gets filled in. "
                     "'Final label' says what that stretch ended up labelled "
                     "as — when it is not the phase this step assigned, a "
@@ -2873,7 +2884,10 @@ with tab_cal:
                     "then looks exactly like a window that was never found. "
                     "This table is the difference: 'Written' says one was "
                     "built, 'Confirmed' says it survived, and 'Discard reason' "
-                    "says which half of the rule it failed."
+                    "says which half of the rule it failed. A valley whose "
+                    "depth `D1 = (z_max − z_valley) / (z_max − z_min)` is below "
+                    "`mature_min_depth` never gets a window; it is listed, "
+                    "unwritten, with that reason."
                 )
                 st.dataframe(_mature_table(_mature_records),
                              use_container_width=True, hide_index=True)
