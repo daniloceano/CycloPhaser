@@ -1252,10 +1252,20 @@ def _label_overlays(values: pd.Series) -> dict[str, dict]:
     detector currently sees under whatever calibration is being tried, not a
     second, independent snapshot.
 
-    Returns {name: {"label": str, "color": str, "values": [float, ...]}} —
-    label_tab.py draws these in the SAME interactive chart as the raw series,
-    on the identical y-axis (no per-curve normalisation), so a flat overlay
-    stays visibly flat rather than being rescaled into looking eventful.
+    Returns {name: {"label": str, "color": str, "values": [float, ...],
+    "shared_values": [float, ...]}}.
+
+    * `values` are in physical units. label_tab.py draws them on the identical
+      y-axis as the raw series when its "Shared 0-1 scale" option is off.
+    * `shared_values` are the same curves on the inspector's grouped 0-1 band
+      (item 30c): `layer_inspector.rescaler` over the THREE layers together,
+      so the amplitude each smoothing pass removes stays visible. The raw
+      series gets a band of its own, rescaled in label_tab.py itself.
+
+    The grouping is computed here, where the package's names may appear, rather
+    than in label_tab.py, whose AST must stay free of them. The group is always
+    all three layers, whichever are switched on, so toggling one never
+    rescales the others.
     """
     zeta_df = pd.DataFrame({"zeta": values})
     vort = process_vorticity(
@@ -1265,8 +1275,11 @@ def _label_overlays(values: pd.Series) -> dict[str, dict]:
         replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
         boundary_padding=boundary_padding,
     )
+    group = li.rescaler([vort[name].values for name in _LABEL_OVERLAY_STYLE], normalize=True)
     return {
-        name: {**style, "values": [float(v) for v in vort[name].values]}
+        name: {**style,
+               "values": [float(v) for v in vort[name].values],
+               "shared_values": [float(v) for v in group(vort[name].values)]}
         for name, style in _LABEL_OVERLAY_STYLE.items()
     }
 

@@ -110,6 +110,7 @@ import re
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -206,7 +207,10 @@ export default function (component) {
   // has to fall through to a full rebuild, same as a changed phase count
   // does. `overlayKey` is a plain string so it can be compared with `===`
   // the same way every other field here is.
-  const overlayKey = (data.overlays || []).map((o) => o.name).join('|');
+  // The shared 0-1 scale (item 30c) changes every curve's path, so it is part
+  // of the key too: switching it has to rebuild, like toggling a layer.
+  const overlayKey = (data.overlays || []).map((o) => o.name).join('|') +
+    (data.display ? '#shared' : '');
   const host0 = parentElement.querySelector('#cp-label-chart');
   const S0 = host0 && host0.__cp;
   const H0 = host0 ? wantH(host0.clientWidth) : 0;
@@ -242,8 +246,13 @@ export default function (component) {
   function build(hintH, carriedPH) {
 
   const N = data.n;
-  const Y = data.y;
+  const Y = data.y;                 // always the PHYSICAL raw values
   const OVERLAYS = data.overlays || [];
+  // Item 30c: on the shared 0-1 scale the raw series is DRAWN from its own
+  // 0-1 band and every overlay from the group band; `Y` and each overlay's
+  // `raw_values` stay physical and are what the hover reads.
+  const DISP = data.display || null;
+  const YD = DISP ? DISP.raw : Y;
   const COL = data.colors;
   const PH = (carriedPH || data.phases).map((p) => ({ ...p }));
   const W = data.w;
@@ -274,7 +283,7 @@ export default function (component) {
       if (arr[i] > hi) hi = arr[i];
     }
   };
-  _scan(Y);
+  _scan(YD);
   OVERLAYS.forEach((o) => _scan(o.values));
   const pad = (hi - lo) * 0.06 || 1;
   const y0 = lo - pad, y1 = hi + pad;
@@ -329,7 +338,7 @@ export default function (component) {
     const t = el('text', {
       x: ML - 8, y: y + 4, 'text-anchor': 'end', 'font-size': 11,
       fill: '#5b6773', 'font-family': 'sans-serif' });
-    t.textContent = v.toExponential(2);
+    t.textContent = DISP ? v.toFixed(2) : v.toExponential(2);
     axis.appendChild(t);
   }
   const xlab = el('text', {
@@ -350,7 +359,7 @@ export default function (component) {
     return d;
   };
   svg.appendChild(el('path', {
-    d: curveD(Y), fill: 'none', stroke: '#1f2d3d', 'stroke-width': 1.8,
+    d: curveD(YD), fill: 'none', stroke: '#1f2d3d', 'stroke-width': 1.8,
     'stroke-linejoin': 'round' }));
 
   // 3b. active overlays — SAME x/y mapping (sx/sy) as the raw series above,
@@ -421,6 +430,43 @@ export default function (component) {
     x: ML + 8, y: MT + 36, 'font-size': 13, fill: '#c1121f', 'font-weight': '600',
     'font-family': 'sans-serif' }));
   const warn = (msg) => { alert.textContent = msg || ''; };
+
+  // Hover readout (item 30c): the step under the pointer and the PHYSICAL
+  // value of every curve there, whatever scale they are drawn on. Display
+  // only — it reads x through `at()` like everything else and never touches
+  // the phases, the selection or the drag.
+  const guide = svg.appendChild(el('line', {
+    y1: MT, y2: MT + PH_, stroke: '#33414f', 'stroke-width': 1,
+    'stroke-dasharray': '3 3', visibility: 'hidden', 'pointer-events': 'none' }));
+  const readout = svg.appendChild(el('text', {
+    'font-size': 11, fill: '#1f2d3d', 'font-family': 'sans-serif',
+    visibility: 'hidden', 'pointer-events': 'none' }));
+  const fmt = (v) => (v === undefined || v === null || !isFinite(v))
+    ? '—' : Number(v).toExponential(3);
+  const hover = (e) => {
+    const x = svg.contains(e.target) ? at(e) : null;
+    if (x === null || x < ML || x > ML + PW) {
+      guide.setAttribute('visibility', 'hidden');
+      readout.setAttribute('visibility', 'hidden');
+      return;
+    }
+    const i = Math.max(0, Math.min(ix(x), N - 1));
+    const lines = ['step ' + i, 'raw ' + fmt(Y[i])].concat(
+      OVERLAYS.map((o) => o.name + ' ' + fmt((o.raw_values || o.values)[i])));
+    while (readout.firstChild) readout.removeChild(readout.firstChild);
+    const right = sx(i) > ML + PW * 0.6;
+    const tx = right ? sx(i) - 6 : sx(i) + 6;
+    readout.setAttribute('text-anchor', right ? 'end' : 'start');
+    lines.forEach((ln, j) => {
+      const ts = el('tspan', { x: tx, y: MT + PH_ - 8 - (lines.length - 1 - j) * 13 });
+      ts.textContent = ln;
+      readout.appendChild(ts);
+    });
+    guide.setAttribute('x1', sx(i));
+    guide.setAttribute('x2', sx(i));
+    guide.setAttribute('visibility', 'visible');
+    readout.setAttribute('visibility', 'visible');
+  };
 
   function update() {
     for (let k = 0; k < PH.length; k++) {
@@ -582,6 +628,7 @@ export default function (component) {
   // try/catch, so when it failed nothing said so. On window the events arrive
   // regardless of where the pointer is, and no capture is needed at all.
   const onMove = (e) => {
+    hover(e);
     if (!S.drag) return;
     const x = at(e);
     if (x === null) return;
@@ -801,7 +848,8 @@ def is_new_edit(payload: dict, last_signature: str | None) -> bool:
 
 
 def _draw(sid: str, values: pd.Series, phases: list[dict],
-         overlays: list[dict] | None = None) -> dict | None:
+         overlays: list[dict] | None = None,
+         raw_display: list[float] | None = None) -> dict | None:
     """Mount the chart and return its last message, if any.
 
     Raises rather than returning None on a mount failure: the caller has to be
@@ -818,12 +866,21 @@ def _draw(sid: str, values: pd.Series, phases: list[dict],
     `_overlay_controls`) — LABELLING mode always calls this with `overlays`
     left at its default, so the wire payload it produces is byte-for-byte
     what it always was.
+
+    `raw_display` (item 30c), when given, is the raw series on its own 0-1
+    band. The chart then draws every curve on the shared 0-1 scale, and its
+    hover reads the physical values (`y`, and each overlay's `raw_values`).
+    It is only ever non-None in INSPECTION with at least one overlay on, and
+    it travels in its own `display` key: `chart_payload`'s pinned keys are
+    untouched.
     """
     # height="content": the component decides its own height from the viewport,
     # so a fixed number here would either crop it or reserve space it does not
     # use.
     payload = chart_payload(sid, values, phases)
     payload["overlays"] = overlays or []
+    if raw_display is not None:
+        payload["display"] = {"raw": [float(v) for v in raw_display]}
     result = _chart_component()(
         data=payload,
         key=chart_key(sid),
@@ -1160,9 +1217,13 @@ def _overlay_controls(sid: str, values: pd.Series, mode: str,
     """INSPECTION-only controls for drawing the package's own filtered/smoothed
     series IN THE SAME interactive chart as the raw one (see `_draw`).
 
-    Returns the list of ACTIVE layers, each `{"name", "label", "color",
-    "values"}` — everything the chart component needs, and nothing chart_payload
-    itself carries (that function's return keys are pinned exactly to the raw
+    Returns `(active, raw_display)`. `active` is the list of ACTIVE layers,
+    each `{"name", "label", "color", "values", "raw_values"}` — `values` is
+    what is drawn (the provider's grouped 0-1 band when "Shared 0-1 scale" is
+    on, physical units otherwise), `raw_values` always physical, for the hover.
+    `raw_display` is the raw series on its own 0-1 band when the shared scale
+    is on and a layer is active, else None. Nothing here is carried by
+    chart_payload itself (that function's return keys are pinned exactly to the raw
     series by tests/test_manual_labels.py's blindness tests; this list is
     merged in separately by `_draw`, only when non-empty).
 
@@ -1186,22 +1247,34 @@ def _overlay_controls(sid: str, values: pd.Series, mode: str,
     schema-4 `overlays_shown` provenance field.
     """
     if mode != "inspect" or overlay_provider is None:
-        return []
+        return [], None
     seen = st.session_state.setdefault(f"_lab_overlays_seen__{sid}", set())
-    show = st.checkbox(
+    c_show, c_shared = st.columns([3, 2])
+    show = c_show.checkbox(
         "Show filtered/smoothed overlays, in the SAME chart (Inspection "
         "only — never offered while Labelling)",
         value=False, key=f"lab_overlay_master__{sid}")
+    # Item 30c. The raw series runs 2-3x the amplitude of the processed ones, so
+    # on one physical axis the processed curves flatten. With this on, the raw
+    # series gets a 0-1 band of its own and the processed layers share ONE
+    # 0-1 band — the inspector's grouping, computed by the provider (see
+    # app.py) and only rendered here. Hover still reads physical values.
+    shared = c_shared.checkbox(
+        "Shared 0-1 scale", value=True, key=f"lab_overlay_shared__{sid}",
+        help="Raw series rescaled to 0-1 on its own band; the filtered and "
+             "smoothed curves rescaled together as one group, so the amplitude "
+             "each pass removes stays visible. Hover shows physical values. "
+             "Off: every curve in physical units on one axis.")
     if not show:
-        return []
+        return [], None
     try:
         layers = overlay_provider(values) or {}
     except Exception as exc:
         st.error(f"Could not compute overlays — {type(exc).__name__}: {exc}")
-        return []
+        return [], None
     if not layers:
         st.caption("No overlay available for this series.")
-        return []
+        return [], None
     active = []
     cols = st.columns(len(layers))
     for col, (name, info) in zip(cols, layers.items()):
@@ -1209,12 +1282,34 @@ def _overlay_controls(sid: str, values: pd.Series, mode: str,
         on = col.checkbox(label, value=False, key=f"lab_overlay__{sid}__{name}")
         if on:
             seen.add(name)
+            physical = list(info.get("values", []))
+            banded = info.get("shared_values")
+            use_band = shared and banded is not None
             active.append({
                 "name": name, "label": label,
                 "color": info.get("color", "#666666"),
-                "values": list(info.get("values", [])),
+                "values": list(banded) if use_band else physical,
+                "raw_values": physical,
             })
-    return active
+    if not (shared and active and all("shared_values" in (layers[a["name"]] or {})
+                                      for a in active)):
+        return active, None
+    return active, unit_band(values)
+
+
+def unit_band(values) -> list[float]:
+    """The raw series on a 0-1 band of its own: (v - min) / (max - min).
+
+    The same arithmetic as the inspector's raw band, `rescaler([zeta], True)`:
+    non-finite values are ignored for the range, a flat series divides by 1
+    (so it sits at 0), and an all-non-finite one uses the range (0, 1). Written
+    out here rather than imported: this module may not import the inspector.
+    `tests/test_label_apptest.py` pins the two to agree.
+    """
+    a = np.asarray(values, dtype=float)
+    fin = a[np.isfinite(a)]
+    lo, hi = (float(fin.min()), float(fin.max())) if fin.size else (0.0, 1.0)
+    return [float(v) for v in (a - lo) / ((hi - lo) or 1.0)]
 
 
 def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) -> None:
@@ -1413,10 +1508,12 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
             "label is no longer blind from that point on."
         )
 
-    overlay_layers = _overlay_controls(sid, values, mode, overlay_provider)
+    overlay_layers, raw_display = _overlay_controls(sid, values, mode,
+                                                    overlay_provider)
 
     try:
-        edit = _draw(sid, values, phases, overlays=overlay_layers)
+        edit = _draw(sid, values, phases, overlays=overlay_layers,
+                     raw_display=raw_display)
     except Exception as exc:
         # Loudly, and naming the exception. The previous version swallowed this
         # and drew a static picture instead, which is how a component that had

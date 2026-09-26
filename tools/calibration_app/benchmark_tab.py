@@ -88,8 +88,10 @@ K_EXTRA = "bench_extra_series"          # uploaded, unlabelled cyclones
 K_RESULTS = "bench_last_results"
 K_FINGERPRINT = "bench_results_fingerprint"
 K_SCORE_LABELLED = "bench_score_labelled_subset"
+K_BATCH = "bench_include_swell_batch"
 
 REFERENCE_MANUAL = "Manual label"
+BATCH_TAG = "swell_item30"
 
 
 # ── state ─────────────────────────────────────────────────────────────────────
@@ -103,6 +105,7 @@ def _init_state() -> None:
     st.session_state.setdefault(K_FIGLAYOUT, "Side by side")
     st.session_state.setdefault(K_EXTRA, {})
     st.session_state.setdefault(K_SCORE_LABELLED, False)
+    st.session_state.setdefault(K_BATCH, False)
 
 
 def _new_column(name: str, doc: dict, origin: str, origin_name: str = "",
@@ -154,58 +157,102 @@ def _fingerprint(cols, ids, reference) -> str:
 
 
 # ── figures ───────────────────────────────────────────────────────────────────
-@st.cache_data(show_spinner=False, max_entries=512)
-def _cell_png(values_tuple: tuple, runs_tuple: tuple, title: str) -> bytes:
-    """Raw series with the column's phases as background bands."""
-    matplotlib.use("Agg")
-    fig, ax = plt.subplots(figsize=(3.6, 1.7))
-    ax.plot(range(len(values_tuple)), values_tuple, color="k", lw=1.0)
-    for phase, a, b in runs_tuple:
-        ax.axvspan(a, b + 0.999, color=PHASE_COLORS.get(phase, "white"),
-                   alpha=0.45, lw=0)
-    ax.set_title(title, fontsize=7)
-    ax.tick_params(labelsize=6)
-    ax.set_xlim(0, max(1, len(values_tuple) - 1))
-    fig.tight_layout(pad=0.3)
+# The Grid's compact convention (app.py `_plot_compact`), item 30c: the raw
+# series and `vorticity_smoothed2` — the series detection runs on — each on a
+# y axis of its own (twinx), raw drawn in front. The raw series spans 2-3x the
+# smoothed one, so one shared axis would flatten the curve that explains the
+# bands. The smoothed curve is the COLUMN's own (`run_series`' `z`, computed
+# with that column's filter_params); a snapshot column has none and draws raw
+# only. A PNG has no hover; the left axis carries the raw values.
+RAW_COLOR = "dimgray"
+FILTERED_COLOR = "#e63946"
+
+
+def _draw_panel(ax, values_tuple, runs, z_tuple, z_lim=None) -> None:
+    x = range(len(values_tuple))
+    back = ax
+    if z_tuple is not None:
+        back = ax.twinx()
+        back.plot(x, z_tuple, color=FILTERED_COLOR, lw=1.2)
+        back.tick_params(right=False, labelright=False)
+        if z_lim is not None:
+            back.set_ylim(*z_lim)
+        ax.patch.set_visible(False)
+        ax.set_zorder(back.get_zorder() + 1)
+    # Bands on the back axis, so neither curve is tinted by them.
+    for phase, a, b in runs:
+        back.axvspan(a, b + 0.999, color=PHASE_COLORS.get(phase, "white"),
+                     alpha=0.45, lw=0, zorder=0)
+    ax.plot(x, values_tuple, color=RAW_COLOR, lw=1.0, alpha=0.9)
+
+
+def _padded(lo: float, hi: float) -> tuple[float, float]:
+    pad = 0.05 * (hi - lo or 1.0)
+    return lo - pad, hi + pad
+
+
+def _png(fig) -> bytes:
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=110)
     plt.close(fig)
     return buf.getvalue()
 
 
+def _cell_figure(values_tuple: tuple, runs_tuple: tuple, title: str,
+                 z_tuple: tuple | None = None):
+    """Raw series, the column's smoothed series and its phases as bands."""
+    matplotlib.use("Agg")
+    fig, ax = plt.subplots(figsize=(3.6, 1.7))
+    _draw_panel(ax, values_tuple, runs_tuple, z_tuple)
+    ax.set_title(title, fontsize=7)
+    ax.tick_params(labelsize=6)
+    ax.set_xlim(0, max(1, len(values_tuple) - 1))
+    fig.tight_layout(pad=0.3)
+    return fig
+
+
+@st.cache_data(show_spinner=False, max_entries=512)
+def _cell_png(values_tuple: tuple, runs_tuple: tuple, title: str,
+              z_tuple: tuple | None = None) -> bytes:
+    return _png(_cell_figure(values_tuple, runs_tuple, title, z_tuple))
+
+
 @st.cache_data(show_spinner=False, max_entries=256)
 def _stacked_png(values_tuple: tuple, panels: tuple) -> bytes:
+    return _png(_stacked_figure(values_tuple, panels))
+
+
+def _stacked_figure(values_tuple: tuple, panels: tuple):
     """All columns stacked vertically on a SHARED x axis and a shared y scale.
 
     The point of this arrangement is that a boundary that moved between two
     configurations is read straight down the figure. That only works if the two
     axes are actually the same, so `sharex=True` and one y range for every panel
-    are the arrangement, not decoration.
+    are the arrangement, not decoration. The same holds for the smoothed curve:
+    each panel draws its own column's, and all of them share one range on the
+    twin axis, so a column that smoothed harder shows a flatter curve.
+
+    `panels` is ((title, runs, z_tuple or None), ...).
     """
     matplotlib.use("Agg")
     n = len(panels)
     fig, axes = plt.subplots(n, 1, figsize=(7.2, 1.35 * n + 0.4),
                              sharex=True, sharey=True, squeeze=False)
-    lo, hi = min(values_tuple), max(values_tuple)
-    pad = 0.05 * (hi - lo or 1.0)
-    for ax, (title, runs) in zip(axes[:, 0], panels):
-        ax.plot(range(len(values_tuple)), values_tuple, color="k", lw=1.0)
-        for phase, a, b in runs:
-            ax.axvspan(a, b + 0.999, color=PHASE_COLORS.get(phase, "white"),
-                       alpha=0.45, lw=0)
+    lim = _padded(min(values_tuple), max(values_tuple))
+    zs = [v for _, _, z in panels if z is not None for v in z if v == v]
+    z_lim = _padded(min(zs), max(zs)) if zs else None
+    for ax, (title, runs, z) in zip(axes[:, 0], panels):
+        _draw_panel(ax, values_tuple, runs, z, z_lim)
         ax.set_ylabel(title, fontsize=7, rotation=0, ha="right", va="center")
         ax.tick_params(labelsize=6)
-        ax.set_ylim(lo - pad, hi + pad)
+        ax.set_ylim(*lim)
     axes[-1, 0].set_xlim(0, max(1, len(values_tuple) - 1))
     fig.tight_layout(pad=0.3)
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=110)
-    plt.close(fig)
-    return buf.getvalue()
+    return fig
 
 
 def _legend() -> None:
-    """Phase colour key, rendered next to the figures it explains."""
+    """Phase colour key and curve key, rendered next to the figures they explain."""
     st.markdown(
         "<div style='margin:2px 0 6px 0'>"
         + " ".join(
@@ -213,6 +260,11 @@ def _legend() -> None:
             f"font-size:11px;color:#111;margin-right:4px'>{p}</span>"
             for p, c in PHASE_COLORS.items())
         + "</div>",
+        unsafe_allow_html=True)
+    st.caption(
+        f"<span style='color:{RAW_COLOR}'>━</span> raw vorticity (left axis) · "
+        f"<span style='color:{FILTERED_COLOR}'>━</span> vorticity_smoothed2 of "
+        "each column, from its own filter_params (own axis, as in the Grid)",
         unsafe_allow_html=True)
 
 
@@ -390,8 +442,9 @@ def _render_scoring(metrics, names, n_unscored: int) -> None:
                 "train numbers.",
                 help="Leakage rule: every aggregate is computed over the train "
                      "split. Aggregates involving the 16 real cyclones of the "
-                     "frozen test split live in this block alone and are never "
-                     "added into the train one.")
+                     "frozen test split — and the swell_item30 batch's 3 test "
+                     "cases, when the batch is included — live in this block "
+                     "alone and are never added into the train one.")
             st.dataframe(_summary_frame(metrics, names, "test"),
                          use_container_width=True)
         else:
@@ -433,12 +486,28 @@ def render() -> None:
     _init_state()
 
     series_bundled, source_of = bc.load_all_series()
+    membership = bc.split_membership()
+    # Item 30c: the frozen swell batch joins the bundled (labelled) population
+    # only while "Include swell_item30 batch" is on. Its test ids carry
+    # membership 'test', so they get exactly what the 16 get — nothing below
+    # special-cases them. The default loaders are not touched.
+    batch_ids: list[str] = []
+    batch_error = None
+    if st.session_state[K_BATCH]:
+        try:
+            b_series, b_membership = bc.load_batch(series_bundled)
+        except Exception as exc:
+            batch_error = f"{type(exc).__name__}: {exc}"
+        else:
+            series_bundled = {**series_bundled, **b_series}
+            source_of.update({k: "real" for k in b_series})
+            membership = {**membership, **b_membership}
+            batch_ids = sorted(b_series)
     extra = st.session_state[K_EXTRA]
     series_all = {**series_bundled,
                   **{k: pd.Series(v) for k, v in extra.items()}}
     for k in extra:
         source_of[k] = "uploaded"
-    membership = bc.split_membership()
     labels = bc.labels_for_display()
 
     mode = st.session_state[K_MODE]
@@ -495,6 +564,21 @@ def render() -> None:
                                                         if n_up else [])
     with st.expander(f"2 · Data — {len(selected)} selected", expanded=True):
         st.caption(f"**{len(selected)} selected** — {', '.join(parts)}")
+        st.checkbox(
+            "Include swell_item30 batch", key=K_BATCH,
+            help="Adds the 10 frozen swell tracks of the item-30 batch "
+                 "(split.yaml `batches: swell_item30`) to the selectable "
+                 "records: its 7 train cases join the train split, and its 3 "
+                 "test cases get exactly the treatment of the 16 frozen test "
+                 "cases — scored only in the test block, never in a train "
+                 "number. Off, the population is the usual 63.")
+        if batch_error:
+            st.error(f"The swell_item30 batch could not be loaded "
+                     f"({batch_error}) — continuing without it.")
+        elif batch_ids:
+            n_bt = sum(1 for s in batch_ids if membership.get(s) == "train")
+            st.caption(f"{BATCH_TAG}: {len(batch_ids)} tracks loaded — {n_bt} "
+                       f"train, {len(batch_ids) - n_bt} test.")
         if dropped:
             st.info(f"{len(dropped)} unlabelled track(s) dropped from the "
                     "selection: Validation mode offers labelled sources only.")
@@ -531,7 +615,9 @@ def render() -> None:
                 default=[s for s in selected if s in selectable],
                 key="bench_ids_widget",
                 format_func=lambda s: (f"{s} ({source_of[s]}/"
-                                       f"{membership.get(s, 'unlabelled')})"),
+                                       f"{membership.get(s, 'unlabelled')}"
+                                       + (f"/{BATCH_TAG}" if s in batch_ids
+                                          else "") + ")"),
             )
             if picked != [s for s in selected if s in selectable]:
                 st.session_state[K_IDS] = list(picked)
@@ -826,19 +912,31 @@ def render() -> None:
         stacked = st.session_state[K_FIGLAYOUT] == "Stacked"
 
         for sid in run_ids:
+            if sid not in series_all:
+                # A batch series from a run made while the batch was included,
+                # after "Include swell_item30 batch" was switched off.
+                st.caption(f"**{sid}** — no longer loaded (swell_item30 batch "
+                           "excluded); run again to refresh.")
+                continue
             st.markdown(f"**{sid}** · {source_of.get(sid, '—')} · "
-                        f"{membership.get(sid, 'unlabelled')}")
+                        f"{membership.get(sid, 'unlabelled')}"
+                        + (f" · {BATCH_TAG}" if sid in batch_ids else ""))
             values = tuple(float(x) for x in series_all[sid].values)
             rec = labels.get(sid)
+
+            def _z(res):
+                z = res.get("z")
+                return None if z is None else tuple(float(v) for v in z.values)
 
             if stacked:
                 panels = []
                 if show_labels and rec is not None:
-                    panels.append(("manual label", tuple(bc.label_runs_for(rec))))
+                    panels.append(("manual label", tuple(bc.label_runs_for(rec)),
+                                   None))
                 for i, nm in enumerate(names):
                     res = results[i][sid]
                     if not res["error"]:
-                        panels.append((nm, tuple(res["runs"])))
+                        panels.append((nm, tuple(res["runs"]), _z(res)))
                 if panels:
                     st.image(_stacked_png(values, tuple(panels)),
                              use_container_width=True)
@@ -865,7 +963,8 @@ def render() -> None:
                         if res["error"]:
                             st.error(res["error"])
                             continue
-                        st.image(_cell_png(values, tuple(res["runs"]), nm),
+                        st.image(_cell_png(values, tuple(res["runs"]), nm,
+                                           _z(res)),
                                  use_container_width=True)
                         _render_cell_notes(res, sid, rec, labels)
             st.divider()

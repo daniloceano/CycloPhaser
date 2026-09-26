@@ -268,3 +268,74 @@ def test_previous_and_next_move_through_the_queue_without_saving():
 
     assert lc.LABELS_PATH.read_text() == before_text, (
         "Previous/Next must never write to manual_labels.yaml")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30c — the "Shared 0-1 scale" option for the overlays
+# ══════════════════════════════════════════════════════════════════════════
+
+def _shared_cbs(at):
+    return [cb for cb in at.checkbox
+            if cb.key and cb.key.startswith("lab_overlay_shared__")]
+
+
+def test_shared_scale_is_offered_and_on_by_default_in_inspection():
+    at = _label_app()
+    assert at.session_state["_lab_mode"] == "inspect"
+    cbs = _shared_cbs(at)
+    assert len(cbs) == 1 and cbs[0].label == "Shared 0-1 scale"
+    assert cbs[0].value is True
+
+
+def test_shared_scale_is_absent_in_labelling():
+    """With the positive control first: the same run DID show it in Inspection,
+    so its absence below is the mode's doing, not a missing widget."""
+    at = _label_app()
+    assert _shared_cbs(at)
+    _switch_to_labelling(at)
+    assert at.session_state["_lab_mode"] == "label"
+    assert not _shared_cbs(at)
+    assert not any("Show filtered/smoothed overlays" in cb.label for cb in at.checkbox)
+
+
+def test_toggling_the_shared_scale_does_not_move_any_phase():
+    at = _label_app()
+    before = [int(nb.value) for nb in _start_idx(at)]
+    next(cb for cb in at.checkbox
+         if "Show filtered/smoothed overlays" in cb.label).set_value(True)
+    at.run()
+    for cb in (cb for cb in at.checkbox if cb.key and cb.key.startswith("lab_overlay__")):
+        cb.set_value(True)
+        at.run()
+    for value in (False, True):
+        _shared_cbs(at)[0].set_value(value)
+        at.run()
+        assert not at.exception, [str(e) for e in at.exception]
+        assert [int(nb.value) for nb in _start_idx(at)] == before
+
+
+def test_unit_band_matches_the_inspectors_raw_band():
+    """label_tab may not import the inspector, so `unit_band` re-writes its
+    arithmetic; this pins the two to agree, edge cases included."""
+    import sys
+
+    import numpy as np
+    sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
+    sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
+    import label_tab
+    import layer_inspector as li
+    import labels_core as lc
+
+    real = next(iter(lc.load_real_series().values())).to_numpy()
+    cases = {
+        "real series": real,
+        "with NaN": np.where(np.arange(len(real)) % 7 == 0, np.nan, real),
+        "flat": np.full(12, 3e-5),
+        "all NaN": np.full(5, np.nan),
+    }
+    for name, a in cases.items():
+        want = li.rescaler([a], True)(a)
+        got = np.asarray(label_tab.unit_band(a))
+        assert np.array_equal(got, want, equal_nan=True), name
+    assert min(label_tab.unit_band(real)) == 0.0
+    assert max(label_tab.unit_band(real)) == 1.0

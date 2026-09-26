@@ -3503,8 +3503,9 @@ The result is no separation found on 3 L cases against 2 K cases with a value.
 It is not proof that none exists.
 
 **Still open:** the evaluator reads the batch's TRAIN part only under
-`--batch-train`, in a block of its own; the benchmark does not read the batch
-at all. Whatever reads the batch next must keep its 3 test cases out of any
+`--batch-train`, in a block of its own. The benchmark reads it only behind
+30c's opt-in "Include swell_item30 batch", with the 3 test cases as `test` (see
+30c). Whatever reads the batch next must keep its 3 test cases out of any
 training aggregate.
 
 ## 30a. Inspector — the two depth-floor parameters — **closed, merged 2026-09-25** (merge `ad8daca`)
@@ -3631,6 +3632,62 @@ inside pytest — to be that worktree's files, `-m "not browser"`:
 
 The superseded branch `fix/inspector-min-depth-params` (`a2b639e`) is still
 unmerged and kept; its fate belongs to the clean-up front.
+
+---
+
+## 30c. Visualisation — shared 0-1 scale in the Label tab, smoothed series and the swell batch in the Benchmark — **done on branch `research/item30-plateau-overwrite`, NOT merged; awaiting Danilo's visual check**
+
+App only: `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated
+`cyclophaser` env, `cyclophaser.__file__` confirmed to be this checkout.
+
+### What was done
+
+* **Label tab, Inspection only: "Shared 0-1 scale"**, on by default, next to
+  the overlay switch. It uses the inspector's grouping: the raw series gets a
+  0-1 band of its own, and `filtered_vorticity`, `vorticity_smoothed` and
+  `vorticity_smoothed2` share ONE band (`layer_inspector.rescaler` over all
+  three, whichever are switched on, so toggling a layer never rescales the
+  others). The group band is computed in `app.py`'s `_label_overlays` (the
+  provider), so `label_tab.py`'s AST stays free of the package's names. The
+  raw band is `label_tab.unit_band`, which re-writes `rescaler([zeta], True)`'s
+  arithmetic, and a test pins the two to agree (flat, NaN and all-NaN
+  included). The hover shows the step and every curve's PHYSICAL value. The
+  band travels in a separate `display` key, and `chart_payload`'s pinned keys
+  are unchanged. `overlays_shown` still records the names seen. Labelling stays
+  raw-only, and the blindness tests pass unloosened.
+* **Benchmark cells and stacked figure** draw each column's own
+  `vorticity_smoothed2` (`run_series`' `z`, from that column's filter_params)
+  with the Grid's compact convention (`_plot_compact`): raw and smoothed on
+  twin y axes, raw in front. In the stacked figure every panel uses its own
+  column's curve, and all panels share one twin range. A snapshot column has
+  no `z` and draws raw only. A PNG has no hover, so the left axis carries the
+  raw values.
+* **Benchmark: "Include swell_item30 batch"**, off by default
+  (`benchmark_core.load_batch`, sha256-checked via `load_batch_series`). The
+  batch's 7 train cases take membership `train`, and its 3 test cases
+  (19930748, 20111118, 19990549) take `test`, which gives them exactly the 16's
+  treatment: the Test button, the frozen test block, never a train number.
+  Nothing downstream special-cases them.
+
+### Default paths unchanged (`research/labels/diagnostics/item30/prove_defaults_30c.py`, against `99f5a9a`)
+
+* The benchmark's `load_all_series` population hash is `d275380b…` both before
+  and after. Sources (51 real / 12 synthetic) and `split_membership` (47/16)
+  are identical.
+* `labels_core.py` (`load_real_series`) and `evaluate_against_labels.py` are
+  byte-identical to `99f5a9a`.
+* The evaluator's default path, run old vs new, gives an identical population
+  hash and identical output, both under `params-14` and under package defaults.
+
+Suite (`-m "not browser"`, dedicated env): **1386 passed, 0 failed**.
+
+### Open
+
+* **Pre-existing, not 30c:** in the Benchmark, pressing **Train** and then
+  **Test** in one session empties the selection (a second press selects the
+  16). Reproduced on `99f5a9a`.
+* Danilo's visual check (Label tab in Inspection with the shared scale;
+  Benchmark with the batch and the smoothed series) comes before any merge.
 
 ---
 

@@ -661,3 +661,182 @@ def test_a_non_baseline_card_still_shows_its_differences():
     caps = [c.value for c in at.caption]
     assert any("Differs from **params-1**" in c for c in caps), (
         "the non-baseline column stopped reporting its differences")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30c — the column's smoothed series in every cell and stacked panel
+# ══════════════════════════════════════════════════════════════════════════
+
+import benchmark_tab as bt  # noqa: E402
+
+
+def _filtered_lines(fig):
+    return [ln for ax in fig.axes for ln in ax.lines
+            if ln.get_color() == bt.FILTERED_COLOR]
+
+
+def _column_z(filename, sid):
+    import yaml
+    pv, gp = bc.split_config(yaml.safe_load((bc.CONFIGS_DIR / filename).read_text()))
+    series, _ = bc.load_all_series()
+    res = bc.run_series(pv, gp, series[sid])
+    return series[sid], res
+
+
+def test_the_two_columns_smooth_differently():
+    """POSITIVE CONTROL for the two pins below: if both configurations produced
+    the same smoothed series, "each cell draws its own column's" would hold for
+    a cell drawing the wrong column's."""
+    sid = sorted(bc.load_all_series()[0])[0]
+    za = _column_z(CFG_A, sid)[1]["z"].to_numpy()
+    zb = _column_z(CFG_B, sid)[1]["z"].to_numpy()
+    assert abs(za - zb).max() > 1e-7, "the two configs smooth identically here"
+
+
+def test_each_cell_draws_its_own_columns_smoothed_series():
+    sid = sorted(bc.load_all_series()[0])[0]
+    raw, res_a = _column_z(CFG_A, sid)
+    _, res_b = _column_z(CFG_B, sid)
+    values = tuple(float(v) for v in raw.values)
+    for res, other in ((res_a, res_b), (res_b, res_a)):
+        z = tuple(float(v) for v in res["z"].values)
+        fig = bt._cell_figure(values, tuple(res["runs"]), "col", z)
+        lines = _filtered_lines(fig)
+        assert len(lines) == 1, "a cell must draw exactly one smoothed curve"
+        drawn = list(lines[0].get_ydata())
+        assert drawn == list(z)
+        assert drawn != [float(v) for v in other["z"].values]
+        # Grid convention: the smoothed curve on an axis of its own, raw in front.
+        raw_ax = next(ax for ax in fig.axes
+                      if any(ln.get_color() == bt.RAW_COLOR for ln in ax.lines))
+        assert lines[0].axes is not raw_ax
+        assert raw_ax.get_zorder() > lines[0].axes.get_zorder()
+
+
+def test_a_cell_without_a_smoothed_series_draws_raw_only():
+    """A frozen-snapshot column carries no `z`; its cell must not invent one."""
+    sid = sorted(bc.load_all_series()[0])[0]
+    raw, res = _column_z(CFG_A, sid)
+    fig = bt._cell_figure(tuple(float(v) for v in raw.values),
+                          tuple(res["runs"]), "snapshot", None)
+    assert _filtered_lines(fig) == []
+
+
+def test_each_stacked_panel_draws_its_own_columns_smoothed_series():
+    sid = sorted(bc.load_all_series()[0])[0]
+    raw, res_a = _column_z(CFG_A, sid)
+    _, res_b = _column_z(CFG_B, sid)
+    za = tuple(float(v) for v in res_a["z"].values)
+    zb = tuple(float(v) for v in res_b["z"].values)
+    panels = (("manual label", tuple(res_a["runs"]), None),
+              ("A", tuple(res_a["runs"]), za),
+              ("B", tuple(res_b["runs"]), zb))
+    fig = bt._stacked_figure(tuple(float(v) for v in raw.values), panels)
+    lines = _filtered_lines(fig)
+    assert [list(ln.get_ydata()) for ln in lines] == [list(za), list(zb)]
+    # one twin range for every panel, so a flatter curve reads as flatter
+    assert lines[0].axes.get_ylim() == lines[1].axes.get_ylim()
+
+
+def test_a_run_keeps_each_columns_own_smoothed_series():
+    """End to end through the tab: what the cells are drawn from is the
+    column's own `z`, computed with that column's filter_params."""
+    at = _two_column_app(n_cyclones=1)
+    sid = next(iter(_loaded(at)[0]["series"]))
+    runs = at.session_state["_bench_runs"]
+    for filename, per_col in zip((CFG_A, CFG_B), runs):
+        want = _column_z(filename, sid)[1]["z"].to_numpy()
+        assert list(per_col[sid]["z"].to_numpy()) == list(want)
+    _widget(at, "radio", "bench_figure_layout").set_value("Stacked")
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30c — "Include swell_item30 batch"
+# ══════════════════════════════════════════════════════════════════════════
+
+BATCH_TEST = {"19930748", "20111118", "19990549"}
+
+
+def _batch():
+    return bc.batch_membership()
+
+
+def test_the_batch_is_what_split_yaml_records():
+    """Guards the tests below from passing on an empty or reshuffled batch."""
+    m = _batch()
+    assert len(m) == 10
+    assert {s for s, v in m.items() if v == "test"} == BATCH_TEST
+
+
+def test_the_default_population_does_not_contain_the_batch():
+    series, _ = bc.load_all_series()
+    assert len(series) == 63
+    assert not set(_batch()) & set(series)
+    assert not set(_batch()) & set(bc.split_membership())
+
+
+def test_the_batch_is_off_by_default_and_not_selectable():
+    at = _app()
+    assert at.session_state["bench_include_swell_batch"] is False
+    opts = set(_widget(at, "multiselect", "bench_ids_widget").options)
+    assert len(opts) == 63
+    assert not {o.split(" ")[0] for o in opts} & set(_batch())
+
+
+def test_the_batch_appears_with_the_control_on_and_goes_with_it_off():
+    at = _app()
+    _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    opts = {o.split(" ")[0] for o in _widget(at, "multiselect", "bench_ids_widget").options}
+    assert set(_batch()) <= opts and len(opts) == 73
+
+    _select(at, sorted(_batch()))
+    _widget(at, "checkbox", "bench_include_swell_batch").set_value(False)
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    opts = {o.split(" ")[0] for o in _widget(at, "multiselect", "bench_ids_widget").options}
+    assert len(opts) == 63 and not set(_batch()) & opts
+    assert not set(_batch()) & set(at.session_state["bench_selected_ids"]), (
+        "batch ids stayed selected after the batch was switched off")
+
+
+def test_the_split_buttons_treat_the_batch_like_the_split():
+    """Train and Test pick the batch's 7 and 3 alongside the 47 and 16 — and,
+    as the positive control, not while the batch is off.
+
+    One fresh app per click: pressing Train and then Test in the same session
+    empties the selection, a defect that predates item 30c (reproduced on
+    99f5a9a) and is not what this test is about."""
+    def picked(key, batch):
+        at = _app()
+        if batch:
+            _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
+            at.run()
+        _widget(at, "button", key).click()
+        at.run()
+        assert not at.exception, [str(e) for e in at.exception]
+        return set(at.session_state["bench_selected_ids"])
+
+    assert len(picked("bench_pick_train", False)) == 47
+    assert len(picked("bench_pick_test", False)) == 16
+    train = picked("bench_pick_train", True)
+    assert len(train) == 54 and not train & BATCH_TEST
+    test = picked("bench_pick_test", True)
+    assert len(test) == 19 and BATCH_TEST <= test
+
+
+def test_the_batch_test_cases_score_only_in_the_test_block():
+    """The 3 are scored where the 16 are — the frozen test block — and never
+    in the train one. Only the blocks' series counts are read here."""
+    at = _app()
+    _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
+    at.run()
+    _select(at, sorted(_batch()))
+    _add_config_column(at, CFG_B)
+    _run(at)
+    labels = [e.label for e in at.expander]
+    assert "Train split — 7 series" in labels, labels
+    assert "Test split (frozen) — 3 series" in labels, labels

@@ -38,7 +38,8 @@ Leakage rule
 Any AGGREGATE number is computed over the TRAIN split. Aggregates involving the
 16 real cyclones of the frozen test split are returned in a separate block,
 labelled test, and never added into the train one. Per-cyclone rows are display,
-not aggregate, and may show either.
+not aggregate, and may show either. The item-30 swell batch, when the tab
+includes it (`load_batch`), adds 7 train and 3 test ids under the same rule.
 """
 
 from __future__ import annotations
@@ -67,9 +68,10 @@ for _p in (str(_REPO / "research" / "labels"),
         sys.path.append(_p)
 
 from cyclophaser.determine_periods import get_periods, process_vorticity  # noqa: E402
-from labels_core import (load_real_series, load_synthetic_series,  # noqa: E402
-                         normalize_phase, read_labels, read_split,
-                         score_phase_sequences, series_sha256)
+from labels_core import (SWELL_BATCH, batch_membership,  # noqa: E402
+                         load_batch_series, load_real_series,
+                         load_synthetic_series, normalize_phase, read_labels,
+                         read_split, score_phase_sequences, series_sha256)
 
 # Imported for its pairing rule ONLY. item19_core.CONFIG stays pointed at
 # params-10; nothing here writes to it. See the module docstring.
@@ -406,6 +408,28 @@ def split_membership() -> dict[str, str]:
     out = {sid: "train" for sid in sp["train"]}
     out.update({sid: "test" for sid in sp["test"]})
     return out
+
+
+def load_batch(existing_ids, batch: str = SWELL_BATCH
+               ) -> tuple[dict[str, pd.Series], dict[str, str]]:
+    """One frozen batch of split.yaml, OPT-IN: ({id: Series}, {id: 'train'|'test'}).
+
+    Item 30c. `load_all_series` and `split_membership` never call this, so the
+    default population stays the 63 and the 47/16 split. The tab merges the
+    result in only when "Include swell_item30 batch" is on, and a batch TEST id
+    then carries membership 'test' — the leakage rule above applies to it
+    exactly as to the 16, because `metrics_by_split` reads nothing else.
+
+    Raises if a batch id is already in `existing_ids` (a batch that shadowed a
+    bundled series would score one series under another's split), and passes on
+    `load_batch_series`' error for a file whose sha256 no longer matches.
+    """
+    series = load_batch_series(batch)
+    clash = sorted(set(series) & set(existing_ids))
+    if clash:
+        raise ValueError(f"batch ids already in the population: {clash}")
+    membership = batch_membership(batch)
+    return series, {sid: membership[sid] for sid in series}
 
 
 # ── the two measurements ──────────────────────────────────────────────────────
