@@ -3482,6 +3482,26 @@ pre-incipient map holds, with three outcomes:
 
 The question is therefore the boundary, not the overwrite.
 
+**Part 2 — separability (2026-09-26).** Measurement only; predictions were
+committed in `2ded3af`, and the full record is in
+`research/labels/diagnostics/item30/REPORT_part2.md`. The measure is E, the
+first step-5 intensification block that starts before the boundary. Three
+candidates were tested: c1 = the D2 depth of E, c2 = c1 / duration, and
+c3 = the fraction of E before the boundary. The groups were L (late: 20120297,
+19940445, 19810854), K (right: 19790612, which has no E, plus 19860380 and
+19870927) and P (21 = 13 real + 8 synthetic, all partial erasures).
+
+- **No candidate passes** the pre-declared criterion.
+  - c1 and c2 put L on both sides of K.
+  - c3 ties L and K at 1 (Q1 CONFIRMED). It clears P by a margin of 0.471,
+    but that only restates the signal.
+- **Q2** does not apply, since nothing separates. **Q3** had no prediction.
+- **Swell check.** E is defined in 10 of the 17 signal tracks, and c3 = 1 in
+  all 10. With no valid threshold there is no side to report.
+
+The result is no separation found on 3 L cases against 2 K cases with a value.
+It is not proof that none exists.
+
 **Still open:** the evaluator reads the batch's TRAIN part only under
 `--batch-train`, in a block of its own; the benchmark does not read the batch
 at all. Whatever reads the batch next must keep its 3 test cases out of any
