@@ -3437,11 +3437,11 @@ all three `[TEST split — locked]`, with both save buttons disabled.
   config is identified by its parameter blocks, compared with
   `research/labels/configs/`, never by its file name.
 
-**Declared exposure (1 bit).** A verdict-consistency check run over the 3
-test records, before the "presence, hash and lock only" rule was applied,
-showed that 20111118's stored verdict differs from the one derived from its
-phases. That is what "Save ambiguous" writes, so the case was saved as
-ambiguous. No other test-label content was read.
+**Declared exposure (1 bit), as observed.** A verdict-consistency check was run
+over the 3 test records before the "presence, hash and lock only" rule was
+applied. It observed that **20111118's stored verdict ≠ the verdict derived from
+its phases**. Reading this as "saved as ambiguous" is an inference, not an
+observation. No other test-label content was read.
 
 **Measurement part — gate and baseline under params-14 (2026-09-25).**
 Measurement only; `cyclophaser/` is untouched. Predictions were committed in
@@ -3469,6 +3469,18 @@ Measurement only; `cyclophaser/` is untouched. Predictions were committed in
   population hash and output are identical.
 - **Baseline under params-14.** Across the 47: sequence 31/47, incipient
   boundary 17/27. Across the batch's 7: sequence 1/7, incipient boundary 3/7.
+
+**H redescribed (2026-09-26): a property of the unconditional overwrite, not an
+isolated defect.** Line 1134 writes `incipient` over `[0, boundary)` whatever the
+pre-incipient map holds, with three outcomes:
+
+- **Boundary right:** it hides a wrong intermediate map (20180608, 19860380,
+  19870927).
+- **Boundary late:** it destroys a correct map (20120297, 19940445, 19810854).
+- **Outside the signal:** it erases only the beginning of the intensification,
+  and the labels agree.
+
+The question is therefore the boundary, not the overwrite.
 
 **Still open:** the evaluator reads the batch's TRAIN part only under
 `--batch-train`, in a block of its own; the benchmark does not read the batch

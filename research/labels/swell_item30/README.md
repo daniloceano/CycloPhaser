@@ -185,7 +185,30 @@ control, stays saveable.
 ## Declared exposure — one bit from a test label
 
 Before the rule "presence, hash and lock only" was applied to the 3 test
-records, a verdict-consistency check was run over all 10. On **20111118**, the
-stored verdict differed from the one derived from its phases. That difference is
-what the tab's "Save ambiguous" button writes, so it reveals that the case was
-saved as ambiguous: **1 bit**. No other content of any test label was read.
+records, a verdict-consistency check was run over all 10. **What was observed:**
+on **20111118**, the stored verdict differs from the verdict derived from its
+phases. That is 1 bit.
+
+Reading it as "saved as ambiguous" is an **inference**, not an observation. It is
+the difference that the tab's "Save ambiguous" button writes, but the verdict
+itself was not read. No other content of any test label was read.
+
+## H is a property of the unconditional overwrite, not an isolated defect
+
+`find_stages.py:1134` overwrites `[0, boundary)` with `incipient`
+unconditionally, whatever the pre-incipient map holds. On the labelled training
+series (item 30 measurement, `research/labels/diagnostics/item30/REPORT.md`)
+that has three outcomes:
+
+- **The boundary is right, and the overwrite hides a wrong intermediate map**:
+  20180608, 19860380, 19870927. The label's incipient end sits within 2 steps
+  of the boundary. What step 6 erased was not in the label.
+- **The boundary is late, and the overwrite destroys a correct map**: 20120297,
+  19940445, 19810854. The label has the intensification (and the mature) that
+  step 6 erased.
+- **Outside the signal, it erases only the beginning of the intensification**,
+  and the labels agree: the labelled incipient end is within ±2 steps of the
+  boundary in 7 of 10 real cases, and within ±1 in 7 of 8 synthetic ones.
+
+The same line does all three. Whether it helps or hurts depends on whether the
+boundary is right, not on the overwrite itself.

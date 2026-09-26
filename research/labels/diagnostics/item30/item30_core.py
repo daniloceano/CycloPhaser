@@ -25,11 +25,12 @@ Two things are ASSERTED on every series, not assumed:
 2. Every step-6 overwrite lies inside [0, boundary) and writes `incipient`, so
    what is attributed to H is H.
 
-The `args_periods` the ribbon receives is CAPTURED from inside `get_periods` (its
-first stage call is wrapped), not transcribed. On this branch
-`layer_inspector.build_args_periods` still lacks the two depth floors (the item
-30a fix is on develop, not here), so it is deliberately not used.
-`build_working_frame` and `pipeline_ribbon` are identical to develop's.
+Since develop-v2.1 was merged in (item 30a, `a860b36`), the ribbon gets
+`layer_inspector.build_args_periods`, built the way app.py builds it. The
+`args_periods` captured from inside `get_periods` (its first stage call is
+wrapped) is kept as a cross-check, and the two are asserted equal on every run.
+Before the merge (`002078b`), the captured args were fed to the ribbon directly,
+because this branch's `build_args_periods` still lacked the two depth floors.
 
 C2' (`reclassify_index0`) runs BEFORE every stage: it is applied inside
 `find_peaks_valleys(z)` while the working frame is built
@@ -134,7 +135,13 @@ def run_series(values: pd.Series, pv: dict, gp: dict) -> dict:
         finally:
             dp.find_intensification_period = orig
         df0 = li.build_working_frame(v, **_frame_kwargs(gp))
-        steps = li.pipeline_ribbon(df0, **captured)
+        # The inspector's own args, built the way app.py builds them. The
+        # args captured from inside get_periods are kept only as a cross-check.
+        args = li.build_args_periods(**{k: val for k, val in gp.items()
+                                        if k not in ("prominence", "prominence_relative",
+                                                     "reclassify_index0")})
+        assert args == captured, "inspector args_periods != get_periods' own"
+        steps = li.pipeline_ribbon(df0, **args)
 
     final = res["periods"].astype(object).tolist()
     step6 = steps[5][1].astype(object).tolist()
@@ -161,7 +168,7 @@ def run_series(values: pd.Series, pv: dict, gp: dict) -> dict:
 
     return {"n": len(final), "boundary": int(boundary), "peak": peak,
             "signal": boundary > peak, "pre": steps[4][1].astype(object).tolist(),
-            "final": final, "erased": erased, "symptom": symptom(final),
+            "final": final, "erased": erased, "symptom": symptom(final), "z": z,
             "args": captured}
 
 
