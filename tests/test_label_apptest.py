@@ -339,3 +339,19 @@ def test_unit_band_matches_the_inspectors_raw_band():
         assert np.array_equal(got, want, equal_nan=True), name
     assert min(label_tab.unit_band(real)) == 0.0
     assert max(label_tab.unit_band(real)) == 1.0
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30 part 3 — the VALIDATION batch appears unlabelled, save-once
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_the_validation_cases_are_in_the_queue_unlabelled_and_marked():
+    val = {"19900808", "19940737", "19960808", "20000821", "19861089"}
+    at = _label_app()
+    nav = next(sb for sb in at.main.selectbox if sb.label == "Jump to case")
+    opts = [o for o in nav.options if any(v in o for v in val)]
+    assert len(opts) == 5
+    assert all("[VALIDATION — first label only]" in o for o in opts), opts
+    # appended last: after every other case, the 10 of the swell batch included
+    last5 = nav.options[-5:]
+    assert {o for o in last5} == set(opts)

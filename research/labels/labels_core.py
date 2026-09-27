@@ -55,6 +55,13 @@ LABELS_PATH = LABELS_DIR / "manual_labels.yaml"
 SWELL_BATCH = "swell_item30"
 SWELL_BATCH_DATA_DIR = "tests/calibration_data/swell_item30"   # repo-relative
 
+# Item 30 part 3: 5 more swell tracks, frozen as `batches: swell_item30_val`
+# with the role VALIDATION — neither train nor test, and in no aggregate. They
+# exist to be labelled blind by Danilo and then to measure prediction V of
+# diagnostics/item30/PREDICTIONS_part3.md once. Same one-level-down layout.
+VALIDATION_BATCH = "swell_item30_val"
+VALIDATION_BATCH_DATA_DIR = "tests/calibration_data/swell_item30_val"
+
 # Seeds are frozen in code AND written into the artefacts they produce. Changing
 # either number invalidates the corresponding artefact, which is the point: a
 # split redrawn after seeing results is not a test set any more.
@@ -245,7 +252,7 @@ def load_synthetic_series(synthetic_dir: Path | None = None,
 
 
 def batch_membership(batch: str = SWELL_BATCH, split_doc: dict | None = None) -> dict[str, str]:
-    """{series_id: 'train'|'test'} of one frozen batch of split.yaml; {} if absent.
+    """{series_id: 'train'|'test'|'validation'} of one frozen batch of split.yaml; {} if absent.
 
     Kept apart from the top-level train/test on purpose: those two lists are
     the 47/16 split, and every existing reader of them (benchmark, evaluator,
@@ -255,8 +262,9 @@ def batch_membership(batch: str = SWELL_BATCH, split_doc: dict | None = None) ->
     blk = (doc.get("batches") or {}).get(batch)
     if not blk:
         return {}
-    out = {sid: "train" for sid in blk["train"]}
-    out.update({sid: "test" for sid in blk["test"]})
+    out = {sid: "train" for sid in blk.get("train", [])}
+    out.update({sid: "test" for sid in blk.get("test", [])})
+    out.update({sid: "validation" for sid in blk.get("validation", [])})
     return out
 
 
@@ -276,7 +284,8 @@ def load_batch_series(batch: str = SWELL_BATCH,
         return {}
     d = REPO_ROOT / blk["data_dir"]
     out = {}
-    for sid in sorted(blk["train"] + blk["test"]):
+    for sid in sorted(blk.get("train", []) + blk.get("test", [])
+                      + blk.get("validation", [])):
         p = d / f"{sid}.csv"
         got = hashlib.sha256(p.read_bytes()).hexdigest()
         if got != blk["file_sha256"][sid]:

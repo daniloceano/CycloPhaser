@@ -68,3 +68,75 @@ def test_batch_series_load_with_their_recorded_hashes():
     assert sorted(series) == sorted(blk["train"] + blk["test"])
     for sid, s in series.items():
         assert len(s) > 0 and (s < 0).all(), sid        # SH cyclone: negative zeta
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30 part 3 — the VALIDATION batch: frozen, in no default path
+# ══════════════════════════════════════════════════════════════════════════
+
+VAL = {"19900808", "19940737", "19960808", "20000821", "19861089"}
+
+
+def _val_block():
+    return lc.read_split()["batches"][lc.VALIDATION_BATCH]
+
+
+def test_validation_block_is_validation_only():
+    blk = _val_block()
+    assert blk["role"] == "validation" and blk["frozen"] is True
+    assert blk["train"] == [] and blk["test"] == []
+    assert set(blk["validation"]) == VAL
+    assert lc.batch_membership(lc.VALIDATION_BATCH) == {s: "validation" for s in VAL}
+
+
+def test_validation_files_carry_their_recorded_hashes():
+    blk = _val_block()
+    d = REPO_ROOT / blk["data_dir"]
+    assert sorted(p.stem for p in d.glob("*.csv")) == sorted(VAL)
+    for sid in VAL:
+        got = hashlib.sha256((d / f"{sid}.csv").read_bytes()).hexdigest()
+        assert got == blk["file_sha256"][sid], sid
+    assert set(lc.load_batch_series(lc.VALIDATION_BATCH)) == VAL
+
+
+def test_validation_is_disjoint_from_everything_else():
+    doc = lc.read_split()
+    others = (set(doc["train"]) | set(doc["test"])
+              | set(lc.batch_membership(lc.SWELL_BATCH)))
+    assert VAL.isdisjoint(others)
+
+
+def test_validation_is_in_no_default_loader():
+    assert VAL.isdisjoint(lc.load_real_series())
+    assert VAL.isdisjoint(lc.load_batch_series())            # the default batch
+    split = lc.read_split()
+    assert VAL.isdisjoint(set(split["train"]) | set(split["test"]))
+
+
+def test_validation_is_not_in_the_benchmark_even_with_the_batch_on():
+    sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
+    import benchmark_core as bc
+    series, _ = bc.load_all_series()
+    b_series, b_membership = bc.load_batch(series)
+    assert VAL.isdisjoint(series) and VAL.isdisjoint(b_series)
+    assert VAL.isdisjoint(bc.split_membership()) and VAL.isdisjoint(b_membership)
+
+
+def test_the_evaluator_never_reaches_the_validation_batch(monkeypatch):
+    import evaluate_against_labels as ev
+    seen = set()
+
+    def run_detector(series, pv, gp):
+        seen.update(series)
+        return {k: None for k in series}, {k: [] for k in series}
+
+    monkeypatch.setattr(ev, "run_detector", run_detector)
+    monkeypatch.setattr(ev, "score_labels", lambda sel, d: {"n_scored": len(sel)})
+    monkeypatch.setattr(ev, "score_phase_sequences", lambda sel, d: {})
+    monkeypatch.setattr(ev, "_fmt", lambda m: "")
+    monkeypatch.setattr(ev, "_fmt_phases", lambda m: "")
+    for argv in ([], ["--batch-train", lc.SWELL_BATCH],
+                 ["--batch-train", lc.VALIDATION_BATCH]):
+        ev.main(argv)
+    assert seen, "the detector stub was never called — the check proves nothing"
+    assert VAL.isdisjoint(seen)
