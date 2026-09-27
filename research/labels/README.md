@@ -78,6 +78,13 @@ Adopting it is pending prediction V of
 validation tracks, `batches.swell_item30_val`) or an explicit decision by Danilo.
 Adopted without V, it must be recorded as "adotado sem validação independente".
 
+**Status at the item-30 closing (2026-09-27): still a CANDIDATE.** V is spent,
+because the 5 validation tracks were seen under params-15 before they were
+labelled. The adoption line of the closing brief was not filled, so params-15
+was NOT adopted and the reference above is unchanged. The table above was not
+extended to params-15 as a reference, and it still omits params-12 to -14, a
+cleanup debt.
+
 **Do not normalise or reformat any of them.** A configuration's identity here is
 its file hash: the Benchmark tab shows that hash as a column's provenance, and
 rewriting a file — even to strip a block that looks redundant — silently

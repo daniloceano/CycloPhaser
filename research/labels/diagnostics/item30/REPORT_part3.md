@@ -195,3 +195,27 @@ the evaluator are unchanged against `1a3ad76`
 - The configs table in `research/labels/README.md` stops at params-11.
 - Importing a config older than params-14 into the app warns "missing key" for
   the incipient keys and `reclassify_index0`.
+
+---
+
+## Closing record (2026-09-27)
+
+- **Rule kept in its BROAD form**, by the declared decision rule. In Danilo's
+  evaluation under params-15 (27 Sept 2026, 20:43Z, 249 tracks), none of the 5
+  tracks outside the signal (19850338, 19890443, 20011085, 20040726, 20110785)
+  was marked bad. 19890443, 20011085 and 20040726 had been marked bad under
+  params-14. Visual marks are judgement, not a score.
+- **V: spent.** The 5 validation tracks were seen under params-15 before they
+  were labelled. `batches.swell_item30_val` stays frozen as a record, role
+  "spent before labelling", with no labels. The block in `split.yaml` was not
+  edited and still reads `role: validation`; updating it is a separate
+  decision.
+- **Test exposure.** 19 test series were evaluated in the Grid under params-15:
+  the 16 of the split, the 3 of the batch and 20203389. Danilo marked 20150377
+  and 20206498 bad. The marks were used in no decision.
+- **Danilo's note.** Other cases may be bad because their series are genuinely
+  ambiguous. They are outside the scope of this front.
+- **Adoption NOT recorded.** The ADOÇÃO line of the closing brief came back
+  unfilled, so params-15 remains a CANDIDATE and is not the reference
+  configuration. The package default stays False.
+- **Merge NOT done.** The AUTORIZAÇÃO DE MERGE line came back unfilled.
