@@ -3499,6 +3499,23 @@ c3 = the fraction of E before the boundary. The groups were L (late: 20120297,
 - **Swell check.** E is defined in 10 of the 17 signal tracks, and c3 = 1 in
   all 10. With no valid threshold there is no side to report.
 
+**Figures for label review (2026-09-27).** Diagnostic only, with no rule
+proposed; the record is in `research/labels/diagnostics/item30/REPORT_figs_cf.md`
+and `figs_cf/`. Each of 8 TRAIN cases shows the label, params-13, params-14 and
+one counterfactual. The cases are L, K, and the 2 P cases with the largest c3:
+20180608 and 20150436. The counterfactual, under params-14, is s5 with
+[0, E.start) written as incipient when E exists and c3 = 1, and s6 otherwise.
+
+- params-13 and params-14 give the same final map in all 8 cases.
+- The counterfactual equals s6 in both P controls and in 19790612.
+- **L: closer to the label** in incipient end and sequence (edit distance),
+  but E starts at step 0 in all three, so the counterfactual has no incipient,
+  while the labels open with 2, 8 and 3 steps of it.
+- **K 19860380 and 19870927: further.** Those labels are `incipient > decay`,
+  and the counterfactual restores an intensification and a mature that the
+  labels do not contain. Moving toward the L labels moves away from these K
+  labels, which is part 2's non-separability case by case.
+
 The result is no separation found on 3 L cases against 2 K cases with a value.
 It is not proof that none exists.
 
