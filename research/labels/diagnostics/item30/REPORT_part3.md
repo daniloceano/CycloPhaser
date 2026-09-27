@@ -124,3 +124,74 @@ therefore not blind in that sense. This is recorded in the batch's
   label | params-14 | params-15), plus a board.
 - `prove_defaults_part3.py`, with outputs `_step2.txt` and `_step3.txt`: the
   default loaders and the evaluator, against `1a3ad76`.
+
+---
+
+## Checkpoint addendum (2026-09-27): the 5 outside the signal, the narrow variant, the benchmark
+
+This section only adds to the report; nothing above is rewritten. The script is
+`outside_signal.py` and its output is `outside_signal_output.txt`. The
+per-track table and the figures are OUTSIDE the repo, in
+`cyclophaser_swell_tracks_test/diag_item30/`
+(`outside_signal_5_params14_15.csv` and `figs_outside_signal/`).
+
+### R3 refuted: 15, not 10 — and the hypothesis that was wrong
+
+The 5 tracks outside the prediction are **19850338, 19890443, 20011085,
+20040726 and 20110785**. None of them is TEST or VALIDATION, and none is in a
+labelled batch. 3 were marked bad and 2 good.
+
+Claude's wrong hypothesis was that "E lies wholly before the boundary" implies
+"boundary > global minimum" (the signal). It does not. In all 5, E is a first,
+shallower deepening:
+
+- E ends at a secondary z valley before the boundary.
+- At E's end, z is 54–88% of the global minimum.
+- The global minimum comes at or after the boundary.
+- In 19890443 the boundary equals the minimum. The signal is a strict `>`, so
+  that track fails it by a tie.
+
+The rule's condition is about where E lies, not about where the minimum lies.
+
+### Narrow variant (measured, not adopted)
+
+The variant acts only when E ends before the boundary **and** the boundary lies
+after the argmin of the filtered z. It is a replica built from the
+pre-incipient map, outside `cyclophaser/`. Its fidelity was checked first: the
+same replica without the extra condition reproduces params-15 on 54/54 TRAIN
+and 196/196 swell tracks.
+
+- **TRAIN:** it changes the same 5 as the rule (R1): True.
+- **Swell:** it changes 10 tracks, exactly the 10 predicted, and 0 of the 5
+  outside the signal.
+
+### R2: the guard that did not exercise the changed branch
+
+The canonical generator, `front_b/default_behaviour_hash.py`, runs the package
+defaults. Their incipient method is geometric, so the generator never enters
+the plateau branch where the rule lives. Its identical digest therefore proves
+nothing about that branch. The effective proof of "default unchanged" on the
+plateau branch is the evaluator's output under params-14: it is identical to
+`1a3ad76`. **Lesson:** a "default unchanged" guard must exercise the branch
+that changed.
+
+### Deviation
+
+The rule was committed (`f85e1b8`) before the checkpoint was approved. The
+history is not rewritten; the deviation is recorded here.
+
+### Benchmark
+
+Labels that carry the adjudication note get their own "Adjudicated (item 30)"
+block in the benchmark's scoring and are never added into train or test
+(`benchmark_core.metrics_by_split`). An AppTest with the swell batch on shows
+the batch's 7 TRAIN cases split into 2 in train and 5 adjudicated. A positive
+control strips the note and gets all 7 back in train. The default loaders and
+the evaluator are unchanged against `1a3ad76`
+(`prove_defaults_part3_checkpoint.txt`).
+
+### Cleanup debts (not done here)
+
+- The configs table in `research/labels/README.md` stops at params-11.
+- Importing a config older than params-14 into the app warns "missing key" for
+  the incipient keys and `reclassify_index0`.

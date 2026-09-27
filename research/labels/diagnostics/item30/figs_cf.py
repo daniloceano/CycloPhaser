@@ -164,14 +164,17 @@ def draw(axes, c) -> None:
 
 
 def figure(cases, path) -> None:
-    rows = []
-    for _ in cases:
-        rows += [3.2, 0.45, 0.45, 0.45, 0.45, 1.3]
+    """One panel + one band per entry of each case's `maps` (4 in 1a3ad76)."""
+    rows, first = [], []
+    for c in cases:
+        first.append(len(rows))
+        rows += [3.2] + [0.45] * len(c["maps"]) + [1.3]
     fig = plt.figure(figsize=(9, 0.75 * sum(rows)))
     gs = fig.add_gridspec(len(rows), 1, height_ratios=rows, hspace=0.08)
     for k, c in enumerate(cases):
-        ax0 = fig.add_subplot(gs[6 * k])
-        axes = [ax0] + [fig.add_subplot(gs[6 * k + j], sharex=ax0) for j in range(1, 5)]
+        ax0 = fig.add_subplot(gs[first[k]])
+        axes = [ax0] + [fig.add_subplot(gs[first[k] + j], sharex=ax0)
+                        for j in range(1, len(c["maps"]) + 1)]
         for a in axes[:-1]:
             a.tick_params(labelbottom=False)
         draw(axes, c)

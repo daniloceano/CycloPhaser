@@ -3552,6 +3552,29 @@ Results:
   sem validação independente".
 - Suite 1419 passed, 0 failed; `cyclophaser/` diff vs develop-v2.1 = the rule only.
 
+**Part 3 checkpoint addendum (2026-09-27).** The record is the addendum of
+`REPORT_part3.md`.
+
+- **R3.** The 5 unpredicted tracks are 19850338, 19890443, 20011085,
+  20040726 and 20110785 (3 marked bad). None is TEST or VALIDATION. In each, E
+  is a first, shallower deepening that ends at a secondary valley inside the
+  plateau, and the global minimum comes at or after the boundary. In 19890443
+  the two are equal, a tie. Claude's hypothesis was wrong: "E wholly before
+  the boundary" does not imply "boundary > global minimum".
+- **Narrow variant** (signal required too; a replica outside the package,
+  measured, not adopted). It changes the same 5 in TRAIN, and exactly the 10
+  predicted in the swell, with none of the 5 above.
+- **R2 lesson.** The canonical hash runs the geometric defaults and never
+  enters the plateau branch. The effective proof there is the evaluator's
+  output under params-14, identical to `1a3ad76`. A "default unchanged" guard
+  must exercise the changed branch.
+- **Deviation.** The rule was committed (`f85e1b8`) before the checkpoint was
+  approved; it is recorded, and the history is not rewritten.
+- **Benchmark.** Adjudicated labels get their own block and are never pooled
+  with train. There is an AppTest with a positive control.
+- **Cleanup debts.** The configs table in `research/labels/README.md` stops
+  at params-11. Importing configs older than params-14 warns "missing key".
+
 The result is no separation found on 3 L cases against 2 K cases with a value.
 It is not proof that none exists.
 

@@ -69,7 +69,7 @@ for _p in (str(_REPO / "research" / "labels"),
 
 from cyclophaser.determine_periods import get_periods, process_vorticity  # noqa: E402
 from labels_core import (SWELL_BATCH, batch_membership,  # noqa: E402
-                         load_batch_series, load_real_series,
+                         is_adjudicated, load_batch_series, load_real_series,
                          load_synthetic_series, normalize_phase, read_labels,
                          read_split, score_phase_sequences, series_sha256)
 
@@ -498,10 +498,22 @@ def metrics_by_split(results: dict[str, dict], labels: dict[str, dict],
     The leakage rule is enforced here rather than left to the caller: a test
     aggregate is computed into its own labelled block and is never added into
     the train one.
+
+    Item 30 part 3: a label carrying the adjudication note
+    (`labels_core.is_adjudicated`) IS the item-30 counterfactual's output, so it
+    cannot score a detector. Wherever it would have fallen, it goes into a third
+    block, "adjudicated", and never into train or test.
     """
-    train_ids = [s for s in selected_ids if membership.get(s) == "train"]
-    test_ids = [s for s in selected_ids if membership.get(s) == "test"]
+    adj = {s for s in selected_ids if s in labels and is_adjudicated(labels[s])}
+    train_ids = [s for s in selected_ids if membership.get(s) == "train" and s not in adj]
+    test_ids = [s for s in selected_ids if membership.get(s) == "test" and s not in adj]
+    adj_ids = [s for s in selected_ids if s in adj]
     return {
+        "adjudicated": {
+            "ids": adj_ids,
+            "sequence": sequence_metrics(results, labels, adj_ids),
+            "mature": mature_metrics(results, labels, adj_ids),
+        },
         "train": {
             "ids": train_ids,
             "sequence": sequence_metrics(results, labels, train_ids),

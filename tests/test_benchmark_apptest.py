@@ -838,5 +838,43 @@ def test_the_batch_test_cases_score_only_in_the_test_block():
     _add_config_column(at, CFG_B)
     _run(at)
     labels = [e.label for e in at.expander]
-    assert "Train split — 7 series" in labels, labels
+    # 7 batch TRAIN = 2 plain + 5 adjudicated (item 30 part 3), each in its block
+    assert "Train split — 2 series" in labels, labels
     assert "Test split (frozen) — 3 series" in labels, labels
+    assert "Adjudicated (item 30) — 5 series" in labels, labels
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30 part 3 — adjudicated labels never enter the train block
+# ══════════════════════════════════════════════════════════════════════════
+
+ADJ = {"20120297", "19940445", "19810854", "19860380", "19870927"}
+
+
+def test_adjudicated_labels_have_their_own_block_with_the_batch_on():
+    at = _app()
+    _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
+    at.run()
+    train7 = sorted(s for s, m in _batch().items() if m == "train")
+    _select(at, train7)
+    _add_config_column(at, CFG_B)
+    _run(at)
+    labels = [e.label for e in at.expander]
+    assert "Train split — 2 series" in labels, labels
+    assert "Adjudicated (item 30) — 5 series" in labels, labels
+    metrics = bc.metrics_by_split(at.session_state["_bench_runs"][0],
+                                  bc.labels_for_display(), train7,
+                                  {**bc.split_membership(), **_batch()})
+    assert set(metrics["adjudicated"]["ids"]) == ADJ
+    assert not set(metrics["train"]["ids"]) & ADJ
+
+
+def test_the_adjudicated_guard_would_catch_a_pooling():
+    """POSITIVE CONTROL: the same selection with the adjudication note stripped
+    from the labels puts all 7 in train — the pooling the test above forbids."""
+    train7 = sorted(s for s, m in _batch().items() if m == "train")
+    labels = {k: {kk: vv for kk, vv in r.items() if kk != "notes"}
+              for k, r in bc.labels_for_display().items() if k in train7}
+    runs = {s: {"runs": None, "starts": None} for s in train7}
+    m = bc.metrics_by_split(runs, labels, train7, {**bc.split_membership(), **_batch()})
+    assert len(m["train"]["ids"]) == 7 and m["adjudicated"]["ids"] == []

@@ -435,6 +435,18 @@ def _render_scoring(metrics, names, n_unscored: int) -> None:
         else:
             st.caption("No train-split cyclone in the current selection.")
 
+    adj_n = len(metrics[0]["adjudicated"]["ids"]) if metrics else 0
+    if adj_n:
+        with st.expander(f"Adjudicated (item 30) — {adj_n} series", expanded=False):
+            st.caption(
+                "Labels replaced by the item-30 counterfactual (Danilo, 27 Sept "
+                "2026). Never added into the train or test numbers.",
+                help="These labels ARE the output of the item-30 counterfactual, "
+                     "so a configuration that reproduces it scores perfectly by "
+                     "construction. They are shown apart and never pooled.")
+            st.dataframe(_summary_frame(metrics, names, "adjudicated"),
+                         use_container_width=True)
+
     with st.expander(f"Test split (frozen) — {test_n} series", expanded=False):
         if test_n:
             st.caption(
