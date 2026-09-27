@@ -3516,6 +3516,42 @@ one counterfactual. The cases are L, K, and the 2 P cases with the largest c3:
   labels do not contain. Moving toward the L labels moves away from these K
   labels, which is part 2's non-separability case by case.
 
+**Part 3 — opt-in rule, params-15 CANDIDATE, adjudicated labels (2026-09-27,
+CHECKPOINT, not merged).** The record is
+`research/labels/diagnostics/item30/REPORT_part3.md`; predictions are in
+`84f7c89`.
+
+- **The rule.** `incipient_plateau_spare_intensification` (bool, default False)
+  in `get_periods` and `determine_periods`, applied in `find_incipient_period`
+  just before the plateau overwrite. If the first intensification that starts
+  before the boundary also ends before it, the boundary moves back to that
+  intensification's start.
+- **Configs.** `params-15` is `params-14` plus the key; `params-14` is
+  untouched.
+- **Labels.** By Danilo's decision, the 5 TRAIN labels where the
+  counterfactual differs from params-14 are now the counterfactual. They are
+  marked in `notes`, the originals are in `swell_item30/labels_v1_snapshot.yaml`,
+  and they are scored in their own ADJUDICATED block.
+- **Validation batch.** 5 tracks frozen as `batches.swell_item30_val` (role
+  validation), unlabelled and outside every aggregate.
+
+Results:
+
+- **R1 CONFIRMED.** The rule changes exactly the 5 of 54 TRAIN series, each
+  into the counterfactual.
+- **R2 CONFIRMED.** Hash `b500d2e0…` before and after. It exercises only the
+  geometric path; the plateau path is proven by the evaluator under params-14.
+- **R3 REFUTED.** 15 swell tracks change, not 10. All 10 predicted change, and
+  5 more change that do NOT carry the signal (3 of them marked bad). The rule
+  is broader than the pattern it was designed for.
+- **R4 CONFIRMED.** Scores 47: 31/47 sequence and 17/27 incipient under both
+  configs. The 2 non-adjudicated batch series: 1/2 under both.
+- **Adjudicated block: 0/5 → 5/5, circular by construction.**
+- **V:** open until Danilo labels the 5 validation tracks, which he saw with
+  detection on 2026-09-24. Without V, adoption must be recorded as "adotado
+  sem validação independente".
+- Suite 1419 passed, 0 failed; `cyclophaser/` diff vs develop-v2.1 = the rule only.
+
 The result is no separation found on 3 L cases against 2 K cases with a value.
 It is not proof that none exists.
 

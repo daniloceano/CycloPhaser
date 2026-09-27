@@ -1,0 +1,14 @@
+cyclophaser.__file__ = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+layer_inspector.__file__ = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/tools/calibration_app/layer_inspector.py
+environment: {'cyclophaser': 'cyclophaser/__init__.py', 'layer_inspector': 'tools/calibration_app/layer_inspector.py', 'python': '3.12.14', 'numpy': '2.5.3', 'scipy': '1.18.0', 'pandas': '3.0.5'}
+R1: 54 TRAIN series; params-15 final map differs from params-14 in 5: 19810854, 19860380, 19870927, 19940445, 20120297
+R1: changed set == the predicted 5: True
+R1: final map == counterfactual of 1a3ad76 in the 5: 20120297 True, 19940445 True, 19810854 True, 19860380 True, 19870927 True
+R3: swell 196; changed 15 | predicted 10 (R group in the 196: 8, + 2) | changed ∩ predicted 10 | changed outside predicted 5 | predicted unchanged 0
+R3: the 5 changed outside the prediction — with the signal (boundary > peak, params-14) 0, without 5 | marked bad 3, not 2 | in a labelled batch 0
+R4/score block 'TRAIN · real': identical under params-14 and params-15 = True
+R4/score block 'TRAIN · synthetic': identical under params-14 and params-15 = True
+R4/score block 'TRAIN · ALL': identical under params-14 and params-15 = True
+R4/score block 'BATCH swell_item30 · TRAIN': identical under params-14 and params-15 = True
+R4/score block 'ADJUDICATED': identical under params-14 and params-15 = False
+figures: figs_part3/ (5 adjudicated + board)
