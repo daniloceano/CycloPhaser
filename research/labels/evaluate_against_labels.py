@@ -6,6 +6,11 @@
     python research/labels/evaluate_against_labels.py --test          # burns the test set
     python research/labels/evaluate_against_labels.py --batch-train swell_item30  # + the batch's TRAIN, own block
 
+Adjudicated labels (item 30 part 3: `labels_core.is_adjudicated`, the vigente
+record's `notes`) are the item-30 counterfactual's own output. They are never
+pooled with any train number: whatever block they would have fallen in, they
+are reported in a block of their own, ADJUDICATED.
+
 What is compared
 ----------------
 A label now carries the cyclone's WHOLE phase sequence, so two things are scored
@@ -66,7 +71,8 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from labels_core import (  # noqa: E402
-    batch_membership, first_blind_record, is_legacy_record, load_batch_series,
+    batch_membership, first_blind_record, is_adjudicated, is_legacy_record,
+    load_batch_series,
     load_real_series, load_synthetic_series, normalize_phase, read_labels,
     read_split, score_labels, score_phase_sequences, series_sha256,
 )
@@ -243,6 +249,10 @@ def main(argv=None) -> int:
         keep = set(read_split()["train"]) | batch_train
         records = {sid: r for sid, r in records.items() if sid in keep}
 
+    # Read from the VIGENTE record, before --against first-blind can swap in an
+    # older version that does not carry the note.
+    adjudicated = {sid for sid, r in records.items() if is_adjudicated(r)}
+
     if args.against == "first-blind":
         never_blind = sorted(sid for sid, r in records.items()
                              if first_blind_record(r) is None)
@@ -307,7 +317,7 @@ def main(argv=None) -> int:
         print("*** Any parameter chosen after reading these numbers makes this  ***")
         print("*** set a second training set, and there is no third.            ***\n")
 
-    for grp, ids in (("train", train), ("test", test)):
+    for grp, ids in (("train", train - adjudicated), ("test", test - adjudicated)):
         if grp not in groups:
             continue
         for src in ("real", "synthetic"):
@@ -331,7 +341,8 @@ def main(argv=None) -> int:
             print(_fmt_phases(score_phase_sequences(sel_all, detected_seqs)))
 
     if batch_train:
-        sel = [r for sid, r in sorted(usable.items()) if sid in batch_train]
+        sel = [r for sid, r in sorted(usable.items())
+               if sid in batch_train and sid not in adjudicated]
         if sel:
             m = score_labels(sel, detected)
             print(f"\n  BATCH {args.batch_train} · TRAIN   ({m['n_scored']} labelled; "
@@ -340,6 +351,16 @@ def main(argv=None) -> int:
             print(_fmt(m))
             print("   ── whole phase sequence ──")
             print(_fmt_phases(score_phase_sequences(sel, detected_seqs)))
+
+    sel = [r for sid, r in sorted(usable.items()) if sid in wanted and sid in adjudicated]
+    if sel:
+        m = score_labels(sel, detected)
+        print(f"\n  ADJUDICATED   ({m['n_scored']} labelled; label = the item-30 "
+              "counterfactual, its own block, never pooled with any train number)")
+        print("   ── incipient boundary ──")
+        print(_fmt(m))
+        print("   ── whole phase sequence ──")
+        print(_fmt_phases(score_phase_sequences(sel, detected_seqs)))
 
     if not args.test:
         print(f"\n  TEST split held out ({len(test)} series). "

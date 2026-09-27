@@ -520,6 +520,20 @@ def make_label_record(series_id: str, source: str, values, phases,
 
 # ── schema 4: blindness provenance and superseded history ───────────────────
 
+# Item 30 part 3. Five TRAIN labels of the swell batch were replaced, by Danilo's
+# decision, with the item-30 counterfactual's phases. They are recognised by
+# this exact `notes` text on the VIGENTE record (an existing optional field, so
+# the schema is unchanged), and every scorer reports them in a block of their
+# own: a label that IS a detector's output cannot score that detector.
+ADJUDICATED_NOTE = ("adjudicated to item-30 counterfactual by Danilo, 27 Sept 2026; "
+                    "original in labels_v1_snapshot.yaml")
+
+
+def is_adjudicated(record: dict) -> bool:
+    """True if this (vigente) record carries the item-30 adjudication note."""
+    return record.get("notes") == ADJUDICATED_NOTE
+
+
 def is_blind(record: dict) -> bool:
     """True if no overlay was on screen when this record was saved.
 

@@ -80,3 +80,62 @@ def test_batch_train_refuses_test():
 def test_unknown_batch_is_an_error():
     with pytest.raises(SystemExit):
         ev.main(["--batch-train", "no_such_batch"])
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30 part 3 — adjudicated labels are never pooled with a train number
+# ══════════════════════════════════════════════════════════════════════════
+
+ADJ = {"20120297", "19940445", "19810854", "19860380", "19870927"}
+
+
+@pytest.fixture
+def calls(monkeypatch):
+    """The id set of every scoring call, in order."""
+    out = []
+
+    def score(sel, detected):
+        out.append({r["id"] for r in sel})
+        return {"n_scored": len(sel)}
+
+    monkeypatch.setattr(ev, "run_detector",
+                        lambda s, pv, gp: ({k: None for k in s}, {k: [] for k in s}))
+    monkeypatch.setattr(ev, "score_labels", score)
+    monkeypatch.setattr(ev, "score_phase_sequences", score)
+    monkeypatch.setattr(ev, "_fmt", lambda m: "")
+    monkeypatch.setattr(ev, "_fmt_phases", lambda m: "")
+    return out
+
+
+def test_the_five_carry_the_adjudication_note_and_no_other_train_label_does():
+    """TRAIN records only — test records are dropped by id before any field is
+    read. That no test block changed is proven by adjudicate_item30.py (68/68
+    other blocks byte-identical)."""
+    train = set(lc.read_split()["train"]) | {
+        s for s, m in lc.batch_membership(BATCH).items() if m == "train"}
+    recs = {s: r for s, r in lc.read_labels().items() if s in train}
+    assert {s for s, r in recs.items() if lc.is_adjudicated(r)} == ADJ
+
+
+@pytest.mark.parametrize("against", ["current", "first-blind"])
+def test_adjudicated_labels_score_only_in_their_own_block(calls, capsys, against):
+    ev.main(["--batch-train", BATCH, "--against", against])
+    for ids in calls:
+        assert ids <= ADJ or ids.isdisjoint(ADJ), sorted(ids)
+    own = [ids for ids in calls if ids and ids <= ADJ]
+    assert own, "no ADJUDICATED block was scored"
+    assert "ADJUDICATED" in capsys.readouterr().out
+
+
+def test_the_default_path_scores_no_adjudicated_label(calls, capsys):
+    ev.main([])
+    assert all(ids.isdisjoint(ADJ) for ids in calls)
+    assert "ADJUDICATED" not in capsys.readouterr().out
+
+
+def test_the_pooling_guard_would_catch_a_leak(calls, monkeypatch):
+    """POSITIVE CONTROL: with the note ignored, the five fall into the batch's
+    TRAIN block next to the two others — the pooling the tests above forbid."""
+    monkeypatch.setattr(ev, "is_adjudicated", lambda r: False)
+    ev.main(["--batch-train", BATCH])
+    assert any(ids & ADJ and not ids <= ADJ for ids in calls)
