@@ -163,6 +163,7 @@ _ARGS_PERIODS_DEFAULTS = {
     "incipient_plateau_k": 3,
     "incipient_smooth_window": 0,
     "incipient_smooth_polyorder": 3,
+    "incipient_plateau_spare_intensification": False,
 }
 
 

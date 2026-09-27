@@ -58,3 +58,21 @@ python  : 3.12.14
 numpy   : 2.5.3
 scipy   : 1.18.0
 pandas  : 3.0.5
+--- record ---
+sha256  : b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+n_series: 47
+commit  : 84f7c894d862a822915c87eba53b114687b27f90
+date    : 2026-09-27
+python  : 3.12.14
+numpy   : 2.5.3
+scipy   : 1.18.0
+pandas  : 3.0.5
+--- record ---
+sha256  : b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
+n_series: 47
+commit  : d1841ccc2dde500514650bae04932a09b9ccc9db
+date    : 2026-09-27
+python  : 3.12.14
+numpy   : 2.5.3
+scipy   : 1.18.0
+pandas  : 3.0.5

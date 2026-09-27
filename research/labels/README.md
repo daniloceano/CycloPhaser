@@ -67,6 +67,16 @@ here; `params-1` to `-8` were added by front 21 (`docs/future_work.md`).
 | `cyclophaser_params-9.yaml` | `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` | historical |
 | `cyclophaser_params-10.yaml` | `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` | **frozen instrument** — `item19_core.CONFIG` |
 | `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | **current calibration reference** |
+| `cyclophaser_params-15.yaml` | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **CANDIDATE** — item 30 part 3, see below |
+
+**`params-15` is a CANDIDATE, not a reference.** It is `params-14` byte for
+byte plus one line, `incipient_plateau_spare_intensification: true` (the item-30
+opt-in rule). It was written by hand, not exported by the app, so its `metadata`
+block is `params-14`'s, timestamp included. `params-14` itself is untouched.
+Adopting it is pending prediction V of
+`diagnostics/item30/PREDICTIONS_part3.md` (Danilo's blind labels of the 5
+validation tracks, `batches.swell_item30_val`) or an explicit decision by Danilo.
+Adopted without V, it must be recorded as "adotado sem validação independente".
 
 **Do not normalise or reformat any of them.** A configuration's identity here is
 its file hash: the Benchmark tab shows that hash as a column's provenance, and

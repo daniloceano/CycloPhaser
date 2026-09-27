@@ -205,6 +205,10 @@ _DEFAULTS: dict = {
     "incipient_plateau_k":            3,
     "incipient_smooth_window":        0,
     "incipient_smooth_polyorder":     3,
+    # Item 30 (opt-in): stop the plateau overwrite at an intensification that
+    # lies wholly before the plateau boundary. OFF, the package default; a YAML
+    # without the key imports as OFF.
+    "incipient_plateau_spare_intensification": False,
     "decay_tail_enabled":             False,
     "decay_tail_fraction_val":        0.05,   # author's validated reference value
 }
@@ -326,6 +330,16 @@ def _parse_reclassify_index0(v) -> bool:
     raise ValueError(f"reclassify_index0 must be a boolean, got {v!r}")
 
 
+def _parse_spare_intensification(v) -> bool:
+    """Validating bool converter for incipient_plateau_spare_intensification —
+    the same rules as `_parse_reclassify_index0`, and the same reason."""
+    try:
+        return _parse_reclassify_index0(v)
+    except ValueError:
+        raise ValueError(
+            f"incipient_plateau_spare_intensification must be a boolean, got {v!r}") from None
+
+
 def _parse_decay_tail_amplitude_fraction(v) -> float:
     """Validating converter for decay_tail_amplitude_fraction — same rationale
     as _parse_prominence_relative: the sidebar slider is bounded to
@@ -364,6 +378,8 @@ _YAML_PHASE_MAP: dict = {
     "incipient_smooth_window":          ("incipient_smooth_window", lambda v: int(float(v))),
     "incipient_smooth_polyorder":       ("incipient_smooth_polyorder", lambda v: int(float(v))),
     "reclassify_index0":                ("reclassify_index0", _parse_reclassify_index0),
+    "incipient_plateau_spare_intensification": ("incipient_plateau_spare_intensification",
+                                                _parse_spare_intensification),
 }
 # The extrema-filtering parameters (prominence / prominence_relative)
 # and decay_tail_amplitude_fraction are NOT in _YAML_PHASE_MAP: each maps to a
@@ -412,7 +428,11 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative",
                               # fallback is not a no-op: absence leaves the rule
                               # ON, because that is the package default a config
                               # without the key now runs under.
-                              "reclassify_index0"}
+                              "reclassify_index0",
+                              # Item 30: every config up to params-14 predates
+                              # the opt-in rule; absence is OFF, the package
+                              # default, a no-op.
+                              "incipient_plateau_spare_intensification"}
 
 # boundary_padding is OPTIONAL on import for the same reason as the optional
 # phase keys above, but for a backward-compatibility reason rather than a
@@ -430,7 +450,7 @@ _PHASE_ENUM_KEYS = ("length_scale", "mature_method", "incipient_method",
 # phase_params entries that are booleans: exported as-is, like the enums, and
 # for the same reason — float(True) is 1.0, which round-trips into a YAML that
 # says `1.0` where the package expects a bool.
-_PHASE_BOOL_KEYS = ("reclassify_index0",)
+_PHASE_BOOL_KEYS = ("reclassify_index0", "incipient_plateau_spare_intensification")
 
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
 _REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
@@ -499,6 +519,7 @@ _PARAM_WIDGET_KEYS: dict[str, tuple[str, ...]] = {
     "incipient_plateau_k":            ("incipient_plateau_k",),
     "incipient_smooth_window":        ("incipient_smooth_window",),
     "incipient_smooth_polyorder":     ("incipient_smooth_polyorder",),
+    "incipient_plateau_spare_intensification": ("incipient_plateau_spare_intensification",),
 }
 
 # Widget keys that legitimately serve more than one parameter. Only the extrema
@@ -523,7 +544,9 @@ _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
 # subtracted here explicitly -- which is what every config exported before
 # mature_min_depth existed (params-1..11) needs.
 _REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP) - {"mature_min_depth",
-                                                    "intensification_min_depth"}
+                                                    "intensification_min_depth",
+                                                    # item 30: absent = OFF, not missing
+                                                    "incipient_plateau_spare_intensification"}
 
 
 # ── Pure helper functions ─────────────────────────────────────────────────────────
@@ -655,6 +678,13 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
                 count += 1
             except (ValueError, TypeError):
                 ignored.append(f"phase_params.{yaml_key} (conversion error)")
+
+    # Item 30: a file WITHOUT the opt-in key describes the rule OFF (every
+    # config up to params-14 predates it). Set in both directions, like the
+    # extrema block below: otherwise importing params-14 into a session with the
+    # checkbox ON would silently keep the rule ON.
+    if "incipient_plateau_spare_intensification" not in pp:
+        st.session_state["incipient_plateau_spare_intensification"] = False
 
     # Extrema filtering (prominence / prominence_relative) — each is a
     # *group* of session_state keys (enabled + mode + value), so it cannot go
@@ -2068,6 +2098,19 @@ with st.sidebar:
             incipient_plateau_k = st.session_state.get(
                 "incipient_plateau_k", _DEFAULTS["incipient_plateau_k"])
 
+        incipient_plateau_spare_intensification = st.checkbox(
+            "Spare an intensification enclosed by the plateau (item 30)",
+            value=_DEFAULTS["incipient_plateau_spare_intensification"],
+            key="incipient_plateau_spare_intensification",
+            disabled=incipient_method != "plateau",
+            help=("Opt-in, OFF by default. The plateau method writes incipient over "
+                  "the whole [0, boundary), which can erase an entire "
+                  "intensification and the mature after it. ON: if the first "
+                  "intensification that starts before the boundary also ends "
+                  "before it, the incipient stops at that intensification's start "
+                  "(no incipient at all if it starts at step 0)."),
+        )
+
         show_incipient_probe = st.checkbox(
             "Show incipient probe overlay",
             value=False, key="show_incipient_probe",
@@ -2154,6 +2197,7 @@ _PHASE_PARAMS = dict(
     incipient_plateau_k=incipient_plateau_k,
     incipient_smooth_window=incipient_smooth_window,
     incipient_smooth_polyorder=incipient_smooth_polyorder,
+    incipient_plateau_spare_intensification=bool(incipient_plateau_spare_intensification),
 )
 _phase_params_tuple = tuple(sorted(
     (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
