@@ -420,15 +420,20 @@ def process_vorticity(
         savgol_polynomial=3,
         cutoff_low=168,
         cutoff_high=18.0,
-        boundary_padding="edge"):
+        boundary_padding="reflect"):
     """
     Calculate derivatives of vorticity and perform filtering and smoothing.
 
-    Defaults (item 31 — a change of default behaviour relative to 2.0.0)
-    ---------------------------------------------------------------------
-    The defaults are the calibration reference ``params-15``
-    (research/labels/configs/cyclophaser_params-15.yaml). They fall in two
-    groups, and only one of them is general:
+    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)
+    ------------------------------------------------------------------------------
+    The defaults are the calibration preset ``params-track``
+    (research/labels/configs/cyclophaser_params-track.yaml) with ONE exception:
+    ``boundary_padding`` defaults to ``"reflect"``, while params-track sets
+    ``"edge"``. params-track is the only configuration with measured scores,
+    and those scores were measured under ``"edge"``: they describe
+    params-track, not these defaults. Callers working with TRACK input who want
+    the measured behaviour must pass params-track explicitly. The defaults fall
+    in two groups, and only one of them is general:
 
     * **Phase defaults** (``get_periods``: thresholds, ``length_scale``,
       ``mature_method``, the depth floors, the ``incipient_*`` rule, the
@@ -436,17 +441,23 @@ def process_vorticity(
       against manual labels of the phase sequence.
     * **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,
       ``use_smoothing=False``, ``use_smoothing_twice=False``,
-      ``boundary_padding="edge"``, ``use_filter='auto'``) were calibrated ONLY
-      for the TRACK input the calibration used: hourly 850 hPa relative
-      vorticity (``min_max_zeta_850``) along South-Atlantic cyclone tracks.
+      ``use_filter='auto'``) were calibrated ONLY, and only together with
+      ``boundary_padding="edge"``, for the TRACK input the calibration used:
+      hourly 850 hPa relative vorticity (``min_max_zeta_850``) along
+      South-Atlantic cyclone tracks. The default ``boundary_padding="reflect"``
+      was not part of that calibration.
       Other inputs (other levels, other sampling, sea-level pressure, wind
       speed, gridded fields) may need a different filtering, which has NOT been
       calibrated here.
     * ``incipient_plateau_spare_intensification=True`` is **"adotada sem
       validação independente"** (item 30): no independent validation exists.
 
-    To reproduce 2.0.0 exactly, pass its values explicitly; the frozen table is
-    research/labels/defaults_2.0.0.json.
+    The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;
+    pass them explicitly to reproduce that behaviour. Despite its name, that
+    table is develop before item 31, NOT the 2.0.0 release: 2.0.0 has no
+    ``boundary_padding`` (it always zero-pads), uses
+    ``replace_endpoints_with_lowpass=24``, and lacks most of the phase
+    parameters documented here.
 
     Args:
         zeta_df (pandas.DataFrame): Input DataFrame containing 'zeta' data (vorticity time series).
@@ -481,11 +492,13 @@ def process_vorticity(
             Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 18.0 (48.0 up to 2.0.0).
 
         boundary_padding (str, optional): How the series is extended beyond its own
-            ends before the Lanczos convolution. ``"edge"`` (default since item 31) and ``"reflect"``
-            remove most of the zero-padding boundary artefact; ``"zero"`` reproduces
-            the behaviour of versions before this default changed. See the
-            "boundary_padding note" below. Only meaningful when ``use_filter`` is
-            truthy. Default is ``"edge"`` (``"reflect"`` up to 2.0.0).
+            ends before the Lanczos convolution. ``"reflect"`` (the default) and ``"edge"``
+            (the padding of params-track) remove most of the zero-padding boundary
+            artefact; ``"zero"`` reproduces the convolution of versions before the
+            parameter existed. See the "boundary_padding note" below. Only
+            meaningful when ``use_filter`` is truthy. Default is ``"reflect"``
+            (``"edge"`` from item 31 until the cleanup front's change C1; the 2.0.0 release has no such
+            parameter and always zero-pads).
 
     use_filter=True note (behaviour change)
     ----------------------------------------
@@ -543,10 +556,13 @@ def process_vorticity(
     (For scale: a lightly-smoothed finite difference of the RAW series gives a
     median of 0.29 at t0, so "reflect" lands close to the uncontaminated signal.)
 
-    ``"reflect"`` became the DEFAULT here (behaviour change) — and item 31 later
-    moved it to ``"edge"``, the padding of the calibration reference params-15:
-    leaving a quantified
-    artefact switched on by default was judged the larger cost. To reproduce
+    ``"reflect"`` became the DEFAULT here (behaviour change): leaving a
+    quantified artefact switched on by default was judged the larger cost.
+    Item 31 moved the default to ``"edge"``, the padding of the calibration
+    reference; C1 of the cleanup front moved it back to ``"reflect"`` and kept
+    ``"edge"`` in the explicit preset params-track
+    (research/labels/configs/cyclophaser_params-track.yaml), the only
+    configuration with measured scores. To reproduce
     results from a version before the default changed, pass
     ``boundary_padding="zero"`` explicitly. Note that switching modes changes
     the smoothed signal in the boundary zone, so a parameter set calibrated
@@ -866,11 +882,16 @@ def get_periods(vorticity,
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
-    Defaults (item 31 — a change of default behaviour relative to 2.0.0)
-    ---------------------------------------------------------------------
-    The defaults are the calibration reference ``params-15``
-    (research/labels/configs/cyclophaser_params-15.yaml). They fall in two
-    groups, and only one of them is general:
+    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)
+    ------------------------------------------------------------------------------
+    The defaults are the calibration preset ``params-track``
+    (research/labels/configs/cyclophaser_params-track.yaml) with ONE exception:
+    ``boundary_padding`` defaults to ``"reflect"``, while params-track sets
+    ``"edge"``. params-track is the only configuration with measured scores,
+    and those scores were measured under ``"edge"``: they describe
+    params-track, not these defaults. Callers working with TRACK input who want
+    the measured behaviour must pass params-track explicitly. The defaults fall
+    in two groups, and only one of them is general:
 
     * **Phase defaults** (``get_periods``: thresholds, ``length_scale``,
       ``mature_method``, the depth floors, the ``incipient_*`` rule, the
@@ -878,17 +899,23 @@ def get_periods(vorticity,
       against manual labels of the phase sequence.
     * **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,
       ``use_smoothing=False``, ``use_smoothing_twice=False``,
-      ``boundary_padding="edge"``, ``use_filter='auto'``) were calibrated ONLY
-      for the TRACK input the calibration used: hourly 850 hPa relative
-      vorticity (``min_max_zeta_850``) along South-Atlantic cyclone tracks.
+      ``use_filter='auto'``) were calibrated ONLY, and only together with
+      ``boundary_padding="edge"``, for the TRACK input the calibration used:
+      hourly 850 hPa relative vorticity (``min_max_zeta_850``) along
+      South-Atlantic cyclone tracks. The default ``boundary_padding="reflect"``
+      was not part of that calibration.
       Other inputs (other levels, other sampling, sea-level pressure, wind
       speed, gridded fields) may need a different filtering, which has NOT been
       calibrated here.
     * ``incipient_plateau_spare_intensification=True`` is **"adotada sem
       validação independente"** (item 30): no independent validation exists.
 
-    To reproduce 2.0.0 exactly, pass its values explicitly; the frozen table is
-    research/labels/defaults_2.0.0.json.
+    The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;
+    pass them explicitly to reproduce that behaviour. Despite its name, that
+    table is develop before item 31, NOT the 2.0.0 release: 2.0.0 has no
+    ``boundary_padding`` (it always zero-pads), uses
+    ``replace_endpoints_with_lowpass=24``, and lacks most of the phase
+    parameters documented here.
 
     Detection pipeline and phase precedence
     ----------------------------------------
@@ -961,7 +988,7 @@ def get_periods(vorticity,
 
     mature_method note
     -------------------
-    With ``mature_method="derivative"`` (the default up to 2.0.0) the mature window around
+    With ``mature_method="derivative"`` (the default before item 31; not a parameter of the 2.0.0 release) the mature window around
     each z_valley is sized as a fixed proportion (``threshold_mature_distance``)
     of the *time* distance to the neighbouring z_peak — the historical
     behaviour, unchanged. With ``mature_method="amplitude"`` the window is
@@ -1028,7 +1055,7 @@ def get_periods(vorticity,
         threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075.
         threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4.
         incipient_method (str, optional): How the incipient phase boundary is placed.
-            ``"geometric"`` (the default up to 2.0.0) is the historical rule: the incipient phase runs
+            ``"geometric"`` (the default before item 31; not a parameter of the 2.0.0 release) is the historical rule: the incipient phase runs
             from the start of the first intensification/decay segment to
             ``threshold_incipient_length`` of the way to the next dz extremum, via the
             case A/B/C dispatch. ``"plateau"`` (the default since item 31) instead marks the leading stretch over
@@ -1048,14 +1075,14 @@ def get_periods(vorticity,
             Only used when ``incipient_method="plateau"``. Default is 0.20.
 
         incipient_plateau_signal (str, optional): Which signal the plateau is measured
-            on. ``"derivative"`` (the default up to 2.0.0) uses ``|dz_dt_smoothed2|`` normalised by its
+            on. ``"derivative"`` (the default before item 31; not a parameter of the 2.0.0 release) uses ``|dz_dt_smoothed2|`` normalised by its
             own maximum — the array the stage detection itself consumes.
             ``"vorticity"`` (the default since item 31) uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the
             **unfiltered** input series, which is immune to filter edge artifacts but
             noisier. Only used when ``incipient_method="plateau"``.
 
         incipient_plateau_crossing (str, optional): How the end of the plateau is
-            detected. ``"single"`` (the default up to 2.0.0) ends it at the first sample with
+            detected. ``"single"`` (the default before item 31; not a parameter of the 2.0.0 release) ends it at the first sample with
             ``rel >= tau``. ``"sustained"`` (the default since item 31) requires ``incipient_plateau_k``
             consecutive samples at or above tau and ends the plateau at the start of
             that run, which is robust to an isolated spike inside the plateau. If no
@@ -1063,13 +1090,13 @@ def get_periods(vorticity,
             Only used when ``incipient_method="plateau"``.
 
         incipient_plateau_k (int, optional): Number of consecutive samples required by
-            ``incipient_plateau_crossing="sustained"``. Default is 5 (3 up to 2.0.0). Ignored for
+            ``incipient_plateau_crossing="sustained"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for
             ``"single"``.
         incipient_smooth_window (int, optional): Width of a Savitzky-Golay pass applied
             to the raw vorticity **before** the incipient probe differentiates it, to
             make the measured rate reliable without re-enabling any pipeline smoothing.
             It affects ONLY the incipient probe — ``df['z']`` and ``df['dz']``, and
-            therefore every other phase, are untouched. 0 disables it (the default up to 2.0.0). Default is 5. Only used when
+            therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when
             ``incipient_method="plateau"`` **and**
             ``incipient_plateau_signal="vorticity"``; the ``"derivative"`` path already
             reads a filtered curve. An even value is rounded up to odd and a value
@@ -1085,7 +1112,7 @@ def get_periods(vorticity,
             When True, let E be the first intensification block of the map the
             incipient stage receives that STARTS before the boundary; if E also
             ENDS before it, the boundary moves back to E's start (a boundary of 0
-            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the 2.0.0 behaviour. Only used when
+            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when
             ``incipient_method="plateau"``. See ``find_incipient_period``.
         prominence (float, optional): Absolute minimum prominence threshold for
             z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``
@@ -1095,7 +1122,7 @@ def get_periods(vorticity,
             mode**: adapts to each cyclone's intensity, generalising across weak
             and strong systems without re-tuning. Example: 0.10 keeps only
             z-extrema whose prominence is ≥ 10 % of the dominant extremum's
-            prominence. Default 0.3 since item 31 (None, a no-op, up to 2.0.0).
+            prominence. Default 0.3 since item 31 (None, a no-op, before item 31; not a parameter of the 2.0.0 release).
         reclassify_index0 (bool, optional): Rule C2' — retype the extremum at
             index 0 against the next extremum that survives the filters, instead
             of leaving its type to the single boundary difference
@@ -1110,7 +1137,7 @@ def get_periods(vorticity,
             filter is active: raw ``argrelextrema`` output alternates, so the
             extremum right after a valley at index 0 is a peak the series rose
             to and cannot lie below it. With ``prominence`` and
-            ``prominence_relative`` both None — the 2.0.0 package defaults — the rule
+            ``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule
             is a measured no-op: identical output with and without it on all 64
             series tried (51 calibration tracks, 12 synthetic series, the
             packaged example). It therefore changes results only for
@@ -1127,9 +1154,9 @@ def get_periods(vorticity,
             params-14 is the first that states it). Applied to ``z`` only: no
             stage function reads index 0's type in ``dz``/``dz2``. Measured in
             research/labels/diagnostics/frontA_idx0_c2/REPORT.md.
-        length_scale (str, optional): "local" (default since item 31) or "global" (the default up to 2.0.0). See the
-            "length_scale note" above. "global" reproduces the behaviour of 2.0.0 and earlier.
-        mature_method (str, optional): "amplitude" (default since item 31) or "derivative" (the default up to 2.0.0).
+        length_scale (str, optional): "local" (default since item 31) or "global" (the default before item 31; not a parameter of the 2.0.0 release). See the
+            "length_scale note" above. "global" reproduces the behaviour from before this option existed.
+        mature_method (str, optional): "amplitude" (default since item 31) or "derivative" (the default before item 31; not a parameter of the 2.0.0 release).
             "derivative" is the original method: the mature window is a fixed
             proportion (``threshold_mature_distance``) of the *time* distance
             between the z_valley and each neighbouring z_peak. "amplitude"
@@ -1141,7 +1168,7 @@ def get_periods(vorticity,
             lag that can displace "derivative"'s window forward of the true z
             minimum on some real cyclones. See
             ``find_stages._amplitude_mature_bounds`` for the full definition.
-            "derivative" reproduces the behaviour of 2.0.0 and earlier.
+            "derivative" reproduces the behaviour from before this option existed.
         mature_amplitude_fraction (float, optional): Fraction (0, 1] of each
             side's peak-to-valley amplitude a timestep's z must still reach to
             count as mature. Only used when ``mature_method="amplitude"``.
@@ -1160,7 +1187,7 @@ def get_periods(vorticity,
             deliberately, since a cyclone can have more than one mature stage. A
             series whose z range is zero or non-finite has no depth scale; the
             floor is skipped for it and a ``UserWarning`` says so. See
-            ``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the 2.0.0 default) admits every valley and
+            ``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) admits every valley and
             reproduces the exact behaviour of all versions prior to this option.
         intensification_min_depth (float, optional): Depth floor in [0, 1] on how
             much a candidate intensification segment must actually deepen to be
@@ -1194,13 +1221,13 @@ def get_periods(vorticity,
             different quantity and not the denominator here.)
             A series whose z range is zero or non-finite has no depth scale; the
             floor is skipped for it and a ``UserWarning`` says so. See
-            ``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the 2.0.0 default) switches the
+            ``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) switches the
             floor off entirely and reproduces the exact behaviour of all versions
             prior to this option.
         decay_tail_amplitude_fraction (float, optional): Fraction (0, 1] of the
             cycle's peak-to-valley amplitude. See the "decay_tail_amplitude_fraction
             note" above and ``find_stages.find_residual_period`` for the full
-            mechanism. Default 0.3 since item 31; None (the 2.0.0 default) disables this check, reproducing the exact
+            mechanism. Default 0.3 since item 31; None (the default before item 31; not a parameter of the 2.0.0 release) disables this check, reproducing the exact
             behaviour of all versions prior to this option.
 
     Returns:
@@ -1366,7 +1393,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       savgol_polynomial: int = 3,
                       cutoff_low: float = 168,
                       cutoff_high: float = 18.0,
-                      boundary_padding: str = "edge",
+                      boundary_padding: str = "reflect",
                       threshold_intensification_length: float = 0.075,
                       threshold_intensification_gap: float = 0.075,
                       threshold_mature_distance: float = 0.18,
@@ -1394,11 +1421,16 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
     """
     Determine meteorological periods from a series of vorticity data.
 
-    Defaults (item 31 — a change of default behaviour relative to 2.0.0)
-    ---------------------------------------------------------------------
-    The defaults are the calibration reference ``params-15``
-    (research/labels/configs/cyclophaser_params-15.yaml). They fall in two
-    groups, and only one of them is general:
+    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)
+    ------------------------------------------------------------------------------
+    The defaults are the calibration preset ``params-track``
+    (research/labels/configs/cyclophaser_params-track.yaml) with ONE exception:
+    ``boundary_padding`` defaults to ``"reflect"``, while params-track sets
+    ``"edge"``. params-track is the only configuration with measured scores,
+    and those scores were measured under ``"edge"``: they describe
+    params-track, not these defaults. Callers working with TRACK input who want
+    the measured behaviour must pass params-track explicitly. The defaults fall
+    in two groups, and only one of them is general:
 
     * **Phase defaults** (``get_periods``: thresholds, ``length_scale``,
       ``mature_method``, the depth floors, the ``incipient_*`` rule, the
@@ -1406,17 +1438,23 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
       against manual labels of the phase sequence.
     * **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,
       ``use_smoothing=False``, ``use_smoothing_twice=False``,
-      ``boundary_padding="edge"``, ``use_filter='auto'``) were calibrated ONLY
-      for the TRACK input the calibration used: hourly 850 hPa relative
-      vorticity (``min_max_zeta_850``) along South-Atlantic cyclone tracks.
+      ``use_filter='auto'``) were calibrated ONLY, and only together with
+      ``boundary_padding="edge"``, for the TRACK input the calibration used:
+      hourly 850 hPa relative vorticity (``min_max_zeta_850``) along
+      South-Atlantic cyclone tracks. The default ``boundary_padding="reflect"``
+      was not part of that calibration.
       Other inputs (other levels, other sampling, sea-level pressure, wind
       speed, gridded fields) may need a different filtering, which has NOT been
       calibrated here.
     * ``incipient_plateau_spare_intensification=True`` is **"adotada sem
       validação independente"** (item 30): no independent validation exists.
 
-    To reproduce 2.0.0 exactly, pass its values explicitly; the frozen table is
-    research/labels/defaults_2.0.0.json.
+    The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;
+    pass them explicitly to reproduce that behaviour. Despite its name, that
+    table is develop before item 31, NOT the 2.0.0 release: 2.0.0 has no
+    ``boundary_padding`` (it always zero-pads), uses
+    ``replace_endpoints_with_lowpass=24``, and lacks most of the phase
+    parameters documented here.
 
     Args:
         series (Union[list, np.ndarray, pd.Series, xr.DataArray]): The vorticity time series to be analyzed.
@@ -1475,7 +1513,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             for hourly data. **Units:** Time steps. Default is 18.0 (48.0 up to 2.0.0).
 
         boundary_padding (str, optional): How the series is extended beyond its own ends
-            before the Lanczos convolution: `"edge"` (default since item 31; `"reflect"` up to 2.0.0), `"reflect"` or `"zero"`.
+            before the Lanczos convolution: `"reflect"` (default; `"edge"` from item 31 until the cleanup front's change C1, and still the
+            padding of params-track; the 2.0.0 release has no such parameter and always zero-pads), `"edge"` or `"zero"`.
             The pre-fix `"zero"` behaviour comes from
             `scipy.signal.convolve(..., mode="same")` and injects a spurious deepening
             ramp worth a median of 74 % of the cyclone's amplitude over roughly 48 % of
@@ -1505,7 +1544,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             dataset. Default is 0.4.
 
         incipient_method (str, optional): How the incipient phase boundary is placed.
-            ``"geometric"`` (the default up to 2.0.0) is the historical rule: the incipient phase runs
+            ``"geometric"`` (the default before item 31; not a parameter of the 2.0.0 release) is the historical rule: the incipient phase runs
             from the start of the first intensification/decay segment to
             ``threshold_incipient_length`` of the way to the next dz extremum, via the
             case A/B/C dispatch. ``"plateau"`` (the default since item 31) instead marks the leading stretch over
@@ -1525,14 +1564,14 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             Only used when ``incipient_method="plateau"``. Default is 0.20.
 
         incipient_plateau_signal (str, optional): Which signal the plateau is measured
-            on. ``"derivative"`` (the default up to 2.0.0) uses ``|dz_dt_smoothed2|`` normalised by its
+            on. ``"derivative"`` (the default before item 31; not a parameter of the 2.0.0 release) uses ``|dz_dt_smoothed2|`` normalised by its
             own maximum — the array the stage detection itself consumes.
             ``"vorticity"`` (the default since item 31) uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the
             **unfiltered** input series, which is immune to filter edge artifacts but
             noisier. Only used when ``incipient_method="plateau"``.
 
         incipient_plateau_crossing (str, optional): How the end of the plateau is
-            detected. ``"single"`` (the default up to 2.0.0) ends it at the first sample with
+            detected. ``"single"`` (the default before item 31; not a parameter of the 2.0.0 release) ends it at the first sample with
             ``rel >= tau``. ``"sustained"`` (the default since item 31) requires ``incipient_plateau_k``
             consecutive samples at or above tau and ends the plateau at the start of
             that run, which is robust to an isolated spike inside the plateau. If no
@@ -1540,13 +1579,13 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             Only used when ``incipient_method="plateau"``.
 
         incipient_plateau_k (int, optional): Number of consecutive samples required by
-            ``incipient_plateau_crossing="sustained"``. Default is 5 (3 up to 2.0.0). Ignored for
+            ``incipient_plateau_crossing="sustained"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for
             ``"single"``.
         incipient_smooth_window (int, optional): Width of a Savitzky-Golay pass applied
             to the raw vorticity **before** the incipient probe differentiates it, to
             make the measured rate reliable without re-enabling any pipeline smoothing.
             It affects ONLY the incipient probe — ``df['z']`` and ``df['dz']``, and
-            therefore every other phase, are untouched. 0 disables it (the default up to 2.0.0). Default is 5. Only used when
+            therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when
             ``incipient_method="plateau"`` **and**
             ``incipient_plateau_signal="vorticity"``; the ``"derivative"`` path already
             reads a filtered curve. An even value is rounded up to odd and a value
@@ -1562,7 +1601,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             When True, let E be the first intensification block of the map the
             incipient stage receives that STARTS before the boundary; if E also
             ENDS before it, the boundary moves back to E's start (a boundary of 0
-            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the 2.0.0 behaviour. Only used when
+            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when
             ``incipient_method="plateau"``. See ``find_incipient_period``.
         reclassify_index0 (bool, optional): Rule C2' — retype the extremum at
             index 0 against the next extremum that survives the filters, instead
@@ -1578,7 +1617,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             filter is active: raw ``argrelextrema`` output alternates, so the
             extremum right after a valley at index 0 is a peak the series rose
             to and cannot lie below it. With ``prominence`` and
-            ``prominence_relative`` both None — the 2.0.0 package defaults — the rule
+            ``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule
             is a measured no-op: identical output with and without it on all 64
             series tried (51 calibration tracks, 12 synthetic series, the
             packaged example). It therefore changes results only for
@@ -1595,10 +1634,10 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             params-14 is the first that states it). Applied to ``z`` only: no
             stage function reads index 0's type in ``dz``/``dz2``. Measured in
             research/labels/diagnostics/frontA_idx0_c2/REPORT.md.
-        length_scale (str, optional): "local" (default since item 31) or "global" (the default up to 2.0.0). Controls what
+        length_scale (str, optional): "local" (default since item 31) or "global" (the default before item 31; not a parameter of the 2.0.0 release). Controls what
             length ``threshold_intensification_length``, ``threshold_intensification_gap``,
             ``threshold_mature_length``, ``threshold_decay_length`` and
-            ``threshold_decay_gap`` are fractions *of*. "global" (the default up to 2.0.0) uses the
+            ``threshold_decay_gap`` are fractions *of*. "global" (the default before item 31; not a parameter of the 2.0.0 release) uses the
             whole series length, reproducing the exact behaviour of all versions
             prior to this option. "local" uses the span of the local cycle each
             candidate segment belongs to instead — see ``get_periods`` for the
@@ -1606,10 +1645,10 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             definition. ``threshold_mature_distance`` and
             ``threshold_incipient_length`` are unaffected; they were already local.
 
-        mature_method (str, optional): "amplitude" (default since item 31) or "derivative" (the default up to 2.0.0).
+        mature_method (str, optional): "amplitude" (default since item 31) or "derivative" (the default before item 31; not a parameter of the 2.0.0 release).
             See ``get_periods`` for the full rationale and
             ``find_stages._amplitude_mature_bounds`` for the precise definition
-            of the "amplitude" method. "derivative" reproduces the behaviour of 2.0.0 and earlier.
+            of the "amplitude" method. "derivative" reproduces the behaviour from before this option existed.
 
         mature_amplitude_fraction (float, optional): Fraction (0, 1] of each
             side's peak-to-valley amplitude a timestep's z must still reach to
@@ -1629,7 +1668,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             deliberately, since a cyclone can have more than one mature stage. A
             series whose z range is zero or non-finite has no depth scale; the
             floor is skipped for it and a ``UserWarning`` says so. See
-            ``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the 2.0.0 default) admits every valley and
+            ``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) admits every valley and
             reproduces the exact behaviour of all versions prior to this option.
 
         intensification_min_depth (float, optional): Depth floor in [0, 1] on how
@@ -1664,7 +1703,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             different quantity and not the denominator here.)
             A series whose z range is zero or non-finite has no depth scale; the
             floor is skipped for it and a ``UserWarning`` says so. See
-            ``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the 2.0.0 default) switches the
+            ``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) switches the
             floor off entirely and reproduces the exact behaviour of all versions
             prior to this option.
 
@@ -1675,7 +1714,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             decay. See ``get_periods`` for the full rationale (an "orphan"
             z_peak that can truncate decay early on single-cycle series) and
             ``find_stages.find_residual_period`` for the precise mechanism.
-            Default 0.3 since item 31; None (the 2.0.0 default) disables this check, reproducing the exact behaviour
+            Default 0.3 since item 31; None (the default before item 31; not a parameter of the 2.0.0 release) disables this check, reproducing the exact behaviour
             of all versions prior to this option.
 
     Returns:

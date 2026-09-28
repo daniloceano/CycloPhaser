@@ -2265,8 +2265,9 @@ _PHASE_PARAMS = dict(
 )
 # Item 31: None is passed EXPLICITLY. prominence / prominence_relative /
 # decay_tail_amplitude_fraction are None when their sidebar check is OFF; up to
-# 2.0.0 omitting them meant the same thing, but the package defaults are now
-# params-15 (prominence_relative=0.3, decay_tail_amplitude_fraction=0.3), so an
+# 2.0.0 omitting them meant the same thing, but the package's phase defaults are
+# now those of params-track (prominence_relative=0.3,
+# decay_tail_amplitude_fraction=0.3), so an
 # omitted OFF would silently run ON.
 _phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 

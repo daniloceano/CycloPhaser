@@ -143,7 +143,9 @@ STEP_NAMES = (
 # were once missing here, and build_args_periods then rejected every run the
 # app made (item 30a).
 _ARGS_PERIODS_DEFAULTS = {
-    # Item 31: the package defaults moved to params-15; these follow them (the
+    # Item 31: the package defaults moved to params-15 (now params-track, whose
+    # phase parameters ARE the package's; C1 changed a filter default only);
+    # these follow them (the
     # test named above pins value for value). The 2.0.0 values are the frozen
     # table research/labels/defaults_2.0.0.json.
     "threshold_intensification_length": 0.075,

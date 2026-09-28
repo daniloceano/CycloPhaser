@@ -71,8 +71,9 @@ ALL_TRACKS = sorted(p.stem for p in CALIB.glob("*.csv"))
 
 # 2.0.0 package-default pre-processing with smoothing off — the configuration
 # the reference ledger counts below were measured under. Item 31 moved the
-# package defaults (cutoff_high 48 -> 18, boundary_padding reflect -> edge), so
-# the 2.0.0 filter values are now spelled out, from the frozen table.
+# package defaults (cutoff_high 48 -> 18, boundary_padding reflect -> edge; C1
+# later moved boundary_padding back to reflect), so the 2.0.0 filter values are
+# now spelled out, from the frozen table.
 PV_DEFAULT = dict(FILTER_2_0_0, use_filter=True, use_smoothing=False,
                   use_smoothing_twice=False)
 
@@ -877,13 +878,13 @@ def test_incipient_lead_never_precedes_the_crossing_index(vort_cache,
 # ══════════════════════════════════════════════════════════════════════════════
 
 APP_PY = REPO_ROOT / "tools" / "calibration_app" / "app.py"
-PARAMS_15 = REPO_ROOT / "research" / "labels" / "configs" / "cyclophaser_params-15.yaml"
+PARAMS_TRACK = REPO_ROOT / "research" / "labels" / "configs" / "cyclophaser_params-track.yaml"
 
 # What the app routes to build_working_frame instead of build_args_periods —
 # the exclusion in the inspector block of app.py.
 _APP_EXTRA_KEYS = ("prominence", "prominence_relative", "reclassify_index0")
 
-# The app's own YAML converters for the three integer-valued keys (params-15
+# The app's own YAML converters for the three integer-valued keys (params-track
 # stores incipient_smooth_window as 5.0).
 _INT_KEYS = ("incipient_plateau_k", "incipient_smooth_window",
              "incipient_smooth_polyorder")
@@ -904,10 +905,10 @@ def _app_phase_param_keys() -> set:
     return {kw.arg for kw in call.keywords}
 
 
-def _params_15():
-    """(filter_params, phase_params) of params-15, phase values typed as the app
+def _params_track():
+    """(filter_params, phase_params) of params-track, phase values typed as the app
     types them on import."""
-    cfg = yaml.safe_load(PARAMS_15.read_text())
+    cfg = yaml.safe_load(PARAMS_TRACK.read_text())
     phase = dict(cfg["phase_params"])
     for k in _INT_KEYS:
         phase[k] = int(float(phase[k]))
@@ -922,7 +923,7 @@ def test_inspector_accepts_the_full_parameter_set_the_app_sends(vort_cache):
     build_args_periods rejected both, so the inspector failed for any track.
     """
     keys = _app_phase_param_keys() - set(_APP_EXTRA_KEYS)
-    pv, phase = _params_15()
+    pv, phase = _params_track()
     args = li.build_args_periods(**{k: phase.get(k) for k in keys})
     df = li.build_working_frame(
         _vort(vort_cache, "20190325", key="p15", **pv),
@@ -979,15 +980,15 @@ def test_args_periods_defaults_are_get_periods_defaults():
     assert wrong == {}, f"(inspector, package) defaults differ: {wrong}"
 
 
-# ── Fidelity with the depth floors ACTIVE (params-15: intensification 0.05,
+# ── Fidelity with the depth floors ACTIVE (params-track: intensification 0.05,
 #    mature 0.80 — the same floors as params-14, which left the repo in item 31;
-#    params-15 adds only incipient_plateau_spare_intensification=True, so the
+#    params-track adds only incipient_plateau_spare_intensification=True, so the
 #    ribbon sweep below now covers that rule too). Every earlier fidelity test
 #    runs with both floors at 0.0, so none of them could see a ledger that
 #    ignored the floors.
 
 def _p15_frame_and_args(cache, track_id):
-    pv, phase = _params_15()
+    pv, phase = _params_track()
     df = li.build_working_frame(
         _vort(cache, track_id, key="p15", **pv),
         **{k: phase.get(k) for k in _APP_EXTRA_KEYS})
@@ -996,16 +997,16 @@ def _p15_frame_and_args(cache, track_id):
     return df, args, phase
 
 
-def test_params_15_has_both_depth_floors_active():
-    """Guard for the tests below: if params-15 ever stopped setting the floors,
+def test_params_track_has_both_depth_floors_active():
+    """Guard for the tests below: if params-track ever stopped setting the floors,
     they would silently fall back to testing the 0.0 path again."""
-    _, phase = _params_15()
+    _, phase = _params_track()
     assert phase["intensification_min_depth"] > 0
     assert phase["mature_min_depth"] > 0
 
 
-def test_ribbon_step_six_equals_get_periods_under_params_15(vort_cache):
-    pv, _ = _params_15()
+def test_ribbon_step_six_equals_get_periods_under_params_track(vort_cache):
+    pv, _ = _params_track()
     divergences = []
     for track_id in ALL_TRACKS:
         df, args, phase = _p15_frame_and_args(vort_cache, track_id)
@@ -1020,7 +1021,7 @@ def test_ribbon_step_six_equals_get_periods_under_params_15(vort_cache):
 
 
 @pytest.mark.parametrize("kind", ["intensification", "decay", "mature"])
-def test_ledger_accepted_set_is_the_package_mask_under_params_15(vort_cache, kind):
+def test_ledger_accepted_set_is_the_package_mask_under_params_track(vort_cache, kind):
     """Each ledger's accepted set == what the package writes, floors active."""
     divergences = []
     for track_id in ALL_TRACKS:
@@ -1042,7 +1043,7 @@ def test_ledger_accepted_set_is_the_package_mask_under_params_15(vort_cache, kin
     assert divergences == [], f"{len(divergences)} tracks diverge: {divergences[:5]}"
 
 
-# Measured 2026-09-25 under params-14; identical under params-15, whose one
+# Measured 2026-09-25 under params-14; identical under params-track, whose one
 # extra key changes 0 of the 47 TRAIN series (item 31, stage 0): on these tracks the floor changes what
 # the package writes (mask with the floor != mask with it at 0.0), so the
 # fidelity above genuinely covers a block the floor REMOVED, not only the 0.0

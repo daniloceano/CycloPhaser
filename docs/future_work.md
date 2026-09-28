@@ -4021,6 +4021,10 @@ with its record appended, and `git diff 45f0600 -- cyclophaser/` is empty.
     * three `suite_*.txt` files held only the `EXIT` line;
     * §12.1 said "22" keys where its own table has 20.
 
+> **Nota de correspondência (2026-09-28).** params-15 foi renomeado para
+> params-track (conteúdo idêntico, sha256 `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04`); registros anteriores citam o
+> nome antigo.
+
 ---
 
 ## Note

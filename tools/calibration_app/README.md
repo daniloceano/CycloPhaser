@@ -161,7 +161,7 @@ matplotlib de conferência em
 
 Compares N configurations side by side, over the cyclones you choose, aligned by
 cyclone. A column is created from the current sidebar state, an uploaded YAML, a
-file in `research/labels/configs/` (since item 31 only params-15; params-1..14
+file in `research/labels/configs/` (since item 31 only params-15, renamed params-track in the cleanup front; params-1..14
 are recoverable, see `research/labels/diagnostics/item31/recovery_table.md`) or a frozen published-version
 snapshot, and stays editable in the tab itself.
 

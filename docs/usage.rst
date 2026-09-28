@@ -77,18 +77,24 @@ Arguments and Parameters for determine_periods
 - **cutoff_high**: (float, optional) High-frequency cutoff for the Lanczos filter, suitable for reducing high-frequency noise in hourly data. **Units**: Time steps. **Default**: 18 (it was 48, i.e. 2 days, up to 2.0.0).  
   **Recommendation**: 18 was calibrated for hourly 850 hPa track vorticity (see the note below). 48 (2 days) filters out more of the mesoscale signal and was the 2.0.0 default; it is not calibrated for the current phase defaults.
 
-- **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolution: `"edge"`, `"reflect"` or `"zero"`. **Default**: `"edge"` (it was `"reflect"` up to 2.0.0). `"zero"` reproduces the pre-fix boundary artefact.
+- **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolution: `"reflect"`, `"edge"` or `"zero"`. **Default**: `"reflect"`. The 2.0.0 release has no such parameter and always zero-pads; after it, development used `"reflect"`, then `"edge"` (item 31), then `"reflect"` again. `"edge"` is the padding of the ``params-track`` preset, the only configuration with measured scores (see below). `"zero"` reproduces the pre-fix boundary artefact.
 
 **Note on Default Values and Data Frequency**: The above default settings assume hourly data frequency. For datasets with different time resolutions (e.g., daily or sub-hourly), adjustments are recommended for parameters like `cutoff_low`, `cutoff_high`, `replace_endpoints_with_lowpass`, and `use_smoothing`. For example, if using daily data, reduce cutoff values by a factor of 24 to adapt accordingly.
 
 Defaults: what was calibrated, and for what
 -------------------------------------------
 
-Since item 31 of the development record, the defaults of ``determine_periods``
-(and of ``process_vorticity`` / ``get_periods``) are the calibration reference
-``params-15``. This is a change of default behaviour relative to 2.0.0; every
-parameter is listed in ``CHANGELOG.md`` (``[Unreleased]`` → Changed). They fall
-in two groups:
+The defaults of ``determine_periods`` (and of ``process_vorticity`` /
+``get_periods``) are the calibration preset ``params-track``
+(``research/labels/configs/cyclophaser_params-track.yaml`` in the repository)
+with **one exception**: ``boundary_padding`` defaults to ``"reflect"``, while
+``params-track`` sets ``"edge"``. ``params-track`` is the only configuration
+with measured scores, and those scores were measured under ``"edge"``: they
+describe ``params-track``, not the package defaults. **If you work with TRACK
+input and want the measured behaviour, pass ``params-track`` explicitly** (its
+filter and phase parameters as keyword arguments). This is a change of default
+behaviour relative to 2.0.0; every parameter is listed in ``CHANGELOG.md``
+(``[Unreleased]`` → Changed). The defaults fall in two groups:
 
 * **Phase defaults** — the thresholds, ``length_scale="local"``,
   ``mature_method="amplitude"``, the depth floors, ``incipient_method="plateau"``
@@ -96,17 +102,23 @@ in two groups:
   ``decay_tail_amplitude_fraction=0.3``. They were calibrated against manual
   labels of cyclone phase sequences.
 * **Filtering defaults** — ``cutoff_high=18``, ``use_smoothing=False``,
-  ``use_smoothing_twice=False``, ``boundary_padding="edge"``,
-  ``use_filter='auto'``. **Only the filtering for TRACK input was calibrated**:
-  hourly 850 hPa relative vorticity along South-Atlantic cyclone tracks.
+  ``use_smoothing_twice=False``, ``use_filter='auto'``, and
+  ``boundary_padding="reflect"``. **Only the filtering for TRACK input was
+  calibrated**, and only together with ``boundary_padding="edge"``: hourly
+  850 hPa relative vorticity along South-Atlantic cyclone tracks. The default
+  ``"reflect"`` was not part of that calibration.
   Other inputs — other levels or variables (SLP, wind speed), other sampling
   intervals, gridded or spatially pre-filtered data — may need a different
   filtering, which has not been calibrated.
 
 The rule ``incipient_plateau_spare_intensification=True`` (item 30) is
 **"adotada sem validação independente"**: it was adopted without an independent
-validation. To reproduce 2.0.0 exactly, pass its values explicitly; the frozen
-table is ``research/labels/defaults_2.0.0.json`` in the repository.
+validation. The defaults before item 31 are frozen in
+``research/labels/defaults_2.0.0.json`` in the repository; pass them explicitly
+to reproduce that behaviour. Despite its name, that table is the development
+line before item 31, **not** the 2.0.0 release: 2.0.0 has no
+``boundary_padding`` (it always zero-pads), uses
+``replace_endpoints_with_lowpass=24``, and lacks most of the phase parameters.
 
 Example Usage
 -------------

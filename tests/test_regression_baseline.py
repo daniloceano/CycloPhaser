@@ -76,8 +76,10 @@ def test_baseline_smoothing(series_and_index):
 
 
 # ── Item 31: the 2.0.0 path, kept as a cross-version check ─────────────────────
-# The package defaults moved to params-15 (item 31), so baseline_default /
-# baseline_smoothing were regenerated under the new defaults. The 2.0.0 CSVs are
+# The package defaults moved to params-15 (item 31; renamed params-track), so
+# baseline_default / baseline_smoothing were regenerated under the new defaults,
+# and again when C1 moved boundary_padding to "reflect" (baseline_default only:
+# baseline_smoothing runs with use_filter=False). The 2.0.0 CSVs are
 # kept as *_2_0_0.csv, and the 2.0.0 defaults — passed explicitly, from the
 # frozen table — must still reproduce them.
 

@@ -9,55 +9,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed — default behaviour: the package defaults are now `params-15` (item 31, stage 2b, `45f0600`; approved by Danilo 2026-09-28)
+### Changed — default behaviour: the package defaults are `params-track`, except `boundary_padding="reflect"` (item 31, then C1 of the cleanup front)
 
-**`determine_periods(series)` with no arguments no longer reproduces 2.0.0.**
+**`determine_periods(series)` with no arguments does not reproduce 2.0.0.**
 The defaults of `process_vorticity`, `get_periods` and `determine_periods` are
-now the calibration reference `research/labels/configs/cyclophaser_params-15.yaml`.
-To reproduce 2.0.0, pass the old values explicitly: the frozen table is
-`research/labels/defaults_2.0.0.json`, and passing it reproduces the 2.0.0
-default-behaviour digest `b500d2e0…` on the 47 training series.
+the calibration preset `research/labels/configs/cyclophaser_params-track.yaml`
+with **one exception**: `boundary_padding` defaults to `"reflect"`, while
+params-track sets `"edge"`.
+
+* Item 31 (stage 2b, `45f0600`; approved by Danilo 2026-09-28) made the preset
+  then named `params-15` the package defaults, `"edge"` included.
+* C1 of the cleanup front renamed `params-15` to `params-track` (identical
+  bytes, sha256 `5aa61f2dec71…`) and moved the `boundary_padding` default to
+  `"reflect"`, keeping `"edge"` in the preset.
+* The other differences between the preset and the defaults are of form only.
+  The file says `use_filter: true`, which the package treats as `'auto'` (with a
+  `UserWarning`). It carries no `prominence`, whose default is `None`.
+
+**Measured scores belong to params-track, not to these defaults.**
+params-track is the only configuration with measured scores, on the training
+and on the test split. Those scores were measured with its own
+`boundary_padding="edge"`, so they describe params-track. If you work with
+TRACK input and want the measured behaviour, pass params-track explicitly.
+
+Against the **2.0.0 release** (tag `v2.0.0`, `5d99ae3`), derived from the
+signatures by `research/cleanup/passo1/v200_vs_head.py`:
 
 Filtering (`process_vorticity`, `determine_periods`):
 
-| parameter | 2.0.0 | now |
+| parameter | 2.0.0 (tag `v2.0.0`) | now |
 |---|---|---|
+| `replace_endpoints_with_lowpass` | `24` | `0` |
+| `use_smoothing` | `"auto"` | `False` |
+| `use_smoothing_twice` | `"auto"` | `False` |
 | `cutoff_high` | `48.0` | `18.0` |
-| `use_smoothing` | `'auto'` | `False` |
-| `use_smoothing_twice` | `'auto'` | `False` |
-| `boundary_padding` | `"reflect"` | `"edge"` |
-| `use_filter`, `cutoff_low`, `savgol_polynomial`, `replace_endpoints_with_lowpass` | unchanged (`'auto'`, 168, 3, 0) | unchanged |
+| `boundary_padding` | — (no such parameter) | `"reflect"` |
+| `use_filter`, `savgol_polynomial`, `cutoff_low` | unchanged (`"auto"`, `3`, `168`) | unchanged |
+
+2.0.0 has no `boundary_padding`: its Lanczos convolution always zero-pads,
+which is `boundary_padding="zero"` now.
 
 Phase detection (`get_periods`, `determine_periods`):
 
-| parameter | 2.0.0 | now |
+| parameter | 2.0.0 (tag `v2.0.0`) | now |
 |---|---|---|
 | `threshold_mature_distance` | `0.125` | `0.18` |
 | `threshold_mature_length` | `0.03` | `0.15` |
-| `prominence_relative` | `None` | `0.3` |
-| `length_scale` | `"global"` | `"local"` |
-| `mature_method` | `"derivative"` | `"amplitude"` |
-| `mature_min_depth` | `0.0` | `0.8` |
-| `intensification_min_depth` | `0.0` | `0.05` |
-| `decay_tail_amplitude_fraction` | `None` | `0.3` |
-| `incipient_method` | `"geometric"` | `"plateau"` |
-| `incipient_plateau_signal` | `"derivative"` | `"vorticity"` |
-| `incipient_plateau_crossing` | `"single"` | `"sustained"` |
-| `incipient_plateau_k` | `3` | `5` |
-| `incipient_smooth_window` | `0` | `5` |
-| `incipient_plateau_spare_intensification` | `False` | `True` — **adotada sem validação independente** (item 30) |
-| the other 10 phase parameters (`threshold_intensification_length`, `_gap`, `threshold_decay_length`, `_gap`, `threshold_incipient_length`, `prominence`, `reclassify_index0`, `mature_amplitude_fraction`, `incipient_plateau_tau`, `incipient_smooth_polyorder`) | unchanged | unchanged |
+| `prominence` | — (no such parameter) | `None` |
+| `prominence_relative` | — (no such parameter) | `0.3` |
+| `reclassify_index0` | — (no such parameter) | `True` |
+| `length_scale` | — (no such parameter) | `"local"` |
+| `mature_method` | — (no such parameter) | `"amplitude"` |
+| `mature_amplitude_fraction` | — (no such parameter) | `0.9` |
+| `mature_min_depth` | — (no such parameter) | `0.8` |
+| `intensification_min_depth` | — (no such parameter) | `0.05` |
+| `decay_tail_amplitude_fraction` | — (no such parameter) | `0.3` |
+| `incipient_method` | — (no such parameter) | `"plateau"` |
+| `incipient_plateau_tau` | — (no such parameter) | `0.2` |
+| `incipient_plateau_signal` | — (no such parameter) | `"vorticity"` |
+| `incipient_plateau_crossing` | — (no such parameter) | `"sustained"` |
+| `incipient_plateau_k` | — (no such parameter) | `5` |
+| `incipient_smooth_window` | — (no such parameter) | `5` |
+| `incipient_smooth_polyorder` | — (no such parameter) | `3` |
+| `incipient_plateau_spare_intensification` | — (no such parameter) | `True` |
+| `threshold_intensification_length`, `threshold_intensification_gap`, `threshold_decay_length`, `threshold_decay_gap`, `threshold_incipient_length` | unchanged (`0.075`, `0.075`, `0.075`, `0.075`, `0.4`) | unchanged |
+
+**The pre-item-31 table is not 2.0.0.** `research/labels/defaults_2.0.0.json`
+freezes the defaults of the development line before item 31. For example, it
+has `boundary_padding="reflect"`, `replace_endpoints_with_lowpass=0` and
+`incipient_method="geometric"`. Its name is historical, and a later step
+renames it. Passing that table reproduces the pre-item-31 default-behaviour
+digest `b500d2e0…` on the 47 training series. It does **not** reproduce 2.0.0.
 
 **Which defaults are general.** The phase defaults were calibrated against
 manual phase labels. **Only the filtering for TRACK input was calibrated**:
 hourly 850 hPa relative vorticity along South-Atlantic cyclone tracks
-(`min_max_zeta_850`). Other inputs may need a different filtering, which has
-not been calibrated here. The evidence is stage 1 of item 31
-(`research/labels/diagnostics/item31/stage1_output.txt`): PASS on the 16
-held-out series, which is weak evidence, because the stage was not
-out-of-sample (DESIGN §5.2).
+(`min_max_zeta_850`). That calibration was done with `boundary_padding="edge"`,
+so the default `"reflect"` was not part of it. Other inputs may need a
+different filtering, which has not been calibrated here. The evidence is
+stage 1 of item 31 (`research/labels/diagnostics/item31/stage1_output.txt`):
+PASS on the 16 held-out series. That is weak evidence, because the stage was
+not out-of-sample (DESIGN §5.2).
 
-**What moves** (DESIGN §11):
+**What C1 moves** (`research/cleanup/passo1/`, TRAIN series only, no scoring
+against labels):
+
+* Of the 54 training series, the final phase map differs between the default
+  and `boundary_padding="edge"` on **19/54**. The phase sequence differs on
+  3/54. No run raised and every sequence is valid, in both modes.
+* **Incipient refusals do not change: 28/54 under `"reflect"` and 28/54 under
+  `"edge"`, the same series.** The default
+  `incipient_plateau_signal="vorticity"` reads the plateau from the RAW input,
+  so the padding cannot reach it. With `incipient_plateau_signal="derivative"`
+  the padding does decide: refusals are 2/54 under `"reflect"` against 32/54
+  under `"edge"` (`refusal_mechanism.py`, a post-hoc check).
+* The normalised filtered derivative at t0 (`|dz_dt_smoothed2[0]|` over its
+  maximum) is zero on 0/54 series under `"reflect"`. It is lower than under
+  `"edge"`: median 0.065 against 0.295, maximum 0.172 against 0.802.
+* **Defect I (item 8(d)) stays on the default path.** The sign of `z[1]-z[0]`
+  disagrees between raw and filtered on 11/54 series under `"reflect"`, against
+  10/54 under `"edge"`.
+* The packaged example keeps the start and end of every phase. The CI
+  baselines regenerated by `item31/regenerate_baselines_2b.py` came out
+  byte-identical.
+* The default-behaviour digest moves from `3a6de265…` to `7552bc67…`
+  (47 training series). The new record is appended to
+  `default_behaviour_sha256.txt`.
+
+**What item 31 moved** (against the pre-item-31 defaults, not against 2.0.0;
+DESIGN §11):
 
 * TRAIN: the final map of 54/54 series changes, the phase sequence of 32/54
   (25 real, 1 synthetic, 6 batch), and incipient presence flips on 24.
@@ -67,7 +127,7 @@ out-of-sample (DESIGN §5.2).
 
 **Calibration app.**
 
-* ~~The sidebar keeps its own hardcoded defaults (the 2.0.0 values)~~ —
+* ~~The sidebar keeps its own hardcoded defaults (the pre-item-31 values)~~ —
   superseded by stage 2c: the sidebar now opens with the package defaults (see
   "Changed — calibration app: the sidebar opens with the package defaults").
 * The app now passes `None` explicitly for checks that are switched off, so an
@@ -84,7 +144,7 @@ out-of-sample (DESIGN §5.2).
   its own for any package parameter. `_sidebar_defaults_from_signature()`
   derives every sidebar widget from `inspect.signature(process_vorticity /
   get_periods)` when the app loads.
-* **Reset.** "Reset to defaults" returns to those values, not to 2.0.0.
+* **Reset.** "Reset to defaults" returns to those values, not to the pre-item-31 table.
 * **Optional checks.** The prominence filter and the decay-tail check start ON
   when their package default is not None, with that value (relative
   prominence 0.3, decay tail 0.3). A value widget whose parameter defaults to
@@ -102,7 +162,7 @@ out-of-sample (DESIGN §5.2).
   * that equality can fail: `cutoff_high=48` makes the column differ.
 * **Benchmark AppTest.** Its sidebar column now sets one declared non-default
   value (`cutoff_high=48`) before being added. An untouched sidebar would equal
-  the params-15 column.
+  the params-15 column (the preset now named params-track).
 
 ### Fixed — `process_vorticity(use_filter=False)` crashed on an unnamed index (item 31, `a1784b5`; approved by Danilo 2026-09-28)
 
@@ -110,7 +170,7 @@ With `use_filter=False` the raw series kept the input index's own dimension
 (`index` for an unnamed index, a list with `x`, or a Series built from
 `.tolist()`), and only a Savitzky-Golay pass rebuilt it on `time`. So
 `use_filter=False` together with `use_smoothing=False` raised
-`ValueError: Coordinate 'time' not found`. That was reachable in 2.0.0 only
+`ValueError: Coordinate 'time' not found`. That was reachable before item 31 only
 with both passed explicitly, but the new default `use_smoothing=False` made it
 reachable with `use_filter=False` alone. The unfiltered branch now builds the
 series on the same `time` coordinate as the filtered one. No output changed:
@@ -119,13 +179,14 @@ crashed now run (`research/labels/diagnostics/item31/fix_use_filter_false_equiva
 
 ### Changed — research tooling: incomplete configs and the configs directory (item 31, stage 2a, `eed8e77`)
 
-* **A key a config does not carry is filled with its frozen cyclophaser 2.0.0
-  default**, never with the live signature's default, and the filled keys are
+* **A key a config does not carry is filled with its frozen pre-item-31
+  default** (the table is named "2.0.0" but is not the 2.0.0 release), never
+  with the live signature's default, and the filled keys are
   always listed. This applies in `evaluate_against_labels.py` (on stderr), in
   the Benchmark column's provenance, and in the app's YAML import (as a
   warning). The table is `research/labels/defaults_2.0.0.json`, generated from
   the stage-0 parameter table (`research/labels/config_defaults.py`).
-* **`research/labels/configs/` holds only `params-15`.** params-1 to params-14
+* **`research/labels/configs/` holds only `params-15`** (renamed `params-track` in the cleanup front). params-1 to params-14
   were removed and are recoverable with `git show 33ea489358d9:<path>`
   (`research/labels/diagnostics/item31/recovery_table.md`).
   `item19_core.load_config()` without a path now raises and names that commit.

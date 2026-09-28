@@ -1,6 +1,11 @@
-"""The frozen cyclophaser 2.0.0 defaults, for tests (item 31).
+"""The frozen pre-item-31 defaults ("2.0.0" in the names), for tests (item 31).
 
-Item 31 moved the package defaults to params-15. Tests whose assertions were
+The names say 2.0.0, but the table is the development line before item 31, NOT
+the 2.0.0 release (which has no boundary_padding and uses
+replace_endpoints_with_lowpass=24); the files are renamed in a later step.
+
+Item 31 moved the package defaults to params-15 (renamed params-track; since C1
+the package defaults are params-track except boundary_padding). Tests whose assertions were
 MEASURED under the 2.0.0 defaults (reference counts, per-track behaviours, the
 develop-v2.1 cross-version baseline) now pass those defaults explicitly, so
 what they assert is unchanged. The values are read from the frozen table

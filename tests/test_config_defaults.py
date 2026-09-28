@@ -10,7 +10,7 @@ cyclophaser 2.0.0 default, and every filled key is listed.
 * the source of a filled value is the TABLE, not the live signature — with a
   positive control, since in stage 2a the two still coincide;
 * evaluator and Benchmark resolve a config to the same arguments;
-* params-15 lacks exactly one key (`prominence`), and the app imports it with
+* params-track lacks exactly one key (`prominence`), and the app imports it with
   that one key listed and prominence filtering left as the file describes.
 """
 
@@ -35,7 +35,7 @@ sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
 import config_defaults as cd  # noqa: E402
 from cyclophaser.determine_periods import get_periods, process_vorticity  # noqa: E402
 
-P15 = LABELS / "configs" / "cyclophaser_params-15.yaml"
+P_TRACK = LABELS / "configs" / "cyclophaser_params-track.yaml"
 PARAM_TABLE = LABELS / "diagnostics" / "item31" / "param_table.json"
 NON_DETECTION = {"zeta_df", "vorticity", "plot", "plot_steps", "export_dict"}
 
@@ -104,15 +104,15 @@ def test_a_filled_value_comes_from_the_table_not_the_signature(tmp_path, monkeyp
         cd._table.cache_clear()
 
 
-def test_params15_lacks_exactly_prominence():
-    _out, filled = cd.fill_missing(yaml.safe_load(P15.read_text()))
+def test_params_track_lacks_exactly_prominence():
+    _out, filled = cd.fill_missing(yaml.safe_load(P_TRACK.read_text()))
     assert filled == [("phase_params.prominence", None)]
 
 
 def test_evaluator_and_benchmark_resolve_a_config_identically(capsys):
     import benchmark_core as bc
     import evaluate_against_labels as ev
-    trimmed = yaml.safe_load(P15.read_text())
+    trimmed = yaml.safe_load(P_TRACK.read_text())
     del trimmed["phase_params"]["mature_min_depth"]
     del trimmed["filter_params"]["boundary_padding"]
     import tempfile
@@ -148,11 +148,11 @@ def _app_loader():
 
 def test_the_app_import_lists_the_filled_key_and_keeps_the_files_meaning():
     load, state = _app_loader()
-    res = load(P15.read_bytes())
+    res = load(P_TRACK.read_bytes())
     assert res["error"] is None
     assert res["filled"] == [("phase_params.prominence", None)]
     assert res["missing"] == ["phase_params.prominence"]
-    # params-15 filters by RELATIVE prominence 0.3; the filled None for the
+    # params-track filters by RELATIVE prominence 0.3; the filled None for the
     # absolute threshold must not switch that off or write a value widget.
     assert state["extrema_prominence_enabled"] is True
     assert state["extrema_prominence_mode"] == "relative"
@@ -162,7 +162,7 @@ def test_the_app_import_lists_the_filled_key_and_keeps_the_files_meaning():
 def test_the_app_import_fills_a_trimmed_file_with_2_0_0_values():
     load, state = _app_loader()
     state["mature_min_depth"] = 0.8                 # the session had the floor ON
-    doc = yaml.safe_load(P15.read_text())
+    doc = yaml.safe_load(P_TRACK.read_text())
     del doc["phase_params"]["mature_min_depth"]
     res = load(yaml.safe_dump(doc).encode())
     assert res["error"] is None

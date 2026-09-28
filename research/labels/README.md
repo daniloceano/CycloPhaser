@@ -50,7 +50,22 @@ the **Label** display mode of the calibration app. Tests are in
 ## Calibration configurations
 
 **Since item 31 (2026-09-28), `research/labels/configs/` holds one file:
-`cyclophaser_params-15.yaml`, the calibration reference.** params-1 to
+`cyclophaser_params-track.yaml`, the calibration preset.**
+
+> **Correspondence (2026-09-28).** params-15 foi renomeado para params-track
+> (conteúdo idêntico, sha256 `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04`); registros anteriores citam o nome antigo.
+
+**params-track = the package defaults except `boundary_padding: edge`** (the
+package default is `"reflect"`). Two further differences are of form only:
+the file carries `use_filter: true`, which the package treats as `'auto'` (with a
+`UserWarning`), and carries no `prominence` key, whose default is `None`
+(`research/cleanup/passo1/params_track_vs_defaults.json`, generated). It is
+the **only configuration with measured scores**, and every score was measured
+under `edge`: those scores belong to params-track, not to the package defaults.
+Anyone working with TRACK series who wants the measured behaviour must pass
+params-track explicitly.
+
+params-1 to
 params-14 were removed by Danilo's decision. They are not lost: each one is
 recoverable byte for byte with the command in
 `diagnostics/item31/recovery_table.md` (`git show 33ea489358d9:<path>`), and the
@@ -68,9 +83,9 @@ config by its hash, never by its file name**: an app export called
 | `cyclophaser_params-12.yaml` | `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` | removed (item 31); params-11 + `mature_min_depth` 0.80 (item 22) |
 | `cyclophaser_params-13.yaml` | `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` | removed (item 31); params-12 + `intensification_min_depth` 0.05 (item 24) |
 | `cyclophaser_params-14.yaml` | `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` | removed (item 31); params-13 + `reclassify_index0` true (item 28) |
-| **`cyclophaser_params-15.yaml`** | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration reference** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
+| **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration preset** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
 
-**Do not normalise or reformat params-15.** Its identity is its file hash: the
+**Do not normalise or reformat params-track.** Its identity is its file hash: the
 Benchmark shows that hash as a column's provenance, and every later record
 cites it. It was written by hand from params-14 (plus one line), so its
 `metadata` block is params-14's, timestamp included.
