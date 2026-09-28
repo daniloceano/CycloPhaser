@@ -1,0 +1,123 @@
+{
+ "tag": "v2.0.0",
+ "tag_commit": "5d99ae3848ad04703a07c7160fe5e3696cd06252",
+ "n_keys": 32,
+ "n_equal": 13,
+ "differences": [
+  {
+   "group": "filter_params",
+   "param": "replace_endpoints_with_lowpass",
+   "json": 0,
+   "tag": 24
+  },
+  {
+   "group": "filter_params",
+   "param": "boundary_padding",
+   "json": "reflect",
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "prominence",
+   "json": null,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "prominence_relative",
+   "json": null,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "reclassify_index0",
+   "json": true,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "length_scale",
+   "json": "global",
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "mature_method",
+   "json": "derivative",
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "mature_amplitude_fraction",
+   "json": 0.9,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "mature_min_depth",
+   "json": 0.0,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "intensification_min_depth",
+   "json": 0.0,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "decay_tail_amplitude_fraction",
+   "json": null,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_method",
+   "json": "geometric",
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_plateau_tau",
+   "json": 0.2,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_plateau_signal",
+   "json": "derivative",
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_plateau_crossing",
+   "json": "single",
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_plateau_k",
+   "json": 3,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_smooth_window",
+   "json": 0,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_smooth_polyorder",
+   "json": 3,
+   "tag": "(parâmetro não existe na tag)"
+  },
+  {
+   "group": "phase_params",
+   "param": "incipient_plateau_spare_intensification",
+   "json": false,
+   "tag": "(parâmetro não existe na tag)"
+  }
+ ],
+ "json_source": "research/labels/diagnostics/item31/param_table.json @ e42da8b (column 'default')"
+}

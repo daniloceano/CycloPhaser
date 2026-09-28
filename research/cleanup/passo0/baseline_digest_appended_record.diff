@@ -1,0 +1,17 @@
+diff --git a/research/labels/diagnostics/front_b/default_behaviour_sha256.txt b/research/labels/diagnostics/front_b/default_behaviour_sha256.txt
+index 449be7e..f94db1b 100644
+--- a/research/labels/diagnostics/front_b/default_behaviour_sha256.txt
++++ b/research/labels/diagnostics/front_b/default_behaviour_sha256.txt
+@@ -103,3 +103,12 @@ python  : 3.12.14
+ numpy   : 2.5.3
+ scipy   : 1.18.0
+ pandas  : 3.0.5
++--- record ---
++sha256  : 3a6de26501c6fed05091025480cacf7502fe2d7d0076ba8479a9ecca81703b99
++n_series: 47
++commit  : 06d85504474b72a894b4e7f72b2944fc577fd139
++date    : 2026-09-28
++python  : 3.12.14
++numpy   : 2.5.3
++scipy   : 1.18.0
++pandas  : 3.0.5
