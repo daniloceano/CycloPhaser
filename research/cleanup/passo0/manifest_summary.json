@@ -1,19 +1,21 @@
 {
- "n_tracked": 537,
+ "n_tracked": 536,
  "dest": {
-  "manter": 221,
-  "remover": 276,
+  "manter": 222,
+  "remover": 274,
   "consolidar": 40
  },
  "stale_confirmed": 40,
  "stale_total": 40,
- "branches": 40,
+ "branches": 41,
  "branch_dest": {
-  "apagar": 31,
-  "manter": 2,
-  "manter como registro": 3,
-  "decidir com o Danilo": 4
+  "apagar": 30,
+  "manter": 3,
+  "tag de arquivo": 6,
+  "tag de arquivo (após Passo 2)": 2
  },
+ "apagar_ancestral": 30,
+ "apagar_patch_equivalent_only": 0,
  "only_here": [
   "research/incipient_plateau/gen_geometric_vs_plateau.py",
   "research/incipient_plateau/geometric_vs_plateau.csv"

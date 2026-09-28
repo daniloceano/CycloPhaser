@@ -1,4 +1,4 @@
 HEAD: 06d85504474b72a894b4e7f72b2944fc577fd139
-python: /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
-sys.executable: /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
-cyclophaser.__file__: /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+python: <env>/bin/python
+sys.executable: <env>/bin/python
+cyclophaser.__file__: <repo>/cyclophaser/__init__.py

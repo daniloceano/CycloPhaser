@@ -78,7 +78,7 @@ ROOT_KEEP = {
     ".readthedocs.yml": "build da documentação",
     "runtime.txt": "versão do Python do deploy",
     ".python-version": "versão do Python do deploy do app (citado em tools/calibration_app/requirements.txt)",
-    "requirements.txt": "toolchain de docs segundo environment.yml; revisar sobreposição com docs/requirements.txt e setup.py no Passo 1",
+    "requirements.txt": "fica (decisão 10): as instruções de instalação/contribuição dos docs de usuário o leem (ver Dados gerados)",
 }
 LABELS_KEEP = {
     "research/labels/README.md": "doc do conjunto de rótulos e das configs (vivo)",
@@ -96,7 +96,7 @@ LABELS_KEEP = {
 def classify(p, t):
     """-> (dest, motive, finding_text or None, section or '', anchors[])"""
     if p in J.KEEP:
-        return "manter", J.KEEP[p], J.KEEP_FINDING.get(p), "", []
+        return "manter", J.KEEP[p], J.KEEP_FINDING.get(p), "", J.KEEP_ANCHORS.get(p, [])
     if p in J.DEST:
         dest, why = J.DEST[p]
         k, fr = front_of(p)
@@ -208,15 +208,21 @@ out = []
 w = out.append
 head = INV["head"]
 w("# Passo 0 — Inventário: manifesto de arquivos, branches e rastreabilidade\n")
-w("**Frente:** limpeza do repositório + default `boundary_padding` · **Passo 0 — somente leitura.** "
-  "Nada fora de `research/cleanup/` foi removido, movido, renomeado ou editado. "
-  "Este documento é a proposta para o Danilo aprovar antes de qualquer mudança.\n")
-w(f"* Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `{head[:7]}` (ponta esperada `06d8550`: confere).")
+w("**Frente:** limpeza do repositório + default `boundary_padding` · **Passo 0 — somente leitura**, corrigido no "
+  "Passo 1. No Passo 0 nada fora de `research/cleanup/` foi removido, movido, renomeado ou editado; as decisões do "
+  "Danilo sobre esta proposta estão em \"Decisões aprovadas\".\n")
+BASE = subprocess.check_output(["git", "merge-base", "HEAD", "origin/develop-v2.1"], cwd=ROOT, text=True).strip()[:7]
+w(f"* Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `{BASE}` (ponta esperada `06d8550`: "
+  f"{'confere' if BASE == '06d8550' else 'NÃO CONFERE'}); inventário regerado em HEAD `{head[:7]}`.")
+w("* **Correções do Passo 1** (aprovadas pelo Danilo): `.pypirc` saiu do versionamento (commit próprio, conteúdo "
+  "não lido); branches com equivalência de patch separadas das ancestrais; `measure_incipient_smoothing.py` → manter; "
+  "saídas de `passo0/` sem caminhos absolutos; decisões aprovadas registradas. Seções 0.1–0.4 regeradas pelos scripts.")
 w("* Gerado por `research/cleanup/passo0/make_manifest.py` a partir de `inventory.py`, `branches.py`, "
   "`defaults_in_text.py` (mecânico) e `judgements.py` (julgamento: destino, motivo, achado). "
   "Toda contagem e todo `arquivo:linha` abaixo é regerado pelo script; nenhum número foi digitado.")
 w("* Âncoras de registro são resolvidas por texto (arquivo + trecho) e o render aborta se o trecho faltar ou for ambíguo.")
-w("* `.pypirc` foi excluído de toda leitura de conteúdo (é arquivo de credenciais; ver decisões).\n")
+w("* `.pypirc` foi excluído de toda leitura de conteúdo (é arquivo de credenciais) e, no Passo 1, saiu do "
+  "versionamento (decisão 2).\n")
 
 # 0.1 -------------------------------------------------------------------------
 suite_raw = (P0 / "baseline_suite_raw.txt").read_text().splitlines()
@@ -238,8 +244,13 @@ w("")
 w(f"Linha final bruta da suíte: `{suite_line.strip()}`. Ambiente (`baseline_env.txt`): "
   + "; ".join(l.strip().replace(str(ROOT), "<repo>") for l in env.splitlines()
                if l.startswith(("HEAD", "cyclophaser.__file__"))) + ".")
-w("As saídas brutas em `passo0/baseline_*.txt` contêm caminhos absolutos da máquina por natureza (proveniência); "
-  "os arquivos derivados desta frente os mascaram como `<repo>` e `~`.")
+ANON = json.loads((P0 / "anonymize_log.json").read_text())
+w("**Anonimização declarada (Passo 1).** Nenhuma saída versionada desta frente contém caminho absoluto: "
+  "raiz do repositório → `<repo>`, ambiente conda (absoluto, relativo à raiz ou com `~`) → `<env>`, home → `~`. "
+  "Feita por `passo0/anonymize.py` (idempotente); `inventory.py` aplica a mesma regra ao que grava e "
+  "`run_baseline.sh` chama o anonimizador ao fim. Substituições por arquivo (`passo0/anonymize_log.json`): "
+  + "; ".join(f"`{k.replace('research/cleanup/', '')}`: " + ", ".join(f"{lab} ×{n}" for lab, n in v.items())
+              for k, v in sorted(ANON.items())) + ".")
 w("\"Suíte completa\" = `-m \"not browser\"`: CLAUDE.md proíbe rodar `tests/test_label_browser.py`. "
   "Só passed/failed são reportados (regra fixa). Saídas brutas: `passo0/baseline_suite_raw.txt`, "
   "`passo0/baseline_digest_raw.txt`, `passo0/baseline_env.txt`; comando: `passo0/run_baseline.sh`.\n")
@@ -542,27 +553,48 @@ w(f"Remotas: **{BR['n_remote']}** (`origin/*`, sem `HEAD`), ponta de develop `{B
   "\"em develop\" = `git merge-base --is-ancestor`; à frente/atrás contra `origin/develop-v2.1`; "
   "citações = `git grep` do nome da branch na árvore de HEAD. Dados: `passo0/branches.json`.\n")
 bdest = Counter()
-w("| branch | ponta | em develop? | +à frente/−atrás | conteúdo (arquivos alterados desde a base) | citada em | destino proposto | motivo |")
-w("|---|---|---|---|---|---|---|---|")
+apagar_anc = apagar_peq = 0
+w("\"patch-eq.\" = NÃO ancestral, mas `git cherry origin/develop-v2.1 <branch>` só imprime `-` (todo commit tem um "
+  "equivalente de patch em develop). Uma branch patch-equivalente NÃO está contida em develop: seus próprios hashes "
+  "deixam de resolver se a ref sumir, por isso nunca é somada às ancestrais. \"hashes citados\" = `git grep` dos "
+  "hashes curtos dos commits da branch que não estão em develop.\n")
+w("| branch | ponta | em develop? (ancestral) | patch-eq.? | +à frente/−atrás | conteúdo (arquivos alterados desde a base) | citada em | hashes citados | destino | motivo |")
+w("|---|---|---|---|---|---|---|---|---|---|")
 for b in BR["remote"]:
     name = b["branch"]
     if name in J.BRANCH:
         d, why = J.BRANCH[name]
     elif b["in_develop"]:
-        d, why = "apagar", "totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop"
+        d, why = "apagar", "ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop"
+    elif b["patch_equivalent"]:
+        d, why = "tag de arquivo", "patch-equivalente, NÃO ancestral: os próprios hashes só resolvem enquanto houver ref"
+        ERRORS.append(f"patch-equivalent branch without judgement: {name}")
     else:
         d, why = "decidir com o Danilo", "não contida em develop"
         ERRORS.append(f"branch without judgement: {name}")
     bdest[d] += 1
+    if d == "apagar":
+        apagar_anc += b["in_develop"]
+        apagar_peq += (not b["in_develop"]) and b["patch_equivalent"]
+        if not b["in_develop"] and not b["patch_equivalent"]:
+            ERRORS.append(f"'apagar' on a branch neither ancestral nor patch-equivalent: {name}")
     content = f"{b['n_files_changed']} arq.: " + ", ".join(b["dirs_changed"][:4]) if b["n_files_changed"] else "— (nada fora de develop)"
     cites = ", ".join(f"`{m}`" for m in b["mentions"][:3]) + (f" +{len(b['mentions']) - 3}" if len(b["mentions"]) > 3 else "") or "—"
-    w(f"| `{name}` | `{b['tip']}` {b['date']} — {esc(b['subject'][:70])} | {'sim' if b['in_develop'] else '**não**'} | "
-      f"+{b['ahead']}/−{b['behind']} | {esc(content)} | {cites} | **{d}** | {esc(why)} |")
+    hcites = ", ".join(f"`{m}`" for m in b["hash_mentions"][:3]) + (f" +{len(b['hash_mentions']) - 3}" if len(b["hash_mentions"]) > 3 else "") or "—"
+    peq = "—" if b["in_develop"] else ("**sim**" if b["patch_equivalent"] else f"não (+{b['cherry_plus']})")
+    w(f"| `{name}` | `{b['tip']}` {b['date']} — {esc(b['subject'][:70])} | {'sim' if b['in_develop'] else '**não**'} | {peq} | "
+      f"+{b['ahead']}/−{b['behind']} | {esc(content)} | {cites} | {hcites} | **{d}** | {esc(why)} |")
 w("")
 w("| destino | branches |\n|---|---|")
 for d, n in sorted(bdest.items()):
     w(f"| {d} | {n} |")
 w("")
+n_peq_all = sum(1 for b in BR["remote"] if b["patch_equivalent"])
+w(f"**Contagem corrigida (Passo 1).** \"apagar\" = {bdest.get('apagar', 0)}: **{apagar_anc} ancestrais** "
+  f"(`--is-ancestor`) e **{apagar_peq} só patch-equivalentes**. Branches patch-equivalentes não ancestrais no total: "
+  f"{n_peq_all} (" + ", ".join(f"`{b['branch']}`" for b in BR["remote"] if b["patch_equivalent"]) + "), todas com "
+  "destino \"tag de arquivo\". O Passo 0 somava `diag/front-b-distance-inert` às 30 ancestrais como \"apagar\" (31); "
+  "seu hash é citado nos registros, então ela não pode sumir sem ref.\n")
 w(f"Branches locais sem remota (fora do escopo, só registradas): {', '.join('`' + b + '`' for b in BR['local_without_remote'])}. "
   "`exp/pre-peak-normalization` (`1faf0c8`) NÃO está em develop, nunca foi publicada e se declara "
   "\"descartável, não mesclar\"; está registrada em `docs/future_work.md` e `research/labels/swell_item30/README.md`.\n")
@@ -589,13 +621,48 @@ w(f"Entradas: {len(tr)}; **SÓ AQUI: {len(only_here)}**" +
 tail = P0 / "manifest_tail.md"   # hand-written: decisions for Danilo, deviations
 if tail.exists():
     out.append(tail.read_text())
+RL = json.loads((P0 / "relabel_diff.json").read_text())
+w("\n## Dados gerados das decisões\n")
+w(f"### Decisão 1 — re-rotulagens de treino fora de develop (`passo0/relabel_diff.py`)\n")
+w(f"`research/labels/manual_labels.yaml` em `origin/develop-v2.1` (`{RL['develop']}`) × `origin/feat/label-tab-toplevel` "
+  f"(`{RL['branch']}`), só ids de TREINO ({RL['n_train_ids']}: `train:` + `batches.*.train`; entradas de teste descartadas "
+  f"antes de comparar; nenhuma série lida). Rótulos de treino: develop {RL['n_train_labels_develop']}, branch "
+  f"{RL['n_train_labels_branch']} (só em develop: {len(RL['only_in_develop'])} — o lote swell, desenhado depois da branch).\n")
+w("| id | campo | develop | branch |\n|---|---|---|---|")
+for r in RL["changed"]:
+    for ph in r.get("phases", []):
+        w(f"| `{r['id']}` | fronteira `{ph['phase']}`.{ph.get('field', '?')} | {ph.get('develop')} | {ph.get('branch')} |")
+    if "verdict" in r:
+        fmt = lambda v: esc(", ".join(f"{k}={x}" for k, x in v.items())) if isinstance(v, dict) else str(v)
+        w(f"| `{r['id']}` | veredito | {fmt(r['verdict']['develop'])} | {fmt(r['verdict']['branch'])} |")
+    for f in r["fields"]:
+        if f not in ("phases", "verdict"):
+            w(f"| `{r['id']}` | {f} | {esc(r[f]['develop'])} | {esc(r[f]['branch'])} |")
+w("")
+w(f"Com mudança de conteúdo: **{len(RL['changed'])}**. Re-salvamento sem mudança de rótulo: "
+  + (", ".join(f"`{x['id']}`" for x in RL["resave_only"]) or "nenhum")
+  + ". Não recuperadas (decisão 1); entram como pendência aberta no documento único (Passo 2).\n")
+RQ = json.loads((P0 / "requirements_readers.json").read_text())
+w("### Decisão 10 — quem lê o `requirements.txt` da raiz (`passo0/requirements_readers.py`; só lista)\n")
+w("| consumidor | lê a raiz? | onde |\n|---|---|---|")
+for g, v in RQ["groups_reading_root"].items():
+    where = ", ".join(f"`{x.split(': ', 1)[1]}`" for x in RQ["readers"] if x.startswith(g + ":")) or "—"
+    w(f"| {g} | {'**sim**' if v else 'não'} | {where} |")
+w("")
+w("O CI instala do wheel mais `pytest pyyaml`; o RTD lê `docs/requirements.txt`; `setup.py` declara "
+  "`install_requires` próprio; o app tem `tools/calibration_app/requirements.txt` próprio. O serviço Streamlit Cloud "
+  "escolhe o arquivo por regra própria, fora da árvore: não verificável daqui. Só as instruções de instalação/contribuição "
+  "dos docs de usuário mandam rodar `pip install -r requirements.txt` na raiz — ou seja, **alguém o lê** (por instrução); "
+  "pela decisão 10 ele fica. O `Pipfile` sai.\n")
+
 w("\n## Resumo para orquestração (gerado)\n")
-w(f"* Branch `chore/repo-cleanup`; ponta de develop-v2.1 encontrada `{head[:7]}` (esperada `06d8550`). "
+w(f"* Branch `chore/repo-cleanup`; base em develop-v2.1 `{BASE}` (esperada `06d8550`); inventário em HEAD `{head[:7]}`. "
   "Hash do commit deste passo: ver a mensagem de entrega (um arquivo não contém o próprio hash).")
 w(f"* Linha de base: suíte previsto 1438/0 → obtido {obt_pass}/{obt_fail}; digest previsto `3a6de265…` → obtido `{digest[:8]}…`.")
 w(f"* Arquivos versionados: {INV['n_tracked_total']} — manter {dest_count.get('manter', 0)}, consolidar "
   f"{dest_count.get('consolidar', 0)}, remover {dest_count.get('remover', 0)}. Scripts de stale_scripts.md confirmados: {n_exist}/{len(STALE)}.")
-w(f"* Branches remotas: {BR['n_remote']} — " + ", ".join(f"{d} {n}" for d, n in sorted(bdest.items())) + ".")
+w(f"* Branches remotas: {BR['n_remote']} — " + ", ".join(f"{d} {n}" for d, n in sorted(bdest.items()))
+  + f"; das \"apagar\", {apagar_anc} ancestrais e {apagar_peq} só patch-equivalentes.")
 w("* SÓ AQUI: " + ("; ".join(f"`{x['path']}` → {x['finding']}" for x in only_here) or "nenhum") + ".")
 w(f"* params-1..14 fora dos diagnósticos e de future_work.md: {len(live_p114)} ocorrências em "
   f"{len({h['file'] for h in live_p114})} arquivos; propostas **migrar** em "
@@ -608,7 +675,8 @@ w(f"* Caminhos absolutos: {len(ab)} ocorrências em {len({h['file'] for h in ab}
 w("* Decisões e desvios: seções acima.")
 (ROOT / "research/cleanup/MANIFEST.md").write_text("\n".join(out) + "\n")
 summary = dict(n_tracked=INV["n_tracked_total"], dest=dict(dest_count), stale_confirmed=n_exist, stale_total=len(STALE),
-               branches=BR["n_remote"], branch_dest=dict(bdest), only_here=[x["path"] for x in only_here],
+               branches=BR["n_remote"], branch_dest=dict(bdest), apagar_ancestral=apagar_anc,
+               apagar_patch_equivalent_only=apagar_peq, only_here=[x["path"] for x in only_here],
                p114_total=len(hits), p114_live=len(live_p114), p114_live_files=sorted({h["file"] for h in live_p114}),
                p15_total=len(p15), p15_viva=cls_count["VIVA"], p15_hist=cls_count["HISTÓRICA"],
                bp_total=len(bp), abs_total=len(ab), abs_files=sorted({h["file"] for h in ab}),

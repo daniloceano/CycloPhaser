@@ -226,6 +226,10 @@
    ],
    "why": "table-row",
    "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    },
     "use_filter": {
      "process_vorticity": "'auto'",
      "determine_periods": "'auto'"
@@ -237,10 +241,6 @@
     "cutoff_low": {
      "process_vorticity": "168",
      "determine_periods": "168"
-    },
-    "replace_endpoints_with_lowpass": {
-     "process_vorticity": "0",
-     "determine_periods": "0"
     }
    },
    "text": "| `use_filter`, `cutoff_low`, `savgol_polynomial`, `replace_endpoints_with_lowpass` | unchanged (`'auto'`, 168, 3, 0) | unchanged |"
@@ -471,17 +471,14 @@
    ],
    "why": "table-row",
    "code": {
-    "incipient_plateau_tau": {
-     "get_periods": "0.2",
-     "determine_periods": "0.2"
+    "reclassify_index0": {
+     "get_periods": "True",
+     "determine_periods": "True",
+     "find_peaks_valleys": "False"
     },
-    "threshold_incipient_length": {
-     "get_periods": "0.4",
-     "determine_periods": "0.4"
-    },
-    "mature_amplitude_fraction": {
-     "get_periods": "0.9",
-     "determine_periods": "0.9"
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
     },
     "prominence": {
      "get_periods": "None",
@@ -492,18 +489,21 @@
      "get_periods": "0.075",
      "determine_periods": "0.075"
     },
-    "reclassify_index0": {
-     "get_periods": "True",
-     "determine_periods": "True",
-     "find_peaks_valleys": "False"
-    },
-    "threshold_intensification_length": {
-     "get_periods": "0.075",
-     "determine_periods": "0.075"
-    },
     "incipient_smooth_polyorder": {
      "get_periods": "3",
      "determine_periods": "3"
+    },
+    "mature_amplitude_fraction": {
+     "get_periods": "0.9",
+     "determine_periods": "0.9"
+    },
+    "incipient_plateau_tau": {
+     "get_periods": "0.2",
+     "determine_periods": "0.2"
+    },
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
     }
    },
    "text": "| the other 10 phase parameters (`threshold_intensification_length`, `_gap`, `threshold_decay_length`, `_gap`, `threshold_incipient_length`, `prominence`, `reclassify_index0`, `mature_amplitude_fraction`, `incipient_plat"
@@ -736,13 +736,13 @@
    ],
    "why": "assignment",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "mature_method": {
      "get_periods": "'amplitude'",
      "determine_periods": "'amplitude'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     }
    },
    "text": "`length_scale` is **not** removed. Under `mature_method=\"amplitude\"` it no longer"
@@ -801,13 +801,13 @@
    ],
    "why": "assignment",
    "code": {
-    "mature_method": {
-     "get_periods": "'amplitude'",
-     "determine_periods": "'amplitude'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
     }
    },
    "text": "under `\"plateau\"`, as `threshold_mature_length` is under `mature_method=\"amplitude\"`."
@@ -866,13 +866,13 @@
    ],
    "why": "assignment",
    "code": {
-    "incipient_plateau_signal": {
-     "get_periods": "'vorticity'",
-     "determine_periods": "'vorticity'"
-    },
     "incipient_method": {
      "get_periods": "'plateau'",
      "determine_periods": "'plateau'"
+    },
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
     }
    },
    "text": "`incipient_method=\"plateau\"` with `incipient_plateau_signal=\"vorticity\"`."
@@ -963,6 +963,10 @@
    ],
    "why": "assignment",
    "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    },
     "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
@@ -970,10 +974,6 @@
     "use_filter": {
      "process_vorticity": "'auto'",
      "determine_periods": "'auto'"
-    },
-    "cutoff_high": {
-     "process_vorticity": "18.0",
-     "determine_periods": "18.0"
     },
     "length_scale": {
      "get_periods": "'local'",
@@ -1371,19 +1371,19 @@
    ],
    "why": "assignment",
    "code": {
-    "use_filter": {
-     "process_vorticity": "'auto'",
-     "determine_periods": "'auto'"
-    },
-    "cutoff_high": {
-     "process_vorticity": "18.0",
-     "determine_periods": "18.0"
-    },
     "boundary_padding": {
      "process_vorticity": "'edge'",
      "determine_periods": "'edge'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
     }
    },
    "text": "0/51 bad cases with `use_filter=true`, `cutoff_high=18`, `boundary_padding=reflect`"
@@ -1562,15 +1562,15 @@
    ],
    "why": "assignment",
    "code": {
-    "use_filter": {
-     "process_vorticity": "'auto'",
-     "determine_periods": "'auto'"
-    },
     "boundary_padding": {
      "process_vorticity": "'edge'",
      "determine_periods": "'edge'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
     }
    },
    "text": "``boundary_padding=\"edge\"``, ``use_filter='auto'``) were calibrated ONLY"
@@ -2246,15 +2246,15 @@
    ],
    "why": "assignment",
    "code": {
-    "use_filter": {
-     "process_vorticity": "'auto'",
-     "determine_periods": "'auto'"
-    },
     "boundary_padding": {
      "process_vorticity": "'edge'",
      "determine_periods": "'edge'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
     }
    },
    "text": "``boundary_padding=\"edge\"``, ``use_filter='auto'``) were calibrated ONLY"
@@ -2523,13 +2523,13 @@
    ],
    "why": "assignment",
    "code": {
-    "mature_method": {
-     "get_periods": "'amplitude'",
-     "determine_periods": "'amplitude'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
     }
    },
    "text": "``mature_method=\"amplitude\"`` ignores ``threshold_mature_length``."
@@ -2543,15 +2543,15 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "boundary_padding": {
      "process_vorticity": "'edge'",
      "determine_periods": "'edge'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
@@ -2842,15 +2842,15 @@
    ],
    "why": "assignment",
    "code": {
-    "use_filter": {
-     "process_vorticity": "'auto'",
-     "determine_periods": "'auto'"
-    },
     "boundary_padding": {
      "process_vorticity": "'edge'",
      "determine_periods": "'edge'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
     }
    },
    "text": "``boundary_padding=\"edge\"``, ``use_filter='auto'``) were calibrated ONLY"
@@ -3200,13 +3200,13 @@
    ],
    "why": "assignment",
    "code": {
-    "mature_method": {
-     "get_periods": "'amplitude'",
-     "determine_periods": "'amplitude'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
     }
    },
    "text": "``mature_method=\"amplitude\"`` ignores ``threshold_mature_length``."
@@ -3220,15 +3220,15 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "boundary_padding": {
      "process_vorticity": "'edge'",
      "determine_periods": "'edge'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
@@ -3469,13 +3469,13 @@
    ],
    "why": "names+default",
    "code": {
-    "cutoff_high": {
-     "process_vorticity": "18.0",
-     "determine_periods": "18.0"
-    },
     "replace_endpoints_with_lowpass": {
      "process_vorticity": "0",
      "determine_periods": "0"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
     },
     "cutoff_low": {
      "process_vorticity": "168",
@@ -3538,13 +3538,13 @@
    ],
    "why": "assignment",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     }
    },
    "text": "Interaction with length_scale / threshold_mature_length: NONE — this window"
@@ -3558,13 +3558,13 @@
    ],
    "why": "assignment",
    "code": {
-    "mature_method": {
-     "get_periods": "'amplitude'",
-     "determine_periods": "'amplitude'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
     }
    },
    "text": "mature_method=\"amplitude\", by design (see the threshold_mature_length /"
@@ -3608,13 +3608,13 @@
    ],
    "why": "assignment",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "mature_method": {
      "get_periods": "'amplitude'",
      "determine_periods": "'amplitude'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     }
    },
    "text": "'length_scale'. Only used when mature_method=\"derivative\"."
@@ -3673,13 +3673,13 @@
    ],
    "why": "assignment",
    "code": {
-    "mature_method": {
-     "get_periods": "'amplitude'",
-     "determine_periods": "'amplitude'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
     }
    },
    "text": "threshold_mature_length is applied ONLY when mature_method=\"derivative\"."
@@ -3893,13 +3893,13 @@
    ],
    "why": "assignment",
    "code": {
-    "incipient_plateau_signal": {
-     "get_periods": "'vorticity'",
-     "determine_periods": "'vorticity'"
-    },
     "incipient_method": {
      "get_periods": "'plateau'",
      "determine_periods": "'plateau'"
+    },
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
     }
    },
    "text": "# `incipient_method=\"plateau\"` with `incipient_plateau_signal=\"vorticity\"`, in"
@@ -3913,13 +3913,13 @@
    ],
    "why": "assignment",
    "code": {
-    "mature_method": {
-     "get_periods": "'amplitude'",
-     "determine_periods": "'amplitude'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
     }
    },
    "text": "# `threshold_mature_length` under `mature_method=\"amplitude\"`."
@@ -5010,17 +5010,17 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
     },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
     },
-    "replace_endpoints_with_lowpass": {
-     "process_vorticity": "0",
-     "determine_periods": "0"
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     },
     "cutoff_low": {
      "process_vorticity": "168",
@@ -5104,13 +5104,13 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "* **Filtering defaults** — ``cutoff_high=18``, ``use_smoothing=False``,"
@@ -5124,15 +5124,15 @@
    ],
    "why": "assignment",
    "code": {
-    "use_smoothing_twice": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "boundary_padding": {
      "process_vorticity": "'edge'",
      "determine_periods": "'edge'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "``use_smoothing_twice=False``, ``boundary_padding=\"edge\"``,"
@@ -5177,11 +5177,11 @@
    ],
    "why": "names+default",
    "code": {
-    "plot_steps": {
+    "export_dict": {
      "get_periods": "False",
      "determine_periods": "False"
     },
-    "export_dict": {
+    "plot_steps": {
      "get_periods": "False",
      "determine_periods": "False"
     },
@@ -5356,13 +5356,13 @@
    ],
    "why": "assignment",
    "code": {
-    "use_filter": {
-     "process_vorticity": "'auto'",
-     "determine_periods": "'auto'"
-    },
     "replace_endpoints_with_lowpass": {
      "process_vorticity": "0",
      "determine_periods": "0"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
     }
    },
    "text": "\"(`if use_filter and replace_endpoints_with_lowpass:`).\")"
@@ -5501,14 +5501,14 @@
    ],
    "why": "assignment",
    "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    },
     "prominence_relative": {
      "get_periods": "0.3",
      "determine_periods": "0.3",
      "find_peaks_valleys": "None"
-    },
-    "decay_tail_amplitude_fraction": {
-     "get_periods": "0.3",
-     "determine_periods": "0.3"
     }
    },
    "text": "# params-15 (prominence_relative=0.3, decay_tail_amplitude_fraction=0.3), so an"
@@ -5629,13 +5629,13 @@
    ],
    "why": "assignment",
    "code": {
-    "mature_method": {
-     "get_periods": "'amplitude'",
-     "determine_periods": "'amplitude'"
-    },
     "threshold_mature_length": {
      "get_periods": "0.15",
      "determine_periods": "0.15"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
     }
    },
    "text": "| `threshold_mature_length` | 0.030 | Min. duration of the mature stage. Only used when `mature_method=\"derivative\"` — see below. |"
@@ -5704,13 +5704,13 @@
    ],
    "why": "table-row",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "threshold_incipient_length": {
      "get_periods": "0.4",
      "determine_periods": "0.4"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     }
    },
    "text": "| `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |"
@@ -5937,14 +5937,14 @@
    ],
    "why": "assignment",
    "code": {
-    "prominence": {
-     "get_periods": "None",
-     "determine_periods": "None",
-     "find_peaks_valleys": "None"
-    },
     "prominence_relative": {
      "get_periods": "0.3",
      "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    },
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
      "find_peaks_valleys": "None"
     }
    },
@@ -5990,14 +5990,14 @@
    ],
    "why": "assignment",
    "code": {
-    "prominence": {
-     "get_periods": "None",
-     "determine_periods": "None",
-     "find_peaks_valleys": "None"
-    },
     "prominence_relative": {
      "get_periods": "0.3",
      "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    },
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
      "find_peaks_valleys": "None"
     }
    },

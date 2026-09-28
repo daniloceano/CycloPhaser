@@ -71,9 +71,15 @@ def ftype(p):
     return "?"
 
 
+CONDA_ENV = re.compile(r"(?:~|/(?:Users|home)/[^/\s`'\"]+)/(?:mini|ana|micro)?(?:conda|forge|mamba)3?/envs/[\w.-]+")
+
+
 def mask(text):
-    """Keep absolute paths out of this front's own versioned outputs."""
-    return text.replace(str(ROOT), "<repo>").replace(str(Path.home()), "~")
+    """Keep absolute paths out of this front's own versioned outputs:
+    conda env -> <env>, repository root -> <repo>, home -> ~."""
+    text = text.replace(str(ROOT), "<repo>")
+    text = CONDA_ENV.sub("<env>", text.replace(str(Path.home()), "~"))
+    return text
 
 
 def grep_fixed(s):

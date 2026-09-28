@@ -85,6 +85,14 @@ KEEP = {
         "citado por teste vivo (test_synthetic_lifecycles.py); tabela por fronteira",
     "research/labels/front_g/front_g_deviation_table.py":
         "gerador da tabela citada por teste vivo",
+    "research/incipient_plateau/measure_incipient_smoothing.py":
+        "citado por comentário vivo do pacote (o alvo do comentário tem de existir; linha em 'registrado em')",
+}
+
+# Anchors shown in the "registrado em" column of a KEPT file: who cites it.
+KEEP_ANCHORS = {
+    "research/incipient_plateau/measure_incipient_smoothing.py":
+        [("cyclophaser/find_stages.py", "research/incipient_plateau/measure_incipient_smoothing.py")],
 }
 
 # Destination overrides that are NOT "manter" (dest, reason).
@@ -494,16 +502,20 @@ BP_NATURE = [
 # 0.3 Branches: proposed destination + reason (judgement). Anything not listed
 # falls to the rule in make_manifest.py (merged → apagar; else decidir).
 BRANCH = {
+    # Destinations follow Danilo's approved decisions (MANIFEST "Decisões aprovadas",
+    # numbered there). "tag de arquivo" = annotated tag archive/* at the tip before the
+    # remote branch may go; deleting a remote branch needs per-branch authorisation (Passo 6).
     "develop-v2.1": ("manter", "branch de desenvolvimento"),
     "master": ("manter", "branch de release"),
-    "diag/front-b-distance-inert": ("apagar", "patch-equivalente já em develop (git cherry '-')"),
-    "diag/series-sha256-mismatch": ("manter como registro", "script + relatório do item 10 só existem aqui; future_work cita a branch"),
-    "feat/label-tab-toplevel": ("decidir com o Danilo", "contém 3 re-rotulagens de treino do Danilo (0c63145) que NUNCA chegaram a develop; código da UI superado"),
-    "fix/idx0-boundary-extremum-type": ("manter como registro", "artefatos de Front A (6060c6d) contra os quais o item 27 comparou; commit marcado NÃO MERGEAR"),
-    "fix/inspector-min-depth-params": ("decidir com o Danilo", "superada por 52ecb04 (item 30a); future_work diz que o destino é desta frente"),
-    "joss-submission": ("manter como registro", "fonte do artigo JOSS (paper/); nada disso está em develop"),
-    "research/item20c-duration-ratio": ("decidir com o Danilo", "o texto do item 23 de future_work só existe nesta branch (develop pula de 22 para 24)"),
-    "research/v3-topology-proxy": ("decidir com o Danilo", "o texto do item 18 de future_work só existe nesta branch; citada por Front B"),
+    "chore/repo-cleanup": ("manter", "branch desta frente (em andamento)"),
+    "diag/front-b-distance-inert": ("tag de arquivo", "patch-equivalente a develop (git cherry só '-'), mas NÃO ancestral: o hash 491a5d0 é citado nos registros (ver 'hashes citados') e só resolve enquanto houver uma ref"),
+    "diag/series-sha256-mismatch": ("tag de arquivo", "decisão 6: branch de registro — script + relatório do item 10 só existem aqui; future_work cita a branch"),
+    "feat/label-tab-toplevel": ("tag de arquivo", "decisão 1: 3 re-rotulagens de treino (0c63145) NÃO são recuperadas; entram como pendência aberta no documento único (Passo 2); código da UI superado"),
+    "fix/idx0-boundary-extremum-type": ("tag de arquivo", "decisão 6: branch de registro — artefatos de Front A (6060c6d) contra os quais o item 27 comparou; commit marcado NÃO MERGEAR"),
+    "fix/inspector-min-depth-params": ("tag de arquivo", "decisão 5: superada por 52ecb04 (item 30a)"),
+    "joss-submission": ("tag de arquivo", "decisão 6: branch de registro — fonte do artigo JOSS (paper/); nada disso está em develop"),
+    "research/item20c-duration-ratio": ("tag de arquivo (após Passo 2)", "decisão 5: o texto do item 23 de future_work só existe aqui; entra no documento único (Passo 2), depois tag"),
+    "research/v3-topology-proxy": ("tag de arquivo (após Passo 2)", "decisão 5: o texto do item 18 de future_work só existe aqui; entra no documento único (Passo 2), depois tag"),
 }
 
 # --------------------------------------------------------------------------- #

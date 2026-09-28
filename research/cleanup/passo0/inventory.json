@@ -1,7 +1,7 @@
 {
- "head": "06d85504474b72a894b4e7f72b2944fc577fd139",
- "n_tracked_total": 537,
- "n_tracked_excluding_cleanup": 537,
+ "head": "c080f4daf4ce06c610bb57520aa1ddfad5734985",
+ "n_tracked_total": 536,
+ "n_tracked_excluding_cleanup": 536,
  "files": [
   {
    "path": ".circleci/config.yml",
@@ -16,15 +16,8 @@
   {
    "path": ".gitignore",
    "type": "config",
-   "last_commit": "25a113a",
-   "last_date": "2026-09-10",
-   "refs": []
-  },
-  {
-   "path": ".pypirc",
-   "type": "config",
-   "last_commit": "e412b72",
-   "last_date": "2023-08-29",
+   "last_commit": "c080f4d",
+   "last_date": "2026-09-28",
    "refs": []
   },
   {
@@ -13519,7 +13512,7 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/REPORT.md",
    "line": 14,
-   "text": "`sys.prefix` = `~/miniconda3/envs/cyclophaser`"
+   "text": "`sys.prefix` = `<env>`"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log",
@@ -13529,12 +13522,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log",
@@ -13579,12 +13572,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log",
    "line": 6,
-   "text": "sys.executable : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log",
    "line": 7,
-   "text": "sys.prefix     : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix     : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log",
@@ -13619,12 +13612,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log",
    "line": 6,
-   "text": "sys.executable : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log",
    "line": 7,
-   "text": "sys.prefix     : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix     : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log",
@@ -13644,12 +13637,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log",
    "line": 6,
-   "text": "sys.executable : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log",
    "line": 7,
-   "text": "sys.prefix     : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix     : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log",
@@ -13659,12 +13652,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log",
@@ -13694,12 +13687,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log",
@@ -13729,12 +13722,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log",
@@ -13764,12 +13757,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log",
@@ -13799,12 +13792,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log",
@@ -13834,12 +13827,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log",
@@ -13869,12 +13862,12 @@
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log",
@@ -13904,27 +13897,27 @@
   {
    "file": "research/labels/diagnostics/frontA_reverify/REPORT.md",
    "line": 28,
-   "text": "| `sys.prefix` | `~/miniconda3/envs/cyclophaser` |"
+   "text": "| `sys.prefix` | `<env>` |"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log",
    "line": 7,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log",
    "line": 8,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log",
    "line": 7,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log",
    "line": 8,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log",
@@ -13934,22 +13927,22 @@
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log",
    "line": 7,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log",
    "line": 8,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log",
    "line": 7,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log",
    "line": 8,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log",
@@ -13964,12 +13957,12 @@
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1b_census.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1b_census.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/1b_census.log",
@@ -14044,12 +14037,12 @@
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/2_census.log",
    "line": 5,
-   "text": "sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "sys.executable       : <env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/2_census.log",
    "line": 6,
-   "text": "sys.prefix           : ~/miniconda3/envs/cyclophaser"
+   "text": "sys.prefix           : <env>"
   },
   {
    "file": "research/labels/diagnostics/frontA_reverify/outputs/2_census.log",
@@ -14089,7 +14082,7 @@
   {
    "file": "research/labels/diagnostics/frontD/REPORT.md",
    "line": 11,
-   "text": "(`~/miniconda3/envs/cyclophaser/bin/python`), with"
+   "text": "(`<env>/bin/python`), with"
   },
   {
    "file": "research/labels/diagnostics/frontD/REPORT.md",
@@ -14119,7 +14112,7 @@
   {
    "file": "research/labels/diagnostics/item19/PROVENANCE.md",
    "line": 23,
-   "text": "~/miniconda3/envs/cyclophaser/bin/python"
+   "text": "<env>/bin/python"
   },
   {
    "file": "research/labels/diagnostics/item19/PROVENANCE.md",
@@ -14129,7 +14122,7 @@
   {
    "file": "research/labels/diagnostics/item19/REPORT.md",
    "line": 23,
-   "text": "| environment | conda `cyclophaser`, `~/miniconda3/envs/cyclophaser/bin/python` |"
+   "text": "| environment | conda `cyclophaser`, `<env>/bin/python` |"
   },
   {
    "file": "research/labels/diagnostics/item19/REPORT.md",
@@ -14139,12 +14132,12 @@
   {
    "file": "research/labels/diagnostics/item20b/REPORT.md",
    "line": 22,
-   "text": "| environment | conda env `cyclophaser`, `~/miniconda3/envs/cyclophaser/bin/python` |"
+   "text": "| environment | conda env `cyclophaser`, `<env>/bin/python` |"
   },
   {
    "file": "research/labels/diagnostics/item20b/REPORT_stage2.md",
    "line": 22,
-   "text": "| environment | conda env `cyclophaser`, `~/miniconda3/envs/cyclophaser/bin/python` |"
+   "text": "| environment | conda env `cyclophaser`, `<env>/bin/python` |"
   },
   {
    "file": "research/labels/diagnostics/item20b/analyse_20b.txt",

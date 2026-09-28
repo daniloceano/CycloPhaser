@@ -42,3 +42,7 @@ echo "EXIT $?" >> "$OUT/baseline_digest_raw.txt"
 LEDGER=research/labels/diagnostics/front_b/default_behaviour_sha256.txt
 git diff -- "$LEDGER" > "$OUT/baseline_digest_appended_record.diff"
 git checkout -- "$LEDGER"
+
+# No machine path in a versioned output (Passo 1 correction): repository root ->
+# <repo>, conda env -> <env>, home -> ~. Declared in anonymize_log.json.
+"$PY" research/cleanup/passo0/anonymize.py "$OUT"/baseline_env.txt "$OUT"/baseline_suite_raw.txt "$OUT"/baseline_digest_raw.txt

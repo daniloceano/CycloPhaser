@@ -1,11 +1,12 @@
 # Passo 0 — Inventário: manifesto de arquivos, branches e rastreabilidade
 
-**Frente:** limpeza do repositório + default `boundary_padding` · **Passo 0 — somente leitura.** Nada fora de `research/cleanup/` foi removido, movido, renomeado ou editado. Este documento é a proposta para o Danilo aprovar antes de qualquer mudança.
+**Frente:** limpeza do repositório + default `boundary_padding` · **Passo 0 — somente leitura**, corrigido no Passo 1. No Passo 0 nada fora de `research/cleanup/` foi removido, movido, renomeado ou editado; as decisões do Danilo sobre esta proposta estão em "Decisões aprovadas".
 
-* Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `06d8550` (ponta esperada `06d8550`: confere).
+* Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `06d8550` (ponta esperada `06d8550`: confere); inventário regerado em HEAD `c080f4d`.
+* **Correções do Passo 1** (aprovadas pelo Danilo): `.pypirc` saiu do versionamento (commit próprio, conteúdo não lido); branches com equivalência de patch separadas das ancestrais; `measure_incipient_smoothing.py` → manter; saídas de `passo0/` sem caminhos absolutos; decisões aprovadas registradas. Seções 0.1–0.4 regeradas pelos scripts.
 * Gerado por `research/cleanup/passo0/make_manifest.py` a partir de `inventory.py`, `branches.py`, `defaults_in_text.py` (mecânico) e `judgements.py` (julgamento: destino, motivo, achado). Toda contagem e todo `arquivo:linha` abaixo é regerado pelo script; nenhum número foi digitado.
 * Âncoras de registro são resolvidas por texto (arquivo + trecho) e o render aborta se o trecho faltar ou for ambíguo.
-* `.pypirc` foi excluído de toda leitura de conteúdo (é arquivo de credenciais; ver decisões).
+* `.pypirc` foi excluído de toda leitura de conteúdo (é arquivo de credenciais) e, no Passo 1, saiu do versionamento (decisão 2).
 
 ## 0.1 Linha de base (mesma máquina, mesma sessão)
 
@@ -18,20 +19,20 @@ Previsões declaradas no prompt da frente antes da medição; não ajustadas.
 | digest `front_b/default_behaviour_hash.py` | começa por `3a6de265` | `3a6de265…` (47 séries) | sim |
 
 Linha final bruta da suíte: `1438 passed, 1 skipped, 29 deselected, 89 warnings in 464.42s (0:07:44)`. Ambiente (`baseline_env.txt`): HEAD: 06d85504474b72a894b4e7f72b2944fc577fd139; cyclophaser.__file__: <repo>/cyclophaser/__init__.py.
-As saídas brutas em `passo0/baseline_*.txt` contêm caminhos absolutos da máquina por natureza (proveniência); os arquivos derivados desta frente os mascaram como `<repo>` e `~`.
+**Anonimização declarada (Passo 1).** Nenhuma saída versionada desta frente contém caminho absoluto: raiz do repositório → `<repo>`, ambiente conda (absoluto, relativo à raiz ou com `~`) → `<env>`, home → `~`. Feita por `passo0/anonymize.py` (idempotente); `inventory.py` aplica a mesma regra ao que grava e `run_baseline.sh` chama o anonimizador ao fim. Substituições por arquivo (`passo0/anonymize_log.json`): `MANIFEST.md`: <env> <- env prefix ×41; `passo0/baseline_digest_raw.txt`: <repo> <- repo root ×2; `passo0/baseline_env.txt`: <env> <- env prefix ×2, <repo> <- repo root ×1; `passo0/baseline_suite_raw.txt`: <env> <- env prefix ×8, <repo> <- repo root ×1; `passo0/inventory.json`: <env> <- env prefix ×41.
 "Suíte completa" = `-m "not browser"`: CLAUDE.md proíbe rodar `tests/test_label_browser.py`. Só passed/failed são reportados (regra fixa). Saídas brutas: `passo0/baseline_suite_raw.txt`, `passo0/baseline_digest_raw.txt`, `passo0/baseline_env.txt`; comando: `passo0/run_baseline.sh`.
 
 **Efeito colateral tratado:** o gerador canônico ANEXA um registro ao seu livro-razão `research/labels/diagnostics/front_b/default_behaviour_sha256.txt`. Como este passo não edita nada fora de `research/cleanup/`, o registro anexado foi guardado em `passo0/baseline_digest_appended_record.diff` e o livro-razão restaurado para HEAD. Na rodada medida isso foi feito à mão logo após o script; `run_baseline.sh` foi depois atualizado para fazer o mesmo sozinho.
 
 ## 0.2 Manifesto de arquivos
 
-Arquivos versionados em HEAD: **537** (git ls-files, excluindo `research/cleanup/`, i.e. a árvore de develop). Linhas do manifesto: 435 (426 individuais + 9 grupos homogêneos cobrindo 111 arquivos).
+Arquivos versionados em HEAD: **536** (git ls-files, excluindo `research/cleanup/`, i.e. a árvore de develop). Linhas do manifesto: 434 (425 individuais + 9 grupos homogêneos cobrindo 111 arquivos).
 
 | destino | arquivos |
 |---|---|
-| manter | 221 |
+| manter | 222 |
 | consolidar | 40 |
-| remover | 276 |
+| remover | 274 |
 
 Colunas: caminho · tipo · último commit (hash data) · contém achado? · quem o referencia (arquivo(nº de linhas); `diag/` = `research/labels/diagnostics/`; lista completa com linhas em `passo0/inventory.json`) · destino · motivo · seção de destino no documento único (se consolidar/achado a mover) · onde o achado já está registrado.
 
@@ -54,8 +55,7 @@ Seções propostas para o documento único (Passo 2):
 
 | caminho | tipo | último commit | achado? | referenciado por | destino | motivo | seção | registrado em |
 |---|---|---|---|---|---|---|---|---|
-| `.gitignore` | config | `25a113a` 2026-09-10 | não | — | **manter** | config de versionamento | — | — |
-| `.pypirc` | config | `e412b72` 2023-08-29 | não | — | **remover** | arquivo de credenciais do PyPI versionado; NÃO LIDO neste inventário — Danilo verifica o conteúdo e, se houver token, revoga-o antes | — | — |
+| `.gitignore` | config | `c080f4d` 2026-09-28 | não | — | **manter** | config de versionamento | — | — |
 | `.python-version` | config | `0df0ef5` 2026-06-16 | não | .gitignore(1), tools/calibration_app/requirements.txt(1) | **manter** | versão do Python do deploy do app (citado em tools/calibration_app/requirements.txt) | — | — |
 | `.readthedocs.yml` | config | `a1ff4d7` 2023-12-18 | não | — | **manter** | build da documentação | — | — |
 | `CHANGELOG.md` | doc de usuário | `cc5519e` 2026-09-28 | sim — mudanças de comportamento por versão, com tabelas de defaults | docs/future_work.md(1), docs/usage.rst(1), diag/frontA_idx0_c2/REPORT.md(1), diag/frontC/REPORT.md(1), +1 | **manter** | doc de usuário; [Unreleased] é vivo | — | — |
@@ -65,7 +65,7 @@ Seções propostas para o documento único (Passo 2):
 | `README.md` | doc de usuário | `7a14eb0` 2026-09-11 | não | docs/future_work.md(7), research/labels/README.md(2), diag/item30/REPORT_part3.md(2), diag/item31/recovery_table.py(2), +4 | **manter** | doc de usuário (entrada do pacote no PyPI) | — | — |
 | `environment.yml` | config | `d876a71` 2026-09-11 | não | docs/future_work.md(7), .circleci/config.yml(1), README.md(1), tests/test_app_distance_removed.py(1) | **manter** | ambiente conda canônico (regra fixa) | — | — |
 | `pyproject.toml` | config | `b7a1c04` 2026-06-15 | não | — | **manter** | build-system | — | — |
-| `requirements.txt` | config | `42af263` 2024-10-29 | não | environment.yml(4), docs/future_work.md(3), docs/installation.rst(2), .readthedocs.yml(1), +3 | **manter** | toolchain de docs segundo environment.yml; revisar sobreposição com docs/requirements.txt e setup.py no Passo 1 | — | — |
+| `requirements.txt` | config | `42af263` 2024-10-29 | não | environment.yml(4), docs/future_work.md(3), docs/installation.rst(2), .readthedocs.yml(1), +3 | **manter** | fica (decisão 10): as instruções de instalação/contribuição dos docs de usuário o leem (ver Dados gerados) | — | — |
 | `runtime.txt` | config | `3d25bd5` 2026-06-15 | não | — | **manter** | versão do Python do deploy | — | — |
 | `setup.py` | config | `f423476` 2026-06-15 | não | environment.yml(2), tools/calibration_app/app.py(2), CHANGELOG.md(1), README.md(1), +4 | **manter** | empacotamento (versão, dependências) | — | — |
 
@@ -140,7 +140,7 @@ Seções propostas para o documento único (Passo 2):
 | `research/incipient_plateau/incipient_smoothing_sweep.csv` | saída gerada | `e0b1b49` 2026-09-04 | sim — varredura de janela/critério da sonda incipient | research/incipient_plateau/measure_incipient_smoothing.py(2), research/incipient_plateau/REPORT_incipient_smoothing.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S02 | `research/incipient_plateau/REPORT_incipient_smoothing.md:96` |
 | `research/incipient_plateau/incipient_smoothing_tables.txt` | saída gerada | `e0b1b49` 2026-09-04 | sim — tabelas da varredura de suavização | research/incipient_plateau/measure_incipient_smoothing.py(2), research/incipient_plateau/REPORT_incipient_smoothing.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S02 | `research/incipient_plateau/REPORT_incipient_smoothing.md:157` |
 | `research/incipient_plateau/measure_incipient.py` | script de diagnóstico | `0fbacc8` 2026-09-04 | não | docs/future_work.md(1), research/incipient_plateau/REPORT_incipient_characterisation.md(1), research/incipient_plateau/REPORT_incipient_smoothing.md(1), research/incipient_plateau/gen_geometric_vs_plateau.py(1), +1 | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
-| `research/incipient_plateau/measure_incipient_smoothing.py` | script de diagnóstico | `e0b1b49` 2026-09-04 | não | CHANGELOG.md(1), cyclophaser/find_stages.py(1), research/incipient_plateau/REPORT_incipient_smoothing.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
+| `research/incipient_plateau/measure_incipient_smoothing.py` | script de diagnóstico | `e0b1b49` 2026-09-04 | não | CHANGELOG.md(1), cyclophaser/find_stages.py(1), research/incipient_plateau/REPORT_incipient_smoothing.md(1) | **manter** | citado por comentário vivo do pacote (o alvo do comentário tem de existir; linha em 'registrado em') | — | `cyclophaser/find_stages.py:905` |
 | `research/incipient_plateau/summary_tables.txt` | saída gerada | `0fbacc8` 2026-09-04 | sim — tabelas-resumo da caracterização | research/incipient_plateau/measure_incipient.py(2), research/incipient_plateau/REPORT_incipient_characterisation.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S02 | `research/incipient_plateau/REPORT_incipient_characterisation.md:302` |
 
 ### `research/inert_params`
@@ -1328,10 +1328,10 @@ Localizador heurístico (`passo0/defaults_in_text.py`) — **364 linhas em 13 ar
 |---|---|
 | `docs/future_work.md:2658` | paths (`/Users/…`) in a public repository. |
 | `docs/future_work.md:2724` | `/Users/…` paths) was honoured for this front's own outputs — its three scripts |
-| `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:14` | `sys.prefix` = `~/miniconda3/envs/cyclophaser` |
+| `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:14` | `sys.prefix` = `<env>` |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
@@ -1340,85 +1340,85 @@ Localizador heurístico (`passo0/defaults_in_text.py`) — **364 linhas em 13 ar
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.json:3` | "cyclophaser": "<repo>/cyclophaser/__init__.py", |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:4` | cwd            : <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:5` | worktree       : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:6` | sys.executable : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:7` | sys.prefix     : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:6` | sys.executable : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:7` | sys.prefix     : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:8` | cyclophaser    : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.json:2` | "worktree": "<repo>", |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.json:3` | "cyclophaser": "<repo>/cyclophaser/__init__.py", |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:4` | cwd            : <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:5` | worktree       : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:6` | sys.executable : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:7` | sys.prefix     : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:6` | sys.executable : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:7` | sys.prefix     : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:8` | cyclophaser    : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log:4` | cwd            : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log:6` | sys.executable : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log:7` | sys.prefix     : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log:6` | sys.executable : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log:7` | sys.prefix     : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log:13` | ASSERT OK: package loads from <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log:13` | ASSERT OK: package loads from <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log:13` | ASSERT OK: package loads from <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log:13` | ASSERT OK: package loads from <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log:13` | ASSERT OK: package loads from <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log:13` | ASSERT OK: package loads from <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:9` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:11` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:13` | ASSERT OK: package loads from <repo> |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log:17` | current   : <repo>/cyclophaser/__init__.py |
-| `research/labels/diagnostics/frontA_reverify/REPORT.md:28` | \| `sys.prefix` \| `~/miniconda3/envs/cyclophaser` \| |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log:7` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log:8` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log:7` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log:8` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_reverify/REPORT.md:28` | \| `sys.prefix` \| `<env>` \| |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log:7` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log:8` | sys.prefix           : <env> |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log:7` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log:8` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log:24` | config: ~/Downloads/cyclophaser_params-9.yaml |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log:7` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log:8` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log:7` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log:8` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log:7` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log:8` | sys.prefix           : <env> |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log:7` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log:8` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log:26` | config: ~/Downloads/cyclophaser_params-9.yaml |
 | `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:8` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log:10` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
@@ -1433,8 +1433,8 @@ Localizador heurístico (`passo0/defaults_in_text.py`) — **364 linhas em 13 ar
 | `research/labels/diagnostics/frontA_reverify/outputs/1b_eval_params9.log:3` | config: <repo>/research/labels/configs/cyclophaser_params-9.yaml |
 | `research/labels/diagnostics/frontA_reverify/outputs/2_attribution.log:42` | wrote <repo>/research/labels/diagnostics/frontA_reverify/outputs/step2_attribution.csv |
 | `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:4` | cwd                  : <repo> |
-| `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:5` | sys.executable       : ~/miniconda3/envs/cyclophaser/bin/python |
-| `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:6` | sys.prefix           : ~/miniconda3/envs/cyclophaser |
+| `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:5` | sys.executable       : <env>/bin/python |
+| `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:6` | sys.prefix           : <env> |
 | `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:7` | cyclophaser.__file__ : <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:8` | determine_periods.py : <repo>/cyclophaser/determine_periods.py |
 | `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:10` | find_stages.py       : <repo>/cyclophaser/find_stages.py |
@@ -1442,18 +1442,18 @@ Localizador heurístico (`passo0/defaults_in_text.py`) — **364 linhas em 13 ar
 | `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:14` | config: <repo>/research/labels/configs/cyclophaser_params-13.yaml |
 | `research/labels/diagnostics/frontA_reverify/outputs/2_census.log:36` | wrote 4 files to <repo>/research/labels/diagnostics/frontA_reverify/outputs with tag 'step2_params13' |
 | `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_fix_eval_before.txt:3` | config: ~/Downloads/cyclophaser_params-9.yaml |
-| `research/labels/diagnostics/frontD/REPORT.md:11` | (`~/miniconda3/envs/cyclophaser/bin/python`), with |
+| `research/labels/diagnostics/frontD/REPORT.md:11` | (`<env>/bin/python`), with |
 | `research/labels/diagnostics/frontD/REPORT.md:537` | paths (`/Users/…`) in a public repository. |
 | `research/labels/diagnostics/frontD/anchoring.txt:64` | wrote <repo>/research/labels/diagnostics/frontD/anchoring.json |
 | `research/labels/diagnostics/frontD/census.txt:74` | wrote <repo>/research/labels/diagnostics/frontD/census.json |
 | `research/labels/diagnostics/frontD/constant_baseline.txt:155` | wrote <repo>/research/labels/diagnostics/frontD/constant_baseline.json |
 | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:20` | `<repo>/cyclophaser/__init__.py` |
-| `research/labels/diagnostics/item19/PROVENANCE.md:23` | ~/miniconda3/envs/cyclophaser/bin/python |
+| `research/labels/diagnostics/item19/PROVENANCE.md:23` | <env>/bin/python |
 | `research/labels/diagnostics/item19/PROVENANCE.md:25` | <repo>/cyclophaser/__init__.py |
-| `research/labels/diagnostics/item19/REPORT.md:23` | \| environment \| conda `cyclophaser`, `~/miniconda3/envs/cyclophaser/bin/python` \| |
+| `research/labels/diagnostics/item19/REPORT.md:23` | \| environment \| conda `cyclophaser`, `<env>/bin/python` \| |
 | `research/labels/diagnostics/item19/REPORT.md:24` | \| cyclophaser imported from \| `<repo>/cyclophaser/__init__.py` — the working tree, **not** the published 1.7.3 \| |
-| `research/labels/diagnostics/item20b/REPORT.md:22` | \| environment \| conda env `cyclophaser`, `~/miniconda3/envs/cyclophaser/bin/python` \| |
-| `research/labels/diagnostics/item20b/REPORT_stage2.md:22` | \| environment \| conda env `cyclophaser`, `~/miniconda3/envs/cyclophaser/bin/python` \| |
+| `research/labels/diagnostics/item20b/REPORT.md:22` | \| environment \| conda env `cyclophaser`, `<env>/bin/python` \| |
+| `research/labels/diagnostics/item20b/REPORT_stage2.md:22` | \| environment \| conda env `cyclophaser`, `<env>/bin/python` \| |
 | `research/labels/diagnostics/item20b/analyse_20b.txt:6` | wrote <repo>/research/labels/diagnostics/item20b/depth_table.csv (46 generating valleys) |
 | `research/labels/diagnostics/item30/figs_cf_output.txt:1` | cyclophaser.__file__ = <repo>/cyclophaser/__init__.py |
 | `research/labels/diagnostics/item30/figs_cf_output.txt:2` | layer_inspector.__file__ = <repo>/tools/calibration_app/layer_inspector.py |
@@ -1510,59 +1510,64 @@ O app (Benchmark) reporta os dois lado a lado, nomeados (`benchmark_core.py`: SE
 
 ## 0.3 Manifesto de branches (somente leitura; nada apagado)
 
-Remotas: **40** (`origin/*`, sem `HEAD`), ponta de develop `06d8550`. "em develop" = `git merge-base --is-ancestor`; à frente/atrás contra `origin/develop-v2.1`; citações = `git grep` do nome da branch na árvore de HEAD. Dados: `passo0/branches.json`.
+Remotas: **41** (`origin/*`, sem `HEAD`), ponta de develop `06d8550`. "em develop" = `git merge-base --is-ancestor`; à frente/atrás contra `origin/develop-v2.1`; citações = `git grep` do nome da branch na árvore de HEAD. Dados: `passo0/branches.json`.
 
-| branch | ponta | em develop? | +à frente/−atrás | conteúdo (arquivos alterados desde a base) | citada em | destino proposto | motivo |
-|---|---|---|---|---|---|---|---|
-| `chore/b-remove-distance` | `2bb2bad` 2026-09-17 — test(front-b): drop a Streamlit-internal attribute from the distance-r | sim | +0/−103 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `develop-v2.1` | `06d8550` 2026-09-28 — docs(item31): registrar o merge (0a469eb) no item 31 — suíte 1438/0 e  | sim | +0/−0 | — (nada fora de develop) | `CHANGELOG.md:297`, `CHANGELOG.md:402`, `docs/future_work.md:400` +118 | **manter** | branch de desenvolvimento |
-| `diag/front-b-distance-inert` | `491a5d0` 2026-09-16 — diag(front-b): record the read-only diagnosis — `distance` is inert at | **não** | +1/−106 | 21 arq.: research/labels/diagnostics | — | **apagar** | patch-equivalente já em develop (git cherry '-') |
-| `diag/series-sha256-mismatch` | `3ae6082` 2026-09-10 — diag(labels): measure series_sha256 mismatch for the 12 void synthetic | **não** | +1/−133 | 3 arq.: research/labels/diagnostics | `docs/future_work.md:846` | **manter como registro** | script + relatório do item 10 só existem aqui; future_work cita a branch |
-| `docs/front-a-findings` | `2ee2414` 2026-09-09 — docs: record Front A findings (index-0 boundary extremum type) | sim | +0/−143 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/front-f-i-ii-iii-findings` | `3aae83d` 2026-09-10 — docs: record F(i)(ii) and F(iii) findings in future_work.md | sim | +0/−134 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/front-g-closing` | `1ccb3db` 2026-09-15 — docs: front G closing record — verification, margin decision, mature b | sim | +0/−111 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/front-g-series-sha256-findings` | `02fe6f7` 2026-09-10 — docs: record the series_sha256 void-label investigation in future_work | sim | +0/−132 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/frontC-hash-provenance` | `e1b29cc` 2026-09-22 — docs(frontC): unattribute the legacy hash record, prove the layout dif | sim | +0/−74 | — (nada fora de develop) | `docs/future_work.md:2418` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/item13-close` | `1b99a57` 2026-09-23 — docs(item13): fechar o item 13 — resíduo "Frente E" encerrado por proc | sim | +0/−62 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/memory-g-e-closing` | `0f680c5` 2026-09-16 — docs: correct the mature rationale and the blindness claim in CLAUDE.m | sim | +0/−107 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/session-findings-register` | `e2ccdad` 2026-09-11 — docs: register the environment-dependence finding and the shadowed-det | sim | +0/−124 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `docs/session-findings-register-2` | `a06a2aa` 2026-09-11 — docs: register ABERTO 1, the CSV-format debt, and the CI coverage gap | sim | +0/−122 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `feat/app-flexible-track-reader` | `ba9af46` 2026-09-24 — docs(item29): registro final antes do merge — premissa (a) caída, dado | sim | +0/−50 | — (nada fora de develop) | `docs/future_work.md:3212`, `docs/future_work.md:3367` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `feat/dedicated-conda-env` | `d876a71` 2026-09-11 — docs: correct item 11(c)'s premise, decide the env front's gate, docum | sim | +0/−126 | — (nada fora de develop) | `docs/future_work.md:913`, `docs/future_work.md:1019` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `feat/freeze-synthetic-series` | `6e05467` 2026-09-10 — docs: record the synthetic-series-freeze front as closed, PASS (item 1 | sim | +0/−130 | — (nada fora de develop) | `docs/future_work.md:936` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `feat/front-g-manual-labels-source` | `727efd2` 2026-09-15 — test(synthetic): score phase timing against manual labels (front G) | sim | +0/−112 | — (nada fora de develop) | `docs/future_work.md:1397` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `feat/label-tab-navigation-overlays` | `f300420` 2026-09-14 — fix(label-tab): wrong-boundary drag, stale test selectors, viewport ov | sim | +0/−115 | — (nada fora de develop) | `docs/future_work.md:1300`, `docs/future_work.md:1479` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `feat/label-tab-toplevel` | `0c63145` 2026-09-15 — data: save 4 manual label re-labels made through the app (real, train  | **não** | +2/−113 | 6 arq.: research/labels/manual_labels.yaml, tests/browser_harness.py, tests/test_label_apptest.py, tests/test_manual_labels.py | — | **decidir com o Danilo** | contém 3 re-rotulagens de treino do Danilo (0c63145) que NUNCA chegaram a develop; código da UI superado |
-| `fix/app-inert-params-signaling` | `20e003d` 2026-09-10 — docs: record the pytest gate exception before merging F(iii) | sim | +0/−137 | — (nada fora de develop) | `research/inert_params/REPORT_inertia_sweep.md:3` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `fix/idx0-boundary-extremum-type` | `6060c6d` 2026-09-09 — REFUTADO - NAO MERGEAR: forcar idx0 a peak, investigacao encerrada sem | **não** | +1/−144 | 31 arq.: cyclophaser/determine_periods.py, research/labels/diagnostics | `docs/future_work.md:579`, `docs/future_work.md:1121`, `research/labels/diagnostics/frontA_reverify/REPORT.md:70` +1 | **manter como registro** | artefatos de Front A (6060c6d) contra os quais o item 27 comparou; commit marcado NÃO MERGEAR |
-| `fix/inspector-crossing-layer-and-legend` | `7133570` 2026-09-09 — fix(app): inspector rel panel names the active signal and shows the cr | sim | +0/−141 | — (nada fora de develop) | — | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `fix/inspector-depth-params` | `52ecb04` 2026-09-25 — test(item30a): fixar só séries de treino nos testes de piso; guarda do | sim | +0/−45 | — (nada fora de develop) | `docs/future_work.md:3641`, `docs/future_work.md:3749`, `docs/future_work.md:3750` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `fix/inspector-min-depth-params` | `a2b639e` 2026-09-23 — fix(app): aceitar mature_min_depth e intensification_min_depth no Insp | **não** | +1/−60 | 3 arq.: docs/future_work.md, tests/test_layer_inspector.py, tools/calibration_app/layer_inspector.py | `docs/future_work.md:3715`, `docs/future_work.md:3761` | **decidir com o Danilo** | superada por 52ecb04 (item 30a); future_work diz que o destino é desta frente |
-| `frontA-idx0-c2` | `e97eb17` 2026-09-24 — fix(item28): pontuar só o TREINO, documentar o no-op sem filtro, atrib | sim | +0/−54 | — (nada fora de develop) | `docs/future_work.md:2941`, `docs/future_work.md:3194`, `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:8` +1 | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `joss-submission` | `8348caf` 2024-10-29 — (auto) Paper PDF Draft | **não** | +26/−254 | 8 arq.: .github/workflows/generate_pdf.yml, paper/density_map_Aggregate.png, paper/life-cycle.png, paper/life_cycle.py | — | **manter como registro** | fonte do artigo JOSS (paper/); nada disso está em develop |
-| `master` | `0df0ef5` 2026-06-16 — fix(deploy): pin Python via .python-version and relax app dependency p | sim | +0/−194 | — (nada fora de develop) | `.circleci/config.yml:111`, `README.md:17`, `docs/conf.py:4` +16 | **manter** | branch de release |
-| `research/frontA-reverify` | `077d273` 2026-09-23 — research(frontA'): reverificação da frente A sob o detector correto —  | sim | +0/−65 | — (nada fora de develop) | `docs/future_work.md:2787`, `research/labels/diagnostics/frontA_reverify/REPORT.md:4` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/frontC-intensification-depth` | `38951f7` 2026-09-22 — docs(frontC): register front 24 — gate PASS, merged; three divergences | sim | +0/−77 | — (nada fora de develop) | `docs/future_work.md:2283`, `research/labels/diagnostics/frontC/REPORT.md:3` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/frontD-stage0-census` | `80e0551` 2026-09-23 — docs(frontD): record the later reading — ARTEFACT was unreachable by c | sim | +0/−71 | — (nada fora de develop) | `docs/future_work.md:2521`, `research/labels/diagnostics/frontD/REPORT.md:8` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/incipient-refusal-stage1` | `edb1a99` 2026-09-23 — research(refusal): fechamento — varredura completa de tau, sem estágio | sim | +0/−68 | — (nada fora de develop) | `docs/future_work.md:2664`, `research/labels/diagnostics/frontRefusal/REPORT.md:5` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/item19-mature-prominence` | `f376a03` 2026-09-17 — diag(item20): closeout corrections — 20205386 blind spot, env-dependen | sim | +0/−96 | — (nada fora de develop) | `docs/future_work.md:1733`, `research/labels/diagnostics/item19/REPORT.md:18` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/item20a-maf-090` | `eea6470` 2026-09-17 — docs(20a): register the front — future_work 20(a) + reference config d | sim | +0/−92 | — (nada fora de develop) | `research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md:114` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/item20b-depth-rule` | `e686972` 2026-09-21 — docs(item20b): register front 22 — stage 1 FAIL (premise), stage 2 PAS | sim | +0/−80 | — (nada fora de develop) | `docs/future_work.md:2142`, `research/labels/diagnostics/item20b/REPORT.md:21`, `research/labels/diagnostics/item20b/REPORT.md:469` +2 | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/item20c-duration-ratio` | `e7792d3` 2026-09-21 — docs(item20c): close the record — verdict completed, 20(e)(i) retired, | **não** | +3/−79 | 7 arq.: docs/future_work.md, research/labels/README.md, research/labels/diagnostics | `docs/future_work.md:2336` | **decidir com o Danilo** | o texto do item 23 de future_work só existe nesta branch (develop pula de 22 para 24) |
-| `research/item30-plateau-overwrite` | `2319609` 2026-09-27 — docs(item30): params-15 adotado como referência de calibração — "adota | sim | +0/−22 | — (nada fora de develop) | `docs/future_work.md:3615`, `docs/future_work.md:3755`, `docs/future_work.md:3766` +2 | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/item31-params15-default` | `e31b727` 2026-09-28 — research(item31): etapa 2c — suíte 1438 passed / 0 failed (previsto 14 | sim | +0/−2 | — (nada fora de develop) | `docs/future_work.md:3825`, `research/labels/diagnostics/item31/DESIGN.md:5` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/item31-stage2b-checkpoint` | `45f0600` 2026-09-28 — docs(item31): etapa 2b — CHECKPOINT pendente de aprovação do Danilo: s | sim | +0/−6 | — (nada fora de develop) | `research/labels/diagnostics/item31/DESIGN.md:758`, `research/labels/diagnostics/item31/gate_2b.py:3` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/item5-benchmark-tab` | `4c64ceb` 2026-09-18 — docs(item5): register front 21 — findings, open defect, remaining debt | sim | +0/−84 | — (nada fora de develop) | `docs/future_work.md:2006` | **apagar** | totalmente contida em develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `research/v3-topology-proxy` | `c508730` 2026-09-16 — research(v3): constant baselines; retract the skeleton claim; mark pos | **não** | +4/−106 | 9 arq.: docs/future_work.md, research/v3_topology_proxy/PROTOCOL.md, research/v3_topology_proxy/RESULTS.md, research/v3_topology_proxy/baselines.py | `docs/future_work.md:1567`, `docs/future_work.md:1644`, `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:174` +3 | **decidir com o Danilo** | o texto do item 18 de future_work só existe nesta branch; citada por Front B |
+"patch-eq." = NÃO ancestral, mas `git cherry origin/develop-v2.1 <branch>` só imprime `-` (todo commit tem um equivalente de patch em develop). Uma branch patch-equivalente NÃO está contida em develop: seus próprios hashes deixam de resolver se a ref sumir, por isso nunca é somada às ancestrais. "hashes citados" = `git grep` dos hashes curtos dos commits da branch que não estão em develop.
+
+| branch | ponta | em develop? (ancestral) | patch-eq.? | +à frente/−atrás | conteúdo (arquivos alterados desde a base) | citada em | hashes citados | destino | motivo |
+|---|---|---|---|---|---|---|---|---|---|
+| `chore/b-remove-distance` | `2bb2bad` 2026-09-17 — test(front-b): drop a Streamlit-internal attribute from the distance-r | sim | — | +0/−103 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `chore/repo-cleanup` | `f17d802` 2026-09-28 — chore(cleanup): passo 0 — inventário somente leitura (manifesto de arq | **não** | não (+1) | +1/−0 | 19 arq.: research/cleanup/MANIFEST.md, research/cleanup/passo0 | — | — | **manter** | branch desta frente (em andamento) |
+| `develop-v2.1` | `06d8550` 2026-09-28 — docs(item31): registrar o merge (0a469eb) no item 31 — suíte 1438/0 e  | sim | — | +0/−0 | — (nada fora de develop) | `CHANGELOG.md:297`, `CHANGELOG.md:402`, `docs/future_work.md:400` +118 | — | **manter** | branch de desenvolvimento |
+| `diag/front-b-distance-inert` | `491a5d0` 2026-09-16 — diag(front-b): record the read-only diagnosis — `distance` is inert at | **não** | **sim** | +1/−106 | 21 arq.: research/labels/diagnostics | — | `research/labels/diagnostics/front_b/sensitivity_probe.py:27 (491a5d0)`, `research/labels/diagnostics/front_b/sweep_distance.py:53 (491a5d0)` | **tag de arquivo** | patch-equivalente a develop (git cherry só '-'), mas NÃO ancestral: o hash 491a5d0 é citado nos registros (ver 'hashes citados') e só resolve enquanto houver uma ref |
+| `diag/series-sha256-mismatch` | `3ae6082` 2026-09-10 — diag(labels): measure series_sha256 mismatch for the 12 void synthetic | **não** | não (+1) | +1/−133 | 3 arq.: research/labels/diagnostics | `docs/future_work.md:846` | `docs/future_work.md:917 (3ae6082)` | **tag de arquivo** | decisão 6: branch de registro — script + relatório do item 10 só existem aqui; future_work cita a branch |
+| `docs/front-a-findings` | `2ee2414` 2026-09-09 — docs: record Front A findings (index-0 boundary extremum type) | sim | — | +0/−143 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/front-f-i-ii-iii-findings` | `3aae83d` 2026-09-10 — docs: record F(i)(ii) and F(iii) findings in future_work.md | sim | — | +0/−134 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/front-g-closing` | `1ccb3db` 2026-09-15 — docs: front G closing record — verification, margin decision, mature b | sim | — | +0/−111 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/front-g-series-sha256-findings` | `02fe6f7` 2026-09-10 — docs: record the series_sha256 void-label investigation in future_work | sim | — | +0/−132 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/frontC-hash-provenance` | `e1b29cc` 2026-09-22 — docs(frontC): unattribute the legacy hash record, prove the layout dif | sim | — | +0/−74 | — (nada fora de develop) | `docs/future_work.md:2418` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/item13-close` | `1b99a57` 2026-09-23 — docs(item13): fechar o item 13 — resíduo "Frente E" encerrado por proc | sim | — | +0/−62 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/memory-g-e-closing` | `0f680c5` 2026-09-16 — docs: correct the mature rationale and the blindness claim in CLAUDE.m | sim | — | +0/−107 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/session-findings-register` | `e2ccdad` 2026-09-11 — docs: register the environment-dependence finding and the shadowed-det | sim | — | +0/−124 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `docs/session-findings-register-2` | `a06a2aa` 2026-09-11 — docs: register ABERTO 1, the CSV-format debt, and the CI coverage gap | sim | — | +0/−122 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `feat/app-flexible-track-reader` | `ba9af46` 2026-09-24 — docs(item29): registro final antes do merge — premissa (a) caída, dado | sim | — | +0/−50 | — (nada fora de develop) | `docs/future_work.md:3212`, `docs/future_work.md:3367` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `feat/dedicated-conda-env` | `d876a71` 2026-09-11 — docs: correct item 11(c)'s premise, decide the env front's gate, docum | sim | — | +0/−126 | — (nada fora de develop) | `docs/future_work.md:913`, `docs/future_work.md:1019` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `feat/freeze-synthetic-series` | `6e05467` 2026-09-10 — docs: record the synthetic-series-freeze front as closed, PASS (item 1 | sim | — | +0/−130 | — (nada fora de develop) | `docs/future_work.md:936` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `feat/front-g-manual-labels-source` | `727efd2` 2026-09-15 — test(synthetic): score phase timing against manual labels (front G) | sim | — | +0/−112 | — (nada fora de develop) | `docs/future_work.md:1397` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `feat/label-tab-navigation-overlays` | `f300420` 2026-09-14 — fix(label-tab): wrong-boundary drag, stale test selectors, viewport ov | sim | — | +0/−115 | — (nada fora de develop) | `docs/future_work.md:1300`, `docs/future_work.md:1479` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `feat/label-tab-toplevel` | `0c63145` 2026-09-15 — data: save 4 manual label re-labels made through the app (real, train  | **não** | não (+2) | +2/−113 | 6 arq.: research/labels/manual_labels.yaml, tests/browser_harness.py, tests/test_label_apptest.py, tests/test_manual_labels.py | — | — | **tag de arquivo** | decisão 1: 3 re-rotulagens de treino (0c63145) NÃO são recuperadas; entram como pendência aberta no documento único (Passo 2); código da UI superado |
+| `fix/app-inert-params-signaling` | `20e003d` 2026-09-10 — docs: record the pytest gate exception before merging F(iii) | sim | — | +0/−137 | — (nada fora de develop) | `research/inert_params/REPORT_inertia_sweep.md:3` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `fix/idx0-boundary-extremum-type` | `6060c6d` 2026-09-09 — REFUTADO - NAO MERGEAR: forcar idx0 a peak, investigacao encerrada sem | **não** | não (+1) | +1/−144 | 31 arq.: cyclophaser/determine_periods.py, research/labels/diagnostics | `docs/future_work.md:579`, `docs/future_work.md:1121`, `research/labels/diagnostics/frontA_reverify/REPORT.md:70` +1 | `docs/future_work.md:1145 (6060c6d)`, `docs/future_work.md:2801 (6060c6d)`, `docs/future_work.md:2823 (6060c6d)` +54 | **tag de arquivo** | decisão 6: branch de registro — artefatos de Front A (6060c6d) contra os quais o item 27 comparou; commit marcado NÃO MERGEAR |
+| `fix/inspector-crossing-layer-and-legend` | `7133570` 2026-09-09 — fix(app): inspector rel panel names the active signal and shows the cr | sim | — | +0/−141 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `fix/inspector-depth-params` | `52ecb04` 2026-09-25 — test(item30a): fixar só séries de treino nos testes de piso; guarda do | sim | — | +0/−45 | — (nada fora de develop) | `docs/future_work.md:3641`, `docs/future_work.md:3749`, `docs/future_work.md:3750` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `fix/inspector-min-depth-params` | `a2b639e` 2026-09-23 — fix(app): aceitar mature_min_depth e intensification_min_depth no Insp | **não** | não (+1) | +1/−60 | 3 arq.: docs/future_work.md, tests/test_layer_inspector.py, tools/calibration_app/layer_inspector.py | `docs/future_work.md:3715`, `docs/future_work.md:3761` | `docs/future_work.md:3715 (a2b639e)`, `docs/future_work.md:3761 (a2b639e)` | **tag de arquivo** | decisão 5: superada por 52ecb04 (item 30a) |
+| `frontA-idx0-c2` | `e97eb17` 2026-09-24 — fix(item28): pontuar só o TREINO, documentar o no-op sem filtro, atrib | sim | — | +0/−54 | — (nada fora de develop) | `docs/future_work.md:2941`, `docs/future_work.md:3194`, `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:8` +1 | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `joss-submission` | `8348caf` 2024-10-29 — (auto) Paper PDF Draft | **não** | não (+22) | +26/−254 | 8 arq.: .github/workflows/generate_pdf.yml, paper/density_map_Aggregate.png, paper/life-cycle.png, paper/life_cycle.py | — | — | **tag de arquivo** | decisão 6: branch de registro — fonte do artigo JOSS (paper/); nada disso está em develop |
+| `master` | `0df0ef5` 2026-06-16 — fix(deploy): pin Python via .python-version and relax app dependency p | sim | — | +0/−194 | — (nada fora de develop) | `.circleci/config.yml:111`, `README.md:17`, `docs/conf.py:4` +16 | — | **manter** | branch de release |
+| `research/frontA-reverify` | `077d273` 2026-09-23 — research(frontA'): reverificação da frente A sob o detector correto —  | sim | — | +0/−65 | — (nada fora de develop) | `docs/future_work.md:2787`, `research/labels/diagnostics/frontA_reverify/REPORT.md:4` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/frontC-intensification-depth` | `38951f7` 2026-09-22 — docs(frontC): register front 24 — gate PASS, merged; three divergences | sim | — | +0/−77 | — (nada fora de develop) | `docs/future_work.md:2283`, `research/labels/diagnostics/frontC/REPORT.md:3` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/frontD-stage0-census` | `80e0551` 2026-09-23 — docs(frontD): record the later reading — ARTEFACT was unreachable by c | sim | — | +0/−71 | — (nada fora de develop) | `docs/future_work.md:2521`, `research/labels/diagnostics/frontD/REPORT.md:8` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/incipient-refusal-stage1` | `edb1a99` 2026-09-23 — research(refusal): fechamento — varredura completa de tau, sem estágio | sim | — | +0/−68 | — (nada fora de develop) | `docs/future_work.md:2664`, `research/labels/diagnostics/frontRefusal/REPORT.md:5` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/item19-mature-prominence` | `f376a03` 2026-09-17 — diag(item20): closeout corrections — 20205386 blind spot, env-dependen | sim | — | +0/−96 | — (nada fora de develop) | `docs/future_work.md:1733`, `research/labels/diagnostics/item19/REPORT.md:18` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/item20a-maf-090` | `eea6470` 2026-09-17 — docs(20a): register the front — future_work 20(a) + reference config d | sim | — | +0/−92 | — (nada fora de develop) | `research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md:114` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/item20b-depth-rule` | `e686972` 2026-09-21 — docs(item20b): register front 22 — stage 1 FAIL (premise), stage 2 PAS | sim | — | +0/−80 | — (nada fora de develop) | `docs/future_work.md:2142`, `research/labels/diagnostics/item20b/REPORT.md:21`, `research/labels/diagnostics/item20b/REPORT.md:469` +2 | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/item20c-duration-ratio` | `e7792d3` 2026-09-21 — docs(item20c): close the record — verdict completed, 20(e)(i) retired, | **não** | não (+3) | +3/−79 | 7 arq.: docs/future_work.md, research/labels/README.md, research/labels/diagnostics | `docs/future_work.md:2336` | — | **tag de arquivo (após Passo 2)** | decisão 5: o texto do item 23 de future_work só existe aqui; entra no documento único (Passo 2), depois tag |
+| `research/item30-plateau-overwrite` | `2319609` 2026-09-27 — docs(item30): params-15 adotado como referência de calibração — "adota | sim | — | +0/−22 | — (nada fora de develop) | `docs/future_work.md:3615`, `docs/future_work.md:3755`, `docs/future_work.md:3766` +2 | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/item31-params15-default` | `e31b727` 2026-09-28 — research(item31): etapa 2c — suíte 1438 passed / 0 failed (previsto 14 | sim | — | +0/−2 | — (nada fora de develop) | `docs/future_work.md:3825`, `research/labels/diagnostics/item31/DESIGN.md:5` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/item31-stage2b-checkpoint` | `45f0600` 2026-09-28 — docs(item31): etapa 2b — CHECKPOINT pendente de aprovação do Danilo: s | sim | — | +0/−6 | — (nada fora de develop) | `research/labels/diagnostics/item31/DESIGN.md:758`, `research/labels/diagnostics/item31/gate_2b.py:3` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/item5-benchmark-tab` | `4c64ceb` 2026-09-18 — docs(item5): register front 21 — findings, open defect, remaining debt | sim | — | +0/−84 | — (nada fora de develop) | `docs/future_work.md:2006` | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
+| `research/v3-topology-proxy` | `c508730` 2026-09-16 — research(v3): constant baselines; retract the skeleton claim; mark pos | **não** | não (+4) | +4/−106 | 9 arq.: docs/future_work.md, research/v3_topology_proxy/PROTOCOL.md, research/v3_topology_proxy/RESULTS.md, research/v3_topology_proxy/baselines.py | `docs/future_work.md:1567`, `docs/future_work.md:1644`, `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:174` +3 | — | **tag de arquivo (após Passo 2)** | decisão 5: o texto do item 18 de future_work só existe aqui; entra no documento único (Passo 2), depois tag |
 
 | destino | branches |
 |---|---|
-| apagar | 31 |
-| decidir com o Danilo | 4 |
-| manter | 2 |
-| manter como registro | 3 |
+| apagar | 30 |
+| manter | 3 |
+| tag de arquivo | 6 |
+| tag de arquivo (após Passo 2) | 2 |
 
-Branches locais sem remota (fora do escopo, só registradas): `chore/repo-cleanup`, `exp/pre-peak-normalization`, `fix/b-distance-length-scale`, `fix/core-bugs`, `input-data`. `exp/pre-peak-normalization` (`1faf0c8`) NÃO está em develop, nunca foi publicada e se declara "descartável, não mesclar"; está registrada em `docs/future_work.md` e `research/labels/swell_item30/README.md`.
+**Contagem corrigida (Passo 1).** "apagar" = 30: **30 ancestrais** (`--is-ancestor`) e **0 só patch-equivalentes**. Branches patch-equivalentes não ancestrais no total: 1 (`diag/front-b-distance-inert`), todas com destino "tag de arquivo". O Passo 0 somava `diag/front-b-distance-inert` às 30 ancestrais como "apagar" (31); seu hash é citado nos registros, então ela não pode sumir sem ref.
+
+Branches locais sem remota (fora do escopo, só registradas): `exp/pre-peak-normalization`, `fix/b-distance-length-scale`, `fix/core-bugs`, `input-data`. `exp/pre-peak-normalization` (`1faf0c8`) NÃO está em develop, nunca foi publicada e se declara "descartável, não mesclar"; está registrada em `docs/future_work.md` e `research/labels/swell_item30/README.md`.
 
 ## 0.4 Rastreabilidade (esqueleto): destino "remover" com achado
 
@@ -1739,64 +1744,40 @@ Para cada entrada que sai e contém achado: onde o achado já está registrado h
 
 Entradas: 166; **SÓ AQUI: 2** — `research/incipient_plateau/gen_geometric_vs_plateau.py` → gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita; `research/incipient_plateau/geometric_vs_plateau.csv` → fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto.
 
-## Decisões que precisam do Danilo
+## Decisões aprovadas pelo Danilo (2026-09-28)
 
-Texto escrito à mão (julgamento). Contagens e `arquivo:linha` que sustentam cada item estão nas seções geradas acima.
+Texto escrito à mão; os números que sustentam cada item estão nas seções geradas acima e em "Dados gerados das
+decisões" abaixo. A proposta original do Passo 0 (as perguntas) está no commit `f17d802`.
 
-1. **Re-rotulagens de treino fora de develop** (`origin/feat/label-tab-toplevel`, commit `0c63145`, 2026-09-15).
-   Três rótulos de treino do Danilo nunca chegaram a `research/labels/manual_labels.yaml` de develop:
-   `20150656` (fronteira `residual`), `20170409` (fronteira `decay`), `20170154` (veredito → `ambiguous`);
-   o quarto (`20180170`) era um re-salvamento sem mudança. Comparação feita lendo o YAML nas duas pontas
-   (as quatro ids conferidas no split de treino; nenhuma série lida). Toda frente desde então rodou sobre os
-   rótulos antigos. Opções: recuperar os três (muda escores de frentes fechadas; teste intocado) /
-   descartar / manter a branch só como registro. O código de UI da mesma branch foi superado.
-2. **`.pypirc` versionado** desde 2023. Não foi lido. Verificar o conteúdo; se houver token, revogá-lo
-   (continua no histórico do git mesmo após remover do versionamento); proposta: remover do versionamento
-   e pôr no `.gitignore`.
-3. **"2.0.0" não é o release 2.0.0** (seção (d)). `research/labels/defaults_2.0.0.json`,
-   `tests/baselines/*_2_0_0.csv`, `tests/legacy_defaults.py`, `item31/make_defaults_2_0_0.py`, a coluna
-   "2.0.0" da tabela do CHANGELOG [Unreleased], as docstrings "(… up to 2.0.0)" e `docs/usage.rst`
-   descrevem develop no estágio 0 do item 31, não o pacote publicado (que não tem `boundary_padding` e
-   usa `replace_endpoints_with_lowpass=24`). Renomear/re-rotular ("pré-item-31") no Passo 1/4? Toca nomes
-   de arquivo lidos por pacote, testes e app.
-4. **App publicado × pacote publicado.** `tools/calibration_app/requirements.txt` instala
-   `cyclophaser>=2.0.0` do PyPI, e a versão mais nova no PyPI é 2.0.0 (`pip index versions`, hoje).
-   `tools/calibration_app/app.py:219` indexa `sig["intensification_min_depth"]`, chave que a assinatura
-   da tag v2.0.0 não tem (seção (d)) → leitura estática: o app de develop quebraria na inicialização contra
-   o 2.0.0 do PyPI (não executado). Relevante para a ordem release → merge em master → deploy.
-5. **Branches "decidir"**: `feat/label-tab-toplevel` (item 1); `fix/inspector-min-depth-params`
-   (superada por `52ecb04`; future_work diz que o destino é desta frente); `research/item20c-duration-ratio`
-   e `research/v3-topology-proxy` — o texto dos itens 23 e 18 de future_work só existe nelas
-   (develop pula de 17 para 19 e de 22 para 24). Mergear só a documentação, manter como registro, ou
-   converter em tag?
-6. **Branches "manter como registro"** → converter em tags anotadas `archive/*` (já existe o precedente
-   `archive/app-phase-focus`) e então apagar as branches? Os hashes citados nos registros continuariam
-   resolvíveis.
-7. **Remoção dos diagnósticos de frentes fechadas.** Antes de remover, criar uma tag anotada no último
-   commit que os contém (ex.: `archive/research-diagnostics-pre-cleanup`), para que todo caminho citado em
-   `docs/future_work.md` (que não será reescrito) resolva com `git show <tag>:<caminho>`. Os scripts de
-   frentes fechadas saem mesmo quando ainda rodam: são reprodutíveis pelo commit.
-8. **Dependências vivas dentro de `diagnostics/`** (`item19/item19_core.py` importado pelo app;
-   `item30/item30_core.py`, `figs_cf.py`, `separability.py` importados por teste; `item31/param_table.json`
-   lido por teste; `item31/recovery_table.*`): manter onde estão (proposta atual) ou mover para um lugar
-   vivo (ex.: `research/labels/instruments/`) no Passo 1, atualizando imports?
-9. **Três reimplementações locais de `pair_by_overlap`** (seção (g)) saem com seus diagnósticos; nada vivo
-   depende delas. Registrar no documento único que o medidor canônico é `item19_core.pair_by_overlap`?
-10. **`Pipfile`** (remover) e **`requirements.txt`** da raiz (manter, mas sobrepõe `docs/requirements.txt`
-    e `setup.py`; inclui `pipenv`): confirmar.
-11. **Defaults literais do app** que divergem da assinatura (seção (e)): intencionais (semântica de YAML
-    antigo sem a chave) ou dívida? Decidir no Passo 4. Com C1 (`reflect`), `app.py:1439` passa a coincidir.
-12. **Default próprio das funções do filtro.** `lanczos_filter`, `lanczos_bandpass_filter` e `_convolve_same`
-    têm default `"reflect"`; `process_vorticity`/`determine_periods` têm `"edge"`. C1 alinha os dois; confirmar
-    que C1 muda só `process_vorticity`/`determine_periods` (o prompt cita só essas assinaturas).
-13. **Textos vivos defasados encontrados** (edição no Passo 1, proposta "migrar"): docstring/comentário de
-    `benchmark_core.py` (`item19_core.CONFIG`, "onze configurações"); docstrings de `layer_inspector.py`
-    ("sob params-14"); comentário de `tests/test_intensification_min_depth.py:69-71`; `CHANGELOG.md:232`
-    e `:288` (arquivos de config removidos); `lanczos_filter.py:6` ("zero" default) contra :39–56
-    ("reflect"); `determine_periods.py:1044`/`:1521` ("as the current defaults are" para `reflect`);
-    comentário de cabeçalho de `tests/test_boundary_padding.py:27` ("default zero").
-14. **SÓ AQUI**: `research/incipient_plateau/geometric_vs_plateau.csv` e seu gerador — consolidar a tabela
-    em S02 antes de remover.
+1. **`feat/label-tab-toplevel` → tag de arquivo.** As re-rotulagens de treino NÃO são recuperadas; entram como
+   pendência aberta no documento único (Passo 2), com as três diferenças regeradas por
+   `passo0/relabel_diff.py` (tabela em "Dados gerados": `20150656` fronteira `residual` 91→100; `20170409`
+   fronteira `decay` 74→71; `20170154` veredito boundary(incipient_end_idx 6)→ambiguous).
+2. **`.pypirc` → removido do versionamento** (commit 1 do Passo 1; conteúdo não aberto). A senha já foi trocada
+   pelo Danilo; o histórico não é reescrito.
+3. **Rótulo "2.0.0"**: os textos são corrigidos no Passo 1 (CHANGELOG, docstrings, `docs/usage.rst`) contra a tag
+   `v2.0.0` real; o renome dos arquivos para "pre-item31" fica para o Passo 4, em commit próprio.
+4. **App publicado × PyPI**: fora de escopo; registrado como insumo da frente de release.
+5. **`fix/inspector-min-depth-params` → tag de arquivo.** `research/item20c-duration-ratio` e
+   `research/v3-topology-proxy`: o texto dos itens 23 e 18 entra no documento único (Passo 2), depois tag de arquivo.
+6. **Branches de registro → tags `archive/*`.** Remoção de branch remota só com autorização explícita por branch
+   (Passo 6).
+7. **Tag `archive/research-diagnostics-pre-cleanup`** antes de qualquer remoção (Passo 3).
+8. **Dependências vivas em `diagnostics/` ficam onde estão.**
+9. **Os dois medidores de "mature correta" ficam;** o documento único diz qual governa o quê. As três cópias
+   locais de `pair_by_overlap` saem com seus diagnósticos.
+10. **`Pipfile` sai. `requirements.txt` da raiz**: listar quem o lê (CI, docs, Streamlit, setup); sai se ninguém,
+    senão fica. Só listado agora — ver "Dados gerados".
+11. **Defaults literais do app**: decidir no Passo 4.
+12. **C1 muda só `process_vorticity` e `determine_periods`**; as funções do filtro já usam `"reflect"` e não
+    são tocadas.
+13. **Migrações de texto aprovadas** (Passo 1, commits 3 e 4).
+14. **`geometric_vs_plateau.csv`**: a tabela entra no documento único antes de remover.
+
+Correções de destino no manifesto, pedidas junto com as decisões: `diag/front-b-distance-inert` → tag de
+arquivo (patch-equivalente, NÃO ancestral; hash `491a5d0` citado em `front_b/sensitivity_probe.py` e
+`front_b/sweep_distance.py`); `research/incipient_plateau/measure_incipient_smoothing.py` → manter (citado por
+`cyclophaser/find_stages.py`).
 
 ## Desvios do prompt, e por quê
 
@@ -1815,20 +1796,53 @@ Texto escrito à mão (julgamento). Contagens e `arquivo:linha` que sustentam ca
 * **Tipo**: acrescentei "script de pesquisa (vivo)" (`labels_core.py`, avaliador, etc.) para não chamá-los
   de "script de diagnóstico".
 * **`.pypirc` não foi lido** (arquivo de credenciais; o classificador de permissões também bloqueou).
-  Está no manifesto, com destino proposto e a verificação pedida ao Danilo.
+  No Passo 1 saiu do versionamento sem ser aberto.
 * **Branches**: a contagem de remotas inclui `develop-v2.1` e `master`. As branches locais sem remota foram
   só registradas (fora do escopo), com destaque para `exp/pre-peak-normalization`, que não está em develop.
 * **Achado fora do que foi pedido**: o rótulo "2.0.0" do item 31 (decisão 3), e as re-rotulagens fora de
   develop (decisão 1).
 * **0.4**: um grupo homogêneo (ex.: `item30/figs_cf/*.png`) conta como uma entrada.
+* **Passo 1 — regeração em HEAD novo.** O inventário foi regerado sobre a árvore do commit 1 do Passo 1 (sem
+  `.pypirc`), e `branches.py` depois de `git fetch origin`: a contagem de remotas inclui agora
+  `origin/chore/repo-cleanup` (publicada ao fim do Passo 0), com destino "manter".
+* **Passo 1 — previsões gravadas neste commit.** `passo1/PREVISOES.md` vai no commit do manifesto (e não no de
+  evidências) para que o git prove que as previsões precedem toda medição do Passo 1.
+
+
+## Dados gerados das decisões
+
+### Decisão 1 — re-rotulagens de treino fora de develop (`passo0/relabel_diff.py`)
+
+`research/labels/manual_labels.yaml` em `origin/develop-v2.1` (`06d8550`) × `origin/feat/label-tab-toplevel` (`0c63145`), só ids de TREINO (54: `train:` + `batches.*.train`; entradas de teste descartadas antes de comparar; nenhuma série lida). Rótulos de treino: develop 54, branch 47 (só em develop: 7 — o lote swell, desenhado depois da branch).
+
+| id | campo | develop | branch |
+|---|---|---|---|
+| `20150656` | fronteira `residual`.start_idx | 91 | 100 |
+| `20170154` | veredito | kind=boundary, incipient_end_idx=6 | kind=ambiguous |
+| `20170409` | fronteira `decay`.start_idx | 74 | 71 |
+
+Com mudança de conteúdo: **3**. Re-salvamento sem mudança de rótulo: `20180170`. Não recuperadas (decisão 1); entram como pendência aberta no documento único (Passo 2).
+
+### Decisão 10 — quem lê o `requirements.txt` da raiz (`passo0/requirements_readers.py`; só lista)
+
+| consumidor | lê a raiz? | onde |
+|---|---|---|
+| CI | não | — |
+| docs build (RTD) | não | — |
+| setup / packaging | não | — |
+| Streamlit app | não | — |
+| conda env | não | — |
+| user docs | **sim** | `docs/contribute.rst:43`, `docs/installation.rst:27`, `docs/installation.rst:66` |
+
+O CI instala do wheel mais `pytest pyyaml`; o RTD lê `docs/requirements.txt`; `setup.py` declara `install_requires` próprio; o app tem `tools/calibration_app/requirements.txt` próprio. O serviço Streamlit Cloud escolhe o arquivo por regra própria, fora da árvore: não verificável daqui. Só as instruções de instalação/contribuição dos docs de usuário mandam rodar `pip install -r requirements.txt` na raiz — ou seja, **alguém o lê** (por instrução); pela decisão 10 ele fica. O `Pipfile` sai.
 
 
 ## Resumo para orquestração (gerado)
 
-* Branch `chore/repo-cleanup`; ponta de develop-v2.1 encontrada `06d8550` (esperada `06d8550`). Hash do commit deste passo: ver a mensagem de entrega (um arquivo não contém o próprio hash).
+* Branch `chore/repo-cleanup`; base em develop-v2.1 `06d8550` (esperada `06d8550`); inventário em HEAD `c080f4d`. Hash do commit deste passo: ver a mensagem de entrega (um arquivo não contém o próprio hash).
 * Linha de base: suíte previsto 1438/0 → obtido 1438/0; digest previsto `3a6de265…` → obtido `3a6de265…`.
-* Arquivos versionados: 537 — manter 221, consolidar 40, remover 276. Scripts de stale_scripts.md confirmados: 40/40.
-* Branches remotas: 40 — apagar 31, decidir com o Danilo 4, manter 2, manter como registro 3.
+* Arquivos versionados: 536 — manter 222, consolidar 40, remover 274. Scripts de stale_scripts.md confirmados: 40/40.
+* Branches remotas: 41 — apagar 30, manter 3, tag de arquivo 6, tag de arquivo (após Passo 2) 2; das "apagar", 30 ancestrais e 0 só patch-equivalentes.
 * SÓ AQUI: `research/incipient_plateau/gen_geometric_vs_plateau.py` → gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita; `research/incipient_plateau/geometric_vs_plateau.csv` → fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto.
 * params-1..14 fora dos diagnósticos e de future_work.md: 103 ocorrências em 22 arquivos; propostas **migrar** em `CHANGELOG.md`, `tests/test_intensification_min_depth.py`, `tools/calibration_app/benchmark_core.py`, `tools/calibration_app/layer_inspector.py`.
 * params-15: 317 ocorrências — vivas 66, históricas 251.
