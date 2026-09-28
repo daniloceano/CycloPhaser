@@ -1,0 +1,10 @@
+HEAD: 052a876
+origin/develop-v2.1: 06d8550
+$ git log --format=%h origin/develop-v2.1..HEAD -- cyclophaser/
+742e685
+$ git log --format='%h %s' origin/develop-v2.1..HEAD   # all commits of the front, for context
+052a876 docs(cleanup): textos vivos defasados fora de cyclophaser/; registro do digest pós-C1
+742e685 feat(C1): default boundary_padding "reflect"; params-15 renomeado params-track
+d8a19cc chore(cleanup): correções do manifesto — branches patch-equivalentes, decisões aprovadas, anonimização
+c080f4d chore(cleanup): remover .pypirc do versionamento e ignorá-lo
+f17d802 chore(cleanup): passo 0 — inventário somente leitura (manifesto de arquivos, branches, rastreabilidade)

@@ -1,0 +1,2109 @@
+{
+ "summary": {
+  "n_train": 54,
+  "n_by_group": {
+   "batch swell_item30": 7,
+   "top-level real": 35,
+   "top-level synthetic": 12
+  },
+  "cyclophaser_file": "cyclophaser/__init__.py",
+  "exceptions": {
+   "default": 0,
+   "edge": 0
+  },
+  "invalid_sequences": {
+   "default": 0,
+   "edge": 0
+  },
+  "refusals": {
+   "default": 28,
+   "edge": 28
+  },
+  "refused_ids": {
+   "default": [
+    "19810854",
+    "19860380",
+    "19940445",
+    "20050893",
+    "20120297",
+    "20150069",
+    "20150528",
+    "20150532",
+    "20150656",
+    "20160587",
+    "20160735",
+    "20170342",
+    "20170520",
+    "20170760",
+    "20170794",
+    "20171179",
+    "20180263",
+    "20180300",
+    "20180628",
+    "20180733",
+    "20181046",
+    "20190879",
+    "20191104",
+    "20201245",
+    "20202023",
+    "20207822",
+    "s5b8aa46f",
+    "s8001f17b"
+   ],
+   "edge": [
+    "19810854",
+    "19860380",
+    "19940445",
+    "20050893",
+    "20120297",
+    "20150069",
+    "20150528",
+    "20150532",
+    "20150656",
+    "20160587",
+    "20160735",
+    "20170342",
+    "20170520",
+    "20170760",
+    "20170794",
+    "20171179",
+    "20180263",
+    "20180300",
+    "20180628",
+    "20180733",
+    "20181046",
+    "20190879",
+    "20191104",
+    "20201245",
+    "20202023",
+    "20207822",
+    "s5b8aa46f",
+    "s8001f17b"
+   ]
+  },
+  "maps_changed": 19,
+  "sequences_changed": 3,
+  "defect_I": {
+   "default": 11,
+   "edge": 10
+  },
+  "defect_I_ids": {
+   "default": [
+    "19790612",
+    "19810854",
+    "19870927",
+    "19940445",
+    "20180170",
+    "20180608",
+    "20180759",
+    "20190325",
+    "20190397",
+    "20203947",
+    "scfcf1387"
+   ],
+   "edge": [
+    "19790612",
+    "19810854",
+    "19870927",
+    "20180170",
+    "20180608",
+    "20180759",
+    "20190325",
+    "20190397",
+    "20191014",
+    "scfcf1387"
+   ]
+  },
+  "dz_t0_rel_zero": {
+   "default": 0,
+   "edge": 0
+  },
+  "dz_t0_rel_median": {
+   "default": 0.06523148152557415,
+   "edge": 0.29465842627424776
+  },
+  "dz_t0_rel_max": {
+   "default": 0.17208094799909057,
+   "edge": 0.8024802760449552
+  }
+ },
+ "rows": [
+  {
+   "id": "19790612",
+   "group": "batch swell_item30",
+   "n": 48,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.006337227229101804
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.03985164335568459
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "19810854",
+   "group": "batch swell_item30",
+   "n": 72,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.07981878780797384
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.3700181015375213
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "19860380",
+   "group": "batch swell_item30",
+   "n": 45,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.014845401429491483
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.46005585883966055
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "19870927",
+   "group": "batch swell_item30",
+   "n": 92,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.061163872895022765
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.2498385115028896
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "19940445",
+   "group": "batch swell_item30",
+   "n": 47,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.012303077054845579
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.009139145408609007
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20050893",
+   "group": "batch swell_item30",
+   "n": 56,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.13694104345356453
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.6326641907773318
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20120297",
+   "group": "batch swell_item30",
+   "n": 40,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06320354003225451
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.2957854609966841
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20150069",
+   "group": "top-level real",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.11439530854507839
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.4759647463189983
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20150436",
+   "group": "top-level real",
+   "n": 112,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.01758486363922685
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.04128064006605419
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20150528",
+   "group": "top-level real",
+   "n": 51,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06668101038691947
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.33474415099663485
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20150532",
+   "group": "top-level real",
+   "n": 107,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.08043191038839004
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.5497138208097565
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20150656",
+   "group": "top-level real",
+   "n": 160,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.04593304079217523
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.07789818703095332
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20160587",
+   "group": "top-level real",
+   "n": 79,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06000371175221112
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.18177498119554272
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20160735",
+   "group": "top-level real",
+   "n": 259,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.11359006518009339
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "decay",
+     "intensification",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.7737222028056957
+   },
+   "map_changed": true,
+   "sequence_changed": true
+  },
+  {
+   "id": "20170154",
+   "group": "top-level real",
+   "n": 124,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06270002748201844
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.1501007881275573
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20170342",
+   "group": "top-level real",
+   "n": 146,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.10507763871353747
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.6352710612767742
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20170409",
+   "group": "top-level real",
+   "n": 169,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.028531174313657277
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.012011778245151646
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20170520",
+   "group": "top-level real",
+   "n": 58,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.11420050930701324
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.45603824820409034
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20170760",
+   "group": "top-level real",
+   "n": 59,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.17208094799909057
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.8024802760449552
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20170794",
+   "group": "top-level real",
+   "n": 224,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.041452501457658816
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06644879537553568
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20171179",
+   "group": "top-level real",
+   "n": 62,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06378195266422883
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.3444215394692288
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20180170",
+   "group": "top-level real",
+   "n": 69,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.01066020990300677
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.002871520842179495
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20180263",
+   "group": "top-level real",
+   "n": 57,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.07414741070256847
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.45729164033414343
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20180300",
+   "group": "top-level real",
+   "n": 59,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.12941820745247962
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.6672077708030082
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20180608",
+   "group": "top-level real",
+   "n": 117,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.02648867948197291
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.12064694859756017
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20180628",
+   "group": "top-level real",
+   "n": 94,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06848563560873805
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.2398886616187248
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20180733",
+   "group": "top-level real",
+   "n": 257,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.11232786935760943
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.4077725223006412
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20180759",
+   "group": "top-level real",
+   "n": 88,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.04922079985608228
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.078377772219891
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20181046",
+   "group": "top-level real",
+   "n": 30,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.08246116018857005
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.459442790538603
+   },
+   "map_changed": true,
+   "sequence_changed": true
+  },
+  {
+   "id": "20190325",
+   "group": "top-level real",
+   "n": 167,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.00478109360140136
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.15497384212881649
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20190397",
+   "group": "top-level real",
+   "n": 56,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.051159177351229934
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.13637747160566682
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20190639",
+   "group": "top-level real",
+   "n": 180,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.049769510638681985
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.2935313915518114
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20190870",
+   "group": "top-level real",
+   "n": 129,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.04907698849889053
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.04777874333289182
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20190879",
+   "group": "top-level real",
+   "n": 79,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.13075075787244259
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.6299171993320447
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20191014",
+   "group": "top-level real",
+   "n": 206,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.03930894154445972
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.057266184303548934
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20191104",
+   "group": "top-level real",
+   "n": 118,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.0997811809108197
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.587062739458827
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20191155",
+   "group": "top-level real",
+   "n": 93,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.07851598749060071
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.2814583147483374
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "20201245",
+   "group": "top-level real",
+   "n": 98,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.09360522027266639
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.6678813870671851
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20202023",
+   "group": "top-level real",
+   "n": 78,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.04998428877798474
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.37799105871012284
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20203947",
+   "group": "top-level real",
+   "n": 242,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "decay",
+     "intensification",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.002764763500769794
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "decay",
+     "intensification",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.40695058480212154
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "20205386",
+   "group": "top-level real",
+   "n": 100,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.1279984198693671
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.3588731971989076
+   },
+   "map_changed": true,
+   "sequence_changed": true
+  },
+  {
+   "id": "20207822",
+   "group": "top-level real",
+   "n": 162,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.1105002001907487
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.4983762436049505
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "s0596ea57",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification"
+    ],
+    "defect_I": null,
+    "dz_t0_rel": 0.002368346027655889
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification"
+    ],
+    "defect_I": null,
+    "dz_t0_rel": 0.02492572518449035
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "s46657891",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.04912906078848247
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.09777450759380046
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "s4e7ff65c",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": null,
+    "dz_t0_rel": 0.029902336923924248
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": null,
+    "dz_t0_rel": 0.006372182323760679
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "s5b8aa46f",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.1500248982006538
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.6774194413557222
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "s5dcc0f79",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": null,
+    "dz_t0_rel": 0.04714829086823497
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": null,
+    "dz_t0_rel": 0.018284292202385782
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "s6b1e8245",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.09507004409832641
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.24739939423620838
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "s6b542eee",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.12476616515269738
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.369144080789807
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "s8001f17b",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.1474736297294187
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": true,
+    "sequence": [
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.6795841801949306
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "s9ddbc53c",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.04652312702575803
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.03851550353063299
+   },
+   "map_changed": true,
+   "sequence_changed": false
+  },
+  {
+   "id": "sbceec644",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.06801790986290292
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.13770315686839102
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "sbd6c6920",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.07099309969085549
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "intensification",
+     "mature",
+     "decay",
+     "intensification",
+     "mature",
+     "decay"
+    ],
+    "defect_I": false,
+    "dz_t0_rel": 0.1301199095498112
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  },
+  {
+   "id": "scfcf1387",
+   "group": "top-level synthetic",
+   "n": 66,
+   "labelled": true,
+   "default": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.10837065116043747
+   },
+   "edge": {
+    "exception": null,
+    "valid": true,
+    "problems": [],
+    "refused": false,
+    "sequence": [
+     "incipient",
+     "decay",
+     "intensification",
+     "mature",
+     "decay",
+     "residual"
+    ],
+    "defect_I": true,
+    "dz_t0_rel": 0.30368099481443267
+   },
+   "map_changed": false,
+   "sequence_changed": false
+  }
+ ]
+}

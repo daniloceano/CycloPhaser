@@ -1,0 +1,4 @@
+signal=vorticity  padding=reflect  refusals 28/54
+signal=vorticity  padding=edge     refusals 28/54
+signal=derivative padding=reflect  refusals 2/54
+signal=derivative padding=edge     refusals 32/54

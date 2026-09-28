@@ -1,0 +1,3 @@
+P2: params-15@d8a19cc 5aa61f2dec71… -> params-track 5aa61f2dec71… identical=True
+YAML keys 31; differing from the signature defaults: filter_params.use_filter yaml=True default='auto', filter_params.boundary_padding yaml='edge' default='reflect'
+signature keys absent from the YAML: phase_params.plot=False, phase_params.plot_steps=False, phase_params.export_dict=False, phase_params.prominence=None
