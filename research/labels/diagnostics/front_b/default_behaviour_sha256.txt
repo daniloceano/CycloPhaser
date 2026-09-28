@@ -103,3 +103,12 @@ python  : 3.12.14
 numpy   : 2.5.3
 scipy   : 1.18.0
 pandas  : 3.0.5
+--- record ---
+sha256  : 7552bc67ed87b0ea8ac4c46aec1013e5034422b4bbbca53743acd9df77aa500f
+n_series: 47
+commit  : 742e6858cf0932db4222e12dedb4db7e85f0aec9
+date    : 2026-09-28
+python  : 3.12.14
+numpy   : 2.5.3
+scipy   : 1.18.0
+pandas  : 3.0.5

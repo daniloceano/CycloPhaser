@@ -2,8 +2,8 @@
 
 All logic lives in `benchmark_core`; this file is the Streamlit surface over it.
 See that module's docstring for the three structural rules (code commit as
-provenance, `bad_cases_count` never a score, `item19_core.CONFIG` never
-repointed) and for the leakage rule on aggregates.
+provenance, `bad_cases_count` never a score, `item19_core`'s configuration
+never used) and for the leakage rule on aggregates.
 
 Reading order
 -------------
@@ -38,7 +38,7 @@ Layout decisions worth stating
 * **A column is edited as YAML text.** A full widget tree per column multiplies
   every sidebar control by the number of columns, and the point of this tab is to
   hold several configurations on screen at once.
-* **A card shows only the parameters that DIFFER from the reference.** The eleven
+* **A card shows only the parameters that DIFFER from the reference.** Calibration
   YAMLs share ~15 identical parameters; listing all of them hides the two or
   three that separate one configuration from another. The full config sits behind
   a drop-down.
@@ -317,7 +317,7 @@ def _render_card(col: dict, spec: bc.ColumnSpec, ref_doc: dict,
         st.caption(f"**2 · running code commit** — `{commit_txt}`",
                    help="The commit of the code actually running. NOT "
                         "`metadata.cyclophaser_version`, which reads 2.0.0 in "
-                        "every one of the eleven files and so distinguishes "
+                        "every calibration file and so distinguishes "
                         "nothing.")
         st.caption("**3 · keys ignored by the current signature** — "
                    + (", ".join(f"`{k}`" for k in h["ignored"]) if h["ignored"]

@@ -291,6 +291,7 @@ reference baseline moved.
 carry the key now runs *with* the rule. To reproduce any earlier release — or
 any calibration config from params-1 to params-13, all of which predate the rule
 — pass `reclassify_index0=False`. `research/labels/configs/cyclophaser_params-14.yaml`
+(removed in item 31; `git show 33ea489:research/labels/configs/cyclophaser_params-14.yaml`)
 is the first config that states it. `find_peaks_valleys` also accepts the flag
 but **defaults to False**, so a direct caller of that function keeps the
 historical behaviour: the rule is a statement about the vorticity series a life
@@ -347,6 +348,7 @@ test. Exactly one falls below 0.15 — 20180733's spurious segment, at
 `D2 = 0.0068` — and the smallest legitimate segment sits at `0.1714`. Nothing
 lies between them, so every floor in `(0.0068, 0.1714]` selects the same
 segments on that split. `research/labels/configs/cyclophaser_params-13.yaml`
+(removed in item 31; `git show 33ea489:research/labels/configs/cyclophaser_params-13.yaml`)
 records the reference value `0.05`.
 
 A series whose z range is zero or non-finite has no depth scale; the floor is

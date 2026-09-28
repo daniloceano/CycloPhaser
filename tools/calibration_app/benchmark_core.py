@@ -2,7 +2,9 @@
 
 Why this module exists
 ----------------------
-The calibration produced eleven configurations over two months and there was no
+The calibration produced eleven configurations over two months (since item 31
+only params-track remains in research/labels/configs/; params-1..14 are
+recoverable from 33ea489) and there was no
 way to see, side by side, how phase detection moved between them. Comparing meant
 swapping a config into the sidebar and remembering what the last one looked like.
 This module turns a configuration into a COLUMN: a self-describing object that
@@ -12,16 +14,18 @@ reports two named measurements over the result.
 Three rules are structural here, not stylistic:
 
 * **The running code's commit is the provenance, not the YAML's version field.**
-  `metadata.cyclophaser_version` reads `2.0.0` in all eleven files and therefore
+  `metadata.cyclophaser_version` reads `2.0.0` in every calibration file and therefore
   distinguishes nothing. `git rev-parse HEAD` is what actually determines the
   behaviour a column displays.
 * **`evaluation.bad_cases_count` is never a score.** Those marks were made in
   different weeks with different understanding of the problem (params-5 and -6
   record 0, params-9 records 6). It is carried as a labelled historical
   annotation and never as a comparison metric.
-* **`item19_core.CONFIG` is never repointed.** It pins params-10 deliberately, as
-  a frozen instrument. This module calls `pair_by_overlap` with a column's own
-  output and leaves the module's configuration alone.
+* **`item19_core`'s configuration is never used.** It once pinned params-10 as
+  a frozen instrument (`item19_core.CONFIG`); item 31 removed that file and the
+  constant (`item19_core.REMOVED_CONFIG` names it). This module imports only
+  `pair_by_overlap` and `MARGIN`, and calls `pair_by_overlap` with a column's
+  own output.
 
 The two measurements are always reported together and always named, because they
 are different instruments and the debt between them is not settled here:
@@ -74,8 +78,9 @@ from labels_core import (SWELL_BATCH, batch_membership,  # noqa: E402
                          load_synthetic_series, normalize_phase, read_labels,
                          read_split, score_phase_sequences, series_sha256)
 
-# Imported for its pairing rule ONLY. item19_core.CONFIG stays pointed at
-# params-10; nothing here writes to it. See the module docstring.
+# Imported for its pairing rule ONLY. item19_core no longer carries a CONFIG
+# (item 31 removed params-10); nothing here reads or writes its configuration.
+# See the module docstring.
 from item19_core import MARGIN as MATURE_MARGIN  # noqa: E402
 from item19_core import pair_by_overlap  # noqa: E402
 
@@ -639,7 +644,7 @@ def reference_metrics(col: dict[str, dict], ref: dict[str, dict], ids) -> dict:
 def config_differences(doc: dict, ref_doc: dict) -> dict[str, tuple]:
     """{'section.key': (this_value, reference_value)} for keys that DIFFER.
 
-    The eleven calibration YAMLs share roughly fifteen identical parameters;
+    Calibration YAMLs share roughly fifteen identical parameters;
     printing all of them on a column card buries the two or three that actually
     separate one configuration from another.
     """

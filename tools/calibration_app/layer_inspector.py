@@ -543,7 +543,8 @@ def _segment_ledger(df: pd.DataFrame, kind: str,
     ``tests/test_layer_inspector.py``: the union of the accepted candidates and
     the filled gaps must equal, bit for bit, the mask the package function
     itself writes on a fresh frame, over 20+ tracks x several prominence
-    settings, and under params-14 with the depth floor active.
+    settings, and under params-track (params-14 before item 31) with the depth
+    floor active.
 
     Returns:
         dict with ``candidates`` (list of records), ``gaps`` (list of records)
@@ -857,7 +858,7 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
         ``written=False`` and the reason "below mature_min_depth";
       * the confirmed set is pinned by a fidelity test against
         ``find_mature_stage``'s actual output on real tracks, including under
-        params-14 with the floor active.
+        params-track (params-14 before item 31) with the floor active.
 
     Reading the neighbours from the INPUT frame (the state after step 2) is
     equivalent to what the package does after writing the windows: a block's

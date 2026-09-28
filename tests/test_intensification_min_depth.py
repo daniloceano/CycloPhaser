@@ -66,9 +66,10 @@ from cyclophaser.find_stages import find_intensification_period
 
 _CALIBRATION_DATA_DIR = os.path.join(os.path.dirname(__file__), "calibration_data")
 
-# params-13 = params-12 + intensification_min_depth. Kept in sync with
-# research/labels/configs/cyclophaser_params-13.yaml by
-# test_params13_yaml_matches_this_module.
+# params-13 = params-12 + intensification_min_depth (params-13 left the repo in
+# item 31; recoverable from 33ea489). Kept in sync with
+# research/labels/configs/cyclophaser_params-track.yaml — params-13 plus two keys
+# this module does not set — by test_params_track_yaml_matches_this_module.
 _FILTER_PARAMS = dict(
     use_filter=True,
     cutoff_low=168,
