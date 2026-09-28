@@ -308,12 +308,12 @@ Regenerated at render time from `inspect.signature` and the YAML (working tree a
 
 - 40 closed-front scripts stopped running when params-1 to params-14 left the configs directory; they are listed, not migrated, and reproduce from commit `33ea489358d9`. `docs/future_work.md:3922@06d8550` `research/labels/diagnostics/item31/stale_scripts.md:1@06d8550`
 - Every file below leaves the tree after approval and stays readable with `git show 06d8550:<path>`. The "finding recorded at" column cites where its finding is written; the destination is a section of this document or a line of `docs/future_work.md`, never a file that leaves.
+- Three reports stay in the tree because the package cites them: `research/labels/diagnostics/frontA_idx0_c2/REPORT.md`, `research/inert_params/REPORT_inertia_sweep.md` and `research/incipient_plateau/REPORT_incipient_characterisation.md` (see `research/cleanup/MANIFEST.md`); their findings remain summarised in §S03, §S09 and §S02.
 - Files that leave without a finding of their own (scripts, and generated outputs whose front report is consolidated here) are not repeated below; they are listed in `research/cleanup/MANIFEST.md`.
 
 | file that leaves | manifest destination | finding recorded at (source) | destination |
 |---|---|---|---|
 | `docs/_images/item5/*.png` | remove | `docs/future_work.md:2004@06d8550` | `docs/future_work.md:2004@06d8550` |
-| `research/incipient_plateau/REPORT_incipient_characterisation.md` | consolidate | the report itself (`research/incipient_plateau/REPORT_incipient_characterisation.md:1@06d8550`) | §S02 |
 | `research/incipient_plateau/REPORT_incipient_smoothing.md` | consolidate | the report itself (`research/incipient_plateau/REPORT_incipient_smoothing.md:1@06d8550`) | §S02 |
 | `research/incipient_plateau/gen_geometric_vs_plateau.py` | remove | only in this file: reproduced in §S02 | §S02 |
 | `research/incipient_plateau/geometric_vs_plateau.csv` | remove | only in this file: reproduced in §S02 | §S02 |
@@ -327,12 +327,10 @@ Regenerated at render time from `inspect.signature` and the YAML (working tree a
 | `research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md` | consolidate | the report itself (`research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md:1@06d8550`) | §S09 |
 | `research/inert_params/INCIDENTAL_crash_bug.md` | consolidate | the report itself (`research/inert_params/INCIDENTAL_crash_bug.md:1@06d8550`) | §S09 |
 | `research/inert_params/PREDICTION.md` | consolidate | the report itself (`research/inert_params/PREDICTION.md:1@06d8550`) | §S09 |
-| `research/inert_params/REPORT_inertia_sweep.md` | consolidate | the report itself (`research/inert_params/REPORT_inertia_sweep.md:1@06d8550`) | §S09 |
 | `research/inert_params/inertia_matrix.csv` | remove | `research/inert_params/REPORT_inertia_sweep.md:36@06d8550` | §S09 |
 | `research/inert_params/inertia_matrix_full.csv` | remove | `docs/future_work.md:756@06d8550` | §S09; `docs/future_work.md:756@06d8550` |
 | `research/inert_params/sweep_derived_summary.txt` | remove | `research/inert_params/REPORT_inertia_sweep.md:87@06d8550` | §S09 |
 | `research/inert_params/sweep_summary.txt` | remove | `research/inert_params/REPORT_inertia_sweep.md:26@06d8550` | §S09 |
-| `research/labels/diagnostics/frontA_idx0_c2/REPORT.md` | consolidate | the report itself (`research/labels/diagnostics/frontA_idx0_c2/REPORT.md:1@06d8550`) | §S03 |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log` | remove | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66@06d8550` | §S03 |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_blocks.csv` | remove | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66@06d8550` | §S03 |
 | `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_boundaries.csv` | remove | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66@06d8550` | §S03 |

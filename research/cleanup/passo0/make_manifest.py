@@ -181,6 +181,52 @@ for p, r in FILES.items():
     reg = [resolve(a) for a in anchors]
     rows.append(dict(path=p, type=r["type"], commit=r["last_commit"], date=r["last_date"],
                      refs=r["refs"], dest=dest, why=why, finding=fin, sec=sec, reg=reg))
+
+# Passo 3 (commit 10b) overrides, detected here, never typed:
+# (1) a leaving file cited by cyclophaser/ stays (the front never edits the package);
+# (2) decision 8: a leaving .py imported by a kept research script stays (live dependency).
+# Iterated until stable, since a file kept by (2) may import another.
+def _pkg_cites(path):
+    out = subprocess.run(["git", "grep", "-n", "-F", "-e", path, "HEAD", "--", "cyclophaser/"],
+                         cwd=ROOT, capture_output=True, text=True).stdout.splitlines()
+    return [":".join(l.split(":")[1:3]) for l in out]
+
+
+def _local_imports(path):
+    mods = set()
+    for node in ast.walk(ast.parse((ROOT / path).read_text(encoding="utf-8"))):
+        if isinstance(node, ast.Import):
+            mods |= {a.name.split(".")[0] for a in node.names}
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            mods.add(node.module.split(".")[0])
+    return mods
+
+
+PASSO3_KEPT = {}
+for x in rows:
+    if x["dest"] in ("remover", "consolidar"):
+        c = _pkg_cites(x["path"])
+        if c:
+            PASSO3_KEPT[x["path"]] = "citado pelo pacote (" + ", ".join(c) + ")"
+_by_module = defaultdict(list)
+for x in rows:
+    if x["path"].endswith(".py"):
+        _by_module[Path(x["path"]).stem].append(x)
+changed = True
+while changed:
+    changed = False
+    kept_py = [x["path"] for x in rows if x["path"].startswith("research/") and x["path"].endswith(".py")
+               and (x["dest"] == "manter" or x["path"] in PASSO3_KEPT)]
+    for kp in kept_py:
+        for mod in _local_imports(kp):
+            for y in _by_module.get(mod, []):
+                if y["dest"] != "manter" and y["path"] not in PASSO3_KEPT \
+                        and Path(y["path"]).parent == Path(kp).parent:
+                    PASSO3_KEPT[y["path"]] = f"dependência viva (decisão 8): importado por {kp}"
+                    changed = True
+for x in rows:
+    if x["path"] in PASSO3_KEPT:
+        x.update(dest="manter", why=PASSO3_KEPT[x["path"]], sec="")
 ROWS = {x["path"]: x for x in rows}
 
 # collapse homogeneous groups
@@ -221,6 +267,8 @@ w("* **Passo 2**: coluna \"destino final\" na seção 0.4 e seção 0.5 (destino
   "`research/cleanup/passo2/traceability.json`; o inventário foi regerado sobre a HEAD do Passo 2 antes de "
   "`docs/findings.md` existir. Na seção (c), as notas de correspondência params-15 → params-track contam como VIVA "
   "pela regra do Passo 0; a contagem com a classe \"correspondência\" está em `passo1/params15_refs.py`.")
+w("* **Passo 3 (10b)**: passaram a \"manter\", detectados por script: " + "; ".join(
+    f"`{k}` — {v}" for k, v in sorted(PASSO3_KEPT.items())) + ".")
 w("* Gerado por `research/cleanup/passo0/make_manifest.py` a partir de `inventory.py`, `branches.py`, "
   "`defaults_in_text.py` (mecânico) e `judgements.py` (julgamento: destino, motivo, achado). "
   "Toda contagem e todo `arquivo:linha` abaixo é regerado pelo script; nenhum número foi digitado.")
@@ -714,7 +762,7 @@ summary = dict(n_tracked=INV["n_tracked_total"], dest=dict(dest_count), stale_co
                p114_total=len(hits), p114_live=len(live_p114), p114_live_files=sorted({h["file"] for h in live_p114}),
                p15_total=len(p15), p15_viva=cls_count["VIVA"], p15_hist=cls_count["HISTÓRICA"],
                bp_total=len(bp), abs_total=len(ab), abs_files=sorted({h["file"] for h in ab}),
-               digest=digest, suite=[obt_pass, obt_fail])
+               digest=digest, suite=[obt_pass, obt_fail], passo3_kept=PASSO3_KEPT)
 (P0 / "manifest_summary.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False))
 if ERRORS:
     print("ERRORS:\n  " + "\n  ".join(ERRORS))

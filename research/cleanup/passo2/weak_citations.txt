@@ -41,9 +41,9 @@ S08	252	research/labels/diagnostics/item31/DESIGN.md:72@06d8550	5, 7
 S08	275	docs/future_work.md:3883@06d8550	3, 9
 S08	278	docs/future_work.md:3847@06d8550	1
 S09	294	research/inert_params/PREDICTION.md:14@06d8550	5
-S11	524	docs/future_work.md:3474@06d8550	0
-S11	525	docs/future_work.md:1460@06d8550	1, 6
-S11	536	research/labels/manual_labels.yaml:777@06d8550	6
-S12	542	research/cleanup/passo1/PREVISOES.md:12@d8a19cc	0
-S12	550	research/labels/diagnostics/item19/item19_core.py:44@06d8550	6
+S11	522	docs/future_work.md:3474@06d8550	0
+S11	523	docs/future_work.md:1460@06d8550	1, 6
+S11	534	research/labels/manual_labels.yaml:777@06d8550	6
+S12	540	research/cleanup/passo1/PREVISOES.md:12@d8a19cc	0
+S12	548	research/labels/diagnostics/item19/item19_core.py:44@06d8550	6
 # total: 45

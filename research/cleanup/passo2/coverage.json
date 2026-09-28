@@ -1,17 +1,9 @@
 {
  "Q1": {
-  "n_consolidar": 40,
-  "ok": 40,
+  "n_consolidar": 37,
+  "ok": 37,
   "without_destination": [],
   "detail": [
-   {
-    "path": "research/incipient_plateau/REPORT_incipient_characterisation.md",
-    "in_s10": true,
-    "destination": "§S02",
-    "section_exists": true,
-    "cited_outside_s10_table": true,
-    "ok": true
-   },
    {
     "path": "research/incipient_plateau/REPORT_incipient_smoothing.md",
     "in_s10": true,
@@ -56,22 +48,6 @@
     "path": "research/inert_params/PREDICTION.md",
     "in_s10": true,
     "destination": "§S09",
-    "section_exists": true,
-    "cited_outside_s10_table": true,
-    "ok": true
-   },
-   {
-    "path": "research/inert_params/REPORT_inertia_sweep.md",
-    "in_s10": true,
-    "destination": "§S09",
-    "section_exists": true,
-    "cited_outside_s10_table": true,
-    "ok": true
-   },
-   {
-    "path": "research/labels/diagnostics/frontA_idx0_c2/REPORT.md",
-    "in_s10": true,
-    "destination": "§S03",
     "section_exists": true,
     "cited_outside_s10_table": true,
     "ok": true
@@ -334,13 +310,13 @@
   "ok": true
  },
  "Q3": {
-  "s10_rows": 206,
+  "s10_rows": 203,
   "destination_kinds": {
-   "findings.md section": 205,
+   "findings.md section": 202,
    "future_work.md line": 28
   },
   "rows_pointing_to_leaving_file": 0,
   "detail": []
  },
- "doc_lines": 553
+ "doc_lines": 551
 }

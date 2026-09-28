@@ -1,9 +1,9 @@
 {
  "n_tracked": 537,
  "dest": {
-  "manter": 224,
-  "remover": 273,
-  "consolidar": 40
+  "manter": 228,
+  "remover": 272,
+  "consolidar": 37
  },
  "stale_confirmed": 40,
  "stale_total": 40,
@@ -99,5 +99,11 @@
  "suite": [
   1438,
   0
- ]
+ ],
+ "passo3_kept": {
+  "research/incipient_plateau/REPORT_incipient_characterisation.md": "citado pelo pacote (cyclophaser/find_stages.py:849)",
+  "research/inert_params/REPORT_inertia_sweep.md": "citado pelo pacote (cyclophaser/determine_periods.py:247)",
+  "research/labels/diagnostics/frontA_idx0_c2/REPORT.md": "citado pelo pacote (cyclophaser/determine_periods.py:72, cyclophaser/determine_periods.py:1156, cyclophaser/determine_periods.py:1636)",
+  "research/labels/diagnostics/item31/item31_core.py": "dependência viva (decisão 8): importado por research/labels/diagnostics/item31/param_table.py"
+ }
 }

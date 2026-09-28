@@ -5,6 +5,7 @@
 * Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `06d8550` (ponta esperada `06d8550`: confere); inventário regerado em HEAD `d79914b`.
 * **Correções do Passo 1** (aprovadas pelo Danilo): `.pypirc` saiu do versionamento (commit próprio, conteúdo não lido); branches com equivalência de patch separadas das ancestrais; `measure_incipient_smoothing.py` → manter; saídas de `passo0/` sem caminhos absolutos; decisões aprovadas registradas. Seções 0.1–0.4 regeradas pelos scripts.
 * **Passo 2**: coluna "destino final" na seção 0.4 e seção 0.5 (destino dos arquivos "consolidar"), lidas de `research/cleanup/passo2/traceability.json`; o inventário foi regerado sobre a HEAD do Passo 2 antes de `docs/findings.md` existir. Na seção (c), as notas de correspondência params-15 → params-track contam como VIVA pela regra do Passo 0; a contagem com a classe "correspondência" está em `passo1/params15_refs.py`.
+* **Passo 3 (10b)**: passaram a "manter", detectados por script: `research/incipient_plateau/REPORT_incipient_characterisation.md` — citado pelo pacote (cyclophaser/find_stages.py:849); `research/inert_params/REPORT_inertia_sweep.md` — citado pelo pacote (cyclophaser/determine_periods.py:247); `research/labels/diagnostics/frontA_idx0_c2/REPORT.md` — citado pelo pacote (cyclophaser/determine_periods.py:72, cyclophaser/determine_periods.py:1156, cyclophaser/determine_periods.py:1636); `research/labels/diagnostics/item31/item31_core.py` — dependência viva (decisão 8): importado por research/labels/diagnostics/item31/param_table.py.
 * Gerado por `research/cleanup/passo0/make_manifest.py` a partir de `inventory.py`, `branches.py`, `defaults_in_text.py` (mecânico) e `judgements.py` (julgamento: destino, motivo, achado). Toda contagem e todo `arquivo:linha` abaixo é regerado pelo script; nenhum número foi digitado.
 * Âncoras de registro são resolvidas por texto (arquivo + trecho) e o render aborta se o trecho faltar ou for ambíguo.
 * `.pypirc` foi excluído de toda leitura de conteúdo (é arquivo de credenciais) e, no Passo 1, saiu do versionamento (decisão 2).
@@ -31,9 +32,9 @@ Arquivos versionados em HEAD: **537** (git ls-files, excluindo `research/cleanup
 
 | destino | arquivos |
 |---|---|
-| manter | 224 |
-| consolidar | 40 |
-| remover | 273 |
+| manter | 228 |
+| consolidar | 37 |
+| remover | 272 |
 
 Colunas: caminho · tipo · último commit (hash data) · contém achado? · quem o referencia (arquivo(nº de linhas); `diag/` = `research/labels/diagnostics/`; lista completa com linhas em `passo0/inventory.json`) · destino · motivo · seção de destino no documento único (se consolidar/achado a mover) · onde o achado já está registrado.
 
@@ -133,7 +134,7 @@ Seções propostas para o documento único (Passo 2):
 
 | caminho | tipo | último commit | achado? | referenciado por | destino | motivo | seção | registrado em |
 |---|---|---|---|---|---|---|---|---|
-| `research/incipient_plateau/REPORT_incipient_characterisation.md` | registro/relatório | `0fbacc8` 2026-09-04 | sim — relatório de frente fechada (achados, previsões, veredito) | diag/item31/exposure_table.md(17), docs/findings.md(7), docs/future_work.md(2), CHANGELOG.md(1), +6 | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S02 | `docs/future_work.md:1294` |
+| `research/incipient_plateau/REPORT_incipient_characterisation.md` | registro/relatório | `0fbacc8` 2026-09-04 | sim — relatório de frente fechada (achados, previsões, veredito) | diag/item31/exposure_table.md(17), docs/findings.md(7), docs/future_work.md(2), CHANGELOG.md(1), +6 | **manter** | citado pelo pacote (cyclophaser/find_stages.py:849) | — | `docs/future_work.md:1294` |
 | `research/incipient_plateau/REPORT_incipient_smoothing.md` | registro/relatório | `e0b1b49` 2026-09-04 | sim — relatório de frente fechada (achados, previsões, veredito) | docs/findings.md(6), diag/item31/exposure_table.md(6), CHANGELOG.md(1), diag/item31/exposure_table.json(1), +2 | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S02 | `docs/future_work.md:1294` |
 | `research/incipient_plateau/gen_geometric_vs_plateau.py` | script de diagnóstico | `8a79f6a` 2026-09-04 | sim — gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita | docs/findings.md(2) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | S02 | **SÓ AQUI** |
 | `research/incipient_plateau/geometric_vs_plateau.csv` | saída gerada | `e965eca` 2026-09-04 | sim — fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto | docs/findings.md(19), research/incipient_plateau/gen_geometric_vs_plateau.py(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S02 | **SÓ AQUI** |
@@ -154,7 +155,7 @@ Seções propostas para o documento único (Passo 2):
 | `research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md` | registro/relatório | `25a113a` 2026-09-10 | sim — relatório de frente fechada (achados, previsões, veredito) | docs/findings.md(3), docs/future_work.md(1), research/inert_params/DATA_DEPENDENT_findings.md(1), research/inert_params/REPORT_inertia_sweep.md(1) | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S09 | `docs/future_work.md:756` |
 | `research/inert_params/INCIDENTAL_crash_bug.md` | registro/relatório | `25a113a` 2026-09-10 | sim — relatório de frente fechada (achados, previsões, veredito) | research/inert_params/REPORT_inertia_sweep.md(3), docs/findings.md(2), docs/future_work.md(1) | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S09 | `docs/future_work.md:756` |
 | `research/inert_params/PREDICTION.md` | registro/relatório | `f188bae` 2026-09-10 | sim — relatório de frente fechada (achados, previsões, veredito) | research/inert_params/REPORT_inertia_sweep.md(3), docs/findings.md(2), research/inert_params/extra_checks.py(1), research/inert_params/followup_checks.py(1), +1 | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S09 | `docs/future_work.md:756` |
-| `research/inert_params/REPORT_inertia_sweep.md` | registro/relatório | `4c0767c` 2026-09-16 | sim — relatório de frente fechada (achados, previsões, veredito) | diag/item31/exposure_table.md(17), docs/findings.md(8), tests/test_app_distance_removed.py(2), .gitignore(1), +11 | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S09 | `docs/future_work.md:756` |
+| `research/inert_params/REPORT_inertia_sweep.md` | registro/relatório | `4c0767c` 2026-09-16 | sim — relatório de frente fechada (achados, previsões, veredito) | diag/item31/exposure_table.md(17), docs/findings.md(8), tests/test_app_distance_removed.py(2), .gitignore(1), +11 | **manter** | citado pelo pacote (cyclophaser/determine_periods.py:247) | — | `docs/future_work.md:756` |
 | `research/inert_params/classify.py` | script de diagnóstico | `25a113a` 2026-09-10 | não | research/inert_params/REPORT_inertia_sweep.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/inert_params/extra_checks.py` | script de diagnóstico | `f188bae` 2026-09-10 | não | research/inert_params/REPORT_inertia_sweep.md(2) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/inert_params/followup_checks.py` | script de diagnóstico | `f188bae` 2026-09-10 | não | research/inert_params/REPORT_inertia_sweep.md(2) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
@@ -197,7 +198,7 @@ Seções propostas para o documento único (Passo 2):
 
 | caminho | tipo | último commit | achado? | referenciado por | destino | motivo | seção | registrado em |
 |---|---|---|---|---|---|---|---|---|
-| `research/labels/diagnostics/frontA_idx0_c2/REPORT.md` | registro/relatório | `e97eb17` 2026-09-24 | sim — relatório de frente fechada (achados, previsões, veredito) | docs/findings.md(33), cyclophaser/determine_periods.py(3), docs/future_work.md(2), CHANGELOG.md(1), +1 | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S03 | `docs/future_work.md:2931` |
+| `research/labels/diagnostics/frontA_idx0_c2/REPORT.md` | registro/relatório | `e97eb17` 2026-09-24 | sim — relatório de frente fechada (achados, previsões, veredito) | docs/findings.md(33), cyclophaser/determine_periods.py(3), docs/future_work.md(2), CHANGELOG.md(1), +1 | **manter** | citado pelo pacote (cyclophaser/determine_periods.py:72, cyclophaser/determine_periods.py:1156, cyclophaser/determine_periods.py:1636) | — | `docs/future_work.md:2931` |
 | `research/labels/diagnostics/frontA_idx0_c2/common.py` | script de diagnóstico | `b3bdaa1` 2026-09-23 | não | diag/frontA_idx0_c2/REPORT.md(2), diag/frontA_idx0_c2/fig_20190639.py(1), diag/frontA_idx0_c2/m2b_peak_to_valley.py(1), diag/frontA_idx0_c2/m3_force_peak.py(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/labels/diagnostics/frontA_idx0_c2/fig_20190639.py` | script de diagnóstico | `8f55c81` 2026-09-23 | não | diag/frontA_idx0_c2/REPORT.md(2) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/labels/diagnostics/frontA_idx0_c2/m1_m2_census.py` | script de diagnóstico | `b3bdaa1` 2026-09-23 | não | diag/frontA_idx0_c2/REPORT.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
@@ -481,7 +482,7 @@ Seções propostas para o documento único (Passo 2):
 | `research/labels/diagnostics/item31/gate_2b.json` | saída gerada | `c5217b5` 2026-09-28 | sim — gate 2b (defaults viram params-15) | diag/item31/future_work_numbers.py(4), diag/item31/gate_2b.py(2), docs/findings.md(1), diag/item31/DESIGN.md(1), +1 | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:756` |
 | `research/labels/diagnostics/item31/gate_2b.py` | script de diagnóstico | `c5217b5` 2026-09-28 | não | diag/item31/DESIGN.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/labels/diagnostics/item31/gate_2b.txt` | saída gerada | `c5217b5` 2026-09-28 | sim — gate 2b | docs/findings.md(1), diag/item31/DESIGN.md(1), diag/item31/gate_2b.py(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:756` |
-| `research/labels/diagnostics/item31/item31_core.py` | script de diagnóstico | `e42da8b` 2026-09-28 | não | — | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
+| `research/labels/diagnostics/item31/item31_core.py` | script de diagnóstico | `e42da8b` 2026-09-28 | não | — | **manter** | dependência viva (decisão 8): importado por research/labels/diagnostics/item31/param_table.py | — | — |
 | `research/labels/diagnostics/item31/make_defaults_2_0_0.py` | script de diagnóstico | `a5067df` 2026-09-28 | não | diag/item31/gate_2a.py(2), research/labels/config_defaults.py(1), research/labels/defaults_2.0.0.json(1), diag/item31/DESIGN.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/labels/diagnostics/item31/p15_expected_digest.py` | script de diagnóstico | `e42da8b` 2026-09-28 | não | diag/item31/DESIGN.md(2), diag/item31/stale_scripts.json(1), diag/item31/stale_scripts.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque (não roda na ponta: params-1..14 removidos) | — | — |
 | `research/labels/diagnostics/item31/p15_expected_digest.txt` | saída gerada | `e42da8b` 2026-09-28 | sim — digest esperado após a etapa 2 (layout front_b) | diag/item31/DESIGN.md(2), diag/item31/p15_expected_digest.py(2), docs/findings.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:375` |
@@ -1766,19 +1767,16 @@ Coluna **destino final (Passo 2)**: para onde o achado vai quando o arquivo sair
 
 ## 0.5 Destinos finais dos arquivos "consolidar" (Passo 2)
 
-40 arquivos; destino lido de `passo2/traceability.json`. Sem destino: 0.
+37 arquivos; destino lido de `passo2/traceability.json`. Sem destino: 0.
 
 | arquivo | seção proposta (Passo 0) | destino final (Passo 2) |
 |---|---|---|
-| `research/incipient_plateau/REPORT_incipient_characterisation.md` | S02 | docs/findings.md §S02 |
 | `research/incipient_plateau/REPORT_incipient_smoothing.md` | S02 | docs/findings.md §S02 |
 | `research/inert_params/BACKLOG_inexplicada.md` | S09 | docs/findings.md §S09 |
 | `research/inert_params/DATA_DEPENDENT_findings.md` | S09 | docs/findings.md §S09 |
 | `research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md` | S09 | docs/findings.md §S09 |
 | `research/inert_params/INCIDENTAL_crash_bug.md` | S09 | docs/findings.md §S09 |
 | `research/inert_params/PREDICTION.md` | S09 | docs/findings.md §S09 |
-| `research/inert_params/REPORT_inertia_sweep.md` | S09 | docs/findings.md §S09 |
-| `research/labels/diagnostics/frontA_idx0_c2/REPORT.md` | S03 | docs/findings.md §S03 |
 | `research/labels/diagnostics/frontA_reverify/REPORT.md` | S03 | docs/findings.md §S03 |
 | `research/labels/diagnostics/frontC/REPORT.md` | S05 | docs/findings.md §S05 |
 | `research/labels/diagnostics/frontD/REPORT.md` | S02 | docs/findings.md §S02 |
@@ -1918,7 +1916,7 @@ O CI instala do wheel mais `pytest pyyaml`; o RTD lê `docs/requirements.txt`; `
 
 * Branch `chore/repo-cleanup`; base em develop-v2.1 `06d8550` (esperada `06d8550`); inventário em HEAD `d79914b`. Hash do commit deste passo: ver a mensagem de entrega (um arquivo não contém o próprio hash).
 * Linha de base: suíte previsto 1438/0 → obtido 1438/0; digest previsto `3a6de265…` → obtido `3a6de265…`.
-* Arquivos versionados: 537 — manter 224, consolidar 40, remover 273. Scripts de stale_scripts.md confirmados: 40/40.
+* Arquivos versionados: 537 — manter 228, consolidar 37, remover 272. Scripts de stale_scripts.md confirmados: 40/40.
 * Branches remotas: 41 — apagar 30, manter 3, tag de arquivo 6, tag de arquivo (após Passo 2) 2; das "apagar", 30 ancestrais e 0 só patch-equivalentes.
 * SÓ AQUI: `research/incipient_plateau/gen_geometric_vs_plateau.py` → gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita; `research/incipient_plateau/geometric_vs_plateau.csv` → fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto.
 * params-1..14 fora dos diagnósticos e de future_work.md: 135 ocorrências em 23 arquivos; propostas **migrar** em `tests/test_intensification_min_depth.py`, `tools/calibration_app/benchmark_core.py`, `tools/calibration_app/layer_inspector.py`.
