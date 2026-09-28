@@ -25,6 +25,8 @@ resolves into this checkout and that `sys.prefix` is the `cyclophaser` env
 | 5 constant comparator (TRAIN) | `constant_train.py` | `constant_train.txt`, `.json` |
 | 6 stage-2 footprint (TRAIN) | `footprint_train.py` | `footprint_train.txt`, `.json` |
 | 6 stage-2 expected digest | `p15_expected_digest.py` | `p15_expected_digest.txt` |
+| stage 1 — THE run (frozen, not yet run) | `stage1_run.py` | `stage1_output.txt`, `.json` (absent until it runs) |
+| stage 1 — scorer smoke test on TRAIN | `stage1_smoke_train.py` | `stage1_smoke_train.txt` |
 
 ---
 
@@ -114,6 +116,10 @@ The per-series table is in the output file. What bears on stage 1:
   a TEST block was ever displayed, or for which configuration. **Question for
   Danilo:** was a Benchmark TEST block ever looked at, and under which config?
   If one was looked at under params-15, stage 1 is not a first scoring either.
+  * **Answered (stage 1, part A, 2026-09-28; §8.3).** Danilo **confirms** that
+    he displayed TEST blocks in the Benchmark. The configurations were not
+    recorded and may include params-15. E23 is now kind **S** in
+    `exposure_table.md`. Stage 1 is therefore not a first scoring; see §5.2.
 
 ## 4. Label-only census of the TEST split (`test_label_census.txt`)
 
@@ -303,6 +309,26 @@ label. Option B must declare which of the two is authoritative before it runs.
   are reported so that the reader can see that. No significance threshold is
   part of the verdict.
 
+**Framing (stage 1, part A, 2026-09-28).** This supersedes the "first scoring"
+wording above and in §3/E22. The text is verbatim as given; it is
+authoritative:
+
+> "A etapa 1 NÃO é validação fora da amostra. As 16 séries foram conjunto
+> de calibração visual (E01), foram vistas sob params-15 na revisão que o
+> adotou (E22) e tiveram blocos TEST exibidos no Benchmark (E23). Os
+> rótulos são julgamento do mesmo avaliador. Logo P15 tem vantagem por
+> construção contra DEF: um PASS é evidência fraca; um FAIL é evidência
+> forte. Esta é a primeira pontuação REGISTRADA e reproduzível, não a
+> primeira exibição."
+
+In English: stage 1 is **not** out-of-sample validation. The 16 series were
+part of the visual calibration set (E01), were seen under params-15 in the
+review that adopted it (E22), and had TEST blocks displayed in the Benchmark
+(E23). The labels are the same assessor's judgement. So P15 has an advantage
+over DEF by construction: **a PASS is weak evidence; a FAIL is strong
+evidence.** This is the first **recorded**, reproducible scoring, not the first
+display.
+
 ### 5.3 Claude's declared prediction for stage 1 (made AFTER the census; not part of the criterion)
 
 The prediction comes from TRAIN rates (`constant_train.txt`) applied to TEST's
@@ -328,6 +354,23 @@ prediction and nothing in the criterion, whose structure was frozen in
   always open with an incipient.
 * **Overall: PASS, low confidence. If it FAILs, V2 will be the condition that
   fails.**
+
+### 5.4 The technical lead's declared prediction (sub-conversation; stage 1, part A, before execution)
+
+This prediction is kept separate from the agent's in §5.3 and is not merged
+with it. It was declared before `stage1_run.py` existed as a run:
+
+| | predicted |
+|---|---|
+| mechanical count, P14 vs P15 final maps on the 16 | **0** |
+| V1, V3, V5 | pass |
+| V4 | probably passes |
+| V2 | uncertain |
+| **overall** | **PASS, low confidence; if FAIL, it fails on V2** |
+
+The agent's §5.3 made no prediction for the mechanical count. The two
+predictions agree on everything else, except that §5.3 puts V4 at "pass" where
+this one says "probably passes".
 
 ## 6. Stage-2 equivalence gate — proposal
 
@@ -430,7 +473,8 @@ supports that.
    the strength of this row would be a choice made after seeing TRAIN numbers,
    with no declared premise. The recommendation stays with the calibrated
    object. The trade-off is recorded as an **open question for Danilo**; if it
-   is pursued, it needs its own front.
+   is pursued, it needs its own front. **Decided (§8.4): params-15's filtering;
+   the hybrid is parked.**
 3. **No presets.** A preset API multiplies the configurations to validate,
    document and keep equivalent (EQ-style gates per preset). The research
    configs already live as versioned YAML in `research/labels/configs/`, and a
@@ -438,23 +482,91 @@ supports that.
 4. **`use_filter='auto'`, not `True`.** The two are equivalent, and `'auto'`
    avoids a warning on every default call.
 
-## 8. Decisions left to Danilo (not decided here)
+## 8. Decisions (Danilo, 2026-09-28)
 
-1. **Inclusion of the 3 batch TEST series** (19930748, 20111118, 19990549):
-   * it needs new evaluator code (the evaluator has only `--batch-train`);
-   * 20111118 has leaked one bit (E21);
-   * it needs a declared source for its incipient verdict (§5.1);
-   * it is the only way stage 1 touches `spare_intensification` (§5.2).
-2. **Comparator scope:**
-   * whether P15 / DEF / CONST is enough;
-   * whether params-14 enters as a scored comparator to isolate the rule;
-   * whether the "P14 vs P15 on the 16" mechanical count stays outside the
-     verdict.
-3. **E23:** was a Benchmark TEST block ever displayed, and under which config?
-4. **The filter trade-off in §7.2.** Keep params-15's filter (recommended), or
-   open a front on the hybrid.
+At stage 0 (`a21bca2`) these were four open questions. Danilo settled them on
+2026-09-28, before stage 1 ran.
+
+1. **Option A only.** The 3 batch TEST series (19930748, 20111118, 19990549)
+   are **NOT scored**. Stage 1's population is the 16 TEST series of the
+   original split.
+   * **Consequence.** With the existing data, `incipient_plateau_spare_intensification`
+     remains **"adotada sem validação independente"** for good. On the split's
+     47 TRAIN series it changes nothing (§2); the 16 TEST series were not
+     selected for it; the 5 validation tracks are spent (item 30). Validating
+     the rule would require labelling **new** swell series.
+   * The new evaluator code and the 20111118 verdict-source question (§5.1,
+     Option B) are no longer needed.
+2. **Comparators: P15, DEF and CONST.** params-14 is not scored. It appears
+   only as the mechanical P14-vs-P15 count on the 16, outside the verdict, as
+   §5 already specified.
+3. **E23, answered.** **Danilo confirms that he displayed TEST blocks in the
+   Benchmark tab.** The configurations were not recorded and may include
+   params-15. The E23 row of `exposure_table.md` is updated to kind **S**, and
+   its source is this line. §5.2 draws the consequence.
+4. **Default filtering = params-15's filtering:**
+   * `cutoff_high = 18`;
+   * `use_smoothing = False` and `use_smoothing_twice = False`;
+   * `boundary_padding = 'edge'`;
+   * `use_filter = 'auto'`;
+   * **no presets API**.
+
+   **The hybrid is parked** (params-15's phases on the 2.0.0 filtering, §7.2).
+   It is not a comparator. After stage 1 has run, no unscored data remains to
+   validate it.
+
+## 9. Stage 1, part A — the freeze (2026-09-28)
+
+**`stage1_run.py` implements §5 with §8's decisions. It was committed and NOT
+run.** Its freeze commit is the one that adds it; the hash is recorded in the
+orchestration summary. The run also prints the last commit touching
+`stage1_run.py` and `DESIGN.md`, so its output names its own reference.
+
+* **One execution, one process, one commit.**
+  * Before anything else, it refuses to run if the tracked tree has changes
+    under `cyclophaser/`, `research/labels/` or `tools/calibration_app/`, or if
+    it is itself uncommitted.
+  * All comparators and both label versions run in the same process.
+* **Single-execution lock.** If `stage1_output.txt` or `.json` exists, it aborts
+  before reading anything. The `.txt` is created exclusively (mode `'x'`)
+  immediately before the first TEST series is processed. A crash after that
+  point still blocks a rerun, and what counts is then the maintainer's call.
+* **Before the lock, no TEST output exists yet.** The checks run in this order:
+  * the environment (`cyclophaser.__file__`, `sys.prefix`, versions);
+  * git HEAD;
+  * the front_b default digest on the 47 TRAIN ids, which must equal
+    `b500d2e0…` before DEF is scored;
+  * the config hashes;
+  * CONST equal to `constant_train.json`;
+  * the 16 labels reproducing the §4 census (n 16, B 9, N₀ 6, M 15, K\* 5) under
+    both versions, with every field the scorer reads present. Any mismatch
+    aborts, since §5.1's arithmetic assumes these counts.
+* **Output.** It covers:
+  * a per-series table;
+  * the aggregates (H, R, C, Q, MAT, false refusals, ambiguous refused);
+  * V1–V5, PASS/FAIL per condition and per label version, and the overall
+    verdict (PASS only if all five hold under both versions);
+  * discordant pairs P15 vs DEF for C and Q;
+  * the evaluator's per-phase boundary numbers;
+  * the P14-vs-P15 mechanical count on the 16.
+* **Smoke test** (`stage1_smoke_train.txt`). The code that runs after the lock
+  (`build_det`, `score_version`, `report`, the JSON dump) was exercised on the
+  35 real TRAIN series, and it reproduces `constant_train.json` exactly under
+  both label versions:
+
+  | | C | Q | MAT |
+  |---|---|---|---|
+  | P15 | 22/33 | 19/35 | 27/33 |
+  | DEF | 6/33 | 11/35 | 18/33 |
+  | CONST | 16/33 | 14/35 | — |
+
+  `stage1_run.main()` was not called, and no TEST label or series was touched.
+  `stage1_output.*` was absent before and after.
 
 ---
 
-*§4, §5.1–5.3, §6, §7 and §8 were written in the second commit of stage 0,
-after the census; §5's structure is as committed in `e42da8b`, before it.*
+*§4, §5.1–5.3, §6 and §7 were written in the second commit of stage 0
+(`a21bca2`), after the census; §5's structure is as committed in `e42da8b`,
+before it. §8's decisions and the additions to §3, §5.2 and §5.3 marked
+"stage 1, part A" were written in the freeze commit, before `stage1_run.py`
+ran.*

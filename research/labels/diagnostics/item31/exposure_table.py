@@ -116,12 +116,15 @@ EVENTS = [
      "the comparator stage 1 would score; 20150377 and 20206498 marked bad; marks "
      "used in no decision.",
      FW, "the 16 of the split, the 3 of the batch and 20203389. Danilo marked 20150377"),
-    ("E23", "?", ALL16, "any config loaded in the Benchmark tab", "since 2026-09-18",
-     "The Benchmark tab computes a TEST block (sequence + mature scored against the "
-     "16 test labels) when test cases are selected. No record says whether any TEST "
-     "block was displayed, for which config. The records DO show the Test button was "
-     "pressed at least once (the 'Train then Test' bug, reproduced on 99f5a9a).",
-     FW, "**Test** in one session empties the selection"),
+    # Stage 0 recorded E23 as "?" (anchored at future_work.md: the 'Train then
+    # Test' bug). Danilo answered on 2026-09-28; the answer is recorded in
+    # DESIGN.md §8.3, which is now the source.
+    ("E23", "S", ALL16, "UNRECORDED — may include **params-15**", "since 2026-09-18",
+     "Danilo CONFIRMS having displayed TEST blocks in the Benchmark tab (sequence + "
+     "mature scored against the 16 test labels); the configs were not recorded and may "
+     "include params-15. Answered 2026-09-28 (stage 0 had it as '?').",
+     "research/labels/diagnostics/item31/DESIGN.md",
+     "3. **E23, answered.** **Danilo confirms that he displayed TEST blocks in the"),
 ]
 
 

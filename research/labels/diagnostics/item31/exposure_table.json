@@ -369,7 +369,7 @@
     },
     {
       "id": "E23",
-      "kind": "?",
+      "kind": "S",
       "series": "ALL16",
       "members": [
         "20150377",
@@ -389,10 +389,10 @@
         "20204655",
         "20206498"
       ],
-      "config": "any config loaded in the Benchmark tab",
+      "config": "UNRECORDED \u2014 may include **params-15**",
       "when": "since 2026-09-18",
-      "what": "The Benchmark tab computes a TEST block (sequence + mature scored against the 16 test labels) when test cases are selected. No record says whether any TEST block was displayed, for which config. The records DO show the Test button was pressed at least once (the 'Train then Test' bug, reproduced on 99f5a9a).",
-      "source": "docs/future_work.md:3815"
+      "what": "Danilo CONFIRMS having displayed TEST blocks in the Benchmark tab (sequence + mature scored against the 16 test labels); the configs were not recorded and may include params-15. Answered 2026-09-28 (stage 0 had it as '?').",
+      "source": "research/labels/diagnostics/item31/DESIGN.md:501"
     }
   ],
   "per_series": {
