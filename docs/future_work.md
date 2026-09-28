@@ -3995,7 +3995,9 @@ Discordant pairs, params-15 against the 2.0.0 defaults:
   sidebar value (`cutoff_high=48`). The swap mutation fails the pin
   (`benchmark_swap_mutation_2c.txt`).
 
-SUITE_2C_LINE
+**Suite at `cc5519e`: 1438 passed, 0 failed**, as declared before the run
+(1433 + the 5 new tests). **Gates:** front_b's default digest is `3a6de265…`,
+with its record appended, and `git diff 45f0600 -- cyclophaser/` is empty.
 
 ### Still open
 

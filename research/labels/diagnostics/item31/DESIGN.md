@@ -1003,7 +1003,19 @@ edits change no count.
 **Gates:** the front_b default digest = `3a6de265…`; `git diff 45f0600 --
 cyclophaser/` is empty.
 
-RESULT_2C_PLACEHOLDER
+### 12.2 Results
+
+| | declared (`61f85cf`) | obtained |
+|---|---|---|
+| sidebar start-up values (`sidebar_table_2c.py --obtained`) | the table above | **37/37 match**: 33 read from the rendered widgets, 4 hidden conditional widgets (`thr_inc_len`, `sm_val`, `sm2_val`, `extrema_prominence_val`) read from `_DEFAULTS` |
+| `tests/test_sidebar_defaults.py` | 5 new tests pass | **5 passed** |
+| `test_benchmark_apptest.py` with `cutoff_high=48` as the declared non-default | passes | **53 passed** |
+| swap mutation (`benchmark_swap_mutation_2c.txt`) | the pin and the load-order test FAIL; the 2 guards PASS | **2 failed, 2 passed**, exactly those |
+| exec-stretch tests (`test_item30…`, `test_config_defaults`, `test_app_distance_removed`) | no change needed | **no change needed**; they pass |
+| full suite at `cc5519e` | **1438 passed, 0 failed** | **1438 passed, 0 failed** (`suite_2c.txt`) |
+| gate: front_b digest | `3a6de265…` | **`3a6de265…`**; record appended at `cc5519e` |
+| gate: `git diff 45f0600 -- cyclophaser/` | empty | **empty** |
+
 
 ---
 

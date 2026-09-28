@@ -85,3 +85,12 @@ python  : 3.12.14
 numpy   : 2.5.3
 scipy   : 1.18.0
 pandas  : 3.0.5
+--- record ---
+sha256  : 3a6de26501c6fed05091025480cacf7502fe2d7d0076ba8479a9ecca81703b99
+n_series: 47
+commit  : cc5519e9dc767f093a853513378bb2c0bd1d775c
+date    : 2026-09-28
+python  : 3.12.14
+numpy   : 2.5.3
+scipy   : 1.18.0
+pandas  : 3.0.5
