@@ -1,0 +1,33 @@
+environment: {"cyclophaser.__file__": "cyclophaser/__init__.py", "sys.prefix": "cyclophaser", "python": "3.12.14", "numpy": "2.5.3", "scipy": "1.18.0", "pandas": "3.0.5"}
+
+=== TRAIN real, labels current: 35 records ===
+verdict kinds: {'none': 16, 'boundary': 17, 'ambiguous': 2}
+sequence distribution:
+  14  intensification > mature > decay
+  13  incipient > intensification > mature > decay
+   3  intensification > mature > decay > residual
+   2  incipient > intensification
+   2  incipient > intensification > mature > decay > residual
+   1  incipient > intensification > mature > decay > intensification > mature > decay > residual
+S* = intensification > mature > decay  (14/35)   INC* = no incipient
+scores on these TRAIN labels (same ruler):
+  constant             incipient hits  0/17 none agreed 16/16 false refusals 17  correct 16/33  sequence 14/35
+  params-15            incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 19/35  mature 27/33
+  defaults             incipient hits  5/17 none agreed  1/16 false refusals  1  correct  6/33  sequence 11/35  mature 18/33
+  p15-phase|def-filter incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 22/35  mature 20/33
+
+=== TRAIN real, labels first-blind: 35 records ===
+verdict kinds: {'none': 16, 'boundary': 17, 'ambiguous': 2}
+sequence distribution:
+  14  intensification > mature > decay
+  13  incipient > intensification > mature > decay
+   3  intensification > mature > decay > residual
+   2  incipient > intensification
+   2  incipient > intensification > mature > decay > residual
+   1  incipient > intensification > mature > decay > intensification > mature > decay > residual
+S* = intensification > mature > decay  (14/35)   INC* = no incipient
+scores on these TRAIN labels (same ruler):
+  constant             incipient hits  0/17 none agreed 16/16 false refusals 17  correct 16/33  sequence 14/35
+  params-15            incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 19/35  mature 27/33
+  defaults             incipient hits  5/17 none agreed  1/16 false refusals  1  correct  6/33  sequence 11/35  mature 18/33
+  p15-phase|def-filter incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 22/35  mature 20/33
