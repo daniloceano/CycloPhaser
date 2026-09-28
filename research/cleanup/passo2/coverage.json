@@ -1,0 +1,346 @@
+{
+ "Q1": {
+  "n_consolidar": 40,
+  "ok": 40,
+  "without_destination": [],
+  "detail": [
+   {
+    "path": "research/incipient_plateau/REPORT_incipient_characterisation.md",
+    "in_s10": true,
+    "destination": "§S02",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/incipient_plateau/REPORT_incipient_smoothing.md",
+    "in_s10": true,
+    "destination": "§S02",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/inert_params/BACKLOG_inexplicada.md",
+    "in_s10": true,
+    "destination": "§S09",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/inert_params/DATA_DEPENDENT_findings.md",
+    "in_s10": true,
+    "destination": "§S09",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md",
+    "in_s10": true,
+    "destination": "§S09",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/inert_params/INCIDENTAL_crash_bug.md",
+    "in_s10": true,
+    "destination": "§S09",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/inert_params/PREDICTION.md",
+    "in_s10": true,
+    "destination": "§S09",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/inert_params/REPORT_inertia_sweep.md",
+    "in_s10": true,
+    "destination": "§S09",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/frontA_idx0_c2/REPORT.md",
+    "in_s10": true,
+    "destination": "§S03",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/frontA_reverify/REPORT.md",
+    "in_s10": true,
+    "destination": "§S03",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/frontC/REPORT.md",
+    "in_s10": true,
+    "destination": "§S05",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/frontD/REPORT.md",
+    "in_s10": true,
+    "destination": "§S02",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/frontRefusal/REPORT.md",
+    "in_s10": true,
+    "destination": "§S02",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/front_b/ADDENDUM_part1b.md",
+    "in_s10": true,
+    "destination": "§S06",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/front_b/REPORT_front_b_part1.md",
+    "in_s10": true,
+    "destination": "§S06",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item19/PROVENANCE.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item19/REPORT.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item19/stage1_per_series.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item19/stage1_prominence.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item19/stage2_grid.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item19/stage2_losses.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item20a/REPORT.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item20a/tables.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item20b/REPORT.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item20b/REPORT_stage2.md",
+    "in_s10": true,
+    "destination": "§S04",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item30/PREDICTIONS.md",
+    "in_s10": true,
+    "destination": "§S07",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item30/PREDICTIONS_part2.md",
+    "in_s10": true,
+    "destination": "§S07",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item30/PREDICTIONS_part3.md",
+    "in_s10": true,
+    "destination": "§S07",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item30/REPORT.md",
+    "in_s10": true,
+    "destination": "§S07",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item30/REPORT_figs_cf.md",
+    "in_s10": true,
+    "destination": "§S07",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item30/REPORT_part2.md",
+    "in_s10": true,
+    "destination": "§S07",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item30/REPORT_part3.md",
+    "in_s10": true,
+    "destination": "§S07",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item31/DESIGN.md",
+    "in_s10": true,
+    "destination": "§S08",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item31/exposure_table.md",
+    "in_s10": true,
+    "destination": "§S08",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item31/param_table.md",
+    "in_s10": true,
+    "destination": "§S08",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item31/sidebar_table_2c.md",
+    "in_s10": true,
+    "destination": "§S08",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item31/stale_scripts.md",
+    "in_s10": true,
+    "destination": "§S10",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item31/test_label_census.txt",
+    "in_s10": true,
+    "destination": "§S08",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   },
+   {
+    "path": "research/labels/diagnostics/item31/train_sequences_2b.md",
+    "in_s10": true,
+    "destination": "§S08",
+    "section_exists": true,
+    "cited_outside_s10_table": true,
+    "ok": true
+   }
+  ]
+ },
+ "Q2": {
+  "csv_rows": 18,
+  "table_rows_found": 18,
+  "cites_csv": true,
+  "cites_generator": true,
+  "ok": true
+ },
+ "Q3": {
+  "s10_rows": 206,
+  "destination_kinds": {
+   "findings.md section": 205,
+   "future_work.md line": 28
+  },
+  "rows_pointing_to_leaving_file": 0,
+  "detail": []
+ },
+ "doc_lines": 548
+}
