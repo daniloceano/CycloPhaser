@@ -728,6 +728,22 @@ order (params-15 first, sidebar second) and the pins unchanged. The result was
 
 The copy was deleted after the run.
 
+**Result of gate 2a (run at `1766338`, the commit that recorded the predictions
+above):**
+
+| | predicted | obtained |
+|---|---|---|
+| G1 cyclophaser/ diff | empty | **empty** |
+| G2 front_b default digest | `b500d2e0…` | **`b500d2e0…`** |
+| G3 removed + recoverable, params-15 intact | PASS | **PASS** |
+| G4 frozen table == live defaults | PASS | **PASS** |
+| G5 evaluator stdout == 33ea489 (params-15; defaults) | identical | **identical** (3258 and 3103 chars) |
+| suite `-m "not browser"` | 1431 passed, 0 failed | **1431 passed, 0 failed** |
+
+Every prediction held (`gate_2a.txt`, `suite_2a.txt`). The only visible effect
+of (a) on params-15 is a stderr note from the evaluator:
+`phase_params.prominence=None`, filled.
+
 ---
 
 *§4, §5.1–5.3, §6 and §7 were written in the second commit of stage 0
