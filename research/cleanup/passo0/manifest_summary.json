@@ -20,8 +20,8 @@
   "research/incipient_plateau/gen_geometric_vs_plateau.py",
   "research/incipient_plateau/geometric_vs_plateau.csv"
  ],
- "p114_total": 986,
- "p114_live": 103,
+ "p114_total": 988,
+ "p114_live": 105,
  "p114_live_files": [
   "CHANGELOG.md",
   "cyclophaser/determine_periods.py",
@@ -46,10 +46,10 @@
   "tools/calibration_app/benchmark_tab.py",
   "tools/calibration_app/layer_inspector.py"
  ],
- "p15_total": 317,
- "p15_viva": 66,
- "p15_hist": 251,
- "bp_total": 126,
+ "p15_total": 265,
+ "p15_viva": 13,
+ "p15_hist": 252,
+ "bp_total": 149,
  "abs_total": 139,
  "abs_files": [
   "docs/future_work.md",

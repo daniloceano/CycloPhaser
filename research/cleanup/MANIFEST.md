@@ -2,8 +2,9 @@
 
 **Frente:** limpeza do repositório + default `boundary_padding` · **Passo 0 — somente leitura**, corrigido no Passo 1. No Passo 0 nada fora de `research/cleanup/` foi removido, movido, renomeado ou editado; as decisões do Danilo sobre esta proposta estão em "Decisões aprovadas".
 
-* Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `06d8550` (ponta esperada `06d8550`: confere); inventário regerado em HEAD `c080f4d`.
+* Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `06d8550` (ponta esperada `06d8550`: confere); inventário regerado em HEAD `2a3080f`.
 * **Correções do Passo 1** (aprovadas pelo Danilo): `.pypirc` saiu do versionamento (commit próprio, conteúdo não lido); branches com equivalência de patch separadas das ancestrais; `measure_incipient_smoothing.py` → manter; saídas de `passo0/` sem caminhos absolutos; decisões aprovadas registradas. Seções 0.1–0.4 regeradas pelos scripts.
+* **Passo 2**: coluna "destino final" na seção 0.4 e seção 0.5 (destino dos arquivos "consolidar"), lidas de `research/cleanup/passo2/traceability.json`; o inventário foi regerado sobre a HEAD do Passo 2 antes de `docs/findings.md` existir. Na seção (c), as notas de correspondência params-15 → params-track contam como VIVA pela regra do Passo 0; a contagem com a classe "correspondência" está em `passo1/params15_refs.py`.
 * Gerado por `research/cleanup/passo0/make_manifest.py` a partir de `inventory.py`, `branches.py`, `defaults_in_text.py` (mecânico) e `judgements.py` (julgamento: destino, motivo, achado). Toda contagem e todo `arquivo:linha` abaixo é regerado pelo script; nenhum número foi digitado.
 * Âncoras de registro são resolvidas por texto (arquivo + trecho) e o render aborta se o trecho faltar ou for ambíguo.
 * `.pypirc` foi excluído de toda leitura de conteúdo (é arquivo de credenciais) e, no Passo 1, saiu do versionamento (decisão 2).
@@ -58,7 +59,7 @@ Seções propostas para o documento único (Passo 2):
 | `.gitignore` | config | `c080f4d` 2026-09-28 | não | — | **manter** | config de versionamento | — | — |
 | `.python-version` | config | `0df0ef5` 2026-06-16 | não | .gitignore(1), tools/calibration_app/requirements.txt(1) | **manter** | versão do Python do deploy do app (citado em tools/calibration_app/requirements.txt) | — | — |
 | `.readthedocs.yml` | config | `a1ff4d7` 2023-12-18 | não | — | **manter** | build da documentação | — | — |
-| `CHANGELOG.md` | doc de usuário | `cc5519e` 2026-09-28 | sim — mudanças de comportamento por versão, com tabelas de defaults | docs/future_work.md(1), docs/usage.rst(1), diag/frontA_idx0_c2/REPORT.md(1), diag/frontC/REPORT.md(1), +1 | **manter** | doc de usuário; [Unreleased] é vivo | — | — |
+| `CHANGELOG.md` | doc de usuário | `a132f37` 2026-09-28 | sim — mudanças de comportamento por versão, com tabelas de defaults | docs/future_work.md(1), docs/usage.rst(1), diag/frontA_idx0_c2/REPORT.md(1), diag/frontC/REPORT.md(1), +1 | **manter** | doc de usuário; [Unreleased] é vivo | — | — |
 | `CLAUDE.md` | config | `0f680c5` 2026-09-16 | não | docs/future_work.md(2), diag/frontA_reverify/REPORT.md(1), diag/frontRefusal/REPORT.md(1), diag/item19/PROVENANCE.md(1), +1 | **manter** | regras fixas para agentes | — | — |
 | `LICENSE` | doc de usuário | `f2c51f3` 2024-09-17 | não | CHANGELOG.md(1), docs/license.rst(1) | **manter** | licença | — | — |
 | `Pipfile` | config | `b734799` 2024-10-18 | não | .gitignore(5), docs/future_work.md(1), environment.yml(1) | **remover** | pins de 2024 que não batem com setup.py/environment.yml; nenhum CI/RTD/env o usa (environment.yml é o canônico) | — | — |
@@ -80,9 +81,9 @@ Seções propostas para o documento único (Passo 2):
 | caminho | tipo | último commit | achado? | referenciado por | destino | motivo | seção | registrado em |
 |---|---|---|---|---|---|---|---|---|
 | `cyclophaser/__init__.py` | pacote | `a6842d9` 2024-10-18 | não | diag/frontA_idx0_c2/outputs/stage2_gate.log(3), diag/item31/gate_2a.txt(3), diag/item30/figs_cf_output.txt(2), diag/item30/part3_measure_output.txt(2), +49 | **manter** | código/dados do pacote | — | — |
-| `cyclophaser/determine_periods.py` | pacote | `a1784b5` 2026-09-28 | não | docs/future_work.md(15), research/inert_params/REPORT_inertia_sweep.md(8), diag/item19/PROVENANCE.md(8), research/inert_params/INCIDENTAL_crash_bug.md(7), +52 | **manter** | código/dados do pacote | — | — |
+| `cyclophaser/determine_periods.py` | pacote | `742e685` 2026-09-28 | não | docs/future_work.md(15), research/inert_params/REPORT_inertia_sweep.md(8), diag/item19/PROVENANCE.md(8), research/inert_params/INCIDENTAL_crash_bug.md(7), +52 | **manter** | código/dados do pacote | — | — |
 | `cyclophaser/find_stages.py` | pacote | `f85e1b8` 2026-09-27 | não | docs/future_work.md(29), diag/item19/REPORT.md(14), diag/frontA_idx0_c2/outputs/m5_boundary_independence.log(9), diag/item19/stage2_grid.py(9), +52 | **manter** | código/dados do pacote | — | — |
-| `cyclophaser/lanczos_filter.py` | pacote | `4e70d17` 2026-09-03 | não | docs/future_work.md(1), diag/item20b/REPORT.md(1), diag/item20b/supplement_20b.py(1), diag/item20b/supplement_20b.txt(1) | **manter** | código/dados do pacote | — | — |
+| `cyclophaser/lanczos_filter.py` | pacote | `742e685` 2026-09-28 | não | docs/future_work.md(1), diag/item20b/REPORT.md(1), diag/item20b/supplement_20b.py(1), diag/item20b/supplement_20b.txt(1) | **manter** | código/dados do pacote | — | — |
 | `cyclophaser/plots.py` | pacote | `5cc80ba` 2026-06-14 | não | tests/test_manual_labels.py(2), CHANGELOG.md(1), research/labels/labels_core.py(1), research/snapshots/README.md(1), +3 | **manter** | código/dados do pacote | — | — |
 
 ### `cyclophaser/example_data`
@@ -100,7 +101,7 @@ Seções propostas para o documento único (Passo 2):
 | `docs/calibration_tool.rst` | doc de usuário | `829296e` 2026-06-15 | não | — | **manter** | documentação de usuário / build RTD | — | — |
 | `docs/conf.py` | doc de usuário | `56a4546` 2026-06-15 | não | .readthedocs.yml(1) | **manter** | documentação de usuário / build RTD | — | — |
 | `docs/contribute.rst` | doc de usuário | `f2c51f3` 2024-09-17 | não | — | **manter** | documentação de usuário / build RTD | — | — |
-| `docs/future_work.md` | registro/relatório | `06d8550` 2026-09-28 | sim — registro canônico de todas as frentes (achados, gates, decisões) | diag/item31/exposure_table.md(39), diag/item31/exposure_table.json(19), CHANGELOG.md(8), diag/frontD/REPORT.md(3), +32 | **manter** | registro canônico; histórico NÃO reescrito (só nota params-15 → params-track) | — | — |
+| `docs/future_work.md` | registro/relatório | `742e685` 2026-09-28 | sim — registro canônico de todas as frentes (achados, gates, decisões) | diag/item31/exposure_table.md(39), diag/item31/exposure_table.json(19), CHANGELOG.md(8), diag/frontD/REPORT.md(3), +32 | **manter** | registro canônico; histórico NÃO reescrito (só nota params-15 → params-track) | — | — |
 | `docs/index.rst` | doc de usuário | `829296e` 2026-06-15 | não | — | **manter** | documentação de usuário / build RTD | — | — |
 | `docs/installation.rst` | doc de usuário | `177eb88` 2024-11-08 | não | — | **manter** | documentação de usuário / build RTD | — | — |
 | `docs/license.rst` | doc de usuário | `f2c51f3` 2024-09-17 | não | — | **manter** | documentação de usuário / build RTD | — | — |
@@ -108,7 +109,7 @@ Seções propostas para o documento único (Passo 2):
 | `docs/overview.rst` | doc de usuário | `107152a` 2024-09-27 | não | — | **manter** | documentação de usuário / build RTD | — | — |
 | `docs/requirements.txt` | doc de usuário | `56a4546` 2026-06-15 | não | .readthedocs.yml(1) | **manter** | documentação de usuário / build RTD | — | — |
 | `docs/testing.rst` | doc de usuário | `f2c51f3` 2024-09-17 | não | — | **manter** | documentação de usuário / build RTD | — | — |
-| `docs/usage.rst` | doc de usuário | `c5217b5` 2026-09-28 | não | docs/future_work.md(1), diag/item31/DESIGN.md(1) | **manter** | documentação de usuário / build RTD | — | — |
+| `docs/usage.rst` | doc de usuário | `742e685` 2026-09-28 | não | docs/future_work.md(1), diag/item31/DESIGN.md(1) | **manter** | documentação de usuário / build RTD | — | — |
 
 ### `docs/_images`
 
@@ -167,9 +168,9 @@ Seções propostas para o documento único (Passo 2):
 
 | caminho | tipo | último commit | achado? | referenciado por | destino | motivo | seção | registrado em |
 |---|---|---|---|---|---|---|---|---|
-| `research/labels/README.md` | registro/relatório | `1766338` 2026-09-28 | sim — tabela de proveniência/hash das configs, removidas incluídas | docs/future_work.md(3), diag/item30/REPORT_part3.md(2), CLAUDE.md(1), diag/item31/recovery_table.py(1) | **manter** | doc do conjunto de rótulos e das configs (vivo) | — | — |
+| `research/labels/README.md` | registro/relatório | `742e685` 2026-09-28 | sim — tabela de proveniência/hash das configs, removidas incluídas | docs/future_work.md(3), diag/item30/REPORT_part3.md(2), CLAUDE.md(1), diag/item31/recovery_table.py(1) | **manter** | doc do conjunto de rótulos e das configs (vivo) | — | — |
 | `research/labels/config_defaults.py` | script de pesquisa (vivo) | `a5067df` 2026-09-28 | não | research/labels/README.md(2), CHANGELOG.md(1), diag/item31/DESIGN.md(1), diag/item31/make_defaults_2_0_0.py(1), +2 | **manter** | preenchimento de chaves ausentes (app e testes) | — | — |
-| `research/labels/configs/cyclophaser_params-15.yaml` | config | `f85e1b8` 2026-09-27 | não | cyclophaser/determine_periods.py(3), diag/item31/gate_2a.py(3), research/labels/README.md(2), CHANGELOG.md(1), +11 | **manter** | a config de referência (renomear para params-track no Passo 1, conteúdo intacto) | — | — |
+| `research/labels/configs/cyclophaser_params-track.yaml` | config | `742e685` 2026-09-28 | não | cyclophaser/determine_periods.py(4), research/labels/README.md(2), tests/test_intensification_min_depth.py(2), CHANGELOG.md(1), +4 | **manter** | a config de referência (renomear para params-track no Passo 1, conteúdo intacto) | — | — |
 | `research/labels/defaults_2.0.0.json` | saída gerada | `a5067df` 2026-09-28 | não | cyclophaser/determine_periods.py(3), CHANGELOG.md(2), research/labels/README.md(2), research/labels/config_defaults.py(2), +10 | **manter** | tabela congelada dos defaults 2.0.0 (pacote, docs, testes) | — | — |
 | `research/labels/evaluate_against_labels.py` | script de pesquisa (vivo) | `a5067df` 2026-09-28 | não | docs/future_work.md(14), diag/front_b/ADDENDUM_part1b.md(9), diag/front_b/reference_score_attribution.py(9), diag/frontD/REPORT.md(8), +28 | **manter** | avaliador vivo (medidor de sequência) | — | — |
 | `research/labels/freeze_synthetic_series.py` | script de pesquisa (vivo) | `490a90e` 2026-09-10 | não | research/labels/labels_core.py(2), docs/future_work.md(1) | **manter** | gerador das séries sintéticas congeladas | — | — |
@@ -336,7 +337,7 @@ Seções propostas para o documento único (Passo 2):
 | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md` | registro/relatório | `a284209` 2026-09-22 | sim — relatório de frente fechada (achados, previsões, veredito) | docs/future_work.md(1), research/inert_params/REPORT_inertia_sweep.md(1), diag/front_b/ADDENDUM_part1b.md(1) | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S06 | `docs/future_work.md:1564` |
 | `research/labels/diagnostics/front_b/collect_train_diagnostics.py` | script de diagnóstico | `4c0767c` 2026-09-16 | não | diag/front_b/ADDENDUM_part1b.md(1), diag/item31/DESIGN.md(1), diag/item31/stale_scripts.json(1), diag/item31/stale_scripts.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque (não roda na ponta: params-1..14 removidos) | — | — |
 | `research/labels/diagnostics/front_b/default_behaviour_hash.py` | script de diagnóstico | `a284209` 2026-09-22 | não | docs/future_work.md(2), diag/frontC/default_equivalence.py(2), diag/front_b/ADDENDUM_part1b.md(2), diag/front_b/default_behaviour_sha256.txt(2), +7 | **manter** | gerador canônico do digest default (linha de base de toda frente) | — | — |
-| `research/labels/diagnostics/front_b/default_behaviour_sha256.txt` | saída gerada | `06d8550` 2026-09-28 | sim — histórico do digest default por commit/ambiente | diag/front_b/ADDENDUM_part1b.md(3), diag/front_b/REPORT_front_b_part1.md(3), CHANGELOG.md(2), diag/front_b/report_headroom.py(2), +3 | **manter** | livro-razão do gerador canônico (o script anexa registros a ele) | — | — |
+| `research/labels/diagnostics/front_b/default_behaviour_sha256.txt` | saída gerada | `052a876` 2026-09-28 | sim — histórico do digest default por commit/ambiente | CHANGELOG.md(3), diag/front_b/ADDENDUM_part1b.md(3), diag/front_b/REPORT_front_b_part1.md(3), diag/front_b/report_headroom.py(2), +3 | **manter** | livro-razão do gerador canônico (o script anexa registros a ele) | — | — |
 | `research/labels/diagnostics/front_b/distance_sweep.txt` | saída gerada | `7fbda56` 2026-09-16 | sim — varredura de `distance` nas séries de treino: parâmetro inerte na referência | diag/front_b/ADDENDUM_part1b.md(2), diag/front_b/sweep_distance.py(2), docs/future_work.md(1), research/inert_params/REPORT_inertia_sweep.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S06 | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:33`, `docs/future_work.md:1564` |
 | `research/labels/diagnostics/front_b/headroom_and_hash.txt` | saída gerada | `7fbda56` 2026-09-16 | sim — folga de `distance` e primeiro registro do digest default | diag/front_b/report_headroom.py(2), diag/front_b/ADDENDUM_part1b.md(1), diag/front_b/REPORT_front_b_part1.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S06 | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:267` |
 | `research/labels/diagnostics/front_b/mature_pairing_audit.py` | script de diagnóstico | `7fbda56` 2026-09-16 | não | diag/front_b/ADDENDUM_part1b.md(2) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
@@ -456,7 +457,7 @@ Seções propostas para o documento único (Passo 2):
 
 | caminho | tipo | último commit | achado? | referenciado por | destino | motivo | seção | registrado em |
 |---|---|---|---|---|---|---|---|---|
-| `research/labels/diagnostics/item31/DESIGN.md` | registro/relatório | `e31b727` 2026-09-28 | sim — relatório de frente fechada (achados, previsões, veredito) | diag/item31/exposure_table.md(17), diag/item31/stage1_run.py(5), diag/item31/exposure_table.py(2), diag/item31/recovery_table.py(2), +9 | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S08 | `docs/future_work.md:3823` |
+| `research/labels/diagnostics/item31/DESIGN.md` | registro/relatório | `e31b727` 2026-09-28 | sim — relatório de frente fechada (achados, previsões, veredito) | diag/item31/exposure_table.md(17), diag/item31/stage1_run.py(5), diag/item31/exposure_table.py(2), diag/item31/recovery_table.py(2), +10 | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S08 | `docs/future_work.md:3823` |
 | `research/labels/diagnostics/item31/benchmark_swap_mutation.txt` | saída gerada | `1766338` 2026-09-28 | sim — mutação: colunas trocadas no teste do benchmark são detectadas | diag/item31/DESIGN.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:756` |
 | `research/labels/diagnostics/item31/benchmark_swap_mutation_2c.txt` | saída gerada | `4304d70` 2026-09-28 | sim — mutação repetida na etapa 2c | docs/future_work.md(1), diag/item31/DESIGN.md(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:923` |
 | `research/labels/diagnostics/item31/constant_train.json` | saída gerada | `a21bca2` 2026-09-28 | sim — baseline constante no treino (params-15, defaults, constante) | diag/item31/stage1_smoke_train.txt(7), diag/item31/stage1_smoke_train.py(3), diag/item31/DESIGN.md(2), diag/item31/constant_train.py(2), +3 | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:170` |
@@ -465,10 +466,10 @@ Seções propostas para o documento único (Passo 2):
 | `research/labels/diagnostics/item31/exposure_table.json` | saída gerada | `5075e49` 2026-09-28 | sim — dados do registro de exposição do TESTE | diag/item31/exposure_table.py(2), diag/item31/future_work_numbers.py(2) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:88` |
 | `research/labels/diagnostics/item31/exposure_table.md` | registro/relatório | `5075e49` 2026-09-28 | sim — relatório/registro | diag/item31/DESIGN.md(4), diag/item31/exposure_table.py(2), docs/future_work.md(1) | **consolidar** | registro de exposição das séries de TESTE — precisa sobreviver à limpeza | S08 | — |
 | `research/labels/diagnostics/item31/exposure_table.py` | script de diagnóstico | `5075e49` 2026-09-28 | não | diag/item31/DESIGN.md(2), diag/item31/exposure_table.md(1), diag/item31/stale_scripts.md(1), diag/item31/stale_scripts.py(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
-| `research/labels/diagnostics/item31/fix_use_filter_false_after.json` | saída gerada | `a1784b5` 2026-09-28 | sim — registro depois do fix use_filter=False | — | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `CHANGELOG.md:107` |
+| `research/labels/diagnostics/item31/fix_use_filter_false_after.json` | saída gerada | `a1784b5` 2026-09-28 | sim — registro depois do fix use_filter=False | — | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `CHANGELOG.md:179` |
 | `research/labels/diagnostics/item31/fix_use_filter_false_before.json` | saída gerada | `e5cd91b` 2026-09-28 | sim — registro antes do fix use_filter=False (crash) | diag/item31/fix_use_filter_false_equivalence.py(2), diag/item31/DESIGN.md(1), diag/item31/future_work_numbers.py(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:865` |
-| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.py` | script de diagnóstico | `e5cd91b` 2026-09-28 | sim — docstring descreve o defeito encontrado | diag/item31/DESIGN.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | S08 | `CHANGELOG.md:107` |
-| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt` | saída gerada | `a1784b5` 2026-09-28 | sim — o que rodava antes do fix roda igual; o que quebrava agora roda | CHANGELOG.md(1), diag/item31/fix_use_filter_false_equivalence.py(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `CHANGELOG.md:118` |
+| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.py` | script de diagnóstico | `e5cd91b` 2026-09-28 | sim — docstring descreve o defeito encontrado | diag/item31/DESIGN.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | S08 | `CHANGELOG.md:179` |
+| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt` | saída gerada | `a1784b5` 2026-09-28 | sim — o que rodava antes do fix roda igual; o que quebrava agora roda | CHANGELOG.md(1), diag/item31/fix_use_filter_false_equivalence.py(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `CHANGELOG.md:190` |
 | `research/labels/diagnostics/item31/footprint_train.json` | saída gerada | `e42da8b` 2026-09-28 | sim — pegada do default novo no treino | diag/item31/footprint_train.py(2) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:442` |
 | `research/labels/diagnostics/item31/footprint_train.py` | script de diagnóstico | `e42da8b` 2026-09-28 | não | diag/item31/DESIGN.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/labels/diagnostics/item31/footprint_train.txt` | saída gerada | `e42da8b` 2026-09-28 | sim — pegada do default novo no treino | diag/item31/DESIGN.md(4), diag/item31/footprint_train.py(2) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:442` |
@@ -492,7 +493,7 @@ Seções propostas para o documento único (Passo 2):
 | `research/labels/diagnostics/item31/recovery_table.json` | saída gerada | `b484738` 2026-09-28 | sim — idem, dados | diag/item31/future_work_numbers.py(3), diag/item31/gate_2a.py(2), diag/item31/recovery_table.py(2) | **manter** | dados do índice de recuperação (mesmo gerador) | — | — |
 | `research/labels/diagnostics/item31/recovery_table.md` | registro/relatório | `b484738` 2026-09-28 | sim — de onde recuperar cada params-1..14 (hash verificado) | research/labels/README.md(2), diag/item31/DESIGN.md(2), diag/item31/recovery_table.py(2), CHANGELOG.md(1), +3 | **manter** | índice de recuperação de params-1..14 (citado pelo app README e por teste vivo) | — | — |
 | `research/labels/diagnostics/item31/recovery_table.py` | script de diagnóstico | `b484738` 2026-09-28 | não | diag/item31/DESIGN.md(2), diag/item31/recovery_table.md(1) | **manter** | gerador do índice de recuperação | — | — |
-| `research/labels/diagnostics/item31/regenerate_baselines_2b.py` | script de diagnóstico | `55a4780` 2026-09-28 | não | — | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
+| `research/labels/diagnostics/item31/regenerate_baselines_2b.py` | script de diagnóstico | `55a4780` 2026-09-28 | não | CHANGELOG.md(1) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
 | `research/labels/diagnostics/item31/sidebar_table_2c.json` | saída gerada | `4304d70` 2026-09-28 | sim — barra lateral derivada da assinatura (2c) | diag/item31/future_work_numbers.py(4), diag/item31/sidebar_table_2c.py(1) | **remover** | saída gerada de frente fechada; o achado está no registro indicado | S08 | `research/labels/diagnostics/item31/DESIGN.md:923` |
 | `research/labels/diagnostics/item31/sidebar_table_2c.md` | registro/relatório | `4304d70` 2026-09-28 | sim — relatório de frente fechada (achados, previsões, veredito) | diag/item31/sidebar_table_2c.py(2), CHANGELOG.md(1), docs/future_work.md(1) | **consolidar** | relatório de frente fechada; achados vão ao documento único (Passo 2) | S08 | `docs/future_work.md:3823` |
 | `research/labels/diagnostics/item31/sidebar_table_2c.py` | script de diagnóstico | `4304d70` 2026-09-28 | não | diag/item31/DESIGN.md(2) | **remover** | script de diagnóstico de frente fechada; reprodutível pelo commit do último toque | — | — |
@@ -533,28 +534,28 @@ Seções propostas para o documento único (Passo 2):
 | `tests/conftest.py` | teste | `263d5bf` 2026-09-06 | não | tests/synthetic/test_synthetic_lifecycles.py(1) | **manter** | suíte de testes | — | — |
 | `tests/expected_default.csv` | dados | `55a4780` 2026-09-28 | não | diag/item31/DESIGN.md(1), diag/item31/regenerate_baselines_2b.py(1), tests/test_determine_periods.py(1) | **manter** | suíte de testes | — | — |
 | `tests/expected_no_filter.csv` | dados | `a1784b5` 2026-09-28 | não | diag/item31/DESIGN.md(3), diag/item31/fix_use_filter_false_equivalence.py(1), diag/item31/regenerate_baselines_2b.py(1), tests/test_determine_periods.py(1) | **manter** | suíte de testes | — | — |
-| `tests/legacy_defaults.py` | teste | `c5217b5` 2026-09-28 | não | docs/future_work.md(1), diag/item31/DESIGN.md(1), tests/test_incipient_plateau.py(1) | **manter** | suíte de testes | — | — |
+| `tests/legacy_defaults.py` | teste | `742e685` 2026-09-28 | não | docs/future_work.md(1), diag/item31/DESIGN.md(1), tests/test_incipient_plateau.py(1) | **manter** | suíte de testes | — | — |
 | `tests/test.csv` | dados | `64c199c` 2024-04-11 | não | cyclophaser/find_stages.py(1), docs/api.rst(1), docs/testing.rst(1), diag/item31/regenerate_baselines_2b.py(1), +1 | **manter** | suíte de testes | — | — |
 | `tests/test_app_distance_removed.py` | teste | `a5067df` 2026-09-28 | não | research/inert_params/REPORT_inertia_sweep.md(1), diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
-| `tests/test_benchmark_apptest.py` | teste | `4304d70` 2026-09-28 | não | diag/item31/DESIGN.md(3), docs/future_work.md(2), diag/item31/benchmark_swap_mutation.txt(1), diag/item31/benchmark_swap_mutation_2c.txt(1), +1 | **manter** | suíte de testes | — | — |
-| `tests/test_boundary_padding.py` | teste | `c5217b5` 2026-09-28 | não | research/inert_params/INCIDENTAL_crash_bug.md(1) | **manter** | suíte de testes | — | — |
-| `tests/test_config_defaults.py` | teste | `1766338` 2026-09-28 | não | diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
+| `tests/test_benchmark_apptest.py` | teste | `742e685` 2026-09-28 | não | diag/item31/DESIGN.md(3), docs/future_work.md(2), diag/item31/benchmark_swap_mutation.txt(1), diag/item31/benchmark_swap_mutation_2c.txt(1), +1 | **manter** | suíte de testes | — | — |
+| `tests/test_boundary_padding.py` | teste | `742e685` 2026-09-28 | não | research/inert_params/INCIDENTAL_crash_bug.md(1) | **manter** | suíte de testes | — | — |
+| `tests/test_config_defaults.py` | teste | `742e685` 2026-09-28 | não | diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
 | `tests/test_decay_tail_amplitude_fraction.py` | teste | `c5217b5` 2026-09-28 | não | docs/future_work.md(4), tests/test_boundary_padding.py(2), research/inert_params/INCIDENTAL_crash_bug.md(1), diag/frontC/REPORT.md(1), +3 | **manter** | suíte de testes | — | — |
 | `tests/test_determine_periods.py` | teste | `7b8c4aa` 2024-10-28 | não | diag/item31/DESIGN.md(2), diag/item31/fix_use_filter_false_equivalence.py(1) | **manter** | suíte de testes | — | — |
 | `tests/test_evaluate_batch_train.py` | teste | `9dc87d4` 2026-09-27 | não | diag/item30/REPORT.md(1) | **manter** | suíte de testes | — | — |
 | `tests/test_incipient_plateau.py` | teste | `c5217b5` 2026-09-28 | não | diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
 | `tests/test_inspector_apptest.py` | teste | `95275ee` 2026-09-25 | não | docs/future_work.md(2) | **manter** | suíte de testes | — | — |
 | `tests/test_integration_prominence.py` | teste | `4c0767c` 2026-09-16 | não | — | **manter** | suíte de testes | — | — |
-| `tests/test_intensification_min_depth.py` | teste | `c5217b5` 2026-09-28 | não | diag/frontC/REPORT.md(1), diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
-| `tests/test_item30_spare_intensification.py` | teste | `c5217b5` 2026-09-28 | não | diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
+| `tests/test_intensification_min_depth.py` | teste | `052a876` 2026-09-28 | não | diag/frontC/REPORT.md(1), diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
+| `tests/test_item30_spare_intensification.py` | teste | `742e685` 2026-09-28 | não | diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
 | `tests/test_label_apptest.py` | teste | `916ecfc` 2026-09-27 | não | research/labels/swell_item30/README.md(1), tools/calibration_app/label_tab.py(1) | **manter** | suíte de testes | — | — |
 | `tests/test_label_browser.py` | teste | `f300420` 2026-09-14 | não | docs/future_work.md(5), CLAUDE.md(2), research/inert_params/REPORT_inertia_sweep.md(2), research/labels/README.md(2), +3 | **manter** | suíte de testes | — | — |
-| `tests/test_layer_inspector.py` | teste | `c5217b5` 2026-09-28 | não | docs/future_work.md(5), tools/calibration_app/layer_inspector.py(3), tests/test_manual_labels.py(2), research/inert_params/INCIDENTAL_crash_bug.md(1), +3 | **manter** | suíte de testes | — | — |
+| `tests/test_layer_inspector.py` | teste | `742e685` 2026-09-28 | não | docs/future_work.md(5), tools/calibration_app/layer_inspector.py(3), tests/test_manual_labels.py(2), research/inert_params/INCIDENTAL_crash_bug.md(1), +3 | **manter** | suíte de testes | — | — |
 | `tests/test_manual_labels.py` | teste | `ab17faa` 2026-09-13 | não | tools/calibration_app/label_tab.py(4), docs/future_work.md(2), research/labels/README.md(2), research/labels/labels_core.py(1) | **manter** | suíte de testes | — | — |
 | `tests/test_peaks_valleys_plateau.py` | teste | `522675e` 2026-06-12 | não | — | **manter** | suíte de testes | — | — |
 | `tests/test_prominence.py` | teste | `4c0767c` 2026-09-16 | não | tests/test_integration_prominence.py(1) | **manter** | suíte de testes | — | — |
 | `tests/test_reclassify_index0.py` | teste | `4e7fa9f` 2026-09-23 | não | diag/frontA_idx0_c2/REPORT.md(1), diag/item31/DESIGN.md(1) | **manter** | suíte de testes | — | — |
-| `tests/test_regression_baseline.py` | teste | `55a4780` 2026-09-28 | não | diag/item31/DESIGN.md(2), research/inert_params/INCIDENTAL_crash_bug.md(1) | **manter** | suíte de testes | — | — |
+| `tests/test_regression_baseline.py` | teste | `742e685` 2026-09-28 | não | diag/item31/DESIGN.md(2), research/inert_params/INCIDENTAL_crash_bug.md(1) | **manter** | suíte de testes | — | — |
 | `tests/test_sidebar_coverage.py` | teste | `773cbef` 2026-09-18 | não | diag/item20b/REPORT_stage2.md(2), docs/future_work.md(1), tests/test_item30_spare_intensification.py(1), tools/calibration_app/README.md(1), +1 | **manter** | suíte de testes | — | — |
 | `tests/test_sidebar_defaults.py` | teste | `4304d70` 2026-09-28 | não | diag/item31/DESIGN.md(2), CHANGELOG.md(1), docs/future_work.md(1) | **manter** | suíte de testes | — | — |
 | `tests/test_swell_batch.py` | teste | `916ecfc` 2026-09-27 | não | research/labels/swell_item30/README.md(1) | **manter** | suíte de testes | — | — |
@@ -606,14 +607,14 @@ Seções propostas para o documento único (Passo 2):
 |---|---|---|---|---|---|---|---|---|
 | `tools/calibration_app/.gitignore` | app | `70cf0b1` 2026-06-14 | não | — | **manter** | app de calibração | — | — |
 | `tools/calibration_app/.streamlit/config.toml` | app | `4e042a2` 2026-06-13 | não | — | **manter** | app de calibração | — | — |
-| `tools/calibration_app/README.md` | doc de usuário | `1766338` 2026-09-28 | não | — | **manter** | app de calibração | — | — |
-| `tools/calibration_app/app.py` | app | `4304d70` 2026-09-28 | não | README.md(2), docs/future_work.md(2), research/inert_params/REPORT_inertia_sweep.md(2), research/inert_params/sweep_inertia.py(2), +10 | **manter** | app de calibração | — | — |
-| `tools/calibration_app/benchmark_core.py` | app | `a5067df` 2026-09-28 | não | diag/item30/prove_defaults_30c.py(2), diag/item30/prove_defaults_part3.py(2) | **manter** | app de calibração | — | — |
-| `tools/calibration_app/benchmark_tab.py` | app | `a5067df` 2026-09-28 | não | — | **manter** | app de calibração | — | — |
+| `tools/calibration_app/README.md` | doc de usuário | `742e685` 2026-09-28 | não | — | **manter** | app de calibração | — | — |
+| `tools/calibration_app/app.py` | app | `742e685` 2026-09-28 | não | README.md(2), docs/future_work.md(2), research/inert_params/REPORT_inertia_sweep.md(2), research/inert_params/sweep_inertia.py(2), +10 | **manter** | app de calibração | — | — |
+| `tools/calibration_app/benchmark_core.py` | app | `052a876` 2026-09-28 | não | diag/item30/prove_defaults_30c.py(2), diag/item30/prove_defaults_part3.py(2) | **manter** | app de calibração | — | — |
+| `tools/calibration_app/benchmark_tab.py` | app | `052a876` 2026-09-28 | não | — | **manter** | app de calibração | — | — |
 | `tools/calibration_app/inspector_mpl.py` | app | `7133570` 2026-09-09 | não | research/app_layer_inspector/gen_inspector_figures.py(1) | **manter** | app de calibração | — | — |
 | `tools/calibration_app/inspector_plotly.py` | app | `95275ee` 2026-09-25 | não | docs/future_work.md(2), tools/calibration_app/app.py(2), environment.yml(1) | **manter** | app de calibração | — | — |
 | `tools/calibration_app/label_tab.py` | app | `916ecfc` 2026-09-27 | não | tools/calibration_app/app.py(7), docs/future_work.md(4), research/labels/README.md(2), research/labels/labels_core.py(1), +3 | **manter** | app de calibração | — | — |
-| `tools/calibration_app/layer_inspector.py` | app | `c5217b5` 2026-09-28 | não | docs/future_work.md(5), diag/item30/figs_cf_output.txt(2), diag/item30/part3_measure_output.txt(2), tests/test_manual_labels.py(2), +10 | **manter** | app de calibração | — | — |
+| `tools/calibration_app/layer_inspector.py` | app | `052a876` 2026-09-28 | não | docs/future_work.md(5), diag/item30/figs_cf_output.txt(2), diag/item30/part3_measure_output.txt(2), tests/test_manual_labels.py(2), +10 | **manter** | app de calibração | — | — |
 | `tools/calibration_app/package_args.py` | app | `baaf595` 2026-09-24 | não | — | **manter** | app de calibração | — | — |
 | `tools/calibration_app/requirements-app.txt` | app | `e3e7b6a` 2026-09-05 | não | docs/future_work.md(3), tools/calibration_app/README.md(2), README.md(1), docs/calibration_tool.rst(1), +3 | **manter** | app de calibração | — | — |
 | `tools/calibration_app/requirements.txt` | app | `e3e7b6a` 2026-09-05 | não | README.md(1), docs/calibration_tool.rst(1), docs/future_work.md(1), environment.yml(1) | **manter** | app de calibração | — | — |
@@ -669,7 +670,7 @@ Seções propostas para o documento único (Passo 2):
 
 ## 0.2 (b) Referências a params-1..14
 
-`git grep -P 'params[-_]?(1[0-4]|[1-9])(?![0-9])'` (sem `research/cleanup/`): **986 ocorrências em 167 arquivos**. Lista completa, linha a linha: `passo0/inventory.json` → `grep_params_1_14`.
+`git grep -P 'params[-_]?(1[0-4]|[1-9])(?![0-9])'` (sem `research/cleanup/`): **988 ocorrências em 167 arquivos**. Lista completa, linha a linha: `passo0/inventory.json` → `grep_params_1_14`.
 
 **Diagnósticos de frentes fechadas e `future_work.md`** — proposta por regra: *aposentar* (o script sai com a frente; reexecução = `git worktree add` em `33ea489` com o assert de `cyclophaser.__file__`); texto de relatório/registro fica como histórico. Exceções: `item19/item19_core.py` já migrado (só `REMOVED_CONFIG`, que é a mensagem de erro); `item30/figs_cf.py`, `item30/separability.py` e `item30/item30_core.py` são importados por teste vivo — o teste reconstrói params-14 em memória a partir de params-15, então nada precisa ser recuperado.
 
@@ -692,33 +693,35 @@ Seções propostas para o documento único (Passo 2):
 
 | arquivo:linha | trecho | proposta | motivo |
 |---|---|---|---|
-| `CHANGELOG.md:128` | * **`research/labels/configs/` holds only `params-15`.** params-1 to params-14 | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
-| `CHANGELOG.md:169` | bit-identical (128/128: 64 series × params-14 and app defaults). The warning | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
-| `CHANGELOG.md:199` | **What moves.** Under the calibration reference (params-13 + the rule = | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
-| `CHANGELOG.md:200` | params-14) the output changes on 5 of those 63 series and is byte-identical on | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
-| `CHANGELOG.md:231` | any calibration config from params-1 to params-13, all of which predate the rule | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
-| `CHANGELOG.md:232` | — pass `reclassify_index0=False`. `research/labels/configs/cyclophaser_params-14.yaml` | **migrar** | [Unreleased] aponta `configs/cyclophaser_params-14.yaml`, que não existe mais na árvore — apontar recovery_table/33ea489 ou params-track |
-| `CHANGELOG.md:288` | segments on that split. `research/labels/configs/cyclophaser_params-13.yaml` | **migrar** | [Unreleased] aponta `configs/cyclophaser_params-13.yaml`, que não existe mais — idem |
-| `cyclophaser/determine_periods.py:1126` | calibration config exported before it, params-1 to params-13 — | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
-| `cyclophaser/determine_periods.py:1127` | params-14 is the first that states it). Applied to ``z`` only: no | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
-| `cyclophaser/determine_periods.py:1594` | calibration config exported before it, params-1 to params-13 — | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
-| `cyclophaser/determine_periods.py:1595` | params-14 is the first that states it). Applied to ``z`` only: no | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
+| `CHANGELOG.md:201` | * **`research/labels/configs/` holds only `params-15`** (renamed `params-track` in the cleanup front). params- | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:242` | bit-identical (128/128: 64 series × params-14 and app defaults). The warning | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:272` | **What moves.** Under the calibration reference (params-13 + the rule = | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:273` | params-14) the output changes on 5 of those 63 series and is byte-identical on | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:304` | any calibration config from params-1 to params-13, all of which predate the rule | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:305` | — pass `reclassify_index0=False`. `research/labels/configs/cyclophaser_params-14.yaml` | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:306` | (removed in item 31; `git show 33ea489:research/labels/configs/cyclophaser_params-14.yaml`) | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:362` | segments on that split. `research/labels/configs/cyclophaser_params-13.yaml` | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `CHANGELOG.md:363` | (removed in item 31; `git show 33ea489:research/labels/configs/cyclophaser_params-13.yaml`) | **manter** | entradas de CHANGELOG narram a história das configs; não carregam arquivo |
+| `cyclophaser/determine_periods.py:1153` | calibration config exported before it, params-1 to params-13 — | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
+| `cyclophaser/determine_periods.py:1154` | params-14 is the first that states it). Applied to ``z`` only: no | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
+| `cyclophaser/determine_periods.py:1633` | calibration config exported before it, params-1 to params-13 — | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
+| `cyclophaser/determine_periods.py:1634` | params-14 is the first that states it). Applied to ``z`` only: no | **manter** | docstring: fato histórico (configs anteriores à regra) — não carrega arquivo |
 | `research/inert_params/REPORT_inertia_sweep.md:363` | `research/labels/configs/cyclophaser_params-9.yaml` | **manter** | relatório histórico (consolidar no Passo 2) |
 | `research/inert_params/REPORT_inertia_sweep.md:388` | versioned `params-9`) imports cleanly: the key is applied to nothing and is | **manter** | relatório histórico (consolidar no Passo 2) |
 | `research/inert_params/REPORT_inertia_sweep.md:408` | Measured on the 47 training series under `params-9` (amplitude), switching | **manter** | relatório histórico (consolidar no Passo 2) |
-| `research/labels/README.md:53` | `cyclophaser_params-15.yaml`, the calibration reference.** params-1 to | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:54` | params-14 were removed by Danilo's decision. They are not lost: each one is | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:59` | `cyclophaser_params-11.yaml` once held params-14's values | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:64` | \| `cyclophaser_params-1.yaml` … `-8.yaml` \| see `diagnostics/item31/recovery_table.md` \| removed (item 31); hi | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:65` | \| `cyclophaser_params-9.yaml` \| `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` \| removed ( | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:66` | \| `cyclophaser_params-10.yaml` \| `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:67` | \| `cyclophaser_params-11.yaml` \| `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:68` | \| `cyclophaser_params-12.yaml` \| `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:69` | \| `cyclophaser_params-13.yaml` \| `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:70` | \| `cyclophaser_params-14.yaml` \| `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:71` | \| **`cyclophaser_params-15.yaml`** \| `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` \| **th | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:75` | cites it. It was written by hand from params-14 (plus one line), so its | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
-| `research/labels/README.md:76` | `metadata` block is params-14's, timestamp included. | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:68` | params-1 to | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:69` | params-14 were removed by Danilo's decision. They are not lost: each one is | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:74` | `cyclophaser_params-11.yaml` once held params-14's values | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:79` | \| `cyclophaser_params-1.yaml` … `-8.yaml` \| see `diagnostics/item31/recovery_table.md` \| removed (item 31); hi | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:80` | \| `cyclophaser_params-9.yaml` \| `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` \| removed ( | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:81` | \| `cyclophaser_params-10.yaml` \| `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:82` | \| `cyclophaser_params-11.yaml` \| `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:83` | \| `cyclophaser_params-12.yaml` \| `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:84` | \| `cyclophaser_params-13.yaml` \| `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:85` | \| `cyclophaser_params-14.yaml` \| `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` \| removed  | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:86` | \| **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) \| `5aa61f2dec710029b46a47668812d14e6d | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:90` | cites it. It was written by hand from params-14 (plus one line), so its | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
+| `research/labels/README.md:91` | `metadata` block is params-14's, timestamp included. | **manter** | tabela de proveniência das configs removidas (histórico com hashes) |
 | `research/labels/split.yaml:159` | groups_file: research/labels/swell_item30/groups_params11.yaml | **manter** | CONGELADO — não reescrever |
 | `research/labels/split.yaml:162` | > peak_idx; C = good AND NOT plateau_boundary > peak_idx (repo params-11, see groups_file) | **manter** | CONGELADO — não reescrever |
 | `research/labels/split.yaml:231` | como cyclophaser_params-11.yaml (sha256 6df2cc0721d080acc294d943a06e03fa0967fd7d91c81b9dccb48a347251f739), | **manter** | CONGELADO — não reescrever |
@@ -761,21 +764,20 @@ Seções propostas para o documento único (Passo 2):
 | `tests/test_app_distance_removed.py:140` | params-9 itself left the repo in item 31 (recoverable from 33ea489, see | **manter** | YAML inline com o valor de params-9 — instrumento congelado embutido |
 | `tests/test_app_distance_removed.py:142` | inline YAML carrying params-9's own value, run through the app's real | **manter** | YAML inline com o valor de params-9 — instrumento congelado embutido |
 | `tests/test_benchmark_apptest.py:49` | # Item 31: params-1 … params-14 left research/labels/configs/, so the two | **manter** | comentários históricos do item 31 |
-| `tests/test_benchmark_apptest.py:708` | from params-1" on params-1's own card — true, and unreadable as anything but | **manter** | comentários históricos do item 31 |
+| `tests/test_benchmark_apptest.py:710` | from params-1" on params-1's own card — true, and unreadable as anything but | **manter** | comentários históricos do item 31 |
 | `tests/test_intensification_min_depth.py:46` | # reference value 0.05 (params-13) sits inside that gap. | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_intensification_min_depth.py:69` | # params-13 = params-12 + intensification_min_depth. Kept in sync with | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_intensification_min_depth.py:70` | # research/labels/configs/cyclophaser_params-13.yaml by | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_intensification_min_depth.py:71` | # test_params13_yaml_matches_this_module. | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_intensification_min_depth.py:105` | # The params-13 reference value. | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_intensification_min_depth.py:222` | """Under params-13 the phantom residual tail is gone and the series ends in | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_intensification_min_depth.py:440` | """params-15 is the calibration reference (params-13 left the repo in item 31; | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_intensification_min_depth.py:441` | params-15 = params-13 + reclassify_index0 + incipient_plateau_spare_intensification, | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
-| `tests/test_item30_spare_intensification.py:144` | # params-14 left the repo in item 31. It was params-15 minus this one key | **manter** | params-14 reconstruído em memória como params-15 − 1 chave (instrumento congelado derivado) |
+| `tests/test_intensification_min_depth.py:69` | # params-13 = params-12 + intensification_min_depth (params-13 left the repo in | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
+| `tests/test_intensification_min_depth.py:71` | # research/labels/configs/cyclophaser_params-track.yaml — params-13 plus two keys | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
+| `tests/test_intensification_min_depth.py:106` | # The params-13 reference value. | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
+| `tests/test_intensification_min_depth.py:223` | """Under params-13 the phantom residual tail is gone and the series ends in | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
+| `tests/test_intensification_min_depth.py:441` | """params-track is the calibration reference (params-13 left the repo in item 31; | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
+| `tests/test_intensification_min_depth.py:442` | params-track = params-13 + reclassify_index0 + incipient_plateau_spare_intensification, | **migrar** | linhas 69-71: comentário diz sincronizar com arquivo removido por teste que não existe mais (hoje test_params15_yaml_matches_this_module) |
+| `tests/test_item30_spare_intensification.py:144` | # params-14 left the repo in item 31. It was params-track minus this one key | **manter** | params-14 reconstruído em memória como params-15 − 1 chave (instrumento congelado derivado) |
 | `tests/test_item30_spare_intensification.py:190` | key (params-14 was exactly that, and left the repo in item 31).""" | **manter** | params-14 reconstruído em memória como params-15 − 1 chave (instrumento congelado derivado) |
-| `tests/test_layer_inspector.py:983` | #    mature 0.80 — the same floors as params-14, which left the repo in item 31; | **manter** | comentários históricos |
-| `tests/test_layer_inspector.py:1045` | # Measured 2026-09-25 under params-14; identical under params-15, whose one | **manter** | comentários históricos |
+| `tests/test_layer_inspector.py:984` | #    mature 0.80 — the same floors as params-14, which left the repo in item 31; | **manter** | comentários históricos |
+| `tests/test_layer_inspector.py:1046` | # Measured 2026-09-25 under params-14; identical under params-track, whose one | **manter** | comentários históricos |
 | `tests/test_reclassify_index0.py:192` | # params-13 — the calibration reference this rule was measured under. | **manter** | valores de params-13 embutidos inline (PARAMS_13_PV) — instrumento congelado |
-| `tools/calibration_app/README.md:164` | file in `research/labels/configs/` (since item 31 only params-15; params-1..14 | **manter** | aponta a recuperação; linha 279 é histórico |
+| `tools/calibration_app/README.md:164` | file in `research/labels/configs/` (since item 31 only params-15, renamed params-track in the cleanup front; p | **manter** | aponta a recuperação; linha 279 é histórico |
 | `tools/calibration_app/README.md:279` | 20203947 under params-9) and `boundary_padding` (a filter parameter that governs | **manter** | aponta a recuperação; linha 279 é histórico |
 | `tools/calibration_app/app.py:448` | # backward-compatibility reason: params-1..11 were | **manter** | comentários/ajuda de compatibilidade com YAMLs antigos que usuários ainda importam |
 | `tools/calibration_app/app.py:455` | # same reason, one config later: params-1..12 all | **manter** | comentários/ajuda de compatibilidade com YAMLs antigos que usuários ainda importam |
@@ -786,35 +788,31 @@ Seções propostas para o documento único (Passo 2):
 | `tools/calibration_app/app.py:1734` | "with decay. Uncheck to reproduce params-13 and every earlier " | **manter** | comentários/ajuda de compatibilidade com YAMLs antigos que usuários ainda importam |
 | `tools/calibration_app/app.py:1812` | # training series under params-9 (amplitude), local vs global changes the | **manter** | comentários/ajuda de compatibilidade com YAMLs antigos que usuários ainda importam |
 | `tools/calibration_app/app.py:1828` | "20203947 under params-9. That is why it sits above steps 4-6 rather " | **manter** | comentários/ajuda de compatibilidade com YAMLs antigos que usuários ainda importam |
-| `tools/calibration_app/benchmark_core.py:19` | different weeks with different understanding of the problem (params-5 and -6 | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
-| `tools/calibration_app/benchmark_core.py:20` | record 0, params-9 records 6). It is carried as a labelled historical | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
-| `tools/calibration_app/benchmark_core.py:22` | * **`item19_core.CONFIG` is never repointed.** It pins params-10 deliberately, as | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
-| `tools/calibration_app/benchmark_core.py:78` | # params-10; nothing here writes to it. See the module docstring. | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
-| `tools/calibration_app/benchmark_core.py:280` | """Numeric order, so params-2 sorts before params-10 (lexicographic does not).""" | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
+| `tools/calibration_app/benchmark_core.py:6` | only params-track remains in research/labels/configs/; params-1..14 are | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
+| `tools/calibration_app/benchmark_core.py:21` | different weeks with different understanding of the problem (params-5 and -6 | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
+| `tools/calibration_app/benchmark_core.py:22` | record 0, params-9 records 6). It is carried as a labelled historical | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
+| `tools/calibration_app/benchmark_core.py:24` | * **`item19_core`'s configuration is never used.** It once pinned params-10 as | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
+| `tools/calibration_app/benchmark_core.py:82` | # (item 31 removed params-10); nothing here reads or writes its configuration. | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
+| `tools/calibration_app/benchmark_core.py:285` | """Numeric order, so params-2 sorts before params-10 (lexicographic does not).""" | **migrar** | docstring/comentário afirmam que item19_core.CONFIG fixa params-10 — CONFIG não existe mais; 'onze configurações' também |
 | `tools/calibration_app/benchmark_tab.py:346` | "different knowledge of the problem (params-5 and " | **manter** | ajuda do anotador histórico (bad_cases_count de YAMLs antigos) |
 | `tools/calibration_app/benchmark_tab.py:347` | "-6 record 0, params-9 records 6). Comparing two of " | **manter** | ajuda do anotador histórico (bad_cases_count de YAMLs antigos) |
-| `tools/calibration_app/layer_inspector.py:544` | settings, and under params-14 with the depth floor active. | **migrar** | docstrings dizem que a fidelidade é fixada 'sob params-14'; o teste hoje usa params-15 |
-| `tools/calibration_app/layer_inspector.py:858` | params-14 with the floor active. | **migrar** | docstrings dizem que a fidelidade é fixada 'sob params-14'; o teste hoje usa params-15 |
+| `tools/calibration_app/layer_inspector.py:546` | settings, and under params-track (params-14 before item 31) with the depth | **migrar** | docstrings dizem que a fidelidade é fixada 'sob params-14'; o teste hoje usa params-15 |
+| `tools/calibration_app/layer_inspector.py:861` | params-track (params-14 before item 31) with the floor active. | **migrar** | docstrings dizem que a fidelidade é fixada 'sob params-14'; o teste hoje usa params-15 |
 
 Nota: a lista de opções do prompt (migrar / aposentar / recuperar de 33ea489) não cobre menção puramente histórica que não carrega arquivo; para esses casos a proposta é **manter** (ver desvios).
 
 ## 0.2 (c) Ocorrências de "params-15"
 
-`git grep -P 'params[-_]?15(?![0-9])'` (pega também `params_15`, `PARAMS_15`, `params15`): **317 ocorrências** — VIVAS **66**, HISTÓRICAS **251**. Regra: VIVA = código, app, testes, READMEs, docs de usuário, benchmark e o [Unreleased] do CHANGELOG; HISTÓRICA = future_work.md, split.yaml, swell_item30/README.md e relatórios/diagnósticos de frente.
+`git grep -P 'params[-_]?15(?![0-9])'` (pega também `params_15`, `PARAMS_15`, `params15`): **265 ocorrências** — VIVAS **13**, HISTÓRICAS **252**. Regra: VIVA = código, app, testes, READMEs, docs de usuário, benchmark e o [Unreleased] do CHANGELOG; HISTÓRICA = future_work.md, split.yaml, swell_item30/README.md e relatórios/diagnósticos de frente.
 
 | arquivo:linha | classe | trecho |
 |---|---|---|
-| `CHANGELOG.md:12` | VIVA | ### Changed — default behaviour: the package defaults are now `params-15` (item 31, stage 2b, `45f0600`; approved by Dan |
-| `CHANGELOG.md:16` | VIVA | now the calibration reference `research/labels/configs/cyclophaser_params-15.yaml`. |
-| `CHANGELOG.md:105` | VIVA | the params-15 column. |
-| `CHANGELOG.md:128` | VIVA | * **`research/labels/configs/` holds only `params-15`.** params-1 to params-14 |
-| `cyclophaser/determine_periods.py:429` | VIVA | The defaults are the calibration reference ``params-15`` |
-| `cyclophaser/determine_periods.py:430` | VIVA | (research/labels/configs/cyclophaser_params-15.yaml). They fall in two |
-| `cyclophaser/determine_periods.py:547` | VIVA | moved it to ``"edge"``, the padding of the calibration reference params-15: |
-| `cyclophaser/determine_periods.py:871` | VIVA | The defaults are the calibration reference ``params-15`` |
-| `cyclophaser/determine_periods.py:872` | VIVA | (research/labels/configs/cyclophaser_params-15.yaml). They fall in two |
-| `cyclophaser/determine_periods.py:1399` | VIVA | The defaults are the calibration reference ``params-15`` |
-| `cyclophaser/determine_periods.py:1400` | VIVA | (research/labels/configs/cyclophaser_params-15.yaml). They fall in two |
+| `CHANGELOG.md:21` | VIVA | then named `params-15` the package defaults, `"edge"` included. |
+| `CHANGELOG.md:22` | VIVA | * C1 of the cleanup front renamed `params-15` to `params-track` (identical |
+| `CHANGELOG.md:91` | VIVA | PASS on the 16 held-out series, measured with params-15 = params-track, i.e. |
+| `CHANGELOG.md:94` | VIVA | of the visual calibration set, were viewed under params-15 in the review that |
+| `CHANGELOG.md:177` | VIVA | the params-15 column (the preset now named params-track). |
+| `CHANGELOG.md:201` | VIVA | * **`research/labels/configs/` holds only `params-15`** (renamed `params-track` in the cleanup front). params-1 to param |
 | `docs/future_work.md:3380` | HISTÓRICA | ## 30. Plateau overwriting intensification — selection, parts 1–3, opt-in rule and params-15 — **closed, merged 2026-09- |
 | `docs/future_work.md:3519` | HISTÓRICA | **Part 3 — opt-in rule, params-15 CANDIDATE, adjudicated labels (2026-09-27, |
 | `docs/future_work.md:3529` | HISTÓRICA | - **Configs.** `params-15` is `params-14` plus the key; `params-14` is |
@@ -843,10 +841,9 @@ Nota: a lista de opções do prompt (migrar / aposentar / recuperar de 33ea489) 
 | `docs/future_work.md:3932` | HISTÓRICA | ### Stage 2b — the defaults become params-15 (`c5217b5` → `45f0600`) |
 | `docs/future_work.md:3940` | HISTÓRICA | \| EQ2 control (params-15, spare=False) \| `3756392e…` \| |
 | `docs/future_work.md:3942` | HISTÓRICA | \| EQ3 (`determine_periods` == G() == G(params-15)) \| train 54/54, example 1/1, test 16/16, batch test 3/3, validation 5/ |
-| `docs/usage.rst:89` | VIVA | ``params-15``. This is a change of default behaviour relative to 2.0.0; every |
-| `research/labels/README.md:53` | VIVA | `cyclophaser_params-15.yaml`, the calibration reference.** params-1 to |
-| `research/labels/README.md:71` | VIVA | \| **`cyclophaser_params-15.yaml`** \| `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` \| **the calibrat |
-| `research/labels/README.md:73` | VIVA | **Do not normalise or reformat params-15.** Its identity is its file hash: the |
+| `docs/future_work.md:4024` | HISTÓRICA | > **Nota de correspondência (2026-09-28).** params-15 foi renomeado para |
+| `research/labels/README.md:55` | VIVA | > **Correspondence (2026-09-28).** params-15 foi renomeado para params-track |
+| `research/labels/README.md:86` | VIVA | \| **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) \| `5aa61f2dec710029b46a47668812d14e6d552517b7bc |
 | `research/labels/diagnostics/item30/PREDICTIONS_part3.md:1` | HISTÓRICA | # Item 30, parte 3 — regra opt-in e params-15: previsões (registradas 2026-09-27T15:05:32Z, antes de qualquer implementa |
 | `research/labels/diagnostics/item30/PREDICTIONS_part3.md:13` | HISTÓRICA | R4 nas 49 séries de treino NÃO adjudicadas, o escore de params-15 é |
 | `research/labels/diagnostics/item30/PREDICTIONS_part3.md:16` | HISTÓRICA | de sequência params-15 ≤ params-14 em 5/5 e < em ≥ 3/5. Medido depois. |
@@ -1070,57 +1067,11 @@ Nota: a lista de opções do prompt (migrar / aposentar / recuperar de 33ea489) 
 | `research/labels/swell_item30/README.md:228` | HISTÓRICA | - **Test exposure.** 19 test series were evaluated in the Grid under params-15: |
 | `research/labels/swell_item30/README.md:234` | HISTÓRICA | unfilled, so params-15 remains a CANDIDATE and is not the reference |
 | `research/labels/swell_item30/README.md:248` | HISTÓRICA | - **Reason:** the 5 tracks were seen under params-15 before any labelling, so |
-| `tests/legacy_defaults.py:3` | VIVA | Item 31 moved the package defaults to params-15. Tests whose assertions were |
-| `tests/test_benchmark_apptest.py:51` | VIVA | # params-15, the calibration reference (Danilo's addendum, 2026-09-28). Since |
-| `tests/test_benchmark_apptest.py:52` | VIVA | # stage 2c the sidebar OPENS with the package defaults, which ARE params-15, so |
-| `tests/test_benchmark_apptest.py:55` | VIVA | # filter_params.cutoff_high = 48 (package default and params-15: 18). It changes |
-| `tests/test_benchmark_apptest.py:57` | VIVA | # `test_the_sidebar_differs_from_params15_in_a_declared_parameter` asserts it; |
-| `tests/test_benchmark_apptest.py:62` | VIVA | CFG_B = "cyclophaser_params-15.yaml" |
-| `tests/test_benchmark_apptest.py:273` | VIVA | assert "params-15" in ref.options |
-| `tests/test_benchmark_apptest.py:274` | VIVA | ref.set_value("params-15") |
-| `tests/test_benchmark_apptest.py:276` | VIVA | assert at.session_state["bench_reference"] == "params-15" |
-| `tests/test_benchmark_apptest.py:351` | VIVA | def test_the_sidebar_differs_from_params15_in_a_declared_parameter(): |
-| `tests/test_benchmark_apptest.py:354` | VIVA | silently become a second copy of params-15.""" |
-| `tests/test_benchmark_apptest.py:358` | VIVA | sec, key, in_sidebar, in_params15 = DECLARED_DIFF |
-| `tests/test_benchmark_apptest.py:360` | VIVA | assert _doc_for(CFG_B)[sec][key] == in_params15 |
-| `tests/test_benchmark_apptest.py:372` | VIVA | "the sidebar and params-15 agree on all of " |
-| `tests/test_benchmark_apptest.py:381` | VIVA | assert b["series"] == _expected_for(CFG_B, ids), "column 1 is not params-15" |
-| `tests/test_config_defaults.py:13` | VIVA | * params-15 lacks exactly one key (`prominence`), and the app imports it with |
-| `tests/test_config_defaults.py:38` | VIVA | P15 = LABELS / "configs" / "cyclophaser_params-15.yaml" |
-| `tests/test_config_defaults.py:107` | VIVA | def test_params15_lacks_exactly_prominence(): |
-| `tests/test_config_defaults.py:155` | VIVA | # params-15 filters by RELATIVE prominence 0.3; the filled None for the |
-| `tests/test_intensification_min_depth.py:439` | VIVA | def test_params15_yaml_matches_this_module(): |
-| `tests/test_intensification_min_depth.py:440` | VIVA | """params-15 is the calibration reference (params-13 left the repo in item 31; |
-| `tests/test_intensification_min_depth.py:441` | VIVA | params-15 = params-13 + reclassify_index0 + incipient_plateau_spare_intensification, |
-| `tests/test_intensification_min_depth.py:446` | VIVA | "configs", "cyclophaser_params-15.yaml") |
-| `tests/test_item30_spare_intensification.py:135` | VIVA | # ── the 5 adjudicated TRAIN cases: params-15 == the counterfactual ────────── |
-| `tests/test_item30_spare_intensification.py:137` | VIVA | def test_params15_reproduces_the_counterfactual_in_the_five(): |
-| `tests/test_item30_spare_intensification.py:144` | VIVA | # params-14 left the repo in item 31. It was params-15 minus this one key |
-| `tests/test_item30_spare_intensification.py:145` | VIVA | # (asserted in item 31, stage 0), so it is params-15 with the key OFF. |
-| `tests/test_item30_spare_intensification.py:146` | VIVA | cfg15 = core.load_config("params-15") |
-| `tests/test_item30_spare_intensification.py:189` | VIVA | """params-15's text with the key's line removed — a real config without the |
-| `tests/test_item30_spare_intensification.py:191` | VIVA | lines = _config_bytes("params-15").decode().splitlines(keepends=True) |
-| `tests/test_item30_spare_intensification.py:209` | VIVA | def test_importing_params15_turns_the_rule_on(): |
-| `tests/test_item30_spare_intensification.py:215` | VIVA | res = load(_config_bytes("params-15")) |
-| `tests/test_layer_inspector.py:880` | VIVA | PARAMS_15 = REPO_ROOT / "research" / "labels" / "configs" / "cyclophaser_params-15.yaml" |
-| `tests/test_layer_inspector.py:886` | VIVA | # The app's own YAML converters for the three integer-valued keys (params-15 |
-| `tests/test_layer_inspector.py:907` | VIVA | def _params_15(): |
-| `tests/test_layer_inspector.py:908` | VIVA | """(filter_params, phase_params) of params-15, phase values typed as the app |
-| `tests/test_layer_inspector.py:925` | VIVA | pv, phase = _params_15() |
-| `tests/test_layer_inspector.py:982` | VIVA | # ── Fidelity with the depth floors ACTIVE (params-15: intensification 0.05, |
-| `tests/test_layer_inspector.py:984` | VIVA | #    params-15 adds only incipient_plateau_spare_intensification=True, so the |
-| `tests/test_layer_inspector.py:990` | VIVA | pv, phase = _params_15() |
-| `tests/test_layer_inspector.py:999` | VIVA | def test_params_15_has_both_depth_floors_active(): |
-| `tests/test_layer_inspector.py:1000` | VIVA | """Guard for the tests below: if params-15 ever stopped setting the floors, |
-| `tests/test_layer_inspector.py:1002` | VIVA | _, phase = _params_15() |
-| `tests/test_layer_inspector.py:1007` | VIVA | def test_ribbon_step_six_equals_get_periods_under_params_15(vort_cache): |
-| `tests/test_layer_inspector.py:1008` | VIVA | pv, _ = _params_15() |
-| `tests/test_layer_inspector.py:1023` | VIVA | def test_ledger_accepted_set_is_the_package_mask_under_params_15(vort_cache, kind): |
-| `tests/test_layer_inspector.py:1045` | VIVA | # Measured 2026-09-25 under params-14; identical under params-15, whose one |
-| `tests/test_regression_baseline.py:79` | VIVA | # The package defaults moved to params-15 (item 31), so baseline_default / |
-| `tools/calibration_app/README.md:164` | VIVA | file in `research/labels/configs/` (since item 31 only params-15; params-1..14 |
-| `tools/calibration_app/app.py:2269` | VIVA | # params-15 (prominence_relative=0.3, decay_tail_amplitude_fraction=0.3), so an |
-| `tools/calibration_app/layer_inspector.py:146` | VIVA | # Item 31: the package defaults moved to params-15; these follow them (the |
+| `tests/legacy_defaults.py:7` | VIVA | Item 31 moved the package defaults to params-15 (renamed params-track; since C1 |
+| `tests/test_benchmark_apptest.py:51` | VIVA | # params-track (named params-15 until the cleanup front), the calibration preset |
+| `tests/test_regression_baseline.py:79` | VIVA | # The package defaults moved to params-15 (item 31; renamed params-track), so |
+| `tools/calibration_app/README.md:164` | VIVA | file in `research/labels/configs/` (since item 31 only params-15, renamed params-track in the cleanup front; params-1..1 |
+| `tools/calibration_app/layer_inspector.py:146` | VIVA | # Item 31: the package defaults moved to params-15 (now params-track, whose |
 
 `HISTÓRICA*` = `item31/param_table.json`: artefato histórico, mas `tests/test_config_defaults.py` lê o arquivo (só a chave `rows`); as ocorrências são nomes de campos. Conferir no Passo 1 que o renome não o afeta.
 
@@ -1128,52 +1079,72 @@ Ocorrências VIVAS que dependem do NOME do arquivo (quebram no renome se não fo
 
 ## 0.2 (d) Default de `boundary_padding`
 
-`git grep boundary_padding` em `cyclophaser/`, `tools/`, `docs/`, `README.md`, `CHANGELOG.md` e YAMLs: **126 ocorrências**. `README.md` não menciona o parâmetro.
+`git grep boundary_padding` em `cyclophaser/`, `tools/`, `docs/`, `README.md`, `CHANGELOG.md` e YAMLs: **149 ocorrências**. `README.md` não menciona o parâmetro.
 
-**Defaults na assinatura (lidos por `inspect.signature`, `defaults_in_text.py`):** `process_vorticity` = 'edge', `determine_periods` = 'edge', `lanczos_filter` = 'reflect', `lanczos_bandpass_filter` = 'reflect'.
+**Defaults na assinatura (lidos por `inspect.signature`, `defaults_in_text.py`):** `process_vorticity` = 'reflect', `determine_periods` = 'reflect', `lanczos_filter` = 'reflect', `lanczos_bandpass_filter` = 'reflect'.
 
 **`get_periods` tem default próprio?** **NÃO** — `get_periods` não recebe `boundary_padding` (recebe a série já filtrada); suas docstrings só CITAM o default de `process_vorticity`. Quem tem default próprio: `process_vorticity` e `determine_periods` (`"edge"`) e, no módulo do filtro, `lanczos_filter`, `lanczos_bandpass_filter` e `_convolve_same` (`"reflect"`) — um default que o prompt não listou.
 
 | arquivo:linha | natureza | trecho |
 |---|---|---|
-| `CHANGELOG.md:28` | tabela do CHANGELOG [Unreleased] (2.0.0 → agora) | \| `boundary_padding` \| `"reflect"` \| `"edge"` \| |
-| `CHANGELOG.md:537` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | (`boundary_padding="reflect"`, see below), the derivative Savgol had become the |
-| `CHANGELOG.md:560` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | \| `boundary_padding` \| `"zero"` \| **`"reflect"`** \| |
-| `CHANGELOG.md:563` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | They had to move together: with `boundary_padding="reflect"` and a non-zero |
-| `CHANGELOG.md:579` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | **`boundary_padding` now defaults to `"reflect"`** |
-| `CHANGELOG.md:600` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | > **How to reproduce earlier results:** pass `boundary_padding="zero"` **and** |
-| `CHANGELOG.md:614` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | It was introduced as a palliative for exactly the artifact `boundary_padding` now |
-| `CHANGELOG.md:619` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | whereas `boundary_padding="reflect"` takes it to 0.42 at no amplitude cost. |
-| `CHANGELOG.md:621` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | With `boundary_padding="reflect"` it is worse than redundant, it is harmful — see |
-| `CHANGELOG.md:653` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | **`boundary_padding` — opt-in fix for the Lanczos zero-padding edge artifact** |
-| `CHANGELOG.md:670` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | `boundary_padding` accepts `"reflect"`, `"edge"` and `"zero"` (the latter |
-| `CHANGELOG.md:691` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | 0/51 bad cases with `use_filter=true`, `cutoff_high=18`, `boundary_padding=reflect` |
-| `cyclophaser/determine_periods.py:423` | ASSINATURA process_vorticity (default) | boundary_padding="edge"): |
-| `cyclophaser/determine_periods.py:439` | docstring (process_vorticity: nota de defaults calibrados) | ``boundary_padding="edge"``, ``use_filter='auto'``) were calibrated ONLY |
-| `cyclophaser/determine_periods.py:483` | docstring (process_vorticity: parâmetro + boundary_padding note) | boundary_padding (str, optional): How the series is extended beyond its own |
-| `cyclophaser/determine_periods.py:487` | docstring (process_vorticity: parâmetro + boundary_padding note) | "boundary_padding note" below. Only meaningful when ``use_filter`` is |
-| `cyclophaser/determine_periods.py:512` | docstring (process_vorticity: parâmetro + boundary_padding note) | boundary_padding note |
-| `cyclophaser/determine_periods.py:551` | docstring (process_vorticity: parâmetro + boundary_padding note) | ``boundary_padding="zero"`` explicitly. Note that switching modes changes |
-| `cyclophaser/determine_periods.py:563` | docstring (process_vorticity: parâmetro + boundary_padding note) | from 24 to **0** together with the ``boundary_padding`` default above. Passing |
-| `cyclophaser/determine_periods.py:567` | docstring (process_vorticity: parâmetro + boundary_padding note) | It was introduced as a palliative for exactly the artefact ``boundary_padding`` |
-| `cyclophaser/determine_periods.py:575` | docstring (process_vorticity: parâmetro + boundary_padding note) | With ``boundary_padding="reflect"`` it is worse than redundant, it is |
-| `cyclophaser/determine_periods.py:593` | docstring (process_vorticity: parâmetro + boundary_padding note) | ``boundary_padding="reflect"`` trades one boundary artefact for another. |
-| `cyclophaser/determine_periods.py:613` | validação / texto de DeprecationWarning | lanfil._validate_padding(boundary_padding) |
-| `cyclophaser/determine_periods.py:619` | validação / texto de DeprecationWarning | "boundary artefact, which boundary_padding now fixes at its source, " |
-| `cyclophaser/determine_periods.py:621` | validação / texto de DeprecationWarning | "Combined with boundary_padding='reflect' it is actively harmful: " |
-| `cyclophaser/determine_periods.py:718` | uso/passagem do parâmetro em código | boundary_padding=boundary_padding) |
-| `cyclophaser/determine_periods.py:738` | uso/passagem do parâmetro em código | boundary_padding=boundary_padding) |
-| `cyclophaser/determine_periods.py:881` | docstring (get_periods: nota de defaults calibrados — cita o default de process_vorticity) | ``boundary_padding="edge"``, ``use_filter='auto'``) were calibrated ONLY |
-| `cyclophaser/determine_periods.py:1044` | docstring (get_periods, incipient_method: 'reflect' como regime calibrado) | ``boundary_padding="reflect"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``"plate |
-| `cyclophaser/determine_periods.py:1369` | ASSINATURA determine_periods (default) | boundary_padding: str = "edge", |
-| `cyclophaser/determine_periods.py:1409` | docstring (determine_periods: nota de defaults calibrados) | ``boundary_padding="edge"``, ``use_filter='auto'``) were calibrated ONLY |
-| `cyclophaser/determine_periods.py:1456` | docstring (determine_periods: parâmetro + nota) | palliative for the Lanczos zero-padding artefact that `boundary_padding` now fixes at its source, |
-| `cyclophaser/determine_periods.py:1457` | docstring (determine_periods: parâmetro + nota) | and combined with `boundary_padding="reflect"` it is harmful (the endpoint splice becomes a step; |
-| `cyclophaser/determine_periods.py:1477` | docstring (determine_periods: parâmetro + nota) | boundary_padding (str, optional): How the series is extended beyond its own ends |
-| `cyclophaser/determine_periods.py:1485` | docstring (determine_periods: parâmetro + nota) | "boundary_padding note" in `process_vorticity` for the full mechanism, |
-| `cyclophaser/determine_periods.py:1521` | docstring (determine_periods, incipient_method: idem) | ``boundary_padding="reflect"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``"plate |
-| `cyclophaser/determine_periods.py:1746` | uso/passagem do parâmetro em código | boundary_padding=boundary_padding |
-| `cyclophaser/lanczos_filter.py:6` | comentário de módulo | # boundary_padding: "zero" (default) vs "reflect" / "edge" |
+| `CHANGELOG.md:12` | uso/passagem do parâmetro em código | ### Changed — default behaviour: the package defaults are `params-track`, except `boundary_padding="reflect"`  |
+| `CHANGELOG.md:17` | uso/passagem do parâmetro em código | with **one exception**: `boundary_padding` defaults to `"reflect"`, while |
+| `CHANGELOG.md:23` | tabela do CHANGELOG [Unreleased] (2.0.0 → agora) | bytes, sha256 `5aa61f2dec71…`) and moved the `boundary_padding` default to |
+| `CHANGELOG.md:32` | tabela do CHANGELOG [Unreleased] (2.0.0 → agora) | `boundary_padding="edge"`, so they describe params-track. If you work with |
+| `CHANGELOG.md:46` | uso/passagem do parâmetro em código | \| `boundary_padding` \| — (no such parameter) \| `"reflect"` \| |
+| `CHANGELOG.md:49` | uso/passagem do parâmetro em código | 2.0.0 has no `boundary_padding`: its Lanczos convolution always zero-pads, |
+| `CHANGELOG.md:50` | uso/passagem do parâmetro em código | which is `boundary_padding="zero"` now. |
+| `CHANGELOG.md:79` | uso/passagem do parâmetro em código | has `boundary_padding="reflect"`, `replace_endpoints_with_lowpass=0` and |
+| `CHANGELOG.md:87` | uso/passagem do parâmetro em código | (`min_max_zeta_850`). That calibration was done with `boundary_padding="edge"`, |
+| `CHANGELOG.md:92` | uso/passagem do parâmetro em código | with `boundary_padding="edge"`, not with the current default. It is weak |
+| `CHANGELOG.md:99` | uso/passagem do parâmetro em código | **Why `"reflect"`.** `boundary_padding="reflect"` is the default by the |
+| `CHANGELOG.md:110` | uso/passagem do parâmetro em código | and `boundary_padding="edge"` on **19/54**. The phase sequence differs on |
+| `CHANGELOG.md:612` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | (`boundary_padding="reflect"`, see below), the derivative Savgol had become the |
+| `CHANGELOG.md:635` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | \| `boundary_padding` \| `"zero"` \| **`"reflect"`** \| |
+| `CHANGELOG.md:638` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | They had to move together: with `boundary_padding="reflect"` and a non-zero |
+| `CHANGELOG.md:654` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | **`boundary_padding` now defaults to `"reflect"`** |
+| `CHANGELOG.md:675` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | > **How to reproduce earlier results:** pass `boundary_padding="zero"` **and** |
+| `CHANGELOG.md:689` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | It was introduced as a palliative for exactly the artifact `boundary_padding` now |
+| `CHANGELOG.md:694` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | whereas `boundary_padding="reflect"` takes it to 0.42 at no amplitude cost. |
+| `CHANGELOG.md:696` | texto de CHANGELOG — entradas antigas [Unreleased→2.0.0]; histórico da mudança zero→reflect | With `boundary_padding="reflect"` it is worse than redundant, it is harmful — see |
+| `CHANGELOG.md:728` | texto de CHANGELOG — releases publicados | **`boundary_padding` — opt-in fix for the Lanczos zero-padding edge artifact** |
+| `CHANGELOG.md:745` | texto de CHANGELOG — releases publicados | `boundary_padding` accepts `"reflect"`, `"edge"` and `"zero"` (the latter |
+| `CHANGELOG.md:766` | texto de CHANGELOG — releases publicados | 0/51 bad cases with `use_filter=true`, `cutoff_high=18`, `boundary_padding=reflect` |
+| `cyclophaser/determine_periods.py:423` | ASSINATURA process_vorticity (default) | boundary_padding="reflect"): |
+| `cyclophaser/determine_periods.py:431` | uso/passagem do parâmetro em código | ``boundary_padding`` defaults to ``"reflect"``, while params-track sets |
+| `cyclophaser/determine_periods.py:445` | uso/passagem do parâmetro em código | ``boundary_padding="edge"``, for the TRACK input the calibration used: |
+| `cyclophaser/determine_periods.py:447` | uso/passagem do parâmetro em código | South-Atlantic cyclone tracks. The default ``boundary_padding="reflect"`` |
+| `cyclophaser/determine_periods.py:458` | uso/passagem do parâmetro em código | ``boundary_padding`` (it always zero-pads), uses |
+| `cyclophaser/determine_periods.py:494` | docstring (process_vorticity: parâmetro + boundary_padding note) | boundary_padding (str, optional): How the series is extended beyond its own |
+| `cyclophaser/determine_periods.py:498` | docstring (process_vorticity: parâmetro + boundary_padding note) | parameter existed. See the "boundary_padding note" below. Only |
+| `cyclophaser/determine_periods.py:525` | docstring (process_vorticity: parâmetro + boundary_padding note) | boundary_padding note |
+| `cyclophaser/determine_periods.py:567` | docstring (process_vorticity: parâmetro + boundary_padding note) | ``boundary_padding="zero"`` explicitly. Note that switching modes changes |
+| `cyclophaser/determine_periods.py:579` | docstring (process_vorticity: parâmetro + boundary_padding note) | from 24 to **0** together with the ``boundary_padding`` default above. Passing |
+| `cyclophaser/determine_periods.py:583` | docstring (process_vorticity: parâmetro + boundary_padding note) | It was introduced as a palliative for exactly the artefact ``boundary_padding`` |
+| `cyclophaser/determine_periods.py:591` | docstring (process_vorticity: parâmetro + boundary_padding note) | With ``boundary_padding="reflect"`` it is worse than redundant, it is |
+| `cyclophaser/determine_periods.py:609` | uso/passagem do parâmetro em código | ``boundary_padding="reflect"`` trades one boundary artefact for another. |
+| `cyclophaser/determine_periods.py:629` | uso/passagem do parâmetro em código | lanfil._validate_padding(boundary_padding) |
+| `cyclophaser/determine_periods.py:635` | uso/passagem do parâmetro em código | "boundary artefact, which boundary_padding now fixes at its source, " |
+| `cyclophaser/determine_periods.py:637` | uso/passagem do parâmetro em código | "Combined with boundary_padding='reflect' it is actively harmful: " |
+| `cyclophaser/determine_periods.py:734` | uso/passagem do parâmetro em código | boundary_padding=boundary_padding) |
+| `cyclophaser/determine_periods.py:754` | uso/passagem do parâmetro em código | boundary_padding=boundary_padding) |
+| `cyclophaser/determine_periods.py:889` | uso/passagem do parâmetro em código | ``boundary_padding`` defaults to ``"reflect"``, while params-track sets |
+| `cyclophaser/determine_periods.py:903` | uso/passagem do parâmetro em código | ``boundary_padding="edge"``, for the TRACK input the calibration used: |
+| `cyclophaser/determine_periods.py:905` | uso/passagem do parâmetro em código | South-Atlantic cyclone tracks. The default ``boundary_padding="reflect"`` |
+| `cyclophaser/determine_periods.py:916` | uso/passagem do parâmetro em código | ``boundary_padding`` (it always zero-pads), uses |
+| `cyclophaser/determine_periods.py:1071` | uso/passagem do parâmetro em código | ``boundary_padding="reflect"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``"plate |
+| `cyclophaser/determine_periods.py:1396` | uso/passagem do parâmetro em código | boundary_padding: str = "reflect", |
+| `cyclophaser/determine_periods.py:1428` | uso/passagem do parâmetro em código | ``boundary_padding`` defaults to ``"reflect"``, while params-track sets |
+| `cyclophaser/determine_periods.py:1442` | uso/passagem do parâmetro em código | ``boundary_padding="edge"``, for the TRACK input the calibration used: |
+| `cyclophaser/determine_periods.py:1444` | uso/passagem do parâmetro em código | South-Atlantic cyclone tracks. The default ``boundary_padding="reflect"`` |
+| `cyclophaser/determine_periods.py:1455` | docstring (determine_periods: parâmetro + nota) | ``boundary_padding`` (it always zero-pads), uses |
+| `cyclophaser/determine_periods.py:1494` | uso/passagem do parâmetro em código | palliative for the Lanczos zero-padding artefact that `boundary_padding` now fixes at its source, |
+| `cyclophaser/determine_periods.py:1495` | uso/passagem do parâmetro em código | and combined with `boundary_padding="reflect"` it is harmful (the endpoint splice becomes a step; |
+| `cyclophaser/determine_periods.py:1515` | uso/passagem do parâmetro em código | boundary_padding (str, optional): How the series is extended beyond its own ends |
+| `cyclophaser/determine_periods.py:1524` | uso/passagem do parâmetro em código | "boundary_padding note" in `process_vorticity` for the full mechanism, |
+| `cyclophaser/determine_periods.py:1560` | uso/passagem do parâmetro em código | ``boundary_padding="reflect"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``"plate |
+| `cyclophaser/determine_periods.py:1785` | uso/passagem do parâmetro em código | boundary_padding=boundary_padding |
+| `cyclophaser/lanczos_filter.py:6` | comentário de módulo | # boundary_padding: "reflect" (default) vs "zero" / "edge" |
 | `cyclophaser/lanczos_filter.py:39` | comentário de módulo | # ``boundary_padding`` selects the padding used instead: |
 | `cyclophaser/lanczos_filter.py:56` | comentário de módulo | # who needs the old output must now pass ``boundary_padding="zero"`` |
 | `cyclophaser/lanczos_filter.py:62` | comentário de módulo | # zero-padded lowpass endpoints.  With ``boundary_padding="reflect"`` it loses |
@@ -1209,8 +1180,11 @@ Ocorrências VIVAS que dependem do NOME do arquivo (quebram no renome se não fo
 | `docs/future_work.md:3175` | registro histórico | `boundary_padding='edge'` flipping the sign at t0, 7 of 51 real tracks — and |
 | `docs/future_work.md:4013` | registro histórico | `boundary_padding='edge'` is the default. Re-measured under the current |
 | `docs/usage.rst:80` | texto de doc de usuário | - **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolut |
-| `docs/usage.rst:99` | texto de doc de usuário | ``use_smoothing_twice=False``, ``boundary_padding="edge"``, |
-| `research/labels/configs/cyclophaser_params-15.yaml:64` | YAML (params-15, conteúdo intacto) | boundary_padding: edge |
+| `docs/usage.rst:90` | texto de doc de usuário | with **one exception**: ``boundary_padding`` defaults to ``"reflect"``, while |
+| `docs/usage.rst:106` | texto de doc de usuário | ``boundary_padding="reflect"``. **Only the filtering for TRACK input was |
+| `docs/usage.rst:107` | texto de doc de usuário | calibrated**, and only together with ``boundary_padding="edge"``: hourly |
+| `docs/usage.rst:120` | texto de doc de usuário | ``boundary_padding`` (it always zero-pads), uses |
+| `research/labels/configs/cyclophaser_params-track.yaml:64` | uso/passagem do parâmetro em código | boundary_padding: edge |
 | `tools/calibration_app/README.md:178` | texto do README do app | 5. the **"pre-filter-fix config"** warning when `boundary_padding` is missing. |
 | `tools/calibration_app/README.md:279` | texto do README do app | 20203947 under params-9) and `boundary_padding` (a filter parameter that governs |
 | `tools/calibration_app/app.py:216` | app: default lido da ASSINATURA (derivado) | "boundary_padding": sig["boundary_padding"], |
@@ -1245,22 +1219,22 @@ Ocorrências VIVAS que dependem do NOME do arquivo (quebram no renome se não fo
 | `tools/calibration_app/app.py:1585` | uso/passagem do parâmetro em código | key="boundary_padding", |
 | `tools/calibration_app/app.py:1624` | app: texto de ajuda do widget | "zero-padding boundary artifact, which `boundary_padding` now fixes at its " |
 | `tools/calibration_app/app.py:1626` | app: texto de ajuda do widget | "Combined with `boundary_padding=reflect` it is actively harmful: both filters " |
-| `tools/calibration_app/app.py:2287` | uso/passagem do parâmetro em código | "boundary_padding": boundary_padding, |
-| `tools/calibration_app/app.py:2520` | uso/passagem do parâmetro em código | boundary_padding, |
-| `tools/calibration_app/app.py:2531` | uso/passagem do parâmetro em código | boundary_padding, |
-| `tools/calibration_app/app.py:2544` | uso/passagem do parâmetro em código | boundary_padding, |
-| `tools/calibration_app/app.py:2665` | uso/passagem do parâmetro em código | boundary_padding, |
-| `tools/calibration_app/app.py:2672` | uso/passagem do parâmetro em código | boundary_padding, |
-| `tools/calibration_app/app.py:2690` | uso/passagem do parâmetro em código | savgol_poly, boundary_padding, |
-| `tools/calibration_app/app.py:2925` | uso/passagem do parâmetro em código | savgol_poly, boundary_padding, |
-| `tools/calibration_app/app.py:3129` | app: texto de ajuda (aba Documentation) | ### `boundary_padding` — Lanczos boundary condition |
-| `tools/calibration_app/app.py:3151` | app: texto de ajuda (aba Documentation) | It was introduced as a palliative for the same zero-padding artifact described under `boundary_padding`, |
-| `tools/calibration_app/app.py:3153` | app: texto de ajuda (aba Documentation) | `boundary_padding=reflect` it is **harmful**: both filters carry full amplitude at the edge, so the 5 % |
-| `tools/calibration_app/benchmark_core.py:93` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "cutoff_high", "boundary_padding") |
-| `tools/calibration_app/benchmark_core.py:103` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "This YAML carries no `boundary_padding`, which dates it to before the filter " |
-| `tools/calibration_app/benchmark_core.py:168` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | * `pre_filter_fix` — True when `boundary_padding` is absent, which dates the |
-| `tools/calibration_app/benchmark_core.py:187` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "pre_filter_fix": "boundary_padding" not in fp, |
-| `tools/calibration_app/benchmark_core.py:250` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "release has no `boundary_padding` — its filter convolution " |
+| `tools/calibration_app/app.py:2288` | uso/passagem do parâmetro em código | "boundary_padding": boundary_padding, |
+| `tools/calibration_app/app.py:2521` | uso/passagem do parâmetro em código | boundary_padding, |
+| `tools/calibration_app/app.py:2532` | uso/passagem do parâmetro em código | boundary_padding, |
+| `tools/calibration_app/app.py:2545` | uso/passagem do parâmetro em código | boundary_padding, |
+| `tools/calibration_app/app.py:2666` | uso/passagem do parâmetro em código | boundary_padding, |
+| `tools/calibration_app/app.py:2673` | uso/passagem do parâmetro em código | boundary_padding, |
+| `tools/calibration_app/app.py:2691` | uso/passagem do parâmetro em código | savgol_poly, boundary_padding, |
+| `tools/calibration_app/app.py:2926` | uso/passagem do parâmetro em código | savgol_poly, boundary_padding, |
+| `tools/calibration_app/app.py:3130` | app: texto de ajuda (aba Documentation) | ### `boundary_padding` — Lanczos boundary condition |
+| `tools/calibration_app/app.py:3152` | app: texto de ajuda (aba Documentation) | It was introduced as a palliative for the same zero-padding artifact described under `boundary_padding`, |
+| `tools/calibration_app/app.py:3154` | app: texto de ajuda (aba Documentation) | `boundary_padding=reflect` it is **harmful**: both filters carry full amplitude at the edge, so the 5 % |
+| `tools/calibration_app/benchmark_core.py:98` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "cutoff_high", "boundary_padding") |
+| `tools/calibration_app/benchmark_core.py:108` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "This YAML carries no `boundary_padding`, which dates it to before the filter " |
+| `tools/calibration_app/benchmark_core.py:173` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | * `pre_filter_fix` — True when `boundary_padding` is absent, which dates the |
+| `tools/calibration_app/benchmark_core.py:192` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "pre_filter_fix": "boundary_padding" not in fp, |
+| `tools/calibration_app/benchmark_core.py:255` | app/benchmark: detecção de YAML pré-fix (ausência da chave) | "release has no `boundary_padding` — its filter convolution " |
 | `tools/calibration_app/benchmark_tab.py:339` | app/benchmark: texto | "(`boundary_padding` is present)") |
 
 **O rótulo "2.0.0" não é o release 2.0.0.** `passo0/v200_vs_defaults_json.py` compara, por AST (nada é importado nem rodado da tag), as assinaturas da tag `v2.0.0` (`5d99ae3`) com `research/labels/defaults_2.0.0.json`: **13 de 32 chaves iguais, 19 diferentes** — `boundary_padding` NÃO EXISTE na tag (o filtro publicado faz zero-padding). A tabela é a de develop no estágio 0 do item 31 (fonte declarada: research/labels/diagnostics/item31/param_table.json @ e42da8b (column 'default')). Portanto a coluna "2.0.0" da tabela do CHANGELOG [Unreleased] (linha 28: `"reflect"`), as docstrings "(`"reflect"` up to 2.0.0)" e `docs/usage.rst:80` descrevem develop antes do item 31, não o pacote publicado. Diferenças completas: `passo0/v200_vs_defaults_json.json`.
@@ -1269,56 +1243,55 @@ Ocorrências VIVAS que dependem do NOME do arquivo (quebram no renome se não fo
 
 | tests/test_boundary_padding.py:linha | trecho |
 |---|---|
-| `27` | # ``boundary_padding`` (opt-in; default "zero" reproduces prior behaviour |
 | `33` | #   1. The DEFAULT IS "reflect": omitting the parameter is byte-identical to |
 | `169` | def test_default_argument_equals_explicit_reflect(n): |
 | `185` | def test_default_differs_from_explicit_zero(n): |
 | `186` | """...and the default is genuinely no longer 'zero'. |
-| `204` | def test_process_vorticity_default_is_edge(cyclone_id, filter_params): |
-| `230` | This is the coverage the old "default == zero" test used to provide: whatever |
-| `231` | the default is, passing "zero" must still reproduce |
-| `251` | def test_determine_periods_default_is_edge(cyclone_id): |
-| `263` | def test_package_defaults_use_edge_end_to_end(): |
-| `359` | def test_reflect_reduces_edge_dz_artifact_across_calibration_set(): |
-| `390` | def test_reflect_changes_the_signal_only_where_expected(): |
+| `204` | def test_process_vorticity_default_is_reflect(cyclone_id, filter_params): |
+| `232` | This is the coverage the old "default == zero" test used to provide: whatever |
+| `233` | the default is, passing "zero" must still reproduce |
+| `253` | def test_determine_periods_default_is_reflect(cyclone_id): |
+| `265` | def test_package_defaults_use_reflect_end_to_end(): |
+| `361` | def test_reflect_reduces_edge_dz_artifact_across_calibration_set(): |
+| `392` | def test_reflect_changes_the_signal_only_where_expected(): |
 
 Confirmação das pistas do prompt (conferidas, não copiadas): assinaturas em `determine_periods.py` :423 e :1369 (`"edge"`); docstrings :439, :881, :1409 (nota de defaults calibrados), :1044 e :1521 (`incipient_method`: `"reflect"` como regime calibrado, "as the current defaults are" — hoje o default é `"edge"`); `lanczos_filter.py:6` diz `"zero" (default)` e :39–56 dizem que o default é `"reflect"` — os dois textos divergem entre si e da assinatura de `process_vorticity`. Tabela do CHANGELOG [Unreleased] na linha 28. `tests/test_boundary_padding.py`: :204, :251 e :263 afirmam `"edge"` para `process_vorticity`/`determine_periods`; :169 afirma `"reflect"` para as funções do filtro; o comentário de cabeçalho :27 ainda diz `default "zero"`.
 
 ## 0.2 (e) Valores default escritos em texto
 
-Localizador heurístico (`passo0/defaults_in_text.py`) — **364 linhas em 13 arquivos**, cada uma com o default da assinatura ao lado para o Passo 4. Tabela completa: `passo0/defaults_in_text.md`. `README.md` não escreve nenhum default.
+Localizador heurístico (`passo0/defaults_in_text.py`) — **402 linhas em 13 arquivos**, cada uma com o default da assinatura ao lado para o Passo 4. Tabela completa: `passo0/defaults_in_text.md`. `README.md` não escreve nenhum default.
 
 | arquivo | linhas |
 |---|---|
-| `CHANGELOG.md` | 76 |
-| `cyclophaser/determine_periods.py` | 129 |
+| `CHANGELOG.md` | 98 |
+| `cyclophaser/determine_periods.py` | 141 |
 | `cyclophaser/find_stages.py` | 32 |
 | `cyclophaser/lanczos_filter.py` | 7 |
 | `docs/api.rst` | 34 |
 | `docs/calibration_tool.rst` | 10 |
-| `docs/usage.rst` | 29 |
+| `docs/usage.rst` | 32 |
 | `tools/calibration_app/README.md` | 3 |
-| `tools/calibration_app/app.py` | 24 |
+| `tools/calibration_app/app.py` | 25 |
 | `tools/calibration_app/benchmark_core.py` | 1 |
 | `tools/calibration_app/label_tab.py` | 12 |
 | `tools/calibration_app/layer_inspector.py` | 6 |
 | `tools/calibration_app/package_args.py` | 1 |
 
-**Defaults escritos como literal no código do app** (`.get("param", literal)`): 11 ocorrências, 6 divergem do default de `process_vorticity`/`get_periods`. Podem ser intencionais (semântica de YAML antigo sem a chave) — decidir no Passo 4:
+**Defaults escritos como literal no código do app** (`.get("param", literal)`): 11 ocorrências, 5 divergem do default de `process_vorticity`/`get_periods`. Podem ser intencionais (semântica de YAML antigo sem a chave) — decidir no Passo 4:
 
 | arquivo:linha | parâmetro | literal | assinatura | veredito |
 |---|---|---|---|---|
 | `tools/calibration_app/app.py:1436` | use_filter | `False` | process_vorticity='auto', determine_periods='auto' | **DIVERGE** |
 | `tools/calibration_app/app.py:1437` | replace_endpoints_with_lowpass | `0` | process_vorticity=0, determine_periods=0 | igual |
 | `tools/calibration_app/app.py:1438` | savgol_polynomial | `3` | process_vorticity=3, determine_periods=3 | igual |
-| `tools/calibration_app/app.py:1439` | boundary_padding | `"reflect"` | process_vorticity='edge', determine_periods='edge', lanczos_filter='reflect', lanczos_bandpass_filter='reflect' | **DIVERGE** |
+| `tools/calibration_app/app.py:1439` | boundary_padding | `"reflect"` | process_vorticity='reflect', determine_periods='reflect', lanczos_filter='reflect', lanczos_bandpass_filter='reflect' | igual |
 | `tools/calibration_app/app.py:1440` | cutoff_low | `168` | process_vorticity=168, determine_periods=168 | igual |
 | `tools/calibration_app/app.py:1441` | cutoff_high | `48` | process_vorticity=18.0, determine_periods=18.0 | **DIVERGE** |
 | `tools/calibration_app/app.py:1815` | mature_method | `_DEFAULTS["mature_method"]` | get_periods='amplitude', determine_periods='amplitude' | derivado (não é literal) |
-| `tools/calibration_app/layer_inspector.py:879` | length_scale | `'global'` | get_periods='local', determine_periods='local' | **DIVERGE** |
-| `tools/calibration_app/layer_inspector.py:880` | mature_method | `'derivative'` | get_periods='amplitude', determine_periods='amplitude' | **DIVERGE** |
-| `tools/calibration_app/layer_inspector.py:881` | mature_amplitude_fraction | `0.90` | get_periods=0.9, determine_periods=0.9 | igual |
-| `tools/calibration_app/layer_inspector.py:882` | mature_min_depth | `0.0` | get_periods=0.8, determine_periods=0.8 | **DIVERGE** |
+| `tools/calibration_app/layer_inspector.py:882` | length_scale | `'global'` | get_periods='local', determine_periods='local' | **DIVERGE** |
+| `tools/calibration_app/layer_inspector.py:883` | mature_method | `'derivative'` | get_periods='amplitude', determine_periods='amplitude' | **DIVERGE** |
+| `tools/calibration_app/layer_inspector.py:884` | mature_amplitude_fraction | `0.90` | get_periods=0.9, determine_periods=0.9 | igual |
+| `tools/calibration_app/layer_inspector.py:885` | mature_min_depth | `0.0` | get_periods=0.8, determine_periods=0.8 | **DIVERGE** |
 
 ## 0.2 (f) Caminhos absolutos versionados
 
@@ -1486,7 +1459,7 @@ Chamadas de `pair_by_overlap(` (12; inclui 3 REIMPLEMENTAÇÕES locais, em `fron
 * `research/labels/diagnostics/item20b/measure_20b.py:245`
 * `research/labels/diagnostics/item31/constant_train.py:78`
 * `research/labels/diagnostics/item31/stage1_run.py:185`
-* `tools/calibration_app/benchmark_core.py:479`
+* `tools/calibration_app/benchmark_core.py:484`
 
 Chamadas de `score_phase_sequences(` (15):
 
@@ -1504,7 +1477,7 @@ Chamadas de `score_phase_sequences(` (15):
 * `tests/test_manual_labels.py:768`
 * `tests/test_manual_labels.py:783`
 * `tests/test_manual_labels.py:1283`
-* `tools/calibration_app/benchmark_core.py:453`
+* `tools/calibration_app/benchmark_core.py:458`
 
 O app (Benchmark) reporta os dois lado a lado, nomeados (`benchmark_core.py`: SEQUENCE_INSTRUMENT / MATURE_INSTRUMENT). Os dois contam populações diferentes; nenhum número foi medido aqui.
 
@@ -1517,8 +1490,8 @@ Remotas: **41** (`origin/*`, sem `HEAD`), ponta de develop `06d8550`. "em develo
 | branch | ponta | em develop? (ancestral) | patch-eq.? | +à frente/−atrás | conteúdo (arquivos alterados desde a base) | citada em | hashes citados | destino | motivo |
 |---|---|---|---|---|---|---|---|---|---|
 | `chore/b-remove-distance` | `2bb2bad` 2026-09-17 — test(front-b): drop a Streamlit-internal attribute from the distance-r | sim | — | +0/−103 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
-| `chore/repo-cleanup` | `f17d802` 2026-09-28 — chore(cleanup): passo 0 — inventário somente leitura (manifesto de arq | **não** | não (+1) | +1/−0 | 19 arq.: research/cleanup/MANIFEST.md, research/cleanup/passo0 | — | — | **manter** | branch desta frente (em andamento) |
-| `develop-v2.1` | `06d8550` 2026-09-28 — docs(item31): registrar o merge (0a469eb) no item 31 — suíte 1438/0 e  | sim | — | +0/−0 | — (nada fora de develop) | `CHANGELOG.md:297`, `CHANGELOG.md:402`, `docs/future_work.md:400` +118 | — | **manter** | branch de desenvolvimento |
+| `chore/repo-cleanup` | `33dc4e1` 2026-09-28 — research(cleanup): passo 1 — evidências (higiene, digests, suíte, port | **não** | não (+6) | +6/−0 | 77 arq.: .gitignore, .pypirc, CHANGELOG.md, cyclophaser/determine_periods.py | — | `research/labels/diagnostics/front_b/default_behaviour_sha256.txt:109 (742e685)` | **manter** | branch desta frente (em andamento) |
+| `develop-v2.1` | `06d8550` 2026-09-28 — docs(item31): registrar o merge (0a469eb) no item 31 — suíte 1438/0 e  | sim | — | +0/−0 | — (nada fora de develop) | `CHANGELOG.md:372`, `CHANGELOG.md:477`, `docs/future_work.md:400` +118 | — | **manter** | branch de desenvolvimento |
 | `diag/front-b-distance-inert` | `491a5d0` 2026-09-16 — diag(front-b): record the read-only diagnosis — `distance` is inert at | **não** | **sim** | +1/−106 | 21 arq.: research/labels/diagnostics | — | `research/labels/diagnostics/front_b/sensitivity_probe.py:27 (491a5d0)`, `research/labels/diagnostics/front_b/sweep_distance.py:53 (491a5d0)` | **tag de arquivo** | patch-equivalente a develop (git cherry só '-'), mas NÃO ancestral: o hash 491a5d0 é citado nos registros (ver 'hashes citados') e só resolve enquanto houver uma ref |
 | `diag/series-sha256-mismatch` | `3ae6082` 2026-09-10 — diag(labels): measure series_sha256 mismatch for the 12 void synthetic | **não** | não (+1) | +1/−133 | 3 arq.: research/labels/diagnostics | `docs/future_work.md:846` | `docs/future_work.md:917 (3ae6082)` | **tag de arquivo** | decisão 6: branch de registro — script + relatório do item 10 só existem aqui; future_work cita a branch |
 | `docs/front-a-findings` | `2ee2414` 2026-09-09 — docs: record Front A findings (index-0 boundary extremum type) | sim | — | +0/−143 | — (nada fora de develop) | — | — | **apagar** | ancestral de develop; os hashes citados nos registros continuam alcançáveis por develop |
@@ -1573,174 +1546,223 @@ Branches locais sem remota (fora do escopo, só registradas): `exp/pre-peak-norm
 
 Para cada entrada que sai e contém achado: onde o achado já está registrado hoje. **SÓ AQUI** alimenta o documento consolidado do Passo 2 (o arquivo só sai depois). Registros em relatórios de frente contam porque esses relatórios são **consolidados**, não removidos.
 
-| arquivo | achado | registrado em |
+Coluna **destino final (Passo 2)**: para onde o achado vai quando o arquivo sair — seção de `docs/findings.md` ou linha de `docs/future_work.md` — lida de `research/cleanup/passo2/traceability.json`, gerado por `passo2/make_findings.py`.
+
+| arquivo | achado | registrado em | destino final (Passo 2) |
+|---|---|---|---|
+| `docs/_images/item5/*.png` | evidência visual (barra lateral/benchmark antes-depois) | `docs/future_work.md:2004` | `docs/future_work.md:2004@06d8550` |
+| `research/incipient_plateau/gen_geometric_vs_plateau.py` | gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita | **SÓ AQUI** | docs/findings.md §S02 |
+| `research/incipient_plateau/geometric_vs_plateau.csv` | fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto | **SÓ AQUI** | docs/findings.md §S02 |
+| `research/incipient_plateau/incipient_measurements.csv` | medições incipient por trajetória (caracterização) | `research/incipient_plateau/REPORT_incipient_characterisation.md:57` | docs/findings.md §S02 |
+| `research/incipient_plateau/incipient_smoothing_real_rel0.csv` | rel(t0) nas trajetórias reais por janela de suavização | `research/incipient_plateau/REPORT_incipient_smoothing.md:118` | docs/findings.md §S02 |
+| `research/incipient_plateau/incipient_smoothing_sweep.csv` | varredura de janela/critério da sonda incipient | `research/incipient_plateau/REPORT_incipient_smoothing.md:96` | docs/findings.md §S02 |
+| `research/incipient_plateau/incipient_smoothing_tables.txt` | tabelas da varredura de suavização | `research/incipient_plateau/REPORT_incipient_smoothing.md:157` | docs/findings.md §S02 |
+| `research/incipient_plateau/summary_tables.txt` | tabelas-resumo da caracterização | `research/incipient_plateau/REPORT_incipient_characterisation.md:302` | docs/findings.md §S02 |
+| `research/inert_params/inertia_matrix.csv` | matriz de inércia parâmetro × config | `research/inert_params/REPORT_inertia_sweep.md:36` | docs/findings.md §S09 |
+| `research/inert_params/inertia_matrix_full.csv` | matriz de inércia completa (com derivados) | `docs/future_work.md:756` | docs/findings.md §S09; `docs/future_work.md:756@06d8550` |
+| `research/inert_params/sweep_derived_summary.txt` | resumo da varredura derivada | `research/inert_params/REPORT_inertia_sweep.md:87` | docs/findings.md §S09 |
+| `research/inert_params/sweep_summary.txt` | resumo da varredura de inércia | `research/inert_params/REPORT_inertia_sweep.md:26` | docs/findings.md §S09 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log` | log da figura de 20190639 (blocos C2 vs rótulo) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_blocks.csv` | blocos de 20190639: rótulo, base, C2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_boundaries.csv` | erro por fronteira de 20190639: base vs C2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_c2.png` | figura de 20190639 sob C2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.json` | impressão digital do tree com a flag desligada | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log` | log da impressão digital (flag off) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.json` | impressão digital do tree com a flag ligada | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log` | log da impressão digital (flag on) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.json` | impressão digital de referência (c714451) para o gate da etapa 2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429`, `docs/future_work.md:3108` | docs/findings.md §S03; `docs/future_work.md:3108@06d8550` |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log` | log da impressão digital de referência | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log` | M1/M2: como a proeminência do idx0 é computada e onde C2 dispararia | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:114`, `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:156` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2_c2_table.csv` | tabela por série de onde C2 dispara | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:156` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.csv` | o ramo peak->valley de C2 onde dispara (20190639) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:261` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log` | log do adendo M2 (ramo peak->valley) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:261` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.csv` | M3: forçar idx0 a peak sob params-13 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:220` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log` | log de M3 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:220` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.png` | figura de M3 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:220` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.csv` | M4: a sobrescrita incipient (defeito H) mascara o efeito em 20180608 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log` | log de M4 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.png` | figura de M4 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_head.csv` | cabeça da série 20180608 antes/depois de H (M4) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.csv` | M5: a fronteira incipient não depende do mapa de fases | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:314`, `docs/future_work.md:3048` | docs/findings.md §S03; `docs/future_work.md:3048@06d8550` |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log` | log de M5 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:314` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_changed_series.png` | figura das séries alteradas pela regra C2' | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.csv` | sob os defaults do pacote a nova regra não muda nada | `docs/future_work.md:3131` | docs/findings.md §S03; `docs/future_work.md:3131@06d8550` |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log` | log da checagem sob defaults do pacote | `docs/future_work.md:3131` | docs/findings.md §S03; `docs/future_work.md:3131@06d8550` |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log` | gate da etapa 2 (Q1–Q8) — PASS | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429`, `docs/future_work.md:3083` | docs/findings.md §S03; `docs/future_work.md:3083@06d8550` |
+| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_table.csv` | tabela por série da etapa 2 (dispara, ramo, sequências off/on) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:467` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log` | log (proveniência + corpo) da regeneração do final_output_check no passo 1a | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log` | log da regeneração do inventário idx0 no passo 1a | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log` | log da captura do estado do pipeline no passo 1a | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log` | saída do avaliador no passo 1a (reprodução de A) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/1a_gate.log` | gate 1a: reprodução campo a campo dos artefatos de A — PASS | `research/labels/diagnostics/frontA_reverify/REPORT.md:135`, `docs/future_work.md:2799` | docs/findings.md §S03; `docs/future_work.md:2799@06d8550` |
+| `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log` | censo do passo 1b na ponta com params-9 | `research/labels/diagnostics/frontA_reverify/REPORT.md:179`, `docs/future_work.md:2817` | docs/findings.md §S03; `docs/future_work.md:2817@06d8550` |
+| `research/labels/diagnostics/frontA_reverify/outputs/1b_diff_vs_A.log` | diff por trajetória contra A no passo 1b: nenhuma diferença | `research/labels/diagnostics/frontA_reverify/REPORT.md:195`, `docs/future_work.md:2817` | docs/findings.md §S03; `docs/future_work.md:2817@06d8550` |
+| `research/labels/diagnostics/frontA_reverify/outputs/1b_eval_params9.log` | avaliador na ponta com params-9 (incipient, recusa) idêntico a A | `docs/future_work.md:2827` | docs/findings.md §S03; `docs/future_work.md:2827@06d8550` |
+| `research/labels/diagnostics/frontA_reverify/outputs/2_attribution.log` | atribuição chave-a-chave da perda de mature em 20191014 a mature_min_depth | `research/labels/diagnostics/frontA_reverify/REPORT.md:239`, `docs/future_work.md:2837` | docs/findings.md §S03; `docs/future_work.md:2837@06d8550` |
+| `research/labels/diagnostics/frontA_reverify/outputs/2_census.log` | censo do passo 2 com params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213`, `docs/future_work.md:2817` | docs/findings.md §S03; `docs/future_work.md:2817@06d8550` |
+| `research/labels/diagnostics/frontA_reverify/outputs/2_diff_vs_A.log` | diff contra A no passo 2 (params-13): nenhuma diferença | `research/labels/diagnostics/frontA_reverify/REPORT.md:220` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_final_output_check.csv` | tabela regenerada final_output_check (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_fix_eval_before.txt` | avaliação regenerada 'antes do fix' de A (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0_final_stage.csv` | tabela regenerada idx0_final_stage (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0_inventory.csv` | tabela regenerada idx0_inventory (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0b_prominence.csv` | tabela regenerada idx0b_prominence (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_V_table.csv` | tabela V (primeira fase não-incipient) sob params-9 | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0_final_stage.csv` | idx0_final_stage sob params-9 (passo 1b) | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0_inventory.csv` | idx0_inventory sob params-9 (passo 1b) | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0b_prominence.csv` | idx0b_prominence sob params-9 (passo 1b) | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step2_attribution.csv` | tabela da atribuição chave-a-chave (passo 2) | `research/labels/diagnostics/frontA_reverify/REPORT.md:239` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_V_table.csv` | tabela V sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0_final_stage.csv` | idx0_final_stage sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0_inventory.csv` | idx0_inventory sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0b_prominence.csv` | idx0b_prominence sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontC/d2_segments.csv` | segmentos de intensificação e sua profundidade D2 (separação no treino) | `research/labels/diagnostics/frontC/REPORT.md:41`, `docs/future_work.md:2366` | docs/findings.md §S05; `docs/future_work.md:2366@06d8550` |
+| `research/labels/diagnostics/frontC/d2_segments.json` | mesmos segmentos D2, formato bruto | `docs/future_work.md:2366` | docs/findings.md §S05; `docs/future_work.md:2366@06d8550` |
+| `research/labels/diagnostics/frontC/fig_20180654_before_after.png` | antes/depois do piso de intensificação em 20180654 | `research/labels/diagnostics/frontC/REPORT.md:41` | docs/findings.md §S05 |
+| `research/labels/diagnostics/frontC/fig_20180733_before_after.png` | antes/depois do piso de intensificação em 20180733 | `research/labels/diagnostics/frontC/REPORT.md:41` | docs/findings.md §S05 |
+| `research/labels/diagnostics/frontC/measurements.json` | medições brutas de treino params-12 → params-13 | `research/labels/diagnostics/frontC/REPORT.md:41`, `docs/future_work.md:2334` | docs/findings.md §S05; `docs/future_work.md:2334@06d8550` |
+| `research/labels/diagnostics/frontD/anchoring.json` | teste de ancoragem artefato vs fase real (C1) | `research/labels/diagnostics/frontD/REPORT.md:158` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/anchoring.txt` | teste de ancoragem artefato vs fase real (C1) | `research/labels/diagnostics/frontD/REPORT.md:158` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/census.json` | censo incipient do treino sob params-13 | `research/labels/diagnostics/frontD/REPORT.md:61` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/census.txt` | censo incipient do treino sob params-13 | `research/labels/diagnostics/frontD/REPORT.md:61` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/constant_baseline.json` | baseline constante para o fim do incipient | `research/labels/diagnostics/frontD/REPORT.md:308` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/constant_baseline.txt` | baseline constante para o fim do incipient | `research/labels/diagnostics/frontD/REPORT.md:308` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/evaluate_params13_train.txt` | saída do avaliador (treino, params-13) | `research/labels/diagnostics/frontD/REPORT.md:243` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/fig_*_opening.png` | figuras da abertura das séries C1 (bruta e filtrada) | `research/labels/diagnostics/frontD/REPORT.md:361` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontD/verify_hashes.txt` | verificação dos hashes antes de medir — PASS | `research/labels/diagnostics/frontD/REPORT.md:29` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/classification.json` | classificação das recusas por causa (M1>M2>M3) | `research/labels/diagnostics/frontRefusal/REPORT.md:170` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/classification.txt` | classificação por causa; contagem do defeito I no conjunto | `research/labels/diagnostics/frontRefusal/REPORT.md:170`, `docs/future_work.md:672` | docs/findings.md §S02; `docs/future_work.md:672@06d8550` |
+| `research/labels/diagnostics/frontRefusal/evaluate_params13_train.txt` | saída do avaliador (treino, params-13) | `research/labels/diagnostics/frontRefusal/REPORT.md:46` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/fig_*_refusal.png` | figuras das séries recusadas | `research/labels/diagnostics/frontRefusal/REPORT.md:155` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/refusal.json` | caminhos de recusa por série | `research/labels/diagnostics/frontRefusal/REPORT.md:67` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/refusal.txt` | caminhos de recusa e as seis séries | `research/labels/diagnostics/frontRefusal/REPORT.md:102` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/separability.json` | separabilidade da recusa por tau | `research/labels/diagnostics/frontRefusal/REPORT.md:201` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/separability.txt` | separabilidade da recusa por tau | `research/labels/diagnostics/frontRefusal/REPORT.md:201` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/tau_sweep.json` | varredura completa de tau: nenhum tau leva o bastante à tolerância | `research/labels/diagnostics/frontRefusal/REPORT.md:334` | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/tau_sweep.txt` | varredura completa de tau | `research/labels/diagnostics/frontRefusal/REPORT.md:334` | docs/findings.md §S02 |
+| `research/labels/diagnostics/front_b/distance_sweep.txt` | varredura de `distance` nas séries de treino: parâmetro inerte na referência | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:33`, `docs/future_work.md:1564` | docs/findings.md §S06; `docs/future_work.md:1564@06d8550` |
+| `research/labels/diagnostics/front_b/headroom_and_hash.txt` | folga de `distance` e primeiro registro do digest default | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:267` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/mature_pairing_audit.txt` | o que o n do pareamento mature conta e o que foi excluído | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:86` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/reference_score_attribution.txt` | proveniência de cada número de referência (armadilha de atribuição) | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:149` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/sensitivity.txt` | sonda causal: sensibilidade das fases a `distance`/`length_scale` | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:223` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/sweep_distance.py` | docstring registra a menor folga sobrevivente e em que série | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:68` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/target_tracks.txt` | as duas trajetórias-alvo: janelas mature e extremos antes/depois do filtro | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:100` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/topology_run_gate_excerpt.txt` | trecho do gate de topologia citado como referência (score de pacote) | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:149` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/train_aggregate.txt` | agregado do split de treino sob a config de referência da época | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:193` | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/train_raw.json` | dados brutos por série do diagnóstico de treino | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:193` | docs/findings.md §S06 |
+| `research/labels/diagnostics/item19/closeout_measurements.txt` | as três medições de fechamento pedidas na revisão | `research/labels/diagnostics/item19/REPORT.md:405` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/evaluate_params10_train.txt` | saída do avaliador (treino, params-10) | `research/labels/diagnostics/item19/REPORT.md:45` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/fig_20160735_params10.png` | figura de 20160735 sob params-10 | `research/labels/diagnostics/item19/REPORT.md:41` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/fig_prominence_distributions.png` | distribuições de proeminência relativa | `research/labels/diagnostics/item19/REPORT.md:92` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/fig_tradeoff_pr060_maf090.png` | o trade-off desenhado | `research/labels/diagnostics/item19/REPORT.md:207` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/stage1_baseline.txt` | baseline constante do estágio 1 | `research/labels/diagnostics/item19/REPORT.md:76` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/stage2_cells.json` | grade de 45 células, bruto | `research/labels/diagnostics/item19/REPORT.md:143`, `docs/future_work.md:1731` | docs/findings.md §S04; `docs/future_work.md:1731@06d8550` |
+| `research/labels/diagnostics/item20a/evaluate_params10_train.txt` | avaliador params-10 (antes) | `research/labels/diagnostics/item20a/REPORT.md:38` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20a/evaluate_params11_train.txt` | avaliador params-11 (depois) | `research/labels/diagnostics/item20a/REPORT.md:52` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20a/measurements.json` | medições brutas params-10 vs params-11 | `research/labels/diagnostics/item20a/REPORT.md:107` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/analyse_20b.txt` | números do relatório do estágio 1 (profundidade dos vales) | `research/labels/diagnostics/item20b/REPORT.md:145`, `docs/future_work.md:2146` | docs/findings.md §S04; `docs/future_work.md:2146@06d8550` |
+| `research/labels/diagnostics/item20b/defectH_watch.txt` | vigia do defeito H durante o piso de mature | `research/labels/diagnostics/item20b/REPORT_stage2.md:227` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/denominator_robustness.txt` | robustez do denominador de D1 | `research/labels/diagnostics/item20b/REPORT_stage2.md:250` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/depth_table.csv` | tabela dos vales geradores e suas profundidades | `research/labels/diagnostics/item20b/REPORT.md:145` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/fig_20160735_before_after.png` | antes/depois de mature_min_depth em 20160735 | `research/labels/diagnostics/item20b/REPORT_stage2.md:114` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/fig_20205386_before_after.png` | antes/depois de mature_min_depth em 20205386 | `research/labels/diagnostics/item20b/REPORT_stage2.md:112` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/gate_stage2.txt` | gate (a)–(f) do estágio 2 — PASS | `research/labels/diagnostics/item20b/REPORT_stage2.md:191`, `docs/future_work.md:2191` | docs/findings.md §S04; `docs/future_work.md:2191@06d8550` |
+| `research/labels/diagnostics/item20b/measurements.json` | dump por série do estágio 1 | `research/labels/diagnostics/item20b/REPORT.md:49` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/stage2_measurements.json` | dump do gate do estágio 2 | `research/labels/diagnostics/item20b/REPORT_stage2.md:191` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/supplement_20b.txt` | conteúdo DC da série que alimenta mature; recontagem | `research/labels/diagnostics/item20b/REPORT.md:96` | docs/findings.md §S04 |
+| `research/labels/diagnostics/item30/census_train_params14.csv` | censo de treino sob params-14 | `research/labels/diagnostics/item30/REPORT.md:184` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/evaluate_params14_train_batch.txt` | avaliador params-14 com lote | `research/labels/diagnostics/item30/REPORT.md:118` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/figs_cf/*.png` | figuras rótulo × params-13 × params-14 × contrafactual (treino) | `research/labels/diagnostics/item30/REPORT_figs_cf.md:3`, `docs/future_work.md:3504` | docs/findings.md §S07; `docs/future_work.md:3504@06d8550` |
+| `research/labels/diagnostics/item30/figs_cf_output.txt` | tabela rótulo × params-14 × contrafactual para os 8 casos | `research/labels/diagnostics/item30/REPORT_figs_cf.md:1` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/figs_part3/*.png` | antes/depois dos 5 adjudicados | `research/labels/diagnostics/item30/REPORT_part3.md:123` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/outside_signal.py` | docstring registra quantas trajetórias swell a regra muda | `research/labels/diagnostics/item30/REPORT_part3.md:45` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/outside_signal_output.txt` | as 5 fora do sinal e a variante estreita (medida, não adotada) | `research/labels/diagnostics/item30/REPORT_part3.md:130` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/part3_eval_params14.txt` | avaliador params-14 (parte 3) | `research/labels/diagnostics/item30/REPORT_part3.md:57` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/part3_eval_params15.txt` | avaliador params-15 (parte 3) | `research/labels/diagnostics/item30/REPORT_part3.md:57` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/part3_measure_output.txt` | medição da parte 3 (predições R1..) | `research/labels/diagnostics/item30/REPORT_part3.md:29` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/post_merge_checks_output.txt` | checagens pós-merge: avaliador e 51 séries idênticos | `docs/future_work.md:3619` | docs/findings.md §S07; `docs/future_work.md:3619@06d8550` |
+| `research/labels/diagnostics/item30/prove_defaults_30c.txt` | 30c não muda caminhos default | `docs/future_work.md:3800` | docs/findings.md §S07; `docs/future_work.md:3800@06d8550` |
+| `research/labels/diagnostics/item30/prove_defaults_part3_checkpoint.txt` | parte 3 não muda caminhos default (checkpoint) | `research/labels/diagnostics/item30/REPORT_part3.md:191` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/prove_defaults_part3_step2.txt` | parte 3 não muda caminhos default (passo 2) | `research/labels/diagnostics/item30/REPORT_part3.md:125` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/prove_defaults_part3_step3.txt` | parte 3 não muda caminhos default (passo 3) | `research/labels/diagnostics/item30/REPORT_part3.md:42` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/separability_criterion.json` | critério de separabilidade declarado | `research/labels/diagnostics/item30/REPORT_part2.md:15` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/separability_train_output.txt` | separabilidade no treino: sem separação | `research/labels/diagnostics/item30/REPORT_part2.md:77` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/separability_train_params14.csv` | tabela de separabilidade por série (params-14) | `research/labels/diagnostics/item30/REPORT_part2.md:77` | docs/findings.md §S07 |
+| `research/labels/diagnostics/item31/benchmark_swap_mutation.txt` | mutação: colunas trocadas no teste do benchmark são detectadas | `research/labels/diagnostics/item31/DESIGN.md:756` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/benchmark_swap_mutation_2c.txt` | mutação repetida na etapa 2c | `research/labels/diagnostics/item31/DESIGN.md:923` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/constant_train.json` | baseline constante no treino (params-15, defaults, constante) | `research/labels/diagnostics/item31/DESIGN.md:170` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/constant_train.txt` | baseline constante no treino | `research/labels/diagnostics/item31/DESIGN.md:170` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/exposure_table.json` | dados do registro de exposição do TESTE | `research/labels/diagnostics/item31/DESIGN.md:88` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/fix_use_filter_false_after.json` | registro depois do fix use_filter=False | `CHANGELOG.md:179` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/fix_use_filter_false_before.json` | registro antes do fix use_filter=False (crash) | `research/labels/diagnostics/item31/DESIGN.md:865` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.py` | docstring descreve o defeito encontrado | `CHANGELOG.md:179` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt` | o que rodava antes do fix roda igual; o que quebrava agora roda | `CHANGELOG.md:190` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/footprint_train.json` | pegada do default novo no treino | `research/labels/diagnostics/item31/DESIGN.md:442` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/footprint_train.txt` | pegada do default novo no treino | `research/labels/diagnostics/item31/DESIGN.md:442` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/future_work_numbers.json` | números do registro do item 31, regenerados | `docs/future_work.md:3823` | docs/findings.md §S08; `docs/future_work.md:3823@06d8550` |
+| `research/labels/diagnostics/item31/gate_2a.txt` | gate 2a (remoção de params-1..14) — PASS | `research/labels/diagnostics/item31/DESIGN.md:595` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/gate_2b.json` | gate 2b (defaults viram params-15) | `research/labels/diagnostics/item31/DESIGN.md:756` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/gate_2b.txt` | gate 2b | `research/labels/diagnostics/item31/DESIGN.md:756` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/p15_expected_digest.txt` | digest esperado após a etapa 2 (layout front_b) | `research/labels/diagnostics/item31/DESIGN.md:375` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/reachability_train.json` | alcançabilidade no treino | `research/labels/diagnostics/item31/DESIGN.md:62` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/reachability_train.txt` | alcançabilidade no treino | `research/labels/diagnostics/item31/DESIGN.md:62` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/sidebar_table_2c.json` | barra lateral derivada da assinatura (2c) | `research/labels/diagnostics/item31/DESIGN.md:923` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/stage1_output.json` | a rodada única de pontuação do estágio 1 — PASS | `docs/future_work.md:3854` | docs/findings.md §S08; `docs/future_work.md:3854@06d8550` |
+| `research/labels/diagnostics/item31/stage1_output.txt` | a rodada única de pontuação do estágio 1 — PASS | `docs/future_work.md:3854` | docs/findings.md §S08; `docs/future_work.md:3854@06d8550` |
+| `research/labels/diagnostics/item31/stage1_smoke_train.txt` | smoke test do pontuador no treino | `research/labels/diagnostics/item31/DESIGN.md:547` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/stale_scripts.json` | lista dos scripts que param de rodar | `research/labels/diagnostics/item31/DESIGN.md:595` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/suite_2a.txt` | suíte após 2a | `research/labels/diagnostics/item31/DESIGN.md:595` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/suite_2b_final.txt` | suíte após 2b | `research/labels/diagnostics/item31/DESIGN.md:756` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/suite_2b_measure.txt` | suíte com os defaults novos antes de tocar testes (falhas esperadas) | `research/labels/diagnostics/item31/DESIGN.md:815` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/suite_2b_prefix.txt` | suíte no prefixo de 2b (uma falha, a do use_filter=False) | `research/labels/diagnostics/item31/DESIGN.md:756` | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/suite_2c.txt` | suíte após 2c | `docs/future_work.md:3983` | docs/findings.md §S08; `docs/future_work.md:3983@06d8550` |
+| `research/labels/diagnostics/item31/test_label_census.json` | censo declarado dos rótulos de TESTE (contagens) | `research/labels/diagnostics/item31/DESIGN.md:124` | docs/findings.md §S08 |
+
+## 0.5 Destinos finais dos arquivos "consolidar" (Passo 2)
+
+40 arquivos; destino lido de `passo2/traceability.json`. Sem destino: 0.
+
+| arquivo | seção proposta (Passo 0) | destino final (Passo 2) |
 |---|---|---|
-| `docs/_images/item5/*.png` | evidência visual (barra lateral/benchmark antes-depois) | `docs/future_work.md:2004` |
-| `research/incipient_plateau/gen_geometric_vs_plateau.py` | gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita | **SÓ AQUI** |
-| `research/incipient_plateau/geometric_vs_plateau.csv` | fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto | **SÓ AQUI** |
-| `research/incipient_plateau/incipient_measurements.csv` | medições incipient por trajetória (caracterização) | `research/incipient_plateau/REPORT_incipient_characterisation.md:57` |
-| `research/incipient_plateau/incipient_smoothing_real_rel0.csv` | rel(t0) nas trajetórias reais por janela de suavização | `research/incipient_plateau/REPORT_incipient_smoothing.md:118` |
-| `research/incipient_plateau/incipient_smoothing_sweep.csv` | varredura de janela/critério da sonda incipient | `research/incipient_plateau/REPORT_incipient_smoothing.md:96` |
-| `research/incipient_plateau/incipient_smoothing_tables.txt` | tabelas da varredura de suavização | `research/incipient_plateau/REPORT_incipient_smoothing.md:157` |
-| `research/incipient_plateau/summary_tables.txt` | tabelas-resumo da caracterização | `research/incipient_plateau/REPORT_incipient_characterisation.md:302` |
-| `research/inert_params/inertia_matrix.csv` | matriz de inércia parâmetro × config | `research/inert_params/REPORT_inertia_sweep.md:36` |
-| `research/inert_params/inertia_matrix_full.csv` | matriz de inércia completa (com derivados) | `docs/future_work.md:756` |
-| `research/inert_params/sweep_derived_summary.txt` | resumo da varredura derivada | `research/inert_params/REPORT_inertia_sweep.md:87` |
-| `research/inert_params/sweep_summary.txt` | resumo da varredura de inércia | `research/inert_params/REPORT_inertia_sweep.md:26` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log` | log da figura de 20190639 (blocos C2 vs rótulo) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_blocks.csv` | blocos de 20190639: rótulo, base, C2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_boundaries.csv` | erro por fronteira de 20190639: base vs C2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_c2.png` | figura de 20190639 sob C2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:66` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.json` | impressão digital do tree com a flag desligada | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log` | log da impressão digital (flag off) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.json` | impressão digital do tree com a flag ligada | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log` | log da impressão digital (flag on) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.json` | impressão digital de referência (c714451) para o gate da etapa 2 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429`, `docs/future_work.md:3108` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log` | log da impressão digital de referência | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log` | M1/M2: como a proeminência do idx0 é computada e onde C2 dispararia | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:114`, `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:156` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2_c2_table.csv` | tabela por série de onde C2 dispara | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:156` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.csv` | o ramo peak->valley de C2 onde dispara (20190639) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:261` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log` | log do adendo M2 (ramo peak->valley) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:261` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.csv` | M3: forçar idx0 a peak sob params-13 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:220` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log` | log de M3 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:220` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.png` | figura de M3 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:220` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.csv` | M4: a sobrescrita incipient (defeito H) mascara o efeito em 20180608 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log` | log de M4 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.png` | figura de M4 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_head.csv` | cabeça da série 20180608 antes/depois de H (M4) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:278` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.csv` | M5: a fronteira incipient não depende do mapa de fases | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:314`, `docs/future_work.md:3048` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log` | log de M5 | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:314` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_changed_series.png` | figura das séries alteradas pela regra C2' | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.csv` | sob os defaults do pacote a nova regra não muda nada | `docs/future_work.md:3131` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log` | log da checagem sob defaults do pacote | `docs/future_work.md:3131` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log` | gate da etapa 2 (Q1–Q8) — PASS | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:429`, `docs/future_work.md:3083` |
-| `research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_table.csv` | tabela por série da etapa 2 (dispara, ramo, sequências off/on) | `research/labels/diagnostics/frontA_idx0_c2/REPORT.md:467` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log` | log (proveniência + corpo) da regeneração do final_output_check no passo 1a | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log` | log da regeneração do inventário idx0 no passo 1a | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log` | log da captura do estado do pipeline no passo 1a | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log` | saída do avaliador no passo 1a (reprodução de A) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1a_gate.log` | gate 1a: reprodução campo a campo dos artefatos de A — PASS | `research/labels/diagnostics/frontA_reverify/REPORT.md:135`, `docs/future_work.md:2799` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1b_census.log` | censo do passo 1b na ponta com params-9 | `research/labels/diagnostics/frontA_reverify/REPORT.md:179`, `docs/future_work.md:2817` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1b_diff_vs_A.log` | diff por trajetória contra A no passo 1b: nenhuma diferença | `research/labels/diagnostics/frontA_reverify/REPORT.md:195`, `docs/future_work.md:2817` |
-| `research/labels/diagnostics/frontA_reverify/outputs/1b_eval_params9.log` | avaliador na ponta com params-9 (incipient, recusa) idêntico a A | `docs/future_work.md:2827` |
-| `research/labels/diagnostics/frontA_reverify/outputs/2_attribution.log` | atribuição chave-a-chave da perda de mature em 20191014 a mature_min_depth | `research/labels/diagnostics/frontA_reverify/REPORT.md:239`, `docs/future_work.md:2837` |
-| `research/labels/diagnostics/frontA_reverify/outputs/2_census.log` | censo do passo 2 com params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213`, `docs/future_work.md:2817` |
-| `research/labels/diagnostics/frontA_reverify/outputs/2_diff_vs_A.log` | diff contra A no passo 2 (params-13): nenhuma diferença | `research/labels/diagnostics/frontA_reverify/REPORT.md:220` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_final_output_check.csv` | tabela regenerada final_output_check (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_fix_eval_before.txt` | avaliação regenerada 'antes do fix' de A (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0_final_stage.csv` | tabela regenerada idx0_final_stage (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0_inventory.csv` | tabela regenerada idx0_inventory (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0b_prominence.csv` | tabela regenerada idx0b_prominence (passo 1a) | `research/labels/diagnostics/frontA_reverify/REPORT.md:135` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_V_table.csv` | tabela V (primeira fase não-incipient) sob params-9 | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0_final_stage.csv` | idx0_final_stage sob params-9 (passo 1b) | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0_inventory.csv` | idx0_inventory sob params-9 (passo 1b) | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0b_prominence.csv` | idx0b_prominence sob params-9 (passo 1b) | `research/labels/diagnostics/frontA_reverify/REPORT.md:179` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step2_attribution.csv` | tabela da atribuição chave-a-chave (passo 2) | `research/labels/diagnostics/frontA_reverify/REPORT.md:239` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_V_table.csv` | tabela V sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0_final_stage.csv` | idx0_final_stage sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0_inventory.csv` | idx0_inventory sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` |
-| `research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0b_prominence.csv` | idx0b_prominence sob params-13 | `research/labels/diagnostics/frontA_reverify/REPORT.md:213` |
-| `research/labels/diagnostics/frontC/d2_segments.csv` | segmentos de intensificação e sua profundidade D2 (separação no treino) | `research/labels/diagnostics/frontC/REPORT.md:41`, `docs/future_work.md:2366` |
-| `research/labels/diagnostics/frontC/d2_segments.json` | mesmos segmentos D2, formato bruto | `docs/future_work.md:2366` |
-| `research/labels/diagnostics/frontC/fig_20180654_before_after.png` | antes/depois do piso de intensificação em 20180654 | `research/labels/diagnostics/frontC/REPORT.md:41` |
-| `research/labels/diagnostics/frontC/fig_20180733_before_after.png` | antes/depois do piso de intensificação em 20180733 | `research/labels/diagnostics/frontC/REPORT.md:41` |
-| `research/labels/diagnostics/frontC/measurements.json` | medições brutas de treino params-12 → params-13 | `research/labels/diagnostics/frontC/REPORT.md:41`, `docs/future_work.md:2334` |
-| `research/labels/diagnostics/frontD/anchoring.json` | teste de ancoragem artefato vs fase real (C1) | `research/labels/diagnostics/frontD/REPORT.md:158` |
-| `research/labels/diagnostics/frontD/anchoring.txt` | teste de ancoragem artefato vs fase real (C1) | `research/labels/diagnostics/frontD/REPORT.md:158` |
-| `research/labels/diagnostics/frontD/census.json` | censo incipient do treino sob params-13 | `research/labels/diagnostics/frontD/REPORT.md:61` |
-| `research/labels/diagnostics/frontD/census.txt` | censo incipient do treino sob params-13 | `research/labels/diagnostics/frontD/REPORT.md:61` |
-| `research/labels/diagnostics/frontD/constant_baseline.json` | baseline constante para o fim do incipient | `research/labels/diagnostics/frontD/REPORT.md:308` |
-| `research/labels/diagnostics/frontD/constant_baseline.txt` | baseline constante para o fim do incipient | `research/labels/diagnostics/frontD/REPORT.md:308` |
-| `research/labels/diagnostics/frontD/evaluate_params13_train.txt` | saída do avaliador (treino, params-13) | `research/labels/diagnostics/frontD/REPORT.md:243` |
-| `research/labels/diagnostics/frontD/fig_*_opening.png` | figuras da abertura das séries C1 (bruta e filtrada) | `research/labels/diagnostics/frontD/REPORT.md:361` |
-| `research/labels/diagnostics/frontD/verify_hashes.txt` | verificação dos hashes antes de medir — PASS | `research/labels/diagnostics/frontD/REPORT.md:29` |
-| `research/labels/diagnostics/frontRefusal/classification.json` | classificação das recusas por causa (M1>M2>M3) | `research/labels/diagnostics/frontRefusal/REPORT.md:170` |
-| `research/labels/diagnostics/frontRefusal/classification.txt` | classificação por causa; contagem do defeito I no conjunto | `research/labels/diagnostics/frontRefusal/REPORT.md:170`, `docs/future_work.md:672` |
-| `research/labels/diagnostics/frontRefusal/evaluate_params13_train.txt` | saída do avaliador (treino, params-13) | `research/labels/diagnostics/frontRefusal/REPORT.md:46` |
-| `research/labels/diagnostics/frontRefusal/fig_*_refusal.png` | figuras das séries recusadas | `research/labels/diagnostics/frontRefusal/REPORT.md:155` |
-| `research/labels/diagnostics/frontRefusal/refusal.json` | caminhos de recusa por série | `research/labels/diagnostics/frontRefusal/REPORT.md:67` |
-| `research/labels/diagnostics/frontRefusal/refusal.txt` | caminhos de recusa e as seis séries | `research/labels/diagnostics/frontRefusal/REPORT.md:102` |
-| `research/labels/diagnostics/frontRefusal/separability.json` | separabilidade da recusa por tau | `research/labels/diagnostics/frontRefusal/REPORT.md:201` |
-| `research/labels/diagnostics/frontRefusal/separability.txt` | separabilidade da recusa por tau | `research/labels/diagnostics/frontRefusal/REPORT.md:201` |
-| `research/labels/diagnostics/frontRefusal/tau_sweep.json` | varredura completa de tau: nenhum tau leva o bastante à tolerância | `research/labels/diagnostics/frontRefusal/REPORT.md:334` |
-| `research/labels/diagnostics/frontRefusal/tau_sweep.txt` | varredura completa de tau | `research/labels/diagnostics/frontRefusal/REPORT.md:334` |
-| `research/labels/diagnostics/front_b/distance_sweep.txt` | varredura de `distance` nas séries de treino: parâmetro inerte na referência | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:33`, `docs/future_work.md:1564` |
-| `research/labels/diagnostics/front_b/headroom_and_hash.txt` | folga de `distance` e primeiro registro do digest default | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:267` |
-| `research/labels/diagnostics/front_b/mature_pairing_audit.txt` | o que o n do pareamento mature conta e o que foi excluído | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:86` |
-| `research/labels/diagnostics/front_b/reference_score_attribution.txt` | proveniência de cada número de referência (armadilha de atribuição) | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:149` |
-| `research/labels/diagnostics/front_b/sensitivity.txt` | sonda causal: sensibilidade das fases a `distance`/`length_scale` | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:223` |
-| `research/labels/diagnostics/front_b/sweep_distance.py` | docstring registra a menor folga sobrevivente e em que série | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:68` |
-| `research/labels/diagnostics/front_b/target_tracks.txt` | as duas trajetórias-alvo: janelas mature e extremos antes/depois do filtro | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:100` |
-| `research/labels/diagnostics/front_b/topology_run_gate_excerpt.txt` | trecho do gate de topologia citado como referência (score de pacote) | `research/labels/diagnostics/front_b/ADDENDUM_part1b.md:149` |
-| `research/labels/diagnostics/front_b/train_aggregate.txt` | agregado do split de treino sob a config de referência da época | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:193` |
-| `research/labels/diagnostics/front_b/train_raw.json` | dados brutos por série do diagnóstico de treino | `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:193` |
-| `research/labels/diagnostics/item19/closeout_measurements.txt` | as três medições de fechamento pedidas na revisão | `research/labels/diagnostics/item19/REPORT.md:405` |
-| `research/labels/diagnostics/item19/evaluate_params10_train.txt` | saída do avaliador (treino, params-10) | `research/labels/diagnostics/item19/REPORT.md:45` |
-| `research/labels/diagnostics/item19/fig_20160735_params10.png` | figura de 20160735 sob params-10 | `research/labels/diagnostics/item19/REPORT.md:41` |
-| `research/labels/diagnostics/item19/fig_prominence_distributions.png` | distribuições de proeminência relativa | `research/labels/diagnostics/item19/REPORT.md:92` |
-| `research/labels/diagnostics/item19/fig_tradeoff_pr060_maf090.png` | o trade-off desenhado | `research/labels/diagnostics/item19/REPORT.md:207` |
-| `research/labels/diagnostics/item19/stage1_baseline.txt` | baseline constante do estágio 1 | `research/labels/diagnostics/item19/REPORT.md:76` |
-| `research/labels/diagnostics/item19/stage2_cells.json` | grade de 45 células, bruto | `research/labels/diagnostics/item19/REPORT.md:143`, `docs/future_work.md:1731` |
-| `research/labels/diagnostics/item20a/evaluate_params10_train.txt` | avaliador params-10 (antes) | `research/labels/diagnostics/item20a/REPORT.md:38` |
-| `research/labels/diagnostics/item20a/evaluate_params11_train.txt` | avaliador params-11 (depois) | `research/labels/diagnostics/item20a/REPORT.md:52` |
-| `research/labels/diagnostics/item20a/measurements.json` | medições brutas params-10 vs params-11 | `research/labels/diagnostics/item20a/REPORT.md:107` |
-| `research/labels/diagnostics/item20b/analyse_20b.txt` | números do relatório do estágio 1 (profundidade dos vales) | `research/labels/diagnostics/item20b/REPORT.md:145`, `docs/future_work.md:2146` |
-| `research/labels/diagnostics/item20b/defectH_watch.txt` | vigia do defeito H durante o piso de mature | `research/labels/diagnostics/item20b/REPORT_stage2.md:227` |
-| `research/labels/diagnostics/item20b/denominator_robustness.txt` | robustez do denominador de D1 | `research/labels/diagnostics/item20b/REPORT_stage2.md:250` |
-| `research/labels/diagnostics/item20b/depth_table.csv` | tabela dos vales geradores e suas profundidades | `research/labels/diagnostics/item20b/REPORT.md:145` |
-| `research/labels/diagnostics/item20b/fig_20160735_before_after.png` | antes/depois de mature_min_depth em 20160735 | `research/labels/diagnostics/item20b/REPORT_stage2.md:114` |
-| `research/labels/diagnostics/item20b/fig_20205386_before_after.png` | antes/depois de mature_min_depth em 20205386 | `research/labels/diagnostics/item20b/REPORT_stage2.md:112` |
-| `research/labels/diagnostics/item20b/gate_stage2.txt` | gate (a)–(f) do estágio 2 — PASS | `research/labels/diagnostics/item20b/REPORT_stage2.md:191`, `docs/future_work.md:2191` |
-| `research/labels/diagnostics/item20b/measurements.json` | dump por série do estágio 1 | `research/labels/diagnostics/item20b/REPORT.md:49` |
-| `research/labels/diagnostics/item20b/stage2_measurements.json` | dump do gate do estágio 2 | `research/labels/diagnostics/item20b/REPORT_stage2.md:191` |
-| `research/labels/diagnostics/item20b/supplement_20b.txt` | conteúdo DC da série que alimenta mature; recontagem | `research/labels/diagnostics/item20b/REPORT.md:96` |
-| `research/labels/diagnostics/item30/census_train_params14.csv` | censo de treino sob params-14 | `research/labels/diagnostics/item30/REPORT.md:184` |
-| `research/labels/diagnostics/item30/evaluate_params14_train_batch.txt` | avaliador params-14 com lote | `research/labels/diagnostics/item30/REPORT.md:118` |
-| `research/labels/diagnostics/item30/figs_cf/*.png` | figuras rótulo × params-13 × params-14 × contrafactual (treino) | `research/labels/diagnostics/item30/REPORT_figs_cf.md:3`, `docs/future_work.md:3504` |
-| `research/labels/diagnostics/item30/figs_cf_output.txt` | tabela rótulo × params-14 × contrafactual para os 8 casos | `research/labels/diagnostics/item30/REPORT_figs_cf.md:1` |
-| `research/labels/diagnostics/item30/figs_part3/*.png` | antes/depois dos 5 adjudicados | `research/labels/diagnostics/item30/REPORT_part3.md:123` |
-| `research/labels/diagnostics/item30/outside_signal.py` | docstring registra quantas trajetórias swell a regra muda | `research/labels/diagnostics/item30/REPORT_part3.md:45` |
-| `research/labels/diagnostics/item30/outside_signal_output.txt` | as 5 fora do sinal e a variante estreita (medida, não adotada) | `research/labels/diagnostics/item30/REPORT_part3.md:130` |
-| `research/labels/diagnostics/item30/part3_eval_params14.txt` | avaliador params-14 (parte 3) | `research/labels/diagnostics/item30/REPORT_part3.md:57` |
-| `research/labels/diagnostics/item30/part3_eval_params15.txt` | avaliador params-15 (parte 3) | `research/labels/diagnostics/item30/REPORT_part3.md:57` |
-| `research/labels/diagnostics/item30/part3_measure_output.txt` | medição da parte 3 (predições R1..) | `research/labels/diagnostics/item30/REPORT_part3.md:29` |
-| `research/labels/diagnostics/item30/post_merge_checks_output.txt` | checagens pós-merge: avaliador e 51 séries idênticos | `docs/future_work.md:3619` |
-| `research/labels/diagnostics/item30/prove_defaults_30c.txt` | 30c não muda caminhos default | `docs/future_work.md:3800` |
-| `research/labels/diagnostics/item30/prove_defaults_part3_checkpoint.txt` | parte 3 não muda caminhos default (checkpoint) | `research/labels/diagnostics/item30/REPORT_part3.md:191` |
-| `research/labels/diagnostics/item30/prove_defaults_part3_step2.txt` | parte 3 não muda caminhos default (passo 2) | `research/labels/diagnostics/item30/REPORT_part3.md:125` |
-| `research/labels/diagnostics/item30/prove_defaults_part3_step3.txt` | parte 3 não muda caminhos default (passo 3) | `research/labels/diagnostics/item30/REPORT_part3.md:42` |
-| `research/labels/diagnostics/item30/separability_criterion.json` | critério de separabilidade declarado | `research/labels/diagnostics/item30/REPORT_part2.md:15` |
-| `research/labels/diagnostics/item30/separability_train_output.txt` | separabilidade no treino: sem separação | `research/labels/diagnostics/item30/REPORT_part2.md:77` |
-| `research/labels/diagnostics/item30/separability_train_params14.csv` | tabela de separabilidade por série (params-14) | `research/labels/diagnostics/item30/REPORT_part2.md:77` |
-| `research/labels/diagnostics/item31/benchmark_swap_mutation.txt` | mutação: colunas trocadas no teste do benchmark são detectadas | `research/labels/diagnostics/item31/DESIGN.md:756` |
-| `research/labels/diagnostics/item31/benchmark_swap_mutation_2c.txt` | mutação repetida na etapa 2c | `research/labels/diagnostics/item31/DESIGN.md:923` |
-| `research/labels/diagnostics/item31/constant_train.json` | baseline constante no treino (params-15, defaults, constante) | `research/labels/diagnostics/item31/DESIGN.md:170` |
-| `research/labels/diagnostics/item31/constant_train.txt` | baseline constante no treino | `research/labels/diagnostics/item31/DESIGN.md:170` |
-| `research/labels/diagnostics/item31/exposure_table.json` | dados do registro de exposição do TESTE | `research/labels/diagnostics/item31/DESIGN.md:88` |
-| `research/labels/diagnostics/item31/fix_use_filter_false_after.json` | registro depois do fix use_filter=False | `CHANGELOG.md:107` |
-| `research/labels/diagnostics/item31/fix_use_filter_false_before.json` | registro antes do fix use_filter=False (crash) | `research/labels/diagnostics/item31/DESIGN.md:865` |
-| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.py` | docstring descreve o defeito encontrado | `CHANGELOG.md:107` |
-| `research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt` | o que rodava antes do fix roda igual; o que quebrava agora roda | `CHANGELOG.md:118` |
-| `research/labels/diagnostics/item31/footprint_train.json` | pegada do default novo no treino | `research/labels/diagnostics/item31/DESIGN.md:442` |
-| `research/labels/diagnostics/item31/footprint_train.txt` | pegada do default novo no treino | `research/labels/diagnostics/item31/DESIGN.md:442` |
-| `research/labels/diagnostics/item31/future_work_numbers.json` | números do registro do item 31, regenerados | `docs/future_work.md:3823` |
-| `research/labels/diagnostics/item31/gate_2a.txt` | gate 2a (remoção de params-1..14) — PASS | `research/labels/diagnostics/item31/DESIGN.md:595` |
-| `research/labels/diagnostics/item31/gate_2b.json` | gate 2b (defaults viram params-15) | `research/labels/diagnostics/item31/DESIGN.md:756` |
-| `research/labels/diagnostics/item31/gate_2b.txt` | gate 2b | `research/labels/diagnostics/item31/DESIGN.md:756` |
-| `research/labels/diagnostics/item31/p15_expected_digest.txt` | digest esperado após a etapa 2 (layout front_b) | `research/labels/diagnostics/item31/DESIGN.md:375` |
-| `research/labels/diagnostics/item31/reachability_train.json` | alcançabilidade no treino | `research/labels/diagnostics/item31/DESIGN.md:62` |
-| `research/labels/diagnostics/item31/reachability_train.txt` | alcançabilidade no treino | `research/labels/diagnostics/item31/DESIGN.md:62` |
-| `research/labels/diagnostics/item31/sidebar_table_2c.json` | barra lateral derivada da assinatura (2c) | `research/labels/diagnostics/item31/DESIGN.md:923` |
-| `research/labels/diagnostics/item31/stage1_output.json` | a rodada única de pontuação do estágio 1 — PASS | `docs/future_work.md:3854` |
-| `research/labels/diagnostics/item31/stage1_output.txt` | a rodada única de pontuação do estágio 1 — PASS | `docs/future_work.md:3854` |
-| `research/labels/diagnostics/item31/stage1_smoke_train.txt` | smoke test do pontuador no treino | `research/labels/diagnostics/item31/DESIGN.md:547` |
-| `research/labels/diagnostics/item31/stale_scripts.json` | lista dos scripts que param de rodar | `research/labels/diagnostics/item31/DESIGN.md:595` |
-| `research/labels/diagnostics/item31/suite_2a.txt` | suíte após 2a | `research/labels/diagnostics/item31/DESIGN.md:595` |
-| `research/labels/diagnostics/item31/suite_2b_final.txt` | suíte após 2b | `research/labels/diagnostics/item31/DESIGN.md:756` |
-| `research/labels/diagnostics/item31/suite_2b_measure.txt` | suíte com os defaults novos antes de tocar testes (falhas esperadas) | `research/labels/diagnostics/item31/DESIGN.md:815` |
-| `research/labels/diagnostics/item31/suite_2b_prefix.txt` | suíte no prefixo de 2b (uma falha, a do use_filter=False) | `research/labels/diagnostics/item31/DESIGN.md:756` |
-| `research/labels/diagnostics/item31/suite_2c.txt` | suíte após 2c | `docs/future_work.md:3983` |
-| `research/labels/diagnostics/item31/test_label_census.json` | censo declarado dos rótulos de TESTE (contagens) | `research/labels/diagnostics/item31/DESIGN.md:124` |
+| `research/incipient_plateau/REPORT_incipient_characterisation.md` | S02 | docs/findings.md §S02 |
+| `research/incipient_plateau/REPORT_incipient_smoothing.md` | S02 | docs/findings.md §S02 |
+| `research/inert_params/BACKLOG_inexplicada.md` | S09 | docs/findings.md §S09 |
+| `research/inert_params/DATA_DEPENDENT_findings.md` | S09 | docs/findings.md §S09 |
+| `research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md` | S09 | docs/findings.md §S09 |
+| `research/inert_params/INCIDENTAL_crash_bug.md` | S09 | docs/findings.md §S09 |
+| `research/inert_params/PREDICTION.md` | S09 | docs/findings.md §S09 |
+| `research/inert_params/REPORT_inertia_sweep.md` | S09 | docs/findings.md §S09 |
+| `research/labels/diagnostics/frontA_idx0_c2/REPORT.md` | S03 | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontA_reverify/REPORT.md` | S03 | docs/findings.md §S03 |
+| `research/labels/diagnostics/frontC/REPORT.md` | S05 | docs/findings.md §S05 |
+| `research/labels/diagnostics/frontD/REPORT.md` | S02 | docs/findings.md §S02 |
+| `research/labels/diagnostics/frontRefusal/REPORT.md` | S02 | docs/findings.md §S02 |
+| `research/labels/diagnostics/front_b/ADDENDUM_part1b.md` | S06 | docs/findings.md §S06 |
+| `research/labels/diagnostics/front_b/REPORT_front_b_part1.md` | S06 | docs/findings.md §S06 |
+| `research/labels/diagnostics/item19/PROVENANCE.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/REPORT.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/stage1_per_series.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/stage1_prominence.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/stage2_grid.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item19/stage2_losses.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20a/REPORT.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20a/tables.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/REPORT.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item20b/REPORT_stage2.md` | S04 | docs/findings.md §S04 |
+| `research/labels/diagnostics/item30/PREDICTIONS.md` | S07 | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/PREDICTIONS_part2.md` | S07 | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/PREDICTIONS_part3.md` | S07 | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/REPORT.md` | S07 | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/REPORT_figs_cf.md` | S07 | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/REPORT_part2.md` | S07 | docs/findings.md §S07 |
+| `research/labels/diagnostics/item30/REPORT_part3.md` | S07 | docs/findings.md §S07 |
+| `research/labels/diagnostics/item31/DESIGN.md` | S08 | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/exposure_table.md` | S08 | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/param_table.md` | S08 | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/sidebar_table_2c.md` | S08 | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/stale_scripts.md` | S10 | docs/findings.md §S10 |
+| `research/labels/diagnostics/item31/test_label_census.txt` | S08 | docs/findings.md §S08 |
+| `research/labels/diagnostics/item31/train_sequences_2b.md` | S08 | docs/findings.md §S08 |
 
 Entradas: 166; **SÓ AQUI: 2** — `research/incipient_plateau/gen_geometric_vs_plateau.py` → gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita; `research/incipient_plateau/geometric_vs_plateau.csv` → fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto.
 
@@ -1839,13 +1861,13 @@ O CI instala do wheel mais `pytest pyyaml`; o RTD lê `docs/requirements.txt`; `
 
 ## Resumo para orquestração (gerado)
 
-* Branch `chore/repo-cleanup`; base em develop-v2.1 `06d8550` (esperada `06d8550`); inventário em HEAD `c080f4d`. Hash do commit deste passo: ver a mensagem de entrega (um arquivo não contém o próprio hash).
+* Branch `chore/repo-cleanup`; base em develop-v2.1 `06d8550` (esperada `06d8550`); inventário em HEAD `2a3080f`. Hash do commit deste passo: ver a mensagem de entrega (um arquivo não contém o próprio hash).
 * Linha de base: suíte previsto 1438/0 → obtido 1438/0; digest previsto `3a6de265…` → obtido `3a6de265…`.
 * Arquivos versionados: 536 — manter 222, consolidar 40, remover 274. Scripts de stale_scripts.md confirmados: 40/40.
 * Branches remotas: 41 — apagar 30, manter 3, tag de arquivo 6, tag de arquivo (após Passo 2) 2; das "apagar", 30 ancestrais e 0 só patch-equivalentes.
 * SÓ AQUI: `research/incipient_plateau/gen_geometric_vs_plateau.py` → gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita; `research/incipient_plateau/geometric_vs_plateau.csv` → fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto.
-* params-1..14 fora dos diagnósticos e de future_work.md: 103 ocorrências em 22 arquivos; propostas **migrar** em `CHANGELOG.md`, `tests/test_intensification_min_depth.py`, `tools/calibration_app/benchmark_core.py`, `tools/calibration_app/layer_inspector.py`.
-* params-15: 317 ocorrências — vivas 66, históricas 251.
-* boundary_padding: 126 ocorrências no escopo; assinaturas com default: `process_vorticity`='edge', `determine_periods`='edge', `lanczos_filter`='reflect', `lanczos_bandpass_filter`='reflect'; `get_periods` tem default próprio: não.
+* params-1..14 fora dos diagnósticos e de future_work.md: 105 ocorrências em 22 arquivos; propostas **migrar** em `tests/test_intensification_min_depth.py`, `tools/calibration_app/benchmark_core.py`, `tools/calibration_app/layer_inspector.py`.
+* params-15: 265 ocorrências — vivas 13, históricas 252.
+* boundary_padding: 149 ocorrências no escopo; assinaturas com default: `process_vorticity`='reflect', `determine_periods`='reflect', `lanczos_filter`='reflect', `lanczos_bandpass_filter`='reflect'; `get_periods` tem default próprio: não.
 * Caminhos absolutos: 139 ocorrências em 41 arquivos; fora de `research/` e `docs/future_work.md`: 0.
 * Decisões e desvios: seções acima.

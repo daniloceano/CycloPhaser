@@ -1,0 +1,2703 @@
+{
+ "rows": [
+  {
+   "path": "docs/_images/item5/*.png",
+   "dest": "remover",
+   "finding": "evidência visual (barra lateral/benchmark antes-depois)",
+   "section": null,
+   "future_work": [
+    "docs/future_work.md:2004@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::## 21. Calibration app — Benchmark tab"
+   ],
+   "destination": [
+    "`docs/future_work.md:2004@06d8550`"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/REPORT_incipient_characterisation.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/REPORT_incipient_smoothing.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/gen_geometric_vs_plateau.py",
+   "dest": "remover",
+   "finding": "gerador do checkpoint visual geometric×plateau (produz geometric_vs_plateau.csv); nenhum relatório o cita",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/geometric_vs_plateau.csv",
+   "dest": "remover",
+   "finding": "fronteira incipient por caso, reais e sintéticos: geometric vs plateau vs verdade de projeto",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/incipient_measurements.csv",
+   "dest": "remover",
+   "finding": "medições incipient por trajetória (caracterização)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/incipient_plateau/REPORT_incipient_characterisation.md::# 1. The four paths of `find_incipient_period`"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/incipient_smoothing_real_rel0.csv",
+   "dest": "remover",
+   "finding": "rel(t0) nas trajetórias reais por janela de suavização",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/incipient_plateau/REPORT_incipient_smoothing.md::# 4. The real tracks say something different"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/incipient_smoothing_sweep.csv",
+   "dest": "remover",
+   "finding": "varredura de janela/critério da sonda incipient",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/incipient_plateau/REPORT_incipient_smoothing.md::# 3. Ranking by number"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/incipient_smoothing_tables.txt",
+   "dest": "remover",
+   "finding": "tabelas da varredura de suavização",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/incipient_plateau/REPORT_incipient_smoothing.md::# 5. Summary"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/incipient_plateau/summary_tables.txt",
+   "dest": "remover",
+   "finding": "tabelas-resumo da caracterização",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/incipient_plateau/REPORT_incipient_characterisation.md::# 6. Summary of findings"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/inert_params/BACKLOG_inexplicada.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/DATA_DEPENDENT_findings.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/INCIDENTAL_crash_bug.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/PREDICTION.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/REPORT_inertia_sweep.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/inertia_matrix.csv",
+   "dest": "remover",
+   "finding": "matriz de inércia parâmetro × config",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [
+    "research/inert_params/REPORT_inertia_sweep.md::## Gate (b) — classification"
+   ],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/inertia_matrix_full.csv",
+   "dest": "remover",
+   "finding": "matriz de inércia completa (com derivados)",
+   "section": "S09",
+   "future_work": [
+    "docs/future_work.md:756@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::### (b) F(iii)"
+   ],
+   "destination": [
+    "§S09",
+    "`docs/future_work.md:756@06d8550`"
+   ]
+  },
+  {
+   "path": "research/inert_params/sweep_derived_summary.txt",
+   "dest": "remover",
+   "finding": "resumo da varredura derivada",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [
+    "research/inert_params/REPORT_inertia_sweep.md::## Methodology corrections"
+   ],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/inert_params/sweep_summary.txt",
+   "dest": "remover",
+   "finding": "resumo da varredura de inércia",
+   "section": "S09",
+   "future_work": [],
+   "recorded_at": [
+    "research/inert_params/REPORT_inertia_sweep.md::were correctly flagged INERT by the sweep"
+   ],
+   "destination": [
+    "§S09"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639.log",
+   "dest": "remover",
+   "finding": "log da figura de 20190639 (blocos C2 vs rótulo)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## Maintainer ruling — `20190639`"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_blocks.csv",
+   "dest": "remover",
+   "finding": "blocos de 20190639: rótulo, base, C2",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## Maintainer ruling — `20190639`"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_boundaries.csv",
+   "dest": "remover",
+   "finding": "erro por fronteira de 20190639: base vs C2",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## Maintainer ruling — `20190639`"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fig_20190639_c2.png",
+   "dest": "remover",
+   "finding": "figura de 20190639 sob C2",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## Maintainer ruling — `20190639`"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.json",
+   "dest": "remover",
+   "finding": "impressão digital do tree com a flag desligada",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_off.log",
+   "dest": "remover",
+   "finding": "log da impressão digital (flag off)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.json",
+   "dest": "remover",
+   "finding": "impressão digital do tree com a flag ligada",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_cur_on.log",
+   "dest": "remover",
+   "finding": "log da impressão digital (flag on)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.json",
+   "dest": "remover",
+   "finding": "impressão digital de referência (c714451) para o gate da etapa 2",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:3108@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate",
+    "docs/future_work.md::| Q1 | `False` == c714451, 63/63 | 63/63 | CONFIRMED |"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:3108@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/fp_ref_c714451.log",
+   "dest": "remover",
+   "finding": "log da impressão digital de referência",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m1_m2_census.log",
+   "dest": "remover",
+   "finding": "M1/M2: como a proeminência do idx0 é computada e onde C2 dispararia",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M1 — how the prominence of index 0 is computed",
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M2 — where C2 would fire"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m2_c2_table.csv",
+   "dest": "remover",
+   "finding": "tabela por série de onde C2 dispara",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M2 — where C2 would fire"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.csv",
+   "dest": "remover",
+   "finding": "o ramo peak->valley de C2 onde dispara (20190639)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::### Addendum — what the `peak->valley` branch does"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m2b_peak_to_valley.log",
+   "dest": "remover",
+   "finding": "log do adendo M2 (ramo peak->valley)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::### Addendum — what the `peak->valley` branch does"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.csv",
+   "dest": "remover",
+   "finding": "M3: forçar idx0 a peak sob params-13",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M3 — forcing index 0 to `peak` under params-13"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.log",
+   "dest": "remover",
+   "finding": "log de M3",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M3 — forcing index 0 to `peak` under params-13"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m3_force_peak.png",
+   "dest": "remover",
+   "finding": "figura de M3",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M3 — forcing index 0 to `peak` under params-13"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.csv",
+   "dest": "remover",
+   "finding": "M4: a sobrescrita incipient (defeito H) mascara o efeito em 20180608",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M4 — 20180608: does the incipient overwrite (H) mask the effect?"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.log",
+   "dest": "remover",
+   "finding": "log de M4",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M4 — 20180608: does the incipient overwrite (H) mask the effect?"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_H.png",
+   "dest": "remover",
+   "finding": "figura de M4",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M4 — 20180608: does the incipient overwrite (H) mask the effect?"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m4_20180608_head.csv",
+   "dest": "remover",
+   "finding": "cabeça da série 20180608 antes/depois de H (M4)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M4 — 20180608: does the incipient overwrite (H) mask the effect?"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.csv",
+   "dest": "remover",
+   "finding": "M5: a fronteira incipient não depende do mapa de fases",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:3048@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M5 — does `boundary` depend on the phase map?",
+    "docs/future_work.md::### M5 — the incipient boundary is upstream"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:3048@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/m5_boundary_independence.log",
+   "dest": "remover",
+   "finding": "log de M5",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## M5 — does `boundary` depend on the phase map?"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_changed_series.png",
+   "dest": "remover",
+   "finding": "figura das séries alteradas pela regra C2'",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.csv",
+   "dest": "remover",
+   "finding": "sob os defaults do pacote a nova regra não muda nada",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:3131@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::#### The finding that matters most"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:3131@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_defaults_check.log",
+   "dest": "remover",
+   "finding": "log da checagem sob defaults do pacote",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:3131@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::#### The finding that matters most"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:3131@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_gate.log",
+   "dest": "remover",
+   "finding": "gate da etapa 2 (Q1–Q8) — PASS",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:3083@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## The gate",
+    "docs/future_work.md::### Stage 2 — rule C2' as default behaviour"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:3083@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_idx0_c2/outputs/stage2_table.csv",
+   "dest": "remover",
+   "finding": "tabela por série da etapa 2 (dispara, ramo, sequências off/on)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_idx0_c2/REPORT.md::## Sequence-match count, and the exception"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1a_build_final_output_check.log",
+   "dest": "remover",
+   "finding": "log (proveniência + corpo) da regeneração do final_output_check no passo 1a",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1a_build_idx0_inventory.log",
+   "dest": "remover",
+   "finding": "log da regeneração do inventário idx0 no passo 1a",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1a_capture_pipeline_state.log",
+   "dest": "remover",
+   "finding": "log da captura do estado do pipeline no passo 1a",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1a_eval_raw.log",
+   "dest": "remover",
+   "finding": "saída do avaliador no passo 1a (reprodução de A)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1a_gate.log",
+   "dest": "remover",
+   "finding": "gate 1a: reprodução campo a campo dos artefatos de A — PASS",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:2799@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)",
+    "docs/future_work.md::### Step 1a — gate — **PASS**"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:2799@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1b_census.log",
+   "dest": "remover",
+   "finding": "censo do passo 1b na ponta com params-9",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:2817@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1b — code drift",
+    "docs/future_work.md::### Steps 1b and 2 — diagnostics"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:2817@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1b_diff_vs_A.log",
+   "dest": "remover",
+   "finding": "diff por trajetória contra A no passo 1b: nenhuma diferença",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:2817@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::### Differences against Front A: **none**",
+    "docs/future_work.md::### Steps 1b and 2 — diagnostics"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:2817@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/1b_eval_params9.log",
+   "dest": "remover",
+   "finding": "avaliador na ponta com params-9 (incipient, recusa) idêntico a A",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:2827@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::Incipient boundary on TRAIN under params-9 at the tip"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:2827@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/2_attribution.log",
+   "dest": "remover",
+   "finding": "atribuição chave-a-chave da perda de mature em 20191014 a mature_min_depth",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:2837@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::### Attribution",
+    "docs/future_work.md::### The one behavioural difference found anywhere"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:2837@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/2_census.log",
+   "dest": "remover",
+   "finding": "censo do passo 2 com params-13",
+   "section": "S03",
+   "future_work": [
+    "docs/future_work.md:2817@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 2 — current state",
+    "docs/future_work.md::### Steps 1b and 2 — diagnostics"
+   ],
+   "destination": [
+    "§S03",
+    "`docs/future_work.md:2817@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/2_diff_vs_A.log",
+   "dest": "remover",
+   "finding": "diff contra A no passo 2 (params-13): nenhuma diferença",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::**0 differences**, same as step 1b"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_final_output_check.csv",
+   "dest": "remover",
+   "finding": "tabela regenerada final_output_check (passo 1a)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_fix_eval_before.txt",
+   "dest": "remover",
+   "finding": "avaliação regenerada 'antes do fix' de A (passo 1a)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0_final_stage.csv",
+   "dest": "remover",
+   "finding": "tabela regenerada idx0_final_stage (passo 1a)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0_inventory.csv",
+   "dest": "remover",
+   "finding": "tabela regenerada idx0_inventory (passo 1a)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1a_regen_idx0b_prominence.csv",
+   "dest": "remover",
+   "finding": "tabela regenerada idx0b_prominence (passo 1a)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1a — environment (GATE)"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_V_table.csv",
+   "dest": "remover",
+   "finding": "tabela V (primeira fase não-incipient) sob params-9",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1b — code drift"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0_final_stage.csv",
+   "dest": "remover",
+   "finding": "idx0_final_stage sob params-9 (passo 1b)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1b — code drift"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0_inventory.csv",
+   "dest": "remover",
+   "finding": "idx0_inventory sob params-9 (passo 1b)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1b — code drift"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step1b_params9_idx0b_prominence.csv",
+   "dest": "remover",
+   "finding": "idx0b_prominence sob params-9 (passo 1b)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 1b — code drift"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step2_attribution.csv",
+   "dest": "remover",
+   "finding": "tabela da atribuição chave-a-chave (passo 2)",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::### Attribution"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step2_params13_V_table.csv",
+   "dest": "remover",
+   "finding": "tabela V sob params-13",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 2 — current state"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0_final_stage.csv",
+   "dest": "remover",
+   "finding": "idx0_final_stage sob params-13",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 2 — current state"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0_inventory.csv",
+   "dest": "remover",
+   "finding": "idx0_inventory sob params-13",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 2 — current state"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontA_reverify/outputs/step2_params13_idx0b_prominence.csv",
+   "dest": "remover",
+   "finding": "idx0b_prominence sob params-13",
+   "section": "S03",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontA_reverify/REPORT.md::## STEP 2 — current state"
+   ],
+   "destination": [
+    "§S03"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontC/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S05",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S05"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontC/d2_segments.csv",
+   "dest": "remover",
+   "finding": "segmentos de intensificação e sua profundidade D2 (separação no treino)",
+   "section": "S05",
+   "future_work": [
+    "docs/future_work.md:2366@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontC/REPORT.md::## Measured — TRAIN split",
+    "docs/future_work.md::### Separation measured on TRAIN"
+   ],
+   "destination": [
+    "§S05",
+    "`docs/future_work.md:2366@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontC/d2_segments.json",
+   "dest": "remover",
+   "finding": "mesmos segmentos D2, formato bruto",
+   "section": "S05",
+   "future_work": [
+    "docs/future_work.md:2366@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::### Separation measured on TRAIN"
+   ],
+   "destination": [
+    "§S05",
+    "`docs/future_work.md:2366@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontC/fig_20180654_before_after.png",
+   "dest": "remover",
+   "finding": "antes/depois do piso de intensificação em 20180654",
+   "section": "S05",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontC/REPORT.md::## Measured — TRAIN split"
+   ],
+   "destination": [
+    "§S05"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontC/fig_20180733_before_after.png",
+   "dest": "remover",
+   "finding": "antes/depois do piso de intensificação em 20180733",
+   "section": "S05",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontC/REPORT.md::## Measured — TRAIN split"
+   ],
+   "destination": [
+    "§S05"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontC/measurements.json",
+   "dest": "remover",
+   "finding": "medições brutas de treino params-12 → params-13",
+   "section": "S05",
+   "future_work": [
+    "docs/future_work.md:2334@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontC/REPORT.md::## Measured — TRAIN split",
+    "docs/future_work.md::## 24. Front C"
+   ],
+   "destination": [
+    "§S05",
+    "`docs/future_work.md:2334@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/anchoring.json",
+   "dest": "remover",
+   "finding": "teste de ancoragem artefato vs fase real (C1)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::## 4. Step 2 — artefact vs real short phase"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/anchoring.txt",
+   "dest": "remover",
+   "finding": "teste de ancoragem artefato vs fase real (C1)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::## 4. Step 2 — artefact vs real short phase"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/census.json",
+   "dest": "remover",
+   "finding": "censo incipient do treino sob params-13",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::## 3. Census — TRAIN"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/census.txt",
+   "dest": "remover",
+   "finding": "censo incipient do treino sob params-13",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::## 3. Census — TRAIN"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/constant_baseline.json",
+   "dest": "remover",
+   "finding": "baseline constante para o fim do incipient",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::### 5.1 Divergence from the brief"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/constant_baseline.txt",
+   "dest": "remover",
+   "finding": "baseline constante para o fim do incipient",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::### 5.1 Divergence from the brief"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/evaluate_params13_train.txt",
+   "dest": "remover",
+   "finding": "saída do avaliador (treino, params-13)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::## 5. Evaluator output, verbatim"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/fig_*_opening.png",
+   "dest": "remover",
+   "finding": "figuras da abertura das séries C1 (bruta e filtrada)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::## 7. Figures"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontD/verify_hashes.txt",
+   "dest": "remover",
+   "finding": "verificação dos hashes antes de medir — PASS",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontD/REPORT.md::## 1. Hash verification"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/classification.json",
+   "dest": "remover",
+   "finding": "classificação das recusas por causa (M1>M2>M3)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::## Step 3 — classification by cause"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/classification.txt",
+   "dest": "remover",
+   "finding": "classificação por causa; contagem do defeito I no conjunto",
+   "section": "S02",
+   "future_work": [
+    "docs/future_work.md:672@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::## Step 3 — classification by cause",
+    "docs/future_work.md::### (d) Defect I (open)"
+   ],
+   "destination": [
+    "§S02",
+    "`docs/future_work.md:672@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/evaluate_params13_train.txt",
+   "dest": "remover",
+   "finding": "saída do avaliador (treino, params-13)",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::## Step 0 — state check"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/fig_*_refusal.png",
+   "dest": "remover",
+   "finding": "figuras das séries recusadas",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::### Figures"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/refusal.json",
+   "dest": "remover",
+   "finding": "caminhos de recusa por série",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::## Step 1 — the refusal paths"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/refusal.txt",
+   "dest": "remover",
+   "finding": "caminhos de recusa e as seis séries",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::## Step 2 — the six series"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/separability.json",
+   "dest": "remover",
+   "finding": "separabilidade da recusa por tau",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::## Step 4 — separability"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/separability.txt",
+   "dest": "remover",
+   "finding": "separabilidade da recusa por tau",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::## Step 4 — separability"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/tau_sweep.json",
+   "dest": "remover",
+   "finding": "varredura completa de tau: nenhum tau leva o bastante à tolerância",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::### The τ claim, strengthened"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/frontRefusal/tau_sweep.txt",
+   "dest": "remover",
+   "finding": "varredura completa de tau",
+   "section": "S02",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/frontRefusal/REPORT.md::### The τ claim, strengthened"
+   ],
+   "destination": [
+    "§S02"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/ADDENDUM_part1b.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/REPORT_front_b_part1.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/distance_sweep.txt",
+   "dest": "remover",
+   "finding": "varredura de `distance` nas séries de treino: parâmetro inerte na referência",
+   "section": "S06",
+   "future_work": [
+    "docs/future_work.md:1564@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/ADDENDUM_part1b.md::## 1. The `distance` sweep",
+    "docs/future_work.md::## 19. Front B"
+   ],
+   "destination": [
+    "§S06",
+    "`docs/future_work.md:1564@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/headroom_and_hash.txt",
+   "dest": "remover",
+   "finding": "folga de `distance` e primeiro registro do digest default",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/REPORT_front_b_part1.md::## 6. Default-behaviour SHA256"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/mature_pairing_audit.txt",
+   "dest": "remover",
+   "finding": "o que o n do pareamento mature conta e o que foi excluído",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/ADDENDUM_part1b.md::## 2. What `n=45` counts"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/reference_score_attribution.txt",
+   "dest": "remover",
+   "finding": "proveniência de cada número de referência (armadilha de atribuição)",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/ADDENDUM_part1b.md::## 4. Provenance of every reference number"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/sensitivity.txt",
+   "dest": "remover",
+   "finding": "sonda causal: sensibilidade das fases a `distance`/`length_scale`",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/REPORT_front_b_part1.md::### Why `distance` is inert, quantified"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/sweep_distance.py",
+   "dest": "remover",
+   "finding": "docstring registra a menor folga sobrevivente e em que série",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/ADDENDUM_part1b.md::gap analysis is confirmed exactly"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/target_tracks.txt",
+   "dest": "remover",
+   "finding": "as duas trajetórias-alvo: janelas mature e extremos antes/depois do filtro",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/REPORT_front_b_part1.md::## 3. The two target tracks"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/topology_run_gate_excerpt.txt",
+   "dest": "remover",
+   "finding": "trecho do gate de topologia citado como referência (score de pacote)",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/ADDENDUM_part1b.md::## 4. Provenance of every reference number"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/train_aggregate.txt",
+   "dest": "remover",
+   "finding": "agregado do split de treino sob a config de referência da época",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/REPORT_front_b_part1.md::## 4. Train split, 35 real + 12 synthetic"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/front_b/train_raw.json",
+   "dest": "remover",
+   "finding": "dados brutos por série do diagnóstico de treino",
+   "section": "S06",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/front_b/REPORT_front_b_part1.md::## 4. Train split, 35 real + 12 synthetic"
+   ],
+   "destination": [
+    "§S06"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/PROVENANCE.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/closeout_measurements.txt",
+   "dest": "remover",
+   "finding": "as três medições de fechamento pedidas na revisão",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item19/REPORT.md::## 4. Findings recorded in passing"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/evaluate_params10_train.txt",
+   "dest": "remover",
+   "finding": "saída do avaliador (treino, params-10)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item19/REPORT.md::### 1.1 Scoring (step 2.1)"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/fig_20160735_params10.png",
+   "dest": "remover",
+   "finding": "figura de 20160735 sob params-10",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item19/REPORT.md::## 1. Stage 1"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/fig_prominence_distributions.png",
+   "dest": "remover",
+   "finding": "distribuições de proeminência relativa",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item19/REPORT.md::### 1.3 Relative prominence"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/fig_tradeoff_pr060_maf090.png",
+   "dest": "remover",
+   "finding": "o trade-off desenhado",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item19/REPORT.md::### 2.3 The trade-off, exactly"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/stage1_baseline.txt",
+   "dest": "remover",
+   "finding": "baseline constante do estágio 1",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item19/REPORT.md::### 1.2 Constant baseline"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/stage1_per_series.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/stage1_prominence.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/stage2_cells.json",
+   "dest": "remover",
+   "finding": "grade de 45 células, bruto",
+   "section": "S04",
+   "future_work": [
+    "docs/future_work.md:1731@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/item19/REPORT.md::## 2. Stage 2 — the 45-cell grid",
+    "docs/future_work.md::### (b) Result — gate FAIL"
+   ],
+   "destination": [
+    "§S04",
+    "`docs/future_work.md:1731@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/stage2_grid.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item19/stage2_losses.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20a/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20a/evaluate_params10_train.txt",
+   "dest": "remover",
+   "finding": "avaliador params-10 (antes)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20a/REPORT.md::## P2 / T9"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20a/evaluate_params11_train.txt",
+   "dest": "remover",
+   "finding": "avaliador params-11 (depois)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20a/REPORT.md::## Gate verdict"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20a/measurements.json",
+   "dest": "remover",
+   "finding": "medições brutas params-10 vs params-11",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20a/REPORT.md::`measurements.json` for the raw record"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20a/tables.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/REPORT_stage2.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/analyse_20b.txt",
+   "dest": "remover",
+   "finding": "números do relatório do estágio 1 (profundidade dos vales)",
+   "section": "S04",
+   "future_work": [
+    "docs/future_work.md:2146@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT.md::## 5. Measurement A",
+    "docs/future_work.md::### Stage 1 — does valley depth separate"
+   ],
+   "destination": [
+    "§S04",
+    "`docs/future_work.md:2146@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/defectH_watch.txt",
+   "dest": "remover",
+   "finding": "vigia do defeito H durante o piso de mature",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT_stage2.md::### Defect H watch"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/denominator_robustness.txt",
+   "dest": "remover",
+   "finding": "robustez do denominador de D1",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT_stage2.md::## 6. Extra measurement 2"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/depth_table.csv",
+   "dest": "remover",
+   "finding": "tabela dos vales geradores e suas profundidades",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT.md::## 5. Measurement A"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/fig_20160735_before_after.png",
+   "dest": "remover",
+   "finding": "antes/depois de mature_min_depth em 20160735",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT_stage2.md::### (a) `20160735` reduces to one block"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/fig_20205386_before_after.png",
+   "dest": "remover",
+   "finding": "antes/depois de mature_min_depth em 20205386",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT_stage2.md::## 4. The gate at `mature_min_depth = 0.80`"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/gate_stage2.txt",
+   "dest": "remover",
+   "finding": "gate (a)–(f) do estágio 2 — PASS",
+   "section": "S04",
+   "future_work": [
+    "docs/future_work.md:2191@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT_stage2.md::### Gate verdict",
+    "docs/future_work.md::### Stage 2 — the rule, implemented anyway"
+   ],
+   "destination": [
+    "§S04",
+    "`docs/future_work.md:2191@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/measurements.json",
+   "dest": "remover",
+   "finding": "dump por série do estágio 1",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT.md::* `measurements.json` — the full per-series dump."
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/stage2_measurements.json",
+   "dest": "remover",
+   "finding": "dump do gate do estágio 2",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT_stage2.md::### Gate verdict"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item20b/supplement_20b.txt",
+   "dest": "remover",
+   "finding": "conteúdo DC da série que alimenta mature; recontagem",
+   "section": "S04",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item20b/REPORT.md::### Its mean — and why the brief's inference"
+   ],
+   "destination": [
+    "§S04"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/PREDICTIONS.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/PREDICTIONS_part2.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/PREDICTIONS_part3.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/REPORT.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/REPORT_figs_cf.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/REPORT_part2.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/REPORT_part3.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/census_train_params14.csv",
+   "dest": "remover",
+   "finding": "censo de treino sob params-14",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT.md::## Step 3 — train census"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/evaluate_params14_train_batch.txt",
+   "dest": "remover",
+   "finding": "avaliador params-14 com lote",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT.md::## Step 2 — gate (0a)/(0b)"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/figs_cf/*.png",
+   "dest": "remover",
+   "finding": "figuras rótulo × params-13 × params-14 × contrafactual (treino)",
+   "section": "S07",
+   "future_work": [
+    "docs/future_work.md:3504@06d8550"
+   ],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_figs_cf.md::Figures are in `figs_cf/`",
+    "docs/future_work.md::and `figs_cf/`. Each of 8 TRAIN cases"
+   ],
+   "destination": [
+    "§S07",
+    "`docs/future_work.md:3504@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/figs_cf_output.txt",
+   "dest": "remover",
+   "finding": "tabela rótulo × params-14 × contrafactual para os 8 casos",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_figs_cf.md::# Item 30 — label × params-13"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/figs_part3/*.png",
+   "dest": "remover",
+   "finding": "antes/depois dos 5 adjudicados",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::- `figs_part3/`: before and after"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/outside_signal.py",
+   "dest": "remover",
+   "finding": "docstring registra quantas trajetórias swell a regra muda",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::**R3, the 5 unpredicted tracks.**"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/outside_signal_output.txt",
+   "dest": "remover",
+   "finding": "as 5 fora do sinal e a variante estreita (medida, não adotada)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::## Checkpoint addendum (2026-09-27)"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/part3_eval_params14.txt",
+   "dest": "remover",
+   "finding": "avaliador params-14 (parte 3)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::## Score, params-14 → params-15"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/part3_eval_params15.txt",
+   "dest": "remover",
+   "finding": "avaliador params-15 (parte 3)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::## Score, params-14 → params-15"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/part3_measure_output.txt",
+   "dest": "remover",
+   "finding": "medição da parte 3 (predições R1..)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::## Predictions"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/post_merge_checks_output.txt",
+   "dest": "remover",
+   "finding": "checagens pós-merge: avaliador e 51 séries idênticos",
+   "section": "S07",
+   "future_work": [
+    "docs/future_work.md:3619@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::(`research/labels/diagnostics/item30/post_merge_checks.py`):"
+   ],
+   "destination": [
+    "§S07",
+    "`docs/future_work.md:3619@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/prove_defaults_30c.txt",
+   "dest": "remover",
+   "finding": "30c não muda caminhos default",
+   "section": "S07",
+   "future_work": [
+    "docs/future_work.md:3800@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::### Default paths unchanged (`research/labels/diagnostics/item30/prove_defaults_30c.py`"
+   ],
+   "destination": [
+    "§S07",
+    "`docs/future_work.md:3800@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/prove_defaults_part3_checkpoint.txt",
+   "dest": "remover",
+   "finding": "parte 3 não muda caminhos default (checkpoint)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::(`prove_defaults_part3_checkpoint.txt`)."
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/prove_defaults_part3_step2.txt",
+   "dest": "remover",
+   "finding": "parte 3 não muda caminhos default (passo 2)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::- `prove_defaults_part3.py`, with outputs"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/prove_defaults_part3_step3.txt",
+   "dest": "remover",
+   "finding": "parte 3 não muda caminhos default (passo 3)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part3.md::`prove_defaults_part3_step3.txt`. The evaluator"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/separability_criterion.json",
+   "dest": "remover",
+   "finding": "critério de separabilidade declarado",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part2.md::## Setup"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/separability_train_output.txt",
+   "dest": "remover",
+   "finding": "separabilidade no treino: sem separação",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part2.md::## Step 1 — the three candidates on the training series"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item30/separability_train_params14.csv",
+   "dest": "remover",
+   "finding": "tabela de separabilidade por série (params-14)",
+   "section": "S07",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item30/REPORT_part2.md::## Step 1 — the three candidates on the training series"
+   ],
+   "destination": [
+    "§S07"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/DESIGN.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/benchmark_swap_mutation.txt",
+   "dest": "remover",
+   "finding": "mutação: colunas trocadas no teste do benchmark são detectadas",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 11. Stage 2b"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/benchmark_swap_mutation_2c.txt",
+   "dest": "remover",
+   "finding": "mutação repetida na etapa 2c",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 12. Stage 2c"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/constant_train.json",
+   "dest": "remover",
+   "finding": "baseline constante no treino (params-15, defaults, constante)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 5. Stage-1 criterion"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/constant_train.txt",
+   "dest": "remover",
+   "finding": "baseline constante no treino",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 5. Stage-1 criterion"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/exposure_table.json",
+   "dest": "remover",
+   "finding": "dados do registro de exposição do TESTE",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 3. Exposure of the TEST series"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/exposure_table.md",
+   "dest": "consolidar",
+   "finding": "relatório/registro",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/fix_use_filter_false_after.json",
+   "dest": "remover",
+   "finding": "registro depois do fix use_filter=False",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "CHANGELOG.md::### Fixed — `process_vorticity(use_filter=False)` crashed"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/fix_use_filter_false_before.json",
+   "dest": "remover",
+   "finding": "registro antes do fix use_filter=False (crash)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::* The before-fix record is `fix_use_filter_false_before.json`."
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/fix_use_filter_false_equivalence.py",
+   "dest": "remover",
+   "finding": "docstring descreve o defeito encontrado",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "CHANGELOG.md::### Fixed — `process_vorticity(use_filter=False)` crashed"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt",
+   "dest": "remover",
+   "finding": "o que rodava antes do fix roda igual; o que quebrava agora roda",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "CHANGELOG.md::crashed now run (`research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt`)."
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/footprint_train.json",
+   "dest": "remover",
+   "finding": "pegada do default novo no treino",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 7. Default filtering — proposal"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/footprint_train.txt",
+   "dest": "remover",
+   "finding": "pegada do default novo no treino",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 7. Default filtering — proposal"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/future_work_numbers.json",
+   "dest": "remover",
+   "finding": "números do registro do item 31, regenerados",
+   "section": "S08",
+   "future_work": [
+    "docs/future_work.md:3823@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::## 31. params-15 as the package default"
+   ],
+   "destination": [
+    "§S08",
+    "`docs/future_work.md:3823@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/gate_2a.txt",
+   "dest": "remover",
+   "finding": "gate 2a (remoção de params-1..14) — PASS",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 10. Stage 2a"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/gate_2b.json",
+   "dest": "remover",
+   "finding": "gate 2b (defaults viram params-15)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 11. Stage 2b"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/gate_2b.txt",
+   "dest": "remover",
+   "finding": "gate 2b",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 11. Stage 2b"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/p15_expected_digest.txt",
+   "dest": "remover",
+   "finding": "digest esperado após a etapa 2 (layout front_b)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 6. Stage-2 equivalence gate"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/param_table.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/reachability_train.json",
+   "dest": "remover",
+   "finding": "alcançabilidade no treino",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 2. Reachability on TRAIN"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/reachability_train.txt",
+   "dest": "remover",
+   "finding": "alcançabilidade no treino",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 2. Reachability on TRAIN"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/sidebar_table_2c.json",
+   "dest": "remover",
+   "finding": "barra lateral derivada da assinatura (2c)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 12. Stage 2c"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/sidebar_table_2c.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 12. Stage 2c"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/stage1_output.json",
+   "dest": "remover",
+   "finding": "a rodada única de pontuação do estágio 1 — PASS",
+   "section": "S08",
+   "future_work": [
+    "docs/future_work.md:3854@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::### Stage 1 — the single scoring run"
+   ],
+   "destination": [
+    "§S08",
+    "`docs/future_work.md:3854@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/stage1_output.txt",
+   "dest": "remover",
+   "finding": "a rodada única de pontuação do estágio 1 — PASS",
+   "section": "S08",
+   "future_work": [
+    "docs/future_work.md:3854@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::### Stage 1 — the single scoring run"
+   ],
+   "destination": [
+    "§S08",
+    "`docs/future_work.md:3854@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/stage1_smoke_train.txt",
+   "dest": "remover",
+   "finding": "smoke test do pontuador no treino",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 9. Stage 1, part A — the freeze"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/stale_scripts.json",
+   "dest": "remover",
+   "finding": "lista dos scripts que param de rodar",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 10. Stage 2a"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/stale_scripts.md",
+   "dest": "consolidar",
+   "finding": "relatório/registro",
+   "section": "S10",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S10"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/suite_2a.txt",
+   "dest": "remover",
+   "finding": "suíte após 2a",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 10. Stage 2a"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/suite_2b_final.txt",
+   "dest": "remover",
+   "finding": "suíte após 2b",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 11. Stage 2b"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/suite_2b_measure.txt",
+   "dest": "remover",
+   "finding": "suíte com os defaults novos antes de tocar testes (falhas esperadas)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::**Measurement** (new defaults, before any test was touched)"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/suite_2b_prefix.txt",
+   "dest": "remover",
+   "finding": "suíte no prefixo de 2b (uma falha, a do use_filter=False)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 11. Stage 2b"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/suite_2c.txt",
+   "dest": "remover",
+   "finding": "suíte após 2c",
+   "section": "S08",
+   "future_work": [
+    "docs/future_work.md:3983@06d8550"
+   ],
+   "recorded_at": [
+    "docs/future_work.md::### Stage 2c — the sidebar opens with the package defaults"
+   ],
+   "destination": [
+    "§S08",
+    "`docs/future_work.md:3983@06d8550`"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/test_label_census.json",
+   "dest": "remover",
+   "finding": "censo declarado dos rótulos de TESTE (contagens)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 4. Label-only census of the TEST split"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/test_label_census.txt",
+   "dest": "consolidar",
+   "finding": "relatório/registro",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [],
+   "destination": [
+    "§S08"
+   ]
+  },
+  {
+   "path": "research/labels/diagnostics/item31/train_sequences_2b.md",
+   "dest": "consolidar",
+   "finding": "relatório de frente fechada (achados, previsões, veredito)",
+   "section": "S08",
+   "future_work": [],
+   "recorded_at": [
+    "research/labels/diagnostics/item31/DESIGN.md::## 11. Stage 2b"
+   ],
+   "destination": [
+    "§S08"
+   ]
+  }
+ ],
+ "n_remover_without_finding": 80
+}

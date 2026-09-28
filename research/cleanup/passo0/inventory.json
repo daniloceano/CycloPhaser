@@ -1,5 +1,5 @@
 {
- "head": "c080f4daf4ce06c610bb57520aa1ddfad5734985",
+ "head": "2a3080f204691b98a267d5a58623b34c4bb539a1",
  "n_tracked_total": 536,
  "n_tracked_excluding_cleanup": 536,
  "files": [
@@ -40,11 +40,11 @@
   {
    "path": "CHANGELOG.md",
    "type": "doc de usuário",
-   "last_commit": "cc5519e",
+   "last_commit": "a132f37",
    "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:1905",
-    "docs/usage.rst:90",
+    "docs/usage.rst:96",
     "research/labels/diagnostics/frontA_idx0_c2/REPORT.md:422",
     "research/labels/diagnostics/frontC/REPORT.md:38",
     "research/labels/diagnostics/item20b/REPORT_stage2.md:345"
@@ -70,7 +70,7 @@
    "last_commit": "f2c51f3",
    "last_date": "2024-09-17",
    "refs": [
-    "CHANGELOG.md:803",
+    "CHANGELOG.md:878",
     "docs/license.rst:19"
    ]
   },
@@ -103,8 +103,8 @@
     "docs/future_work.md:3387",
     "docs/future_work.md:3575",
     "docs/future_work.md:3605",
-    "research/labels/README.md:219",
-    "research/labels/README.md:60",
+    "research/labels/README.md:234",
+    "research/labels/README.md:75",
     "research/labels/diagnostics/item30/REPORT_part3.md:195",
     "research/labels/diagnostics/item30/REPORT_part3.md:228",
     "research/labels/diagnostics/item31/exposure_table.py:4",
@@ -184,7 +184,7 @@
   {
    "path": "cyclophaser/determine_periods.py",
    "type": "pacote",
-   "last_commit": "a1784b5",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:1227",
@@ -317,7 +317,7 @@
     "research/snapshots/make_published_snapshot.py:20",
     "research/snapshots/v1.9.4.json:5",
     "research/snapshots/v2.0.0.json:5",
-    "tests/test_layer_inspector.py:946",
+    "tests/test_layer_inspector.py:947",
     "tools/calibration_app/app.py:1521",
     "tools/calibration_app/app.py:1526"
    ]
@@ -334,7 +334,7 @@
     "setup.py:47",
     "tests/test_track_io.py:38",
     "tools/calibration_app/README.md:40",
-    "tools/calibration_app/app.py:2452"
+    "tools/calibration_app/app.py:2453"
    ]
   },
   {
@@ -343,7 +343,7 @@
    "last_commit": "f85e1b8",
    "last_date": "2026-09-27",
    "refs": [
-    "CHANGELOG.md:763",
+    "CHANGELOG.md:838",
     "docs/future_work.md:1580",
     "docs/future_work.md:1603",
     "docs/future_work.md:1765",
@@ -507,21 +507,21 @@
     "research/labels/diagnostics/item31/param_table.py:60",
     "research/labels/swell_item30/README.md:198",
     "research/snapshots/README.md:26",
-    "tests/test_layer_inspector.py:749",
+    "tests/test_layer_inspector.py:750",
     "tests/test_regression_baseline.py:10",
     "tools/calibration_app/README.md:273",
     "tools/calibration_app/README.md:278",
     "tools/calibration_app/app.py:1538",
     "tools/calibration_app/app.py:1825",
     "tools/calibration_app/app.py:2013",
-    "tools/calibration_app/layer_inspector.py:1036"
+    "tools/calibration_app/layer_inspector.py:1039"
    ]
   },
   {
    "path": "cyclophaser/lanczos_filter.py",
    "type": "pacote",
-   "last_commit": "4e70d17",
-   "last_date": "2026-09-03",
+   "last_commit": "742e685",
+   "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:2178",
     "research/labels/diagnostics/item20b/REPORT.md:117",
@@ -535,7 +535,7 @@
    "last_commit": "5cc80ba",
    "last_date": "2026-06-14",
    "refs": [
-    "CHANGELOG.md:797",
+    "CHANGELOG.md:872",
     "research/labels/labels_core.py:114",
     "research/snapshots/README.md:26",
     "tests/synthetic/generate_figures.py:56",
@@ -612,7 +612,7 @@
    "refs": [
     "README.md:17",
     "docs/index.rst:11",
-    "docs/usage.rst:180"
+    "docs/usage.rst:192"
    ]
   },
   {
@@ -621,7 +621,7 @@
    "last_commit": "a6842d9",
    "last_date": "2024-10-18",
    "refs": [
-    "docs/usage.rst:133"
+    "docs/usage.rst:145"
    ]
   },
   {
@@ -630,7 +630,7 @@
    "last_commit": "598fc88",
    "last_date": "2024-10-03",
    "refs": [
-    "docs/usage.rst:140"
+    "docs/usage.rst:152"
    ]
   },
   {
@@ -666,21 +666,21 @@
   {
    "path": "docs/future_work.md",
    "type": "registro/relatório",
-   "last_commit": "06d8550",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     ".circleci/config.yml:10",
     ".circleci/config.yml:12",
-    "CHANGELOG.md:244",
-    "CHANGELOG.md:300",
-    "CHANGELOG.md:382",
-    "CHANGELOG.md:390",
-    "CHANGELOG.md:462",
-    "CHANGELOG.md:548",
-    "CHANGELOG.md:694",
-    "CHANGELOG.md:794",
+    "CHANGELOG.md:318",
+    "CHANGELOG.md:375",
+    "CHANGELOG.md:457",
+    "CHANGELOG.md:465",
+    "CHANGELOG.md:537",
+    "CHANGELOG.md:623",
+    "CHANGELOG.md:769",
+    "CHANGELOG.md:869",
     "CLAUDE.md:6",
-    "cyclophaser/determine_periods.py:791",
+    "cyclophaser/determine_periods.py:807",
     "cyclophaser/find_stages.py:893",
     "environment.yml:27",
     "environment.yml:35",
@@ -689,8 +689,8 @@
     "research/incipient_plateau/measure_incipient.py:24",
     "research/inert_params/REPORT_inertia_sweep.md:394",
     "research/inert_params/REPORT_inertia_sweep.md:433",
+    "research/labels/README.md:113",
     "research/labels/README.md:27",
-    "research/labels/README.md:98",
     "research/labels/diagnostics/frontC/REPORT.md:38",
     "research/labels/diagnostics/frontC/REPORT.md:94",
     "research/labels/diagnostics/frontC/default_equivalence.py:57",
@@ -841,7 +841,7 @@
   {
    "path": "docs/usage.rst",
    "type": "doc de usuário",
-   "last_commit": "c5217b5",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:4011",
@@ -910,7 +910,7 @@
    "last_commit": "0fbacc8",
    "last_date": "2026-09-04",
    "refs": [
-    "CHANGELOG.md:406",
+    "CHANGELOG.md:481",
     "cyclophaser/find_stages.py:849",
     "docs/future_work.md:1314",
     "docs/future_work.md:1325",
@@ -935,7 +935,7 @@
     "research/labels/diagnostics/item31/exposure_table.md:52",
     "research/labels/diagnostics/item31/exposure_table.py:55",
     "tests/test_incipient_plateau.py:62",
-    "tools/calibration_app/app.py:2496"
+    "tools/calibration_app/app.py:2497"
    ]
   },
   {
@@ -944,7 +944,7 @@
    "last_commit": "e0b1b49",
    "last_date": "2026-09-04",
    "refs": [
-    "CHANGELOG.md:469",
+    "CHANGELOG.md:544",
     "research/labels/diagnostics/item31/exposure_table.json:96",
     "research/labels/diagnostics/item31/exposure_table.md:13",
     "research/labels/diagnostics/item31/exposure_table.md:37",
@@ -1034,7 +1034,7 @@
    "last_commit": "e0b1b49",
    "last_date": "2026-09-04",
    "refs": [
-    "CHANGELOG.md:468",
+    "CHANGELOG.md:543",
     "cyclophaser/find_stages.py:905",
     "research/incipient_plateau/REPORT_incipient_smoothing.md:9"
    ]
@@ -1121,7 +1121,7 @@
    "last_date": "2026-09-16",
    "refs": [
     ".gitignore:204",
-    "CHANGELOG.md:383",
+    "CHANGELOG.md:458",
     "cyclophaser/determine_periods.py:247",
     "docs/future_work.md:1587",
     "research/inert_params/DATA_DEPENDENT_findings.md:15",
@@ -1273,7 +1273,7 @@
   {
    "path": "research/labels/README.md",
    "type": "registro/relatório",
-   "last_commit": "1766338",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "CLAUDE.md:48",
@@ -1291,9 +1291,9 @@
    "last_commit": "a5067df",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:127",
+    "CHANGELOG.md:200",
     "research/labels/README.md:44",
-    "research/labels/README.md:81",
+    "research/labels/README.md:96",
     "research/labels/diagnostics/item31/DESIGN.md:721",
     "research/labels/diagnostics/item31/make_defaults_2_0_0.py:16",
     "tests/test_config_defaults.py:4",
@@ -1301,31 +1301,24 @@
    ]
   },
   {
-   "path": "research/labels/configs/cyclophaser_params-15.yaml",
+   "path": "research/labels/configs/cyclophaser_params-track.yaml",
    "type": "config",
-   "last_commit": "f85e1b8",
-   "last_date": "2026-09-27",
+   "last_commit": "742e685",
+   "last_date": "2026-09-28",
    "refs": [
     "CHANGELOG.md:16",
-    "cyclophaser/determine_periods.py:1400",
+    "cyclophaser/determine_periods.py:1427",
     "cyclophaser/determine_periods.py:430",
-    "cyclophaser/determine_periods.py:872",
+    "cyclophaser/determine_periods.py:564",
+    "cyclophaser/determine_periods.py:888",
+    "docs/usage.rst:89",
     "research/labels/README.md:53",
-    "research/labels/README.md:71",
-    "research/labels/diagnostics/item30/part3_eval_params15.txt:3",
-    "research/labels/diagnostics/item31/DESIGN.md:186",
-    "research/labels/diagnostics/item31/gate_2a.py:101",
-    "research/labels/diagnostics/item31/gate_2a.py:85",
-    "research/labels/diagnostics/item31/gate_2a.py:89",
-    "research/labels/diagnostics/item31/gate_2a.txt:3",
-    "research/labels/diagnostics/item31/param_table.py:12",
-    "research/labels/diagnostics/item31/recovery_table.py:54",
-    "research/labels/diagnostics/item31/stage1_output.txt:10",
-    "research/labels/diagnostics/item31/stage1_run.py:27",
-    "tests/test_benchmark_apptest.py:62",
+    "research/labels/README.md:86",
+    "tests/test_benchmark_apptest.py:64",
     "tests/test_config_defaults.py:38",
-    "tests/test_intensification_min_depth.py:446",
-    "tests/test_layer_inspector.py:880"
+    "tests/test_intensification_min_depth.py:447",
+    "tests/test_intensification_min_depth.py:71",
+    "tests/test_layer_inspector.py:881"
    ]
   },
   {
@@ -1334,15 +1327,15 @@
    "last_commit": "a5067df",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:126",
-    "CHANGELOG.md:18",
-    "cyclophaser/determine_periods.py:1419",
-    "cyclophaser/determine_periods.py:449",
-    "cyclophaser/determine_periods.py:891",
+    "CHANGELOG.md:199",
+    "CHANGELOG.md:77",
+    "cyclophaser/determine_periods.py:1452",
+    "cyclophaser/determine_periods.py:455",
+    "cyclophaser/determine_periods.py:913",
     "docs/future_work.md:3909",
-    "docs/usage.rst:109",
+    "docs/usage.rst:117",
     "research/labels/README.md:44",
-    "research/labels/README.md:80",
+    "research/labels/README.md:95",
     "research/labels/config_defaults.py:11",
     "research/labels/config_defaults.py:25",
     "research/labels/diagnostics/item31/DESIGN.md:522",
@@ -1352,10 +1345,10 @@
     "research/labels/diagnostics/item31/gate_2b.py:21",
     "research/labels/diagnostics/item31/make_defaults_2_0_0.py:16",
     "research/labels/diagnostics/item31/make_defaults_2_0_0.py:32",
-    "tests/legacy_defaults.py:18",
-    "tests/legacy_defaults.py:7",
+    "tests/legacy_defaults.py:12",
+    "tests/legacy_defaults.py:23",
     "tests/test_config_defaults.py:95",
-    "tools/calibration_app/layer_inspector.py:148"
+    "tools/calibration_app/layer_inspector.py:150"
    ]
   },
   {
@@ -1364,9 +1357,9 @@
    "last_commit": "e97eb17",
    "last_date": "2026-09-24",
    "refs": [
-    "CHANGELOG.md:243",
-    "cyclophaser/determine_periods.py:1129",
-    "cyclophaser/determine_periods.py:1597",
+    "CHANGELOG.md:317",
+    "cyclophaser/determine_periods.py:1156",
+    "cyclophaser/determine_periods.py:1636",
     "cyclophaser/determine_periods.py:72",
     "docs/future_work.md:2946",
     "docs/future_work.md:3086",
@@ -1708,7 +1701,7 @@
    "last_commit": "740b994",
    "last_date": "2026-09-23",
    "refs": [
-    "CHANGELOG.md:225",
+    "CHANGELOG.md:298",
     "research/labels/diagnostics/frontA_idx0_c2/REPORT.md:552"
    ]
   },
@@ -2591,7 +2584,7 @@
    "last_commit": "a284209",
    "last_date": "2026-09-22",
    "refs": [
-    "CHANGELOG.md:379",
+    "CHANGELOG.md:454",
     "docs/future_work.md:2403",
     "docs/future_work.md:2469",
     "research/labels/diagnostics/frontC/REPORT.md:89",
@@ -2613,11 +2606,12 @@
   {
    "path": "research/labels/diagnostics/front_b/default_behaviour_sha256.txt",
    "type": "saída gerada",
-   "last_commit": "06d8550",
+   "last_commit": "052a876",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:368",
-    "CHANGELOG.md:66",
+    "CHANGELOG.md:129",
+    "CHANGELOG.md:138",
+    "CHANGELOG.md:443",
     "research/labels/diagnostics/front_b/ADDENDUM_part1b.md:194",
     "research/labels/diagnostics/front_b/ADDENDUM_part1b.md:219",
     "research/labels/diagnostics/front_b/ADDENDUM_part1b.md:242",
@@ -2912,7 +2906,7 @@
     "docs/future_work.md:1847",
     "docs/future_work.md:1878",
     "docs/future_work.md:2278",
-    "research/labels/README.md:87",
+    "research/labels/README.md:102",
     "research/labels/diagnostics/item19/REPORT.md:32",
     "research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md:64",
     "research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md:78",
@@ -3731,6 +3725,7 @@
    "last_commit": "e31b727",
    "last_date": "2026-09-28",
    "refs": [
+    "CHANGELOG.md:96",
     "docs/future_work.md:3830",
     "research/labels/config_defaults.py:4",
     "research/labels/diagnostics/item31/constant_train.py:25",
@@ -3916,7 +3911,7 @@
    "last_commit": "a1784b5",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:118",
+    "CHANGELOG.md:190",
     "research/labels/diagnostics/item31/fix_use_filter_false_equivalence.py:25"
    ]
   },
@@ -4174,10 +4169,10 @@
    "last_commit": "b484738",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:130",
+    "CHANGELOG.md:203",
     "docs/future_work.md:3920",
-    "research/labels/README.md:56",
-    "research/labels/README.md:64",
+    "research/labels/README.md:71",
+    "research/labels/README.md:79",
     "research/labels/diagnostics/item31/DESIGN.md:600",
     "research/labels/diagnostics/item31/DESIGN.md:602",
     "research/labels/diagnostics/item31/recovery_table.py:14",
@@ -4202,7 +4197,9 @@
    "type": "script de diagnóstico",
    "last_commit": "55a4780",
    "last_date": "2026-09-28",
-   "refs": []
+   "refs": [
+    "CHANGELOG.md:125"
+   ]
   },
   {
    "path": "research/labels/diagnostics/item31/sidebar_table_2c.json",
@@ -4223,7 +4220,7 @@
    "last_commit": "4304d70",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:94",
+    "CHANGELOG.md:166",
     "docs/future_work.md:3990",
     "research/labels/diagnostics/item31/sidebar_table_2c.py:186",
     "research/labels/diagnostics/item31/sidebar_table_2c.py:6"
@@ -4258,7 +4255,7 @@
    "last_commit": "33ea489",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:56",
+    "CHANGELOG.md:90",
     "research/labels/diagnostics/item31/DESIGN.md:28",
     "research/labels/diagnostics/item31/DESIGN.md:559",
     "research/labels/diagnostics/item31/stage1_run.py:10",
@@ -4332,9 +4329,9 @@
    "last_commit": "1766338",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:133",
+    "CHANGELOG.md:206",
     "docs/future_work.md:3923",
-    "research/labels/README.md:91",
+    "research/labels/README.md:106",
     "research/labels/diagnostics/item31/DESIGN.md:653",
     "research/labels/diagnostics/item31/stale_scripts.py:102",
     "research/labels/diagnostics/item31/stale_scripts.py:18"
@@ -4449,7 +4446,7 @@
    "last_commit": "a5067df",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:124",
+    "CHANGELOG.md:197",
     "CLAUDE.md:60",
     "README.md:76",
     "docs/future_work.md:1021",
@@ -4466,10 +4463,10 @@
     "docs/future_work.md:3805",
     "docs/future_work.md:3925",
     "docs/future_work.md:864",
-    "research/labels/README.md:225",
+    "research/labels/README.md:109",
+    "research/labels/README.md:240",
     "research/labels/README.md:43",
-    "research/labels/README.md:82",
-    "research/labels/README.md:94",
+    "research/labels/README.md:97",
     "research/labels/diagnostics/frontA_reverify/REPORT.md:131",
     "research/labels/diagnostics/frontA_reverify/REPORT.md:203",
     "research/labels/diagnostics/frontA_reverify/REPORT.md:288",
@@ -4546,8 +4543,8 @@
     "research/labels/swell_item30/README.md:163",
     "tests/test_evaluate_batch_train.py:1",
     "tools/calibration_app/README.md:186",
-    "tools/calibration_app/benchmark_core.py:30",
-    "tools/calibration_app/benchmark_core.py:95"
+    "tools/calibration_app/benchmark_core.py:100",
+    "tools/calibration_app/benchmark_core.py:34"
    ]
   },
   {
@@ -4614,7 +4611,7 @@
    "last_commit": "97513a7",
    "last_date": "2026-09-05",
    "refs": [
-    "research/labels/README.md:105",
+    "research/labels/README.md:120",
     "research/labels/README.md:40",
     "tests/test_manual_labels.py:450"
    ]
@@ -4625,7 +4622,7 @@
    "last_commit": "9dc87d4",
    "last_date": "2026-09-27",
    "refs": [
-    "CHANGELOG.md:388",
+    "CHANGELOG.md:463",
     "CLAUDE.md:28",
     "docs/future_work.md:1308",
     "docs/future_work.md:1322",
@@ -4639,8 +4636,8 @@
     "docs/future_work.md:852",
     "docs/future_work.md:905",
     "docs/future_work.md:980",
-    "research/labels/README.md:210",
-    "research/labels/README.md:259",
+    "research/labels/README.md:225",
+    "research/labels/README.md:274",
     "research/labels/README.md:29",
     "research/labels/README.md:42",
     "research/labels/diagnostics/frontA_idx0_c2/REPORT.md:101",
@@ -4690,8 +4687,8 @@
     "docs/future_work.md:973",
     "docs/future_work.md:974",
     "research/inert_params/REPORT_inertia_sweep.md:362",
-    "research/labels/README.md:116",
-    "research/labels/README.md:215",
+    "research/labels/README.md:131",
+    "research/labels/README.md:230",
     "research/labels/README.md:40",
     "research/labels/README.md:41",
     "research/labels/diagnostics/frontA_idx0_c2/common.py:50",
@@ -4742,11 +4739,11 @@
     "research/labels/swell_item30/freeze_validation_batch.py:19",
     "research/labels/swell_item30/freeze_validation_batch_output.txt:2",
     "tests/test_evaluate_batch_train.py:3",
-    "tests/test_layer_inspector.py:1053",
-    "tests/test_layer_inspector.py:1065",
-    "tests/test_layer_inspector.py:1067",
+    "tests/test_layer_inspector.py:1054",
+    "tests/test_layer_inspector.py:1066",
+    "tests/test_layer_inspector.py:1068",
     "tests/test_swell_batch.py:1",
-    "tools/calibration_app/benchmark_core.py:420",
+    "tools/calibration_app/benchmark_core.py:425",
     "tools/calibration_app/benchmark_tab.py:582",
     "tools/calibration_app/label_tab.py:1674",
     "tools/calibration_app/label_tab.py:1679",
@@ -4763,8 +4760,8 @@
    "last_date": "2026-09-27",
    "refs": [
     "docs/future_work.md:3387",
-    "research/labels/README.md:219",
-    "research/labels/README.md:60",
+    "research/labels/README.md:234",
+    "research/labels/README.md:75",
     "research/labels/diagnostics/item31/exposure_table.py:4"
    ]
   },
@@ -4948,7 +4945,7 @@
    "last_commit": "f423476",
    "last_date": "2026-06-15",
    "refs": [
-    "CHANGELOG.md:802",
+    "CHANGELOG.md:877",
     "README.md:97",
     "docs/future_work.md:1034",
     "environment.yml:26",
@@ -4993,7 +4990,7 @@
    "last_commit": "d810d22",
    "last_date": "2026-09-04",
    "refs": [
-    "CHANGELOG.md:403",
+    "CHANGELOG.md:478",
     "research/labels/diagnostics/item31/DESIGN.md:432",
     "tests/test_incipient_plateau.py:53",
     "tests/test_incipient_plateau.py:7"
@@ -5611,7 +5608,7 @@
   {
    "path": "tests/legacy_defaults.py",
    "type": "teste",
-   "last_commit": "c5217b5",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:3960",
@@ -5632,7 +5629,7 @@
    "last_commit": "f80c2f6",
    "last_date": "2026-09-04",
    "refs": [
-    "CHANGELOG.md:441",
+    "CHANGELOG.md:516",
     "CLAUDE.md:34",
     "docs/future_work.md:1268",
     "docs/future_work.md:1309",
@@ -5668,7 +5665,7 @@
     "tools/calibration_app/app.py:109",
     "tools/calibration_app/app.py:1415",
     "tools/calibration_app/app.py:1429",
-    "tools/calibration_app/app.py:2334",
+    "tools/calibration_app/app.py:2335",
     "tools/calibration_app/app.py:67",
     "tools/calibration_app/label_tab.py:1344",
     "tools/calibration_app/label_tab.py:32"
@@ -5780,8 +5777,8 @@
    "last_commit": "68defa2",
    "last_date": "2026-06-13",
    "refs": [
-    "CHANGELOG.md:732",
-    "CHANGELOG.md:797",
+    "CHANGELOG.md:807",
+    "CHANGELOG.md:872",
     "cyclophaser/plots.py:299"
    ]
   },
@@ -5845,7 +5842,7 @@
   {
    "path": "tests/test_benchmark_apptest.py",
    "type": "teste",
-   "last_commit": "4304d70",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:3339",
@@ -5855,13 +5852,13 @@
     "research/labels/diagnostics/item31/DESIGN.md:994",
     "research/labels/diagnostics/item31/benchmark_swap_mutation.txt:1",
     "research/labels/diagnostics/item31/benchmark_swap_mutation_2c.txt:1",
-    "tools/calibration_app/benchmark_core.py:547"
+    "tools/calibration_app/benchmark_core.py:552"
    ]
   },
   {
    "path": "tests/test_boundary_padding.py",
    "type": "teste",
-   "last_commit": "c5217b5",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "research/inert_params/INCIDENTAL_crash_bug.md:119"
@@ -5870,7 +5867,7 @@
   {
    "path": "tests/test_config_defaults.py",
    "type": "teste",
-   "last_commit": "1766338",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "research/labels/diagnostics/item31/DESIGN.md:721"
@@ -5891,7 +5888,7 @@
     "research/labels/diagnostics/item31/exposure_table.json:110",
     "research/labels/diagnostics/item31/exposure_table.md:14",
     "research/labels/diagnostics/item31/exposure_table.py:64",
-    "tests/test_boundary_padding.py:427",
+    "tests/test_boundary_padding.py:429",
     "tests/test_boundary_padding.py:84"
    ]
   },
@@ -5944,7 +5941,7 @@
   {
    "path": "tests/test_intensification_min_depth.py",
    "type": "teste",
-   "last_commit": "c5217b5",
+   "last_commit": "052a876",
    "last_date": "2026-09-28",
    "refs": [
     "research/labels/diagnostics/frontC/REPORT.md:37",
@@ -5954,7 +5951,7 @@
   {
    "path": "tests/test_item30_spare_intensification.py",
    "type": "teste",
-   "last_commit": "c5217b5",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "research/labels/diagnostics/item31/DESIGN.md:637"
@@ -5985,8 +5982,8 @@
     "docs/future_work.md:833",
     "research/inert_params/REPORT_inertia_sweep.md:316",
     "research/inert_params/REPORT_inertia_sweep.md:329",
-    "research/labels/README.md:184",
     "research/labels/README.md:199",
+    "research/labels/README.md:214",
     "tests/test_label_apptest.py:6",
     "tests/test_manual_labels.py:1135",
     "tests/test_manual_labels.py:1173",
@@ -5997,7 +5994,7 @@
   {
    "path": "tests/test_layer_inspector.py",
    "type": "teste",
-   "last_commit": "c5217b5",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:1059",
@@ -6012,8 +6009,8 @@
     "tests/test_manual_labels.py:58",
     "tools/calibration_app/README.md:155",
     "tools/calibration_app/layer_inspector.py:142",
-    "tools/calibration_app/layer_inspector.py:220",
-    "tools/calibration_app/layer_inspector.py:541"
+    "tools/calibration_app/layer_inspector.py:222",
+    "tools/calibration_app/layer_inspector.py:543"
    ]
   },
   {
@@ -6024,7 +6021,7 @@
    "refs": [
     "docs/future_work.md:1059",
     "docs/future_work.md:864",
-    "research/labels/README.md:144",
+    "research/labels/README.md:159",
     "research/labels/README.md:48",
     "research/labels/labels_core.py:114",
     "tools/calibration_app/label_tab.py:1242",
@@ -6062,7 +6059,7 @@
   {
    "path": "tests/test_regression_baseline.py",
    "type": "teste",
-   "last_commit": "55a4780",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "research/inert_params/INCIDENTAL_crash_bug.md:118",
@@ -6090,7 +6087,7 @@
    "last_commit": "4304d70",
    "last_date": "2026-09-28",
    "refs": [
-    "CHANGELOG.md:95",
+    "CHANGELOG.md:167",
     "docs/future_work.md:3991",
     "research/labels/diagnostics/item31/DESIGN.md:1011",
     "research/labels/diagnostics/item31/DESIGN.md:995"
@@ -6159,14 +6156,14 @@
   {
    "path": "tools/calibration_app/README.md",
    "type": "doc de usuário",
-   "last_commit": "1766338",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": []
   },
   {
    "path": "tools/calibration_app/app.py",
    "type": "app",
-   "last_commit": "4304d70",
+   "last_commit": "742e685",
    "last_date": "2026-09-28",
    "refs": [
     "README.md:55",
@@ -6179,8 +6176,8 @@
     "research/inert_params/REPORT_inertia_sweep.md:181",
     "research/inert_params/sweep_inertia.py:121",
     "research/inert_params/sweep_inertia.py:51",
-    "research/labels/README.md:123",
-    "research/labels/README.md:184",
+    "research/labels/README.md:138",
+    "research/labels/README.md:199",
     "research/labels/diagnostics/frontA_idx0_c2/REPORT.md:419",
     "research/labels/diagnostics/frontC/REPORT.md:36",
     "research/labels/diagnostics/item20b/REPORT_stage2.md:346",
@@ -6193,7 +6190,7 @@
   {
    "path": "tools/calibration_app/benchmark_core.py",
    "type": "app",
-   "last_commit": "a5067df",
+   "last_commit": "052a876",
    "last_date": "2026-09-28",
    "refs": [
     "research/labels/diagnostics/item30/prove_defaults_30c.py:65",
@@ -6205,7 +6202,7 @@
   {
    "path": "tools/calibration_app/benchmark_tab.py",
    "type": "app",
-   "last_commit": "a5067df",
+   "last_commit": "052a876",
    "last_date": "2026-09-28",
    "refs": []
   },
@@ -6228,7 +6225,7 @@
     "docs/future_work.md:1286",
     "environment.yml:59",
     "tools/calibration_app/app.py:1003",
-    "tools/calibration_app/app.py:2582"
+    "tools/calibration_app/app.py:2583"
    ]
   },
   {
@@ -6241,7 +6238,7 @@
     "docs/future_work.md:1484",
     "docs/future_work.md:3779",
     "docs/future_work.md:863",
-    "research/labels/README.md:144",
+    "research/labels/README.md:159",
     "research/labels/README.md:46",
     "research/labels/labels_core.py:113",
     "tests/test_label_apptest.py:12",
@@ -6253,13 +6250,13 @@
     "tools/calibration_app/app.py:1349",
     "tools/calibration_app/app.py:1354",
     "tools/calibration_app/app.py:1357",
-    "tools/calibration_app/app.py:3037"
+    "tools/calibration_app/app.py:3038"
    ]
   },
   {
    "path": "tools/calibration_app/layer_inspector.py",
    "type": "app",
-   "last_commit": "c5217b5",
+   "last_commit": "052a876",
    "last_date": "2026-09-28",
    "refs": [
     "docs/future_work.md:1059",
@@ -6338,7 +6335,7 @@
    "last_commit": "baaf595",
    "last_date": "2026-09-24",
    "refs": [
-    "CHANGELOG.md:140",
+    "CHANGELOG.md:213",
     "docs/future_work.md:3229",
     "docs/future_work.md:3290",
     "docs/future_work.md:3312",
@@ -6350,57 +6347,67 @@
  "grep_params_1_14": [
   {
    "file": "CHANGELOG.md",
-   "line": 128,
-   "text": "* **`research/labels/configs/` holds only `params-15`.** params-1 to params-14"
+   "line": 201,
+   "text": "* **`research/labels/configs/` holds only `params-15`** (renamed `params-track` in the cleanup front). params-1 to params-14"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 169,
+   "line": 242,
    "text": "bit-identical (128/128: 64 series × params-14 and app defaults). The warning"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 199,
+   "line": 272,
    "text": "**What moves.** Under the calibration reference (params-13 + the rule ="
   },
   {
    "file": "CHANGELOG.md",
-   "line": 200,
+   "line": 273,
    "text": "params-14) the output changes on 5 of those 63 series and is byte-identical on"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 231,
+   "line": 304,
    "text": "any calibration config from params-1 to params-13, all of which predate the rule"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 232,
+   "line": 305,
    "text": "— pass `reclassify_index0=False`. `research/labels/configs/cyclophaser_params-14.yaml`"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 288,
+   "line": 306,
+   "text": "(removed in item 31; `git show 33ea489:research/labels/configs/cyclophaser_params-14.yaml`)"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 362,
    "text": "segments on that split. `research/labels/configs/cyclophaser_params-13.yaml`"
   },
   {
+   "file": "CHANGELOG.md",
+   "line": 363,
+   "text": "(removed in item 31; `git show 33ea489:research/labels/configs/cyclophaser_params-13.yaml`)"
+  },
+  {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1126,
+   "line": 1153,
    "text": "calibration config exported before it, params-1 to params-13 —"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1127,
+   "line": 1154,
    "text": "params-14 is the first that states it). Applied to ``z`` only: no"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1594,
+   "line": 1633,
    "text": "calibration config exported before it, params-1 to params-13 —"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1595,
+   "line": 1634,
    "text": "params-14 is the first that states it). Applied to ``z`` only: no"
   },
   {
@@ -6935,67 +6942,67 @@
   },
   {
    "file": "research/labels/README.md",
-   "line": 53,
-   "text": "`cyclophaser_params-15.yaml`, the calibration reference.** params-1 to"
-  },
-  {
-   "file": "research/labels/README.md",
-   "line": 54,
-   "text": "params-14 were removed by Danilo's decision. They are not lost: each one is"
-  },
-  {
-   "file": "research/labels/README.md",
-   "line": 59,
-   "text": "`cyclophaser_params-11.yaml` once held params-14's values"
-  },
-  {
-   "file": "research/labels/README.md",
-   "line": 64,
-   "text": "| `cyclophaser_params-1.yaml` … `-8.yaml` | see `diagnostics/item31/recovery_table.md` | removed (item 31); historical, added to the repo by front 21 |"
-  },
-  {
-   "file": "research/labels/README.md",
-   "line": 65,
-   "text": "| `cyclophaser_params-9.yaml` | `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` | removed (item 31); historical |"
-  },
-  {
-   "file": "research/labels/README.md",
-   "line": 66,
-   "text": "| `cyclophaser_params-10.yaml` | `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` | removed (item 31); was `item19_core.CONFIG`, the frozen instrument of items 19/20 |"
-  },
-  {
-   "file": "research/labels/README.md",
-   "line": 67,
-   "text": "| `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | removed (item 31); calibration reference from front 20(a) to 2026-09-27 |"
-  },
-  {
-   "file": "research/labels/README.md",
    "line": 68,
-   "text": "| `cyclophaser_params-12.yaml` | `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` | removed (item 31); params-11 + `mature_min_depth` 0.80 (item 22) |"
+   "text": "params-1 to"
   },
   {
    "file": "research/labels/README.md",
    "line": 69,
+   "text": "params-14 were removed by Danilo's decision. They are not lost: each one is"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 74,
+   "text": "`cyclophaser_params-11.yaml` once held params-14's values"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 79,
+   "text": "| `cyclophaser_params-1.yaml` … `-8.yaml` | see `diagnostics/item31/recovery_table.md` | removed (item 31); historical, added to the repo by front 21 |"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 80,
+   "text": "| `cyclophaser_params-9.yaml` | `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` | removed (item 31); historical |"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 81,
+   "text": "| `cyclophaser_params-10.yaml` | `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` | removed (item 31); was `item19_core.CONFIG`, the frozen instrument of items 19/20 |"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 82,
+   "text": "| `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | removed (item 31); calibration reference from front 20(a) to 2026-09-27 |"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 83,
+   "text": "| `cyclophaser_params-12.yaml` | `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` | removed (item 31); params-11 + `mature_min_depth` 0.80 (item 22) |"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 84,
    "text": "| `cyclophaser_params-13.yaml` | `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` | removed (item 31); params-12 + `intensification_min_depth` 0.05 (item 24) |"
   },
   {
    "file": "research/labels/README.md",
-   "line": 70,
+   "line": 85,
    "text": "| `cyclophaser_params-14.yaml` | `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` | removed (item 31); params-13 + `reclassify_index0` true (item 28) |"
   },
   {
    "file": "research/labels/README.md",
-   "line": 71,
-   "text": "| **`cyclophaser_params-15.yaml`** | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration reference** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independ"
+   "line": 86,
+   "text": "| **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration preset** — params-14 + `incipient_plateau_spare_intensification` true (item 30"
   },
   {
    "file": "research/labels/README.md",
-   "line": 75,
+   "line": 90,
    "text": "cites it. It was written by hand from params-14 (plus one line), so its"
   },
   {
    "file": "research/labels/README.md",
-   "line": 76,
+   "line": 91,
    "text": "`metadata` block is params-14's, timestamp included."
   },
   {
@@ -11110,7 +11117,7 @@
   },
   {
    "file": "tests/test_benchmark_apptest.py",
-   "line": 708,
+   "line": 710,
    "text": "from params-1\" on params-1's own card — true, and unreadable as anything but"
   },
   {
@@ -11121,42 +11128,37 @@
   {
    "file": "tests/test_intensification_min_depth.py",
    "line": 69,
-   "text": "# params-13 = params-12 + intensification_min_depth. Kept in sync with"
-  },
-  {
-   "file": "tests/test_intensification_min_depth.py",
-   "line": 70,
-   "text": "# research/labels/configs/cyclophaser_params-13.yaml by"
+   "text": "# params-13 = params-12 + intensification_min_depth (params-13 left the repo in"
   },
   {
    "file": "tests/test_intensification_min_depth.py",
    "line": 71,
-   "text": "# test_params13_yaml_matches_this_module."
+   "text": "# research/labels/configs/cyclophaser_params-track.yaml — params-13 plus two keys"
   },
   {
    "file": "tests/test_intensification_min_depth.py",
-   "line": 105,
+   "line": 106,
    "text": "# The params-13 reference value."
   },
   {
    "file": "tests/test_intensification_min_depth.py",
-   "line": 222,
+   "line": 223,
    "text": "\"\"\"Under params-13 the phantom residual tail is gone and the series ends in"
   },
   {
    "file": "tests/test_intensification_min_depth.py",
-   "line": 440,
-   "text": "\"\"\"params-15 is the calibration reference (params-13 left the repo in item 31;"
+   "line": 441,
+   "text": "\"\"\"params-track is the calibration reference (params-13 left the repo in item 31;"
   },
   {
    "file": "tests/test_intensification_min_depth.py",
-   "line": 441,
-   "text": "params-15 = params-13 + reclassify_index0 + incipient_plateau_spare_intensification,"
+   "line": 442,
+   "text": "params-track = params-13 + reclassify_index0 + incipient_plateau_spare_intensification,"
   },
   {
    "file": "tests/test_item30_spare_intensification.py",
    "line": 144,
-   "text": "# params-14 left the repo in item 31. It was params-15 minus this one key"
+   "text": "# params-14 left the repo in item 31. It was params-track minus this one key"
   },
   {
    "file": "tests/test_item30_spare_intensification.py",
@@ -11165,13 +11167,13 @@
   },
   {
    "file": "tests/test_layer_inspector.py",
-   "line": 983,
+   "line": 984,
    "text": "#    mature 0.80 — the same floors as params-14, which left the repo in item 31;"
   },
   {
    "file": "tests/test_layer_inspector.py",
-   "line": 1045,
-   "text": "# Measured 2026-09-25 under params-14; identical under params-15, whose one"
+   "line": 1046,
+   "text": "# Measured 2026-09-25 under params-14; identical under params-track, whose one"
   },
   {
    "file": "tests/test_reclassify_index0.py",
@@ -11181,7 +11183,7 @@
   {
    "file": "tools/calibration_app/README.md",
    "line": 164,
-   "text": "file in `research/labels/configs/` (since item 31 only params-15; params-1..14"
+   "text": "file in `research/labels/configs/` (since item 31 only params-15, renamed params-track in the cleanup front; params-1..14"
   },
   {
    "file": "tools/calibration_app/README.md",
@@ -11235,27 +11237,32 @@
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 19,
+   "line": 6,
+   "text": "only params-track remains in research/labels/configs/; params-1..14 are"
+  },
+  {
+   "file": "tools/calibration_app/benchmark_core.py",
+   "line": 21,
    "text": "different weeks with different understanding of the problem (params-5 and -6"
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 20,
+   "line": 22,
    "text": "record 0, params-9 records 6). It is carried as a labelled historical"
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 22,
-   "text": "* **`item19_core.CONFIG` is never repointed.** It pins params-10 deliberately, as"
+   "line": 24,
+   "text": "* **`item19_core`'s configuration is never used.** It once pinned params-10 as"
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 78,
-   "text": "# params-10; nothing here writes to it. See the module docstring."
+   "line": 82,
+   "text": "# (item 31 removed params-10); nothing here reads or writes its configuration."
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 280,
+   "line": 285,
    "text": "\"\"\"Numeric order, so params-2 sorts before params-10 (lexicographic does not).\"\"\""
   },
   {
@@ -11270,70 +11277,45 @@
   },
   {
    "file": "tools/calibration_app/layer_inspector.py",
-   "line": 544,
-   "text": "settings, and under params-14 with the depth floor active."
+   "line": 546,
+   "text": "settings, and under params-track (params-14 before item 31) with the depth"
   },
   {
    "file": "tools/calibration_app/layer_inspector.py",
-   "line": 858,
-   "text": "params-14 with the floor active."
+   "line": 861,
+   "text": "params-track (params-14 before item 31) with the floor active."
   }
  ],
  "grep_params_15": [
   {
    "file": "CHANGELOG.md",
-   "line": 12,
-   "text": "### Changed — default behaviour: the package defaults are now `params-15` (item 31, stage 2b, `45f0600`; approved by Danilo 2026-09-28)"
+   "line": 21,
+   "text": "then named `params-15` the package defaults, `\"edge\"` included."
   },
   {
    "file": "CHANGELOG.md",
-   "line": 16,
-   "text": "now the calibration reference `research/labels/configs/cyclophaser_params-15.yaml`."
+   "line": 22,
+   "text": "* C1 of the cleanup front renamed `params-15` to `params-track` (identical"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 105,
-   "text": "the params-15 column."
+   "line": 91,
+   "text": "PASS on the 16 held-out series, measured with params-15 = params-track, i.e."
   },
   {
    "file": "CHANGELOG.md",
-   "line": 128,
-   "text": "* **`research/labels/configs/` holds only `params-15`.** params-1 to params-14"
+   "line": 94,
+   "text": "of the visual calibration set, were viewed under params-15 in the review that"
   },
   {
-   "file": "cyclophaser/determine_periods.py",
-   "line": 429,
-   "text": "The defaults are the calibration reference ``params-15``"
+   "file": "CHANGELOG.md",
+   "line": 177,
+   "text": "the params-15 column (the preset now named params-track)."
   },
   {
-   "file": "cyclophaser/determine_periods.py",
-   "line": 430,
-   "text": "(research/labels/configs/cyclophaser_params-15.yaml). They fall in two"
-  },
-  {
-   "file": "cyclophaser/determine_periods.py",
-   "line": 547,
-   "text": "moved it to ``\"edge\"``, the padding of the calibration reference params-15:"
-  },
-  {
-   "file": "cyclophaser/determine_periods.py",
-   "line": 871,
-   "text": "The defaults are the calibration reference ``params-15``"
-  },
-  {
-   "file": "cyclophaser/determine_periods.py",
-   "line": 872,
-   "text": "(research/labels/configs/cyclophaser_params-15.yaml). They fall in two"
-  },
-  {
-   "file": "cyclophaser/determine_periods.py",
-   "line": 1399,
-   "text": "The defaults are the calibration reference ``params-15``"
-  },
-  {
-   "file": "cyclophaser/determine_periods.py",
-   "line": 1400,
-   "text": "(research/labels/configs/cyclophaser_params-15.yaml). They fall in two"
+   "file": "CHANGELOG.md",
+   "line": 201,
+   "text": "* **`research/labels/configs/` holds only `params-15`** (renamed `params-track` in the cleanup front). params-1 to params-14"
   },
   {
    "file": "docs/future_work.md",
@@ -11476,24 +11458,19 @@
    "text": "| EQ3 (`determine_periods` == G() == G(params-15)) | train 54/54, example 1/1, test 16/16, batch test 3/3, validation 5/5 |"
   },
   {
-   "file": "docs/usage.rst",
-   "line": 89,
-   "text": "``params-15``. This is a change of default behaviour relative to 2.0.0; every"
+   "file": "docs/future_work.md",
+   "line": 4024,
+   "text": "> **Nota de correspondência (2026-09-28).** params-15 foi renomeado para"
   },
   {
    "file": "research/labels/README.md",
-   "line": 53,
-   "text": "`cyclophaser_params-15.yaml`, the calibration reference.** params-1 to"
+   "line": 55,
+   "text": "> **Correspondence (2026-09-28).** params-15 foi renomeado para params-track"
   },
   {
    "file": "research/labels/README.md",
-   "line": 71,
-   "text": "| **`cyclophaser_params-15.yaml`** | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration reference** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independ"
-  },
-  {
-   "file": "research/labels/README.md",
-   "line": 73,
-   "text": "**Do not normalise or reformat params-15.** Its identity is its file hash: the"
+   "line": 86,
+   "text": "| **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration preset** — params-14 + `incipient_plateau_spare_intensification` true (item 30"
   },
   {
    "file": "research/labels/diagnostics/item30/PREDICTIONS_part3.md",
@@ -12612,450 +12589,320 @@
   },
   {
    "file": "tests/legacy_defaults.py",
-   "line": 3,
-   "text": "Item 31 moved the package defaults to params-15. Tests whose assertions were"
+   "line": 7,
+   "text": "Item 31 moved the package defaults to params-15 (renamed params-track; since C1"
   },
   {
    "file": "tests/test_benchmark_apptest.py",
    "line": 51,
-   "text": "# params-15, the calibration reference (Danilo's addendum, 2026-09-28). Since"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 52,
-   "text": "# stage 2c the sidebar OPENS with the package defaults, which ARE params-15, so"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 55,
-   "text": "# filter_params.cutoff_high = 48 (package default and params-15: 18). It changes"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 57,
-   "text": "# `test_the_sidebar_differs_from_params15_in_a_declared_parameter` asserts it;"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 62,
-   "text": "CFG_B = \"cyclophaser_params-15.yaml\""
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 273,
-   "text": "assert \"params-15\" in ref.options"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 274,
-   "text": "ref.set_value(\"params-15\")"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 276,
-   "text": "assert at.session_state[\"bench_reference\"] == \"params-15\""
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 351,
-   "text": "def test_the_sidebar_differs_from_params15_in_a_declared_parameter():"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 354,
-   "text": "silently become a second copy of params-15.\"\"\""
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 358,
-   "text": "sec, key, in_sidebar, in_params15 = DECLARED_DIFF"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 360,
-   "text": "assert _doc_for(CFG_B)[sec][key] == in_params15"
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 372,
-   "text": "\"the sidebar and params-15 agree on all of \""
-  },
-  {
-   "file": "tests/test_benchmark_apptest.py",
-   "line": 381,
-   "text": "assert b[\"series\"] == _expected_for(CFG_B, ids), \"column 1 is not params-15\""
-  },
-  {
-   "file": "tests/test_config_defaults.py",
-   "line": 13,
-   "text": "* params-15 lacks exactly one key (`prominence`), and the app imports it with"
-  },
-  {
-   "file": "tests/test_config_defaults.py",
-   "line": 38,
-   "text": "P15 = LABELS / \"configs\" / \"cyclophaser_params-15.yaml\""
-  },
-  {
-   "file": "tests/test_config_defaults.py",
-   "line": 107,
-   "text": "def test_params15_lacks_exactly_prominence():"
-  },
-  {
-   "file": "tests/test_config_defaults.py",
-   "line": 155,
-   "text": "# params-15 filters by RELATIVE prominence 0.3; the filled None for the"
-  },
-  {
-   "file": "tests/test_intensification_min_depth.py",
-   "line": 439,
-   "text": "def test_params15_yaml_matches_this_module():"
-  },
-  {
-   "file": "tests/test_intensification_min_depth.py",
-   "line": 440,
-   "text": "\"\"\"params-15 is the calibration reference (params-13 left the repo in item 31;"
-  },
-  {
-   "file": "tests/test_intensification_min_depth.py",
-   "line": 441,
-   "text": "params-15 = params-13 + reclassify_index0 + incipient_plateau_spare_intensification,"
-  },
-  {
-   "file": "tests/test_intensification_min_depth.py",
-   "line": 446,
-   "text": "\"configs\", \"cyclophaser_params-15.yaml\")"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 135,
-   "text": "# ── the 5 adjudicated TRAIN cases: params-15 == the counterfactual ──────────"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 137,
-   "text": "def test_params15_reproduces_the_counterfactual_in_the_five():"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 144,
-   "text": "# params-14 left the repo in item 31. It was params-15 minus this one key"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 145,
-   "text": "# (asserted in item 31, stage 0), so it is params-15 with the key OFF."
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 146,
-   "text": "cfg15 = core.load_config(\"params-15\")"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 189,
-   "text": "\"\"\"params-15's text with the key's line removed — a real config without the"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 191,
-   "text": "lines = _config_bytes(\"params-15\").decode().splitlines(keepends=True)"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 209,
-   "text": "def test_importing_params15_turns_the_rule_on():"
-  },
-  {
-   "file": "tests/test_item30_spare_intensification.py",
-   "line": 215,
-   "text": "res = load(_config_bytes(\"params-15\"))"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 880,
-   "text": "PARAMS_15 = REPO_ROOT / \"research\" / \"labels\" / \"configs\" / \"cyclophaser_params-15.yaml\""
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 886,
-   "text": "# The app's own YAML converters for the three integer-valued keys (params-15"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 907,
-   "text": "def _params_15():"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 908,
-   "text": "\"\"\"(filter_params, phase_params) of params-15, phase values typed as the app"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 925,
-   "text": "pv, phase = _params_15()"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 982,
-   "text": "# ── Fidelity with the depth floors ACTIVE (params-15: intensification 0.05,"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 984,
-   "text": "#    params-15 adds only incipient_plateau_spare_intensification=True, so the"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 990,
-   "text": "pv, phase = _params_15()"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 999,
-   "text": "def test_params_15_has_both_depth_floors_active():"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 1000,
-   "text": "\"\"\"Guard for the tests below: if params-15 ever stopped setting the floors,"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 1002,
-   "text": "_, phase = _params_15()"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 1007,
-   "text": "def test_ribbon_step_six_equals_get_periods_under_params_15(vort_cache):"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 1008,
-   "text": "pv, _ = _params_15()"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 1023,
-   "text": "def test_ledger_accepted_set_is_the_package_mask_under_params_15(vort_cache, kind):"
-  },
-  {
-   "file": "tests/test_layer_inspector.py",
-   "line": 1045,
-   "text": "# Measured 2026-09-25 under params-14; identical under params-15, whose one"
+   "text": "# params-track (named params-15 until the cleanup front), the calibration preset"
   },
   {
    "file": "tests/test_regression_baseline.py",
    "line": 79,
-   "text": "# The package defaults moved to params-15 (item 31), so baseline_default /"
+   "text": "# The package defaults moved to params-15 (item 31; renamed params-track), so"
   },
   {
    "file": "tools/calibration_app/README.md",
    "line": 164,
-   "text": "file in `research/labels/configs/` (since item 31 only params-15; params-1..14"
-  },
-  {
-   "file": "tools/calibration_app/app.py",
-   "line": 2269,
-   "text": "# params-15 (prominence_relative=0.3, decay_tail_amplitude_fraction=0.3), so an"
+   "text": "file in `research/labels/configs/` (since item 31 only params-15, renamed params-track in the cleanup front; params-1..14"
   },
   {
    "file": "tools/calibration_app/layer_inspector.py",
    "line": 146,
-   "text": "# Item 31: the package defaults moved to params-15; these follow them (the"
+   "text": "# Item 31: the package defaults moved to params-15 (now params-track, whose"
   }
  ],
  "grep_boundary_padding": [
   {
    "file": "CHANGELOG.md",
-   "line": 28,
-   "text": "| `boundary_padding` | `\"reflect\"` | `\"edge\"` |"
+   "line": 12,
+   "text": "### Changed — default behaviour: the package defaults are `params-track`, except `boundary_padding=\"reflect\"` (item 31, then C1 of the cleanup front)"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 537,
+   "line": 17,
+   "text": "with **one exception**: `boundary_padding` defaults to `\"reflect\"`, while"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 23,
+   "text": "bytes, sha256 `5aa61f2dec71…`) and moved the `boundary_padding` default to"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 32,
+   "text": "`boundary_padding=\"edge\"`, so they describe params-track. If you work with"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 46,
+   "text": "| `boundary_padding` | — (no such parameter) | `\"reflect\"` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 49,
+   "text": "2.0.0 has no `boundary_padding`: its Lanczos convolution always zero-pads,"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 50,
+   "text": "which is `boundary_padding=\"zero\"` now."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 79,
+   "text": "has `boundary_padding=\"reflect\"`, `replace_endpoints_with_lowpass=0` and"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 87,
+   "text": "(`min_max_zeta_850`). That calibration was done with `boundary_padding=\"edge\"`,"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 92,
+   "text": "with `boundary_padding=\"edge\"`, not with the current default. It is weak"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 99,
+   "text": "**Why `\"reflect\"`.** `boundary_padding=\"reflect\"` is the default by the"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 110,
+   "text": "and `boundary_padding=\"edge\"` on **19/54**. The phase sequence differs on"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 612,
    "text": "(`boundary_padding=\"reflect\"`, see below), the derivative Savgol had become the"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 560,
+   "line": 635,
    "text": "| `boundary_padding` | `\"zero\"` | **`\"reflect\"`** |"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 563,
+   "line": 638,
    "text": "They had to move together: with `boundary_padding=\"reflect\"` and a non-zero"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 579,
+   "line": 654,
    "text": "**`boundary_padding` now defaults to `\"reflect\"`**"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 600,
+   "line": 675,
    "text": "> **How to reproduce earlier results:** pass `boundary_padding=\"zero\"` **and**"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 614,
+   "line": 689,
    "text": "It was introduced as a palliative for exactly the artifact `boundary_padding` now"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 619,
+   "line": 694,
    "text": "whereas `boundary_padding=\"reflect\"` takes it to 0.42 at no amplitude cost."
   },
   {
    "file": "CHANGELOG.md",
-   "line": 621,
+   "line": 696,
    "text": "With `boundary_padding=\"reflect\"` it is worse than redundant, it is harmful — see"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 653,
+   "line": 728,
    "text": "**`boundary_padding` — opt-in fix for the Lanczos zero-padding edge artifact**"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 670,
+   "line": 745,
    "text": "`boundary_padding` accepts `\"reflect\"`, `\"edge\"` and `\"zero\"` (the latter"
   },
   {
    "file": "CHANGELOG.md",
-   "line": 691,
+   "line": 766,
    "text": "0/51 bad cases with `use_filter=true`, `cutoff_high=18`, `boundary_padding=reflect`"
   },
   {
    "file": "cyclophaser/determine_periods.py",
    "line": 423,
-   "text": "boundary_padding=\"edge\"):"
+   "text": "boundary_padding=\"reflect\"):"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 439,
-   "text": "``boundary_padding=\"edge\"``, ``use_filter='auto'``) were calibrated ONLY"
+   "line": 431,
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 483,
+   "line": 445,
+   "text": "``boundary_padding=\"edge\"``, for the TRACK input the calibration used:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 447,
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 458,
+   "text": "``boundary_padding`` (it always zero-pads), uses"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 494,
    "text": "boundary_padding (str, optional): How the series is extended beyond its own"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 487,
-   "text": "\"boundary_padding note\" below. Only meaningful when ``use_filter`` is"
+   "line": 498,
+   "text": "parameter existed. See the \"boundary_padding note\" below. Only"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 512,
+   "line": 525,
    "text": "boundary_padding note"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 551,
+   "line": 567,
    "text": "``boundary_padding=\"zero\"`` explicitly. Note that switching modes changes"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 563,
+   "line": 579,
    "text": "from 24 to **0** together with the ``boundary_padding`` default above. Passing"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 567,
+   "line": 583,
    "text": "It was introduced as a palliative for exactly the artefact ``boundary_padding``"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 575,
+   "line": 591,
    "text": "With ``boundary_padding=\"reflect\"`` it is worse than redundant, it is"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 593,
+   "line": 609,
    "text": "``boundary_padding=\"reflect\"`` trades one boundary artefact for another."
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 613,
+   "line": 629,
    "text": "lanfil._validate_padding(boundary_padding)"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 619,
+   "line": 635,
    "text": "\"boundary artefact, which boundary_padding now fixes at its source, \""
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 621,
+   "line": 637,
    "text": "\"Combined with boundary_padding='reflect' it is actively harmful: \""
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 718,
+   "line": 734,
    "text": "boundary_padding=boundary_padding)"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 738,
+   "line": 754,
    "text": "boundary_padding=boundary_padding)"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 881,
-   "text": "``boundary_padding=\"edge\"``, ``use_filter='auto'``) were calibrated ONLY"
+   "line": 889,
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1044,
+   "line": 903,
+   "text": "``boundary_padding=\"edge\"``, for the TRACK input the calibration used:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 905,
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 916,
+   "text": "``boundary_padding`` (it always zero-pads), uses"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1071,
    "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1369,
-   "text": "boundary_padding: str = \"edge\","
+   "line": 1396,
+   "text": "boundary_padding: str = \"reflect\","
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1409,
-   "text": "``boundary_padding=\"edge\"``, ``use_filter='auto'``) were calibrated ONLY"
+   "line": 1428,
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1456,
+   "line": 1442,
+   "text": "``boundary_padding=\"edge\"``, for the TRACK input the calibration used:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1444,
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1455,
+   "text": "``boundary_padding`` (it always zero-pads), uses"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1494,
    "text": "palliative for the Lanczos zero-padding artefact that `boundary_padding` now fixes at its source,"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1457,
+   "line": 1495,
    "text": "and combined with `boundary_padding=\"reflect\"` it is harmful (the endpoint splice becomes a step;"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1477,
+   "line": 1515,
    "text": "boundary_padding (str, optional): How the series is extended beyond its own ends"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1485,
+   "line": 1524,
    "text": "\"boundary_padding note\" in `process_vorticity` for the full mechanism,"
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1521,
+   "line": 1560,
    "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
   },
   {
    "file": "cyclophaser/determine_periods.py",
-   "line": 1746,
+   "line": 1785,
    "text": "boundary_padding=boundary_padding"
   },
   {
    "file": "cyclophaser/lanczos_filter.py",
    "line": 6,
-   "text": "# boundary_padding: \"zero\" (default) vs \"reflect\" / \"edge\""
+   "text": "# boundary_padding: \"reflect\" (default) vs \"zero\" / \"edge\""
   },
   {
    "file": "cyclophaser/lanczos_filter.py",
@@ -13230,15 +13077,30 @@
   {
    "file": "docs/usage.rst",
    "line": 80,
-   "text": "- **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolution: `\"edge\"`, `\"reflect\"` or `\"zero\"`. **Default**: `\"edge\"` (it was `\"reflect\"` up to 2.0.0). `\"zero\"` reproduces the pre-fix bo"
+   "text": "- **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolution: `\"reflect\"`, `\"edge\"` or `\"zero\"`. **Default**: `\"reflect\"`. The 2.0.0 release has no such parameter and always zero-pads; af"
   },
   {
    "file": "docs/usage.rst",
-   "line": 99,
-   "text": "``use_smoothing_twice=False``, ``boundary_padding=\"edge\"``,"
+   "line": 90,
+   "text": "with **one exception**: ``boundary_padding`` defaults to ``\"reflect\"``, while"
   },
   {
-   "file": "research/labels/configs/cyclophaser_params-15.yaml",
+   "file": "docs/usage.rst",
+   "line": 106,
+   "text": "``boundary_padding=\"reflect\"``. **Only the filtering for TRACK input was"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 107,
+   "text": "calibrated**, and only together with ``boundary_padding=\"edge\"``: hourly"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 120,
+   "text": "``boundary_padding`` (it always zero-pads), uses"
+  },
+  {
+   "file": "research/labels/configs/cyclophaser_params-track.yaml",
    "line": 64,
    "text": "boundary_padding: edge"
   },
@@ -13414,82 +13276,82 @@
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2287,
+   "line": 2288,
    "text": "\"boundary_padding\": boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2520,
+   "line": 2521,
    "text": "boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2531,
+   "line": 2532,
    "text": "boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2544,
+   "line": 2545,
    "text": "boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2665,
+   "line": 2666,
    "text": "boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2672,
+   "line": 2673,
    "text": "boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2690,
+   "line": 2691,
    "text": "savgol_poly, boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 2925,
+   "line": 2926,
    "text": "savgol_poly, boundary_padding,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 3129,
+   "line": 3130,
    "text": "### `boundary_padding` — Lanczos boundary condition"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 3151,
+   "line": 3152,
    "text": "It was introduced as a palliative for the same zero-padding artifact described under `boundary_padding`,"
   },
   {
    "file": "tools/calibration_app/app.py",
-   "line": 3153,
+   "line": 3154,
    "text": "`boundary_padding=reflect` it is **harmful**: both filters carry full amplitude at the edge, so the 5 %"
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 93,
+   "line": 98,
    "text": "\"cutoff_high\", \"boundary_padding\")"
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 103,
+   "line": 108,
    "text": "\"This YAML carries no `boundary_padding`, which dates it to before the filter \""
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 168,
+   "line": 173,
    "text": "* `pre_filter_fix` — True when `boundary_padding` is absent, which dates the"
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 187,
+   "line": 192,
    "text": "\"pre_filter_fix\": \"boundary_padding\" not in fp,"
   },
   {
    "file": "tools/calibration_app/benchmark_core.py",
-   "line": 250,
+   "line": 255,
    "text": "\"release has no `boundary_padding` — its filter convolution \""
   },
   {

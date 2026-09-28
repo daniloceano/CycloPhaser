@@ -217,6 +217,10 @@ w(f"* Branch `chore/repo-cleanup`, criada de `origin/develop-v2.1` @ `{BASE}` (p
 w("* **Correções do Passo 1** (aprovadas pelo Danilo): `.pypirc` saiu do versionamento (commit próprio, conteúdo "
   "não lido); branches com equivalência de patch separadas das ancestrais; `measure_incipient_smoothing.py` → manter; "
   "saídas de `passo0/` sem caminhos absolutos; decisões aprovadas registradas. Seções 0.1–0.4 regeradas pelos scripts.")
+w("* **Passo 2**: coluna \"destino final\" na seção 0.4 e seção 0.5 (destino dos arquivos \"consolidar\"), lidas de "
+  "`research/cleanup/passo2/traceability.json`; o inventário foi regerado sobre a HEAD do Passo 2 antes de "
+  "`docs/findings.md` existir. Na seção (c), as notas de correspondência params-15 → params-track contam como VIVA "
+  "pela regra do Passo 0; a contagem com a classe \"correspondência\" está em `passo1/params15_refs.py`.")
 w("* Gerado por `research/cleanup/passo0/make_manifest.py` a partir de `inventory.py`, `branches.py`, "
   "`defaults_in_text.py` (mecânico) e `judgements.py` (julgamento: destino, motivo, achado). "
   "Toda contagem e todo `arquivo:linha` abaixo é regerado pelo script; nenhum número foi digitado.")
@@ -604,7 +608,21 @@ w("## 0.4 Rastreabilidade (esqueleto): destino \"remover\" com achado\n")
 w("Para cada entrada que sai e contém achado: onde o achado já está registrado hoje. **SÓ AQUI** alimenta o "
   "documento consolidado do Passo 2 (o arquivo só sai depois). Registros em relatórios de frente contam porque "
   "esses relatórios são **consolidados**, não removidos.\n")
-w("| arquivo | achado | registrado em |\n|---|---|---|")
+TRACE_P = ROOT / "research/cleanup/passo2/traceability.json"
+TRACE = {r["path"]: r for r in json.loads(TRACE_P.read_text())["rows"]} if TRACE_P.exists() else {}
+
+
+def final_dest(path):
+    r = TRACE.get(path)
+    if not r:
+        return "—"
+    return "; ".join(d.replace("§", "docs/findings.md §") if d.startswith("§") else d for d in r["destination"])
+
+
+w("Coluna **destino final (Passo 2)**: para onde o achado vai quando o arquivo sair — seção de "
+  "`docs/findings.md` ou linha de `docs/future_work.md` — lida de `research/cleanup/passo2/traceability.json`, "
+  "gerado por `passo2/make_findings.py`.\n" if TRACE else "")
+w("| arquivo | achado | registrado em | destino final (Passo 2) |\n|---|---|---|---|")
 only_here = []
 tr = [x for x in rows if x["dest"] == "remover" and x["finding"] and x["path"] not in members_of] + \
      [g for g in grouped if g["dest"] == "remover" and g["finding"]]
@@ -613,8 +631,17 @@ for x in sorted(tr, key=lambda z: z["path"]):
     if not reg:
         reg = "**SÓ AQUI**"
         only_here.append(x)
-    w(f"| `{x['path']}` | {esc(x['finding'])} | {reg} |")
+    w(f"| `{x['path']}` | {esc(x['finding'])} | {reg} | {esc(final_dest(x['path']))} |")
 w("")
+if TRACE:
+    cons = [x for x in rows if x["dest"] == "consolidar"]
+    w("## 0.5 Destinos finais dos arquivos \"consolidar\" (Passo 2)\n")
+    w(f"{len(cons)} arquivos; destino lido de `passo2/traceability.json`. Sem destino: "
+      f"{sum(1 for x in cons if final_dest(x['path']) == '—')}.\n")
+    w("| arquivo | seção proposta (Passo 0) | destino final (Passo 2) |\n|---|---|---|")
+    for x in sorted(cons, key=lambda z: z["path"]):
+        w(f"| `{x['path']}` | {x['sec'] or '—'} | {esc(final_dest(x['path']))} |")
+    w("")
 w(f"Entradas: {len(tr)}; **SÓ AQUI: {len(only_here)}**" +
   (" — " + "; ".join(f"`{x['path']}` → {x['finding']}" for x in only_here) if only_here else "") + ".\n")
 
