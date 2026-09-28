@@ -88,8 +88,20 @@ hourly 850 hPa relative vorticity along South-Atlantic cyclone tracks
 so the default `"reflect"` was not part of it. Other inputs may need a
 different filtering, which has not been calibrated here. The evidence is
 stage 1 of item 31 (`research/labels/diagnostics/item31/stage1_output.txt`):
-PASS on the 16 held-out series. That is weak evidence, because the stage was
-not out-of-sample (DESIGN §5.2).
+PASS on the 16 held-out series, measured with params-15 = params-track, i.e.
+with `boundary_padding="edge"`, not with the current default. It is weak
+evidence because stage 1 was not a first scoring: those 16 series had been part
+of the visual calibration set, were viewed under params-15 in the review that
+adopted it, and had TEST blocks displayed in the Benchmark, and their labels are
+the same assessor's judgement (`research/labels/diagnostics/item31/DESIGN.md`,
+§3 events E01, E22, E23, and §5.2).
+
+**Why `"reflect"`.** `boundary_padding="reflect"` is the default by the
+maintainer's choice (2026-09-28), made without a detection-quality measurement.
+The two consequences expected when the change was decided did not hold on the
+training series: incipient refusals are 28/54 under `"reflect"` (28/54 under
+`"edge"`), and defect I is present on 11/54 (10/54 under `"edge"`)
+(`research/cleanup/passo1/hygiene_train.json`).
 
 **What C1 moves** (`research/cleanup/passo1/`, TRAIN series only, no scoring
 against labels):
