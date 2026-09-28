@@ -718,7 +718,14 @@ def process_vorticity(
             boundary_padding=boundary_padding)
         filtered_vorticity = xr.DataArray(filtered_vorticity, coords={'time':zeta_df.index})
     else:
-        filtered_vorticity = da['zeta'].copy()
+        # Same 'time' coordinate as the filtered branch above. Without it the
+        # raw series stayed on the input index's own dimension ('index' for an
+        # unnamed index), and only a Savitzky-Golay pass rebuilt it on 'time' —
+        # so use_filter=False with use_smoothing=False raised in
+        # differentiate('time'). Item 31 made use_smoothing=False the default,
+        # which made that reachable with use_filter=False alone.
+        filtered_vorticity = xr.DataArray(da['zeta'].values.copy(),
+                                          coords={'time': zeta_df.index})
     da = da.assign(variables={'filtered_vorticity': filtered_vorticity})
 
     # Use the first and last 5% of a lower pass filtered vorticity
