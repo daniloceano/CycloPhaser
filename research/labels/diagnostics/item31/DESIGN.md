@@ -833,7 +833,40 @@ and the 2.0.0 table passed explicitly must still reproduce them. The regenerated
 artefact is regenerated:** **1433 passed, 0 failed**. That is the 1431 tests of
 the measurement run (renamed one for one) + 2 added.
 
-SUITE2B_RESULT_PLACEHOLDER
+**Result at `55a4780` (after regeneration, before any fix): 1432 passed, 1
+failed. The prediction (1433 / 0) MISSED by one.**
+
+The failure is `test_determine_periods.py::test_determine_periods_with_options`,
+with `ValueError: Coordinate 'time' not found`. It is not a CSV mismatch: the
+regeneration of `tests/expected_no_filter.csv` itself raised the same error, so
+that artefact could not be regenerated at all.
+
+**Finding: a pre-existing package defect that the new defaults make reachable.**
+
+* **The mechanism.** `process_vorticity(..., use_filter=False)` leaves the raw
+  series on the input index's own dimension, which is `index` when the index is
+  unnamed (a list with `x`, or a Series built from `.tolist()`). Only the
+  Savitzky-Golay step rebuilt it on `time`, and `get_periods` then calls
+  `differentiate('time')`.
+* **In 2.0.0** this crashed only with `use_smoothing=False` passed explicitly:
+  55/110 runs of `v200_nos` crash.
+* **Under the new defaults** `use_filter=False` alone crashes: 55/110 runs of
+  `new` crash. That is the setting `docs/usage.rst` recommends for tracks that
+  are already spatially filtered.
+* The before-fix record is `fix_use_filter_false_before.json`.
+
+**The fix is in its own commit (next), declared as a SEPARATE change for Danilo
+to accept or reject.** The else-branch builds the unfiltered series on the same
+`time` coordinate as the filtered branch. Predictions, declared before applying
+it:
+
+| check | predicted |
+|---|---|
+| `fix_use_filter_false_equivalence.py --phase after`: outputs identical after the fix | 55/55 `new`, 110/110 `v200`, 55/55 `v200_nos` |
+| crashes remaining | 0 in all three configurations |
+| EQ1 / EQ2 / EQ4 digests | unchanged: they run the filtered path |
+| full suite after the fix and the regeneration of `expected_no_filter.csv` | **1433 passed, 0 failed** |
+
 
 ### 11.4 Effect on the app (task 8)
 
