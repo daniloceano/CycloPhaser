@@ -1,0 +1,104 @@
+batch: swell_item30
+base: Gramcianinov et al. (2020), Atlantic extratropical cyclone tracks (TRACK on ERA5), Mendeley
+  Data 4, 108111 — the same base as the 51 labelled real series
+via: 'cyclone_monitor: per-cyclone Parquet files under data/processed/tracks_by_id on swell;
+  200 of 6789 drawn with random.Random(29).sample over the sorted list'
+id: the original TRACK id of the cyclone_monitor file, unchanged
+conversion: min_max_zeta_850 = -1e-5 * vor42 (vor42 in 1e-5 s^-1, positive)
+conversion_check: 'MEASURED (item 30 step 0d) on 20180733, the one swell track that is also
+  a labelled TRAIN series: -1e-5 * vor42 vs the repo series — same 257 hourly times (lag 0),
+  max|diff| 1.36e-20 (max relative 1.7e-16, 1 ulp; 218/257 bit-identical), mean ratio 1.000,
+  sign 257/257 negative; the standard-format file itself is byte-identical to tests/calibration_data/20180733.csv.
+  20203389 (TEST) is byte-identical too; its label was not read.'
+format: time;min_max_zeta_850, hourly, copied byte for byte
+files:
+  '19790612':
+    file: tests/calibration_data/swell_item30/19790612.csv
+    sha256: 95a49e85d8cffd879e63d400e9a0a4275a4fe876009acb8daddbf83de641427b
+    original_id: '19790612'
+    n_steps: 48
+    first_time: '1979-07-14 22:00:00'
+    last_time: '1979-07-16 21:00:00'
+    group: S
+    split: train
+  '19810854':
+    file: tests/calibration_data/swell_item30/19810854.csv
+    sha256: c208fb247eaf70e4138d7cc48024c17d4de55bf9bdc7708cdfd19cd6c4f7f2b9
+    original_id: '19810854'
+    n_steps: 72
+    first_time: '1981-09-25 10:00:00'
+    last_time: '1981-09-28 09:00:00'
+    group: S
+    split: train
+  '19860380':
+    file: tests/calibration_data/swell_item30/19860380.csv
+    sha256: 59545d588ad2e53d093d4ca14885c66919be3e791da2b880da74dc7d4ae3b1e7
+    original_id: '19860380'
+    n_steps: 45
+    first_time: '1986-05-21 13:00:00'
+    last_time: '1986-05-23 09:00:00'
+    group: R
+    split: train
+  '19870927':
+    file: tests/calibration_data/swell_item30/19870927.csv
+    sha256: df3c7d9adbb6d3a95ea88f7dd28f147e8f2781119f4e98f00b90c5b40c6779d2
+    original_id: '19870927'
+    n_steps: 92
+    first_time: '1987-10-10 09:00:00'
+    last_time: '1987-10-14 04:00:00'
+    group: R
+    split: train
+  '19930748':
+    file: tests/calibration_data/swell_item30/19930748.csv
+    sha256: fefaf36178432fcf6ada957854b80d412ef5239172e5fe46e23d8389958de246
+    original_id: '19930748'
+    n_steps: 37
+    first_time: '1993-08-11 17:00:00'
+    last_time: '1993-08-13 05:00:00'
+    group: R
+    split: test
+  '19940445':
+    file: tests/calibration_data/swell_item30/19940445.csv
+    sha256: 3564f718b26c882dddfb3501af699ba771a931b57621bed86138e6154a6cbaa8
+    original_id: '19940445'
+    n_steps: 47
+    first_time: '1994-05-25 23:00:00'
+    last_time: '1994-05-27 21:00:00'
+    group: R
+    split: train
+  '19990549':
+    file: tests/calibration_data/swell_item30/19990549.csv
+    sha256: 195e70486db6ac44ae7c5b3c91ad3734c624a365237fcdcc3d8fed313f630e27
+    original_id: '19990549'
+    n_steps: 108
+    first_time: '1999-06-14 15:00:00'
+    last_time: '1999-06-19 02:00:00'
+    group: C
+    split: test
+  '20050893':
+    file: tests/calibration_data/swell_item30/20050893.csv
+    sha256: 9eeb455e7d3a1ffd227692c76f97a75da1cb4dc3489c3eea205c011df648afdd
+    original_id: '20050893'
+    n_steps: 56
+    first_time: '2005-10-11 06:00:00'
+    last_time: '2005-10-13 13:00:00'
+    group: C
+    split: train
+  '20111118':
+    file: tests/calibration_data/swell_item30/20111118.csv
+    sha256: 5d501e8455aa68ba9391a604c9b7aa47f7f267017ae5e99223653f2cb68d53a2
+    original_id: '20111118'
+    n_steps: 38
+    first_time: '2011-12-17 10:00:00'
+    last_time: '2011-12-18 23:00:00'
+    group: S
+    split: test
+  '20120297':
+    file: tests/calibration_data/swell_item30/20120297.csv
+    sha256: 257075ae7990c409f37914bd607a22eeb44d326a45a9d87b78c15db39fdcd5d4
+    original_id: '20120297'
+    n_steps: 40
+    first_time: '2012-04-06 18:00:00'
+    last_time: '2012-04-08 09:00:00'
+    group: R
+    split: train

@@ -828,7 +828,8 @@ def get_periods(vorticity,
                 incipient_plateau_crossing: str = "single",
                 incipient_plateau_k: int = 3,
                 incipient_smooth_window: int = 0,
-                incipient_smooth_polyorder: int = 3) -> pd.DataFrame:
+                incipient_smooth_polyorder: int = 3,
+                incipient_plateau_spare_intensification: bool = False) -> pd.DataFrame:
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
@@ -1023,6 +1024,15 @@ def get_periods(vorticity,
         incipient_smooth_polyorder (int, optional): Polynomial order of that
             Savitzky-Golay pass. Default is 3. A window at or below this order cannot
             define the fit and is skipped (no smoothing).
+        incipient_plateau_spare_intensification (bool, optional): Item 30. The
+            plateau method writes ``incipient`` over the whole ``[0, boundary)``,
+            which can erase an entire intensification (and the mature after it).
+            When True, let E be the first intensification block of the map the
+            incipient stage receives that STARTS before the boundary; if E also
+            ENDS before it, the boundary moves back to E's start (a boundary of 0
+            writes no incipient at all). Otherwise nothing changes. Default False,
+            which reproduces the previous behaviour exactly. Only used when
+            ``incipient_method="plateau"``. See ``find_incipient_period``.
         prominence (float, optional): Absolute minimum prominence threshold for
             z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``
             for the full description of prominence modes.
@@ -1235,6 +1245,7 @@ def get_periods(vorticity,
         "incipient_plateau_k": incipient_plateau_k,
         "incipient_smooth_window": incipient_smooth_window,
         "incipient_smooth_polyorder": incipient_smooth_polyorder,
+        "incipient_plateau_spare_intensification": incipient_plateau_spare_intensification,
     }
 
     # Detect different stages of cyclone lifecycle
@@ -1326,7 +1337,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
                       incipient_plateau_crossing: str = "single",
                       incipient_plateau_k: int = 3,
                       incipient_smooth_window: int = 0,
-                      incipient_smooth_polyorder: int = 3) -> pd.DataFrame:
+                      incipient_smooth_polyorder: int = 3,
+                      incipient_plateau_spare_intensification: bool = False) -> pd.DataFrame:
     """
     Determine meteorological periods from a series of vorticity data.
 
@@ -1470,6 +1482,15 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         incipient_smooth_polyorder (int, optional): Polynomial order of that
             Savitzky-Golay pass. Default is 3. A window at or below this order cannot
             define the fit and is skipped (no smoothing).
+        incipient_plateau_spare_intensification (bool, optional): Item 30. The
+            plateau method writes ``incipient`` over the whole ``[0, boundary)``,
+            which can erase an entire intensification (and the mature after it).
+            When True, let E be the first intensification block of the map the
+            incipient stage receives that STARTS before the boundary; if E also
+            ENDS before it, the boundary moves back to E's start (a boundary of 0
+            writes no incipient at all). Otherwise nothing changes. Default False,
+            which reproduces the previous behaviour exactly. Only used when
+            ``incipient_method="plateau"``. See ``find_incipient_period``.
         reclassify_index0 (bool, optional): Rule C2' — retype the extremum at
             index 0 against the next extremum that survives the filters, instead
             of leaving its type to the single boundary difference
@@ -1682,6 +1703,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         incipient_plateau_k=incipient_plateau_k,
         incipient_smooth_window=incipient_smooth_window,
         incipient_smooth_polyorder=incipient_smooth_polyorder,
+        incipient_plateau_spare_intensification=incipient_plateau_spare_intensification,
     )
 
     return df

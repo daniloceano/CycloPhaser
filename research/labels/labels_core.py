@@ -46,6 +46,22 @@ LABELS_DIR = Path(__file__).resolve().parent
 SPLIT_PATH = LABELS_DIR / "split.yaml"
 LABELS_PATH = LABELS_DIR / "manual_labels.yaml"
 
+# Item 30: 10 swell tracks drawn into the labelled set AFTER the split above was
+# frozen, recorded as a separate frozen block `batches: swell_item30` of
+# split.yaml (see research/labels/swell_item30/). Their files live one level
+# BELOW tests/calibration_data on purpose: every reader of that folder globs
+# "*.csv" non-recursively, so the 51 stay exactly 51 for all of them —
+# `load_real_series`, the benchmark, make_split, the tests, the Grid loader.
+SWELL_BATCH = "swell_item30"
+SWELL_BATCH_DATA_DIR = "tests/calibration_data/swell_item30"   # repo-relative
+
+# Item 30 part 3: 5 more swell tracks, frozen as `batches: swell_item30_val`
+# with the role VALIDATION — neither train nor test, and in no aggregate. They
+# exist to be labelled blind by Danilo and then to measure prediction V of
+# diagnostics/item30/PREDICTIONS_part3.md once. Same one-level-down layout.
+VALIDATION_BATCH = "swell_item30_val"
+VALIDATION_BATCH_DATA_DIR = "tests/calibration_data/swell_item30_val"
+
 # Seeds are frozen in code AND written into the artefacts they produce. Changing
 # either number invalidates the corresponding artefact, which is the point: a
 # split redrawn after seeing results is not a test set any more.
@@ -233,6 +249,51 @@ def load_synthetic_series(synthetic_dir: Path | None = None,
         series[oid] = df["min_max_zeta_850"].astype("float64")
         names[oid] = case_name
     return series, names
+
+
+def batch_membership(batch: str = SWELL_BATCH, split_doc: dict | None = None) -> dict[str, str]:
+    """{series_id: 'train'|'test'|'validation'} of one frozen batch of split.yaml; {} if absent.
+
+    Kept apart from the top-level train/test on purpose: those two lists are
+    the 47/16 split, and every existing reader of them (benchmark, evaluator,
+    tests) must keep seeing exactly that population.
+    """
+    doc = split_doc if split_doc is not None else read_split()
+    blk = (doc.get("batches") or {}).get(batch)
+    if not blk:
+        return {}
+    out = {sid: "train" for sid in blk.get("train", [])}
+    out.update({sid: "test" for sid in blk.get("test", [])})
+    out.update({sid: "validation" for sid in blk.get("validation", [])})
+    return out
+
+
+def load_batch_series(batch: str = SWELL_BATCH,
+                      split_doc: dict | None = None) -> dict[str, pd.Series]:
+    """The series of one frozen batch of split.yaml, as {id: raw vorticity Series}.
+
+    Same parser as `load_real_series` (pandas' default float parser), so a
+    label's `series_sha256` means the same thing for a batch series as for the
+    51. Each file's sha256 is checked against the one the batch block recorded
+    when it was drawn, and a mismatch raises: the file IS the series a label
+    will be written against, and a silently edited copy would void that label.
+    """
+    doc = split_doc if split_doc is not None else read_split()
+    blk = (doc.get("batches") or {}).get(batch)
+    if not blk:
+        return {}
+    d = REPO_ROOT / blk["data_dir"]
+    out = {}
+    for sid in sorted(blk.get("train", []) + blk.get("test", [])
+                      + blk.get("validation", [])):
+        p = d / f"{sid}.csv"
+        got = hashlib.sha256(p.read_bytes()).hexdigest()
+        if got != blk["file_sha256"][sid]:
+            raise ValueError(f"{p} sha256 {got} != {blk['file_sha256'][sid]} "
+                             f"recorded in split.yaml batch {batch!r}")
+        df = pd.read_csv(p, sep=";", index_col="time", parse_dates=True)
+        out[sid] = df["min_max_zeta_850"].astype("float64")
+    return out
 
 
 # ── Piece 1: the frozen, stratified split ────────────────────────────────────
@@ -467,6 +528,20 @@ def make_label_record(series_id: str, source: str, values, phases,
 
 
 # ── schema 4: blindness provenance and superseded history ───────────────────
+
+# Item 30 part 3. Five TRAIN labels of the swell batch were replaced, by Danilo's
+# decision, with the item-30 counterfactual's phases. They are recognised by
+# this exact `notes` text on the VIGENTE record (an existing optional field, so
+# the schema is unchanged), and every scorer reports them in a block of their
+# own: a label that IS a detector's output cannot score that detector.
+ADJUDICATED_NOTE = ("adjudicated to item-30 counterfactual by Danilo, 27 Sept 2026; "
+                    "original in labels_v1_snapshot.yaml")
+
+
+def is_adjudicated(record: dict) -> bool:
+    """True if this (vigente) record carries the item-30 adjudication note."""
+    return record.get("notes") == ADJUDICATED_NOTE
+
 
 def is_blind(record: dict) -> bool:
     """True if no overlay was on screen when this record was saved.

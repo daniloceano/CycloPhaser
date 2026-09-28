@@ -3377,6 +3377,250 @@ belongs to the maturation diagnostic that followed, not to this front.
 
 ---
 
+## 30. Plateau overwriting intensification — selection part: 10 swell tracks drawn for manual labelling — **done on branch `research/item30-plateau-overwrite`, NOT merged**
+
+The labelled set has no case where the incipient plateau ends after the intensity
+peak and overwrites the intensification. Without such cases, a fix could only be
+calibrated against visual marks. Ten tracks from the 200-track swell sample were
+therefore drawn into the labelled set by a seeded rule and split before
+labelling. No detector was run on the 10 and no figure was drawn. The full record
+is in `research/labels/swell_item30/README.md`.
+
+- **Groups.** They come from the maturation diagnostic of 2026-09-24
+  (`m1_baseline.csv`, repo `params-11`, package code of `d45ae49`). The signal is
+  `plateau_boundary > peak_idx`: R = bad with the signal (9), S = good with the
+  signal (10), C = the other good tracks (175). The lists were reconstructed
+  exactly from the saved CSV and match the lists printed in that session.
+- **Overlap exclusions.** 20180733 (train) and 20203389 (test) are already among
+  the 51, with byte-identical files. They were removed before the draw, leaving
+  group sizes of R 9, S 10 and C 173.
+- **Conversion** (`-1e-5 * vor42`). Measured on 20180733: max|Δ| 1.36e-20 (1 ulp),
+  ratio 1.000, same sign, lag 0.
+- **Draw.** Seed `20260925` with `numpy.random.default_rng`, pre-registered in
+  `659eb5e` before it was run. **Train:** 19860380, 19870927, 19940445, 20120297
+  (R); 19790612, 19810854 (S); 20050893 (C). **Test:** 19930748 (R), 20111118 (S),
+  19990549 (C). The batch is recorded as `batches: swell_item30` at the end of
+  `split.yaml`. The original 146 lines are byte-identical.
+- **Integration.** The series are in `tests/calibration_data/swell_item30/`, one
+  level down, so every non-recursive `*.csv` reader still sees 51 real series.
+  The label tab appends the 10 after the 63 without changing their order; the 3
+  test cases can be saved once while unlabelled and are locked after that.
+  The benchmark population is unchanged (35/12/16 by split × source, same
+  population hash).
+
+**Provenance finding: the 15 bad marks were not made under `params-11`.** The
+app export that holds them (named `cyclophaser_params-11.yaml`, sha256 `6df2cc07…`)
+has filter and phase parameters identical to `params-14`: floors 0.05 and 0.80.
+The diagnostic ran the repo's `params-11`, where the floors are 0.0. The groups
+are unaffected, because the signal reads only `z`, `z_unfil` and the plateau
+parameters, and neither floor touches them. This was established by reading the
+code, not by running it. Only the batch's labelling note is affected: R, and in
+fact all 10, were seen with the `params-14` detection before labelling.
+
+**Labels recorded (2026-09-25).** `manual_labels.yaml` gained exactly the 10
+batch records (63 → 73). The 63 earlier records are byte-identical, block by
+block, to `develop-v2.1`. For all 10, `series_sha256` equals the hash of the batch
+file, whose sha256 matches `split.yaml`. The 7 train records pass schema-4
+validation, with the stored verdict equal to the one derived from their phases.
+For the 3 test records only presence, hash and lock were checked; AppTest shows
+all three `[TEST split — locked]`, with both save buttons disabled.
+
+- **(a) Decision (Danilo):** the save-once exception for the batch's 3 test cases
+  is accepted. They were labellable once while unlabelled, and are locked from
+  then on.
+- **(b) Exposure:** the original TEST series **20203389** was among the 200 swell
+  tracks Danilo evaluated with detection in the Grid on 2026-09-24. Its label
+  predates that (all 63 were on file by 2026-09-14) and was not read. Any later
+  test result citing it should carry the caveat.
+- **(c) Name trap:** the app export `cyclophaser_params-11.yaml` (`6df2cc07…`)
+  holds **`params-14`'s values** (0.05 / 0.80 / `reclassify_index0` true). A
+  config is identified by its parameter blocks, compared with
+  `research/labels/configs/`, never by its file name.
+
+**Declared exposure (1 bit), as observed.** A verdict-consistency check was run
+over the 3 test records before the "presence, hash and lock only" rule was
+applied. It observed that **20111118's stored verdict ≠ the verdict derived from
+its phases**. Reading this as "saved as ambiguous" is an inference, not an
+observation. No other test-label content was read.
+
+**Measurement part — gate and baseline under params-14 (2026-09-25).**
+Measurement only; `cyclophaser/` is untouched. Predictions were committed in
+`f01ca88` before anything ran. The full record is in
+`research/labels/diagnostics/item30/REPORT.md`. TEST series (16 + 3, plus
+20203389 in the swell) were excluded everywhere.
+
+- **Config comparison.** `params-11` and `params-14` are identical in filter and
+  `incipient_*` parameters.
+- **P1 CONFIRMED.** The boundary is identical in 196/196 tracks.
+- **P2 CONFIRMED.** The signal fires in 8/14 bad and 9/182 good tracks.
+- **P3 CONFIRMED (8/8).** H (`find_stages.py:1134`) erases the step-5
+  intensification before the boundary, exactly and nowhere else.
+- **P4 REFUTED (5/8).** In 3 tracks the whole mature is erased too, so the final
+  map reads `incipient > decay`.
+- **P5 REFUTED (2/9).** The intensification does not end at the global minimum.
+  In 7/9 good tracks the peak is at index 0–1 and only decay is erased.
+- **P6 REFUTED (2/4).** 19860380 and 19870927 are labelled `incipient > decay`,
+  so the erased "intensification" is not in the label.
+- **Census.** The signal fires in 0/35 of the split's real train series, which
+  confirms the batch premise. Away from the signal, H erases the leading part of
+  the intensification, mostly where the labels agree (incipient end within ±2
+  steps of the boundary in 7/10).
+- **Evaluator.** It gains `--batch-train`. Its default path is unchanged:
+  population hash and output are identical.
+- **Baseline under params-14.** Across the 47: sequence 31/47, incipient
+  boundary 17/27. Across the batch's 7: sequence 1/7, incipient boundary 3/7.
+
+**H redescribed (2026-09-26): a property of the unconditional overwrite, not an
+isolated defect.** Line 1134 writes `incipient` over `[0, boundary)` whatever the
+pre-incipient map holds, with three outcomes:
+
+- **Boundary right:** it hides a wrong intermediate map (20180608, 19860380,
+  19870927).
+- **Boundary late:** it destroys a correct map (20120297, 19940445, 19810854).
+- **Outside the signal:** it erases only the beginning of the intensification,
+  and the labels agree.
+
+The question is therefore the boundary, not the overwrite.
+
+**Part 2 — separability (2026-09-26).** Measurement only; predictions were
+committed in `2ded3af`, and the full record is in
+`research/labels/diagnostics/item30/REPORT_part2.md`. The measure is E, the
+first step-5 intensification block that starts before the boundary. Three
+candidates were tested: c1 = the D2 depth of E, c2 = c1 / duration, and
+c3 = the fraction of E before the boundary. The groups were L (late: 20120297,
+19940445, 19810854), K (right: 19790612, which has no E, plus 19860380 and
+19870927) and P (21 = 13 real + 8 synthetic, all partial erasures).
+
+- **No candidate passes** the pre-declared criterion.
+  - c1 and c2 put L on both sides of K.
+  - c3 ties L and K at 1 (Q1 CONFIRMED). It clears P by a margin of 0.471,
+    but that only restates the signal.
+- **Q2** does not apply, since nothing separates. **Q3** had no prediction.
+- **Swell check.** E is defined in 10 of the 17 signal tracks, and c3 = 1 in
+  all 10. With no valid threshold there is no side to report.
+
+**Figures for label review (2026-09-27).** Diagnostic only, with no rule
+proposed; the record is in `research/labels/diagnostics/item30/REPORT_figs_cf.md`
+and `figs_cf/`. Each of 8 TRAIN cases shows the label, params-13, params-14 and
+one counterfactual. The cases are L, K, and the 2 P cases with the largest c3:
+20180608 and 20150436. The counterfactual, under params-14, is s5 with
+[0, E.start) written as incipient when E exists and c3 = 1, and s6 otherwise.
+
+- params-13 and params-14 give the same final map in all 8 cases.
+- The counterfactual equals s6 in both P controls and in 19790612.
+- **L: closer to the label** in incipient end and sequence (edit distance),
+  but E starts at step 0 in all three, so the counterfactual has no incipient,
+  while the labels open with 2, 8 and 3 steps of it.
+- **K 19860380 and 19870927: further.** Those labels are `incipient > decay`,
+  and the counterfactual restores an intensification and a mature that the
+  labels do not contain. Moving toward the L labels moves away from these K
+  labels, which is part 2's non-separability case by case.
+
+**Part 3 — opt-in rule, params-15 CANDIDATE, adjudicated labels (2026-09-27,
+CHECKPOINT, not merged).** The record is
+`research/labels/diagnostics/item30/REPORT_part3.md`; predictions are in
+`84f7c89`.
+
+- **The rule.** `incipient_plateau_spare_intensification` (bool, default False)
+  in `get_periods` and `determine_periods`, applied in `find_incipient_period`
+  just before the plateau overwrite. If the first intensification that starts
+  before the boundary also ends before it, the boundary moves back to that
+  intensification's start.
+- **Configs.** `params-15` is `params-14` plus the key; `params-14` is
+  untouched.
+- **Labels.** By Danilo's decision, the 5 TRAIN labels where the
+  counterfactual differs from params-14 are now the counterfactual. They are
+  marked in `notes`, the originals are in `swell_item30/labels_v1_snapshot.yaml`,
+  and they are scored in their own ADJUDICATED block.
+- **Validation batch.** 5 tracks frozen as `batches.swell_item30_val` (role
+  validation), unlabelled and outside every aggregate.
+
+Results:
+
+- **R1 CONFIRMED.** The rule changes exactly the 5 of 54 TRAIN series, each
+  into the counterfactual.
+- **R2 CONFIRMED.** Hash `b500d2e0…` before and after. It exercises only the
+  geometric path; the plateau path is proven by the evaluator under params-14.
+- **R3 REFUTED.** 15 swell tracks change, not 10. All 10 predicted change, and
+  5 more change that do NOT carry the signal (3 of them marked bad). The rule
+  is broader than the pattern it was designed for.
+- **R4 CONFIRMED.** Scores 47: 31/47 sequence and 17/27 incipient under both
+  configs. The 2 non-adjudicated batch series: 1/2 under both.
+- **Adjudicated block: 0/5 → 5/5, circular by construction.**
+- **V:** open until Danilo labels the 5 validation tracks, which he saw with
+  detection on 2026-09-24. Without V, adoption must be recorded as "adotado
+  sem validação independente".
+- Suite 1419 passed, 0 failed; `cyclophaser/` diff vs develop-v2.1 = the rule only.
+
+**Part 3 checkpoint addendum (2026-09-27).** The record is the addendum of
+`REPORT_part3.md`.
+
+- **R3.** The 5 unpredicted tracks are 19850338, 19890443, 20011085,
+  20040726 and 20110785 (3 marked bad). None is TEST or VALIDATION. In each, E
+  is a first, shallower deepening that ends at a secondary valley inside the
+  plateau, and the global minimum comes at or after the boundary. In 19890443
+  the two are equal, a tie. Claude's hypothesis was wrong: "E wholly before
+  the boundary" does not imply "boundary > global minimum".
+- **Narrow variant** (signal required too; a replica outside the package,
+  measured, not adopted). It changes the same 5 in TRAIN, and exactly the 10
+  predicted in the swell, with none of the 5 above.
+- **R2 lesson.** The canonical hash runs the geometric defaults and never
+  enters the plateau branch. The effective proof there is the evaluator's
+  output under params-14, identical to `1a3ad76`. A "default unchanged" guard
+  must exercise the changed branch.
+- **Deviation.** The rule was committed (`f85e1b8`) before the checkpoint was
+  approved; it is recorded, and the history is not rewritten.
+- **Benchmark.** Adjudicated labels get their own block and are never pooled
+  with train. There is an AppTest with a positive control.
+- **Cleanup debts.** The configs table in `research/labels/README.md` stops
+  at params-11. Importing configs older than params-14 warns "missing key".
+
+**Closing record (2026-09-27).**
+
+- **Rule kept in its BROAD form**, by the declared decision rule. In Danilo's
+  evaluation under params-15 (27 Sept 2026, 20:43Z, 249 tracks), none of the 5
+  tracks outside the signal (19850338, 19890443, 20011085, 20040726, 20110785)
+  was marked bad. 19890443, 20011085 and 20040726 had been marked bad under
+  params-14. Visual marks are judgement, not a score.
+- **V: spent.** The 5 validation tracks were seen under params-15 before they
+  were labelled. `batches.swell_item30_val` stays frozen as a record, role
+  "spent before labelling", with no labels. The block in `split.yaml` was not
+  edited and still reads `role: validation`; updating it is a separate
+  decision.
+- **Test exposure.** 19 test series were evaluated in the Grid under params-15:
+  the 16 of the split, the 3 of the batch and 20203389. Danilo marked 20150377
+  and 20206498 bad. The marks were used in no decision.
+- **Danilo's note.** Other cases may be bad because their series are genuinely
+  ambiguous. They are outside the scope of this front.
+- **Adoption NOT recorded.** The ADOÇÃO line of the closing brief came back
+  unfilled, so params-15 remains a CANDIDATE and is not the reference
+  configuration. The package default stays False.
+- **Merge NOT done.** The AUTORIZAÇÃO DE MERGE line came back unfilled.
+
+**Closing decisions (2026-09-27; they supersede the two lines above).**
+
+- **Adoption (Danilo): "adotado sem validação independente".** params-15 is
+  now the calibration reference, and params-11 becomes historical. The package
+  default of `incipient_plateau_spare_intensification` stays False. The configs
+  table in `research/labels/README.md` now runs to params-15, which also clears
+  that cleanup debt.
+- **Validation batch (Danilo's authorisation).** In `batches.swell_item30_val`,
+  only `role` and `labelling_note` were edited: the role is now "spent before
+  labelling", and the note carries the edit record. The series hashes are
+  unchanged. The label tab locks the 5 outright, which an AppTest proves.
+  Commit `916ecfc`.
+- **Merge authorised by Danilo.** The merge result is recorded on
+  develop-v2.1.
+
+The result is no separation found on 3 L cases against 2 K cases with a value.
+It is not proof that none exists.
+
+**Still open:** the evaluator reads the batch's TRAIN part only under
+`--batch-train`, in a block of its own. The benchmark reads it only behind
+30c's opt-in "Include swell_item30 batch", with the 3 test cases as `test` (see
+30c). Whatever reads the batch next must keep its 3 test cases out of any
+training aggregate.
+
 ## 30a. Inspector — the two depth-floor parameters — **closed, merged 2026-09-25** (merge `ad8daca`)
 
 Branch `fix/inspector-depth-params`, from `develop-v2.1` @ `0f5bef5`. App only:
@@ -3503,6 +3747,63 @@ The superseded branch `fix/inspector-min-depth-params` (`a2b639e`) is still
 unmerged and kept; its fate belongs to the clean-up front.
 
 ---
+
+## 30c. Visualisation — shared 0-1 scale in the Label tab, smoothed series and the swell batch in the Benchmark — **done on branch `research/item30-plateau-overwrite`, NOT merged; awaiting Danilo's visual check**
+
+App only: `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated
+`cyclophaser` env, `cyclophaser.__file__` confirmed to be this checkout.
+
+### What was done
+
+* **Label tab, Inspection only: "Shared 0-1 scale"**, on by default, next to
+  the overlay switch. It uses the inspector's grouping: the raw series gets a
+  0-1 band of its own, and `filtered_vorticity`, `vorticity_smoothed` and
+  `vorticity_smoothed2` share ONE band (`layer_inspector.rescaler` over all
+  three, whichever are switched on, so toggling a layer never rescales the
+  others). The group band is computed in `app.py`'s `_label_overlays` (the
+  provider), so `label_tab.py`'s AST stays free of the package's names. The
+  raw band is `label_tab.unit_band`, which re-writes `rescaler([zeta], True)`'s
+  arithmetic, and a test pins the two to agree (flat, NaN and all-NaN
+  included). The hover shows the step and every curve's PHYSICAL value. The
+  band travels in a separate `display` key, and `chart_payload`'s pinned keys
+  are unchanged. `overlays_shown` still records the names seen. Labelling stays
+  raw-only, and the blindness tests pass unloosened.
+* **Benchmark cells and stacked figure** draw each column's own
+  `vorticity_smoothed2` (`run_series`' `z`, from that column's filter_params)
+  with the Grid's compact convention (`_plot_compact`): raw and smoothed on
+  twin y axes, raw in front. In the stacked figure every panel uses its own
+  column's curve, and all panels share one twin range. A snapshot column has
+  no `z` and draws raw only. A PNG has no hover, so the left axis carries the
+  raw values.
+* **Benchmark: "Include swell_item30 batch"**, off by default
+  (`benchmark_core.load_batch`, sha256-checked via `load_batch_series`). The
+  batch's 7 train cases take membership `train`, and its 3 test cases
+  (19930748, 20111118, 19990549) take `test`, which gives them exactly the 16's
+  treatment: the Test button, the frozen test block, never a train number.
+  Nothing downstream special-cases them.
+
+### Default paths unchanged (`research/labels/diagnostics/item30/prove_defaults_30c.py`, against `99f5a9a`)
+
+* The benchmark's `load_all_series` population hash is `d275380b…` both before
+  and after. Sources (51 real / 12 synthetic) and `split_membership` (47/16)
+  are identical.
+* `labels_core.py` (`load_real_series`) and `evaluate_against_labels.py` are
+  byte-identical to `99f5a9a`.
+* The evaluator's default path, run old vs new, gives an identical population
+  hash and identical output, both under `params-14` and under package defaults.
+
+Suite (`-m "not browser"`, dedicated env): **1386 passed, 0 failed**.
+
+### Open
+
+* **Pre-existing, not 30c:** in the Benchmark, pressing **Train** and then
+  **Test** in one session empties the selection (a second press selects the
+  16). Reproduced on `99f5a9a`.
+* Danilo's visual check (Label tab in Inspection with the shared scale;
+  Benchmark with the batch and the smoothed series) comes before any merge.
+
+---
+
 
 ## Note
 

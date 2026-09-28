@@ -1035,6 +1035,38 @@ def _incipient_plateau_boundary(rel, tau, crossing, k):
     return int(hits[0]) if hits.size else 0
 
 
+def _spare_enclosed_intensification(periods, boundary: int) -> int:
+    """Item 30 (opt-in): the plateau boundary, pulled back so as not to erase an
+    intensification that lies wholly before it.
+
+    The plateau overwrite writes ``incipient`` over ``[0, boundary)``. When the
+    plateau ends late (after the intensity peak), that span can hold a whole
+    intensification — and the mature after it — which the overwrite erases,
+    leaving a cycle with neither phase.
+
+    E is the first contiguous block of the INPUT map (the one this stage
+    receives, before any incipient is written) whose label starts with
+    ``"intensification"`` and whose START lies before ``boundary``. If E also
+    ENDS before ``boundary`` (last index <= boundary - 1), the boundary becomes
+    E's start; a result of 0 means no incipient is written. In every other case
+    — no such E, or E running past the boundary — the boundary is returned
+    unchanged.
+
+    Positional throughout: ``periods`` is read by position, like the
+    ``.iloc[:boundary]`` it guards.
+    """
+    labels = [str(x) if pd.notnull(x) else "" for x in periods]
+    i, n = 0, len(labels)
+    while i < min(boundary, n):
+        if labels[i].startswith("intensification"):
+            j = i
+            while j + 1 < n and labels[j + 1].startswith("intensification"):
+                j += 1
+            return i if j < boundary else boundary
+        i += 1
+    return boundary
+
+
 def find_incipient_period(df, **args_periods):
 
     """
@@ -1082,6 +1114,10 @@ def find_incipient_period(df, **args_periods):
               signal="vorticity".
             - 'incipient_smooth_polyorder' (int): polynomial order for that
               pass. Default 3.
+            - 'incipient_plateau_spare_intensification' (bool): item 30. When
+              True, an intensification lying wholly before the plateau boundary
+              is not overwritten: the boundary moves back to its start (see the
+              plateau branch). Default False. Only used when method="plateau".
 
     Returns:
         pd.DataFrame: Updated DataFrame with 'incipient' stages marked in the
@@ -1128,6 +1164,8 @@ def find_incipient_period(df, **args_periods):
             args_periods.get('incipient_plateau_crossing', 'single'),
             args_periods.get('incipient_plateau_k', 3),
         )
+        if args_periods.get('incipient_plateau_spare_intensification', False):
+            boundary = _spare_enclosed_intensification(periods, boundary)
         if boundary > 0:
             # [t0, boundary) — half-open, hence .iloc and not the label-based
             # (inclusive) .loc slicing the geometric branches use.

@@ -268,3 +268,117 @@ def test_previous_and_next_move_through_the_queue_without_saving():
 
     assert lc.LABELS_PATH.read_text() == before_text, (
         "Previous/Next must never write to manual_labels.yaml")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30c — the "Shared 0-1 scale" option for the overlays
+# ══════════════════════════════════════════════════════════════════════════
+
+def _shared_cbs(at):
+    return [cb for cb in at.checkbox
+            if cb.key and cb.key.startswith("lab_overlay_shared__")]
+
+
+def test_shared_scale_is_offered_and_on_by_default_in_inspection():
+    at = _label_app()
+    assert at.session_state["_lab_mode"] == "inspect"
+    cbs = _shared_cbs(at)
+    assert len(cbs) == 1 and cbs[0].label == "Shared 0-1 scale"
+    assert cbs[0].value is True
+
+
+def test_shared_scale_is_absent_in_labelling():
+    """With the positive control first: the same run DID show it in Inspection,
+    so its absence below is the mode's doing, not a missing widget."""
+    at = _label_app()
+    assert _shared_cbs(at)
+    _switch_to_labelling(at)
+    assert at.session_state["_lab_mode"] == "label"
+    assert not _shared_cbs(at)
+    assert not any("Show filtered/smoothed overlays" in cb.label for cb in at.checkbox)
+
+
+def test_toggling_the_shared_scale_does_not_move_any_phase():
+    at = _label_app()
+    before = [int(nb.value) for nb in _start_idx(at)]
+    next(cb for cb in at.checkbox
+         if "Show filtered/smoothed overlays" in cb.label).set_value(True)
+    at.run()
+    for cb in (cb for cb in at.checkbox if cb.key and cb.key.startswith("lab_overlay__")):
+        cb.set_value(True)
+        at.run()
+    for value in (False, True):
+        _shared_cbs(at)[0].set_value(value)
+        at.run()
+        assert not at.exception, [str(e) for e in at.exception]
+        assert [int(nb.value) for nb in _start_idx(at)] == before
+
+
+def test_unit_band_matches_the_inspectors_raw_band():
+    """label_tab may not import the inspector, so `unit_band` re-writes its
+    arithmetic; this pins the two to agree, edge cases included."""
+    import sys
+
+    import numpy as np
+    sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
+    sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
+    import label_tab
+    import layer_inspector as li
+    import labels_core as lc
+
+    real = next(iter(lc.load_real_series().values())).to_numpy()
+    cases = {
+        "real series": real,
+        "with NaN": np.where(np.arange(len(real)) % 7 == 0, np.nan, real),
+        "flat": np.full(12, 3e-5),
+        "all NaN": np.full(5, np.nan),
+    }
+    for name, a in cases.items():
+        want = li.rescaler([a], True)(a)
+        got = np.asarray(label_tab.unit_band(a))
+        assert np.array_equal(got, want, equal_nan=True), name
+    assert min(label_tab.unit_band(real)) == 0.0
+    assert max(label_tab.unit_band(real)) == 1.0
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# item 30 part 3 — the VALIDATION batch appears unlabelled, save-once
+# ══════════════════════════════════════════════════════════════════════════
+
+def test_the_validation_cases_are_in_the_queue_unlabelled_and_marked():
+    val = {"19900808", "19940737", "19960808", "20000821", "19861089"}
+    at = _label_app()
+    nav = next(sb for sb in at.main.selectbox if sb.label == "Jump to case")
+    opts = [o for o in nav.options if any(v in o for v in val)]
+    assert len(opts) == 5
+    # spent before labelling (item 30 closing, 27 Sept 2026): locked outright
+    assert all("[VALIDATION spent — locked]" in o for o in opts), opts
+    # appended last: after every other case, the 10 of the swell batch included
+    last5 = nav.options[-5:]
+    assert {o for o in last5} == set(opts)
+
+
+def test_a_spent_validation_case_cannot_be_saved_even_once():
+    """Item 30 closing: `batches.swell_item30_val` is "spent before labelling".
+    In Labelling mode — where saving is otherwise allowed — an UNLABELLED
+    validation case has both save buttons disabled, and the lock is the ONLY
+    blocker named (no overwrite, no synthetic confirmation, no sequence
+    problem), so it is the lock that disables them. Nothing is written."""
+    import sys
+    sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
+    import labels_core as lc
+    before = lc.LABELS_PATH.read_text()
+    val = {"19900808", "19940737", "19960808", "20000821", "19861089"}
+    at = _label_app()
+    nav = next(sb for sb in at.main.selectbox if sb.label == "Jump to case")
+    idx = next(i for i, o in enumerate(nav.options) if any(v in o for v in val))
+    nav.set_value(idx)
+    at.run()
+    _switch_to_labelling(at)
+    assert at.session_state["_lab_mode"] == "label"
+    saves = [b for b in at.button if b.label in ("💾 Save & next", "Save ambiguous")]
+    assert len(saves) == 2 and all(b.disabled for b in saves)
+    blocked = [c.value for c in at.caption if c.value.startswith("Cannot save yet")]
+    assert blocked == ["Cannot save yet — this validation case is SPENT (never "
+                       "labelled) — saving is blocked, not just discouraged."], blocked
+    assert lc.LABELS_PATH.read_text() == before
