@@ -168,6 +168,20 @@ def main() -> None:
             inc, seqs, rb = det[name]
             res[name] = summarise(name, recs, {k: inc[k] for k in recs},
                                   {k: seqs[k] for k in recs}, {k: rb[k] for k in recs})
+        # Sequence matches broken down by the LABEL's sequence class (TRAIN), so a
+        # class-mix shift between TRAIN and TEST can be reasoned about in DESIGN §5.
+        by_class = {}
+        for name in cfgs:
+            seqs = det[name][1]
+            for sid, r in recs.items():
+                cls = " > ".join(label_seq(r))
+                hit = [p for p, _ in seqs[sid]] == list(label_seq(r))
+                by_class.setdefault(cls, {}).setdefault(name, 0)
+                by_class[cls][name] += hit
+        print("sequence matches by label class (TRAIN):")
+        for cls, v in sorted(by_class.items(), key=lambda kv: -seqc[kv[0]]):
+            print(f"  {seqc[cls]:>2}  {cls:<70} " + "  ".join(f"{k} {v[k]}" for k in cfgs))
+        res["by_class"] = by_class
         out[version] = {"n": len(recs), "kinds": dict(kinds), "sequences": dict(seqc),
                         "S_star": list(s_star), "INC_star": inc_star, "scores": res}
     (HERE / "constant_train.json").write_text(json.dumps(out, indent=2))

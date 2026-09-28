@@ -90,6 +90,38 @@
         "mae": 4.818181818181818,
         "mature_hits": 20,
         "n_mature": 33
+      },
+      "by_class": {
+        "intensification > mature > decay": {
+          "params-15": 9,
+          "defaults": 0,
+          "p15-phase|def-filter": 12
+        },
+        "incipient > intensification > mature > decay": {
+          "params-15": 8,
+          "defaults": 11,
+          "p15-phase|def-filter": 10
+        },
+        "intensification > mature > decay > residual": {
+          "params-15": 2,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        }
       }
     }
   },
@@ -176,6 +208,38 @@
         "mae": 4.818181818181818,
         "mature_hits": 20,
         "n_mature": 33
+      },
+      "by_class": {
+        "intensification > mature > decay": {
+          "params-15": 9,
+          "defaults": 0,
+          "p15-phase|def-filter": 12
+        },
+        "incipient > intensification > mature > decay": {
+          "params-15": 8,
+          "defaults": 11,
+          "p15-phase|def-filter": 10
+        },
+        "intensification > mature > decay > residual": {
+          "params-15": 2,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        }
       }
     }
   }

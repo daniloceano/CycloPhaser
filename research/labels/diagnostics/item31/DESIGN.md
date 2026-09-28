@@ -117,8 +117,49 @@ The per-series table is in the output file. What bears on stage 1:
 
 ## 4. Label-only census of the TEST split (`test_label_census.txt`)
 
-*Run after §5's structure was committed; see §5 for the commit.* Filled in below
-the line in the second commit of this stage.
+**This is a declared exposure of the TEST labels, at the level of counts.**
+
+* **When it ran.** It ran only after the structure in §5 had been committed and
+  pushed (`e42da8b`). The script itself was committed, unexecuted, in that same
+  commit.
+* **What was read.** The records of the 16 split TEST ids, filtered by id before
+  any field was touched. The 3 batch TEST ids were not read.
+* **What was not done.** No detector was called. Series were loaded only to
+  check `series_sha256`.
+* **What the output holds.** Aggregates only, and the script asserts that no
+  test id appears in its own output.
+
+| quantity | current | first-blind |
+|---|---:|---:|
+| records present / hash OK / legacy / adjudicated | 16 / 16 / 0 / 0 | — |
+| **usable, *n*** | **16** | 16 (all 16 have a blind version) |
+| verdict `boundary`, **B** | **9** | 9 |
+| verdict `none` (label refuses incipient), **N₀** | **6** | 6 |
+| verdict `ambiguous` | 1 | 1 |
+| label has an incipient phase | 10 (= 9 boundary + 1 whose incipient boundary is `unsure`) | 10 |
+| label has a mature, **M** | **15** | 15 |
+| more than one mature | 1 | 1 |
+| boundaries marked `unsure` (all phases) | 5 | 5 |
+| distinct sequences | 4 | 4 |
+
+Sequence distribution:
+
+| count | label sequence |
+|---:|---|
+| 9 | incipient > intensification > mature > decay |
+| 5 | intensification > mature > decay |
+| 1 | incipient > decay |
+| 1 | intensification > mature > decay > intensification > mature > decay |
+
+* **first-blind = current in all 16**, in phases, verdict, `tolerance_idx` and
+  `unsure` alike. The label-version choice in §5 is therefore moot for the
+  split's 16. Both versions are still run.
+* **K\*, the number of TEST labels equal to S\*, is 5.** This fixes CONST's
+  sequence score on TEST before stage 1 runs (declared in §5).
+* **TEST's modal sequence is not TRAIN's.** It is
+  `incipient > intensification > mature > decay` (9/16), whereas the TRAIN mode
+  S\* covers 14/35. The constant is weaker on TEST (5/16) than on TRAIN (14/35).
+  That was not chosen: S\* was frozen from TRAIN before the census.
 
 ## 5. Stage-1 criterion — STRUCTURE (committed before the census ran)
 
@@ -203,10 +244,217 @@ line. The conditions required are:
 * FAIL is reachable for any counts, since a tie on V1 or V2 already fails.
 * V5 is vacuous if M = 0, and that would be said.
 
+With the census: B = 9 ≥ 1, K\* = 5 ≤ 15, n = 16 ≥ 1, B + N₀ = 15 ≥ 1 and
+M = 15 > 0. Every condition holds.
+
+### 5.1 Reachability with the census numbers (Option A: n = 16, B = 9, N₀ = 6, M = 15, K\* = 5)
+
+The census fixes CONST's scores on TEST before stage 1:
+C(CONST) = 0 + 6 = **6 / 15** and Q(CONST) = **5 / 16**.
+
+| | PASS needs | range of P15 | reachable? |
+|---|---|---|---|
+| V1 + V3 | C(P15) ≥ max(C(DEF) + 1, **7**) | 0 … 15 | yes, unless C(DEF) = 15 |
+| V2 + V4 | Q(P15) ≥ max(Q(DEF) + 1, **6**) | 0 … 16 | yes, unless Q(DEF) = 16 |
+| V5 | MAT(P15) ≥ MAT(DEF) | 0 … 15 | always (a tie passes); **not vacuous**, M = 15 |
+
+**PASS is jointly reachable.** Consider a detector that reproduces every label
+exactly.
+
+* It scores H = 9 (all errors 0), R = 6, so C = 15.
+* It scores Q = 16 and MAT = 15.
+
+So V1–V5 hold together unless DEF is itself perfect on C (15) or on Q (16).
+Unlike front D's gate (item 25), no two conditions exclude each other. They sit
+on different counts (C, Q, MAT), and each has headroom above its CONST bar
+(7 ≤ 15, 6 ≤ 16).
+
+* **Minimal PASS vector:** C(P15) = 7, C(DEF) ≤ 6, Q(P15) = 6, Q(DEF) ≤ 5,
+  MAT(P15) = MAT(DEF).
+* **Minimal FAIL vector:** C(P15) = C(DEF), since V1 fails on a tie. Any other
+  count can take any value. FAIL is reachable for every possible DEF.
+
+**Option B (+ 3 batch TEST series), by bounds.** The 3 labels were not read, so
+only bounds are available:
+
+* n′ = 19;
+* B′ ∈ [9, 12] and N₀′ ∈ [6, 9];
+* K\*′ ∈ [5, 8] ≤ 18 = n′ − 1;
+* M′ ∈ [15, 18].
+
+The label-reproducing argument does not depend on the 3 labels' content, so
+PASS and FAIL stay reachable. One caveat is specific to Option B. For 20111118,
+the stored verdict differs from the verdict derived from its phases (E21).
+`score_labels` reads the **stored** verdict, while `score_phase_sequences` reads
+the **phases**, so the two metrics would score two different readings of one
+label. Option B must declare which of the two is authoritative before it runs.
+
+### 5.2 What this criterion does and does not test
+
+* **It does NOT test `spare_intensification`** (§2). The rule changes 0/47
+  TRAIN series of the split. Whether it fires on any of the 16 is unmeasured;
+  stage 1's mechanical count (P14 vs P15 on the 16) will say. Only Option B
+  reaches series selected where the rule can fire.
+* **It tests** params-15 as a whole against the current defaults and against
+  the constant, on 16 labels. Those labels were never scored under params-15,
+  subject to E23. Stage 1's claim is limited by E22: the detector output was
+  seen, though not scored.
+* **With n = 16, a one-count margin is within noise.** The discordant pairs
+  are reported so that the reader can see that. No significance threshold is
+  part of the verdict.
+
+### 5.3 Claude's declared prediction for stage 1 (made AFTER the census; not part of the criterion)
+
+The prediction comes from TRAIN rates (`constant_train.txt`) applied to TEST's
+class mix (§4).
+
+**Order, declared.** The per-class breakdown in `constant_train.py`
+("sequence matches by label class") was added **after** the census, because the
+census showed TEST's class mix. It is a TRAIN-only computation. It feeds this
+prediction and nothing in the criterion, whose structure was frozen in
+`e42da8b`.
+
+| | params-15 | defaults |
+|---|---|---|
+| **C** (TRAIN rates) | H 8/17, R 14/16 | H 5/17, R 1/16 |
+| **C** (expected on TEST) | ≈ 4 + 5 = 9 | ≈ 3 |
+| **Q** on the I>It>M>D class (TRAIN) | 8/13 | 11/13 |
+| **Q** on the I>M>D class (TRAIN) | 9/14 | 0/14 |
+| **Q** (expected on TEST) | ≈ 5.5 + 3.2 ≈ 8.7 | ≈ 7.6 |
+| **MAT** (TRAIN) | 27/33 | 18/33 |
+
+* **V1, V3, V4, V5:** predicted to pass.
+* **V2:** close to a coin flip. TEST's mix favours the defaults, which almost
+  always open with an incipient.
+* **Overall: PASS, low confidence. If it FAILs, V2 will be the condition that
+  fails.**
+
 ## 6. Stage-2 equivalence gate — proposal
+
+**The change** (stage 2, only after stage 1 and Danilo's decision) sets the
+signature defaults of `process_vorticity`, `get_periods` and `determine_periods`
+to params-15. It covers the 17 behavioural differences in `param_table.md`,
+normalised to the annotated types:
+
+* `use_filter` stays `'auto'`;
+* `cutoff_high = 18.0` (a float, as annotated);
+* `incipient_smooth_window = 5` (an int);
+* `incipient_smooth_polyorder` stays `3`.
+
+The docstrings that state defaults change with them.
+
+**Canonical generator:**
+
+```
+G(s; pv, gp) = get_periods(process_vorticity(DataFrame({'zeta': s}), **pv), **gp)['periods']
+```
+
+This is the call that `evaluate_against_labels.run_detector`,
+`benchmark_core` and the front_b digest all make. `determine_periods` is the
+public wrapper around it. At stage 0, with params-15 passed explicitly, the two
+agree on **54/54** TRAIN series (`footprint_train.txt` A). That makes
+`determine_periods(s) == G(s; {}, {})` a legitimate equivalence to assert after
+the change.
+
+**Gate — all mechanical, no label read; predictions declared here:**
+
+| | check | expected |
+|---|---|---|
+| EQ1 | `front_b/default_behaviour_hash.py`, unmodified (the single default-digest generator), at the stage-2 commit | **`3a6de265…`** (`p15_expected_digest.txt`) — a new record appended, earlier ones untouched |
+| EQ2 | the same layout over the 54 (47 + 7 batch train), no kwargs | **`923e1a03…`**. EQ1 alone cannot see `spare_intensification` (the 47 are identical under params-14 and params-15), so EQ2 is the check that exercises the changed branch, as item 30's R2 lesson requires. Control: under params-14 the 54 give `3756392e…` |
+| EQ3 | `determine_periods(s)` == `G(s; {}, {})` == `G(s; **params-15 explicit)`, element for element | identical on every series run: the 54 TRAIN series, `example_file`, and — only after stage 1 — the 16 TEST, 3 batch TEST and 5 validation series |
+| EQ4 | the OLD defaults passed explicitly, taken from `param_table.json` (the "default" column, not typed by hand) | reproduces **`b500d2e0…`** on the 47, so the 2.0.0 behaviour stays reachable by arguments |
+| EQ5 | `determine_periods(s)` with no arguments | emits no `use_filter` `UserWarning` |
+
+**Declared list of series that change relative to the current defaults**
+(`b500d2e0…`; setup.py still says 2.0.0):
+
+* **TRAIN, final map: all 54** (35/35 real, 12/12 synthetic, 7/7 batch).
+* **TRAIN, sequence: exactly 32**:
+  * 25 original real, listed in `footprint_train.txt` as `SEQ original_real`;
+  * 1 synthetic, `s0596ea57` (`intensification` becomes
+    `incipient > intensification`);
+  * 6 batch: 19790612, 19810854, 19870927, 19940445, 20050893 and 20120297.
+* **TRAIN, incipient presence flips: 24** (19 real, 1 synthetic, 4 batch).
+* **TEST, validation and `example_file` are not declared at stage 0.** Stage 0
+  may not run them. Stage 2 reports their counts; it has no list to check them
+  against.
+
+**Suite: pinned artefacts that must move.** Stage 2 must first measure these
+under the patched defaults, then declare the predicted **passed / failed**
+before committing the change, per the repo rule:
+
+* `tests/test_regression_baseline.py` (`baselines/baseline_default.csv`);
+* `tests/test_determine_periods.py` (`expected_default.csv`);
+* `tests/test_incipient_plateau.py` (`baselines/baseline_defaults_multitrack.csv`);
+* `tests/synthetic/test_synthetic_lifecycles.py`, which calls
+  `determine_periods` with defaults. Its timing test uses margin 6 against the
+  manual labels, and its sequence test uses `expected_phases`;
+* front_b's `default_behaviour_sha256.txt` gets a record appended and never
+  rewritten.
+
+Every test that passes explicit arguments should be unaffected, and EQ4
+supports that.
 
 ## 7. Default filtering — proposal
 
+**Recommendation: ship params-15's filter with its phase parameters.**
+
+* `use_filter='auto'` (unchanged; it is ≡ `True` without the warning);
+* `cutoff_low = 168` (unchanged);
+* `cutoff_high = 18.0` (currently 48.0);
+* `use_smoothing = False` and `use_smoothing_twice = False` (currently
+  `'auto'`);
+* `savgol_polynomial = 3` and `replace_endpoints_with_lowpass = 0` (unchanged);
+* `boundary_padding = 'edge'` (currently `'reflect'`);
+* **no presets API**.
+
+**Justification, with what argues against it.**
+
+1. **params-15 is one calibrated object.** Every phase parameter from items 19
+   to 30 was chosen and scored under this filter. The phase thresholds are
+   relative to the filtered series (`length_scale='local'`, amplitude
+   fractions, depth floors). A phase-only default change would ship a
+   combination no front ever calibrated.
+2. **The hybrid was measured here, on TRAIN only** (`constant_train.txt`,
+   `p15-phase|def-filter`):
+
+   | | incipient | sequence | mature |
+   |---|---|---|---|
+   | hybrid | identical (22/33) | **22/35** | **20/33** |
+   | params-15 | 22/33 | 19/35 | 27/33 |
+
+   The incipient scores are identical because the plateau signal reads the
+   unfiltered vorticity. **The params-15 filter is therefore not dominant.** It
+   costs 3 sequences and gains 7 matures on the 35. Recommending the hybrid on
+   the strength of this row would be a choice made after seeing TRAIN numbers,
+   with no declared premise. The recommendation stays with the calibrated
+   object. The trade-off is recorded as an **open question for Danilo**; if it
+   is pursued, it needs its own front.
+3. **No presets.** A preset API multiplies the configurations to validate,
+   document and keep equivalent (EQ-style gates per preset). The research
+   configs already live as versioned YAML in `research/labels/configs/`, and a
+   user who wants the old behaviour passes arguments (EQ4 guarantees that path).
+4. **`use_filter='auto'`, not `True`.** The two are equivalent, and `'auto'`
+   avoids a warning on every default call.
+
+## 8. Decisions left to Danilo (not decided here)
+
+1. **Inclusion of the 3 batch TEST series** (19930748, 20111118, 19990549):
+   * it needs new evaluator code (the evaluator has only `--batch-train`);
+   * 20111118 has leaked one bit (E21);
+   * it needs a declared source for its incipient verdict (§5.1);
+   * it is the only way stage 1 touches `spare_intensification` (§5.2).
+2. **Comparator scope:**
+   * whether P15 / DEF / CONST is enough;
+   * whether params-14 enters as a scored comparator to isolate the rule;
+   * whether the "P14 vs P15 on the 16" mechanical count stays outside the
+     verdict.
+3. **E23:** was a Benchmark TEST block ever displayed, and under which config?
+4. **The filter trade-off in §7.2.** Keep params-15's filter (recommended), or
+   open a front on the hybrid.
+
 ---
 
-*Sections 4, 5 (arithmetic), 6 and 7 are filled in the second commit of stage 0.*
+*§4, §5.1–5.3, §6, §7 and §8 were written in the second commit of stage 0,
+after the census; §5's structure is as committed in `e42da8b`, before it.*

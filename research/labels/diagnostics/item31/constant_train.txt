@@ -15,6 +15,13 @@ scores on these TRAIN labels (same ruler):
   params-15            incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 19/35  mature 27/33
   defaults             incipient hits  5/17 none agreed  1/16 false refusals  1  correct  6/33  sequence 11/35  mature 18/33
   p15-phase|def-filter incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 22/35  mature 20/33
+sequence matches by label class (TRAIN):
+  14  intensification > mature > decay                                       params-15 9  defaults 0  p15-phase|def-filter 12
+  13  incipient > intensification > mature > decay                           params-15 8  defaults 11  p15-phase|def-filter 10
+   3  intensification > mature > decay > residual                            params-15 2  defaults 0  p15-phase|def-filter 0
+   2  incipient > intensification                                            params-15 0  defaults 0  p15-phase|def-filter 0
+   2  incipient > intensification > mature > decay > residual                params-15 0  defaults 0  p15-phase|def-filter 0
+   1  incipient > intensification > mature > decay > intensification > mature > decay > residual params-15 0  defaults 0  p15-phase|def-filter 0
 
 === TRAIN real, labels first-blind: 35 records ===
 verdict kinds: {'none': 16, 'boundary': 17, 'ambiguous': 2}
@@ -31,3 +38,10 @@ scores on these TRAIN labels (same ruler):
   params-15            incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 19/35  mature 27/33
   defaults             incipient hits  5/17 none agreed  1/16 false refusals  1  correct  6/33  sequence 11/35  mature 18/33
   p15-phase|def-filter incipient hits  8/17 none agreed 14/16 false refusals  6  correct 22/33  sequence 22/35  mature 20/33
+sequence matches by label class (TRAIN):
+  14  intensification > mature > decay                                       params-15 9  defaults 0  p15-phase|def-filter 12
+  13  incipient > intensification > mature > decay                           params-15 8  defaults 11  p15-phase|def-filter 10
+   3  intensification > mature > decay > residual                            params-15 2  defaults 0  p15-phase|def-filter 0
+   2  incipient > intensification                                            params-15 0  defaults 0  p15-phase|def-filter 0
+   2  incipient > intensification > mature > decay > residual                params-15 0  defaults 0  p15-phase|def-filter 0
+   1  incipient > intensification > mature > decay > intensification > mature > decay > residual params-15 0  defaults 0  p15-phase|def-filter 0
