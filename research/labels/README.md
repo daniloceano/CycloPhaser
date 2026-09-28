@@ -41,104 +41,54 @@ the manual label is the source of truth for every phase, `mature` included.
 | `split.yaml` | **Committed artefact.** The frozen split. |
 | `manual_labels.yaml` | **Committed artefact — the deliverable.** Written incrementally by the app. |
 | `evaluate_against_labels.py` | Runs the detector, scores it against the labels. |
+| `config_defaults.py`, `defaults_2.0.0.json` | Fills keys a config does not carry with the frozen 2.0.0 defaults, and lists them (item 31, decision (a)). |
 
 The labelling UI itself is `tools/calibration_app/label_tab.py`, reached through
 the **Label** display mode of the calibration app. Tests are in
 `tests/test_manual_labels.py`.
 
-## The eleven calibration configurations
+## Calibration configurations
 
-`research/labels/configs/` holds all eleven configurations produced during the
-calibration, **each exactly as the calibration app exported it** — including
-`metadata.cyclones_used` with its 51 entries. They are the Benchmark tab's
-config source, and the tab spans the whole history only because all eleven are
-here; `params-1` to `-8` were added by front 21 (`docs/future_work.md`).
-`params-12` to `-15` came later, one per front (items 22, 24, 28 and 30); the
-table below lists all fifteen.
+**Since item 31 (2026-09-28), `research/labels/configs/` holds one file:
+`cyclophaser_params-15.yaml`, the calibration reference.** params-1 to
+params-14 were removed by Danilo's decision. They are not lost: each one is
+recoverable byte for byte with the command in
+`diagnostics/item31/recovery_table.md` (`git show 33ea489358d9:<path>`), and the
+records of earlier fronts still cite them by name and hash. **Always identify a
+config by its hash, never by its file name**: an app export called
+`cyclophaser_params-11.yaml` once held params-14's values
+(`swell_item30/README.md`, "Name trap").
 
 | File | sha256 | |
 |---|---|---|
-| `cyclophaser_params-1.yaml` | `5e4bdeb86f4ab184b8b20bc42df35f49cd7b583a1589b8e68fd7a020dc63a988` | historical |
-| `cyclophaser_params-2.yaml` | `fe0e57319fcda15b7d2d047b1b09e62e61d7fd7890846a4fc4f090ea6aaa29c1` | historical |
-| `cyclophaser_params-3.yaml` | `a71d9417314ad95311e4e29ff7fd927cdc0ebbb8288c78134eae7defc491f32c` | historical |
-| `cyclophaser_params-4.yaml` | `892a464cd7394d6dd9b5a9690b0fc81ee76daa1b34d3979e2b2d363ac6526cbd` | historical |
-| `cyclophaser_params-5.yaml` | `e574ceeb039d88e1b65810d615d2136f486084b702b4542333ec6b7fa844b072` | historical |
-| `cyclophaser_params-6.yaml` | `b0cf47d9dfd54960cdfc52a5a5054afa5b5a622caa6f90621dc4d49bd97ad841` | historical |
-| `cyclophaser_params-7.yaml` | `02cf6a6afa9ff34ab53b527b5f14f288e87d641375876739f5135b22702f2316` | historical |
-| `cyclophaser_params-8.yaml` | `ce9fdace1ebb88071a27d196736c3ac53123f0873095d6910ff86c78b4b3ca61` | historical |
-| `cyclophaser_params-9.yaml` | `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` | historical |
-| `cyclophaser_params-10.yaml` | `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` | **frozen instrument** — `item19_core.CONFIG` |
-| `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | historical — calibration reference from front 20(a) until 2026-09-27 |
-| `cyclophaser_params-12.yaml` | `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` | historical — `params-11` + `mature_min_depth` 0.80 (item 22) |
-| `cyclophaser_params-13.yaml` | `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` | historical — `params-12` + `intensification_min_depth` 0.05 (item 24) |
-| `cyclophaser_params-14.yaml` | `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` | historical — `params-13` + `reclassify_index0` true (item 28) |
-| `cyclophaser_params-15.yaml` | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **current calibration reference** — `params-14` + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
+| `cyclophaser_params-1.yaml` … `-8.yaml` | see `diagnostics/item31/recovery_table.md` | removed (item 31); historical, added to the repo by front 21 |
+| `cyclophaser_params-9.yaml` | `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` | removed (item 31); historical |
+| `cyclophaser_params-10.yaml` | `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` | removed (item 31); was `item19_core.CONFIG`, the frozen instrument of items 19/20 |
+| `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | removed (item 31); calibration reference from front 20(a) to 2026-09-27 |
+| `cyclophaser_params-12.yaml` | `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` | removed (item 31); params-11 + `mature_min_depth` 0.80 (item 22) |
+| `cyclophaser_params-13.yaml` | `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` | removed (item 31); params-12 + `intensification_min_depth` 0.05 (item 24) |
+| `cyclophaser_params-14.yaml` | `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` | removed (item 31); params-13 + `reclassify_index0` true (item 28) |
+| **`cyclophaser_params-15.yaml`** | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration reference** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
 
-**Adopted on 2026-09-27: `params-15` is the calibration reference, "adotado sem
-validação independente".** Danilo decided this at the item-30 closing; V could
-not be measured (see below). The package default of the rule stays False. The
-two paragraphs below record its candidate period and are superseded by this one.
+**Do not normalise or reformat params-15.** Its identity is its file hash: the
+Benchmark shows that hash as a column's provenance, and every later record
+cites it. It was written by hand from params-14 (plus one line), so its
+`metadata` block is params-14's, timestamp included.
 
-**`params-15` is a CANDIDATE, not a reference.** It is `params-14` byte for
-byte plus one line, `incipient_plateau_spare_intensification: true` (the item-30
-opt-in rule). It was written by hand, not exported by the app, so its `metadata`
-block is `params-14`'s, timestamp included. `params-14` itself is untouched.
-Adopting it is pending prediction V of
-`diagnostics/item30/PREDICTIONS_part3.md` (Danilo's blind labels of the 5
-validation tracks, `batches.swell_item30_val`) or an explicit decision by Danilo.
-Adopted without V, it must be recorded as "adotado sem validação independente".
+**Incomplete configs** (item 31, decision (a)). A key a config does not carry is
+filled with its **cyclophaser 2.0.0 default** from the frozen table
+`defaults_2.0.0.json` (generated from item 31's parameter table, never edited by
+hand; helper `config_defaults.py`), and the filled keys are always listed —
+by `evaluate_against_labels.py` (stderr), by the Benchmark column's provenance
+(item 4) and by the app's YAML import (a warning). A key present is never
+changed. This keeps an old or hand-trimmed config meaning what it meant when it
+was written, whatever the package defaults become.
 
-**Status at the item-30 closing (2026-09-27): still a CANDIDATE.** V is spent,
-because the 5 validation tracks were seen under params-15 before they were
-labelled. The adoption line of the closing brief was not filled, so params-15
-was NOT adopted and the reference above is unchanged. The table above was not
-extended to params-15 as a reference, and it still omits params-12 to -14, a
-cleanup debt.
-
-**Do not normalise or reformat any of them.** A configuration's identity here is
-its file hash: the Benchmark tab shows that hash as a column's provenance, and
-rewriting a file — even to strip a block that looks redundant — silently
-repoints every record that cites it. This nearly happened during front 21: the
-eight added files were first written without `metadata.cyclones_used`, on the
-mistaken belief that the pre-existing three were trimmed that way. They are not,
-and the directory briefly carried two formats. The eight were restored to the
-app's own export format and verified against independently computed hashes.
-
-`params-10` is the strictest case: `item19_core.CONFIG` pins it as a frozen
-measuring instrument, so changing its bytes would redefine the baseline that
-items 19 and 20 were measured against. It must not be touched for any reason.
-
-## Reference configuration
-
-**Current calibration reference: `research/labels/configs/cyclophaser_params-15.yaml`**
-(sha256 `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04`),
-**adotado sem validação independente** at the item-30 closing (2026-09-27). It is
-`params-14` plus the opt-in item-30 rule `incipient_plateau_spare_intensification`
-(package default False). **Future fronts measure against this config.** The record
-is `diagnostics/item30/REPORT_part3.md`, including the 5 swell tracks outside the
-item-30 signal that the rule also changes.
-
-*Previous reference (front 20(a) to 2026-09-27):*
-`research/labels/configs/cyclophaser_params-11.yaml`
-(sha256 `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420`).
-It is `params-10` with `mature_amplitude_fraction` 0.90 instead of 0.95, closed
-by front 20(a) with a PASS gate.
-
-`cyclophaser_params-9.yaml` and `cyclophaser_params-10.yaml` are historical.
-They are kept intact and are never rewritten: earlier fronts' numbers were
-produced with them, and editing one retroactively would invalidate the record it
-anchors.
-
-**This is not the package default.** `mature_amplitude_fraction` in
-`cyclophaser/` remains **0.95** and did not change in front 20(a) — that front
-touched no package line. Moving the default is a public-API decision, deferred
-until after fronts 20b and 20c.
-
-**`research/labels/diagnostics/item19/item19_core.py` keeps its `CONFIG`
-pointing at `params-10` on purpose.** It is the frozen measuring instrument of
-items 19 and 20, and the 32/47 and 38/47 figures were produced with it in that
-state. Do not "fix" that pointer — repointing it at `params-11` would silently
-redefine the baseline every later front compares against.
+**`item19_core.py` no longer has a default config.** `pair_by_overlap` and
+`MARGIN`, which the Benchmark imports, are unchanged. `load_config()` without a
+path raises and names the recovery commit. The item 19/20 scripts, and every
+other closed-front script that loads a removed config, are listed in
+`diagnostics/item31/stale_scripts.md` and reproduce from `33ea489358d9`.
 
 Two instruments score matures and they are **not** interchangeable:
 `evaluate_against_labels.py` / `score_phase_sequences` scores only series whose

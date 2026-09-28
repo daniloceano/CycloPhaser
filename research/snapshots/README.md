@@ -73,7 +73,8 @@ snapshot is that release's package defaults.
 ## Measured divergence from the current reference
 
 Against `params-11`, over the 51 real tracks (computed with
-`research/labels/configs/cyclophaser_params-11.yaml` on the current working tree):
+`research/labels/configs/cyclophaser_params-11.yaml` on the current working tree; that
+file was removed in item 31 and is recoverable with `git show 33ea489358d9:research/labels/configs/cyclophaser_params-11.yaml`):
 
 | snapshot | series whose phase SEQUENCE differs |
 |---|---|

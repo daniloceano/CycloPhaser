@@ -1,0 +1,170 @@
+{
+  "research/labels/diagnostics/frontA_reverify/attribute_params.py": [
+    "removed file params-9 (line 76)",
+    "removed file params-13 (line 77)"
+  ],
+  "research/labels/diagnostics/frontC/d2_separation.py": [
+    "removed file params-12 (line 94)"
+  ],
+  "research/labels/diagnostics/frontC/default_equivalence.py": [
+    "removed file params-12 (line 133)",
+    "removed file params-13 (line 141)"
+  ],
+  "research/labels/diagnostics/frontC/make_figures.py": [
+    "removed file params-12 (line 99)",
+    "removed file params-13 (line 100)"
+  ],
+  "research/labels/diagnostics/frontC/measure_frontC.py": [
+    "removed file params-12 (line 148)",
+    "removed file params-13 (line 148)",
+    "removed file params-12 (line 153)",
+    "removed file params-13 (line 154)"
+  ],
+  "research/labels/diagnostics/frontC/report_test_series.py": [
+    "removed file params-12 (line 42)",
+    "removed file params-13 (line 43)",
+    "removed config name params-12 (line 53)",
+    "removed config name params-13 (line 53)",
+    "removed config name params-12 (line 62)",
+    "removed config name params-13 (line 62)",
+    "removed config name params-12 (line 64)",
+    "removed config name params-13 (line 64)"
+  ],
+  "research/labels/diagnostics/frontD/anchoring.py": [
+    "removed file params-13 (line 38)"
+  ],
+  "research/labels/diagnostics/frontD/census.py": [
+    "removed file params-13 (line 43)"
+  ],
+  "research/labels/diagnostics/frontD/make_figures.py": [
+    "removed file params-13 (line 27)"
+  ],
+  "research/labels/diagnostics/frontD/verify_hashes.py": [
+    "removed file params-13 (line 31)"
+  ],
+  "research/labels/diagnostics/frontRefusal/diagnose.py": [
+    "removed file params-13 (line 51)"
+  ],
+  "research/labels/diagnostics/frontRefusal/make_figures.py": [
+    "removed file params-13 (line 38)"
+  ],
+  "research/labels/diagnostics/front_b/collect_train_diagnostics.py": [
+    "removed file params-9 (line 40)"
+  ],
+  "research/labels/diagnostics/front_b/reference_score_attribution.py": [
+    "removed file params-9 (line 24)",
+    "removed config name params-9 (line 72)",
+    "removed config name params-9 (line 94)",
+    "removed config name params-9 (line 96)",
+    "removed config name params-9 (line 98)",
+    "removed config name params-9 (line 100)",
+    "removed config name params-9 (line 102)"
+  ],
+  "research/labels/diagnostics/front_b/sensitivity_probe.py": [
+    "removed file params-9 (line 11)"
+  ],
+  "research/labels/diagnostics/front_b/sweep_distance.py": [
+    "removed file params-9 (line 34)"
+  ],
+  "research/labels/diagnostics/item19/closeout_measurements.py": [
+    "item19_core default config: load_config() (line 24)"
+  ],
+  "research/labels/diagnostics/item19/stage1_describe.py": [
+    "item19_core default config: load_config() (line 85)",
+    "item19_core default config: .CONFIG (line 89)"
+  ],
+  "research/labels/diagnostics/item19/stage2_grid.py": [
+    "item19_core default config: load_config() (line 131)",
+    "item19_core default config: .CONFIG (line 135)"
+  ],
+  "research/labels/diagnostics/item19/stage2_tradeoff_figure.py": [
+    "item19_core default config: load_config() (line 29)",
+    "removed config name params-10 (line 73)"
+  ],
+  "research/labels/diagnostics/item20a/measure_20a.py": [
+    "removed file params-10 (line 33)",
+    "removed file params-11 (line 34)"
+  ],
+  "research/labels/diagnostics/item20b/default_equivalence.py": [
+    "removed file params-11 (line 69)",
+    "removed file params-12 (line 78)"
+  ],
+  "research/labels/diagnostics/item20b/gate_stage2.py": [
+    "removed file params-11 (line 184)",
+    "removed file params-12 (line 184)",
+    "removed file params-11 (line 189)",
+    "removed file params-12 (line 190)"
+  ],
+  "research/labels/diagnostics/item20b/make_figures.py": [
+    "removed file params-11 (line 73)",
+    "removed file params-12 (line 74)"
+  ],
+  "research/labels/diagnostics/item20b/measure_20b.py": [
+    "removed file params-11 (line 39)",
+    "item19_core default config: load_config() (line 285)"
+  ],
+  "research/labels/diagnostics/item30/census_train.py": [
+    "removed config name params-14 (line 51)"
+  ],
+  "research/labels/diagnostics/item30/figs_cf.py": [
+    "removed config name params-13 (line 122)",
+    "removed config name params-14 (line 123)",
+    "removed config name params-13 (line 156)",
+    "removed config name params-13 (line 207)",
+    "removed config name params-14 (line 207)",
+    "removed config name params-14 (line 258)",
+    "removed config name params-14 (line 260)"
+  ],
+  "research/labels/diagnostics/item30/outside_signal.py": [
+    "removed config name params-14 (line 89)",
+    "removed config name params-14 (line 107)"
+  ],
+  "research/labels/diagnostics/item30/part3_measure.py": [
+    "removed config name params-14 (line 130)",
+    "removed config name params-13 (line 131)",
+    "removed config name params-14 (line 157)",
+    "removed config name params-14 (line 163)"
+  ],
+  "research/labels/diagnostics/item30/post_merge_checks.py": [
+    "removed file params-14 (line 42)",
+    "removed config name params-14 (line 46)",
+    "removed config name params-14 (line 64)"
+  ],
+  "research/labels/diagnostics/item30/prove_defaults_30c.py": [
+    "removed file params-14 (line 89)",
+    "removed config name params-14 (line 93)"
+  ],
+  "research/labels/diagnostics/item30/prove_defaults_part3.py": [
+    "removed file params-14 (line 89)",
+    "removed config name params-14 (line 92)"
+  ],
+  "research/labels/diagnostics/item30/prove_evaluator_default.py": [
+    "removed file params-14 (line 67)",
+    "removed config name params-14 (line 71)"
+  ],
+  "research/labels/diagnostics/item30/separability.py": [
+    "removed config name params-14 (line 131)"
+  ],
+  "research/labels/diagnostics/item30/swell_baseline_gate.py": [
+    "removed config name params-11 (line 70)",
+    "removed config name params-14 (line 70)",
+    "removed config name params-14 (line 74)",
+    "removed config name params-11 (line 75)"
+  ],
+  "research/labels/diagnostics/item31/p15_expected_digest.py": [
+    "removed config name params-14 (line 75)"
+  ],
+  "research/labels/diagnostics/item31/reachability_train.py": [
+    "removed config name params-14 (line 36)"
+  ],
+  "research/labels/diagnostics/item31/stage1_run.py": [
+    "removed config name params-14 (line 350)",
+    "removed config name params-14 (line 354)"
+  ],
+  "research/labels/diagnostics/item31/stage1_smoke_train.py": [
+    "removed config name params-14 (line 52)"
+  ],
+  "research/labels/swell_item30/adjudicate_item30.py": [
+    "removed config name params-14 (line 134)"
+  ]
+}
