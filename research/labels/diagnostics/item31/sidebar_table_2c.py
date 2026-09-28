@@ -129,8 +129,23 @@ def obtained() -> dict:
     at = AppTest.from_file(str(APP), default_timeout=300)
     at.run()
     assert not at.exception, [str(e) for e in at.exception]
-    return {k: at.session_state[k] for k in list(SCALAR) + list(GROUP_KEYS)
-            if k in at.session_state}
+    got = {k: at.session_state[k] for k in list(SCALAR) + list(GROUP_KEYS)
+           if k in at.session_state}
+    # A conditional widget hidden at start-up (e.g. thr_inc_len under plateau,
+    # sm_val with smoothing off) has no session value; its start-up value is
+    # the app's _DEFAULTS entry, read from the same stretch of app.py the tests
+    # execute on their own.
+    import types
+    import yaml
+    src = APP.read_text()
+    start = src.index("_DEFAULTS: dict = {")
+    end = src.index("_SM_OPTS = ")
+    ns = {"st": types.SimpleNamespace(session_state={}), "yaml": yaml}
+    exec(compile(src[start:end], "app.py", "exec"), ns)
+    for k in list(SCALAR) + list(GROUP_KEYS):
+        if k not in got:
+            got[k] = ("hidden", ns["_DEFAULTS"][k])
+    return got
 
 
 def main() -> None:
@@ -153,14 +168,17 @@ def main() -> None:
         doc = json.loads(js.read_text())
         got = obtained()
         for r in doc["rows"]:
-            r["obtained"] = got.get(r["key"], "(not rendered at start-up)")
+            v = got[r["key"]]
+            r["hidden"] = isinstance(v, tuple)
+            r["obtained"] = v[1] if isinstance(v, tuple) else v
         js.write_text(json.dumps(doc, indent=2, default=repr))
         rows, own = doc["rows"], doc["app_own"]
     md = ["| widget key | package parameter | today (2.0.0) | declared (signature) | "
           + ("obtained | match |" if a.obtained else "changes? |"),
           "|---|---|---|---|---|" + ("---|" if a.obtained else "")]
     for r in rows:
-        tail = (f"`{r['obtained']!r}` | {'yes' if r['obtained'] == r['declared'] else '**NO**'} |"
+        tail = (f"`{r['obtained']!r}`{' (hidden at start-up; `_DEFAULTS`)' if r.get('hidden') else ''} | "
+                f"{'yes' if r['obtained'] == r['declared'] else '**NO**'} |"
                 if a.obtained else f"{'**yes**' if r['today'] != r['declared'] else 'no'} |")
         md.append(f"| `{r['key']}` | `{r['parameter']}` | `{r['today']!r}` | `{r['declared']!r}` | {tail}")
     md += ["", "App-own keys, not package parameters (unchanged): "

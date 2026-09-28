@@ -47,18 +47,20 @@ sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
 import benchmark_core as bc  # noqa: E402
 
 # Item 31: params-1 … params-14 left research/labels/configs/, so the two
-# columns are no longer two files. Column A is the SIDEBAR at start-up — the
-# app's 2.0.0 sidebar defaults — and column B is params-15, the calibration
-# reference (Danilo's addendum, 2026-09-28). The sidebar must differ from
-# params-15 in at least one DECLARED parameter, so the two columns give
-# different results: phase_params.incipient_method, 'geometric' (sidebar) vs
-# 'plateau' (params-15). `test_the_sidebar_differs_from_params15_in_a_declared_
-# parameter` asserts it; the output-level control is
-# `test_the_two_configurations_are_actually_distinguishable`.
+# columns are no longer two files. Column A is the SIDEBAR and column B is
+# params-15, the calibration reference (Danilo's addendum, 2026-09-28). Since
+# stage 2c the sidebar OPENS with the package defaults, which ARE params-15, so
+# an untouched sidebar column would equal column B. The sidebar column is
+# therefore taken after ONE declared non-default value is set in the sidebar:
+# filter_params.cutoff_high = 48 (package default and params-15: 18). It changes
+# both the smoothed series (the 30c tests below need that) and the phases.
+# `test_the_sidebar_differs_from_params15_in_a_declared_parameter` asserts it;
+# the output-level control is `test_the_two_configurations_are_actually_
+# distinguishable`, and swapping the columns must fail the pin.
 SIDEBAR = "sidebar"
 CFG_A = SIDEBAR
 CFG_B = "cyclophaser_params-15.yaml"
-DECLARED_DIFF = ("phase_params", "incipient_method", "geometric", "plateau")
+DECLARED_DIFF = ("filter_params", "cutoff_high", 48, 18)
 
 
 def _app() -> AppTest:
@@ -88,9 +90,19 @@ def _add_config_column(at, filename):
     return at
 
 
+def _set_declared_sidebar_value(at):
+    """Set the ONE declared non-default sidebar value (DECLARED_DIFF)."""
+    _sec, key, value, _p15 = DECLARED_DIFF
+    _widget(at, "slider", key).set_value(value)
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+
+
 def _add_column(at, source):
-    """A column from the sidebar (source == SIDEBAR) or from a configs/ file."""
+    """A column from the sidebar (source == SIDEBAR, after the declared
+    non-default value is set) or from a configs/ file."""
     if source == SIDEBAR:
+        _set_declared_sidebar_value(at)
         _widget(at, "button", "bench_add_sidebar").click()
         at.run()
         assert not at.exception, [str(e) for e in at.exception]
@@ -101,9 +113,11 @@ def _add_column(at, source):
 @functools.lru_cache(maxsize=1)
 def _sidebar_yaml() -> str:
     """The document a sidebar column is built from — the app's own published
-    `_bench_live_config` at start-up, read once."""
+    `_bench_live_config`, after the declared non-default value is set, read once."""
     import yaml
-    return yaml.safe_dump(_app().session_state["_bench_live_config"])
+    at = _app()
+    _set_declared_sidebar_value(at)
+    return yaml.safe_dump(at.session_state["_bench_live_config"])
 
 
 def _doc_for(source) -> dict:
@@ -338,9 +352,14 @@ def test_the_sidebar_differs_from_params15_in_a_declared_parameter():
     """Addendum guard (item 31): the two sources differ in the parameter the
     header declares, with the declared values — so the sidebar column cannot
     silently become a second copy of params-15."""
+    import inspect
+
+    from cyclophaser.determine_periods import process_vorticity
     sec, key, in_sidebar, in_params15 = DECLARED_DIFF
     assert _doc_for(CFG_A)[sec][key] == in_sidebar
     assert _doc_for(CFG_B)[sec][key] == in_params15
+    # ... and the sidebar value really is a NON-default one (stage 2c)
+    assert inspect.signature(process_vorticity).parameters[key].default != in_sidebar
 
 
 def test_the_two_configurations_are_actually_distinguishable():
