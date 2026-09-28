@@ -3377,7 +3377,7 @@ belongs to the maturation diagnostic that followed, not to this front.
 
 ---
 
-## 30. Plateau overwriting intensification — selection part: 10 swell tracks drawn for manual labelling — **done on branch `research/item30-plateau-overwrite`, NOT merged**
+## 30. Plateau overwriting intensification — selection, parts 1–3, opt-in rule and params-15 — **closed, merged 2026-09-27** (merge `5434d87`)
 
 The labelled set has no case where the incipient plateau ends after the intensity
 peak and overwrites the intensification. Without such cases, a fix could only be
@@ -3611,6 +3611,21 @@ Results:
   Commit `916ecfc`.
 - **Merge authorised by Danilo.** The merge result is recorded on
   develop-v2.1.
+
+**Merge (2026-09-27).** `research/item30-plateau-overwrite` was merged into
+`develop-v2.1` with `--no-ff` and no PR, as merge **`5434d87`**. Its parents
+are `f92569a` (the develop tip, confirmed before merging) and `2319609` (the
+branch tip). Post-merge checks
+(`research/labels/diagnostics/item30/post_merge_checks.py`):
+
+- The `cyclophaser/` diff between `f92569a` and `5434d87` is the rule only (2
+  files, +62/−2), identical to the branch's.
+- The default evaluator matches `f92569a` in population hash and full output,
+  under params-14 and under package defaults.
+- `load_real_series` returns 51 series.
+- R1, rerun: params-15 changes exactly the 5 adjudicated TRAIN series of 54,
+  each into the counterfactual.
+- Suite (`-m "not browser"`): **1422 passed, 0 failed**.
 
 The result is no separation found on 3 L cases against 2 K cases with a value.
 It is not proof that none exists.
