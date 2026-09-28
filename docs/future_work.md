@@ -3597,6 +3597,21 @@ Results:
   configuration. The package default stays False.
 - **Merge NOT done.** The AUTORIZAÇÃO DE MERGE line came back unfilled.
 
+**Closing decisions (2026-09-27; they supersede the two lines above).**
+
+- **Adoption (Danilo): "adotado sem validação independente".** params-15 is
+  now the calibration reference, and params-11 becomes historical. The package
+  default of `incipient_plateau_spare_intensification` stays False. The configs
+  table in `research/labels/README.md` now runs to params-15, which also clears
+  that cleanup debt.
+- **Validation batch (Danilo's authorisation).** In `batches.swell_item30_val`,
+  only `role` and `labelling_note` were edited: the role is now "spent before
+  labelling", and the note carries the edit record. The series hashes are
+  unchanged. The label tab locks the 5 outright, which an AppTest proves.
+  Commit `916ecfc`.
+- **Merge authorised by Danilo.** The merge result is recorded on
+  develop-v2.1.
+
 The result is no separation found on 3 L cases against 2 K cases with a value.
 It is not proof that none exists.
 

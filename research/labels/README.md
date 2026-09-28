@@ -53,6 +53,8 @@ calibration, **each exactly as the calibration app exported it** — including
 `metadata.cyclones_used` with its 51 entries. They are the Benchmark tab's
 config source, and the tab spans the whole history only because all eleven are
 here; `params-1` to `-8` were added by front 21 (`docs/future_work.md`).
+`params-12` to `-15` came later, one per front (items 22, 24, 28 and 30); the
+table below lists all fifteen.
 
 | File | sha256 | |
 |---|---|---|
@@ -66,8 +68,16 @@ here; `params-1` to `-8` were added by front 21 (`docs/future_work.md`).
 | `cyclophaser_params-8.yaml` | `ce9fdace1ebb88071a27d196736c3ac53123f0873095d6910ff86c78b4b3ca61` | historical |
 | `cyclophaser_params-9.yaml` | `0c3ec55910c45a6dcf9a1787ceca3f3c6796cf25da953be642befa29eaac9f63` | historical |
 | `cyclophaser_params-10.yaml` | `c14755e3ac1c2dcb2da8e652e7eba61ce20b8c45235b18cd7183abac047902d7` | **frozen instrument** — `item19_core.CONFIG` |
-| `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | **current calibration reference** |
-| `cyclophaser_params-15.yaml` | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **CANDIDATE** — item 30 part 3, see below |
+| `cyclophaser_params-11.yaml` | `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420` | historical — calibration reference from front 20(a) until 2026-09-27 |
+| `cyclophaser_params-12.yaml` | `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` | historical — `params-11` + `mature_min_depth` 0.80 (item 22) |
+| `cyclophaser_params-13.yaml` | `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` | historical — `params-12` + `intensification_min_depth` 0.05 (item 24) |
+| `cyclophaser_params-14.yaml` | `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` | historical — `params-13` + `reclassify_index0` true (item 28) |
+| `cyclophaser_params-15.yaml` | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **current calibration reference** — `params-14` + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
+
+**Adopted on 2026-09-27: `params-15` is the calibration reference, "adotado sem
+validação independente".** Danilo decided this at the item-30 closing; V could
+not be measured (see below). The package default of the rule stays False. The
+two paragraphs below record its candidate period and are superseded by this one.
 
 **`params-15` is a CANDIDATE, not a reference.** It is `params-14` byte for
 byte plus one line, `incipient_plateau_spare_intensification: true` (the item-30
@@ -100,10 +110,19 @@ items 19 and 20 were measured against. It must not be touched for any reason.
 
 ## Reference configuration
 
-**Current calibration reference: `research/labels/configs/cyclophaser_params-11.yaml`**
+**Current calibration reference: `research/labels/configs/cyclophaser_params-15.yaml`**
+(sha256 `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04`),
+**adotado sem validação independente** at the item-30 closing (2026-09-27). It is
+`params-14` plus the opt-in item-30 rule `incipient_plateau_spare_intensification`
+(package default False). **Future fronts measure against this config.** The record
+is `diagnostics/item30/REPORT_part3.md`, including the 5 swell tracks outside the
+item-30 signal that the rule also changes.
+
+*Previous reference (front 20(a) to 2026-09-27):*
+`research/labels/configs/cyclophaser_params-11.yaml`
 (sha256 `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420`).
 It is `params-10` with `mature_amplitude_fraction` 0.90 instead of 0.95, closed
-by front 20(a) with a PASS gate. **Future fronts measure against this config.**
+by front 20(a) with a PASS gate.
 
 `cyclophaser_params-9.yaml` and `cyclophaser_params-10.yaml` are historical.
 They are kept intact and are never rewritten: earlier fronts' numbers were
