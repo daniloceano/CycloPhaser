@@ -1,8 +1,8 @@
 {
- "n_tracked": 536,
+ "n_tracked": 537,
  "dest": {
-  "manter": 222,
-  "remover": 274,
+  "manter": 224,
+  "remover": 273,
   "consolidar": 40
  },
  "stale_confirmed": 40,
@@ -20,11 +20,12 @@
   "research/incipient_plateau/gen_geometric_vs_plateau.py",
   "research/incipient_plateau/geometric_vs_plateau.csv"
  ],
- "p114_total": 988,
- "p114_live": 105,
+ "p114_total": 1018,
+ "p114_live": 135,
  "p114_live_files": [
   "CHANGELOG.md",
   "cyclophaser/determine_periods.py",
+  "docs/findings.md",
   "research/inert_params/REPORT_inertia_sweep.md",
   "research/labels/README.md",
   "research/labels/split.yaml",
@@ -46,10 +47,10 @@
   "tools/calibration_app/benchmark_tab.py",
   "tools/calibration_app/layer_inspector.py"
  ],
- "p15_total": 265,
+ "p15_total": 274,
  "p15_viva": 13,
- "p15_hist": 252,
- "bp_total": 149,
+ "p15_hist": 261,
+ "bp_total": 156,
  "abs_total": 139,
  "abs_files": [
   "docs/future_work.md",

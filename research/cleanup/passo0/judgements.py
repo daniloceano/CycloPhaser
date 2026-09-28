@@ -87,7 +87,16 @@ KEEP = {
         "gerador da tabela citada por teste vivo",
     "research/incipient_plateau/measure_incipient_smoothing.py":
         "citado por comentário vivo do pacote (o alvo do comentário tem de existir; linha em 'registrado em')",
+    DIAG + "item31/regenerate_baselines_2b.py":
+        "gerador canônico dos baselines do CI (tests/expected_*.csv, tests/baselines/*, tests/test.csv)",
 }
+
+# Passo 4 — live texts to revise (approved by Danilo 2026-09-28): (file, needle, what is wrong).
+PASSO4 = [
+    ("tools/calibration_app/app.py", "incipient phase (0/51); under `edge`, 33/51 refuse.",
+     "texto de ajuda afirma 0/51 recusas sob reflect e 33/51 sob edge sem nomear o sinal; falso para o default "
+     "incipient_plateau_signal=\"vorticity\" (ver docs/findings.md S12)"),
+]
 
 # Anchors shown in the "registrado em" column of a KEPT file: who cites it.
 KEEP_ANCHORS = {
@@ -427,6 +436,7 @@ STALE_RESULT = {
 # Default for historical records and closed-front diagnostics is decided by rule
 # in make_manifest.py; these are the live files, per file:line range.
 P114_LIVE = {
+    "docs/findings.md": ("manter", "registro consolidado (Passo 2): menção histórica, cita a fonte por commit"),
     "CHANGELOG.md": ("manter", "entradas de CHANGELOG narram a história das configs; não carregam arquivo"),
     "cyclophaser/determine_periods.py": ("manter", "docstring: fato histórico (configs anteriores à regra) — não carrega arquivo"),
     "research/inert_params/REPORT_inertia_sweep.md": ("manter", "relatório histórico (consolidar no Passo 2)"),
@@ -455,6 +465,7 @@ P114_LIVE = {
 # Section (c): params-15 VIVA / HISTÓRICA — rules by path (first match wins).
 P15_CLASS = [
     ("docs/future_work.md", "HISTÓRICA", "registro de itens fechados"),
+    ("docs/findings.md", "HISTÓRICA", "registro consolidado de achados (Passo 2)"),
     ("research/labels/split.yaml", "HISTÓRICA", "congelado"),
     ("research/labels/swell_item30/README.md", "HISTÓRICA", "registro do item 30"),
     (DIAG + "item31/param_table.json", "HISTÓRICA*", "artefato do item 31, mas lido por teste vivo (só `rows`) — conferir no Passo 1"),

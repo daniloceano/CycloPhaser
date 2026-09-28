@@ -645,6 +645,13 @@ if TRACE:
 w(f"Entradas: {len(tr)}; **SÓ AQUI: {len(only_here)}**" +
   (" — " + "; ".join(f"`{x['path']}` → {x['finding']}" for x in only_here) if only_here else "") + ".\n")
 
+w("## Lista do Passo 4 — textos vivos a revisar\n")
+w("Além dos defaults escritos em texto (seção (e)) e dos literais do app (decisão 11). Linhas resolvidas por texto.\n")
+w("| arquivo:linha | o que está errado |\n|---|---|")
+for f, needle, what in J.PASSO4:
+    w(f"| `{resolve((f, needle))}` | {esc(what)} |")
+w("")
+
 tail = P0 / "manifest_tail.md"   # hand-written: decisions for Danilo, deviations
 if tail.exists():
     out.append(tail.read_text())

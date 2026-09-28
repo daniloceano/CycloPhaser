@@ -688,11 +688,7 @@
    ],
    "why": "table-row",
    "code": {
-    "threshold_intensification_length": {
-     "get_periods": "0.075",
-     "determine_periods": "0.075"
-    },
-    "threshold_intensification_gap": {
+    "threshold_decay_length": {
      "get_periods": "0.075",
      "determine_periods": "0.075"
     },
@@ -700,11 +696,15 @@
      "get_periods": "0.4",
      "determine_periods": "0.4"
     },
-    "threshold_decay_gap": {
+    "threshold_intensification_gap": {
      "get_periods": "0.075",
      "determine_periods": "0.075"
     },
-    "threshold_decay_length": {
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    },
+    "threshold_decay_gap": {
      "get_periods": "0.075",
      "determine_periods": "0.075"
     }
@@ -720,15 +720,15 @@
    ],
    "why": "assignment",
    "code": {
-    "replace_endpoints_with_lowpass": {
-     "process_vorticity": "0",
-     "determine_periods": "0"
-    },
     "boundary_padding": {
      "process_vorticity": "'reflect'",
      "determine_periods": "'reflect'",
      "lanczos_filter": "'reflect'",
      "lanczos_bandpass_filter": "'reflect'"
+    },
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
     }
    },
    "text": "has `boundary_padding=\"reflect\"`, `replace_endpoints_with_lowpass=0` and"
@@ -797,7 +797,7 @@
      "lanczos_bandpass_filter": "'reflect'"
     }
    },
-   "text": "**Why `\"reflect\"`.** `boundary_padding=\"reflect\"` is the default by the"
+   "text": "**The `reflect` default.** `boundary_padding=\"reflect\"` is the default by the"
   },
   {
    "file": "CHANGELOG.md",
@@ -1074,13 +1074,13 @@
    ],
    "why": "assignment",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "mature_method": {
      "get_periods": "'amplitude'",
      "determine_periods": "'amplitude'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     }
    },
    "text": "`length_scale` is **not** removed. Under `mature_method=\"amplitude\"` it no longer"
@@ -1204,13 +1204,13 @@
    ],
    "why": "assignment",
    "code": {
-    "incipient_method": {
-     "get_periods": "'plateau'",
-     "determine_periods": "'plateau'"
-    },
     "incipient_plateau_signal": {
      "get_periods": "'vorticity'",
      "determine_periods": "'vorticity'"
+    },
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
     }
    },
    "text": "`incipient_method=\"plateau\"` with `incipient_plateau_signal=\"vorticity\"`."
@@ -1598,13 +1598,13 @@
    ],
    "why": "assignment",
    "code": {
-    "cutoff_low": {
-     "process_vorticity": "168",
-     "determine_periods": "168"
-    },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
+    },
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
     }
    },
    "text": "single scalar multiply (0.0714 for `cutoff_low=168` / `cutoff_high=24`), not a"
@@ -1735,11 +1735,11 @@
    ],
    "why": "assignment",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -1897,11 +1897,11 @@
    ],
    "why": "assignment",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -2041,13 +2041,13 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "savgol_polynomial": {
      "process_vorticity": "3",
      "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "to `savgol_polynomial`. **Units**: Time steps. Default is `False` (`'auto'` up to 2.0.0). **To deactivate**, set `use_smoothing`"
@@ -2076,11 +2076,11 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -2171,13 +2171,13 @@
    ],
    "why": "assignment",
    "code": {
-    "cutoff_low": {
-     "process_vorticity": "168",
-     "determine_periods": "168"
-    },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
+    },
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
     }
    },
    "text": "``cutoff_low=168``/``cutoff_high=24``), i.e. no convolution at all — so a"
@@ -2379,13 +2379,13 @@
    ],
    "why": "assignment",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "savgol_polynomial": {
      "process_vorticity": "3",
      "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "to `savgol_polynomial` to avoid errors. For example, if `savgol_polynomial=3`, then `use_smoothing` must be"
@@ -2399,13 +2399,13 @@
    ],
    "why": "assignment",
    "code": {
-    "cutoff_low": {
-     "process_vorticity": "168",
-     "determine_periods": "168"
-    },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
+    },
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
     }
    },
    "text": ">>> df = process_vorticity(zeta_df, cutoff_low=168, cutoff_high=24)"
@@ -2638,11 +2638,11 @@
    ],
    "why": "assignment",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -3293,11 +3293,11 @@
    ],
    "why": "assignment",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -3558,11 +3558,11 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -3982,17 +3982,17 @@
    ],
    "why": "names+default",
    "code": {
-    "cutoff_low": {
-     "process_vorticity": "168",
-     "determine_periods": "168"
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
     },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
     },
-    "replace_endpoints_with_lowpass": {
-     "process_vorticity": "0",
-     "determine_periods": "0"
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
     }
    },
    "text": "- **Data Frequency**: The default values for `cutoff_low`, `cutoff_high`, `replace_endpoints_with_lowpass`,"
@@ -4121,13 +4121,13 @@
    ],
    "why": "assignment",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "mature_method": {
      "get_periods": "'amplitude'",
      "determine_periods": "'amplitude'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     }
    },
    "text": "'length_scale'. Only used when mature_method=\"derivative\"."
@@ -4406,13 +4406,13 @@
    ],
    "why": "assignment",
    "code": {
-    "incipient_method": {
-     "get_periods": "'plateau'",
-     "determine_periods": "'plateau'"
-    },
     "incipient_plateau_signal": {
      "get_periods": "'vorticity'",
      "determine_periods": "'vorticity'"
+    },
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
     }
    },
    "text": "# `incipient_method=\"plateau\"` with `incipient_plateau_signal=\"vorticity\"`, in"
@@ -4723,11 +4723,11 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -4743,13 +4743,13 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "savgol_polynomial": {
      "process_vorticity": "3",
      "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "- **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing. **Note:** This must be less than or equal to the window length specified in `use_smoothing`. Default is 3."
@@ -4763,13 +4763,13 @@
    ],
    "why": "names+default",
    "code": {
-    "cutoff_low": {
-     "process_vorticity": "168",
-     "determine_periods": "168"
-    },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
+    },
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
     }
    },
    "text": "- **cutoff_low** and **cutoff_high**: (float, optional) Low and high-frequency cutoffs for the Lanczos filter, respectively. **Units:** Time steps. Default values are 168 and 48, respectively."
@@ -5409,13 +5409,13 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "savgol_polynomial": {
      "process_vorticity": "3",
      "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "- **use_smoothing**: (str, int, optional) Apply Savgol smoothing to filtered vorticity data. Set to `'auto'` to automatically choose an appropriate window length, or provide an integer window length directly. **Note**: T"
@@ -5429,11 +5429,11 @@
    ],
    "why": "names+default",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -5454,13 +5454,13 @@
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
-     "process_vorticity": "False",
-     "determine_periods": "False"
-    },
     "savgol_polynomial": {
      "process_vorticity": "3",
      "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
     }
    },
    "text": "- **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing, which must be less than or equal to the window length specified in `use_smoothing` and `use_smoothing_twice`. **Default**: 3."
@@ -5523,17 +5523,17 @@
    ],
    "why": "names+default",
    "code": {
-    "cutoff_low": {
-     "process_vorticity": "168",
-     "determine_periods": "168"
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
     },
     "cutoff_high": {
      "process_vorticity": "18.0",
      "determine_periods": "18.0"
     },
-    "replace_endpoints_with_lowpass": {
-     "process_vorticity": "0",
-     "determine_periods": "0"
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
     },
     "use_smoothing": {
      "process_vorticity": "False",
@@ -5938,11 +5938,11 @@
    ],
    "why": "assignment",
    "code": {
-    "use_smoothing_twice": {
+    "use_smoothing": {
      "process_vorticity": "False",
      "determine_periods": "False"
     },
-    "use_smoothing": {
+    "use_smoothing_twice": {
      "process_vorticity": "False",
      "determine_periods": "False"
     }
@@ -6222,13 +6222,13 @@
    ],
    "why": "assignment",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "mature_method": {
      "get_periods": "'amplitude'",
      "determine_periods": "'amplitude'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     },
     "threshold_mature_distance": {
      "get_periods": "0.18",
@@ -6276,13 +6276,13 @@
    ],
    "why": "table-row",
    "code": {
-    "length_scale": {
-     "get_periods": "'local'",
-     "determine_periods": "'local'"
-    },
     "threshold_incipient_length": {
      "get_periods": "0.4",
      "determine_periods": "0.4"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
     }
    },
    "text": "| `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |"

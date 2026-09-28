@@ -22,34 +22,54 @@
   {
    "branch": "chore/repo-cleanup",
    "hash_mentions": [
-    "research/labels/diagnostics/front_b/default_behaviour_sha256.txt:109 (742e685)"
+    "docs/findings.md:258 (b60d57b)",
+    "docs/findings.md:39 (a132f37)",
+    "docs/findings.md:253 (a132f37)",
+    "docs/findings.md:277 (a132f37)",
+    "docs/findings.md:537 (a132f37)",
+    "docs/findings.md:541 (a132f37)",
+    "docs/findings.md:543 (a132f37)",
+    "docs/findings.md:43 (33dc4e1)",
+    "docs/findings.md:255 (33dc4e1)",
+    "docs/findings.md:256 (33dc4e1)",
+    "docs/findings.md:278 (33dc4e1)",
+    "docs/findings.md:538 (33dc4e1)",
+    "docs/findings.md:539 (33dc4e1)",
+    "docs/findings.md:39 (742e685)",
+    "research/labels/diagnostics/front_b/default_behaviour_sha256.txt:109 (742e685)",
+    "docs/findings.md:531 (d8a19cc)",
+    "docs/findings.md:532 (d8a19cc)",
+    "docs/findings.md:537 (d8a19cc)",
+    "docs/findings.md:532 (f17d802)"
    ],
-   "tip": "33dc4e1",
+   "tip": "d79914b",
    "date": "2026-09-28",
-   "subject": "research(cleanup): passo 1 — evidências (higiene, digests, suíte, portão (a), relatório)",
+   "subject": "research(cleanup): passo 2 — verificações (Q1–Q5), citações fracas, correção S12 do FINDING de inertes",
    "in_develop": false,
    "patch_equivalent": false,
    "cherry_minus": 0,
-   "cherry_plus": 6,
-   "ahead": 6,
+   "cherry_plus": 10,
+   "ahead": 10,
    "behind": 0,
    "merge_base": "06d8550",
-   "n_files_changed": 77,
+   "n_files_changed": 95,
    "dirs_changed": [
     ".gitignore",
     ".pypirc",
     "CHANGELOG.md",
     "cyclophaser/determine_periods.py",
     "cyclophaser/lanczos_filter.py",
+    "docs/findings.md",
     "docs/future_work.md",
     "docs/usage.rst",
     "research/cleanup/MANIFEST.md",
     "research/cleanup/passo0",
     "research/cleanup/passo1",
-    "research/labels/README.md",
-    "research/labels/configs"
+    "research/cleanup/passo2"
    ],
-   "mentions": []
+   "mentions": [
+    "docs/findings.md:16"
+   ]
   },
   {
    "branch": "develop-v2.1",
@@ -69,6 +89,8 @@
    "mentions": [
     "CHANGELOG.md:372",
     "CHANGELOG.md:477",
+    "docs/findings.md:4",
+    "docs/findings.md:13",
     "docs/future_work.md:400",
     "docs/future_work.md:660",
     "docs/future_work.md:719",
@@ -490,7 +512,9 @@
   },
   {
    "branch": "feat/label-tab-toplevel",
-   "hash_mentions": [],
+   "hash_mentions": [
+    "docs/findings.md:531 (0c63145)"
+   ],
    "tip": "0c63145",
    "date": "2026-09-15",
    "subject": "data: save 4 manual label re-labels made through the app (real, train split)",
@@ -510,7 +534,9 @@
     "tools/calibration_app/app.py",
     "tools/calibration_app/label_tab.py"
    ],
-   "mentions": []
+   "mentions": [
+    "docs/findings.md:531"
+   ]
   },
   {
    "branch": "fix/app-inert-params-signaling",
@@ -908,7 +934,12 @@
   },
   {
    "branch": "research/item20c-duration-ratio",
-   "hash_mentions": [],
+   "hash_mentions": [
+    "docs/findings.md:149 (e7792d3)",
+    "docs/findings.md:150 (e7792d3)",
+    "docs/findings.md:524 (e7792d3)",
+    "docs/findings.md:548 (e7792d3)"
+   ],
    "tip": "e7792d3",
    "date": "2026-09-21",
    "subject": "docs(item20c): close the record — verdict completed, 20(e)(i) retired, 0.95 default claim corrected",
@@ -1013,7 +1044,11 @@
   },
   {
    "branch": "research/v3-topology-proxy",
-   "hash_mentions": [],
+   "hash_mentions": [
+    "docs/findings.md:66 (c508730)",
+    "docs/findings.md:67 (c508730)",
+    "docs/findings.md:548 (c508730)"
+   ],
    "tip": "c508730",
    "date": "2026-09-16",
    "subject": "research(v3): constant baselines; retract the skeleton claim; mark post-hoc blocks",

@@ -96,7 +96,7 @@ adopted it, and had TEST blocks displayed in the Benchmark, and their labels are
 the same assessor's judgement (`research/labels/diagnostics/item31/DESIGN.md`,
 §3 events E01, E22, E23, and §5.2).
 
-**Why `"reflect"`.** `boundary_padding="reflect"` is the default by the
+**The `reflect` default.** `boundary_padding="reflect"` is the default by the
 maintainer's choice (2026-09-28), made without a detection-quality measurement.
 The two consequences expected when the change was decided did not hold on the
 training series: incipient refusals are 28/54 under `"reflect"` (28/54 under

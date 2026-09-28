@@ -9,6 +9,8 @@ Template syntax (path shorthands FW, CL, D/, IP/, IN/, P1/ — see ALIASES)
                        contains `needle`; rendered as `path:LINE@06d8550`.
 {{path@REF|needle}}    the same, at commit REF (a branch commit or a commit of
                        this branch).
+{{path@REF:N|text}}    line N of path at REF, which must contain `text` (for
+                       lines whose text is not unique in the file).
 {{!csv_table}}         S02: research/incipient_plateau/geometric_vs_plateau.csv
                        at 06d8550, one table row per CSV row, each row citing
                        its own CSV line.
@@ -267,6 +269,12 @@ def main():
         for a, full in ALIASES.items():
             if path == a or path.startswith(a + "/"):
                 path = full + path[len(a):]
+        if ":" in ref:                       # {{path@REF:N|text}}: a fixed line that must contain text
+            ref, n = ref.split(":", 1)
+            lines = show(ref.strip(), path.strip())
+            if not (n.isdigit() and 1 <= int(n) <= len(lines) and needle in lines[int(n) - 1]):
+                ERRORS.append(f"fixed line does not hold its text: {path}:{n}@{ref} :: {needle!r}")
+            return f"`{path.strip()}:{n}@{ref.strip()}`"
         return resolve(path.strip(), ref.strip(), needle)[0]
 
     out = re.sub(r"\{\{(.+?)\}\}", cite, src)
