@@ -515,6 +515,26 @@ At stage 0 (`a21bca2`) these were four open questions. Danilo settled them on
    It is not a comparator. After stage 1 has run, no unscored data remains to
    validate it.
 
+### 8.1 Stage-2 decisions (Danilo, 2026-09-28, after stage 1 ran)
+
+5. **(a) Incomplete configs.** A key a config does not carry is filled with its
+   **2.0.0 default**, taken from a **frozen table generated from
+   `param_table.json`'s "default" column** (`research/labels/defaults_2.0.0.json`,
+   written by `make_defaults_2_0_0.py`, never typed by hand). An explicit warning
+   lists the keys that were filled. It applies to `evaluate_against_labels.load_config`,
+   `benchmark_core` and the app's YAML import. It settles item 30's clean-up debt
+   ("importing configs older than params-14 warns 'missing key'"): the warning is
+   now a declared fill, with the value used.
+6. **params-1 … params-14 are REMOVED in this front.** This scope moves ahead of
+   the clean-up front, by Danilo's decision. **params-15 stays.** Old records in
+   `docs/future_work.md` are not rewritten; the recovery table in §10.1 says how
+   to recover each file.
+7. **The Benchmark AppTest's positive control** (addendum). The sidebar column
+   may be the second source, **provided the sidebar differs from params-15 in at
+   least one parameter**, so that the two columns give different results. The
+   parameter and value are declared in §10.2, and a mutation run shows the test
+   FAILS when the columns are swapped.
+
 ## 9. Stage 1, part A — the freeze (2026-09-28)
 
 **`stage1_run.py` implements §5 with §8's decisions. It was committed and NOT
@@ -562,6 +582,55 @@ orchestration summary. The run also prints the last commit touching
 
   `stage1_run.main()` was not called, and no TEST label or series was touched.
   `stage1_output.*` was absent before and after.
+
+## 10. Stage 2a — removal of params-1 … params-14, no package behaviour change
+
+Declared **before** any file was deleted or any test edited. The HEAD at
+declaration is `33ea489`.
+
+### 10.1 Recovery table (`recovery_table.py` → `recovery_table.md`)
+
+The table below is pasted from `recovery_table.md` in the commit that deletes the
+files. Each row was verified at generation: the `git show` hash equals the
+working-tree hash, which equals the hash in the README table. `33ea489` is on
+this branch, and all 14 files also exist unchanged on `develop-v2.1` (`6f956fc`).
+
+RECOVERY_TABLE_PLACEHOLDER
+
+### 10.2 Tests that read a removed file — declared, test by test, before editing
+
+The brief says "the 4 tests"; **five test files** read a params-N (N ≤ 14) file.
+`test_reclassify_index0.py` only carries params-13's values inline, and is not
+touched.
+
+| test | reads | what changes | what does NOT change |
+|---|---|---|---|
+| `test_app_distance_removed.py::test_reference_config_still_carries_distance` | params-9, to show that a real export carries `distance: 5` | The real-world case becomes an **inline YAML with `distance: 5`** (params-9's value), passed through the app's own `_load_yaml_config`. It asserts the key lands in `ignored` with the "distance removido" explanation and is applied nowhere. The test is renamed `test_a_config_carrying_distance_imports_with_the_explanation`. It is a behavioural check where the old one only checked a file. | the class's static checks on `app.py` |
+| `test_benchmark_apptest.py` | params-1 (CFG_A), params-5 (third column), params-11 (CFG_B, reference option, cards) | **CFG_A = the sidebar column** (2.0.0 sidebar defaults). **CFG_B = params-15.** The third column is a second sidebar column. The reference option becomes `params-15`. The cards read the first column's own name. `_expected_for` and `_column_z` accept the sidebar source, whose document is the app's published `_bench_live_config`. **Declared parameter that makes the two columns differ:** `phase_params.incipient_method` = **`geometric`** (sidebar) vs **`plateau`** (params-15). It is asserted by a new guard, `test_the_sidebar_differs_from_params15_in_a_declared_parameter`. | every assertion's intent: alignment, isolation with its positive control, the swap control, unlabelled rows, batch/adjudicated blocks |
+| `test_intensification_min_depth.py::test_params13_yaml_matches_this_module` | params-13 | The reference file becomes **params-15**. params-15 = params-13 + `reclassify_index0` + `spare_intensification`, and neither key is among those compared, so every compared key has the same value (checked by script). Renamed `test_params15_yaml_matches_this_module`. | the values compared |
+| `test_item30_spare_intensification.py` (2 tests) | params-14 | **(i)** `params15_reproduces_the_counterfactual`: `cfg14` = params-15 with `incipient_plateau_spare_intensification=False` passed explicitly. This is identical to params-14 by stage 0's assert (the only difference is that key). **(ii)** `importing_params14_turns_the_rule_off`: the file is **params-15's text with the key's line removed** (a real config without the key). Under decision (a) the key is now **filled with False and listed**, so the assertion `not in res["missing"]` **inverts**: the key must appear in the fill list with value False. The state assertion (False) is unchanged. | the positive control (params-15 turns it on) |
+| `test_layer_inspector.py` (§7 fidelity, 4 tests) | params-14 | `_params_14` → `_params_15`, and the tests are renamed. The floors are identical (0.05 / 0.80). The only added key is `spare_intensification=True`, so the ribbon fidelity sweep now also covers the rule. The cache key becomes `"p15"`. | the depth-floor guard and the ledger ≡ mask checks |
+
+**Suite prediction for gate 2a.** The baseline is `33ea489`, measured in a clean
+worktree before any edit. The prediction is written when the baseline lands; see
+§10.5.
+
+### 10.3 `item19_core`
+
+`pair_by_overlap` and `MARGIN` stay. `CONFIG = params-10` is removed.
+`load_config()` with no path raises and names the recovery commit. `load_config(path)`
+still works. The Benchmark imports only `pair_by_overlap` and `MARGIN`.
+
+### 10.4 Closed-front scripts that stop running — NOT migrated
+
+These scripts are listed by `stale_scripts.py`, and they reproduce from
+`33ea489`. The list is pasted from `stale_scripts.md` in the 2a commit.
+
+STALE_SCRIPTS_PLACEHOLDER
+
+### 10.5 Gate 2a — declared before running
+
+GATE2A_PLACEHOLDER
 
 ---
 
