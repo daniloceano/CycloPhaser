@@ -75,6 +75,19 @@ out-of-sample (DESIGN §5.2).
 * The inspector's fallback table follows the package defaults, and an explicit
   `decay_tail_amplitude_fraction=None` is no longer replaced by the default.
 
+### Fixed — `process_vorticity(use_filter=False)` crashed on an unnamed index (item 31, `a1784b5`) — **a separate change, pending approval**
+
+With `use_filter=False` the raw series kept the input index's own dimension
+(`index` for an unnamed index, a list with `x`, or a Series built from
+`.tolist()`), and only a Savitzky-Golay pass rebuilt it on `time`. So
+`use_filter=False` together with `use_smoothing=False` raised
+`ValueError: Coordinate 'time' not found`. That was reachable in 2.0.0 only
+with both passed explicitly, but the new default `use_smoothing=False` made it
+reachable with `use_filter=False` alone. The unfiltered branch now builds the
+series on the same `time` coordinate as the filtered one. No output changed:
+110/110 runs that ran before give byte-identical periods, and the 110 that
+crashed now run (`research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt`).
+
 ### Changed — research tooling: incomplete configs and the configs directory (item 31, stage 2a, `eed8e77`)
 
 * **A key a config does not carry is filled with its frozen cyclophaser 2.0.0

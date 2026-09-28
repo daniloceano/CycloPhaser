@@ -867,6 +867,32 @@ it:
 | EQ1 / EQ2 / EQ4 digests | unchanged: they run the filtered path |
 | full suite after the fix and the regeneration of `expected_no_filter.csv` | **1433 passed, 0 failed** |
 
+**Results of the fix (`a1784b5`):**
+
+| check | predicted | obtained |
+|---|---|---|
+| outputs identical after the fix | 55/55 · 110/110 · 55/55 | **55/55 · 110/110 · 55/55** |
+| crashes remaining | 0 | **0** (110 fixed) |
+| EQ1–EQ5, rerun | unchanged | **unchanged, PASS** |
+| `expected_no_filter.csv` | regenerable | **regenerated**; the other three came out byte-identical on rerun |
+| full suite at `a1784b5` | 1433 passed, 0 failed | **1433 passed, 0 failed** (`suite_2b_final.txt`) |
+
+**front_b record (step 7).** `front_b/default_behaviour_hash.py`, the single
+default-digest generator, ran unmodified at `a1784b5`. It printed `3a6de265…`
+(= EQ1) and **appended** a record with its provenance (generator, python 3.12.14,
+numpy 2.5.3, scipy 1.18.0, pandas 3.0.5, commit). The diff is 9 inserted lines
+and no line changed.
+
+**Summary of the suite through 2b:**
+
+| run | commit | passed | failed |
+|---|---|---:|---:|
+| baseline, before item 31 stage 2 | `33ea489` | 1422 | 0 |
+| gate 2a | `1766338` | 1431 | 0 (predicted 1431 / 0) |
+| 2b measurement (new defaults, tests untouched) | `c5217b5` code | 1260 | **171** |
+| 2b after migration + regeneration, before the fix | `55a4780` | 1432 | **1** (predicted 1433 / 0: **missed**) |
+| 2b final | `a1784b5` | **1433** | **0** (predicted 1433 / 0 after the fix) |
+
 
 ### 11.4 Effect on the app (task 8)
 
