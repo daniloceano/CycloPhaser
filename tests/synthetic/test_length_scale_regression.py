@@ -246,14 +246,17 @@ def test_case_b_local_recovers_second_cycle():
     )
 
 
-def test_case_b_global_mode_unaffected_by_length_scale_option_existing():
-    """Adding the length_scale parameter must not change 'global' output vs.
-    calling determine_periods() without specifying it at all (implicit default)."""
+def test_case_b_explicit_default_length_scale_equals_implicit():
+    """The package's length_scale default, passed explicitly, must give the same
+    output as not passing it. Item 31 moved that default from "global" to
+    "local"; it is read from the signature, and every other parameter is held at
+    its 2.0.0 value, so only length_scale's own default is exercised."""
+    import inspect
+    default_now = inspect.signature(determine_periods).parameters["length_scale"].default
+    _base = {k: v for k, v in ALL_2_0_0.items() if k != "length_scale"}
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        # Item 31: on the 2.0.0 base (length_scale="global" there), explicit vs implicit.
-        _base = {k: v for k, v in ALL_2_0_0.items() if k != "length_scale"}
         df_explicit = determine_periods(_series_case_b, x=_series_case_b.index, **_base,
-                                        length_scale="global")
+                                        length_scale=default_now)
         df_implicit = determine_periods(_series_case_b, x=_series_case_b.index, **_base)
     pd.testing.assert_frame_equal(df_explicit, df_implicit)

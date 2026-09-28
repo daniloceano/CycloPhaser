@@ -744,6 +744,114 @@ Every prediction held (`gate_2a.txt`, `suite_2a.txt`). The only visible effect
 of (a) on params-15 is a stderr note from the evaluator:
 `phase_params.prominence=None`, filled.
 
+## 11. Stage 2b — the defaults become params-15 (CHECKPOINT, pending Danilo's approval)
+
+This stage is on branch **`research/item31-stage2b-checkpoint`** (from `eed8e77`),
+committed there for verification only and NOT on the front branch.
+
+### 11.1 The change
+
+* **Signatures.** `process_vorticity`, `get_periods` and `determine_periods` now
+  take the params-15 defaults, normalised to the annotated types:
+  * `use_filter` stays `'auto'`;
+  * `cutoff_high = 18.0` (a float);
+  * `incipient_smooth_window = 5` (an int);
+  * `incipient_smooth_polyorder` stays `3`.
+
+  That makes 17 behavioural changes. A script asserts that every signature
+  default equals params-15 (`use_filter` `'auto'` ≡ `True`).
+* **Docstrings.**
+  * Every "(default)" and "Default is …" statement for a moved parameter now
+    gives the new value and the 2.0.0 one.
+  * Each of the three functions opens with a "Defaults (item 31)" note. It
+    separates phase defaults from filtering, says that only the TRACK filtering
+    was calibrated, gives the status of spare_intensification ("adotada sem
+    validação independente"), and says how to reproduce 2.0.0.
+* **Inspector** (`layer_inspector`).
+  * `_ARGS_PERIODS_DEFAULTS` follows the new `get_periods` defaults, as a test
+    requires.
+  * `build_working_frame`'s `prominence_relative` default becomes 0.3.
+  * `build_args_periods` no longer drops an explicit
+    `decay_tail_amplitude_fraction=None`, because None is a value there (OFF).
+* **App.** `_phase_params_tuple` and `_bench_live_config` keep `None` values. A
+  sidebar check that is OFF used to be omitted, which in 2.0.0 meant the
+  default None. Under the new defaults that would silently run
+  `prominence_relative=0.3` / `decay_tail_amplitude_fraction=0.3`.
+
+### 11.2 Equivalence gate (`gate_2b.py` → `gate_2b.txt`, `gate_2b.json`) — **PASS**
+
+| | predicted (DESIGN §6 / brief) | obtained |
+|---|---|---|
+| EQ1 front_b-layout digest, 47 TRAIN, no args | `3a6de265…` | **`3a6de265…`** |
+| EQ2 same layout, 54 (47 + 7 batch), no args | `923e1a03…` | **`923e1a03…`** |
+| EQ2 control: params-15 with spare=False explicit | `3756392e…` | **`3756392e…`** |
+| EQ3 `determine_periods(s)` == `G(s)` == `G(s, params-15)` | identical everywhere | **54/54 train, 1/1 example, 16/16 test, 3/3 batch test, 5/5 validation** |
+| EQ4 the 2.0.0 table explicit, 47 TRAIN | `b500d2e0…` | **`b500d2e0…`** |
+| EQ5 no `use_filter` warning, no args | none | **none on all 79** |
+| TRAIN changes vs 2.0.0: final map / sequence (real / synthetic / batch) / incipient presence | 54 / 32 (25/1/6) / 24 | **54 / 32 (25/1/6) / 24** |
+
+Counts only, vs 2.0.0, with no prediction declared:
+
+| population | final map changed | sequence changed | incipient presence flips |
+|---|---|---|---|
+| `example_file` | 1/1 | 1/1 | 1/1 |
+| 16 split TEST | 16/16 | 12/16 | 10/16 |
+| 3 batch TEST | 3/3 | 2/3 | 1/3 |
+| 5 validation | 5/5 | 5/5 | 4/5 |
+
+The per-series TRAIN before/after sequences are in `train_sequences_2b.md`.
+
+### 11.3 The suite — measured, classified, then declared
+
+**Measurement** (new defaults, before any test was touched): **171 failed,
+1260 passed**. Each of the 171 falls into one class:
+
+| class | what it is | files (failures) | treatment |
+|---|---|---|---|
+| **A** | asserts the default VALUE, or "explicit default == implicit" | `test_boundary_padding` (103: default is reflect ×51 ×2, end-to-end ×1), `test_item30_spare_intensification` (3), `test_intensification_min_depth` (2), `test_decay_tail_amplitude_fraction` (1) | follow the new default: `edge`; spare `True`; "explicit current default == implicit", with the default READ FROM THE SIGNATURE rather than typed |
+| **C** | a behaviour or number MEASURED under the 2.0.0 defaults, inherited silently | `test_layer_inspector` (38: incipient lead ×26, mature lens ×5, ledger reference counts ×4, ribbon-overwrite ×1, read-back ×1, decay ledger ×1), `test_incipient_plateau` (15), `synthetic/test_length_scale_regression` (3) | pass the 2.0.0 values **explicitly** from the frozen table (`tests/legacy_defaults.py`), so every assertion keeps meaning what it meant. `test_incipient_plateau`'s develop-v2.1 baseline becomes the cross-version check of the explicit 2.0.0 path |
+| **harness** | `test_layer_inspector::test_ribbon_step_six_equals_get_periods` (3). The test forwarded `config.get(k)` (an explicit None) to the frame while `get_periods(**config)` took the new 0.3 default. **Not an inspector defect**: forwarding only the keys the config carries restores the comparison, with no change to the claim | | forward only present keys |
+| **B** | outputs pinned to the default path | `test_regression_baseline` (2), `test_determine_periods` (1) | **regenerate** under the new defaults, AFTER this declaration |
+
+Two further edits:
+* One test that passed but whose claim was class A:
+  `test_case_b_global_mode_unaffected…`, renamed
+  `test_case_b_explicit_default_length_scale_equals_implicit`.
+* One passing test pinned for consistency with its class-C sibling:
+  `test_crossing_index_matches_the_package_boundary_function`.
+
+After A, C and the harness fix, the nine affected files gave **3 failed**, all
+of them class B. After the length_scale rewrite, the remaining failures are
+exactly the three B tests.
+
+**Added:** two cross-version tests in `test_regression_baseline.py`. The 2.0.0
+CSVs are kept as `baseline_default_2_0_0.csv` / `baseline_smoothing_2_0_0.csv`,
+and the 2.0.0 table passed explicitly must still reproduce them. The regenerated
+`baseline_default.csv` / `baseline_smoothing.csv` pin the new defaults.
+
+**Prediction for the full suite after regeneration, declared here before any
+artefact is regenerated:** **1433 passed, 0 failed**. That is the 1431 tests of
+the measurement run (renamed one for one) + 2 added.
+
+SUITE2B_RESULT_PLACEHOLDER
+
+### 11.4 Effect on the app (task 8)
+
+| surface | reads the signature? | before (2a) | after (2b) |
+|---|---|---|---|
+| sidebar widgets (`app._DEFAULTS`) | **no**, hardcoded | 2.0.0 values | **unchanged: still 2.0.0.** "Reset to defaults" resets to 2.0.0, not to the package defaults |
+| Grid run (`_run_get_periods`) | no; passes the sidebar | OFF checks omitted (≡ None) | OFF checks passed as explicit `None`, so they stay OFF under the new defaults |
+| Benchmark sidebar column (`_bench_live_config`) | no | None omitted, filled with 2.0.0 by (a) | None kept, explicit, same run |
+| Benchmark file column | through `split_config` + (a) | absent key → 2.0.0 | unchanged (absent key → 2.0.0, never the new default) |
+| Inspector (`build_args_periods`) | its fallback table mirrors `get_periods` | 2.0.0 table | **params-15 table**. The app always passes every key the sidebar holds, so the displayed ribbon still follows the sidebar |
+
+**Open, for Danilo:** should the sidebar's `_DEFAULTS` also move to params-15?
+Not done here, for two reasons:
+* the brief asked only to report the effect;
+* the Benchmark AppTest's positive control relies on the sidebar differing from
+  params-15 (§10.2, `incipient_method` `geometric` vs `plateau`). Moving the
+  sidebar would need a new declared difference.
+
 ---
 
 *§4, §5.1–5.3, §6 and §7 were written in the second commit of stage 0
