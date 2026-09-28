@@ -1,0 +1,223 @@
+{
+  "environment": {
+    "cyclophaser.__file__": "cyclophaser/__init__.py",
+    "sys.prefix": "cyclophaser",
+    "python": "3.12.14",
+    "numpy": "2.5.3",
+    "scipy": "1.18.0",
+    "pandas": "3.0.5"
+  },
+  "stage0": {
+    "params15_keys": 31,
+    "differ_strict_value_behaviour": [
+      20,
+      19,
+      17
+    ],
+    "reachability_p14_p15_sequence": {
+      "original_real": 0,
+      "synthetic": 0,
+      "batch_train": 5
+    },
+    "census": {
+      "n": 16,
+      "verdict_kinds": {
+        "boundary": 9,
+        "none": 6,
+        "ambiguous": 1
+      },
+      "has_mature": 15,
+      "equal_to_S_star": 5
+    },
+    "first_blind_identical": 16,
+    "S_star": [
+      "intensification",
+      "mature",
+      "decay"
+    ],
+    "S_star_train_count": 14,
+    "exposure_events": 23
+  },
+  "stage1": {
+    "verdict": "PASS",
+    "failed": [],
+    "head": "5075e49",
+    "V_current": {
+      "V1": true,
+      "V2": true,
+      "V3": true,
+      "V4": true,
+      "V5": true
+    },
+    "V_first_blind": {
+      "V1": true,
+      "V2": true,
+      "V3": true,
+      "V4": true,
+      "V5": true
+    },
+    "aggregates_current": {
+      "P15": {
+        "H": 3,
+        "B": 9,
+        "R": 6,
+        "N0": 6,
+        "C": 9,
+        "C_den": 15,
+        "Q": 10,
+        "Q_den": 16,
+        "false_refusals": 4,
+        "MAT": 11,
+        "M": 15
+      },
+      "DEF": {
+        "H": 4,
+        "B": 9,
+        "R": 0,
+        "N0": 6,
+        "C": 4,
+        "C_den": 15,
+        "Q": 8,
+        "Q_den": 16,
+        "false_refusals": 0,
+        "MAT": 10,
+        "M": 15
+      },
+      "CONST": {
+        "H": 0,
+        "B": 9,
+        "R": 6,
+        "N0": 6,
+        "C": 6,
+        "C_den": 15,
+        "Q": 5,
+        "Q_den": 16,
+        "false_refusals": 9
+      }
+    },
+    "discordant": {
+      "C": {
+        "P15_right_DEF_wrong": 7,
+        "DEF_right_P15_wrong": 2
+      },
+      "Q": {
+        "P15_right_DEF_wrong": 6,
+        "DEF_right_P15_wrong": 4
+      }
+    },
+    "p14_vs_p15_changed": [
+      "20170756"
+    ],
+    "incipient_boundary_P15_test": [
+      3,
+      9
+    ],
+    "incipient_boundary_P15_train_real": [
+      8,
+      17
+    ],
+    "false_refusals_P15_test": [
+      4,
+      9
+    ],
+    "false_refusals_P15_train_real": [
+      6,
+      17
+    ]
+  },
+  "stage2a": {
+    "removed": 14,
+    "recovery_commit": "33ea489358d9",
+    "stale_scripts": 40,
+    "suite": {
+      "passed": 1431,
+      "failed": 0
+    }
+  },
+  "stage2b": {
+    "digests": {
+      "EQ1": "3a6de265\u2026",
+      "EQ2": "923e1a03\u2026",
+      "EQ2_control": "3756392e\u2026",
+      "EQ4": "b500d2e0\u2026"
+    },
+    "eq3": {
+      "train_54": "54/54",
+      "example_file": "1/1",
+      "test_16": "16/16",
+      "batch_test_3": "3/3",
+      "validation_5": "5/5"
+    },
+    "train_changes": {
+      "final_map": 54,
+      "sequence": 32,
+      "sequence_by_group": {
+        "original_real": 25,
+        "synthetic": 1,
+        "batch_train": 6
+      },
+      "incipient_presence": 24
+    },
+    "counts_only": {
+      "example_file": {
+        "n": 1,
+        "final_map": 1,
+        "sequence": 1,
+        "incipient_presence": 1
+      },
+      "test_16": {
+        "n": 16,
+        "final_map": 16,
+        "sequence": 12,
+        "incipient_presence": 10
+      },
+      "batch_test_3": {
+        "n": 3,
+        "final_map": 3,
+        "sequence": 2,
+        "incipient_presence": 1
+      },
+      "validation_5": {
+        "n": 5,
+        "final_map": 5,
+        "sequence": 5,
+        "incipient_presence": 4
+      }
+    },
+    "suite_measure": {
+      "passed": 1260,
+      "failed": 171
+    },
+    "suite_prefix": {
+      "passed": 1432,
+      "failed": 1
+    },
+    "suite_final": {
+      "passed": 1433,
+      "failed": 0
+    },
+    "fix_crashes_before": {
+      "new": 55,
+      "v200": 0,
+      "v200_nos": 55
+    }
+  },
+  "stage2c": {
+    "sidebar_keys": 37,
+    "sidebar_changed": 20,
+    "sidebar_obtained_match": 37
+  },
+  "defect_I_current_defaults": {
+    "n_real": 51,
+    "members_all": 7,
+    "members_train": [
+      "20180170",
+      "20180608",
+      "20180759",
+      "20190325",
+      "20190397",
+      "20191014"
+    ],
+    "n_train_real": 35
+  }
+}

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed — default behaviour: the package defaults are now `params-15` (item 31) — **PENDING DANILO'S APPROVAL** (checkpoint branch `research/item31-stage2b-checkpoint`)
+### Changed — default behaviour: the package defaults are now `params-15` (item 31, stage 2b, `45f0600`; approved by Danilo 2026-09-28)
 
 **`determine_periods(series)` with no arguments no longer reproduces 2.0.0.**
 The defaults of `process_vorticity`, `get_periods` and `determine_periods` are
@@ -67,15 +67,44 @@ out-of-sample (DESIGN §5.2).
 
 **Calibration app.**
 
-* The sidebar keeps its own hardcoded defaults (the 2.0.0 values), so it does
-  NOT follow the package; "Reset to defaults" resets to 2.0.0.
+* ~~The sidebar keeps its own hardcoded defaults (the 2.0.0 values)~~ —
+  superseded by stage 2c: the sidebar now opens with the package defaults (see
+  "Changed — calibration app: the sidebar opens with the package defaults").
 * The app now passes `None` explicitly for checks that are switched off, so an
   unchecked prominence or decay-tail check stays off under the new package
   defaults.
 * The inspector's fallback table follows the package defaults, and an explicit
   `decay_tail_amplitude_fraction=None` is no longer replaced by the default.
 
-### Fixed — `process_vorticity(use_filter=False)` crashed on an unnamed index (item 31, `a1784b5`) — **a separate change, pending approval**
+### Changed — calibration app: the sidebar opens with the package defaults (item 31, stage 2c)
+
+**One source for the sidebar's start-up values: the package signature.**
+
+* **Where the values come from.** `app._DEFAULTS` no longer holds a table of
+  its own for any package parameter. `_sidebar_defaults_from_signature()`
+  derives every sidebar widget from `inspect.signature(process_vorticity /
+  get_periods)` when the app loads.
+* **Reset.** "Reset to defaults" returns to those values, not to 2.0.0.
+* **Optional checks.** The prominence filter and the decay-tail check start ON
+  when their package default is not None, with that value (relative
+  prominence 0.3, decay tail 0.3). A value widget whose parameter defaults to
+  None starts unchecked and keeps the app's fallback. The prominence-mode radio
+  follows the same table.
+* **What moves.** 20 of the 37 sidebar keys change start-up value. The full
+  before/after table is `research/labels/diagnostics/item31/sidebar_table_2c.md`.
+* **Tests.** `tests/test_sidebar_defaults.py` pins four things:
+  * the start-up widgets and the published live config equal the signature
+    defaults, key by key;
+  * Reset returns to them;
+  * an untouched sidebar column in the Benchmark gives the same phase map as
+    `determine_periods(series)` with no arguments, on 3 training series
+    including one of the swell batch;
+  * that equality can fail: `cutoff_high=48` makes the column differ.
+* **Benchmark AppTest.** Its sidebar column now sets one declared non-default
+  value (`cutoff_high=48`) before being added. An untouched sidebar would equal
+  the params-15 column.
+
+### Fixed — `process_vorticity(use_filter=False)` crashed on an unnamed index (item 31, `a1784b5`; approved by Danilo 2026-09-28)
 
 With `use_filter=False` the raw series kept the input index's own dimension
 (`index` for an unnamed index, a list with `x`, or a Series built from

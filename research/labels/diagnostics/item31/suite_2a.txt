@@ -1,1 +1,2 @@
-suite (-m "not browser", HEAD 1766338 working tree): EXIT 0
+suite (-m "not browser", HEAD 1766338 working tree): 1431 passed, 1 skipped, 29 deselected, 89 warnings in 398.40s (0:06:38) | EXIT 0
+(corrected 2026-09-28, item 31 stage 2c: the first version of this file held only the EXIT line — tail -1 of a log ending in an appended EXIT line; the summary above is from the full pytest log of that run)
