@@ -351,7 +351,34 @@ def test_the_validation_cases_are_in_the_queue_unlabelled_and_marked():
     nav = next(sb for sb in at.main.selectbox if sb.label == "Jump to case")
     opts = [o for o in nav.options if any(v in o for v in val)]
     assert len(opts) == 5
-    assert all("[VALIDATION — first label only]" in o for o in opts), opts
+    # spent before labelling (item 30 closing, 27 Sept 2026): locked outright
+    assert all("[VALIDATION spent — locked]" in o for o in opts), opts
     # appended last: after every other case, the 10 of the swell batch included
     last5 = nav.options[-5:]
     assert {o for o in last5} == set(opts)
+
+
+def test_a_spent_validation_case_cannot_be_saved_even_once():
+    """Item 30 closing: `batches.swell_item30_val` is "spent before labelling".
+    In Labelling mode — where saving is otherwise allowed — an UNLABELLED
+    validation case has both save buttons disabled, and the lock is the ONLY
+    blocker named (no overwrite, no synthetic confirmation, no sequence
+    problem), so it is the lock that disables them. Nothing is written."""
+    import sys
+    sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
+    import labels_core as lc
+    before = lc.LABELS_PATH.read_text()
+    val = {"19900808", "19940737", "19960808", "20000821", "19861089"}
+    at = _label_app()
+    nav = next(sb for sb in at.main.selectbox if sb.label == "Jump to case")
+    idx = next(i for i, o in enumerate(nav.options) if any(v in o for v in val))
+    nav.set_value(idx)
+    at.run()
+    _switch_to_labelling(at)
+    assert at.session_state["_lab_mode"] == "label"
+    saves = [b for b in at.button if b.label in ("💾 Save & next", "Save ambiguous")]
+    assert len(saves) == 2 and all(b.disabled for b in saves)
+    blocked = [c.value for c in at.caption if c.value.startswith("Cannot save yet")]
+    assert blocked == ["Cannot save yet — this validation case is SPENT (never "
+                       "labelled) — saving is blocked, not just discouraged."], blocked
+    assert lc.LABELS_PATH.read_text() == before

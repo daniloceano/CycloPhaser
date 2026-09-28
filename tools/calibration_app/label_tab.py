@@ -1128,7 +1128,8 @@ def _case_navigation(queue: list[str], records: dict, series: dict,
                      sources: dict, synth_names: dict[str, str],
                      test_ids: set, mode: str, pos: int,
                      batch_ids: frozenset = frozenset(),
-                     val_ids: frozenset = frozenset()) -> int:
+                     val_ids: frozenset = frozenset(),
+                     val_spent: bool = False) -> int:
     """The case picker: a dropdown to jump to ANY of the 63 cases directly,
     with status/split/frozen indicators, plus a filter for "not yet labelled".
 
@@ -1147,7 +1148,9 @@ def _case_navigation(queue: list[str], records: dict, series: dict,
         sid = queue[i]
         status = _case_status(series[sid], records.get(sid))
         tag = ""
-        if sid in val_ids:
+        if sid in val_ids and val_spent:
+            tag += "  [VALIDATION spent — locked]"
+        elif sid in val_ids:
             tag += ("  [VALIDATION — first label only]" if not records.get(sid)
                     else "  [VALIDATION — locked]")
         elif sid in test_ids:
@@ -1357,8 +1360,16 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     # Item 30 part 3: the VALIDATION cases get the batch-test treatment — one
     # save while unlabelled, locked after — so a validation label can never be
     # revised once results exist. They are in no aggregate anywhere.
-    batch_test_ids |= val_set if split_doc else set()
-    test_ids = (set(split_doc.get("test", [])) | batch_test_ids) if split_doc else set()
+    # Item 30 closing (27 Sept 2026, Danilo): the batch's role became "spent
+    # before labelling" — V can no longer be measured, so the 5 are locked
+    # outright, not even a first save.
+    val_role = ((split_doc.get("batches") or {}).get(lc.VALIDATION_BATCH) or {}).get(
+        "role") if split_doc else None
+    val_spent = val_role == "spent before labelling"
+    if not val_spent:
+        batch_test_ids |= val_set if split_doc else set()
+    test_ids = ((set(split_doc.get("test", [])) | batch_test_ids
+                 | (val_set if val_spent else set())) if split_doc else set())
     synth_names = _load_synthetic_names()
 
     # Resume where the last session stopped. Stored in session state after the
@@ -1370,7 +1381,8 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
 
     pos = _case_navigation(queue, records, series, sources, synth_names,
                           test_ids, st.session_state.get("_lab_mode", "inspect"), pos,
-                          batch_ids=frozenset(batch_set), val_ids=frozenset(val_set))
+                          batch_ids=frozenset(batch_set), val_ids=frozenset(val_set),
+                          val_spent=val_spent)
     sid = queue[pos]
     mode = _mode_switch(sid)
     values = series[sid]
@@ -1667,6 +1679,10 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
                    "(research/labels/split.yaml). It has no label yet, so it can "
                    "be saved ONCE — after that it is locked like every test "
                    "case, overwrite included. Check the table before saving.")
+    elif is_test_case and lock_kind == "VALIDATION" and val_spent:
+        st.error("This case is in the item-30 validation batch, SPENT before "
+                 "labelling (split.yaml, swell_item30_val) — saving is BLOCKED, "
+                 "not just discouraged.")
     elif is_test_case and lock_kind == "VALIDATION":
         st.error("This case is in the item-30 VALIDATION batch and already "
                  "labelled — saving is BLOCKED, not just discouraged.")
@@ -1690,6 +1706,8 @@ def render(default_tolerance: int = DEFAULT_TOLERANCE, overlay_provider=None) ->
     elif is_test_case and not test_first_label:
         blockers.append("this case is in the TEST split — saving is blocked, "
                         "not just discouraged" if lock_kind == "TEST" else
+                        "this validation case is SPENT (never labelled) — saving "
+                        "is blocked, not just discouraged" if val_spent else
                         "this VALIDATION case is already labelled — saving is "
                         "blocked, not just discouraged")
     if problem:

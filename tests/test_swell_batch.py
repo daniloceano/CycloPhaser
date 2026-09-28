@@ -83,7 +83,8 @@ def _val_block():
 
 def test_validation_block_is_validation_only():
     blk = _val_block()
-    assert blk["role"] == "validation" and blk["frozen"] is True
+    # item 30 closing (27 Sept 2026, authorised by Danilo): V spent
+    assert blk["role"] == "spent before labelling" and blk["frozen"] is True
     assert blk["train"] == [] and blk["test"] == []
     assert set(blk["validation"]) == VAL
     assert lc.batch_membership(lc.VALIDATION_BATCH) == {s: "validation" for s in VAL}

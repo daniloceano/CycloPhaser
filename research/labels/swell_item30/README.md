@@ -234,3 +234,20 @@ boundary is right, not on the overwrite itself.
   unfilled, so params-15 remains a CANDIDATE and is not the reference
   configuration. The package default stays False.
 - **Merge NOT done.** The AUTORIZAÇÃO DE MERGE line came back unfilled.
+
+### Edit of the frozen validation block (2026-09-27)
+
+- **Authorised by:** Danilo, in the item-30 closing decisions.
+- **What changed in `batches.swell_item30_val` (split.yaml):** only two
+  fields. `role` went from `validation` to `spent before labelling`, and the
+  same edit record (date, reason, authorisation) was appended to
+  `labelling_note`.
+- **What did not change:** every other field of the block, including the ids,
+  `file_sha256` and `data_dir`. The text before the block is byte-identical,
+  and so are the 5 files in `tests/calibration_data/swell_item30_val/`.
+- **Reason:** the 5 tracks were seen under params-15 before any labelling, so
+  prediction V can no longer be measured. The block stays as a record, with no
+  labels.
+- **Effect:** the label tab now locks the 5 outright, with not even a first
+  save. `tests/test_label_apptest.py` proves that neither save button can be
+  used, that the lock is the only blocker, and that nothing is written.

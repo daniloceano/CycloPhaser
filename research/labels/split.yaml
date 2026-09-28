@@ -237,7 +237,7 @@ batches:
   swell_item30_val:
     frozen: true
     created: '2026-09-27T15:12:11+00:00'
-    role: validation
+    role: spent before labelling
     rule: 'The swell tracks with the item-30 signal (plateau boundary > peak) and E defined
       under params-14 (part 2, separability.py step 2: 10 of 17), minus those already drawn
       into batches.swell_item30 — 5 tracks. Deterministic; fixed by Danilo''s part-3 brief before
@@ -264,7 +264,11 @@ batches:
       '19940737': 769e693176a437dd53ac0254c4bab49f48425c1790d15e344c53234a5c3addf7
       '19960808': aac0799e0940dd1b5adf4db8958a0282816e94aeb619b973cb351266f004d2e7
       '20000821': 63eaa4ab7a9e93eabc6917828fadb1d79a0585e2e3b8845650451a6b12b62545
-    labelling_note: Sem rótulo e sem detecção ao congelar. Os 5 estão entre os 200 da amostra
+    labelling_note: 'Sem rótulo e sem detecção ao congelar. Os 5 estão entre os 200 da amostra
       swell vistos por Danilo com detecção no Grid em 2026-09-24 (avaliação de marcas ruins),
       então a rotulagem de validação não é cega nesse sentido. Nesta parte nenhum aparece por
-      caso em tabela, figura, log ou benchmark.
+      caso em tabela, figura, log ou benchmark. EDIÇÃO 2026-09-27 (autorizada por Danilo no fechamento
+      do item 30): role ''validation'' -> ''spent before labelling'' e esta nota. Motivo: os 5
+      foram vistos sob params-15 antes de qualquer rotulagem, então a previsão V não pode mais
+      ser medida; o bloco fica como registro, sem rótulos, e os 5 ficam travados na aba label.
+      Nenhum outro campo mudou.'
