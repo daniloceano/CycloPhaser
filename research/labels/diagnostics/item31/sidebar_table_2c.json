@@ -1,0 +1,236 @@
+{
+  "rows": [
+    {
+      "key": "use_filter",
+      "parameter": "use_filter",
+      "today": true,
+      "declared": true
+    },
+    {
+      "key": "cutoff_low",
+      "parameter": "cutoff_low",
+      "today": 168,
+      "declared": 168
+    },
+    {
+      "key": "cutoff_high",
+      "parameter": "cutoff_high",
+      "today": 48,
+      "declared": 18
+    },
+    {
+      "key": "replace_endpoints",
+      "parameter": "replace_endpoints_with_lowpass",
+      "today": 0,
+      "declared": 0
+    },
+    {
+      "key": "savgol_poly",
+      "parameter": "savgol_polynomial",
+      "today": 3,
+      "declared": 3
+    },
+    {
+      "key": "boundary_padding",
+      "parameter": "boundary_padding",
+      "today": "reflect",
+      "declared": "edge"
+    },
+    {
+      "key": "thr_int_len",
+      "parameter": "threshold_intensification_length",
+      "today": 0.075,
+      "declared": 0.075
+    },
+    {
+      "key": "thr_int_gap",
+      "parameter": "threshold_intensification_gap",
+      "today": 0.075,
+      "declared": 0.075
+    },
+    {
+      "key": "intensification_min_depth",
+      "parameter": "intensification_min_depth",
+      "today": 0.0,
+      "declared": 0.05
+    },
+    {
+      "key": "thr_mat_dist",
+      "parameter": "threshold_mature_distance",
+      "today": 0.125,
+      "declared": 0.18
+    },
+    {
+      "key": "thr_mat_len",
+      "parameter": "threshold_mature_length",
+      "today": 0.03,
+      "declared": 0.15
+    },
+    {
+      "key": "thr_dec_len",
+      "parameter": "threshold_decay_length",
+      "today": 0.075,
+      "declared": 0.075
+    },
+    {
+      "key": "thr_dec_gap",
+      "parameter": "threshold_decay_gap",
+      "today": 0.075,
+      "declared": 0.075
+    },
+    {
+      "key": "thr_inc_len",
+      "parameter": "threshold_incipient_length",
+      "today": 0.4,
+      "declared": 0.4
+    },
+    {
+      "key": "length_scale",
+      "parameter": "length_scale",
+      "today": "global",
+      "declared": "local"
+    },
+    {
+      "key": "mature_method",
+      "parameter": "mature_method",
+      "today": "derivative",
+      "declared": "amplitude"
+    },
+    {
+      "key": "mature_amplitude_fraction",
+      "parameter": "mature_amplitude_fraction",
+      "today": 0.9,
+      "declared": 0.9
+    },
+    {
+      "key": "mature_min_depth",
+      "parameter": "mature_min_depth",
+      "today": 0.0,
+      "declared": 0.8
+    },
+    {
+      "key": "reclassify_index0",
+      "parameter": "reclassify_index0",
+      "today": true,
+      "declared": true
+    },
+    {
+      "key": "incipient_method",
+      "parameter": "incipient_method",
+      "today": "geometric",
+      "declared": "plateau"
+    },
+    {
+      "key": "incipient_plateau_tau",
+      "parameter": "incipient_plateau_tau",
+      "today": 0.2,
+      "declared": 0.2
+    },
+    {
+      "key": "incipient_plateau_signal",
+      "parameter": "incipient_plateau_signal",
+      "today": "derivative",
+      "declared": "vorticity"
+    },
+    {
+      "key": "incipient_plateau_crossing",
+      "parameter": "incipient_plateau_crossing",
+      "today": "single",
+      "declared": "sustained"
+    },
+    {
+      "key": "incipient_plateau_k",
+      "parameter": "incipient_plateau_k",
+      "today": 3,
+      "declared": 5
+    },
+    {
+      "key": "incipient_smooth_window",
+      "parameter": "incipient_smooth_window",
+      "today": 0,
+      "declared": 5
+    },
+    {
+      "key": "incipient_smooth_polyorder",
+      "parameter": "incipient_smooth_polyorder",
+      "today": 3,
+      "declared": 3
+    },
+    {
+      "key": "incipient_plateau_spare_intensification",
+      "parameter": "incipient_plateau_spare_intensification",
+      "today": false,
+      "declared": true
+    },
+    {
+      "key": "sm_mode",
+      "parameter": "(group)",
+      "today": "auto",
+      "declared": "off"
+    },
+    {
+      "key": "sm_val",
+      "parameter": "(group)",
+      "today": 17,
+      "declared": 17
+    },
+    {
+      "key": "sm2_mode",
+      "parameter": "(group)",
+      "today": "auto",
+      "declared": "off"
+    },
+    {
+      "key": "sm2_val",
+      "parameter": "(group)",
+      "today": 17,
+      "declared": 17
+    },
+    {
+      "key": "extrema_prominence_enabled",
+      "parameter": "(group)",
+      "today": false,
+      "declared": true
+    },
+    {
+      "key": "extrema_prominence_mode",
+      "parameter": "(group)",
+      "today": "relative",
+      "declared": "relative"
+    },
+    {
+      "key": "extrema_prominence_rel_val",
+      "parameter": "(group)",
+      "today": 0.1,
+      "declared": 0.3
+    },
+    {
+      "key": "extrema_prominence_val",
+      "parameter": "(group)",
+      "today": 1e-06,
+      "declared": 1e-06
+    },
+    {
+      "key": "decay_tail_enabled",
+      "parameter": "(group)",
+      "today": false,
+      "declared": true
+    },
+    {
+      "key": "decay_tail_fraction_val",
+      "parameter": "(group)",
+      "today": 0.05,
+      "declared": 0.3
+    }
+  ],
+  "app_own": {
+    "n_cols": 2,
+    "view_mode": "Grid",
+    "inspector_track": null,
+    "inspector_ribbon": true,
+    "inspector_ledger": true,
+    "inspector_mature": true,
+    "inspector_incipient": true,
+    "inspector_normalize": true
+  }
+}
