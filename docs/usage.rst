@@ -59,13 +59,13 @@ Arguments and Parameters for determine_periods
 - **use_filter**: (str or int, optional) Apply a Lanczos filter to the `series`. Specify a window length as an integer to customize or use `'auto'` for adaptive length based on dataset size (half of series length). **Units**: Time steps. **Default**: 'auto'.  
   **Recommendation**: If using relative vorticity series, turn off `use_filter` if the tracking procedure already applies spatial filtering to avoid over-filtering and signal loss. For hourly ERA5 data, `'auto'` is typically effective, though this may need adjustment for different temporal resolutions and spatial resolutions. Use smoothing also if noise levels are too high.
 
-- **replace_endpoints_with_lowpass**: (int, optional) Applies a lowpass filter to smooth the series endpoints, which helps stabilize edge effects during filtering. Specify the window length. **Units**: Time steps. **Default**: 24.  
+- **replace_endpoints_with_lowpass**: (int, optional) Applies a lowpass filter to smooth the series endpoints, which helps stabilize edge effects during filtering. Specify the window length. **Units**: Time steps. **Default**: 0 (disabled; deprecated — it was 24 up to the filter fix, see the `process_vorticity` docstring).  
   **Recommendation**: For hourly relative vorticity data, a 24-hour (24 time steps) setting is effective. Adjust this based on the temporal and spatial resolution of the original data, especially if using data with higher spatial resolution.
 
-- **use_smoothing**: (str, int, optional) Apply Savgol smoothing to filtered vorticity data. Set to `'auto'` to automatically choose an appropriate window length, or provide an integer window length directly. **Note**: The specified window length must be an odd number and greater than or equal to `savgol_polynomial`. Set `use_smoothing=False` to deactivate. **Units**: Time steps. **Default**: 'auto'.  
+- **use_smoothing**: (str, int, optional) Apply Savgol smoothing to filtered vorticity data. Set to `'auto'` to automatically choose an appropriate window length, or provide an integer window length directly. **Note**: The specified window length must be an odd number and greater than or equal to `savgol_polynomial`. Set `use_smoothing=False` to deactivate. **Units**: Time steps. **Default**: False (it was 'auto' up to 2.0.0).  
   **Recommendation**: This setting is sensitive to the length of the time series. The `'auto'` setting uses a window length approximately 1/4 of the series length for series >8 days; otherwise, it uses about 1/2. For lower-noise data, this value can be decreased, and for higher-noise data, increase it accordingly.
 
-- **use_smoothing_twice**: (str, int, optional) Apply a second pass of Savgol smoothing for further noise reduction. This uses similar parameters to `use_smoothing`. **Default**: 'auto'.  
+- **use_smoothing_twice**: (str, int, optional) Apply a second pass of Savgol smoothing for further noise reduction. This uses similar parameters to `use_smoothing`. **Default**: False (it was 'auto' up to 2.0.0).  
   **Recommendation**: This should be a gentler smoothing than the initial `use_smoothing`. The `'auto'` setting applies half the window length used in the first pass.
 
 - **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing, which must be less than or equal to the window length specified in `use_smoothing` and `use_smoothing_twice`. **Default**: 3.  
@@ -74,10 +74,39 @@ Arguments and Parameters for determine_periods
 - **cutoff_low**: (float, optional) Low-frequency cutoff for the Lanczos filter, designed for data with hourly resolution. **Units**: Time steps. **Default**: 168.  
   **Recommendation**: Set this to the equivalent of 7 days in time steps to filter out planetary wave influences on vorticity.
 
-- **cutoff_high**: (float, optional) High-frequency cutoff for the Lanczos filter, suitable for reducing high-frequency noise in hourly data. **Units**: Time steps. **Default**: 48.  
-  **Recommendation**: Set this to the equivalent of 2 days in time steps to effectively filter out mesoscale influences on vorticity.
+- **cutoff_high**: (float, optional) High-frequency cutoff for the Lanczos filter, suitable for reducing high-frequency noise in hourly data. **Units**: Time steps. **Default**: 18 (it was 48, i.e. 2 days, up to 2.0.0).  
+  **Recommendation**: 18 was calibrated for hourly 850 hPa track vorticity (see the note below). 48 (2 days) filters out more of the mesoscale signal and was the 2.0.0 default; it is not calibrated for the current phase defaults.
+
+- **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolution: `"edge"`, `"reflect"` or `"zero"`. **Default**: `"edge"` (it was `"reflect"` up to 2.0.0). `"zero"` reproduces the pre-fix boundary artefact.
 
 **Note on Default Values and Data Frequency**: The above default settings assume hourly data frequency. For datasets with different time resolutions (e.g., daily or sub-hourly), adjustments are recommended for parameters like `cutoff_low`, `cutoff_high`, `replace_endpoints_with_lowpass`, and `use_smoothing`. For example, if using daily data, reduce cutoff values by a factor of 24 to adapt accordingly.
+
+Defaults: what was calibrated, and for what
+-------------------------------------------
+
+Since item 31 of the development record, the defaults of ``determine_periods``
+(and of ``process_vorticity`` / ``get_periods``) are the calibration reference
+``params-15``. This is a change of default behaviour relative to 2.0.0; every
+parameter is listed in ``CHANGELOG.md`` (``[Unreleased]`` → Changed). They fall
+in two groups:
+
+* **Phase defaults** — the thresholds, ``length_scale="local"``,
+  ``mature_method="amplitude"``, the depth floors, ``incipient_method="plateau"``
+  and its ``incipient_*`` settings, ``prominence_relative=0.3`` and
+  ``decay_tail_amplitude_fraction=0.3``. They were calibrated against manual
+  labels of cyclone phase sequences.
+* **Filtering defaults** — ``cutoff_high=18``, ``use_smoothing=False``,
+  ``use_smoothing_twice=False``, ``boundary_padding="edge"``,
+  ``use_filter='auto'``. **Only the filtering for TRACK input was calibrated**:
+  hourly 850 hPa relative vorticity along South-Atlantic cyclone tracks.
+  Other inputs — other levels or variables (SLP, wind speed), other sampling
+  intervals, gridded or spatially pre-filtered data — may need a different
+  filtering, which has not been calibrated.
+
+The rule ``incipient_plateau_spare_intensification=True`` (item 30) is
+**"adotada sem validação independente"**: it was adopted without an independent
+validation. To reproduce 2.0.0 exactly, pass its values explicitly; the frozen
+table is ``research/labels/defaults_2.0.0.json`` in the repository.
 
 Example Usage
 -------------

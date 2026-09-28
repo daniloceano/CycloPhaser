@@ -30,6 +30,7 @@ helper below therefore runs before asserting on results.
 
 from __future__ import annotations
 
+import functools
 import sys
 from pathlib import Path
 
@@ -45,10 +46,21 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
 import benchmark_core as bc  # noqa: E402
 
-# Two configurations from opposite ends of the calibration: params-1 predates
-# the filter fix entirely, params-11 is the current reference.
-CFG_A = "cyclophaser_params-1.yaml"
-CFG_B = "cyclophaser_params-11.yaml"
+# Item 31: params-1 … params-14 left research/labels/configs/, so the two
+# columns are no longer two files. Column A is the SIDEBAR and column B is
+# params-15, the calibration reference (Danilo's addendum, 2026-09-28). Since
+# stage 2c the sidebar OPENS with the package defaults, which ARE params-15, so
+# an untouched sidebar column would equal column B. The sidebar column is
+# therefore taken after ONE declared non-default value is set in the sidebar:
+# filter_params.cutoff_high = 48 (package default and params-15: 18). It changes
+# both the smoothed series (the 30c tests below need that) and the phases.
+# `test_the_sidebar_differs_from_params15_in_a_declared_parameter` asserts it;
+# the output-level control is `test_the_two_configurations_are_actually_
+# distinguishable`, and swapping the columns must fail the pin.
+SIDEBAR = "sidebar"
+CFG_A = SIDEBAR
+CFG_B = "cyclophaser_params-15.yaml"
+DECLARED_DIFF = ("filter_params", "cutoff_high", 48, 18)
 
 
 def _app() -> AppTest:
@@ -78,6 +90,43 @@ def _add_config_column(at, filename):
     return at
 
 
+def _set_declared_sidebar_value(at):
+    """Set the ONE declared non-default sidebar value (DECLARED_DIFF)."""
+    _sec, key, value, _p15 = DECLARED_DIFF
+    _widget(at, "slider", key).set_value(value)
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+
+
+def _add_column(at, source):
+    """A column from the sidebar (source == SIDEBAR, after the declared
+    non-default value is set) or from a configs/ file."""
+    if source == SIDEBAR:
+        _set_declared_sidebar_value(at)
+        _widget(at, "button", "bench_add_sidebar").click()
+        at.run()
+        assert not at.exception, [str(e) for e in at.exception]
+        return at
+    return _add_config_column(at, source)
+
+
+@functools.lru_cache(maxsize=1)
+def _sidebar_yaml() -> str:
+    """The document a sidebar column is built from — the app's own published
+    `_bench_live_config`, after the declared non-default value is set, read once."""
+    import yaml
+    at = _app()
+    _set_declared_sidebar_value(at)
+    return yaml.safe_dump(at.session_state["_bench_live_config"])
+
+
+def _doc_for(source) -> dict:
+    import yaml
+    if source == SIDEBAR:
+        return yaml.safe_load(_sidebar_yaml())
+    return yaml.safe_load((bc.CONFIGS_DIR / source).read_text())
+
+
 def _select(at, ids):
     _widget(at, "multiselect", "bench_ids_widget").set_value(list(ids))
     at.run()
@@ -102,8 +151,8 @@ def _two_column_app(n_cyclones=3, run=True) -> AppTest:
     at = _app()
     ms = _widget(at, "multiselect", "bench_ids_widget")
     _select(at, list(ms.options[:n_cyclones]))
-    _add_config_column(at, CFG_A)
-    _add_config_column(at, CFG_B)
+    _add_column(at, CFG_A)
+    _add_column(at, CFG_B)
     if run:
         _run(at)
     return at
@@ -117,14 +166,14 @@ def test_two_configurations_load_as_two_columns():
     at = _two_column_app()
     cols = at.session_state["bench_columns"]
     assert len(cols) == 2, [c["name"] for c in cols]
-    assert [c["origin_name"] for c in cols] == [CFG_A, CFG_B]
+    assert [c["origin_name"] for c in cols] == ["current sidebar state", CFG_B]
     assert len(_loaded(at)) == 2
 
 
 def test_a_third_column_is_added_on_demand_without_disturbing_the_first_two():
     at = _two_column_app()
     before = [dict(c["series"]) for c in _loaded(at)]
-    _add_config_column(at, "cyclophaser_params-5.yaml")
+    _add_column(at, SIDEBAR)          # a second sidebar column (item 31)
     _run(at)
     after = _loaded(at)
     assert len(after) == 3
@@ -161,7 +210,7 @@ def test_no_results_exist_before_run():
     at = _app()
     ms = _widget(at, "multiselect", "bench_ids_widget")
     _select(at, list(ms.options[:2]))
-    _add_config_column(at, CFG_A)
+    _add_column(at, CFG_A)
     assert "bench_last_results" not in at.session_state, (
         "results appeared without Run being pressed")
 
@@ -221,10 +270,10 @@ def test_reference_defaults_to_the_manual_label_when_labels_exist():
 def test_reference_can_be_pointed_at_a_configuration_column():
     at = _two_column_app()
     ref = _widget(at, "selectbox", "bench_reference")
-    assert "params-11" in ref.options
-    ref.set_value("params-11")
+    assert "params-15" in ref.options
+    ref.set_value("params-15")
     at.run()
-    assert at.session_state["bench_reference"] == "params-11"
+    assert at.session_state["bench_reference"] == "params-15"
     assert not at.exception, [str(e) for e in at.exception]
 
 
@@ -289,9 +338,7 @@ def test_toggling_the_label_overlay_does_not_change_any_column_result():
 
 def _expected_for(filename, ids):
     """Detector output for one config, computed straight from benchmark_core."""
-    import yaml
-    doc = yaml.safe_load((bc.CONFIGS_DIR / filename).read_text())
-    pv, gp = bc.split_config(doc)
+    pv, gp = bc.split_config(_doc_for(filename))
     series, _ = bc.load_all_series()
     out = {}
     for sid in ids:
@@ -301,6 +348,20 @@ def _expected_for(filename, ids):
     return out
 
 
+def test_the_sidebar_differs_from_params15_in_a_declared_parameter():
+    """Addendum guard (item 31): the two sources differ in the parameter the
+    header declares, with the declared values — so the sidebar column cannot
+    silently become a second copy of params-15."""
+    import inspect
+
+    from cyclophaser.determine_periods import process_vorticity
+    sec, key, in_sidebar, in_params15 = DECLARED_DIFF
+    assert _doc_for(CFG_A)[sec][key] == in_sidebar
+    assert _doc_for(CFG_B)[sec][key] == in_params15
+    # ... and the sidebar value really is a NON-default one (stage 2c)
+    assert inspect.signature(process_vorticity).parameters[key].default != in_sidebar
+
+
 def test_the_two_configurations_are_actually_distinguishable():
     """Guards the test below from being vacuous."""
     at = _two_column_app()
@@ -308,7 +369,7 @@ def test_the_two_configurations_are_actually_distinguishable():
     a, b = _loaded(at)
     differing = [s for s in ids if a["series"][s] != b["series"][s]]
     assert differing, (
-        "params-1 and params-11 agree on all of "
+        "the sidebar and params-15 agree on all of "
         f"{ids} — pick series where they differ or the isolation test is vacuous")
 
 
@@ -316,8 +377,8 @@ def test_each_column_carries_its_own_configuration_not_its_neighbours():
     at = _two_column_app()
     ids = at.session_state["bench_selected_ids"]
     a, b = _loaded(at)
-    assert a["series"] == _expected_for(CFG_A, ids), "column 0 is not params-1"
-    assert b["series"] == _expected_for(CFG_B, ids), "column 1 is not params-11"
+    assert a["series"] == _expected_for(CFG_A, ids), "column 0 is not the sidebar"
+    assert b["series"] == _expected_for(CFG_B, ids), "column 1 is not params-15"
 
 
 def test_swapping_the_columns_would_fail_the_pin():
@@ -645,21 +706,24 @@ def test_the_parameter_baseline_card_is_labelled_not_diffed_against_itself():
     """With the manual label as reference, the first config column becomes the
     parameter baseline. Diffing it against itself printed "No parameter differs
     from params-1" on params-1's own card — true, and unreadable as anything but
-    a claim about the configuration."""
+    a claim about the configuration. (Item 31: the baseline is now the sidebar
+    column; its name is read from the session.)"""
     at = _two_column_app(n_cyclones=1, run=False)
     assert at.session_state["bench_reference"] == "Manual label"
+    base = at.session_state["bench_columns"][0]["name"]
     caps = [c.value for c in at.caption]
     assert any("Parameter baseline" in c for c in caps), (
         "the baseline column is not labelled as the baseline")
-    assert not any("No parameter differs from **params-1**" in c for c in caps), (
+    assert not any(f"No parameter differs from **{base}**" in c for c in caps), (
         "the baseline card is still being diffed against itself")
 
 
 def test_a_non_baseline_card_still_shows_its_differences():
     """Guards the test above from passing by suppressing every diff."""
     at = _two_column_app(n_cyclones=1, run=False)
+    base = at.session_state["bench_columns"][0]["name"]
     caps = [c.value for c in at.caption]
-    assert any("Differs from **params-1**" in c for c in caps), (
+    assert any(f"Differs from **{base}**" in c for c in caps), (
         "the non-baseline column stopped reporting its differences")
 
 
@@ -676,8 +740,7 @@ def _filtered_lines(fig):
 
 
 def _column_z(filename, sid):
-    import yaml
-    pv, gp = bc.split_config(yaml.safe_load((bc.CONFIGS_DIR / filename).read_text()))
+    pv, gp = bc.split_config(_doc_for(filename))
     series, _ = bc.load_all_series()
     res = bc.run_series(pv, gp, series[sid])
     return series[sid], res

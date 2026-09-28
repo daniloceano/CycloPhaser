@@ -1,0 +1,16 @@
+Item 31 — stage-1 scorer smoke test on TRAIN (35 real, original split)
+environment: {"cyclophaser.__file__": "cyclophaser/__init__.py", "sys.prefix": "cyclophaser", "python": "3.12.14", "numpy": "2.5.3", "scipy": "1.18.0", "pandas": "3.0.5"}
+stage1_run.main() NOT called; no TEST label read; no TEST series run.
+
+scorer reproduces constant_train.json (stage 0):
+current      P15   C 22/33  Q 19/35  MAT 27/33  == constant_train.json: True
+current      DEF   C 6/33  Q 11/35  MAT 18/33  == constant_train.json: True
+current      CONST C 16/33  Q 14/35  == constant_train.json: True
+first-blind  P15   C 22/33  Q 19/35  MAT 27/33  == constant_train.json: True
+first-blind  DEF   C 6/33  Q 11/35  MAT 18/33  == constant_train.json: True
+first-blind  CONST C 16/33  Q 14/35  == constant_train.json: True
+
+report(): 339 lines produced without error; JSON dump OK
+P14 ≠ P15 final maps on these 35: 0 (stage 0 said 0)
+(The TRAIN verdict line printed by report() is not a result of anything: the criterion is defined on the 16 TEST series only.)
+stage1_output.txt / .json: absent before and after — OK

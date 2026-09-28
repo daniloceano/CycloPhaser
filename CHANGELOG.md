@@ -9,6 +9,129 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — default behaviour: the package defaults are now `params-15` (item 31, stage 2b, `45f0600`; approved by Danilo 2026-09-28)
+
+**`determine_periods(series)` with no arguments no longer reproduces 2.0.0.**
+The defaults of `process_vorticity`, `get_periods` and `determine_periods` are
+now the calibration reference `research/labels/configs/cyclophaser_params-15.yaml`.
+To reproduce 2.0.0, pass the old values explicitly: the frozen table is
+`research/labels/defaults_2.0.0.json`, and passing it reproduces the 2.0.0
+default-behaviour digest `b500d2e0…` on the 47 training series.
+
+Filtering (`process_vorticity`, `determine_periods`):
+
+| parameter | 2.0.0 | now |
+|---|---|---|
+| `cutoff_high` | `48.0` | `18.0` |
+| `use_smoothing` | `'auto'` | `False` |
+| `use_smoothing_twice` | `'auto'` | `False` |
+| `boundary_padding` | `"reflect"` | `"edge"` |
+| `use_filter`, `cutoff_low`, `savgol_polynomial`, `replace_endpoints_with_lowpass` | unchanged (`'auto'`, 168, 3, 0) | unchanged |
+
+Phase detection (`get_periods`, `determine_periods`):
+
+| parameter | 2.0.0 | now |
+|---|---|---|
+| `threshold_mature_distance` | `0.125` | `0.18` |
+| `threshold_mature_length` | `0.03` | `0.15` |
+| `prominence_relative` | `None` | `0.3` |
+| `length_scale` | `"global"` | `"local"` |
+| `mature_method` | `"derivative"` | `"amplitude"` |
+| `mature_min_depth` | `0.0` | `0.8` |
+| `intensification_min_depth` | `0.0` | `0.05` |
+| `decay_tail_amplitude_fraction` | `None` | `0.3` |
+| `incipient_method` | `"geometric"` | `"plateau"` |
+| `incipient_plateau_signal` | `"derivative"` | `"vorticity"` |
+| `incipient_plateau_crossing` | `"single"` | `"sustained"` |
+| `incipient_plateau_k` | `3` | `5` |
+| `incipient_smooth_window` | `0` | `5` |
+| `incipient_plateau_spare_intensification` | `False` | `True` — **adotada sem validação independente** (item 30) |
+| the other 10 phase parameters (`threshold_intensification_length`, `_gap`, `threshold_decay_length`, `_gap`, `threshold_incipient_length`, `prominence`, `reclassify_index0`, `mature_amplitude_fraction`, `incipient_plateau_tau`, `incipient_smooth_polyorder`) | unchanged | unchanged |
+
+**Which defaults are general.** The phase defaults were calibrated against
+manual phase labels. **Only the filtering for TRACK input was calibrated**:
+hourly 850 hPa relative vorticity along South-Atlantic cyclone tracks
+(`min_max_zeta_850`). Other inputs may need a different filtering, which has
+not been calibrated here. The evidence is stage 1 of item 31
+(`research/labels/diagnostics/item31/stage1_output.txt`): PASS on the 16
+held-out series, which is weak evidence, because the stage was not
+out-of-sample (DESIGN §5.2).
+
+**What moves** (DESIGN §11):
+
+* TRAIN: the final map of 54/54 series changes, the phase sequence of 32/54
+  (25 real, 1 synthetic, 6 batch), and incipient presence flips on 24.
+* The packaged example changes its sequence.
+* The default-behaviour digest moves from `b500d2e0…` to `3a6de265…`, with a
+  record appended in `default_behaviour_sha256.txt`.
+
+**Calibration app.**
+
+* ~~The sidebar keeps its own hardcoded defaults (the 2.0.0 values)~~ —
+  superseded by stage 2c: the sidebar now opens with the package defaults (see
+  "Changed — calibration app: the sidebar opens with the package defaults").
+* The app now passes `None` explicitly for checks that are switched off, so an
+  unchecked prominence or decay-tail check stays off under the new package
+  defaults.
+* The inspector's fallback table follows the package defaults, and an explicit
+  `decay_tail_amplitude_fraction=None` is no longer replaced by the default.
+
+### Changed — calibration app: the sidebar opens with the package defaults (item 31, stage 2c)
+
+**One source for the sidebar's start-up values: the package signature.**
+
+* **Where the values come from.** `app._DEFAULTS` no longer holds a table of
+  its own for any package parameter. `_sidebar_defaults_from_signature()`
+  derives every sidebar widget from `inspect.signature(process_vorticity /
+  get_periods)` when the app loads.
+* **Reset.** "Reset to defaults" returns to those values, not to 2.0.0.
+* **Optional checks.** The prominence filter and the decay-tail check start ON
+  when their package default is not None, with that value (relative
+  prominence 0.3, decay tail 0.3). A value widget whose parameter defaults to
+  None starts unchecked and keeps the app's fallback. The prominence-mode radio
+  follows the same table.
+* **What moves.** 20 of the 37 sidebar keys change start-up value. The full
+  before/after table is `research/labels/diagnostics/item31/sidebar_table_2c.md`.
+* **Tests.** `tests/test_sidebar_defaults.py` pins four things:
+  * the start-up widgets and the published live config equal the signature
+    defaults, key by key;
+  * Reset returns to them;
+  * an untouched sidebar column in the Benchmark gives the same phase map as
+    `determine_periods(series)` with no arguments, on 3 training series
+    including one of the swell batch;
+  * that equality can fail: `cutoff_high=48` makes the column differ.
+* **Benchmark AppTest.** Its sidebar column now sets one declared non-default
+  value (`cutoff_high=48`) before being added. An untouched sidebar would equal
+  the params-15 column.
+
+### Fixed — `process_vorticity(use_filter=False)` crashed on an unnamed index (item 31, `a1784b5`; approved by Danilo 2026-09-28)
+
+With `use_filter=False` the raw series kept the input index's own dimension
+(`index` for an unnamed index, a list with `x`, or a Series built from
+`.tolist()`), and only a Savitzky-Golay pass rebuilt it on `time`. So
+`use_filter=False` together with `use_smoothing=False` raised
+`ValueError: Coordinate 'time' not found`. That was reachable in 2.0.0 only
+with both passed explicitly, but the new default `use_smoothing=False` made it
+reachable with `use_filter=False` alone. The unfiltered branch now builds the
+series on the same `time` coordinate as the filtered one. No output changed:
+110/110 runs that ran before give byte-identical periods, and the 110 that
+crashed now run (`research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt`).
+
+### Changed — research tooling: incomplete configs and the configs directory (item 31, stage 2a, `eed8e77`)
+
+* **A key a config does not carry is filled with its frozen cyclophaser 2.0.0
+  default**, never with the live signature's default, and the filled keys are
+  always listed. This applies in `evaluate_against_labels.py` (on stderr), in
+  the Benchmark column's provenance, and in the app's YAML import (as a
+  warning). The table is `research/labels/defaults_2.0.0.json`, generated from
+  the stage-0 parameter table (`research/labels/config_defaults.py`).
+* **`research/labels/configs/` holds only `params-15`.** params-1 to params-14
+  were removed and are recoverable with `git show 33ea489358d9:<path>`
+  (`research/labels/diagnostics/item31/recovery_table.md`).
+  `item19_core.load_config()` without a path now raises and names that commit.
+  40 closed-front scripts that loaded a removed config are listed, not
+  migrated (`stale_scripts.md`).
+
 ### Added — calibration app: flexible track reading (item 29, merge `84b63ec`)
 
 **One reader for every track, recognised by content; `.txt` accepted; an

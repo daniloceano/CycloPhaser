@@ -1,0 +1,10 @@
+[before @ 55a4780] new       110 runs, 55 CRASH
+[before @ 55a4780] v200      110 runs, 0 CRASH
+[before @ 55a4780] v200_nos  110 runs, 55 CRASH
+[after @ e5cd91b] new       110 runs, 0 CRASH
+[after @ e5cd91b] v200      110 runs, 0 CRASH
+[after @ e5cd91b] v200_nos  110 runs, 0 CRASH
+  new       outputs before identical after: 55/55; crashes fixed: 55; crashes remaining: 0
+  v200      outputs before identical after: 110/110; crashes fixed: 0; crashes remaining: 0
+  v200_nos  outputs before identical after: 55/55; crashes fixed: 55; crashes remaining: 0
+FIX EQUIVALENCE (no output changed, no crash left): PASS

@@ -53,6 +53,7 @@
 
 import glob
 import os
+import inspect
 import warnings
 
 import numpy as np
@@ -152,29 +153,36 @@ def calibration_tracks():
 # ── The default is a strict no-op ───────────────────────────────────────────────
 
 
-def test_default_zero_matches_implicit_default():
-    """Passing intensification_min_depth=0.0 explicitly must be byte-identical to
-    not passing the parameter at all."""
+# Item 31: the package default of intensification_min_depth moved (0.0 up to 2.0.0).
+# These tests pin that the CURRENT default is forwarded exactly as if
+# passed explicitly — read from the signature, not typed here.
+_DEFAULT_NOW = inspect.signature(determine_periods).parameters["intensification_min_depth"].default
+
+
+def test_explicit_default_matches_implicit_default():
+    """Passing the current default of intensification_min_depth explicitly must
+    be byte-identical to not passing the parameter at all."""
     series = _load_track(_CONVERT_CASES[0])
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         df_explicit = determine_periods(
-            series, **_FILTER_PARAMS, **_PHASE_PARAMS, intensification_min_depth=0.0
+            series, **_FILTER_PARAMS, **_PHASE_PARAMS, intensification_min_depth=_DEFAULT_NOW
         )
         df_implicit = determine_periods(series, **_FILTER_PARAMS, **_PHASE_PARAMS)
     pd.testing.assert_frame_equal(df_explicit, df_implicit)
 
 
-def test_default_zero_changes_nothing_on_any_calibration_track(calibration_tracks):
-    """Across the whole calibration set, the default must reproduce the previous
-    behaviour on every track -- not merely on the two this front targets."""
+def test_explicit_default_changes_nothing_on_any_calibration_track(calibration_tracks):
+    """Across the whole calibration set, the default passed explicitly must equal
+    the implicit default on every track -- not merely on the two this front
+    targets."""
     for cid in _ALL_TRACK_IDS:
         series = _load_track(cid)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             implicit = determine_periods(series, **_FILTER_PARAMS, **_PHASE_PARAMS)
             explicit = determine_periods(
-                series, **_FILTER_PARAMS, **_PHASE_PARAMS, intensification_min_depth=0.0
+                series, **_FILTER_PARAMS, **_PHASE_PARAMS, intensification_min_depth=_DEFAULT_NOW
             )
         pd.testing.assert_frame_equal(explicit, implicit, obj=cid)
 
@@ -428,12 +436,14 @@ def test_zero_amplitude_series_is_not_warned_about_at_the_default():
 # ── The config on disk agrees with this module ─────────────────────────────────
 
 
-def test_params13_yaml_matches_this_module():
-    """params-13 is the calibration reference for this parameter; if it drifts
-    from the values exercised here, these tests stop describing it."""
+def test_params15_yaml_matches_this_module():
+    """params-15 is the calibration reference (params-13 left the repo in item 31;
+    params-15 = params-13 + reclassify_index0 + incipient_plateau_spare_intensification,
+    neither of which this module sets). If it drifts from the values exercised
+    here, these tests stop describing it."""
     import yaml
     path = os.path.join(os.path.dirname(__file__), os.pardir, "research", "labels",
-                        "configs", "cyclophaser_params-13.yaml")
+                        "configs", "cyclophaser_params-15.yaml")
     doc = yaml.safe_load(open(path))
     assert doc["phase_params"]["intensification_min_depth"] == X
     for key, value in _PHASE_PARAMS.items():

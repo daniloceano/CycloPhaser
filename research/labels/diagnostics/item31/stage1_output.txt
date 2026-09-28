@@ -1,0 +1,216 @@
+==============================================================================
+ITEM 31 — STAGE 1 — single scoring run (DESIGN.md §5, §8)
+==============================================================================
+environment: {"cyclophaser.__file__": "cyclophaser/__init__.py", "sys.prefix": "cyclophaser", "python": "3.12.14", "numpy": "2.5.3", "scipy": "1.18.0", "pandas": "3.0.5"}
+HEAD: 5075e492c39b443557a39195d8662484b72182f1
+last commit touching stage1_run.py: 5075e492c39b443557a39195d8662484b72182f1
+last commit touching DESIGN.md:     5075e492c39b443557a39195d8662484b72182f1
+cyclophaser/ diff vs develop-v2.1: EMPTY
+front_b default digest (47 TRAIN, package defaults) = b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5  == b500d2e0…: True
+config params-15: research/labels/configs/cyclophaser_params-15.yaml sha256 5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04
+config params-14: research/labels/configs/cyclophaser_params-14.yaml sha256 acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e
+CONST: S* = intensification > mature > decay, INC* = no incipient (constant_train.json)
+population: the 16 split TEST ids (Option A); census re-check {'n': 16, 'B': 9, 'N0': 6, 'M': 15, 'K_star': 5} under current AND first-blind: OK
+lock taken: stage1_output.txt created exclusively; a second run will abort.
+
+──────────────────────────────────────────────────────────────────────────────
+LABELS: current   (n = 16)
+──────────────────────────────────────────────────────────────────────────────
+per series:  id | label kind (end±tol) | label sequence
+             P15: inc C Q MAT seq | DEF: inc C Q MAT seq | CONST: C Q
+  20150377 | boundary 34±2 | incipient > intensification > mature > decay
+      P15  inc   35  C ✓  Q ✗  MAT ✗  incipient > intensification > decay
+      DEF  inc   17  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20150561 | boundary 7±3 | incipient > intensification > mature > decay
+      P15  inc None  C ✗  Q ✗  MAT ✓  intensification > mature > decay
+      DEF  inc    7  C ✓  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20150646 | ambiguous | incipient > intensification > mature > decay
+      P15  inc    2  C —  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    2  C —  Q ✓  MAT ✗  incipient > intensification > mature > decay
+      CONST            C —  Q ✗
+  20150746 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✗  intensification > mature > decay
+      DEF  inc    6  C ✗  Q ✗  MAT ✗  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20160030 | boundary 13±2 | incipient > intensification > mature > decay
+      P15  inc None  C ✗  Q ✗  MAT ✓  intensification > mature > decay
+      DEF  inc   11  C ✓  Q ✓  MAT ✗  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20170225 | boundary 3±1 | incipient > intensification > mature > decay
+      P15  inc    8  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    6  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20170587 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay
+      DEF  inc   12  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20170756 | boundary 23±4 | incipient > decay
+      P15  inc None  C ✗  Q ✗  MAT —  intensification > mature > decay
+      DEF  inc    2  C ✗  Q ✗  MAT —  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20170899 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✗  intensification > mature > decay
+      DEF  inc    6  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20180129 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay
+      DEF  inc    7  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20180654 | boundary 37±2 | incipient > intensification > mature > decay
+      P15  inc None  C ✗  Q ✗  MAT ✓  intensification > mature > decay
+      DEF  inc   20  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20190691 | none | intensification > mature > decay > intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay > intensification > mature > decay
+      DEF  inc    7  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✗
+  20203373 | boundary 9±2 | incipient > intensification > mature > decay
+      P15  inc   10  C ✓  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    8  C ✓  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20203389 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay
+      DEF  inc    8  C ✗  Q ✗  MAT ✗  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20204655 | boundary 4±1 | incipient > intensification > mature > decay
+      P15  inc    8  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    9  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20206498 | boundary 10±2 | incipient > intensification > mature > decay
+      P15  inc    9  C ✓  Q ✗  MAT ✗  incipient > intensification > decay > intensification > decay
+      DEF  inc    8  C ✓  Q ✗  MAT ✗  incipient > intensification > mature > decay > intensification > mature > decay
+      CONST            C ✗  Q ✗
+
+aggregate:
+  comparator   H/B    R/N0   C/(B+N0)  Q/n     MAT/M   false-refusals  ambiguous-refused
+  P15         3/9    6/6     9/15    10/16    11/15               4  0/1
+  DEF         4/9    0/6     4/15     8/16    10/15               0  0/1
+  CONST       0/9    6/6     6/15     5/16        —               9  1/1
+
+evaluator per-phase boundary numbers (sequence-matched series only; denominators differ by comparator — reported, not in the verdict):
+  P15: boundaries 15/22 within own margin; unsure excluded 5
+      mature           n  9  hit  7  MAE 2.11  worst 9
+      decay            n  9  hit  6  MAE 1.78  worst 6
+      intensification  n  4  hit  2  MAE 3.0  worst 5
+  DEF: boundaries 9/21 within own margin; unsure excluded 3
+      intensification  n  7  hit  3  MAE 6.43  worst 17
+      mature           n  7  hit  3  MAE 3.29  worst 8
+      decay            n  7  hit  3  MAE 3.86  worst 8
+
+discordant pairs P15 vs DEF:
+  C: P15 right & DEF wrong 7; DEF right & P15 wrong 2
+  Q: P15 right & DEF wrong 6; DEF right & P15 wrong 4
+
+conditions:
+  V1  C(P15) 9 > C(DEF) 4                PASS
+  V2  Q(P15) 10 > Q(DEF) 8               PASS
+  V3  C(P15) 9 > C(CONST) 6              PASS
+  V4  Q(P15) 10 > Q(CONST) 5             PASS
+  V5  MAT(P15) 11 >= MAT(DEF) 10         PASS
+  current: PASS
+
+──────────────────────────────────────────────────────────────────────────────
+LABELS: first-blind   (n = 16)
+──────────────────────────────────────────────────────────────────────────────
+per series:  id | label kind (end±tol) | label sequence
+             P15: inc C Q MAT seq | DEF: inc C Q MAT seq | CONST: C Q
+  20150377 | boundary 34±2 | incipient > intensification > mature > decay
+      P15  inc   35  C ✓  Q ✗  MAT ✗  incipient > intensification > decay
+      DEF  inc   17  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20150561 | boundary 7±3 | incipient > intensification > mature > decay
+      P15  inc None  C ✗  Q ✗  MAT ✓  intensification > mature > decay
+      DEF  inc    7  C ✓  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20150646 | ambiguous | incipient > intensification > mature > decay
+      P15  inc    2  C —  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    2  C —  Q ✓  MAT ✗  incipient > intensification > mature > decay
+      CONST            C —  Q ✗
+  20150746 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✗  intensification > mature > decay
+      DEF  inc    6  C ✗  Q ✗  MAT ✗  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20160030 | boundary 13±2 | incipient > intensification > mature > decay
+      P15  inc None  C ✗  Q ✗  MAT ✓  intensification > mature > decay
+      DEF  inc   11  C ✓  Q ✓  MAT ✗  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20170225 | boundary 3±1 | incipient > intensification > mature > decay
+      P15  inc    8  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    6  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20170587 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay
+      DEF  inc   12  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20170756 | boundary 23±4 | incipient > decay
+      P15  inc None  C ✗  Q ✗  MAT —  intensification > mature > decay
+      DEF  inc    2  C ✗  Q ✗  MAT —  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20170899 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✗  intensification > mature > decay
+      DEF  inc    6  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20180129 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay
+      DEF  inc    7  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20180654 | boundary 37±2 | incipient > intensification > mature > decay
+      P15  inc None  C ✗  Q ✗  MAT ✓  intensification > mature > decay
+      DEF  inc   20  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20190691 | none | intensification > mature > decay > intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay > intensification > mature > decay
+      DEF  inc    7  C ✗  Q ✗  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✗
+  20203373 | boundary 9±2 | incipient > intensification > mature > decay
+      P15  inc   10  C ✓  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    8  C ✓  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20203389 | none | intensification > mature > decay
+      P15  inc None  C ✓  Q ✓  MAT ✓  intensification > mature > decay
+      DEF  inc    8  C ✗  Q ✗  MAT ✗  incipient > intensification > mature > decay
+      CONST            C ✓  Q ✓
+  20204655 | boundary 4±1 | incipient > intensification > mature > decay
+      P15  inc    8  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      DEF  inc    9  C ✗  Q ✓  MAT ✓  incipient > intensification > mature > decay
+      CONST            C ✗  Q ✗
+  20206498 | boundary 10±2 | incipient > intensification > mature > decay
+      P15  inc    9  C ✓  Q ✗  MAT ✗  incipient > intensification > decay > intensification > decay
+      DEF  inc    8  C ✓  Q ✗  MAT ✗  incipient > intensification > mature > decay > intensification > mature > decay
+      CONST            C ✗  Q ✗
+
+aggregate:
+  comparator   H/B    R/N0   C/(B+N0)  Q/n     MAT/M   false-refusals  ambiguous-refused
+  P15         3/9    6/6     9/15    10/16    11/15               4  0/1
+  DEF         4/9    0/6     4/15     8/16    10/15               0  0/1
+  CONST       0/9    6/6     6/15     5/16        —               9  1/1
+
+evaluator per-phase boundary numbers (sequence-matched series only; denominators differ by comparator — reported, not in the verdict):
+  P15: boundaries 15/22 within own margin; unsure excluded 5
+      mature           n  9  hit  7  MAE 2.11  worst 9
+      decay            n  9  hit  6  MAE 1.78  worst 6
+      intensification  n  4  hit  2  MAE 3.0  worst 5
+  DEF: boundaries 9/21 within own margin; unsure excluded 3
+      intensification  n  7  hit  3  MAE 6.43  worst 17
+      mature           n  7  hit  3  MAE 3.29  worst 8
+      decay            n  7  hit  3  MAE 3.86  worst 8
+
+discordant pairs P15 vs DEF:
+  C: P15 right & DEF wrong 7; DEF right & P15 wrong 2
+  Q: P15 right & DEF wrong 6; DEF right & P15 wrong 4
+
+conditions:
+  V1  C(P15) 9 > C(DEF) 4                PASS
+  V2  Q(P15) 10 > Q(DEF) 8               PASS
+  V3  C(P15) 9 > C(CONST) 6              PASS
+  V4  Q(P15) 10 > Q(CONST) 5             PASS
+  V5  MAT(P15) 11 >= MAT(DEF) 10         PASS
+  first-blind: PASS
+
+==============================================================================
+mechanical count (outside the verdict): final map P14 ≠ P15 on 1/16: 20170756
+VERDICT: PASS
+Reading (DESIGN §5.2): not out-of-sample validation; PASS = weak evidence, FAIL = strong evidence.
+==============================================================================

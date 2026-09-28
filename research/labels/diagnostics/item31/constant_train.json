@@ -1,0 +1,246 @@
+{
+  "environment": {
+    "cyclophaser.__file__": "cyclophaser/__init__.py",
+    "sys.prefix": "cyclophaser",
+    "python": "3.12.14",
+    "numpy": "2.5.3",
+    "scipy": "1.18.0",
+    "pandas": "3.0.5"
+  },
+  "current": {
+    "n": 35,
+    "kinds": {
+      "none": 16,
+      "boundary": 17,
+      "ambiguous": 2
+    },
+    "sequences": {
+      "intensification > mature > decay": 14,
+      "incipient > intensification > mature > decay": 13,
+      "intensification > mature > decay > residual": 3,
+      "incipient > intensification": 2,
+      "incipient > intensification > mature > decay > residual": 2,
+      "incipient > intensification > mature > decay > intensification > mature > decay > residual": 1
+    },
+    "S_star": [
+      "intensification",
+      "mature",
+      "decay"
+    ],
+    "INC_star": null,
+    "scores": {
+      "constant": {
+        "incipient_hits": 0,
+        "n_boundary": 17,
+        "none_agreed": 16,
+        "n_none": 16,
+        "false_refusals": 17,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 2,
+        "incipient_correct": 16,
+        "incipient_decidable": 33,
+        "sequence_match": 14,
+        "n_series": 35,
+        "mae": null
+      },
+      "params-15": {
+        "incipient_hits": 8,
+        "n_boundary": 17,
+        "none_agreed": 14,
+        "n_none": 16,
+        "false_refusals": 6,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 1,
+        "incipient_correct": 22,
+        "incipient_decidable": 33,
+        "sequence_match": 19,
+        "n_series": 35,
+        "mae": 4.818181818181818,
+        "mature_hits": 27,
+        "n_mature": 33
+      },
+      "defaults": {
+        "incipient_hits": 5,
+        "n_boundary": 17,
+        "none_agreed": 1,
+        "n_none": 16,
+        "false_refusals": 1,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 0,
+        "incipient_correct": 6,
+        "incipient_decidable": 33,
+        "sequence_match": 11,
+        "n_series": 35,
+        "mae": 6.125,
+        "mature_hits": 18,
+        "n_mature": 33
+      },
+      "p15-phase|def-filter": {
+        "incipient_hits": 8,
+        "n_boundary": 17,
+        "none_agreed": 14,
+        "n_none": 16,
+        "false_refusals": 6,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 1,
+        "incipient_correct": 22,
+        "incipient_decidable": 33,
+        "sequence_match": 22,
+        "n_series": 35,
+        "mae": 4.818181818181818,
+        "mature_hits": 20,
+        "n_mature": 33
+      },
+      "by_class": {
+        "intensification > mature > decay": {
+          "params-15": 9,
+          "defaults": 0,
+          "p15-phase|def-filter": 12
+        },
+        "incipient > intensification > mature > decay": {
+          "params-15": 8,
+          "defaults": 11,
+          "p15-phase|def-filter": 10
+        },
+        "intensification > mature > decay > residual": {
+          "params-15": 2,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        }
+      }
+    }
+  },
+  "first-blind": {
+    "n": 35,
+    "kinds": {
+      "none": 16,
+      "boundary": 17,
+      "ambiguous": 2
+    },
+    "sequences": {
+      "intensification > mature > decay": 14,
+      "incipient > intensification > mature > decay": 13,
+      "intensification > mature > decay > residual": 3,
+      "incipient > intensification": 2,
+      "incipient > intensification > mature > decay > residual": 2,
+      "incipient > intensification > mature > decay > intensification > mature > decay > residual": 1
+    },
+    "S_star": [
+      "intensification",
+      "mature",
+      "decay"
+    ],
+    "INC_star": null,
+    "scores": {
+      "constant": {
+        "incipient_hits": 0,
+        "n_boundary": 17,
+        "none_agreed": 16,
+        "n_none": 16,
+        "false_refusals": 17,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 2,
+        "incipient_correct": 16,
+        "incipient_decidable": 33,
+        "sequence_match": 14,
+        "n_series": 35,
+        "mae": null
+      },
+      "params-15": {
+        "incipient_hits": 8,
+        "n_boundary": 17,
+        "none_agreed": 14,
+        "n_none": 16,
+        "false_refusals": 6,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 1,
+        "incipient_correct": 22,
+        "incipient_decidable": 33,
+        "sequence_match": 19,
+        "n_series": 35,
+        "mae": 4.818181818181818,
+        "mature_hits": 27,
+        "n_mature": 33
+      },
+      "defaults": {
+        "incipient_hits": 5,
+        "n_boundary": 17,
+        "none_agreed": 1,
+        "n_none": 16,
+        "false_refusals": 1,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 0,
+        "incipient_correct": 6,
+        "incipient_decidable": 33,
+        "sequence_match": 11,
+        "n_series": 35,
+        "mae": 6.125,
+        "mature_hits": 18,
+        "n_mature": 33
+      },
+      "p15-phase|def-filter": {
+        "incipient_hits": 8,
+        "n_boundary": 17,
+        "none_agreed": 14,
+        "n_none": 16,
+        "false_refusals": 6,
+        "ambiguous": 2,
+        "ambiguous_detector_none": 1,
+        "incipient_correct": 22,
+        "incipient_decidable": 33,
+        "sequence_match": 22,
+        "n_series": 35,
+        "mae": 4.818181818181818,
+        "mature_hits": 20,
+        "n_mature": 33
+      },
+      "by_class": {
+        "intensification > mature > decay": {
+          "params-15": 9,
+          "defaults": 0,
+          "p15-phase|def-filter": 12
+        },
+        "incipient > intensification > mature > decay": {
+          "params-15": 8,
+          "defaults": 11,
+          "p15-phase|def-filter": 10
+        },
+        "intensification > mature > decay > residual": {
+          "params-15": 2,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        },
+        "incipient > intensification > mature > decay > intensification > mature > decay > residual": {
+          "params-15": 0,
+          "defaults": 0,
+          "p15-phase|def-filter": 0
+        }
+      }
+    }
+  }
+}

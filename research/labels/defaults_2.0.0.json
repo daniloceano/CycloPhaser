@@ -1,0 +1,42 @@
+{
+  "what": "cyclophaser 2.0.0 signature defaults, FROZEN (item 31, decision (a)). A config key that is absent is filled with this value, never with whatever the signature says today.",
+  "generated_by": "research/labels/diagnostics/item31/make_defaults_2_0_0.py",
+  "source": "research/labels/diagnostics/item31/param_table.json @ e42da8b (column 'default')",
+  "source_sha256": "51ae16c5e7e6051dc1f94cdfd9dea0b4d309aa13cd08dca3e01c8e2e9611f7af",
+  "filter_params": {
+    "use_filter": "auto",
+    "replace_endpoints_with_lowpass": 0,
+    "use_smoothing": "auto",
+    "use_smoothing_twice": "auto",
+    "savgol_polynomial": 3,
+    "cutoff_low": 168,
+    "cutoff_high": 48.0,
+    "boundary_padding": "reflect"
+  },
+  "phase_params": {
+    "threshold_intensification_length": 0.075,
+    "threshold_intensification_gap": 0.075,
+    "threshold_mature_distance": 0.125,
+    "threshold_mature_length": 0.03,
+    "threshold_decay_length": 0.075,
+    "threshold_decay_gap": 0.075,
+    "threshold_incipient_length": 0.4,
+    "prominence": null,
+    "prominence_relative": null,
+    "reclassify_index0": true,
+    "length_scale": "global",
+    "mature_method": "derivative",
+    "mature_amplitude_fraction": 0.9,
+    "mature_min_depth": 0.0,
+    "intensification_min_depth": 0.0,
+    "decay_tail_amplitude_fraction": null,
+    "incipient_method": "geometric",
+    "incipient_plateau_tau": 0.2,
+    "incipient_plateau_signal": "derivative",
+    "incipient_plateau_crossing": "single",
+    "incipient_plateau_k": 3,
+    "incipient_smooth_window": 0,
+    "incipient_smooth_polyorder": 3,
+    "incipient_plateau_spare_intensification": false
+  }
+}

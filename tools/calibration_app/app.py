@@ -150,16 +150,11 @@ st.set_page_config(page_title="CycloPhaser Calibration", layout="wide")
 
 # ── Defaults ─────────────────────────────────────────────────────────────────────
 _DEFAULTS: dict = {
-    "use_filter":        True,
-    "cutoff_low":        168,
-    "cutoff_high":       48,
-    "sm_mode":           "auto",
-    "sm_val":            17,
-    "sm2_mode":          "auto",
-    "sm2_val":           17,
-    "replace_endpoints": 0,
-    "savgol_poly":       3,
-    "boundary_padding":  "reflect",
+    # Item 31, stage 2c: every PACKAGE PARAMETER's start-up value (and what
+    # "Reset to defaults" returns to) comes from the package's own signature —
+    # see _sidebar_defaults_from_signature() below, which fills them in. Only
+    # app-own keys live in this literal: view state, and the fallback a value
+    # widget shows while its check is OFF (the parameter's default is None).
     "n_cols":            2,
     # Layer-inspector view state: which mode, which track, which decision
     # overlays are computed. Listed here so "Reset to defaults" clears it, like
@@ -177,41 +172,96 @@ _DEFAULTS: dict = {
     # Shared y scale: divide every curve in a panel by its own max|y| so they
     # fit one axis (a twinx is not an option -- see _plot_compact's zorder bug).
     "inspector_normalize":  True,
-    "thr_int_len":       0.075,
-    "thr_dec_len":       0.075,
-    "thr_mat_len":       0.030,
-    "thr_mat_dist":      0.125,
-    "thr_int_gap":       0.075,
-    "intensification_min_depth":  0.00,
-    "thr_dec_gap":       0.075,
-    "thr_inc_len":       0.400,
-    "length_scale":      "global",
-    "mature_method":              "derivative",
-    "mature_amplitude_fraction":  0.90,
-    "mature_min_depth":           0.00,
-    "extrema_prominence_enabled":     False,
-    "extrema_prominence_mode":        "relative",   # 'relative' | 'absolute'
-    "extrema_prominence_rel_val":     0.10,         # fraction (relative mode)
-    "extrema_prominence_val":         1e-6,         # absolute threshold
-    # Rule C2' on index 0 — ON by default, matching the package's own default
-    # since front A / item 28. A config exported before params-14 carries no
-    # such key, so importing one leaves this ON: absence means "the current
-    # default", exactly as the package treats it.
-    "reclassify_index0":              True,
-    "incipient_method":               "geometric",
-    "incipient_plateau_tau":          0.20,
-    "incipient_plateau_signal":       "derivative",
-    "incipient_plateau_crossing":     "single",
-    "incipient_plateau_k":            3,
-    "incipient_smooth_window":        0,
-    "incipient_smooth_polyorder":     3,
-    # Item 30 (opt-in): stop the plateau overwrite at an intensification that
-    # lies wholly before the plateau boundary. OFF, the package default; a YAML
-    # without the key imports as OFF.
-    "incipient_plateau_spare_intensification": False,
-    "decay_tail_enabled":             False,
-    "decay_tail_fraction_val":        0.05,   # author's validated reference value
+    # Fallbacks of value widgets whose parameter default is None (check OFF).
+    "sm_val":                     17,
+    "sm2_val":                    17,
+    "extrema_prominence_rel_val": 0.10,     # fraction (relative mode)
+    "extrema_prominence_val":     1e-6,     # absolute threshold
+    "decay_tail_fraction_val":    0.05,     # author's validated reference value
 }
+
+
+def _sidebar_defaults_from_signature() -> dict:
+    """Every sidebar widget key that carries a package parameter, with the value
+    the package's SIGNATURE gives it (item 31, stage 2c — one source).
+
+    * a scalar parameter → its default, in the widget's type (the integer
+      sliders get an int; the "Apply Lanczos filter" checkbox gets True for
+      'auto');
+    * use_smoothing / use_smoothing_twice → mode 'auto' | 'off' | 'manual';
+    * the prominence filter and the decay tail are ON when their package
+      default is not None, with that value; OFF otherwise, and the value widget
+      keeps the app's fallback from _DEFAULTS.
+
+    Imports are local so the stretch of this file that tests execute on their
+    own (from `_DEFAULTS` to `_load_yaml_config`) stays self-contained.
+    """
+    import inspect as _inspect
+    from cyclophaser.determine_periods import get_periods as _gp
+    from cyclophaser.determine_periods import process_vorticity as _pv
+
+    sig = {}
+    for fn in (_pv, _gp):
+        for k, p in _inspect.signature(fn).parameters.items():
+            if p.default is not _inspect.Parameter.empty:
+                sig[k] = p.default
+
+    uf = sig["use_filter"]
+    out = {
+        "use_filter": uf == "auto" or (uf is not False and bool(uf)),
+        "cutoff_low": int(sig["cutoff_low"]),
+        "cutoff_high": int(sig["cutoff_high"]),
+        "replace_endpoints": int(sig["replace_endpoints_with_lowpass"]),
+        "savgol_poly": int(sig["savgol_polynomial"]),
+        "boundary_padding": sig["boundary_padding"],
+        "thr_int_len": sig["threshold_intensification_length"],
+        "thr_int_gap": sig["threshold_intensification_gap"],
+        "intensification_min_depth": sig["intensification_min_depth"],
+        "thr_mat_dist": sig["threshold_mature_distance"],
+        "thr_mat_len": sig["threshold_mature_length"],
+        "thr_dec_len": sig["threshold_decay_length"],
+        "thr_dec_gap": sig["threshold_decay_gap"],
+        "thr_inc_len": sig["threshold_incipient_length"],
+        "length_scale": sig["length_scale"],
+        "mature_method": sig["mature_method"],
+        "mature_amplitude_fraction": sig["mature_amplitude_fraction"],
+        "mature_min_depth": sig["mature_min_depth"],
+        "reclassify_index0": sig["reclassify_index0"],
+        "incipient_method": sig["incipient_method"],
+        "incipient_plateau_tau": sig["incipient_plateau_tau"],
+        "incipient_plateau_signal": sig["incipient_plateau_signal"],
+        "incipient_plateau_crossing": sig["incipient_plateau_crossing"],
+        "incipient_plateau_k": int(sig["incipient_plateau_k"]),
+        "incipient_smooth_window": int(sig["incipient_smooth_window"]),
+        "incipient_smooth_polyorder": int(sig["incipient_smooth_polyorder"]),
+        "incipient_plateau_spare_intensification":
+            bool(sig["incipient_plateau_spare_intensification"]),
+    }
+    for mode_k, val_k, param in (("sm_mode", "sm_val", "use_smoothing"),
+                                 ("sm2_mode", "sm2_val", "use_smoothing_twice")):
+        v = sig[param]
+        if v == "auto":
+            out[mode_k] = "auto"
+        elif v is False:
+            out[mode_k] = "off"
+        else:
+            out[mode_k], out[val_k] = "manual", int(v)
+    pr, pa = sig["prominence_relative"], sig["prominence"]
+    out["extrema_prominence_enabled"] = pr is not None or pa is not None
+    out["extrema_prominence_mode"] = ("relative" if pr is not None
+                                      else "absolute" if pa is not None else "relative")
+    if pr is not None:
+        out["extrema_prominence_rel_val"] = pr
+    if pa is not None:
+        out["extrema_prominence_val"] = pa
+    dt = sig["decay_tail_amplitude_fraction"]
+    out["decay_tail_enabled"] = dt is not None
+    if dt is not None:
+        out["decay_tail_fraction_val"] = dt
+    return out
+
+
+_DEFAULTS.update(_sidebar_defaults_from_signature())
 
 _SM_OPTS = ["auto", "off", "manual"]
 _VIEW_MODES = ["Grid", "Inspector", "Label"]
@@ -453,7 +503,6 @@ _PHASE_ENUM_KEYS = ("length_scale", "mature_method", "incipient_method",
 _PHASE_BOOL_KEYS = ("reclassify_index0", "incipient_plateau_spare_intensification")
 
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
-_REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
 # Keys a previous build of this app exported and which the package no longer
 # accepts. Kept here (rather than deleted outright) so an old YAML imports
 # cleanly with an explicit, accurate explanation instead of a bare "unknown key".
@@ -538,15 +587,17 @@ _NON_PARAMETER_ARGS = frozenset({"zeta_df", "vorticity", "plot", "plot_steps",
 
 
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
-# A key in _YAML_PHASE_MAP is APPLIED on import; being in _OPTIONAL_PHASE_YAML_KEYS
-# only keeps it out of the "unknown key" list. A parameter that must be both
-# applied when present and not reported missing when absent therefore has to be
-# subtracted here explicitly -- which is what every config exported before
-# mature_min_depth existed (params-1..11) needs.
-_REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP) - {"mature_min_depth",
-                                                    "intensification_min_depth",
-                                                    # item 30: absent = OFF, not missing
-                                                    "incipient_plateau_spare_intensification"}
+# Item 31, decision (a): there is no longer a "required" set. Every key a file
+# does not carry is FILLED with the frozen cyclophaser 2.0.0 default
+# (research/labels/config_defaults.py) and listed — see _load_yaml_config. The
+# "optional" sets above now only keep those keys out of the "unknown key" list.
+
+# The three keys whose sidebar control is an enabled flag + a value: the app's
+# own export omits them when the check is OFF, so an absent key means OFF. Their
+# 2.0.0 default is None (OFF) as well, so filling them is recorded but nothing is
+# written into a value widget — the "absent" branch below switches them off.
+_ABSENT_MEANS_OFF_KEYS = ("prominence", "prominence_relative",
+                          "decay_tail_amplitude_fraction")
 
 
 # ── Pure helper functions ─────────────────────────────────────────────────────────
@@ -610,25 +661,37 @@ def _compute_evaluation(cyclone_names) -> dict:
 def _load_yaml_config(yaml_bytes: bytes) -> dict:
     """Parse an exported YAML and write values into session_state.
 
-    Returns {"error": str|None, "ignored": list, "missing": list, "count": int}.
+    Returns {"error": str|None, "ignored": list, "missing": list,
+             "filled": list[(key, value)], "count": int}.
+
+    Item 31, decision (a): every key the file does not carry is filled with the
+    frozen cyclophaser 2.0.0 default and listed — `filled` holds (key, value),
+    `missing` the key names alone. Nothing absent is left to whatever the
+    session happened to hold.
     """
     try:
         doc = yaml.safe_load(yaml_bytes)
     except yaml.YAMLError as exc:
-        return {"error": f"Invalid YAML: {exc}", "ignored": [], "missing": [], "count": 0}
+        return {"error": f"Invalid YAML: {exc}", "ignored": [], "missing": [], "filled": [], "count": 0}
 
     if not isinstance(doc, dict):
-        return {"error": "YAML root must be a mapping.", "ignored": [], "missing": [], "count": 0}
+        return {"error": "YAML root must be a mapping.", "ignored": [], "missing": [], "filled": [], "count": 0}
 
     missing_secs = [s for s in ("filter_params", "phase_params") if s not in doc]
     if missing_secs:
         return {
             "error": f"Missing required sections: {', '.join(missing_secs)}",
-            "ignored": [], "missing": [], "count": 0,
+            "ignored": [], "missing": [], "filled": [], "count": 0,
         }
 
-    fp = doc["filter_params"]
-    pp = doc["phase_params"]
+    import config_defaults   # research/labels — on sys.path via benchmark_core
+    given_fp = dict(doc["filter_params"] or {})
+    given_pp = dict(doc["phase_params"] or {})
+    _filled_doc, filled = config_defaults.fill_missing(
+        {"filter_params": given_fp, "phase_params": given_pp})
+    fp = _filled_doc["filter_params"]
+    pp = {k: v for k, v in _filled_doc["phase_params"].items()
+          if not (k in _ABSENT_MEANS_OFF_KEYS and k not in given_pp)}
 
     ignored = (
         [f"filter_params.{k}" for k in fp if k not in _KNOWN_FILTER_YAML_KEYS]
@@ -641,10 +704,7 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
     # "unknown" would wrongly suggest a typo. Nothing is applied from them.
     ignored += [f"phase_params.{k} ({why})"
                 for k, why in _REMOVED_PHASE_YAML_KEYS.items() if k in pp]
-    missing = (
-        [f"filter_params.{k}" for k in _REQUIRED_FILTER_YAML_KEYS if k not in fp]
-        + [f"phase_params.{k}" for k in _REQUIRED_PHASE_YAML_KEYS if k not in pp]
-    )
+    missing = [k for k, _v in filled]
 
     count = 0
     for yaml_key, (ss_key, conv) in _YAML_FILTER_MAP.items():
@@ -758,7 +818,8 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
         elif bad_list is not None:
             ignored.append("evaluation.bad_cases (not a list)")
 
-    return {"error": None, "ignored": ignored, "missing": missing, "count": count}
+    return {"error": None, "ignored": ignored, "missing": missing, "filled": filled,
+            "count": count}
 
 
 def _build_yaml(cyclone_names) -> str:
@@ -1434,8 +1495,11 @@ with st.sidebar:
             st.success(f"Loaded {_r['count']} parameters from YAML.")
             if _r["ignored"]:
                 st.warning(f"Ignored unknown keys: {', '.join(_r['ignored'])}")
-            if _r["missing"]:
-                st.warning(f"Using defaults for missing keys: {', '.join(_r['missing'])}")
+            if _r.get("filled"):
+                st.warning(
+                    f"{len(_r['filled'])} key(s) absent from this file were filled with "
+                    "the cyclophaser 2.0.0 defaults (frozen table, item 31): "
+                    + ", ".join(f"{k}={v!r}" for k, v in _r["filled"]))
 
     st.divider()
     st.button("↺ Reset to defaults", on_click=_reset, use_container_width=True)
@@ -1690,7 +1754,7 @@ with st.sidebar:
             _prom_mode = st.radio(
                 "Prominence mode",
                 options=["relative", "absolute"],
-                index=0,
+                index=["relative", "absolute"].index(_DEFAULTS["extrema_prominence_mode"]),
                 format_func=lambda x: (
                     "Relative (recommended)" if x == "relative" else "Absolute"
                 ),
@@ -2199,9 +2263,12 @@ _PHASE_PARAMS = dict(
     incipient_smooth_polyorder=incipient_smooth_polyorder,
     incipient_plateau_spare_intensification=bool(incipient_plateau_spare_intensification),
 )
-_phase_params_tuple = tuple(sorted(
-    (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
-))
+# Item 31: None is passed EXPLICITLY. prominence / prominence_relative /
+# decay_tail_amplitude_fraction are None when their sidebar check is OFF; up to
+# 2.0.0 omitting them meant the same thing, but the package defaults are now
+# params-15 (prominence_relative=0.3, decay_tail_amplitude_fraction=0.3), so an
+# omitted OFF would silently run ON.
+_phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 
 # The sidebar's live state, in the same shape a calibration YAML uses, so the
 # Benchmark tab can spawn a column from "the current sidebar" without
@@ -2219,7 +2286,8 @@ st.session_state["_bench_live_config"] = {
         "savgol_polynomial": savgol_poly,
         "boundary_padding": boundary_padding,
     },
-    "phase_params": {k: v for k, v in _PHASE_PARAMS.items() if v is not None},
+    # Item 31: None kept (OFF), for the reason given at _phase_params_tuple.
+    "phase_params": dict(_PHASE_PARAMS),
 }
 
 # ── File upload ──────────────────────────────────────────────────────────────────
