@@ -82,6 +82,8 @@ invariant itself is unchanged, and the global == local invariant held in all
 four (boundary_padding x replace_endpoints_with_lowpass) combinations tested.
 """
 
+import sys
+from pathlib import Path
 import warnings
 
 import pandas as pd
@@ -92,10 +94,15 @@ from cyclophaser.determine_periods import determine_periods, periods_to_dict
 from .generators import make_lifecycle_series
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from legacy_defaults import ALL_2_0_0  # noqa: E402
+
 def _run(series, length_scale):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        df = determine_periods(series, x=series.index, length_scale=length_scale)
+        # Item 31: measured on the 2.0.0 base — passed explicitly.
+        df = determine_periods(series, x=series.index,
+                               **{**ALL_2_0_0, "length_scale": length_scale})
     return periods_to_dict(df)
 
 
@@ -244,6 +251,9 @@ def test_case_b_global_mode_unaffected_by_length_scale_option_existing():
     calling determine_periods() without specifying it at all (implicit default)."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        df_explicit = determine_periods(_series_case_b, x=_series_case_b.index, length_scale="global")
-        df_implicit = determine_periods(_series_case_b, x=_series_case_b.index)
+        # Item 31: on the 2.0.0 base (length_scale="global" there), explicit vs implicit.
+        _base = {k: v for k, v in ALL_2_0_0.items() if k != "length_scale"}
+        df_explicit = determine_periods(_series_case_b, x=_series_case_b.index, **_base,
+                                        length_scale="global")
+        df_implicit = determine_periods(_series_case_b, x=_series_case_b.index, **_base)
     pd.testing.assert_frame_equal(df_explicit, df_implicit)

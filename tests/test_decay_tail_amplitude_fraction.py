@@ -80,6 +80,7 @@
 
 import glob
 import os
+import inspect
 import warnings
 
 import pandas as pd
@@ -167,14 +168,20 @@ def calibration_tracks():
 # ── Default (None) is a strict no-op ────────────────────────────────────────────
 
 
-def test_default_none_matches_implicit_default():
-    """Passing decay_tail_amplitude_fraction=None explicitly must be byte-identical
-    to not passing the parameter at all (implicit default)."""
+# Item 31: the package default of decay_tail_amplitude_fraction moved (None up to 2.0.0).
+# These tests pin that the CURRENT default is forwarded exactly as if
+# passed explicitly — read from the signature, not typed here.
+_DEFAULT_NOW = inspect.signature(determine_periods).parameters["decay_tail_amplitude_fraction"].default
+
+
+def test_explicit_default_matches_implicit_default():
+    """Passing the current default of decay_tail_amplitude_fraction explicitly
+    must be byte-identical to not passing the parameter at all."""
     series = _load_track(_CONVERT_CASES[0])
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         df_explicit = determine_periods(
-            series, **_FILTER_PARAMS, **_PHASE_PARAMS, decay_tail_amplitude_fraction=None
+            series, **_FILTER_PARAMS, **_PHASE_PARAMS, decay_tail_amplitude_fraction=_DEFAULT_NOW
         )
         df_implicit = determine_periods(series, **_FILTER_PARAMS, **_PHASE_PARAMS)
     pd.testing.assert_frame_equal(df_explicit, df_implicit)

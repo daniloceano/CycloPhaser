@@ -47,6 +47,7 @@ from tests.synthetic.cases import (
 )
 from tests.synthetic.generators import make_lifecycle_series
 
+import sys
 from pathlib import Path
 
 _BASELINE = Path(__file__).parent / "baselines" / "baseline_defaults_multitrack.csv"
@@ -80,10 +81,17 @@ DESIGNED_IC = {
 NO_IC = list(STEEP_START_CASE_IDS)
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from legacy_defaults import ALL_2_0_0  # noqa: E402
+
 def _run(series, **kwargs):
+    """determine_periods on the 2.0.0 base (item 31): every assertion in this
+    module was measured under the 2.0.0 defaults plus the stated overrides, so
+    that base is passed explicitly (tests/legacy_defaults.py, from the frozen
+    table) instead of being inherited from the package."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        return determine_periods(series, **kwargs)
+        return determine_periods(series, **{**ALL_2_0_0, **kwargs})
 
 
 def _leading_incipient_len(df):
@@ -112,7 +120,9 @@ def _baseline_tracks():
 
 @pytest.mark.parametrize("track", _baseline_tracks())
 def test_defaults_identical_to_develop_v21(track):
-    """determine_periods(series) with no args == develop-v2.1, per track."""
+    """The 2.0.0 defaults, passed explicitly, == develop-v2.1, per track (item 31:
+    the package defaults moved; this stays the cross-version check of the 2.0.0
+    path, which `_run` now spells out)."""
     baseline = pd.read_csv(_BASELINE, dtype={"track": str})
     expected = baseline[baseline["track"] == track].reset_index(drop=True)
 

@@ -60,12 +60,21 @@ from cyclophaser.plots import plot_all_periods  # noqa: E402
 
 import layer_inspector as li  # noqa: E402
 
+sys.path.insert(0, str(REPO_ROOT / "tests"))
+# Item 31: tests whose numbers were MEASURED under the 2.0.0 defaults pass them
+# explicitly; tests about the CURRENT defaults (the ribbon with config dict(),
+# the defaults-equality checks of section 7) do not.
+from legacy_defaults import ARGS_2_0_0, FILTER_2_0_0, FRAME_2_0_0, PHASE_2_0_0  # noqa: E402
+
 CALIB = REPO_ROOT / "tests" / "calibration_data"
 ALL_TRACKS = sorted(p.stem for p in CALIB.glob("*.csv"))
 
-# Package-default pre-processing with smoothing off — the configuration the
-# reference ledger counts below were measured under.
-PV_DEFAULT = dict(use_filter=True, use_smoothing=False, use_smoothing_twice=False)
+# 2.0.0 package-default pre-processing with smoothing off — the configuration
+# the reference ledger counts below were measured under. Item 31 moved the
+# package defaults (cutoff_high 48 -> 18, boundary_padding reflect -> edge), so
+# the 2.0.0 filter values are now spelled out, from the frozen table.
+PV_DEFAULT = dict(FILTER_2_0_0, use_filter=True, use_smoothing=False,
+                  use_smoothing_twice=False)
 
 # The section-3c calibration, the regime in which the prominence filter
 # actually rejects candidates on real tracks.
@@ -163,9 +172,10 @@ INTENSIFICATION_REFERENCE = {0.075: (71, 2), 0.15: (61, 12),
 def test_intensification_ledger_reference_counts(vort_cache, threshold, expected):
     accepted = rejected = 0
     for track_id in ALL_TRACKS:
-        df = li.build_working_frame(_vort(vort_cache, track_id))
-        args = li.build_args_periods(threshold_intensification_length=threshold,
-                                     length_scale="global")
+        df = li.build_working_frame(_vort(vort_cache, track_id), **FRAME_2_0_0)
+        args = li.build_args_periods(**{**ARGS_2_0_0,
+                                        "threshold_intensification_length": threshold,
+                                        "length_scale": "global"})
         ledger = li.intensification_ledger(df, **args)
         accepted += sum(c["accepted"] for c in ledger["candidates"])
         rejected += sum(not c["accepted"] for c in ledger["candidates"])
@@ -179,8 +189,8 @@ def test_decay_ledger_covers_the_last_valley_to_the_end_of_the_series(vort_cache
     that most often ends a track."""
     seen = 0
     for track_id in ALL_TRACKS:
-        df = li.build_working_frame(_vort(vort_cache, track_id))
-        ledger = li.decay_ledger(df, **li.build_args_periods())
+        df = li.build_working_frame(_vort(vort_cache, track_id), **FRAME_2_0_0)
+        ledger = li.decay_ledger(df, **li.build_args_periods(**ARGS_2_0_0))
         tails = [c for c in ledger["candidates"] if c["to_series_end"]]
         assert len(tails) <= 1
         if tails:
@@ -233,8 +243,11 @@ def test_ribbon_step_six_equals_get_periods(vort_cache, config):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             df_result = get_periods(vort, **config)
+        # Item 31: forward only what the config CARRIES. An explicit None here
+        # would switch the prominence filter off while get_periods(**config)
+        # runs its default (0.3 since item 31).
         df = li.build_working_frame(
-            vort, **{k: config.get(k) for k in _EXTREMA_KEYS})
+            vort, **{k: config[k] for k in _EXTREMA_KEYS if k in config})
         args = li.build_args_periods(
             **{k: v for k, v in config.items() if k not in _EXTREMA_KEYS})
         steps = li.pipeline_ribbon(df, **args)
@@ -259,8 +272,8 @@ def test_ribbon_shows_a_later_step_overwriting_an_earlier_one(vort_cache):
     between 28/01 13h and 20h; incipient takes the first 6 steps of the
     intensification. If the ribbon stopped showing this, it would have stopped
     doing the one thing it exists for."""
-    df = li.build_working_frame(_vort(vort_cache, "20150069"))
-    steps = li.pipeline_ribbon(df, **li.build_args_periods())
+    df = li.build_working_frame(_vort(vort_cache, "20150069"), **FRAME_2_0_0)
+    steps = li.pipeline_ribbon(df, **li.build_args_periods(**ARGS_2_0_0))
     got = {(r["step"], r["from"], r["to"],
             r["start"].strftime("%d/%m %H"), r["end"].strftime("%d/%m %H"), r["n"])
            for r in li.ribbon_overwrites(steps)}
@@ -354,7 +367,7 @@ def test_mature_lens_accepted_extrema_are_the_detector_s(vort_cache, track_id,
     vort = _vort(vort_cache, track_id, key="author", **AUTHOR_PV)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        df_result = get_periods(vort, **extrema)
+        df_result = get_periods(vort, **{**PHASE_2_0_0, **extrema})   # 2.0.0 base
     lens = li.mature_lens(df_result["z"], **extrema)
     for kind in ("peak", "valley"):
         np.testing.assert_array_equal(
@@ -463,8 +476,9 @@ def test_incipient_boundary_is_read_back_not_recomputed(vort_cache, track_id):
     vort = _vort(vort_cache, track_id, key="author", **AUTHOR_PV)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        df_result = get_periods(vort, incipient_method="plateau",
-                                incipient_plateau_tau=0.20)
+        df_result = get_periods(vort, **{**PHASE_2_0_0,            # 2.0.0 base
+                                         "incipient_method": "plateau",
+                                         "incipient_plateau_tau": 0.20})
     lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
                              df_result["dz2"], signal="derivative", tau=0.20)
     assert li.incipient_lead(df_result) == lens["boundary_raw"]
@@ -818,10 +832,11 @@ def test_crossing_index_matches_the_package_boundary_function(vort_cache,
     vort = _vort(vort_cache, track_id)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        df_result = get_periods(vort, incipient_method="plateau",
-                                incipient_plateau_tau=0.20,
-                                incipient_plateau_crossing=crossing,
-                                incipient_plateau_k=k)
+        df_result = get_periods(vort, **{**PHASE_2_0_0,            # 2.0.0 base
+                                         "incipient_method": "plateau",
+                                         "incipient_plateau_tau": 0.20,
+                                         "incipient_plateau_crossing": crossing,
+                                         "incipient_plateau_k": k})
     lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
                              df_result["dz2"], signal="derivative", tau=0.20,
                              crossing=crossing, k=k)
@@ -843,10 +858,11 @@ def test_incipient_lead_never_precedes_the_crossing_index(vort_cache,
     vort = _vort(vort_cache, track_id)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        df_result = get_periods(vort, incipient_method="plateau",
-                                incipient_plateau_tau=0.20,
-                                incipient_plateau_crossing=crossing,
-                                incipient_plateau_k=k)
+        df_result = get_periods(vort, **{**PHASE_2_0_0,            # 2.0.0 base
+                                         "incipient_method": "plateau",
+                                         "incipient_plateau_tau": 0.20,
+                                         "incipient_plateau_crossing": crossing,
+                                         "incipient_plateau_k": k})
     lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
                              df_result["dz2"], signal="derivative", tau=0.20,
                              crossing=crossing, k=k)

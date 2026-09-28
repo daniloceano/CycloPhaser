@@ -103,11 +103,12 @@ def test_the_geometric_method_never_reads_the_key(monkeypatch):
     assert seen == []
 
 
-# ── default False in every public signature, forwarded as given ─────────────
+# ── default True in every public signature (item 31; False up to 2.0.0), ─────
+#    forwarded as given ──────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("fn", [get_periods, determine_periods])
-def test_the_public_default_is_false(fn):
-    assert inspect.signature(fn).parameters[KEY].default is False
+def test_the_public_default_is_true(fn):
+    assert inspect.signature(fn).parameters[KEY].default is True
 
 
 def test_get_periods_forwards_the_key_to_the_stages(monkeypatch):
@@ -126,9 +127,9 @@ def test_get_periods_forwards_the_key_to_the_stages(monkeypatch):
     track = pd.read_csv(example_file, parse_dates=[0], delimiter=";", index_col=[0])
     vort = dp.process_vorticity(pd.DataFrame({"zeta": track["min_max_zeta_850"].values}))
     get_periods(vort)
-    assert got[KEY] is False
-    get_periods(vort, **{KEY: True})
     assert got[KEY] is True
+    get_periods(vort, **{KEY: False})
+    assert got[KEY] is False
 
 
 # ── the 5 adjudicated TRAIN cases: params-15 == the counterfactual ──────────

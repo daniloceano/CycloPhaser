@@ -2213,9 +2213,12 @@ _PHASE_PARAMS = dict(
     incipient_smooth_polyorder=incipient_smooth_polyorder,
     incipient_plateau_spare_intensification=bool(incipient_plateau_spare_intensification),
 )
-_phase_params_tuple = tuple(sorted(
-    (k, v) for k, v in _PHASE_PARAMS.items() if v is not None
-))
+# Item 31: None is passed EXPLICITLY. prominence / prominence_relative /
+# decay_tail_amplitude_fraction are None when their sidebar check is OFF; up to
+# 2.0.0 omitting them meant the same thing, but the package defaults are now
+# params-15 (prominence_relative=0.3, decay_tail_amplitude_fraction=0.3), so an
+# omitted OFF would silently run ON.
+_phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 
 # The sidebar's live state, in the same shape a calibration YAML uses, so the
 # Benchmark tab can spawn a column from "the current sidebar" without
@@ -2233,7 +2236,8 @@ st.session_state["_bench_live_config"] = {
         "savgol_polynomial": savgol_poly,
         "boundary_padding": boundary_padding,
     },
-    "phase_params": {k: v for k, v in _PHASE_PARAMS.items() if v is not None},
+    # Item 31: None kept (OFF), for the reason given at _phase_params_tuple.
+    "phase_params": dict(_PHASE_PARAMS),
 }
 
 # ── File upload ──────────────────────────────────────────────────────────────────

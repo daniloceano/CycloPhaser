@@ -143,27 +143,30 @@ STEP_NAMES = (
 # were once missing here, and build_args_periods then rejected every run the
 # app made (item 30a).
 _ARGS_PERIODS_DEFAULTS = {
+    # Item 31: the package defaults moved to params-15; these follow them (the
+    # test named above pins value for value). The 2.0.0 values are the frozen
+    # table research/labels/defaults_2.0.0.json.
     "threshold_intensification_length": 0.075,
     "threshold_intensification_gap": 0.075,
-    "threshold_mature_distance": 0.125,
-    "threshold_mature_length": 0.03,
+    "threshold_mature_distance": 0.18,
+    "threshold_mature_length": 0.15,
     "threshold_decay_length": 0.075,
     "threshold_decay_gap": 0.075,
     "threshold_incipient_length": 0.4,
-    "length_scale": "global",
-    "mature_method": "derivative",
+    "length_scale": "local",
+    "mature_method": "amplitude",
     "mature_amplitude_fraction": 0.90,
-    "mature_min_depth": 0.0,
-    "intensification_min_depth": 0.0,
-    "decay_tail_amplitude_fraction": None,
-    "incipient_method": "geometric",
+    "mature_min_depth": 0.8,
+    "intensification_min_depth": 0.05,
+    "decay_tail_amplitude_fraction": 0.3,
+    "incipient_method": "plateau",
     "incipient_plateau_tau": 0.20,
-    "incipient_plateau_signal": "derivative",
-    "incipient_plateau_crossing": "single",
-    "incipient_plateau_k": 3,
-    "incipient_smooth_window": 0,
+    "incipient_plateau_signal": "vorticity",
+    "incipient_plateau_crossing": "sustained",
+    "incipient_plateau_k": 5,
+    "incipient_smooth_window": 5,
     "incipient_smooth_polyorder": 3,
-    "incipient_plateau_spare_intensification": False,
+    "incipient_plateau_spare_intensification": True,
 }
 
 
@@ -179,8 +182,17 @@ def build_args_periods(**overrides) -> dict:
     if unknown:
         raise KeyError(f"not stage-detection parameters: {sorted(unknown)}")
     args = dict(_ARGS_PERIODS_DEFAULTS)
-    args.update({k: v for k, v in overrides.items() if v is not None})
+    # None means "use the default" — except where None is itself a VALUE the
+    # package accepts: decay_tail_amplitude_fraction=None switches the check
+    # OFF. Up to item 31 its default was None, so dropping it was harmless;
+    # with the default at 0.3 an app that says OFF must stay OFF here too, or
+    # the ribbon would explain a run get_periods never made.
+    args.update({k: v for k, v in overrides.items()
+                 if v is not None or k in _NONE_IS_A_VALUE})
     return args
+
+
+_NONE_IS_A_VALUE = frozenset({"decay_tail_amplitude_fraction"})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -189,7 +201,7 @@ def build_args_periods(**overrides) -> dict:
 
 def build_working_frame(vorticity,
                         prominence=None,
-                        prominence_relative=None,
+                        prominence_relative=0.3,          # get_periods' default (item 31)
                         reclassify_index0=True,
                         ) -> pd.DataFrame:
     """Reproduce ``get_periods``' internal frame, field for field.
