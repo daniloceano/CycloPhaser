@@ -73,3 +73,34 @@ def test_baseline_smoothing(series_and_index):
         expected.reset_index(drop=True),
         check_like=False,
     )
+
+
+# ── Item 31: the 2.0.0 path, kept as a cross-version check ─────────────────────
+# The package defaults moved to params-15 (item 31), so baseline_default /
+# baseline_smoothing were regenerated under the new defaults. The 2.0.0 CSVs are
+# kept as *_2_0_0.csv, and the 2.0.0 defaults — passed explicitly, from the
+# frozen table — must still reproduce them.
+
+import sys as _sys  # noqa: E402
+from pathlib import Path as _Path  # noqa: E402
+
+_sys.path.insert(0, str(_Path(__file__).resolve().parent))
+from legacy_defaults import ALL_2_0_0  # noqa: E402
+
+
+def test_baseline_default_2_0_0_path(series_and_index):
+    series, x = series_and_index
+    result = _run_and_dict(series, x, **ALL_2_0_0)
+    expected = _load_baseline("baseline_default_2_0_0")
+    pd.testing.assert_frame_equal(result.reset_index(drop=True),
+                                  expected.reset_index(drop=True), check_like=False)
+
+
+def test_baseline_smoothing_2_0_0_path(series_and_index):
+    series, x = series_and_index
+    kwargs = {**ALL_2_0_0, "use_filter": False, "use_smoothing": 10,
+              "use_smoothing_twice": False}
+    result = _run_and_dict(series, x, **kwargs)
+    expected = _load_baseline("baseline_smoothing_2_0_0")
+    pd.testing.assert_frame_equal(result.reset_index(drop=True),
+                                  expected.reset_index(drop=True), check_like=False)
