@@ -68,6 +68,7 @@ for _p in (str(_REPO / "research" / "labels"),
         sys.path.append(_p)
 
 from cyclophaser.determine_periods import get_periods, process_vorticity  # noqa: E402
+from config_defaults import fill_missing  # noqa: E402  (research/labels, item 31 (a))
 from labels_core import (SWELL_BATCH, batch_membership,  # noqa: E402
                          is_adjudicated, load_batch_series, load_real_series,
                          load_synthetic_series, normalize_phase, read_labels,
@@ -144,8 +145,12 @@ def split_config(doc: dict) -> tuple[dict, dict]:
 
     Keys the current signature does not accept are dropped, exactly as
     `evaluate_against_labels.load_config` drops them, so a column runs the same
-    way the evaluation script would run it.
+    way the evaluation script would run it. Keys the document does not carry are
+    filled with the frozen 2.0.0 defaults (`config_defaults.fill_missing`, item
+    31 decision (a)) — the same rule, so the two still agree; the list of filled
+    keys is the header's `defaulted` (see `signature_audit`).
     """
+    doc, _filled = fill_missing(doc)
     gp_ok = set(inspect.signature(get_periods).parameters) - {"vorticity"}
     pv = {k: v for k, v in (doc.get("filter_params") or {}).items() if k in PV_KEYS}
     gp = {k: v for k, v in (doc.get("phase_params") or {}).items() if k in gp_ok}
@@ -157,8 +162,9 @@ def signature_audit(doc: dict) -> dict:
 
     * `ignored`  — keys the YAML carries that the current signature does not read
                    (`distance` is the one that matters historically).
-    * `defaulted`— keys the signature has that the YAML omits, each with the value
-                   that will therefore be used.
+    * `defaulted`— keys the YAML omits, each with the value that will therefore
+                   be used: the FROZEN 2.0.0 default (`config_defaults`, item 31
+                   decision (a)), not the signature's current one.
     * `pre_filter_fix` — True when `boundary_padding` is absent, which dates the
                    file to before the filter fix. See PRE_FILTER_FIX_WARNING.
     """
@@ -166,15 +172,14 @@ def signature_audit(doc: dict) -> dict:
     fp = dict(doc.get("filter_params") or {})
     pp = dict(doc.get("phase_params") or {})
 
-    ignored, defaulted = [], {}
+    ignored = []
     for section, given, known in (("filter_params", fp, cur["filter_params"]),
                                   ("phase_params", pp, cur["phase_params"])):
         for k in sorted(given):
             if k not in known:
                 ignored.append(f"{section}.{k}")
-        for k in sorted(known):
-            if k not in given:
-                defaulted[f"{section}.{k}"] = known[k]
+    _doc, filled = fill_missing(doc)
+    defaulted = dict(sorted(filled))
 
     return {
         "ignored": ignored,

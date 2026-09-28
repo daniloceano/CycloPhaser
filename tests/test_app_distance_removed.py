@@ -134,13 +134,34 @@ class TestDistanceImportWarning:
         # the generic unknown-key comprehension must exclude removed keys
         assert "if k not in _REMOVED_PHASE_YAML_KEYS" in src
 
-    def test_reference_config_still_carries_distance(self):
-        """The versioned params-9 export is the real-world case this handles."""
+    def test_a_config_carrying_distance_imports_with_the_explanation(self):
+        """The real-world case: every export up to params-9 carried `distance: 5`.
+
+        params-9 itself left the repo in item 31 (recoverable from 33ea489, see
+        research/labels/diagnostics/item31/recovery_table.md), so the case is an
+        inline YAML carrying params-9's own value, run through the app's real
+        `_load_yaml_config` rather than asserted about a file."""
+        import datetime as _dt
+        import sys
+        import types
+
         import yaml
-        cfg = REPO_ROOT / "research/labels/configs/cyclophaser_params-9.yaml"
-        doc = yaml.safe_load(cfg.read_text())
-        assert doc["phase_params"]["distance"] == 5, (
-            "params-9 is a historical record and must keep distance: 5")
+        sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))   # config_defaults
+        src = APP_PY.read_text()
+        start = src.index("_DEFAULTS: dict = {")
+        fn = src.index("def _load_yaml_config(")
+        end = src.index("\ndef ", fn + 1)
+        st = types.SimpleNamespace(session_state={})
+        ns = {"st": st, "yaml": yaml, "Path": Path, "datetime": _dt.datetime,
+              "timezone": _dt.timezone, "__name__": "_distance_loader"}
+        exec(compile(src[start:end], "app.py", "exec"), ns)
+        res = ns["_load_yaml_config"](
+            b"filter_params: {use_filter: true}\nphase_params: {distance: 5}\n")
+        assert res["error"] is None
+        explained = [k for k in res["ignored"] if k.startswith("phase_params.distance ")]
+        assert explained and "distance removido" in explained[0], res["ignored"]
+        assert "phase_params.distance" not in res["ignored"], "reported as a bare unknown key"
+        assert "distance" not in st.session_state
 
 
 # ── (c) length_scale survives, guarded but ENABLED ───────────────────────────

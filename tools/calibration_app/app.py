@@ -453,7 +453,6 @@ _PHASE_ENUM_KEYS = ("length_scale", "mature_method", "incipient_method",
 _PHASE_BOOL_KEYS = ("reclassify_index0", "incipient_plateau_spare_intensification")
 
 _KNOWN_FILTER_YAML_KEYS = set(_YAML_FILTER_MAP) | {"use_smoothing", "use_smoothing_twice"}
-_REQUIRED_FILTER_YAML_KEYS = _KNOWN_FILTER_YAML_KEYS - _OPTIONAL_FILTER_YAML_KEYS
 # Keys a previous build of this app exported and which the package no longer
 # accepts. Kept here (rather than deleted outright) so an old YAML imports
 # cleanly with an explicit, accurate explanation instead of a bare "unknown key".
@@ -538,15 +537,17 @@ _NON_PARAMETER_ARGS = frozenset({"zeta_df", "vorticity", "plot", "plot_steps",
 
 
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
-# A key in _YAML_PHASE_MAP is APPLIED on import; being in _OPTIONAL_PHASE_YAML_KEYS
-# only keeps it out of the "unknown key" list. A parameter that must be both
-# applied when present and not reported missing when absent therefore has to be
-# subtracted here explicitly -- which is what every config exported before
-# mature_min_depth existed (params-1..11) needs.
-_REQUIRED_PHASE_YAML_KEYS = set(_YAML_PHASE_MAP) - {"mature_min_depth",
-                                                    "intensification_min_depth",
-                                                    # item 30: absent = OFF, not missing
-                                                    "incipient_plateau_spare_intensification"}
+# Item 31, decision (a): there is no longer a "required" set. Every key a file
+# does not carry is FILLED with the frozen cyclophaser 2.0.0 default
+# (research/labels/config_defaults.py) and listed — see _load_yaml_config. The
+# "optional" sets above now only keep those keys out of the "unknown key" list.
+
+# The three keys whose sidebar control is an enabled flag + a value: the app's
+# own export omits them when the check is OFF, so an absent key means OFF. Their
+# 2.0.0 default is None (OFF) as well, so filling them is recorded but nothing is
+# written into a value widget — the "absent" branch below switches them off.
+_ABSENT_MEANS_OFF_KEYS = ("prominence", "prominence_relative",
+                          "decay_tail_amplitude_fraction")
 
 
 # ── Pure helper functions ─────────────────────────────────────────────────────────
@@ -610,25 +611,37 @@ def _compute_evaluation(cyclone_names) -> dict:
 def _load_yaml_config(yaml_bytes: bytes) -> dict:
     """Parse an exported YAML and write values into session_state.
 
-    Returns {"error": str|None, "ignored": list, "missing": list, "count": int}.
+    Returns {"error": str|None, "ignored": list, "missing": list,
+             "filled": list[(key, value)], "count": int}.
+
+    Item 31, decision (a): every key the file does not carry is filled with the
+    frozen cyclophaser 2.0.0 default and listed — `filled` holds (key, value),
+    `missing` the key names alone. Nothing absent is left to whatever the
+    session happened to hold.
     """
     try:
         doc = yaml.safe_load(yaml_bytes)
     except yaml.YAMLError as exc:
-        return {"error": f"Invalid YAML: {exc}", "ignored": [], "missing": [], "count": 0}
+        return {"error": f"Invalid YAML: {exc}", "ignored": [], "missing": [], "filled": [], "count": 0}
 
     if not isinstance(doc, dict):
-        return {"error": "YAML root must be a mapping.", "ignored": [], "missing": [], "count": 0}
+        return {"error": "YAML root must be a mapping.", "ignored": [], "missing": [], "filled": [], "count": 0}
 
     missing_secs = [s for s in ("filter_params", "phase_params") if s not in doc]
     if missing_secs:
         return {
             "error": f"Missing required sections: {', '.join(missing_secs)}",
-            "ignored": [], "missing": [], "count": 0,
+            "ignored": [], "missing": [], "filled": [], "count": 0,
         }
 
-    fp = doc["filter_params"]
-    pp = doc["phase_params"]
+    import config_defaults   # research/labels — on sys.path via benchmark_core
+    given_fp = dict(doc["filter_params"] or {})
+    given_pp = dict(doc["phase_params"] or {})
+    _filled_doc, filled = config_defaults.fill_missing(
+        {"filter_params": given_fp, "phase_params": given_pp})
+    fp = _filled_doc["filter_params"]
+    pp = {k: v for k, v in _filled_doc["phase_params"].items()
+          if not (k in _ABSENT_MEANS_OFF_KEYS and k not in given_pp)}
 
     ignored = (
         [f"filter_params.{k}" for k in fp if k not in _KNOWN_FILTER_YAML_KEYS]
@@ -641,10 +654,7 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
     # "unknown" would wrongly suggest a typo. Nothing is applied from them.
     ignored += [f"phase_params.{k} ({why})"
                 for k, why in _REMOVED_PHASE_YAML_KEYS.items() if k in pp]
-    missing = (
-        [f"filter_params.{k}" for k in _REQUIRED_FILTER_YAML_KEYS if k not in fp]
-        + [f"phase_params.{k}" for k in _REQUIRED_PHASE_YAML_KEYS if k not in pp]
-    )
+    missing = [k for k, _v in filled]
 
     count = 0
     for yaml_key, (ss_key, conv) in _YAML_FILTER_MAP.items():
@@ -758,7 +768,8 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
         elif bad_list is not None:
             ignored.append("evaluation.bad_cases (not a list)")
 
-    return {"error": None, "ignored": ignored, "missing": missing, "count": count}
+    return {"error": None, "ignored": ignored, "missing": missing, "filled": filled,
+            "count": count}
 
 
 def _build_yaml(cyclone_names) -> str:
@@ -1434,8 +1445,11 @@ with st.sidebar:
             st.success(f"Loaded {_r['count']} parameters from YAML.")
             if _r["ignored"]:
                 st.warning(f"Ignored unknown keys: {', '.join(_r['ignored'])}")
-            if _r["missing"]:
-                st.warning(f"Using defaults for missing keys: {', '.join(_r['missing'])}")
+            if _r.get("filled"):
+                st.warning(
+                    f"{len(_r['filled'])} key(s) absent from this file were filled with "
+                    "the cyclophaser 2.0.0 defaults (frozen table, item 31): "
+                    + ", ".join(f"{k}={v!r}" for k, v in _r["filled"]))
 
     st.divider()
     st.button("↺ Reset to defaults", on_click=_reset, use_container_width=True)

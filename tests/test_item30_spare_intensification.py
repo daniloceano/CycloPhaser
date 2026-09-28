@@ -140,7 +140,10 @@ def test_params15_reproduces_the_counterfactual_in_the_five():
     import item30_core as core
 
     batch = core.lc.load_batch_series()
-    cfg14, cfg15 = core.load_config("params-14"), core.load_config("params-15")
+    # params-14 left the repo in item 31. It was params-15 minus this one key
+    # (asserted in item 31, stage 0), so it is params-15 with the key OFF.
+    cfg15 = core.load_config("params-15")
+    cfg14 = (cfg15[0], {**cfg15[1], KEY: False})
     for sid in ("20120297", "19940445", "19810854", "19860380", "19870927"):
         r14 = core.run_series(batch[sid], *cfg14)
         cand = figs_cf.sep.candidates(r14, pd.Series(r14["z"]))
@@ -171,6 +174,7 @@ def _app_yaml_loader():
     st = types.SimpleNamespace(session_state={})
     ns = {"st": st, "yaml": yaml, "Path": Path, "datetime": _dt.datetime,
           "timezone": _dt.timezone, "__name__": "_app_yaml_loader"}
+    sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))   # config_defaults
     exec(compile(src[start:end], "app.py", "exec"), ns)
     return ns["_load_yaml_config"], st.session_state
 
@@ -180,13 +184,25 @@ def _config_bytes(name):
             / f"cyclophaser_{name}.yaml").read_bytes()
 
 
-def test_importing_params14_turns_the_rule_off_even_if_it_was_on():
+def _without_key_bytes():
+    """params-15's text with the key's line removed — a real config without the
+    key (params-14 was exactly that, and left the repo in item 31)."""
+    lines = _config_bytes("params-15").decode().splitlines(keepends=True)
+    kept = [ln for ln in lines if not ln.strip().startswith(f"{KEY}:")]
+    assert len(kept) == len(lines) - 1
+    return "".join(kept).encode()
+
+
+def test_importing_a_config_without_the_key_turns_the_rule_off_even_if_it_was_on():
     load, state = _app_yaml_loader()
     state[KEY] = True                       # the session had it ON
-    res = load(_config_bytes("params-14"))
+    res = load(_without_key_bytes())
     assert res["error"] is None
     assert state[KEY] is False
-    assert f"phase_params.{KEY}" not in res["missing"]
+    # Item 31, decision (a): absence is FILLED with the 2.0.0 default (False)
+    # and LISTED — no longer silently treated as "not missing".
+    assert (f"phase_params.{KEY}", False) in res["filled"]
+    assert f"phase_params.{KEY}" in res["missing"]
 
 
 def test_importing_params15_turns_the_rule_on():

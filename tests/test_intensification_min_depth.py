@@ -428,12 +428,14 @@ def test_zero_amplitude_series_is_not_warned_about_at_the_default():
 # ── The config on disk agrees with this module ─────────────────────────────────
 
 
-def test_params13_yaml_matches_this_module():
-    """params-13 is the calibration reference for this parameter; if it drifts
-    from the values exercised here, these tests stop describing it."""
+def test_params15_yaml_matches_this_module():
+    """params-15 is the calibration reference (params-13 left the repo in item 31;
+    params-15 = params-13 + reclassify_index0 + incipient_plateau_spare_intensification,
+    neither of which this module sets). If it drifts from the values exercised
+    here, these tests stop describing it."""
     import yaml
     path = os.path.join(os.path.dirname(__file__), os.pardir, "research", "labels",
-                        "configs", "cyclophaser_params-13.yaml")
+                        "configs", "cyclophaser_params-15.yaml")
     doc = yaml.safe_load(open(path))
     assert doc["phase_params"]["intensification_min_depth"] == X
     for key, value in _PHASE_PARAMS.items():

@@ -28,7 +28,13 @@ from cyclophaser.determine_periods import (get_periods, process_vorticity,
                                            _collapse_plateaux)
 from scipy.signal import argrelextrema, peak_prominences
 
-CONFIG = REPO / "research" / "labels" / "configs" / "cyclophaser_params-10.yaml"
+# Item 31 (2026-09-28): the frozen instrument this module pinned, params-10, was
+# REMOVED from research/labels/configs/ with params-1..14 (Danilo's decision).
+# `pair_by_overlap` and `MARGIN` — all the Benchmark imports — are unchanged.
+# The item 19/20 measurements reproduce from the commit below, where CONFIG
+# still pointed at the file.
+RECOVERY_COMMIT = "33ea489358d9"
+REMOVED_CONFIG = "research/labels/configs/cyclophaser_params-10.yaml"
 OUT = REPO / "research" / "labels" / "diagnostics" / "item19"
 
 PV_KEYS = ("use_filter", "replace_endpoints_with_lowpass", "use_smoothing",
@@ -38,7 +44,13 @@ PV_KEYS = ("use_filter", "replace_endpoints_with_lowpass", "use_smoothing",
 MARGIN = 6            # item 17(d): the asserted boundary margin is a fixed 6
 
 
-def load_config(path=CONFIG):
+def load_config(path=None):
+    if path is None:
+        raise FileNotFoundError(
+            f"item19_core no longer has a default config: {REMOVED_CONFIG} (params-10, "
+            f"the frozen instrument of items 19/20) was removed in item 31. Recover it "
+            f"with `git show {RECOVERY_COMMIT}:{REMOVED_CONFIG}`, or run the item 19/20 "
+            f"scripts from commit {RECOVERY_COMMIT}.")
     doc = yaml.safe_load(Path(path).read_text()) or {}
     gp_ok = set(inspect.signature(get_periods).parameters) - {"vorticity"}
     pv = {k: v for k, v in (doc.get("filter_params") or {}).items() if k in PV_KEYS}

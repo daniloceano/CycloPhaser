@@ -122,11 +122,19 @@ def load_config(path: Path | None):
 
     Unknown keys are dropped rather than raising: the app's export also carries a
     `metadata` and an `evaluation` block, neither of which is a detector
-    parameter, and old exports legitimately lack keys added since.
+    parameter.
+
+    Keys the file does NOT carry are filled with the frozen cyclophaser 2.0.0
+    defaults (`config_defaults.fill_missing`, item 31 decision (a)), never with
+    whatever the signature says today, and every filled key is listed on stderr.
+    `path=None` still means package defaults: nothing is filled.
     """
     if path is None:
         return {}, {}
-    doc = yaml.safe_load(Path(path).read_text()) or {}
+    from config_defaults import fill_missing, fill_warning
+    doc, filled = fill_missing(yaml.safe_load(Path(path).read_text()) or {})
+    if filled:
+        print(f"NOTE ({Path(path).name}): {fill_warning(filled)}", file=sys.stderr)
     import inspect
 
     from cyclophaser.determine_periods import get_periods
