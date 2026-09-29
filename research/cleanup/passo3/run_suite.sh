@@ -6,7 +6,7 @@
 set -u
 cd "$(git rev-parse --show-toplevel)"
 PY="${PY:-python}"
-OUT=research/cleanup/passo3/suite_raw.txt
+OUT=research/cleanup/passo3/${SUITE_OUT:-suite_raw.txt}
 test -z "$(git status --porcelain -- cyclophaser tests tools research/labels/configs)" \
   || { echo "ABORT: tree not clean at HEAD"; exit 1; }
 {

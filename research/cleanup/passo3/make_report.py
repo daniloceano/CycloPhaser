@@ -23,7 +23,15 @@ def digest(n):
 
 
 T = j("tag_and_trace.json")
-L = j("live_refs.json")
+L = j("live_refs.json")                          # first measurement (commit 13), defective scanner
+LC = j("live_refs_2912b79_corrected.json")       # corrected scanner, same tree
+LA = j("live_refs_after14.json")                 # corrected scanner, after commit 14
+IA = j("imports_check_after14.json")
+VA = j("verify_citations_after14.json")
+suite14 = (HERE / "suite_after14_raw.txt").read_text()
+last14 = next(l for l in reversed(suite14.splitlines()) if re.search(r"\d+ passed", l))
+cnt14 = {k: int(v) for v, k in re.findall(r"(\d+) (passed|failed|skipped|deselected)", last14)}
+head14 = re.search(r"^HEAD: ([0-9a-f]{40})", suite14, re.M).group(1)
 I = j("imports_check.json")
 V = j("verify_citations_after.json")
 suite = (HERE / "suite_raw.txt").read_text()
@@ -43,8 +51,10 @@ rows = [
     ("R2", "100 % na tag", f"{T['R2']['present_at_tag']}/{T['R2']['checked']} em `{TAG}` (`{tag_commit}`)",
      not T["R2"]["missing"]),
     ("R3", "S10: 0 falhas", f"{T['R3']['rows']} linhas; falhas {len(T['R3']['failures'])}", not T["R3"]["failures"]),
-    ("R4", "referências vivas: 0", f"{L['live_references']} (saídas do próprio script, à parte: {L['own_outputs']})",
-     L["live_references"] == 0),
+    ("R4", "referências vivas: 0",
+     f"primeira medição {L['live_references']} com scanner defeituoso → medição corrigida em `2912b79`: "
+     f"**{LC['live_references']}** em {LC['files_with_references']} arquivos (lista abaixo)",
+     LC["live_references"] == 0),
     ("R5", ".py mantidos: 0 falhas", f"{I['kept_py']} arquivos, {I['local_imports_checked']} imports locais; falhas {len(I['failures'])}",
      not I["failures"]),
     ("R6", "suíte 0 falhas; diff de cyclophaser/ vazio",
@@ -60,6 +70,28 @@ out = ["# Passo 3 — relatório (gerado)\n",
        f"(commit 11, `{tag_commit}`, onde está a tag).\n",
        "| id | previsto | obtido | confere |", "|---|---|---|---|"]
 out += [f"| {a} | {b} | {c} | {'sim' if ok else '**NÃO**'} |" for a, b, c, ok in rows]
+cy14 = subprocess.run(["git", "diff", "--stat", "654a3e5", "HEAD", "--", "cyclophaser/"], cwd=ROOT,
+                      capture_output=True, text=True).stdout.strip()
+out += ["", "## R4 — correção (depois do commit 13)\n",
+        "O scanner da primeira medição só reconhecia o caminho completo (e o nome solto no mesmo diretório); "
+        "menções por caminho parcial (`diagnostics/item31/...`) ou só pelo nome passaram. Corrigido em "
+        "`passo3/live_refs.py` com a MESMA definição do PREVISOES (qualquer sufixo de 2+ componentes, ou o nome "
+        "sozinho quando nenhum arquivo em HEAD o tem). **R4 = FAIL**; a previsão não é ajustada.\n",
+        f"Medição corrigida na árvore de `2912b79` — {LC['live_references']} referências em "
+        f"{LC['files_with_references']} arquivos (`live_refs_2912b79_corrected.txt`):\n"]
+out += [f"* `{r['file']}:{r['line']}` → `{r['removed']}`" for r in LC["refs"]]
+out += ["", "Reescritas no commit 14 para `archive/research-diagnostics-pre-cleanup:<caminho>`. No mesmo commit, "
+        "`item30/figs_cf.py` voltou ao estado de `654a3e5` e `item30/separability_train_params14.csv` foi restaurado "
+        "da tag (manter, decisão 8).\n",
+        "### Medido uma vez depois do commit 14\n", "| medida | obtido |", "|---|---|",
+        f"| R4 (scanner corrigido) | {LA['live_references']} referências vivas; caminhos removidos {LA['removed']}; "
+        f"saídas do próprio script {LA['own_outputs']} (`live_refs_after14_own_outputs.txt`) |",
+        f"| R5 | {IA['kept_py']} .py, {IA['local_imports_checked']} imports locais, falhas {len(IA['failures'])} |",
+        f"| suíte | {cnt14.get('passed', 0)} passed / {cnt14.get('failed', 0)} failed / {cnt14.get('skipped', 0)} skipped / "
+        f"{cnt14.get('deselected', 0)} deselected (HEAD `{head14[:7]}`) |",
+        f"| verify_citations | {VA['citations_resolved']}/{VA['citations_total']} citações, falhas {len(VA['failures'])}, "
+        f"fracas {VA['weak_citations']} |",
+        f"| diff de `cyclophaser/` desde `654a3e5` | {cy14 or 'vazio'} |"]
 out += ["", "## Removidos por diretório\n", "| diretório | arquivos |", "|---|---|"]
 out += [f"| `{k}` | {v} |" for k, v in r1["per_dir"].items()]
 out += ["", f"Linha final da suíte: `{last.strip()}`."]
