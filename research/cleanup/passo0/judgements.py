@@ -87,6 +87,8 @@ KEEP = {
         "gerador da tabela citada por teste vivo",
     "research/incipient_plateau/measure_incipient_smoothing.py":
         "citado por comentário vivo do pacote (o alvo do comentário tem de existir; linha em 'registrado em')",
+    DIAG + "item30/separability_train_params14.csv":
+        "dependência viva de script mantido (decisão 8): lida por item30/figs_cf.py (p_controls); restaurada da tag no commit 14",
     DIAG + "item31/regenerate_baselines_2b.py":
         "gerador canônico dos baselines do CI (tests/expected_*.csv, tests/baselines/*, tests/test.csv)",
 }

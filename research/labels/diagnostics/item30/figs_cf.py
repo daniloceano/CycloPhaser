@@ -9,8 +9,7 @@ excluded by id before anything is read):
 
 * L: 20120297, 19940445, 19810854; K: 19790612, 19860380, 19870927;
 * P controls: the two P cases with the largest c3 in
-  `archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/separability_train_params14.csv`
-  (part 2, written by separability.py), chosen by that file, not by hand.
+  `separability_train_params14.csv` (part 2), chosen by that file, not by hand.
 
 Counterfactual (closed definition, params-14, no variants):
 
@@ -51,16 +50,8 @@ PHASE_COLORS = {"incipient": "#65a1e6", "intensification": "#f7b538",
 LAYERS = ("filtered_vorticity", "vorticity_smoothed", "vorticity_smoothed2")
 
 
-# The clean-up front removed this table from the tree; it is read from the archive tag
-# (separability.py regenerates it under its own name if rerun).
-SEPARABILITY_TABLE = "archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/separability_train_params14.csv"
-
-
 def p_controls() -> list[str]:
-    import io
-    import subprocess
-    text = subprocess.check_output(["git", "show", SEPARABILITY_TABLE], cwd=HERE, text=True)
-    t = pd.read_csv(io.StringIO(text), dtype={"id": str})
+    t = pd.read_csv(HERE / "separability_train_params14.csv", dtype={"id": str})
     p = t[t.group == "P"].sort_values("c3", ascending=False)
     return list(p.id[:2])
 

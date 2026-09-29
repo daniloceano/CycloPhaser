@@ -1,7 +1,8 @@
 """Filling incomplete calibration configs with the FROZEN 2.0.0 defaults.
 
-Decision (a) of item 31 (Danilo, 2026-09-28; research/labels/diagnostics/item31/
-DESIGN.md §8.1): a config that does not carry a key is run with that key's
+Decision (a) of item 31 (Danilo, 2026-09-28;
+archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/DESIGN.md §8.1):
+a config that does not carry a key is run with that key's
 **cyclophaser 2.0.0 default**, and the keys filled are always listed.
 
 Why frozen and not "the current default": a config file is a record of what was
@@ -9,7 +10,8 @@ run. Once the package defaults move (item 31, stage 2b), "absent" would silently
 start meaning something else — a config exported with the decay-tail check OFF
 (the app omits None) would run with the new default ON. The table is
 `defaults_2.0.0.json`, generated from the stage-0 parameter table
-(`diagnostics/item31/make_defaults_2_0_0.py`), never edited by hand.
+(`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/make_defaults_2_0_0.py`),
+never edited by hand.
 
 Used by `evaluate_against_labels.load_config`, `tools/calibration_app/
 benchmark_core.split_config` / `signature_audit`, and the app's YAML import.

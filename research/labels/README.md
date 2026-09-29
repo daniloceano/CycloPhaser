@@ -103,7 +103,7 @@ was written, whatever the package defaults become.
 `MARGIN`, which the Benchmark imports, are unchanged. `load_config()` without a
 path raises and names the recovery commit. The item 19/20 scripts, and every
 other closed-front script that loads a removed config, are listed in
-`diagnostics/item31/stale_scripts.md` and reproduce from `33ea489358d9`.
+`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/stale_scripts.md` and reproduce from `33ea489358d9`.
 
 Two instruments score matures and they are **not** interchangeable:
 `evaluate_against_labels.py` / `score_phase_sequences` scores only series whose

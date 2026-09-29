@@ -267,6 +267,9 @@ w("* **Passo 2**: coluna \"destino final\" na seção 0.4 e seção 0.5 (destino
   "`research/cleanup/passo2/traceability.json`; o inventário foi regerado sobre a HEAD do Passo 2 antes de "
   "`docs/findings.md` existir. Na seção (c), as notas de correspondência params-15 → params-track contam como VIVA "
   "pela regra do Passo 0; a contagem com a classe \"correspondência\" está em `passo1/params15_refs.py`.")
+w("* **Passo 3 (commit 14)**: `item30/separability_train_params14.csv` → manter (decisão 8, lida por "
+  "`item30/figs_cf.py`), restaurada da tag. Este manifesto descreve a árvore ANTERIOR à remoção "
+  f"(inventário em `{head[:7]}`); a lista efetivamente removida no commit 12 é `passo3/removed_files.txt`.")
 w("* **Passo 3 (10b)**: passaram a \"manter\", detectados por script: " + "; ".join(
     f"`{k}` — {v}" for k, v in sorted(PASSO3_KEPT.items())) + ".")
 w("* Gerado por `research/cleanup/passo0/make_manifest.py` a partir de `inventory.py`, `branches.py`, "

@@ -1,0 +1,8 @@
+live references to removed paths: 7 in 5 files
+research/labels/README.md:106 -> research/labels/diagnostics/item31/stale_scripts.md
+research/labels/config_defaults.py:4 -> research/labels/diagnostics/item31/DESIGN.md
+research/labels/config_defaults.py:12 -> research/labels/diagnostics/item31/make_defaults_2_0_0.py
+research/labels/labels_core.py:61 -> research/labels/diagnostics/item30/PREDICTIONS_part3.md
+research/labels/swell_item30/adjudicate_item30.py:16 -> research/labels/diagnostics/item30/REPORT_figs_cf.md
+research/labels/swell_item30/adjudicate_item30.py:54 -> research/labels/diagnostics/item30/REPORT_figs_cf.md
+research/labels/swell_item30/freeze_validation_batch.py:5 -> research/labels/diagnostics/item30/PREDICTIONS_part3.md

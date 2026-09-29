@@ -309,6 +309,7 @@ Regenerated at render time from `inspect.signature` and the YAML (working tree a
 - 40 closed-front scripts stopped running when params-1 to params-14 left the configs directory; they are listed, not migrated, and reproduce from commit `33ea489358d9`. `docs/future_work.md:3922@06d8550` `research/labels/diagnostics/item31/stale_scripts.md:1@06d8550`
 - Every file below leaves the tree after approval and stays readable with `git show 06d8550:<path>`. The "finding recorded at" column cites where its finding is written; the destination is a section of this document or a line of `docs/future_work.md`, never a file that leaves.
 - Three reports stay in the tree because the package cites them: `research/labels/diagnostics/frontA_idx0_c2/REPORT.md`, `research/inert_params/REPORT_inertia_sweep.md` and `research/incipient_plateau/REPORT_incipient_characterisation.md` (see `research/cleanup/MANIFEST.md`); their findings remain summarised in §S03, §S09 and §S02.
+- `research/labels/diagnostics/item30/separability_train_params14.csv` also stays: the kept script `research/labels/diagnostics/item30/figs_cf.py` reads it.
 - Files that leave without a finding of their own (scripts, and generated outputs whose front report is consolidated here) are not repeated below; they are listed in `research/cleanup/MANIFEST.md`.
 
 | file that leaves | manifest destination | finding recorded at (source) | destination |
@@ -479,7 +480,6 @@ Regenerated at render time from `inspect.signature` and the YAML (working tree a
 | `research/labels/diagnostics/item30/prove_defaults_part3_step3.txt` | remove | `research/labels/diagnostics/item30/REPORT_part3.md:42@06d8550` | §S07 |
 | `research/labels/diagnostics/item30/separability_criterion.json` | remove | `research/labels/diagnostics/item30/REPORT_part2.md:15@06d8550` | §S07 |
 | `research/labels/diagnostics/item30/separability_train_output.txt` | remove | `research/labels/diagnostics/item30/REPORT_part2.md:77@06d8550` | §S07 |
-| `research/labels/diagnostics/item30/separability_train_params14.csv` | remove | `research/labels/diagnostics/item30/REPORT_part2.md:77@06d8550` | §S07 |
 | `research/labels/diagnostics/item31/DESIGN.md` | consolidate | the report itself (`research/labels/diagnostics/item31/DESIGN.md:1@06d8550`) | §S08 |
 | `research/labels/diagnostics/item31/benchmark_swap_mutation.txt` | remove | `research/labels/diagnostics/item31/DESIGN.md:756@06d8550` | §S08 |
 | `research/labels/diagnostics/item31/benchmark_swap_mutation_2c.txt` | remove | `research/labels/diagnostics/item31/DESIGN.md:923@06d8550` | §S08 |

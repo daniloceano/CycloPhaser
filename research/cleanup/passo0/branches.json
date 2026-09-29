@@ -22,53 +22,52 @@
   {
    "branch": "chore/repo-cleanup",
    "hash_mentions": [
-    "docs/findings.md:258 (b60d57b)",
-    "docs/findings.md:39 (a132f37)",
-    "docs/findings.md:253 (a132f37)",
-    "docs/findings.md:277 (a132f37)",
-    "docs/findings.md:537 (a132f37)",
-    "docs/findings.md:541 (a132f37)",
-    "docs/findings.md:543 (a132f37)",
-    "docs/findings.md:43 (33dc4e1)",
-    "docs/findings.md:255 (33dc4e1)",
-    "docs/findings.md:256 (33dc4e1)",
-    "docs/findings.md:278 (33dc4e1)",
-    "docs/findings.md:538 (33dc4e1)",
-    "docs/findings.md:539 (33dc4e1)",
-    "docs/findings.md:39 (742e685)",
+    "docs/findings.md:263 (d79914b)",
+    "docs/findings.md:44 (a132f37)",
+    "docs/findings.md:258 (a132f37)",
+    "docs/findings.md:282 (a132f37)",
+    "docs/findings.md:540 (a132f37)",
+    "docs/findings.md:544 (a132f37)",
+    "docs/findings.md:546 (a132f37)",
+    "docs/findings.md:48 (33dc4e1)",
+    "docs/findings.md:260 (33dc4e1)",
+    "docs/findings.md:261 (33dc4e1)",
+    "docs/findings.md:283 (33dc4e1)",
+    "docs/findings.md:541 (33dc4e1)",
+    "docs/findings.md:542 (33dc4e1)",
+    "docs/findings.md:44 (742e685)",
     "research/labels/diagnostics/front_b/default_behaviour_sha256.txt:109 (742e685)",
-    "docs/findings.md:531 (d8a19cc)",
-    "docs/findings.md:532 (d8a19cc)",
-    "docs/findings.md:537 (d8a19cc)",
-    "docs/findings.md:532 (f17d802)"
+    "docs/findings.md:535 (d8a19cc)",
+    "docs/findings.md:540 (d8a19cc)",
+    "docs/findings.md:535 (f17d802)"
    ],
-   "tip": "d79914b",
+   "tip": "21afa06",
    "date": "2026-09-28",
-   "subject": "research(cleanup): passo 2 — verificações (Q1–Q5), citações fracas, correção S12 do FINDING de inertes",
+   "subject": "research(cleanup): passo 3, commit 13 — evidências R1–R8 e saída da suíte",
    "in_develop": false,
    "patch_equivalent": false,
    "cherry_minus": 0,
-   "cherry_plus": 10,
-   "ahead": 10,
+   "cherry_plus": 15,
+   "ahead": 15,
    "behind": 0,
    "merge_base": "06d8550",
-   "n_files_changed": 95,
+   "n_files_changed": 437,
    "dirs_changed": [
     ".gitignore",
     ".pypirc",
     "CHANGELOG.md",
+    "Pipfile",
     "cyclophaser/determine_periods.py",
     "cyclophaser/lanczos_filter.py",
+    "docs/_images/density_map_Aggregate.png",
+    "docs/_images/item5",
     "docs/findings.md",
     "docs/future_work.md",
     "docs/usage.rst",
-    "research/cleanup/MANIFEST.md",
-    "research/cleanup/passo0",
-    "research/cleanup/passo1",
-    "research/cleanup/passo2"
+    "research/cleanup/MANIFEST.md"
    ],
    "mentions": [
-    "docs/findings.md:16"
+    "docs/findings.md:21"
    ]
   },
   {
@@ -90,7 +89,7 @@
     "CHANGELOG.md:372",
     "CHANGELOG.md:477",
     "docs/findings.md:4",
-    "docs/findings.md:13",
+    "docs/findings.md:18",
     "docs/future_work.md:400",
     "docs/future_work.md:660",
     "docs/future_work.md:719",
@@ -513,7 +512,7 @@
   {
    "branch": "feat/label-tab-toplevel",
    "hash_mentions": [
-    "docs/findings.md:531 (0c63145)"
+    "docs/findings.md:534 (0c63145)"
    ],
    "tip": "0c63145",
    "date": "2026-09-15",
@@ -535,7 +534,7 @@
     "tools/calibration_app/label_tab.py"
    ],
    "mentions": [
-    "docs/findings.md:531"
+    "docs/findings.md:534"
    ]
   },
   {
@@ -935,10 +934,10 @@
   {
    "branch": "research/item20c-duration-ratio",
    "hash_mentions": [
-    "docs/findings.md:149 (e7792d3)",
-    "docs/findings.md:150 (e7792d3)",
-    "docs/findings.md:524 (e7792d3)",
-    "docs/findings.md:548 (e7792d3)"
+    "docs/findings.md:154 (e7792d3)",
+    "docs/findings.md:155 (e7792d3)",
+    "docs/findings.md:527 (e7792d3)",
+    "docs/findings.md:551 (e7792d3)"
    ],
    "tip": "e7792d3",
    "date": "2026-09-21",
@@ -1045,9 +1044,9 @@
   {
    "branch": "research/v3-topology-proxy",
    "hash_mentions": [
-    "docs/findings.md:66 (c508730)",
-    "docs/findings.md:67 (c508730)",
-    "docs/findings.md:548 (c508730)"
+    "docs/findings.md:71 (c508730)",
+    "docs/findings.md:72 (c508730)",
+    "docs/findings.md:551 (c508730)"
    ],
    "tip": "c508730",
    "date": "2026-09-16",

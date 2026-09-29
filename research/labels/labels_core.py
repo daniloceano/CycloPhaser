@@ -58,7 +58,8 @@ SWELL_BATCH_DATA_DIR = "tests/calibration_data/swell_item30"   # repo-relative
 # Item 30 part 3: 5 more swell tracks, frozen as `batches: swell_item30_val`
 # with the role VALIDATION — neither train nor test, and in no aggregate. They
 # exist to be labelled blind by Danilo and then to measure prediction V of
-# diagnostics/item30/PREDICTIONS_part3.md once. Same one-level-down layout.
+# archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/PREDICTIONS_part3.md
+# once. Same one-level-down layout.
 VALIDATION_BATCH = "swell_item30_val"
 VALIDATION_BATCH_DATA_DIR = "tests/calibration_data/swell_item30_val"
 

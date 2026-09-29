@@ -2,7 +2,7 @@
 
 Role: VALIDATION — neither train nor test, and in no aggregate. The 5 exist to be
 labelled blind by Danilo and to measure prediction V of
-`diagnostics/item30/PREDICTIONS_part3.md` once.
+`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/PREDICTIONS_part3.md` once.
 
 Selection (deterministic, fixed before this script): the swell tracks that part 2
 found with the signal AND with E defined, minus the ones already drawn into the
