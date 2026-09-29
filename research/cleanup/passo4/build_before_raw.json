@@ -1,0 +1,10 @@
+{
+ "log": "build_before_raw.txt",
+ "warnings": 1,
+ "errors": 0,
+ "exit": "EXIT 0",
+ "warning_lines": [
+  "WARNING: autodoc: failed to import function 'determine_periods' from module 'cyclophaser'; the following exception was raised:"
+ ],
+ "error_lines": []
+}
