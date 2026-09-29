@@ -1,7 +1,0 @@
-Item 31 stage 2c — MUTATION: tests/test_benchmark_apptest.py copied with _two_column_app adding the columns SWAPPED (params-15 first, sidebar-with-cutoff_high=48 second), pins unchanged. Run 2026-09-28 at the 2c working tree; copy deleted after. Expected: the pin and the load-order test FAIL; the two order-independent guards PASS.
-
-FAILED tests/test_zz_mutation_swap_tmp.py::test_each_column_carries_its_own_configuration_not_its_neighbours
-FAILED tests/test_zz_mutation_swap_tmp.py::test_two_configurations_load_as_two_columns
-PASSED tests/test_zz_mutation_swap_tmp.py::test_the_sidebar_differs_from_params15_in_a_declared_parameter
-PASSED tests/test_zz_mutation_swap_tmp.py::test_the_two_configurations_are_actually_distinguishable
-2 failed, 2 passed in 20.32s

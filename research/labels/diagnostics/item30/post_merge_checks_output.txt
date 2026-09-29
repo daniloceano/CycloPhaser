@@ -1,8 +1,0 @@
-HEAD: 5434d87 | compared against: f92569a
-evaluator params-14: population hash f92569a b39338fd670bf31e merge b39338fd670bf31e identical=True | output identical=True (3083 chars)
-evaluator package defaults: population hash f92569a b39338fd670bf31e merge b39338fd670bf31e identical=True | output identical=True (2928 chars)
-load_real_series: 51 series (== 51: True)
-R1: 54 TRAIN series; params-15 final map differs from params-14 in 5: 19810854, 19860380, 19870927, 19940445, 20120297
-R1: changed set == the predicted 5: True
-R1: final map == counterfactual of 1a3ad76 in the 5: 20120297 True, 19940445 True, 19810854 True, 19860380 True, 19870927 True
-ALL CHECKS (evaluator + 51) OK=True

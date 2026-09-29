@@ -410,7 +410,8 @@ def test_invalid_parameters_raise(kwargs):
 # ═════════════════════════════════════════════════════════════════════════════
 # Applies only to incipient_method="plateau" with
 # incipient_plateau_signal="vorticity", which reads d(zeta_raw)/dt on the
-# UNFILTERED input. See research/incipient_plateau/REPORT_incipient_smoothing.md.
+# UNFILTERED input. See archive/research-diagnostics-pre-cleanup:research/incipient_plateau/REPORT_incipient_smoothing.md
+# and docs/findings.md §S02.
 _NOISY_DESIGNED_IC = sorted(set(DESIGNED_IC) & set(NOISY_CASE_IDS))
 _CLEAN_DESIGNED_IC = sorted(set(DESIGNED_IC) & set(CLEAN_CASE_IDS))
 

@@ -1,7 +1,7 @@
 """Choose the incipient probe's smoothing window and boundary criterion BY NUMBER.
 
 MEASUREMENT ONLY — does not modify ``cyclophaser/``. Sibling of
-``measure_incipient.py``; that script and its three output artefacts are left
+``archive/research-diagnostics-pre-cleanup:research/incipient_plateau/measure_incipient.py``; that script and its three output artefacts are left
 untouched.
 
 What this answers

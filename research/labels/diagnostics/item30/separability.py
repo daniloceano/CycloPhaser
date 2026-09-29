@@ -1,7 +1,8 @@
 """Item 30, part 2 — does any quantity of the pre-incipient map separate L from K?
 
 MEASUREMENT ONLY. No rule and no parameter is proposed; no threshold is swept
-beyond reporting the valid interval. Predictions: PREDICTIONS_part2.md, committed
+beyond reporting the valid interval. Predictions:
+archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/PREDICTIONS_part2.md, committed
 before this script was run.
 
 All definitions use params-14, and the pre-incipient map is step 5 of the

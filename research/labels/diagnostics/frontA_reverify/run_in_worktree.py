@@ -23,7 +23,8 @@ So: this wrapper puts the worktree at `sys.path[0]`, imports `cyclophaser`
 BEFORE the script body runs, and HARD-ASSERTS that the loaded package -- and
 the two modules Front A's mechanical claim depends on -- live inside the
 worktree. Only then is the script executed, via runpy, under `__main__` with
-its original argv. The printed provenance block goes verbatim into REPORT.md.
+its original argv. The printed provenance block goes verbatim into
+archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/frontA_reverify/REPORT.md.
 
 Run:
     python run_in_worktree.py --worktree <path> --script <path-under-worktree> \

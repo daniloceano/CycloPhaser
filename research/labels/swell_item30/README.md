@@ -197,7 +197,7 @@ itself was not read. No other content of any test label was read.
 
 `find_stages.py:1134` overwrites `[0, boundary)` with `incipient`
 unconditionally, whatever the pre-incipient map holds. On the labelled training
-series (item 30 measurement, `research/labels/diagnostics/item30/REPORT.md`)
+series (item 30 measurement, `archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/REPORT.md`)
 that has three outcomes:
 
 - **The boundary is right, and the overwrite hides a wrong intermediate map**:
