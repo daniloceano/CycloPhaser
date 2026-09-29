@@ -1,0 +1,14 @@
+{
+ "research/cleanup/passo3/digest_after_raw.txt": {
+  "<env>": 1,
+  "<repo>": 3
+ },
+ "research/cleanup/passo3/digest_before_raw.txt": {
+  "<env>": 1,
+  "<repo>": 3
+ },
+ "research/cleanup/passo3/suite_raw.txt": {
+  "<env>": 9,
+  "<repo>": 2
+ }
+}
