@@ -1,0 +1,3 @@
+$ git log --format='%h %s' origin/develop-v2.1..HEAD -- cyclophaser/   (HEAD = 129b04d)
+129b04d docs(cyclophaser): 16b — docstring de decay_tail_amplitude_fraction com o default atual
+742e685 feat(C1): default boundary_padding "reflect"; params-15 renomeado params-track

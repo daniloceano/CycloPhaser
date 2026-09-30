@@ -57,3 +57,29 @@ antes de qualquer edição de documentação ou do app.
 * **Configuração que chega a um caminho de reserva (D5):** uma configuração
   versionada que, passada ao caminho do app, faz ao menos um `.get(chave,
   literal)` usar o literal (chave ausente).
+
+## Mudança de portão (decisão do Danilo, 2026-09-29) — seção acrescentada no commit 16c
+
+As previsões acima não foram editadas.
+
+> "Única mudança de comportamento no pacote: C1 (742e685). Fora dele, um único
+> commit só de docstring em cyclophaser/, verificado por (i) árvore sintática sem
+> docstrings idêntica antes e depois e (ii) digest default igual na mesma sessão."
+
+Motivo: D1 "antes" achou docstring falsa em `cyclophaser/determine_periods.py:948`
+(nota de `decay_tail_amplitude_fraction`: "default None"; o default é 0.3).
+O commit só de docstring é o 16b.
+
+## Medições "antes" de D1 — duas, registradas sem ajuste
+
+* Oficial (commit 16, `before.json`): 14 divergências, 1 em `cyclophaser/`.
+* Corrigida (commit 16c, `before_corrected.json`, remedida sobre a árvore de
+  `b9991c4` com o verificador corrigido): o widget do app passa a vir antes do
+  nome citado no parágrafo; `app.py:1630` era falso positivo e `app.py:2005` é de
+  `mature_min_depth`.
+
+## Previsão intermediária (declarada no commit 16c, antes de medir)
+
+| id | previsão |
+|---|---|
+| D1a | 0 divergências FORA de `docs/*.rst` após o commit 17 (verificador corrigido) |

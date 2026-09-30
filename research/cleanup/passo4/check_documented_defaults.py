@@ -31,10 +31,12 @@ parameter name is not a value). A parenthesised or "it was …" value after X is
 historical and ignored. The parameter is, in order: the nearest parameter
 header at or above the line within the same block (walking up until a blank
 line; a docstring "name (type", an rst/markdown bullet "**name**", or a heading
-"### `name`"); else the parameter named nearest before X on the line or earlier
-in the same paragraph; else, in the app's .py files, the widget of the statement
+"### `name`"); else, in the app's .py files, the widget of the statement
 (`key="w"` / `_DEFAULTS["w"]` up to 14 raw lines above, mapped to a parameter by
-the app's own widget→parameter table in `_sidebar_defaults_from_signature`).
+the app's own widget→parameter table in `_sidebar_defaults_from_signature`);
+else the parameter named nearest before X on the line or earlier in the same
+paragraph. (Commit 16c: the widget rule used to come after the paragraph rule,
+which attributed app.py:1630 to boundary_padding and app.py:2005 to prominence.)
 
 cyclophaser/find_stages.py documents the STAGE functions, whose parameters come
 in `args_periods` with their own fallbacks (`args_periods.get(key, literal)`),
@@ -168,7 +170,15 @@ def param_for(lines, raw, i, pos, line):
             m = rx.match(lines[j])
             if m and m.group(1) in DEFAULTS:
                 return m.group(1)
-    # 2. the parameter named nearest before the value, on the line or earlier in the paragraph
+    # 2. app widgets (before any name cited in the paragraph): the widget key of the
+    #    statement — the help text of a widget is about that widget's parameter
+    #    even when it mentions another parameter (Passo 4, commit 16c correction)
+    if raw is not None:
+        for j in range(i, max(-1, i - 15), -1):
+            m = re.search(r'(?:key=|_DEFAULTS\[)"(\w+)"', raw[j])
+            if m and m.group(1) in WIDGET_TO_PARAM:
+                return WIDGET_TO_PARAM[m.group(1)]
+    # 3. the parameter named nearest before the value, on the line or earlier in the paragraph
     before = [m for m in NAME_RE.finditer(line) if m.start() < pos]
     if before:
         return before[-1].group(1)
@@ -178,12 +188,6 @@ def param_for(lines, raw, i, pos, line):
         names = NAME_RE.findall(lines[j])
         if names:
             return names[-1]
-    # 3. app widgets: the widget key of the statement
-    if raw is not None:
-        for j in range(i, max(-1, i - 15), -1):
-            m = re.search(r'(?:key=|_DEFAULTS\[)"(\w+)"', raw[j])
-            if m and m.group(1) in WIDGET_TO_PARAM:
-                return WIDGET_TO_PARAM[m.group(1)]
     return None
 
 
