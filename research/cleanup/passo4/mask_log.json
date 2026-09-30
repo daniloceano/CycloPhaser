@@ -1,1 +1,14 @@
-{}
+{
+ "research/cleanup/passo4/digest_16b_after_raw.txt": {
+  "<env>": 1,
+  "<repo>": 3
+ },
+ "research/cleanup/passo4/digest_16b_before_raw.txt": {
+  "<env>": 1,
+  "<repo>": 3
+ },
+ "research/cleanup/passo4/suite_16b_raw.txt": {
+  "<env>": 9,
+  "<repo>": 2
+ }
+}

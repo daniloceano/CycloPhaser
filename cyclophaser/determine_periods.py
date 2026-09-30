@@ -945,7 +945,8 @@ def get_periods(vorticity,
     (the largest interior peak always scores 1.0 by construction) — which
     truncates ``find_decay_period``'s decay block early, well before the
     cyclone has actually dissipated. With ``decay_tail_amplitude_fraction`` set
-    (opt-in; default None reproduces prior behaviour exactly),
+    (default 0.3; ``None`` switches the check off and leaves the tail to the
+    catch-all, the behaviour before this option existed),
     ``find_residual_period`` checks whether that NaN tail contains a genuine
     re-deepening — a drop below the tail's running-maximum z larger than this
     fraction of the cycle's own peak-to-valley amplitude — and, if not, extends

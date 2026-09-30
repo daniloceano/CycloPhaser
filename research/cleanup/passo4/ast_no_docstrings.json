@@ -1,0 +1,33 @@
+{
+ "before": "b9991c4",
+ "after": "WORKTREE",
+ "files": 5,
+ "identical": true,
+ "rows": [
+  {
+   "file": "cyclophaser/__init__.py",
+   "ast_without_docstrings_identical": true,
+   "source_identical": true
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "ast_without_docstrings_identical": true,
+   "source_identical": false
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "ast_without_docstrings_identical": true,
+   "source_identical": true
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "ast_without_docstrings_identical": true,
+   "source_identical": true
+  },
+  {
+   "file": "cyclophaser/plots.py",
+   "ast_without_docstrings_identical": true,
+   "source_identical": true
+  }
+ ]
+}
