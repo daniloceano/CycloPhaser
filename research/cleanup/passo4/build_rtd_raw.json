@@ -1,0 +1,13 @@
+{
+ "log": "build_rtd_raw.txt",
+ "warnings": 2,
+ "errors": 1,
+ "exit": "EXIT 0",
+ "warning_lines": [
+  "<docs-venv>/lib/python3.12/site-packages/cyclophaser/determine_periods.py:docstring of cyclophaser.determine_periods.determine_periods:45: WARNING: Inline strong start-string without end-string.",
+  "<docs-venv>/lib/python3.12/site-packages/cyclophaser/determine_periods.py:docstring of cyclophaser.determine_periods.determine_periods:86: WARNING: Inline strong start-string without end-string."
+ ],
+ "error_lines": [
+  "<docs-venv>/lib/python3.12/site-packages/cyclophaser/determine_periods.py:docstring of cyclophaser.determine_periods.determine_periods:95: ERROR: Undefined substitution referenced: \"dz\"."
+ ]
+}

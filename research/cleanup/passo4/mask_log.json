@@ -1,4 +1,7 @@
 {
+ "research/cleanup/passo4/build_rtd_raw.txt": {
+  "<docs-venv>": 3
+ },
  "research/cleanup/passo4/digest_16b_after_raw.txt": {
   "<env>": 1,
   "<repo>": 3
@@ -8,6 +11,10 @@
   "<repo>": 3
  },
  "research/cleanup/passo4/suite_16b_raw.txt": {
+  "<env>": 9,
+  "<repo>": 2
+ },
+ "research/cleanup/passo4/suite_after17_raw.txt": {
   "<env>": 9,
   "<repo>": 2
  }
