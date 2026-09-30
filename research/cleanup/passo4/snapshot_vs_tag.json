@@ -1,0 +1,35 @@
+{
+ "file": "research/snapshots/v2.0.0.json",
+ "label": "cyclophaser 2.0.0 (published, package defaults)",
+ "version": "2.0.0",
+ "generator": "research/snapshots/make_published_snapshot.py",
+ "parameters": "package defaults \u2014 no argument is passed to process_vorticity or get_periods",
+ "n_series": 63,
+ "counts": {
+  "real": 51,
+  "synthetic": 12,
+  "total": 63,
+  "failed": 0
+ },
+ "tag": "v2.0.0",
+ "tag_commit": "5d99ae3",
+ "signature_vs_tag": {
+  "determine_periods": {
+   "in_tag": true,
+   "params_with_default": 19,
+   "differing": {}
+  },
+  "process_vorticity": {
+   "in_tag": true,
+   "params_with_default": 7,
+   "differing": {}
+  },
+  "get_periods": {
+   "in_tag": true,
+   "params_with_default": 10,
+   "differing": {}
+  }
+ },
+ "sha256": "944b51d89d4efc495a0502e3eb8a5092d39022ec4ebb1f27635eabcbabad8ab0",
+ "sha256_in_SHA256SUMS": true
+}

@@ -1,3 +1,4 @@
+> Files this report cites that are no longer in the tree were removed in the repository clean-up and are kept at `archive/research-diagnostics-pre-cleanup:research/inert_params/`.
 # FRENTE F(iii) — Inert parameters not signalled in the calibration app
 
 Branch `fix/app-inert-params-signaling`, from `develop-v2.1` @ `1f38611`

@@ -103,7 +103,7 @@ def test_the_geometric_method_never_reads_the_key(monkeypatch):
     assert seen == []
 
 
-# ── default True in every public signature (item 31; False up to 2.0.0), ─────
+# ── default True in every public signature (item 31; False before it), ─────
 #    forwarded as given ──────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("fn", [get_periods, determine_periods])

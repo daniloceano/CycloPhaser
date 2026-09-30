@@ -124,7 +124,7 @@ def load_config(path: Path | None):
     `metadata` and an `evaluation` block, neither of which is a detector
     parameter.
 
-    Keys the file does NOT carry are filled with the frozen cyclophaser 2.0.0
+    Keys the file does NOT carry are filled with the frozen pre-item-31
     defaults (`config_defaults.fill_missing`, item 31 decision (a)), never with
     whatever the signature says today, and every filled key is listed on stderr.
     `path=None` still means package defaults: nothing is filled.

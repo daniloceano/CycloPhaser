@@ -60,7 +60,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import peak_prominences
 
-from cyclophaser.determine_periods import find_peaks_valleys, post_process_periods
+from cyclophaser.determine_periods import find_peaks_valleys, get_periods, post_process_periods
 from cyclophaser.find_stages import (
     _amplitude_mature_bounds,
     _incipient_plateau_boundary,
@@ -146,7 +146,7 @@ _ARGS_PERIODS_DEFAULTS = {
     # Item 31: the package defaults moved to params-15 (now params-track, whose
     # phase parameters ARE the package's; C1 changed a filter default only);
     # these follow them (the
-    # test named above pins value for value). The 2.0.0 values are the frozen
+    # test named above pins value for value). The pre-item-31 values are the frozen
     # table research/labels/defaults_2.0.0.json.
     "threshold_intensification_length": 0.075,
     "threshold_intensification_gap": 0.075,
@@ -170,6 +170,12 @@ _ARGS_PERIODS_DEFAULTS = {
     "incipient_smooth_polyorder": 3,
     "incipient_plateau_spare_intensification": True,
 }
+
+
+def _gp_default(name: str):
+    """The default of `name` in get_periods' signature."""
+    import inspect
+    return inspect.signature(get_periods).parameters[name].default
 
 
 def build_args_periods(**overrides) -> dict:
@@ -879,10 +885,14 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
     """
     threshold_mature_distance = args_periods['threshold_mature_distance']
     threshold_mature_length = args_periods['threshold_mature_length']
-    length_scale = args_periods.get('length_scale', 'global')
-    mature_method = args_periods.get('mature_method', 'derivative')
-    mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction', 0.90)
-    mature_min_depth = args_periods.get('mature_min_depth', 0.0)
+    # Fallbacks read from get_periods' signature, never typed here (clean-up
+    # front, Passo 4). In the app the keys always arrive: build_args_periods
+    # fills every one of them from _ARGS_PERIODS_DEFAULTS.
+    length_scale = args_periods.get('length_scale', _gp_default('length_scale'))
+    mature_method = args_periods.get('mature_method', _gp_default('mature_method'))
+    mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction',
+                                                 _gp_default('mature_amplitude_fraction'))
+    mature_min_depth = args_periods.get('mature_min_depth', _gp_default('mature_min_depth'))
     if not 0 <= mature_min_depth <= 1:
         raise ValueError(
             f"mature_min_depth must be in [0, 1], got {mature_min_depth!r}.")

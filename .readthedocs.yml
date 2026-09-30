@@ -29,3 +29,7 @@ formats:
 python:
   install:
     - requirements: docs/requirements.txt
+    # install the package itself so autodoc can import it and render the
+    # docstrings of the documented functions
+    - method: pip
+      path: .

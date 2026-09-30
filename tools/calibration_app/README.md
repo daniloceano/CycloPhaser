@@ -1,160 +1,159 @@
 # CycloPhaser — Calibration App
 
-Ferramenta interativa para calibrar os parâmetros de filtragem e suavização
-do CycloPhaser antes de rodar a detecção de fases.
+An interactive tool to calibrate CycloPhaser's filtering, smoothing and
+phase-detection parameters on real and synthetic tracks, and to compare
+configurations side by side.
 
-## Instalação
+## Installation
 
-Execute a partir do diretório `tools/calibration_app/`:
+Run from the `tools/calibration_app/` directory:
 
 ```bash
 cd tools/calibration_app
 pip install -r requirements-app.txt
 ```
 
-O `-e ../..` em `requirements-app.txt` instala o CycloPhaser em modo
-editável a partir da raiz do repositório.
+The `-e ../..` line in `requirements-app.txt` installs CycloPhaser in editable
+mode from the repository root.
 
-## Como rodar
+## Running
 
 ```bash
 streamlit run app.py
 ```
 
-Abra http://localhost:8501 no navegador.
+Open http://localhost:8501 in a browser.
 
-## Formato do track
+## Track format
 
-Os dois campos de envio (Calibration e Benchmark → Exploration) aceitam `.csv`
-e `.txt`. O formato é reconhecido pelo **conteúdo**, nunca pela extensão
-(`track_io.py`, a única função de leitura do app).
+Both upload fields (Calibration and Benchmark → Exploration) accept `.csv` and
+`.txt`. The format is recognised by **content**, never by extension
+(`track_io.py`, the app's only reader).
 
-**Formato padrão** — primeira linha com nomes de colunas separados por `;`,
-incluindo:
+**Standard format** — a first line with column names separated by `;`,
+including:
 
-- `time` — datas **ano primeiro** (`YYYY-MM-DD…`, ex. `2015-01-27 04:00:00` ou
+- `time` — **year-first** dates (`YYYY-MM-DD…`, e.g. `2015-01-27 04:00:00` or
   `2008-08-15-2100`);
-- `min_max_zeta_850` — vorticidade relativa em 850 hPa (s⁻¹), convenção do
-  hemisfério sul (ciclônica = negativa).
+- `min_max_zeta_850` — 850 hPa relative vorticity (s⁻¹), Southern-Hemisphere
+  convention (cyclonic = negative).
 
-Outras colunas são ignoradas. Compatível com o `example_file.csv` em
+Other columns are ignored. Compatible with `example_file.csv` in
 `cyclophaser/example_data/`.
 
-**Formato customizado** (opt-in, expander *Custom track format*, desligado por
-padrão) — separador (`auto`, `;`, `,`, tab, whitespace), linha de cabeçalho
-sim/não, coluna de data e de vorticidade (nome, ou número a partir de 1 sem
-cabeçalho) e formato de data strftime opcional. Datas que não começam pelo ano
-exigem o formato explícito: a inferência do pandas lê `05/01/2015` como 1º de
-maio sem aviso. Cada arquivo lido assim é mostrado numa pré-visualização
-(primeiras linhas, primeira/última data, nº de pontos, mín./máx. da
-vorticidade, avisos de sinal e de magnitude) e só é usado depois de confirmado.
-O arquivo é normalizado para o formato padrão; o resto do app não muda.
+**Custom format** (opt-in, *Custom track format* expander, off by default) —
+separator (`auto`, `;`, `,`, tab, whitespace), header line yes/no, date and
+vorticity columns (by name, or by 1-based number without a header) and an
+optional strftime date format. Dates that do not start with the year need the
+explicit format: pandas' inference reads `05/01/2015` as 1 May without warning.
+Each file read this way is shown in a preview (first rows, first/last date,
+number of points, min/max vorticity, sign and magnitude warnings) and is used
+only after it is confirmed. The file is normalised to the standard format; the
+rest of the app does not change.
 
-**Validação, em qualquer caminho** — datas interpretadas, estritamente
-crescentes e sem duplicatas; vorticidade numérica float64 sem NaN; pelo menos
-2 pontos. Um arquivo que falha é recusado com a causa, nunca aceito em silêncio.
+**Validation, on every path** — dates parsed, strictly increasing and without
+duplicates; numeric float64 vorticity without NaN; at least 2 points. A file
+that fails is refused with the cause, never accepted silently.
 
-## Modos de exibição
+## Display modes
 
-O topo da aba **Calibration** tem um seletor de modo (a interface do app é
-toda em inglês). Ambos são **pura visualização**: nenhum controle deles altera
-a detecção, e nada do estado deles entra no YAML exportado.
+The top of the **Calibration** tab has a mode selector: Grid, Inspector and
+Label. Grid and Inspector are **pure visualisation**: none of their controls
+changes the detection, and none of their state enters the exported YAML. Label
+is the manual-labelling tool; see `research/labels/README.md`.
 
-### Grid (padrão)
+### Grid (default)
 
-A grade multi-ciclone histórica, **inalterada**: figuras matplotlib
-renderizadas em PNG e cacheadas, 1–6 colunas, e o mesmo PNG dentro do ZIP de
-export. Renderizar 51 figuras Plotly na mesma página trava o navegador, e o
-PNG exportado precisa continuar determinístico — por isso este modo continua
-em matplotlib.
+The multi-cyclone grid: matplotlib figures rendered to PNG and cached, 1–6
+columns, and the same PNG inside the export ZIP. Rendering 51 Plotly figures on
+one page freezes the browser, and the exported PNG must stay deterministic —
+which is why this mode stays in matplotlib.
 
-### Inspector (um track por vez)
+### Inspector (one track at a time)
 
-Um gráfico Plotly de painéis empilhados (`z` / `dz` / `dz2`, eixo x
-compartilhado e zoom sincronizado) para **um** track escolhido no selectbox
-*Track to inspect*. A escolha do renderizador é o ponto do modo: clicar na
-legenda liga e desliga uma camada **no cliente**, sem rerun do Streamlit.
+A Plotly figure of stacked panels (`z` / `dz` / `dz2`, shared x axis and
+synchronised zoom) for **one** track chosen in the *Track to inspect* select
+box. The renderer is the point of the mode: clicking the legend turns a layer
+on and off **in the browser**, without a Streamlit rerun.
 
-**O inspetor abre com tudo ligado.** Todas as camadas de série estão visíveis
-e as quatro sobreposições de decisão vêm marcadas — o trabalho é por *track*
-(um ciclone selecionado), não pela grade inteira, então calcular as quatro de
-saída é barato. Desmarcar uma derruba o custo dela.
+**The inspector opens with everything on.** Every series layer is visible and
+the four decision overlays are checked — the work is per *track* (one selected
+cyclone), not for the whole grid, so computing all four is cheap. Unchecking one
+removes its cost.
 
-Há dois tipos de controle, e a diferença é deliberada:
+There are two kinds of control, and the difference is deliberate:
 
-- **Camadas de série** — `zeta`, `filtered_vorticity`, `vorticity_smoothed`,
+- **Series layers** — `zeta`, `filtered_vorticity`, `vorticity_smoothed`,
   `vorticity_smoothed2`, `dz_dt_filt`, `dz_dt_smoothed2`, `dz_dt2_filt`,
-  `dz_dt2_smoothed2`, os três `*_peaks_valleys` e a fronteira `Ic` de ground
-  truth dos casos sintéticos. Estão **sempre** no gráfico: desligar uma é um
-  clique na legenda (ela vira `legendonly` e continua na figura), de graça. O
-  sombreado de fases é a única exceção — uma faixa de altura total é uma
-  *shape* do layout, que o Plotly não coloca na legenda — e fica **sempre
-  ligado**: é o fundo contra o qual todas as outras camadas são lidas.
+  `dz_dt2_smoothed2`, the three `*_peaks_valleys`, and the ground-truth `Ic`
+  boundary of the synthetic cases. They are **always** in the figure: hiding one
+  is a legend click (it becomes `legendonly` and stays in the figure), at no
+  cost. Phase shading is the one exception — a full-height band is a layout
+  *shape*, which Plotly does not put in the legend — and it is **always on**: it
+  is the background every other layer is read against.
 
-  As cores seguem o padrão do próprio pacote (`cyclophaser/plots.py`,
-  `plot_didactic`): ζ cru em cinza, `filtered_vorticity` em âmbar,
-  `vorticity_smoothed` em azul-marinho e `vorticity_smoothed2` em vermelho.
-  Nos painéis de derivada vale a cor por *quantidade* do mesmo arquivo
-  (`series_colors`: dz vermelho, dz2 âmbar), com o estágio intermediário
-  `*_filt` num tom claro e o estágio que a detecção lê na cor cheia e no
-  traço mais grosso.
-- **Sobreposições de decisão** — exigem cálculo no servidor, então são
-  `st.checkbox`:
-  - **Pipeline ribbon** — seis faixas, uma por etapa, coloridas pelas fases
-    vigentes *depois* daquela etapa. As seis funções rodam em ordem fixa e
-    sobrescrevem umas às outras; ler uma coluna de cima para baixo mostra um
-    trecho mudando de dono.
-  - **Candidate ledger** — cada segmento que `find_intensification_period` e
-    `find_decay_period` consideram, com a escala usada, o mínimo exigido, o
-    veredito sob os sliders atuais, os gaps e o teste de preenchimento, e
-    (cruzando com a fita) se um candidato aceito foi sobrescrito por uma etapa
-    posterior.
-  - **Mature layers** — picos/vales de `z` aceitos e rejeitados sob o limiar
-    de proeminência efetivo, e as janelas maduras, **incluindo as que a
-    confirmação estrita descartou** — que hoje somem sem deixar rastro no
-    resultado.
-  - **Incipient layers** — sondagem suavizada, perfil `rel = |dz|/max|dz|`
-    contra τ, joelho de `|dz2|` e a fronteira incipiente que o run produziu
-    (lida de `df['periods']`, não recomputada). Fora de
-    `incipient_method="plateau"` as camadas de rel/τ/sondagem não existem e
-    são omitidas com um aviso; `dz` e `dz2` crus continuam.
+  Colours follow the package's own convention (`cyclophaser/plots.py`,
+  `plot_didactic`): raw ζ in grey, `filtered_vorticity` in amber,
+  `vorticity_smoothed` in navy and `vorticity_smoothed2` in red. In the
+  derivative panels the per-*quantity* colour of the same file applies
+  (`series_colors`: dz red, dz2 amber), with the intermediate `*_filt` stage in
+  a light tone and the stage the detection reads in full colour and a thicker
+  line.
+- **Decision overlays** — they need server-side computation, so they are
+  `st.checkbox` controls:
+  - **Pipeline ribbon** — six bands, one per step, coloured by the phases in
+    force *after* that step. The six functions run in a fixed order and
+    overwrite one another; reading a column from top to bottom shows a stretch
+    changing owner.
+  - **Candidate ledger** — every segment `find_intensification_period` and
+    `find_decay_period` consider, with the scale used, the required minimum, the
+    verdict under the current sliders, the gaps and the fill-in test, and
+    (crossed with the ribbon) whether an accepted candidate was overwritten by a
+    later step.
+  - **Mature layers** — accepted and rejected `z` peaks/valleys under the
+    effective prominence threshold, and the mature windows, **including those
+    the strict confirmation discarded** — which otherwise vanish without a trace
+    in the result.
+  - **Incipient layers** — the smoothed probe, the profile `rel = |dz|/max|dz|`
+    against τ, the `|dz2|` knee, and the incipient boundary the run produced
+    (read from `df['periods']`, not recomputed). Outside
+    `incipient_method="plateau"` the rel/τ/probe layers do not exist and are
+    omitted with a notice; raw `dz` and `dz2` remain.
 
-**Escala compartilhada (`Shared y scale`, ligada por padrão).** As curvas são
-reescaladas para uma faixa **0–1**, nos **mesmos grupos** que a figura do modo
-Grid coloca nos seus dois eixos (`plots.plot_all_periods` usa `twinx`: o `zeta`
-cru num eixo, `filtered_vorticity` + `vorticity_smoothed` +
-`vorticity_smoothed2` juntos no outro). Os painéis de derivada seguem a mesma
-regra: `*_filt` e `*_smoothed2` dividem uma faixa.
+**Shared scale (`Shared y scale`, on by default).** The curves are rescaled to a
+**0–1** band, in the **same groups** the Grid figure puts on its two axes
+(`plots.plot_all_periods` uses `twinx`: raw `zeta` on one axis,
+`filtered_vorticity` + `vorticity_smoothed` + `vorticity_smoothed2` together on
+the other). The derivative panels follow the same rule: `*_filt` and
+`*_smoothed2` share a band.
 
-As duas metades do agrupamento importam:
+Both halves of the grouping matter:
 
-- dar ao **cru uma faixa própria** é o que faz ele **se sobrepor** à filtrada
-  em vez de esmagá-la — ele tem 2–3× mais amplitude, e numa escala comum
-  achataria as outras contra o eixo;
-- manter os **estágios do pipeline juntos** é o que preserva a amplitude que
-  cada passada de suavização tirou. Escalando cada um por conta própria, todo
-  estágio passa a ocupar a altura inteira e todos ficam idênticos — medido em
-  20190325 com os defaults do pacote, `filtered_vorticity` tem 1,25× a
-  amplitude de `vorticity_smoothed2`, e a escala por série apagava isso.
+- giving **raw its own band** is what lets it **overlay** the filtered series
+  instead of crushing it — it has 2–3× more amplitude, and on a common scale it
+  would flatten the others against the axis;
+- keeping **the pipeline stages together** is what preserves the amplitude each
+  smoothing pass removed. Scaling each stage on its own makes every stage fill
+  the whole height and all of them look identical — measured on 20190325 with
+  the package defaults of the time, `filtered_vorticity` has 1.25× the amplitude
+  of `vorticity_smoothed2`, and per-series scaling erased that.
 
-O painel passa então a ser lido pela **forma** — onde cada série vira, e quando
-—, que é a única coisa sobre a qual as regras de fase agem. A magnitude sai do
-eixo, mas **cada hover continua mostrando o valor bruto**. Efeito colateral: o
-zero fica numa altura diferente para cada faixa, então a linha de zero dos
-painéis dz/dz2 não é desenhada nesse modo. Desmarque para ler unidades
-verdadeiras e um zero real.
+The panel is then read by **shape** — where each series turns, and when —,
+which is the only thing the phase rules act on. Magnitude leaves the axis, but
+**every hover still shows the raw value**. Side effect: zero sits at a different
+height in each band, so the zero line of the dz/dz2 panels is not drawn in this
+mode. Uncheck it to read true units and a real zero.
 
-(Um `twinx` de verdade continua descartado no inspetor: foi ele que causou o
-bug de zorder na figura compacta da grade. O que se reproduz aqui é o
-*agrupamento* que o `twinx` do pacote produz, num eixo só.)
+(A real `twinx` stays out of the inspector: it caused the zorder bug in the
+grid's compact figure. What is reproduced here is the *grouping* the package's
+`twinx` produces, on a single axis.)
 
-**Fidelidade.** Toda a conta vive em funções puras
-(`layer_inspector.py`, sem Streamlit e sem biblioteca de plot), que só
-*chamam* as funções do próprio pacote — a fita executa as seis funções em
-sequência sobre uma cópia do df, e o ledger é comparado, em teste, com a
-máscara que a função do pacote produz sozinha (`tests/test_layer_inspector.py`).
-Os mesmos helpers alimentam o renderizador Plotly do app e o render estático
-matplotlib de conferência em
+**Fidelity.** All computation lives in pure functions (`layer_inspector.py`,
+no Streamlit and no plotting library) that only *call* the package's own
+functions — the ribbon runs the six functions in sequence on a copy of the
+frame, and the ledger is compared, in a test, with the mask the package function
+produces on its own (`tests/test_layer_inspector.py`). The same helpers feed the
+app's Plotly renderer and the static matplotlib check render in
 `research/app_layer_inspector/gen_inspector_figures.py`.
 
 ## Benchmark tab
@@ -171,7 +170,7 @@ five mandatory items:
 
 1. sha256 of the source YAML, or `edited in session` if it was changed;
 2. the commit of the code actually running (`git rev-parse HEAD`). **Not**
-   `metadata.cyclophaser_version`: it reads `2.0.0` in all eleven files and
+   `metadata.cyclophaser_version`: it reads `2.0.0` in every calibration file and
    distinguishes nothing;
 3. keys present in the YAML and ignored by the current signature (`distance`);
 4. keys absent from the YAML and filled by the current default, with the value;
@@ -234,7 +233,7 @@ one exists, otherwise the first configuration column. The manual label has no
 parameters, so the card diffs fall back to the first configuration column as
 their parameter baseline, and the card says so.
 
-**A card shows only the parameters that DIFFER from the reference.** The eleven
+**A card shows only the parameters that DIFFER from the reference.** Calibration
 YAMLs share roughly fifteen identical parameters; listing all of them hides the
 two or three that separate one configuration from another. The full
 configuration sits behind the card's `Provenance` drop-down.
@@ -276,20 +275,20 @@ which is why it sits under Residual.
 Two parameters span groups and carry a note in their own widget: `length_scale`
 (scales the intensification and decay duration thresholds,
 `find_stages.py:387`, and changes detected phases on 20160735, 20191014 and
-20203947 under params-9) and `boundary_padding` (a filter parameter that governs
-the incipient phase: under `reflect` no series refuses an incipient phase, 0/51;
-under `edge`, 33/51 refuse).
+20203947 under params-9) and `boundary_padding` (a filter parameter that can
+govern the incipient phase: with `incipient_plateau_signal="derivative"` no
+series refuses an incipient phase under `reflect`, 0/51, against 33/51 under
+`edge`; with the default `incipient_plateau_signal="vorticity"` the probe reads
+the raw series and refusals do not change, 28/54 training series under both —
+`research/cleanup/passo1/RELATORIO.md`).
 
 This layout's coverage is verified by an automatic test, not by eye:
 `tests/test_sidebar_coverage.py` enumerates the package's public signature and
 requires every parameter to have a control and no widget key to repeat.
 
-## Escopo atual (Etapa 1)
+## Scope
 
-- Upload de tracks `.csv`/`.txt` (formato padrão ou customizado — ver "Formato do track")
-- Controle interativo de filtro Lanczos e suavização Savgol
-- Visualização de ζ original, filtrada, suavizada 1× e suavizada 2×
-- Cache automático: o filtro só re-executa quando os parâmetros mudam
-
-**Próximas etapas (não implementadas aqui):** calibração de thresholds de
-fase (Etapa 2), grade multi-ciclone, export de parâmetros.
+The app covers the whole detection pipeline: track upload (standard or custom
+format), every filter, smoothing and phase-detection parameter of the package in
+the sidebar, the Grid, Inspector and Label display modes, the Benchmark tab, and
+export of the parameters (YAML) with the figures and phase tables.

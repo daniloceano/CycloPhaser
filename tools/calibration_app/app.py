@@ -48,10 +48,6 @@ try:
 except Exception:
     _CP_VERSION = "unknown"
 
-_METHOD_IMG = (
-    Path(__file__).parent.parent.parent / "docs" / "_images" / "cyclophaser_methodology.jpg"
-)
-
 # Resolved relative to this file (not the Streamlit process's CWD, which varies
 # depending on how `streamlit run` is invoked) so "Load all test cyclones" works
 # regardless of the working directory the app was launched from.
@@ -262,6 +258,53 @@ def _sidebar_defaults_from_signature() -> dict:
 
 
 _DEFAULTS.update(_sidebar_defaults_from_signature())
+
+
+def _pkg_default(name: str):
+    """The package's own signature default of `name` (process_vorticity /
+    get_periods), for every place where the app WRITES or FALLS BACK to a default
+    — never a literal typed here (clean-up front, Passo 4)."""
+    import inspect as _inspect
+    from cyclophaser.determine_periods import get_periods as _gp
+    from cyclophaser.determine_periods import process_vorticity as _pv
+    for fn in (_pv, _gp):
+        p = _inspect.signature(fn).parameters.get(name)
+        if p is not None and p.default is not _inspect.Parameter.empty:
+            return p.default
+    raise KeyError(name)
+
+
+def _doc_defaults(md: str) -> str:
+    """Fill the Documentation tab's placeholders from the package signature:
+    ``<<name>>`` → the default of `name`; ``<<name?value>>`` → " (default)" when
+    `value` is the default of `name`, else nothing. Nothing in that tab is typed."""
+    def fill(m):
+        name, _, value = m.group(1).partition("?")
+        d = _pkg_default(name)
+        if value:
+            return " (default)" if str(d) == value else ""
+        return f"{d:g}" if isinstance(d, float) else ("`None`" if d is None else f"`{d}`" if isinstance(d, str) else str(d))
+    import re as _re_doc
+    return _re_doc.sub(r"<<([\w?.\-]+)>>", fill, md)
+
+
+def _default_mark(name: str, value) -> str:
+    """' (default)' when `value` is the package default of `name`, else ''."""
+    return " (default)" if value == _pkg_default(name) else ""
+
+
+def _off_or_default_text(name: str) -> str:
+    """For an enable-checkbox whose parameter is None when OFF: what the package
+    default does, read from the signature."""
+    d = _pkg_default(name)
+    if d is None:
+        return "Leave disabled to use the default CycloPhaser behaviour."
+    return f"The package default is enabled, with `{name}={d!r}`."
+
+
+def _with_default_mark(name: str, value, label: str) -> str:
+    """A radio option label, marked '(default)' when `value` is the package default."""
+    return f"{label} (default)" if value == _pkg_default(name) else label
 
 _SM_OPTS = ["auto", "off", "manual"]
 _VIEW_MODES = ["Grid", "Inspector", "Label"]
@@ -487,8 +530,9 @@ _OPTIONAL_PHASE_YAML_KEYS = {"prominence", "prominence_relative",
 # boundary_padding is OPTIONAL on import for the same reason as the optional
 # phase keys above, but for a backward-compatibility reason rather than a
 # "mode wasn't in use" one: every YAML exported before the option existed
-# legitimately lacks the key, and such a file must import cleanly and fall back
-# to the default ("zero") without a spurious "missing key" warning. It is still
+# legitimately lacks the key, and such a file must import cleanly and be filled
+# like any absent key (frozen pre-item-31 table, _load_yaml_config) without a
+# spurious "missing key" warning. It is still
 # recognised for the "unknown key" check.
 _OPTIONAL_FILTER_YAML_KEYS = {"boundary_padding"}
 
@@ -588,13 +632,13 @@ _NON_PARAMETER_ARGS = frozenset({"zeta_df", "vorticity", "plot", "plot_steps",
 
 _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
 # Item 31, decision (a): there is no longer a "required" set. Every key a file
-# does not carry is FILLED with the frozen cyclophaser 2.0.0 default
+# does not carry is FILLED with the frozen pre-item-31 default
 # (research/labels/config_defaults.py) and listed — see _load_yaml_config. The
 # "optional" sets above now only keep those keys out of the "unknown key" list.
 
 # The three keys whose sidebar control is an enabled flag + a value: the app's
 # own export omits them when the check is OFF, so an absent key means OFF. Their
-# 2.0.0 default is None (OFF) as well, so filling them is recorded but nothing is
+# pre-item-31 default is None (OFF) as well, so filling them is recorded but nothing is
 # written into a value widget — the "absent" branch below switches them off.
 _ABSENT_MEANS_OFF_KEYS = ("prominence", "prominence_relative",
                           "decay_tail_amplitude_fraction")
@@ -665,7 +709,7 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
              "filled": list[(key, value)], "count": int}.
 
     Item 31, decision (a): every key the file does not carry is filled with the
-    frozen cyclophaser 2.0.0 default and listed — `filled` holds (key, value),
+    frozen pre-item-31 default and listed — `filled` holds (key, value),
     `missing` the key names alone. Nothing absent is left to whatever the
     session happened to hold.
     """
@@ -1433,16 +1477,18 @@ def _preset_to_widgets(preset: dict) -> dict:
     to mode 'off', 'auto' to mode 'auto', and an int to mode 'manual' + value.
     """
     out = {
-        "use_filter":        bool(preset.get("use_filter", False)),
-        "replace_endpoints": int(preset.get("replace_endpoints_with_lowpass", 0)),
-        "savgol_poly":       int(preset.get("savgol_polynomial", 3)),
-        "boundary_padding":  str(preset.get("boundary_padding", "reflect")),
-        "cutoff_low":        int(preset.get("cutoff_low", 168)),
-        "cutoff_high":       int(preset.get("cutoff_high", 48)),
+        "use_filter":        _DEFAULTS["use_filter"] if "use_filter" not in preset
+                             else bool(preset["use_filter"]),
+        "replace_endpoints": int(preset.get("replace_endpoints_with_lowpass",
+                                            _pkg_default("replace_endpoints_with_lowpass"))),
+        "savgol_poly":       int(preset.get("savgol_polynomial", _pkg_default("savgol_polynomial"))),
+        "boundary_padding":  str(preset.get("boundary_padding", _pkg_default("boundary_padding"))),
+        "cutoff_low":        int(preset.get("cutoff_low", _pkg_default("cutoff_low"))),
+        "cutoff_high":       int(preset.get("cutoff_high", _pkg_default("cutoff_high"))),
     }
     for src, mode_key, val_key in (("use_smoothing", "sm_mode", "sm_val"),
                                    ("use_smoothing_twice", "sm2_mode", "sm2_val")):
-        v = preset.get(src, "auto")
+        v = preset.get(src, _pkg_default(src))
         if v is False:
             out[mode_key] = "off"
         elif isinstance(v, int) and not isinstance(v, bool):
@@ -1498,7 +1544,7 @@ with st.sidebar:
             if _r.get("filled"):
                 st.warning(
                     f"{len(_r['filled'])} key(s) absent from this file were filled with "
-                    "the cyclophaser 2.0.0 defaults (frozen table, item 31): "
+                    "the frozen pre-item-31 defaults (research/labels/defaults_2.0.0.json, item 31): "
                     + ", ".join(f"{k}={v!r}" for k, v in _r["filled"]))
 
     st.divider()
@@ -1558,7 +1604,7 @@ with st.sidebar:
             "Maximum period (hours) retained by the filter — the lower frequency bound. "
             "Components with periods longer than this value are suppressed. "
             "Higher values remove more large-scale trend; lower values preserve slower "
-            "cyclone variations. Default: 168 h (7 days)."
+            f"cyclone variations. Default: {_pkg_default('cutoff_low'):g} h."
             + ("" if use_filter else
                " **Inactive**: only the Lanczos convolution reads it, and it does not "
                "run when 'Apply Lanczos filter' is off.")
@@ -1572,7 +1618,7 @@ with st.sidebar:
             "Minimum period (hours) retained by the filter — the upper frequency bound. "
             "Components with periods shorter than this value are suppressed as noise. "
             "Lower values allow more high-frequency variability; higher values produce "
-            "a smoother curve. Default: 48 h (2 days)."
+            f"a smoother curve. Default: {_pkg_default('cutoff_high'):g} h."
             + ("" if use_filter else
                " **Inactive**: only the Lanczos convolution reads it, and it does not "
                "run when 'Apply Lanczos filter' is off.")
@@ -1587,7 +1633,8 @@ with st.sidebar:
         help=(
             "How the series is extended beyond its own ends before the Lanczos "
             "convolution.\n\n"
-            "**reflect** (default) — pads with the reflection of the series. "
+            "**reflect**" + (" (default)" if _pkg_default("boundary_padding") == "reflect" else "")
+            + " — pads with the reflection of the series. "
             "Takes the normalised |dz| at the first sample from a median 0.95 down "
             "to 0.42 on the 51-track set.\n\n"
             "**zero** — the pre-fix behaviour: the kernel sees zeros "
@@ -1595,14 +1642,21 @@ with st.sidebar:
             "spurious deepening ramp worth a median 74% of the cyclone's amplitude "
             "over roughly 48% of every series (the kernel is ~half the series long). "
             "Pass it to reproduce results from before this default changed.\n\n"
-            "**edge** — pads with the edge value repeated. Between the two "
+            "**edge**" + (" (default)" if _pkg_default("boundary_padding") == "edge" else "")
+            + " — pads with the edge value repeated; the padding of the measured "
+            "preset params-track. Between the two "
             "(median 0.50), changes marginally fewer phase sequences.\n\n"
             "**Spans groups.** This is a FILTER parameter (step 1), but it "
             "governs the INCIPIENT phase (step 9): the incipient phase is read "
             "at the leading edge, which is exactly what this control rewrites. "
-            "Measured on the 51-track set: under `reflect` no series refuses an "
-            "incipient phase (0/51); under `edge`, 33/51 refuse. Changing it "
-            "here changes step 9 without touching any of step 9's own "
+            "It matters for refusals only through the filtered curve: with "
+            "`incipient_plateau_signal=\"derivative\"` the probe reads the filtered "
+            "derivative and, on the 51-track set, no series refuses an incipient "
+            "phase under `reflect` (0/51) while 33/51 refuse under `edge`. With the "
+            "default `incipient_plateau_signal=\"vorticity\"` the probe reads the raw "
+            "series, and the padding does not change refusals (28/54 training series "
+            "under both; research/cleanup/passo1/RELATORIO.md). Changing it "
+            "here can change step 9 without touching any of step 9's own "
             "controls.\n\n"
             "Changing this alters the smoothed signal near the boundaries, so a "
             "calibrated parameter set must be re-validated before it is trusted "
@@ -1627,7 +1681,7 @@ with st.sidebar:
                 "carry full amplitude at the edge, so the 5% splice becomes a visible step. "
                 "Measured: **28 of 51** calibration tracks opened with a spurious `decay` phase "
                 "with this at 24, against **0/51** with it at 0.\n\n"
-                "Default: 0 (was 24 up to v2.0.0)."
+                f"Default: {_pkg_default('replace_endpoints_with_lowpass')} (it was 24 up to v2.0.0)."
                 + ("" if use_filter else
                    " **Inactive**: only applied when `use_filter` is on "
                    "(`if use_filter and replace_endpoints_with_lowpass:`).")
@@ -1708,7 +1762,7 @@ with st.sidebar:
                 "Degree of the polynomial fitted in each Savitzky-Golay window. "
                 "Lower degrees (2–3) yield more aggressive smoothing. "
                 "Higher degrees (4–5) better preserve local extrema and inflection points, "
-                "but may be unstable with small window sizes. Default: 3."
+                f"but may be unstable with small window sizes. Default: {_pkg_default('savgol_polynomial')}."
                 + ("" if use_smoothing is not False else
                    " **Inactive**: `use_smoothing='off'` skips every Savgol pass this "
                    "reads — including the ones over `dz`/`dz2` — regardless of "
@@ -1740,7 +1794,7 @@ with st.sidebar:
         st.caption(
             "Optional post-processing for the detected peaks/valleys. "
             "Boundary extrema (first and last points) are always preserved. "
-            "Leave disabled to use the default CycloPhaser behaviour."
+            + _off_or_default_text("prominence_relative")
         )
         _prom_enabled = st.checkbox(
             "Enable prominence filter", value=_DEFAULTS["extrema_prominence_enabled"],
@@ -1817,7 +1871,9 @@ with st.sidebar:
         "Threshold scale",
         options=["global", "local"],
         index=["global", "local"].index(_DEFAULTS["length_scale"]),
-        format_func=lambda x: "Global (default, v2.0.0 behaviour)" if x == "global" else "Local (per-cycle)",
+        format_func=lambda x: _with_default_mark(
+            "length_scale", x, "Global (whole series; the behaviour before this option)"
+            if x == "global" else "Local (per-cycle)"),
         key="length_scale",
         horizontal=True,
         help=(
@@ -1829,9 +1885,9 @@ with st.sidebar:
             "than inside one of them.\n\n"
             "Controls what length the duration thresholds of the "
             "intensification, decay and mature groups below are fractions *of*. "
-            "**global** (default): thresholds are measured against the whole "
+            "**global**" + _default_mark("length_scale", "global") + ": thresholds are measured against the whole "
             "series length — unchanged from v2.0.0. "
-            "**local**: thresholds are measured against each individual life "
+            "**local**" + _default_mark("length_scale", "local") + ": thresholds are measured against each individual life "
             "cycle's own span instead, which resolves tracks containing "
             "multiple asymmetric cycles — a short second cycle would "
             "otherwise have every one of its phases rejected by thresholds "
@@ -1889,8 +1945,8 @@ with st.sidebar:
                 "stretch is labelled intensification; step 7 then turns that phantom "
                 "intensification (having no mature after it) into residual to the end of the "
                 "series. Raise it to reject flat candidates. The floor is applied to each raw "
-                "segment before the gap merge above, not to the merged block. Default 0.00 "
-                "switches it off."
+                "segment before the gap merge above, not to the merged block. "
+                f"Default {_pkg_default('intensification_min_depth'):.2f}; 0.00 switches it off."
             ),
         )
 
@@ -1926,14 +1982,16 @@ with st.sidebar:
         "Mature stage method",
         options=["derivative", "amplitude"],
         index=["derivative", "amplitude"].index(_DEFAULTS["mature_method"]),
-        format_func=lambda x: "Derivative (default, v2.0.0 behaviour)" if x == "derivative" else "Amplitude (opt-in)",
+        format_func=lambda x: _with_default_mark(
+            "mature_method", x, "Derivative (the behaviour before this option)"
+            if x == "derivative" else "Amplitude"),
         key="mature_method",
         horizontal=True,
         help=(
             "Controls how the mature-stage window around each vorticity minimum is sized. "
-            "**derivative** (default): a fixed proportion ('Mature distance' below) of the "
+            "**derivative**" + _default_mark("mature_method", "derivative") + ": a fixed proportion ('Mature distance' below) of the "
             "time distance to the neighbouring vorticity peaks — unchanged from v2.0.0. "
-            "**amplitude** (opt-in): the contiguous stretch of vorticity around the minimum "
+            "**amplitude**" + _default_mark("mature_method", "amplitude") + ": the contiguous stretch of vorticity around the minimum "
             "that stays within a fraction of the cycle's own peak-to-valley amplitude on each "
             "side ('Mature amplitude fraction' below). Anchors directly on the vorticity value "
             "rather than on smoothed-derivative extrema, which can lag the true minimum and "
@@ -2002,7 +2060,7 @@ with st.sidebar:
             "the *smaller of a valley's two climbs* and feeds every phase), this "
             "acts inside mature detection only and cannot move an incipient, decay "
             "or residual boundary. Applies to both mature stage methods. "
-            "0.00 (default) admits every valley and changes nothing."
+            f"Default {_pkg_default('mature_min_depth'):.2f}; 0.00 admits every valley and changes nothing."
         ),
     )
 
@@ -2021,8 +2079,8 @@ with st.sidebar:
             "correctly rejected. This 'orphan' peak (no surviving valley after it) "
             "truncates decay early; the flat tail left behind is then labelled "
             "'residual' even though nothing in the vorticity indicates a genuine "
-            "re-intensification. Leave disabled to use the default CycloPhaser "
-            "behaviour."
+            "re-intensification. "
+            + _off_or_default_text("decay_tail_amplitude_fraction")
         )
         _decay_tail_enabled = st.checkbox(
             "Extend decay over a flat/plateau tail", value=_DEFAULTS["decay_tail_enabled"],
@@ -2073,9 +2131,8 @@ with st.sidebar:
             index=["geometric", "plateau"].index(_DEFAULTS["incipient_method"]),
             key="incipient_method",
             horizontal=True,
-            format_func=lambda x: (
-                "Geometric (default)" if x == "geometric" else "Plateau (opt-in)"
-            ),
+            format_func=lambda x: _with_default_mark(
+                "incipient_method", x, "Geometric" if x == "geometric" else "Plateau"),
             help=(
                 "'geometric' is the historical rule: the incipient phase ends "
                 "`Min. incipient length` of the way to the next dz extremum. "
@@ -2167,7 +2224,8 @@ with st.sidebar:
             value=_DEFAULTS["incipient_plateau_spare_intensification"],
             key="incipient_plateau_spare_intensification",
             disabled=incipient_method != "plateau",
-            help=("Opt-in, OFF by default. The plateau method writes incipient over "
+            help=(("ON" if _pkg_default("incipient_plateau_spare_intensification") else "OFF")
+                  + " by default. The plateau method writes incipient over "
                   "the whole [0, boundary), which can erase an entire "
                   "intensification and the mature after it. ON: if the first "
                   "intensification that starts before the boundary also ends "
@@ -2199,7 +2257,8 @@ with st.sidebar:
                     "incipient probe differentiates it. Affects the incipient "
                     "probe only — `z` and `dz` used by every other phase are "
                     "untouched, and the pipeline stays Savgol-off.\n\n"
-                    "0 disables it (default, previous behaviour). Even values are "
+                    f"Default {_pkg_default('incipient_smooth_window')}; 0 disables it "
+                    "(the behaviour before this option). Even values are "
                     "rounded up to odd.\n\n"
                     "Measured on the synthetic suite: w≥5 removes the spurious "
                     "noise trip that leaves the noisy designed-Ic cases with no "
@@ -2264,8 +2323,8 @@ _PHASE_PARAMS = dict(
     incipient_plateau_spare_intensification=bool(incipient_plateau_spare_intensification),
 )
 # Item 31: None is passed EXPLICITLY. prominence / prominence_relative /
-# decay_tail_amplitude_fraction are None when their sidebar check is OFF; up to
-# 2.0.0 omitting them meant the same thing, but the package's phase defaults are
+# decay_tail_amplitude_fraction are None when their sidebar check is OFF; before
+# item 31 omitting them meant the same thing, but the package's phase defaults are
 # now those of params-track (prominence_relative=0.3,
 # decay_tail_amplitude_fraction=0.3), so an
 # omitted OFF would silently run ON.
@@ -3082,19 +3141,7 @@ with tab_doc:
     )
 
     with st.expander("1 · Method overview", expanded=True):
-        if _METHOD_IMG.exists():
-            st.image(
-                str(_METHOD_IMG),
-                caption=(
-                    "Illustration of CycloPhaser methodology. "
-                    "(A) Raw vorticity series. (B) After Lanczos band-pass filtering "
-                    "(dashed circles: endpoint artifacts). (C) After first Savitzky-Golay pass. "
-                    "(D) After second pass. (E) Identified peaks and valleys. "
-                    "(F–J) Sequential detection of intensification, decay, mature, residual, "
-                    "and incipient stages. (K) Full life cycle. From de Souza et al. (2024)."
-                ),
-            )
-        st.markdown("""
+        st.markdown(_doc_defaults("""
 CycloPhaser identifies distinct phases of cyclone life cycles by analyzing the relative
 vorticity time series at the cyclone centre and its first derivative.
 
@@ -3104,33 +3151,33 @@ vorticity time series at the cyclone centre and its first derivative.
 |---|---|
 | **Incipient** | Early development before any identifiable intensification. Detected last (fills unlabelled periods at the series start). |
 | **Intensification** | Vorticity intensity increases (more negative in SH) from one peak to a subsequent valley. |
-| **Mature** | Interval between a derivative valley and its following derivative peak — cyclone's peak strength. |
+| **Mature** | The cyclone's peak strength around a vorticity minimum. How its window is sized depends on `mature_method` (default <<mature_method>>; see section 3). |
 | **Decay** | Decrease in vorticity after the mature phase until dissipation. |
 | **Residual** | Re-intensification episodes that do not progress to a full mature stage. |
 
-**Pipeline:** Lanczos band-pass filter → Savitzky-Golay smoothing (1× or 2×) → peak/valley detection → phase labelling.
+**Pipeline:** Lanczos band-pass filter → optional Savitzky-Golay smoothing (`use_smoothing` default <<use_smoothing>>) → peak/valley detection → phase labelling.
 
 > **Southern Hemisphere convention**: vorticity is negative; more negative = more intense.
 > For Northern Hemisphere data, multiply the series by −1 before passing to CycloPhaser.
-""")
+"""))
 
     with st.expander("2 · Filter and smoothing parameters", expanded=False):
-        st.markdown("""
+        st.markdown(_doc_defaults("""
 ### `use_filter` — Lanczos band-pass filter
 Activates spectral filtering. Disabling leaves the raw series and typically yields very noisy detection.
 
 ### `cutoff_low` — Low-frequency cutoff (hours)
 Maximum period retained. Variability slower than this is suppressed (e.g., seasonal trends).
-**Default: 168 h (7 days).**
+**Default: <<cutoff_low>> h.**
 
 ### `cutoff_high` — High-frequency cutoff (hours)
 Minimum period retained. Variability faster than this is suppressed as noise.
-**Default: 48 h (2 days).**
+**Default: <<cutoff_high>> h.**
 
 ### `boundary_padding` — Lanczos boundary condition
 How the series is extended beyond its own ends before the convolution.
 
-- `reflect` (**default**) — pads with the reflection of the series. Normalised `|dz|` at the
+- `reflect`<<boundary_padding?reflect>> — pads with the reflection of the series. Normalised `|dz|` at the
   first sample drops from a median **0.95 → 0.42** (last sample 0.98 → 0.35).
 - `zero` — the pre-fix behaviour (`scipy.signal.convolve(..., mode="same")`).
   The kernel sees zeros outside the series; since vorticity has a non-zero floor, this injects a
@@ -3139,15 +3186,16 @@ How the series is extended beyond its own ends before the convolution.
   series long. Measured on the 51-track set, this ramp alone accounts for ≥ 80 % of the slope at the
   first sample in **51/51** tracks. Pass it explicitly to reproduce results from before this
   default changed.
-- `edge` — pads with the edge value repeated. Between the two (median 0.50) and changes marginally
-  fewer phase sequences (13/51 vs 14/51 for `reflect`).
+- `edge`<<boundary_padding?edge>> — pads with the edge value repeated; the padding of the measured
+  preset params-track. Between the two (median 0.50) and changes marginally fewer phase sequences
+  (13/51 vs 14/51 for `reflect`).
 
 Changing this alters the smoothed signal near the boundaries, so **a calibrated parameter set must be
 re-validated before it is trusted in a new mode**. Only has an effect when the Lanczos filter is on.
 
 ### `replace_endpoints_with_lowpass` — Endpoint correction (**DEPRECATED**)
 Replaces the first/last 5 % of the filtered output with a simple low-pass estimate.
-**Default: 0 (disabled)** — it was 24 up to v2.0.0.
+**Default: <<replace_endpoints_with_lowpass>>** (0 disables it) — it was 24 up to v2.0.0.
 
 It was introduced as a palliative for the same zero-padding artifact described under `boundary_padding`,
 and it applies the *same* zero-padded convolution internally, so it never fixed the cause. Combined with
@@ -3156,40 +3204,40 @@ splice becomes a visible step. Measured over the 51 tracks, the number opening w
 phase goes **4/51 → 28/51** under `reflect` with this at 24, and **0/51** with it at 0. Leave it at 0.
 
 ### `use_smoothing` / `use_smoothing_twice` — Savitzky-Golay
-- `'auto'`: window computed from series length (recommended).
+- `'auto'`: window computed from series length.
 - `'off'`: skip smoothing.
 - `'manual'`: set window size explicitly (must be odd).
 
-A second pass (`use_smoothing_twice`) further smooths the already-smoothed curve — useful for hourly data.
-Can distort short phases.
+A second pass (`use_smoothing_twice`) further smooths the already-smoothed curve. Can distort short
+phases. Defaults: `use_smoothing` <<use_smoothing>>, `use_smoothing_twice` <<use_smoothing_twice>>.
 
 ### `savgol_polynomial` — Polynomial degree
 Degree of the polynomial fitted in each window. Lower (2–3) = more smoothing; higher (4–5) = better
-preservation of extrema. **Default: 3.**
-""")
+preservation of extrema. **Default: <<savgol_polynomial>>.**
+"""))
 
     with st.expander("3 · Phase detection thresholds", expanded=False):
-        st.markdown("""
+        st.markdown(_doc_defaults("""
 All thresholds are **fractions of a length**, making them resolution-independent.
-Which length depends on `length_scale` (see below): by default the whole series;
-optionally, each threshold's own local cycle.
+Which length depends on `length_scale` (see below; default <<length_scale>>): the whole
+series under `global`, each segment's own local cycle under `local`.
 
 | Parameter | Default | Description |
 |---|---|---|
-| `threshold_intensification_length` | 0.075 | Min. duration of an intensification segment. |
-| `threshold_decay_length` | 0.075 | Min. duration of a decay segment. |
-| `threshold_mature_length` | 0.030 | Min. duration of the mature stage. Only used when `mature_method="derivative"` — see below. |
-| `threshold_mature_distance` | 0.125 | Max. distance between vorticity minimum and mature segment centre. Already local — unaffected by `length_scale`. Only used when `mature_method="derivative"` — see below. |
-| `threshold_intensification_gap` | 0.075 | Max. gap between consecutive intensification segments for merging. |
-| `threshold_decay_gap` | 0.075 | Max. gap between consecutive decay segments for merging. |
-| `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |
+| `threshold_intensification_length` | <<threshold_intensification_length>> | Min. duration of an intensification segment. |
+| `threshold_decay_length` | <<threshold_decay_length>> | Min. duration of a decay segment. |
+| `threshold_mature_length` | <<threshold_mature_length>> | Min. duration of the mature stage. Only used when `mature_method="derivative"` — see below. |
+| `threshold_mature_distance` | <<threshold_mature_distance>> | Max. distance between vorticity minimum and mature segment centre. Already local — unaffected by `length_scale`. Only used when `mature_method="derivative"` — see below. |
+| `threshold_intensification_gap` | <<threshold_intensification_gap>> | Max. gap between consecutive intensification segments for merging. |
+| `threshold_decay_gap` | <<threshold_decay_gap>> | Max. gap between consecutive decay segments for merging. |
+| `threshold_incipient_length` | <<threshold_incipient_length>> | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |
 
 ### `length_scale` — global vs. local threshold denominator
 
-- **`global`** (default): the five thresholds above (excluding mature distance and
+- **`global`**<<length_scale?global>>: the five thresholds above (excluding mature distance and
   incipient length, which were always local) are measured against the whole input
   series length. Matches all versions prior to this option.
-- **`local`**: each candidate segment is instead measured against the span of the
+- **`local`**<<length_scale?local>>: each candidate segment is instead measured against the span of the
   local life cycle it belongs to (the nearest vorticity extrema immediately before
   and after it). Fixes tracks with multiple, differently-sized life cycles: under
   `global`, a small second cycle's phases are checked against a denominator
@@ -3201,11 +3249,11 @@ optionally, each threshold's own local cycle.
 
 ### `mature_method` — how the mature window is sized
 
-- **`derivative`** (default): the mature window around each vorticity minimum is a
+- **`derivative`**<<mature_method?derivative>>: the mature window around each vorticity minimum is a
   fixed proportion (`threshold_mature_distance`) of the *time* distance to the
   neighbouring vorticity peaks — unchanged from v2.0.0. `threshold_mature_length`
   then applies as a minimum-duration floor on that window.
-- **`amplitude`** (opt-in): the mature window is instead the contiguous stretch of
+- **`amplitude`**<<mature_method?amplitude>>: the mature window is instead the contiguous stretch of
   vorticity around the minimum that stays within `mature_amplitude_fraction` of the
   cycle's own peak-to-valley amplitude, evaluated independently on the
   intensification side and the decay side. This anchors directly on the vorticity
@@ -3225,8 +3273,9 @@ optionally, each threshold's own local cycle.
 
 ### `decay_tail_amplitude_fraction` — extending decay over a flat/plateau tail
 
-- **`None`** (default): disabled, matching all versions prior to this option.
-- **Opt-in** (e.g. `0.05`, the author's validated reference value): compensates for
+- Default: <<decay_tail_amplitude_fraction>>. **`None`** disables the check, matching all versions
+  prior to this option.
+- A value (a fraction of the cycle's amplitude) compensates for
   an artifact of the prominence filter. On a single-cycle series, peaks and valleys
   are scored against SEPARATE populations, so the largest interior peak always
   survives `prominence_relative` filtering by construction — even when its
@@ -3247,10 +3296,10 @@ optionally, each threshold's own local cycle.
   from the extrema themselves, which was found to inflate the mature window's
   duration in every case it fixed (the decay-side amplitude reference in the
   `amplitude` mature method shifts when the bounding peak changes).
-- Validated safe window on the 51-track calibration set: **`(0.0356, 0.0651]`**.
-  Below it, some spurious tails aren't absorbed; above it, genuine
-  re-intensifications start being swallowed too.
-""")
+- Its original calibration was made on a configuration that predates the filter
+  fixes, and it does not reproduce under the current filtering; recalibrating it is
+  an open item (`docs/findings.md`, S11).
+"""))
 
     with st.expander("4 · Known methodological notes", expanded=False):
         st.markdown("""

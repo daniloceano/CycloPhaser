@@ -1,0 +1,34 @@
+[
+ {
+  "old": "segments may be accepted as intensification.**\n\n",
+  "new": "segments may be accepted as intensification.**\n\n*Current default: `intensification_min_depth=0.05` (see the first entry of this section); the text below describes the option as it was introduced.*\n\n"
+ },
+ {
+  "old": "**`mature_min_depth` — an opt-in depth floor on which valleys may generate a\nmature phase.**\n\n",
+  "new": "**`mature_min_depth` — an opt-in depth floor on which valleys may generate a\nmature phase.**\n\n*Current default: `mature_min_depth=0.8` (see the first entry of this section); the text below describes the option as it was introduced.*\n\n"
+ },
+ {
+  "old": "unchanged by default)**\n\n",
+  "new": "unchanged by default)**\n\n*Current default: `incipient_method=\"plateau\"` (see the first entry of this section); the text below describes the option as it was introduced.*\n\n"
+ },
+ {
+  "old": "for the incipient probe (opt-in, default off)**\n\n",
+  "new": "for the incipient probe (opt-in, default off)**\n\n*Current default: `incipient_smooth_window=5`, `incipient_smooth_polyorder=3` (see the first entry of this section); the text below describes the option as it was introduced.*\n\n"
+ },
+ {
+  "old": "**`boundary_padding` — opt-in fix for the Lanczos zero-padding edge artifact**\n\n",
+  "new": "**`boundary_padding` — opt-in fix for the Lanczos zero-padding edge artifact**\n\n*Current default: `boundary_padding=\"reflect\"` (see the first entry of this section); the text below describes the option as it was introduced.*\n\n"
+ },
+ {
+  "old": "**Default `0.0` switches the floor off entirely**",
+  "new": "**`0.0` (the default before item 31) switches the floor off entirely**"
+ },
+ {
+  "old": "**Default `0.0` is a no-op**",
+  "new": "**`0.0` (the default before item 31) is a no-op**"
+ },
+ {
+  "old": "controlled by `incipient_smooth_window` (default `0`,\ndisabled — previous behaviour byte for byte)",
+  "new": "controlled by `incipient_smooth_window` (`0`, the default before item 31,\ndisables it — previous behaviour byte for byte)"
+ }
+]

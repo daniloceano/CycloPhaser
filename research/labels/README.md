@@ -41,7 +41,7 @@ the manual label is the source of truth for every phase, `mature` included.
 | `split.yaml` | **Committed artefact.** The frozen split. |
 | `manual_labels.yaml` | **Committed artefact — the deliverable.** Written incrementally by the app. |
 | `evaluate_against_labels.py` | Runs the detector, scores it against the labels. |
-| `config_defaults.py`, `defaults_2.0.0.json` | Fills keys a config does not carry with the frozen 2.0.0 defaults, and lists them (item 31, decision (a)). |
+| `config_defaults.py`, `defaults_2.0.0.json` | Fills keys a config does not carry with the frozen pre-item-31 defaults (the file name says 2.0.0; see below), and lists them (item 31, decision (a)). |
 
 The labelling UI itself is `tools/calibration_app/label_tab.py`, reached through
 the **Label** display mode of the calibration app. Tests are in
@@ -91,13 +91,28 @@ cites it. It was written by hand from params-14 (plus one line), so its
 `metadata` block is params-14's, timestamp included.
 
 **Incomplete configs** (item 31, decision (a)). A key a config does not carry is
-filled with its **cyclophaser 2.0.0 default** from the frozen table
+filled with its **pre-item-31 default** from the frozen table
 `defaults_2.0.0.json` (generated from item 31's parameter table, never edited by
 hand; helper `config_defaults.py`), and the filled keys are always listed —
 by `evaluate_against_labels.py` (stderr), by the Benchmark column's provenance
 (item 4) and by the app's YAML import (a warning). A key present is never
 changed. This keeps an old or hand-trimmed config meaning what it meant when it
 was written, whatever the package defaults become.
+
+**What "2.0.0" means in these file names.** `defaults_2.0.0.json`,
+`tests/legacy_defaults.py` and `tests/baselines/*_2_0_0.csv` hold the defaults of
+the development line **before item 31**, not those of the published 2.0.0
+release: the release has no `boundary_padding` (its Lanczos convolution always
+zero-pads) and uses `replace_endpoints_with_lowpass=24`, and it has none of the
+later phase parameters. The names are historical; `CHANGELOG.md`
+([Unreleased], "The pre-item-31 table is not 2.0.0") lists the differences.
+
+**The published 2.0.0 itself** is in `research/snapshots/v2.0.0.json`: the phase
+detections produced by running the 2.0.0 wheel from PyPI with its package
+defaults over 63 series (51 real + 12 synthetic). Its recorded public
+signature matches the `v2.0.0` tag parameter for parameter (`determine_periods` 19, `process_vorticity` 7, `get_periods` 10 defaults;
+0 differ), and its sha256 is listed in `research/snapshots/SHA256SUMS`
+(checked by `research/cleanup/passo4/snapshot_vs_tag.py`).
 
 **`item19_core.py` no longer has a default config.** `pair_by_overlap` and
 `MARGIN`, which the Benchmark imports, are unchanged. `load_config()` without a

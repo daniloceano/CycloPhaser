@@ -168,7 +168,7 @@ def calibration_tracks():
 # ── Default (None) is a strict no-op ────────────────────────────────────────────
 
 
-# Item 31: the package default of decay_tail_amplitude_fraction moved (None up to 2.0.0).
+# Item 31: the package default of decay_tail_amplitude_fraction moved (None before item 31).
 # These tests pin that the CURRENT default is forwarded exactly as if
 # passed explicitly — read from the signature, not typed here.
 _DEFAULT_NOW = inspect.signature(determine_periods).parameters["decay_tail_amplitude_fraction"].default

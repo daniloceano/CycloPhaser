@@ -1,3 +1,4 @@
+> Files this report cites that are no longer in the tree were removed in the repository clean-up and are kept at `archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/frontA_idx0_c2/`.
 # Front A / item 28 — conditional reclassification of the extremum at index 0 (rule C2), stage 1
 
 **Measurement only. Nothing under `cyclophaser/` or `tests/` was touched.** The

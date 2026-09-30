@@ -323,14 +323,14 @@ def _render_card(col: dict, spec: bc.ColumnSpec, ref_doc: dict,
                    + (", ".join(f"`{k}`" for k in h["ignored"]) if h["ignored"]
                       else "none"))
         if h["defaulted"]:
-            st.caption(f"**4 · keys absent, filled with the frozen 2.0.0 default** "
+            st.caption(f"**4 · keys absent, filled with the frozen pre-item-31 default** "
                        f"({len(h['defaulted'])})")
             st.dataframe(
                 pd.DataFrame({"default in use": {k: repr(v)
                                                  for k, v in h["defaulted"].items()}}),
                 use_container_width=True)
         else:
-            st.caption("**4 · keys absent, filled with the frozen 2.0.0 default** — none")
+            st.caption("**4 · keys absent, filled with the frozen pre-item-31 default** — none")
         if h["pre_filter_fix"]:
             st.caption("**5 · pre-filter-fix warning**")
             st.caption(h["pre_filter_fix_warning"])

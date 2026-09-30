@@ -87,13 +87,13 @@ hourly 850 hPa relative vorticity along South-Atlantic cyclone tracks
 (`min_max_zeta_850`). That calibration was done with `boundary_padding="edge"`,
 so the default `"reflect"` was not part of it. Other inputs may need a
 different filtering, which has not been calibrated here. The evidence is
-stage 1 of item 31 (`research/labels/diagnostics/item31/stage1_output.txt`):
+stage 1 of item 31 (`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/stage1_output.txt`):
 PASS on the 16 held-out series, measured with params-15 = params-track, i.e.
 with `boundary_padding="edge"`, not with the current default. It is weak
 evidence because stage 1 was not a first scoring: those 16 series had been part
 of the visual calibration set, were viewed under params-15 in the review that
 adopted it, and had TEST blocks displayed in the Benchmark, and their labels are
-the same assessor's judgement (`research/labels/diagnostics/item31/DESIGN.md`,
+the same assessor's judgement (`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/DESIGN.md`,
 §3 events E01, E22, E23, and §5.2).
 
 **The `reflect` default.** `boundary_padding="reflect"` is the default by the
@@ -148,6 +148,17 @@ DESIGN §11):
 * The inspector's fallback table follows the package defaults, and an explicit
   `decay_tail_amplitude_fraction=None` is no longer replaced by the default.
 
+### Changed — repository clean-up: research diagnostics archived (clean-up front)
+
+Research diagnostics that no live file needs were removed from the tree:
+309 files, deleted by `2912b79`. Every one of them is kept at
+the tag `archive/research-diagnostics-pre-cleanup` (`654a3e5`) and is read with
+`git show archive/research-diagnostics-pre-cleanup:<path>`; 1 of them
+(`research/labels/diagnostics/item30/separability_train_params14.csv`) was restored to the tree by `51596c0`.
+Live files that cited a removed path now cite it in that form. The findings the
+removed reports supported are consolidated, with their citations, in
+`docs/findings.md`. Nothing under `cyclophaser/` changed in this step.
+
 ### Changed — calibration app: the sidebar opens with the package defaults (item 31, stage 2c)
 
 **One source for the sidebar's start-up values: the package signature.**
@@ -163,7 +174,7 @@ DESIGN §11):
   None starts unchecked and keeps the app's fallback. The prominence-mode radio
   follows the same table.
 * **What moves.** 20 of the 37 sidebar keys change start-up value. The full
-  before/after table is `research/labels/diagnostics/item31/sidebar_table_2c.md`.
+  before/after table is `archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/sidebar_table_2c.md`.
 * **Tests.** `tests/test_sidebar_defaults.py` pins four things:
   * the start-up widgets and the published live config equal the signature
     defaults, key by key;
@@ -187,7 +198,7 @@ with both passed explicitly, but the new default `use_smoothing=False` made it
 reachable with `use_filter=False` alone. The unfiltered branch now builds the
 series on the same `time` coordinate as the filtered one. No output changed:
 110/110 runs that ran before give byte-identical periods, and the 110 that
-crashed now run (`research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt`).
+crashed now run (`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt`).
 
 ### Changed — research tooling: incomplete configs and the configs directory (item 31, stage 2a, `eed8e77`)
 
@@ -203,7 +214,7 @@ crashed now run (`research/labels/diagnostics/item31/fix_use_filter_false_equiva
   (`research/labels/diagnostics/item31/recovery_table.md`).
   `item19_core.load_config()` without a path now raises and names that commit.
   40 closed-front scripts that loaded a removed config are listed, not
-  migrated (`stale_scripts.md`).
+  migrated (`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/stale_scripts.md`).
 
 ### Added — calibration app: flexible track reading (item 29, merge `84b63ec`)
 
@@ -295,7 +306,7 @@ a peak. What breaks that alternation is the prominence filter. **With
 defaults give you — the rule never fires: measured identical output with and
 without it on all 64 series tried** (51 calibration tracks, 12 synthetic series,
 the packaged example file;
-`research/labels/diagnostics/frontA_idx0_c2/stage2_defaults_check.py`). So this
+`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/frontA_idx0_c2/stage2_defaults_check.py`). So this
 change affects only configurations that use a prominence filter, and no CI
 reference baseline moved.
 
@@ -321,6 +332,8 @@ required to pass — in
 
 **`intensification_min_depth` — an opt-in depth floor on which candidate
 segments may be accepted as intensification.**
+
+*Current default: `intensification_min_depth=0.05` (see the first entry of this section); the text below describes the option as it was introduced.*
 
 `get_periods` and `determine_periods` accept a new `intensification_min_depth`
 float in `[0, 1]`. A raw candidate segment (a z-peak and the next z-valley) is
@@ -367,7 +380,7 @@ A series whose z range is zero or non-finite has no depth scale; the floor is
 skipped for it and a `UserWarning` says so, rather than the request being
 silently ignored.
 
-**Default `0.0` switches the floor off entirely**, and is a strict no-op: the
+**`0.0` (the default before item 31) switches the floor off entirely**, and is a strict no-op: the
 phase output over the 47 training series is byte-identical with the parameter
 absent and with `0.0` passed explicitly, and identical to `develop-v2.1`'s
 output for the same series in the same environment.
@@ -377,6 +390,8 @@ See `docs/future_work.md` item 22 ("Recorded while working front C") and
 
 **`mature_min_depth` — an opt-in depth floor on which valleys may generate a
 mature phase.**
+
+*Current default: `mature_min_depth=0.8` (see the first entry of this section); the text below describes the option as it was introduced.*
 
 `get_periods` and `determine_periods` accept a new `mature_min_depth` float in
 `[0, 1]`. A z-valley is allowed to generate a mature block only when its
@@ -404,7 +419,7 @@ A series whose z range is zero or non-finite has no depth scale; the floor is
 skipped for that series and a `UserWarning` says so rather than the filter being
 silently ignored.
 
-**Default `0.0` is a no-op**: every valley has `D1 >= 0` by construction, so the
+**`0.0` (the default before item 31) is a no-op**: every valley has `D1 >= 0` by construction, so the
 filter admits all of them and the phase output is unchanged from prior versions.
 
 ### Removed
@@ -469,6 +484,8 @@ frozen synthetic series (hash-checked), instead of the hand-typed
 **Opt-in `incipient_method="plateau"` — a slope-based incipient boundary (behaviour
 unchanged by default)**
 
+*Current default: `incipient_method="plateau"` (see the first entry of this section); the text below describes the option as it was introduced.*
+
 `determine_periods(..., incipient_method="plateau")` places the incipient/next-phase
 boundary at the end of the initial low-slope *plateau* — the leading stretch over
 which the normalised slope `|dz|/max|dz|` stays below `incipient_plateau_tau`
@@ -523,6 +540,8 @@ boundary.
 **`incipient_smooth_window` / `incipient_smooth_polyorder` — dedicated denoising
 for the incipient probe (opt-in, default off)**
 
+*Current default: `incipient_smooth_window=5`, `incipient_smooth_polyorder=3` (see the first entry of this section); the text below describes the option as it was introduced.*
+
 `incipient_plateau_signal="vorticity"` reads the rate on `d(zeta_raw)/dt`, which
 is immune to the pipeline's edge artifacts and, for the same reason, exposed to
 raw noise: on the 2 %-noise synthetic cases the normalised raw gradient at t₀ is
@@ -530,8 +549,8 @@ already 0.25–0.57, above any usable tau, so the criterion trips at the first
 sample and yields no incipient phase at all.
 
 A Savitzky-Golay pass is now applied to the raw vorticity **before** the probe
-differentiates it, controlled by `incipient_smooth_window` (default `0`,
-disabled — previous behaviour byte for byte) and `incipient_smooth_polyorder`
+differentiates it, controlled by `incipient_smooth_window` (`0`, the default before item 31,
+disables it — previous behaviour byte for byte) and `incipient_smooth_polyorder`
 (default 3). It touches the incipient probe **only**: `df['z']` and `df['dz']`
 are unchanged, so every other phase is unaffected and `use_smoothing` stays off
 as decided in `docs/future_work.md` §4. Both parameters are ignored outside
@@ -541,7 +560,7 @@ Savitzky-Golay rather than a moving average: a boxcar attenuates a sinusoid's
 amplitude and smears its curvature, and curvature is what the probe reads.
 
 Measured on the synthetic suite (`measure_incipient_smoothing.py`,
-`REPORT_incipient_smoothing.md`): a window of 5–9 takes the designed-Ic cases
+`archive/research-diagnostics-pre-cleanup:research/incipient_plateau/REPORT_incipient_smoothing.md`): a window of 5–9 takes the designed-Ic cases
 left with no phase from 1–2 down to 0, and makes `incipient_plateau_crossing=
 "sustained"` unnecessary — single-crossing catches up with `k=3` once the rate is
 reliable. **Goldilocks caveat, measured:** on real tracks `rel(t₀)` is *not*
@@ -726,6 +745,8 @@ literal window length, and `use_filter=1` is no longer conflated with `True`
 ### Added
 
 **`boundary_padding` — opt-in fix for the Lanczos zero-padding edge artifact**
+
+*Current default: `boundary_padding="reflect"` (see the first entry of this section); the text below describes the option as it was introduced.*
 
 `lanczos_filter` and `lanczos_bandpass_filter` convolve via
 `scipy.signal.convolve(..., mode="same")`, which implicitly zero-pads the input

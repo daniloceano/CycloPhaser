@@ -151,7 +151,7 @@ def split_config(doc: dict) -> tuple[dict, dict]:
     Keys the current signature does not accept are dropped, exactly as
     `evaluate_against_labels.load_config` drops them, so a column runs the same
     way the evaluation script would run it. Keys the document does not carry are
-    filled with the frozen 2.0.0 defaults (`config_defaults.fill_missing`, item
+    filled with the frozen pre-item-31 defaults (`config_defaults.fill_missing`, item
     31 decision (a)) — the same rule, so the two still agree; the list of filled
     keys is the header's `defaulted` (see `signature_audit`).
     """
@@ -168,7 +168,7 @@ def signature_audit(doc: dict) -> dict:
     * `ignored`  — keys the YAML carries that the current signature does not read
                    (`distance` is the one that matters historically).
     * `defaulted`— keys the YAML omits, each with the value that will therefore
-                   be used: the FROZEN 2.0.0 default (`config_defaults`, item 31
+                   be used: the FROZEN pre-item-31 default (`config_defaults`, item 31
                    decision (a)), not the signature's current one.
     * `pre_filter_fix` — True when `boundary_padding` is absent, which dates the
                    file to before the filter fix. See PRE_FILTER_FIX_WARNING.

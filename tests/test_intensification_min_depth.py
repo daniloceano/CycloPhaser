@@ -154,7 +154,7 @@ def calibration_tracks():
 # ── The default is a strict no-op ───────────────────────────────────────────────
 
 
-# Item 31: the package default of intensification_min_depth moved (0.0 up to 2.0.0).
+# Item 31: the package default of intensification_min_depth moved (0.0 before item 31).
 # These tests pin that the CURRENT default is forwarded exactly as if
 # passed explicitly — read from the signature, not typed here.
 _DEFAULT_NOW = inspect.signature(determine_periods).parameters["intensification_min_depth"].default
