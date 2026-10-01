@@ -1,0 +1,48 @@
+HEAD: c5e298bfe502c14b3c0d68a38ba24d7a1cf39236
+docs/conf.py extensions: 17:extensions = []
+30:extensions = ['sphinx.ext.autodoc']
+env: Python 3.12.9, sphinx 7.2.6, cyclophaser installed by 'pip install .' from the tree at HEAD
+Running Sphinx v7.2.6
+making output directory... done
+building [mo]: targets for 0 po files that are out of date
+writing output... 
+building [html]: targets for 9 source files that are out of date
+updating environment: [new config] 9 added, 0 changed, 0 removed
+[2Kreading sources... [ 11%] api
+[2Kreading sources... [ 22%] calibration_tool
+[2Kreading sources... [ 33%] contribute
+[2Kreading sources... [ 44%] index
+[2Kreading sources... [ 56%] installation
+[2Kreading sources... [ 67%] license
+[2Kreading sources... [ 78%] overview
+[2Kreading sources... [ 89%] testing
+[2Kreading sources... [100%] usage
+<docs-venv>/lib/python3.12/site-packages/cyclophaser/determine_periods.py:docstring of cyclophaser.determine_periods.determine_periods:45: WARNING: Inline strong start-string without end-string.
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... done
+preparing documents... done
+copying assets... copying static files... done
+copying extra files... done
+done
+[2Kwriting output... [ 11%] api
+[2Kwriting output... [ 22%] calibration_tool
+[2Kwriting output... [ 33%] contribute
+[2Kwriting output... [ 44%] index
+[2Kwriting output... [ 56%] installation
+[2Kwriting output... [ 67%] license
+[2Kwriting output... [ 78%] overview
+[2Kwriting output... [ 89%] testing
+[2Kwriting output... [100%] usage
+generating indices... genindex done
+writing additional pages... search done
+[2Kcopying images... [ 25%] _images/test_custom.png
+[2Kcopying images... [ 50%] _images/cyclophaser_methodology.jpg
+[2Kcopying images... [ 75%] _images/test_default.png
+[2Kcopying images... [100%] _images/test_steps_default.png
+dumping search index in English (code: en)... done
+dumping object inventory... done
+build succeeded, 1 warning.
+
+The HTML pages are in docs/_build/html.
+EXIT 0
