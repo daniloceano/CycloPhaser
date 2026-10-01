@@ -97,3 +97,17 @@ Motivo: a varredura de docstrings e comentários de `cyclophaser/` (commit 16d,
 `passo4/sweep_16d.py`), que acha afirmações de default e de "opt-in" defasadas
 desde o item 31. Comentários não entram na árvore sintática, então o critério
 (i) cobre também os commits só de comentário.
+
+## Redeclaração de D4 (decisão do Danilo, 2026-10-01) — acrescentada no commit 16h, antes de qualquer medição da Fase C
+
+A previsão D4 do Passo 4 replanejado ("diff de `cyclophaser/` desde 16g vazio")
+é substituída por:
+
+| id | previsão |
+|---|---|
+| D4 | suíte (`-m "not browser"`) 0 falhas; **diff de `cyclophaser/` desde 16h vazio**; R4 (scanner corrigido do Passo 3) continua 0. |
+
+Motivo: a página da API do site passou a incluir `process_vorticity`, e a tabela
+rst da nota sobre `replace_endpoints_with_lowpass` na sua docstring era
+malformada (1 ERROR na build). O Danilo autorizou a correção como commit só de
+docstring (16h), com o mesmo portão. A previsão anterior não foi medida.

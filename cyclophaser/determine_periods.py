@@ -597,12 +597,12 @@ def process_vorticity(
     number of tracks whose detected life cycle OPENS with a spurious ``decay``
     phase goes:
 
-    ============================================  ========  ===========
-    configuration                                 "zero"    "reflect"
-    ============================================  ========  ===========
-    defaults with replace_endpoints_with_lowpass=24   4/51      28/51
-    defaults with replace_endpoints_with_lowpass=0    0/51       0/51
-    ============================================  ========  ===========
+    ===============================================  ======  =========
+    configuration                                    "zero"  "reflect"
+    ===============================================  ======  =========
+    defaults with replace_endpoints_with_lowpass=24  4/51    28/51
+    defaults with replace_endpoints_with_lowpass=0   0/51    0/51
+    ===============================================  ======  =========
 
     A cyclone track essentially never begins by weakening, so 28/51 is an
     artefact, not a finding. Hence the two defaults had to move together: a
