@@ -274,20 +274,6 @@ def _pkg_default(name: str):
     raise KeyError(name)
 
 
-def _doc_defaults(md: str) -> str:
-    """Fill the Documentation tab's placeholders from the package signature:
-    ``<<name>>`` → the default of `name`; ``<<name?value>>`` → " (default)" when
-    `value` is the default of `name`, else nothing. Nothing in that tab is typed."""
-    def fill(m):
-        name, _, value = m.group(1).partition("?")
-        d = _pkg_default(name)
-        if value:
-            return " (default)" if str(d) == value else ""
-        return f"{d:g}" if isinstance(d, float) else ("`None`" if d is None else f"`{d}`" if isinstance(d, str) else str(d))
-    import re as _re_doc
-    return _re_doc.sub(r"<<([\w?.\-]+)>>", fill, md)
-
-
 def _default_mark(name: str, value) -> str:
     """' (default)' when `value` is the package default of `name`, else ''."""
     return " (default)" if value == _pkg_default(name) else ""
@@ -636,10 +622,13 @@ _KNOWN_PHASE_YAML_KEYS  = set(_YAML_PHASE_MAP) | _OPTIONAL_PHASE_YAML_KEYS
 # (research/labels/config_defaults.py) and listed — see _load_yaml_config. The
 # "optional" sets above now only keep those keys out of the "unknown key" list.
 
-# The three keys whose sidebar control is an enabled flag + a value: the app's
-# own export omits them when the check is OFF, so an absent key means OFF. Their
-# pre-item-31 default is None (OFF) as well, so filling them is recorded but nothing is
-# written into a value widget — the "absent" branch below switches them off.
+# The three keys whose sidebar control is an enabled flag + a value. The app's
+# export writes them as an explicit null when the check is OFF (Passo 4: an
+# omitted key would take the package default, which for prominence_relative and
+# decay_tail_amplitude_fraction is ON). Files exported before that omit them, so
+# on import both an absent key and a null mean OFF. Their pre-item-31 default is
+# None (OFF) as well, so filling them is recorded but nothing is written into a
+# value widget — the OFF branch below switches them off.
 _ABSENT_MEANS_OFF_KEYS = ("prominence", "prominence_relative",
                           "decay_tail_amplitude_fraction")
 
@@ -794,16 +783,16 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
     # *group* of session_state keys (enabled + mode + value), so it cannot go
     # through _YAML_PHASE_MAP's single-key mapping; see _EXTREMA_YAML_KEYS above.
     #
-    # Absence is meaningful, not missing data: _build_yaml omits any parameter
-    # whose value is None, and the two prominence modes are mutually exclusive,
-    # so a file carrying neither key describes prominence filtering that was
-    # switched OFF. The enabled flags are therefore set from the file in BOTH
+    # OFF is a null (what _build_yaml writes now) or an absent key (what files
+    # exported before it carry); the two prominence modes are mutually
+    # exclusive, so a file carrying neither as a number describes prominence
+    # filtering that was switched OFF. The enabled flags are therefore set from the file in BOTH
     # directions rather than only being turned on — otherwise importing a
     # "filtering off" YAML into a session that currently has filtering on would
     # silently keep the session's filter and reproduce the wrong calibration.
     # prominence_relative wins if a hand-edited file somehow carries both, matching
     # the sidebar radio's single-mode model (relative is its default).
-    if "prominence_relative" in pp:
+    if pp.get("prominence_relative") is not None:
         try:
             st.session_state["extrema_prominence_rel_val"] = _parse_prominence_relative(
                 pp["prominence_relative"])
@@ -812,7 +801,7 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
             count += 1
         except (ValueError, TypeError):
             ignored.append("phase_params.prominence_relative (conversion error)")
-    elif "prominence" in pp:
+    elif pp.get("prominence") is not None:
         try:
             st.session_state["extrema_prominence_val"]     = _parse_prominence(pp["prominence"])
             st.session_state["extrema_prominence_mode"]    = "absolute"
@@ -825,8 +814,8 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
 
     # decay_tail_amplitude_fraction — same enabled+value group pattern as the
     # extrema block above, and same reasoning for setting `enabled` in BOTH
-    # directions (absence means the file describes this check switched OFF).
-    if "decay_tail_amplitude_fraction" in pp:
+    # directions (a null or an absent key means this check switched OFF).
+    if pp.get("decay_tail_amplitude_fraction") is not None:
         try:
             st.session_state["decay_tail_fraction_val"] = _parse_decay_tail_amplitude_fraction(
                 pp["decay_tail_amplitude_fraction"])
@@ -886,14 +875,15 @@ def _build_yaml(cyclone_names) -> str:
         # length_scale and mature_method are string enums ("global"/"local",
         # "derivative"/"amplitude"), not numeric thresholds — exported as-is
         # rather than coerced through float().
-        # Note every key here is omitted when its value is None, so which
-        # extrema keys appear also encodes whether that filter was enabled —
-        # see the extrema-import block in _load_yaml_config.
+        # A parameter whose value is None (a check switched OFF: prominence,
+        # prominence_relative, decay_tail_amplitude_fraction) is written as an
+        # explicit null, never omitted: omitted, it would run with the package
+        # default, which is not OFF. See the extrema-import block in
+        # _load_yaml_config.
         "phase_params": {
-            **{k: (int(v) if k in ("incipient_plateau_k",) else float(v))
+            **{k: (None if v is None else int(v) if k in ("incipient_plateau_k",) else float(v))
                for k, v in _PHASE_PARAMS.items()
-               if v is not None and k not in _PHASE_ENUM_KEYS
-               and k not in _PHASE_BOOL_KEYS},
+               if k not in _PHASE_ENUM_KEYS and k not in _PHASE_BOOL_KEYS},
             **{k: _PHASE_PARAMS[k] for k in _PHASE_ENUM_KEYS},
             **{k: bool(_PHASE_PARAMS[k]) for k in _PHASE_BOOL_KEYS},
         },
@@ -1512,6 +1502,8 @@ elif _synth_sel is None:
 # ── Page header ──────────────────────────────────────────────────────────────────
 st.title("CycloPhaser — Parameter Calibration")
 st.caption("Filtering · Smoothing · Phase Detection · Multi-cyclone")
+st.markdown("How the method works, the defaults and what was calibrated: "
+            "[CycloPhaser documentation](https://cyclophaser.readthedocs.io/en/latest/).")
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -2625,7 +2617,7 @@ _ok_results = {n: r for n, r in all_results.items() if r["ok"]}
 _zip_bytes  = _build_zip(_ok_results, _build_yaml(cyclone_names))
 
 # ── Tabs ─────────────────────────────────────────────────────────────────────────
-tab_cal, tab_bench, tab_doc = st.tabs(["Calibration", "Benchmark", "Documentation"])
+tab_cal, tab_bench = st.tabs(["Calibration", "Benchmark"])
 
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 1 — Calibration
@@ -3124,218 +3116,7 @@ with tab_cal:
         )
 
 # ══════════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Documentation
-# ══════════════════════════════════════════════════════════════════════════════════
-# ══════════════════════════════════════════════════════════════════════════════════
 # TAB 2 — Benchmark
 # ══════════════════════════════════════════════════════════════════════════════════
 with tab_bench:
     benchmark_tab.render()
-
-with tab_doc:
-    st.header("CycloPhaser — Method Documentation")
-    st.caption(
-        "Reference: de Souza et al. (2024). *New perspectives on South Atlantic storm track "
-        "through an automatic method for detecting extratropical cyclones' lifecycle*. "
-        "International Journal of Climatology."
-    )
-
-    with st.expander("1 · Method overview", expanded=True):
-        st.markdown(_doc_defaults("""
-CycloPhaser identifies distinct phases of cyclone life cycles by analyzing the relative
-vorticity time series at the cyclone centre and its first derivative.
-
-**Five stages:**
-
-| Stage | Description |
-|---|---|
-| **Incipient** | Early development before any identifiable intensification. Detected last (fills unlabelled periods at the series start). |
-| **Intensification** | Vorticity intensity increases (more negative in SH) from one peak to a subsequent valley. |
-| **Mature** | The cyclone's peak strength around a vorticity minimum. How its window is sized depends on `mature_method` (default <<mature_method>>; see section 3). |
-| **Decay** | Decrease in vorticity after the mature phase until dissipation. |
-| **Residual** | Re-intensification episodes that do not progress to a full mature stage. |
-
-**Pipeline:** Lanczos band-pass filter → optional Savitzky-Golay smoothing (`use_smoothing` default <<use_smoothing>>) → peak/valley detection → phase labelling.
-
-> **Southern Hemisphere convention**: vorticity is negative; more negative = more intense.
-> For Northern Hemisphere data, multiply the series by −1 before passing to CycloPhaser.
-"""))
-
-    with st.expander("2 · Filter and smoothing parameters", expanded=False):
-        st.markdown(_doc_defaults("""
-### `use_filter` — Lanczos band-pass filter
-Activates spectral filtering. Disabling leaves the raw series and typically yields very noisy detection.
-
-### `cutoff_low` — Low-frequency cutoff (hours)
-Maximum period retained. Variability slower than this is suppressed (e.g., seasonal trends).
-**Default: <<cutoff_low>> h.**
-
-### `cutoff_high` — High-frequency cutoff (hours)
-Minimum period retained. Variability faster than this is suppressed as noise.
-**Default: <<cutoff_high>> h.**
-
-### `boundary_padding` — Lanczos boundary condition
-How the series is extended beyond its own ends before the convolution.
-
-- `reflect`<<boundary_padding?reflect>> — pads with the reflection of the series. Normalised `|dz|` at the
-  first sample drops from a median **0.95 → 0.42** (last sample 0.98 → 0.35).
-- `zero` — the pre-fix behaviour (`scipy.signal.convolve(..., mode="same")`).
-  The kernel sees zeros outside the series; since vorticity has a non-zero floor, this injects a
-  spurious *deepening* ramp worth a median **74 % of the cyclone's own amplitude**, spread over the
-  boundary zone — which is ~**24 % of the series at each end** because the kernel is about half the
-  series long. Measured on the 51-track set, this ramp alone accounts for ≥ 80 % of the slope at the
-  first sample in **51/51** tracks. Pass it explicitly to reproduce results from before this
-  default changed.
-- `edge`<<boundary_padding?edge>> — pads with the edge value repeated; the padding of the measured
-  preset params-track. Between the two (median 0.50) and changes marginally fewer phase sequences
-  (13/51 vs 14/51 for `reflect`).
-
-Changing this alters the smoothed signal near the boundaries, so **a calibrated parameter set must be
-re-validated before it is trusted in a new mode**. Only has an effect when the Lanczos filter is on.
-
-### `replace_endpoints_with_lowpass` — Endpoint correction (**DEPRECATED**)
-Replaces the first/last 5 % of the filtered output with a simple low-pass estimate.
-**Default: <<replace_endpoints_with_lowpass>>** (0 disables it) — it was 24 up to v2.0.0.
-
-It was introduced as a palliative for the same zero-padding artifact described under `boundary_padding`,
-and it applies the *same* zero-padded convolution internally, so it never fixed the cause. Combined with
-`boundary_padding=reflect` it is **harmful**: both filters carry full amplitude at the edge, so the 5 %
-splice becomes a visible step. Measured over the 51 tracks, the number opening with a spurious `decay`
-phase goes **4/51 → 28/51** under `reflect` with this at 24, and **0/51** with it at 0. Leave it at 0.
-
-### `use_smoothing` / `use_smoothing_twice` — Savitzky-Golay
-- `'auto'`: window computed from series length.
-- `'off'`: skip smoothing.
-- `'manual'`: set window size explicitly (must be odd).
-
-A second pass (`use_smoothing_twice`) further smooths the already-smoothed curve. Can distort short
-phases. Defaults: `use_smoothing` <<use_smoothing>>, `use_smoothing_twice` <<use_smoothing_twice>>.
-
-### `savgol_polynomial` — Polynomial degree
-Degree of the polynomial fitted in each window. Lower (2–3) = more smoothing; higher (4–5) = better
-preservation of extrema. **Default: <<savgol_polynomial>>.**
-"""))
-
-    with st.expander("3 · Phase detection thresholds", expanded=False):
-        st.markdown(_doc_defaults("""
-All thresholds are **fractions of a length**, making them resolution-independent.
-Which length depends on `length_scale` (see below; default <<length_scale>>): the whole
-series under `global`, each segment's own local cycle under `local`.
-
-| Parameter | Default | Description |
-|---|---|---|
-| `threshold_intensification_length` | <<threshold_intensification_length>> | Min. duration of an intensification segment. |
-| `threshold_decay_length` | <<threshold_decay_length>> | Min. duration of a decay segment. |
-| `threshold_mature_length` | <<threshold_mature_length>> | Min. duration of the mature stage. Only used when `mature_method="derivative"` — see below. |
-| `threshold_mature_distance` | <<threshold_mature_distance>> | Max. distance between vorticity minimum and mature segment centre. Already local — unaffected by `length_scale`. Only used when `mature_method="derivative"` — see below. |
-| `threshold_intensification_gap` | <<threshold_intensification_gap>> | Max. gap between consecutive intensification segments for merging. |
-| `threshold_decay_gap` | <<threshold_decay_gap>> | Max. gap between consecutive decay segments for merging. |
-| `threshold_incipient_length` | <<threshold_incipient_length>> | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |
-
-### `length_scale` — global vs. local threshold denominator
-
-- **`global`**<<length_scale?global>>: the five thresholds above (excluding mature distance and
-  incipient length, which were always local) are measured against the whole input
-  series length. Matches all versions prior to this option.
-- **`local`**<<length_scale?local>>: each candidate segment is instead measured against the span of the
-  local life cycle it belongs to (the nearest vorticity extrema immediately before
-  and after it). Fixes tracks with multiple, differently-sized life cycles: under
-  `global`, a small second cycle's phases are checked against a denominator
-  dominated by a much larger first cycle and can all be rejected, collapsing the
-  whole second cycle into a single `residual` block.
-- Note: for a track containing only **one** life cycle, `local` and `global` are
-  mathematically identical (there is no other cycle to distinguish the local scale
-  from). `length_scale` only changes anything on tracks with more than one cycle.
-
-### `mature_method` — how the mature window is sized
-
-- **`derivative`**<<mature_method?derivative>>: the mature window around each vorticity minimum is a
-  fixed proportion (`threshold_mature_distance`) of the *time* distance to the
-  neighbouring vorticity peaks — unchanged from v2.0.0. `threshold_mature_length`
-  then applies as a minimum-duration floor on that window.
-- **`amplitude`**<<mature_method?amplitude>>: the mature window is instead the contiguous stretch of
-  vorticity around the minimum that stays within `mature_amplitude_fraction` of the
-  cycle's own peak-to-valley amplitude, evaluated independently on the
-  intensification side and the decay side. This anchors directly on the vorticity
-  value itself rather than on smoothed-derivative extrema, which can lag the true
-  minimum by a few timesteps and displace the `derivative` window forward of where
-  the cyclone was actually most intense on some real cyclones.
-- **`threshold_mature_length` and `threshold_mature_distance` have NO EFFECT when
-  `mature_method="amplitude"`.** That minimum-duration floor was calibrated for
-  `derivative`'s window; reusing it for `amplitude` was found (case 20160030) to
-  discard well-centred amplitude windows for being narrow, which is a physically
-  meaningful outcome of `mature_amplitude_fraction` there, not a defect to filter
-  out. No replacement minimum-duration safeguard exists for `amplitude` at this
-  time — this is deliberate, to evaluate the method unconstrained first; revisit
-  only if calibration surfaces spurious, very short amplitude windows.
-- The mature-must-be-followed-by-decay physical confirmation check (see the
-  Known methodological notes tab) applies identically in both modes.
-
-### `decay_tail_amplitude_fraction` — extending decay over a flat/plateau tail
-
-- Default: <<decay_tail_amplitude_fraction>>. **`None`** disables the check, matching all versions
-  prior to this option.
-- A value (a fraction of the cycle's amplitude) compensates for
-  an artifact of the prominence filter. On a single-cycle series, peaks and valleys
-  are scored against SEPARATE populations, so the largest interior peak always
-  survives `prominence_relative` filtering by construction — even when its
-  prominence is negligible — while the valley of the same ripple is correctly
-  rejected. This "orphan" peak (no surviving valley after it) makes
-  `find_decay_period` truncate decay early; the flat tail left behind is then
-  labelled `residual` by the catch-all rule in `find_residual_period` (step 4
-  below), even though nothing in the vorticity indicates a genuine
-  re-intensification.
-- With this set, `find_residual_period` checks — immediately before that catch-all
-  rule, and only when the tail directly follows an existing `decay` block —
-  whether the tail contains a genuine re-deepening: a drop below the tail's
-  running-maximum vorticity larger than this fraction of the cycle's own
-  peak-to-valley amplitude. If not, the tail is labelled `decay` instead of
-  `residual`.
-- **Never touches `z_peaks_valleys` or any detected extrema**, so it cannot shift
-  the mature window — unlike the discarded alternative of dropping the orphan peak
-  from the extrema themselves, which was found to inflate the mature window's
-  duration in every case it fixed (the decay-side amplitude reference in the
-  `amplitude` mature method shifts when the bounding peak changes).
-- Its original calibration was made on a configuration that predates the filter
-  fixes, and it does not reproduce under the current filtering; recalibrating it is
-  an open item (`docs/findings.md`, S11).
-"""))
-
-    with st.expander("4 · Known methodological notes", expanded=False):
-        st.markdown("""
-### Detection pipeline and phase precedence
-
-Functions are called in a **fixed order**:
-
-1. `find_intensification_period`
-2. `find_decay_period`
-3. `find_mature_stage`
-4. `find_residual_period`
-5. `post_process_periods` — gap-filling and singleton removal
-6. `find_incipient_period` — fills unlabelled timesteps at the start
-
-**Later functions can overwrite earlier ones.** `find_decay_period` (step 2) may overwrite
-regions already labelled by `find_intensification_period` (step 1) because both scan the same
-peaks/valleys and their intervals can overlap.
-
-### Calibrating thresholds: inspect the final output
-
-Because of this precedence, a threshold may have a smaller effect than expected.
-For example, `threshold_intensification_gap` bridges gaps between intensification blocks —
-but if `find_decay_period` subsequently relabels those timesteps as decay, the gap-bridging
-has no visible effect on the final output.
-
-> **Always inspect the final `periods` column, not the effect of each threshold in isolation.**
-
-### Phase detection lag
-
-The detected *start* of a phase may lag the true onset by up to **15–18 h
-(5–6 timesteps at 3-hourly resolution)**. This is an inherent consequence of the
-Lanczos + Savgol chain: the smoothed signal requires several timesteps to build
-enough amplitude for reliable detection. The lag is most pronounced for **residual**
-(re-intensification after decay), where it was consistently 15–18 h across synthetic
-test cases.
-
-> When defining search windows for event attribution, allow a margin of at least **18 h**
-> around detected phase boundaries.
-""")
