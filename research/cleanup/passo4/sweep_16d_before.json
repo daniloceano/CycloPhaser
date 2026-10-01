@@ -1,0 +1,1404 @@
+{
+ "rev": "working tree",
+ "hits": 199,
+ "by_file": {
+  "cyclophaser/determine_periods.py": 140,
+  "cyclophaser/find_stages.py": 49,
+  "cyclophaser/lanczos_filter.py": 10
+ },
+ "rows": [
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 139,
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "text": "NOTE (#14 — pending fix): argrelextrema uses mode='clip' by default, which"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 172,
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "text": "Default None disables absolute filtering (no-op)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 176,
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "text": "below 10 % of the most prominent one.  Default None"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 179,
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "text": "see ``_reclassify_index0``. **Default False here,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 181,
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "text": "default it to True.** The asymmetry is deliberate:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 427,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 429,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "The defaults are the calibration preset ``params-track``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 431,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 434,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "params-track, not these defaults. Callers working with TRACK input who want"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 435,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 438,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 442,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 447,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 455,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 466,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "(or `True`, which is equivalent — see the \"use_filter=True note\" below) for the default window"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 468,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "window length explicitly in time steps. **Units**: Time steps. Default is `'auto'`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 472,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "Default is 0 (disabled) — it was 24 in versions up to and including 2.0.0. Passing a non-zero"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 477,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "default window length or specify an integer value as the desired window length. Must be greater than or equal"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 478,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "to `savgol_polynomial`. **Units**: Time steps. Default is `False` (`'auto'` up to 2.0.0). **To deactivate**, set `use_smoothing`"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 483,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "Same requirements as `use_smoothing`. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 486,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "window length (`use_smoothing` or `use_smoothing_twice` if specified). Default is 3."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 489,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "noise. Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 168."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 492,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 18.0 (48.0 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 495,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "ends before the Lanczos convolution. ``\"reflect\"`` (the default) and ``\"edge\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 499,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "meaningful when ``use_filter`` is truthy. Default is ``\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 559,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "``\"reflect\"`` became the DEFAULT here (behaviour change): leaving a"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 560,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "quantified artefact switched on by default was judged the larger cost."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 561,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "Item 31 moved the default to ``\"edge\"``, the padding of the calibration"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 566,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "results from a version before the default changed, pass"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 578,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "``replace_endpoints_with_lowpass`` is **DEPRECATED** and its default changed"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 579,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "from 24 to **0** together with the ``boundary_padding`` default above. Passing"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 595,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "visible STEP. Measured over the 51 tracks with the package defaults, the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 602,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "defaults with replace_endpoints_with_lowpass=24   4/51      28/51"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 603,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "defaults with replace_endpoints_with_lowpass=0    0/51       0/51"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 607,
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "text": "artefact, not a finding. Hence the two defaults had to move together: a"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 741,
+   "kind": "comment",
+   "function": "process_vorticity",
+   "text": "# differentiate('time'). Item 31 made use_smoothing=False the default,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 810,
+   "kind": "comment",
+   "function": "process_vorticity",
+   "text": "# test: other falsy values (0, '') keep their previous behaviour, which the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 885,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 887,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "The defaults are the calibration preset ``params-track``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 889,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 892,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "params-track, not these defaults. Callers working with TRACK input who want"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 893,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 896,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 900,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 905,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 913,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 948,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "(default 0.3; ``None`` switches the check off and leaves the tail to the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 975,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``threshold_decay_gap`` are all fractions of a *length*.  With the default"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 992,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "With ``mature_method=\"derivative\"`` (the default before item 31; not a parameter of the 2.0.0 release) the mature window around"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1048,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "plot (Union[str, bool], optional): Path to save plots or False to disable plotting. Default is False."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1049,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "plot_steps (Union[str, bool], optional): Path to save step-by-step plots or False to disable. Default is False."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1050,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "export_dict (Union[str, bool], optional): Path to export periods to CSV or False to disable. Default is False."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1051,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "threshold_intensification_length (float, optional): Minimum intensification length. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1052,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "threshold_intensification_gap (float, optional): Maximum gap in intensification periods. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1053,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "threshold_mature_distance (float, optional): Distance threshold for mature stage detection. Default is 0.18 (0.125 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1054,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "threshold_mature_length (float, optional): Minimum mature stage length. Default is 0.15 (0.03 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1055,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "threshold_decay_length (float, optional): Minimum decay stage length. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1056,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1057,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1059,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``\"geometric\"`` (the default before item 31; not a parameter of the 2.0.0 release) is the historical rule: the incipient phase runs"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1062,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "case A/B/C dispatch. ``\"plateau\"`` (the default since item 31) instead marks the leading stretch over"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1068,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "artifact at t0 has been controlled. Under the 2.0.0 package defaults the first"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1072,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1076,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "Only used when ``incipient_method=\"plateau\"``. Default is 0.20."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1079,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "on. ``\"derivative\"`` (the default before item 31; not a parameter of the 2.0.0 release) uses ``|dz_dt_smoothed2|`` normalised by its"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1081,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``\"vorticity\"`` (the default since item 31) uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1086,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "detected. ``\"single\"`` (the default before item 31; not a parameter of the 2.0.0 release) ends it at the first sample with"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1087,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``rel >= tau``. ``\"sustained\"`` (the default since item 31) requires ``incipient_plateau_k``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1094,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``incipient_plateau_crossing=\"sustained\"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1100,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1108,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "Savitzky-Golay pass. Default is 3. A window at or below this order cannot"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1116,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1119,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1126,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "prominence. Default 0.3 since item 31 (None, a no-op, before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1141,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1147,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "**Default True — this is a change of default behaviour.** Index 0 is"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1158,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "length_scale (str, optional): \"local\" (default since item 31) or \"global\" (the default before item 31; not a parameter of the 2.0.0 release). See the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1160,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "mature_method (str, optional): \"amplitude\" (default since item 31) or \"derivative\" (the default before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1164,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "(opt-in) instead defines the mature window as the contiguous"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1176,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "Default 0.90."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1191,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) admits every valley and"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1225,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) switches the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1231,
+   "kind": "docstring",
+   "function": "get_periods",
+   "text": "mechanism. Default 0.3 since item 31; None (the default before item 31; not a parameter of the 2.0.0 release) disables this check, reproducing the exact"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1425,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1427,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "The defaults are the calibration preset ``params-track``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1429,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1432,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "params-track, not these defaults. Callers working with TRACK input who want"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1433,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1436,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1440,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1445,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1453,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1470,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "plot (Union[str, bool], optional): Path to save generated plots. Set to `False` to skip plotting. Default is `False`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1473,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "phase of the algorithm. Set to `False` to disable. Default is `False`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1476,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "exporting. Default is `False`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1478,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "hemisphere (str, optional): Hemisphere of the data. Set to `\"southern\"` (default) to apply southern hemisphere"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1482,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "pressure (SLP) data**, set to `\"southern\"` as the default convention."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1490,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Default is `'auto'`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1493,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "filtered series with a lowpass estimate. **Units:** Time steps. Default is 0 (disabled) — it was 24"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1501,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "`True` to use a default window, specify an integer window length, or use `'auto'` to adapt the length based"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1502,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "on data. **Must be greater than or equal to `savgol_polynomial`** to avoid errors. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1505,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "noise reduction. Choose `True`, `False`, or specify an integer. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1508,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "to the window length specified in `use_smoothing` and `use_smoothing_twice`.** Default is 3."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1511,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "for hourly data. **Units:** Time steps. Default is 168."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1514,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "for hourly data. **Units:** Time steps. Default is 18.0 (48.0 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1517,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "before the Lanczos convolution: `\"reflect\"` (default; `\"edge\"` from item 31 until the cleanup front's change C1, and still the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1524,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "reproduce results from a version before this default changed — see the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1529,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "of the dataset. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1531,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "threshold_intensification_gap (float, optional): Maximum allowed gap in intensification phase. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1534,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "of the mature stage. Default is 0.18 (0.125 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1537,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Default is 0.15 (0.03 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1540,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1542,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "threshold_decay_gap (float, optional): Maximum allowed gap in decay phase. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1545,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "dataset. Default is 0.4."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1548,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``\"geometric\"`` (the default before item 31; not a parameter of the 2.0.0 release) is the historical rule: the incipient phase runs"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1551,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "case A/B/C dispatch. ``\"plateau\"`` (the default since item 31) instead marks the leading stretch over"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1557,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "artifact at t0 has been controlled. Under the 2.0.0 package defaults the first"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1561,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1565,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Only used when ``incipient_method=\"plateau\"``. Default is 0.20."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1568,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "on. ``\"derivative\"`` (the default before item 31; not a parameter of the 2.0.0 release) uses ``|dz_dt_smoothed2|`` normalised by its"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1570,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``\"vorticity\"`` (the default since item 31) uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1575,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "detected. ``\"single\"`` (the default before item 31; not a parameter of the 2.0.0 release) ends it at the first sample with"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1576,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``rel >= tau``. ``\"sustained\"`` (the default since item 31) requires ``incipient_plateau_k``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1583,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``incipient_plateau_crossing=\"sustained\"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1589,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1597,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Savitzky-Golay pass. Default is 3. A window at or below this order cannot"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1605,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1621,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1627,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "**Default True — this is a change of default behaviour.** Index 0 is"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1638,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "length_scale (str, optional): \"local\" (default since item 31) or \"global\" (the default before item 31; not a parameter of the 2.0.0 release). Controls what"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1641,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``threshold_decay_gap`` are fractions *of*. \"global\" (the default before item 31; not a parameter of the 2.0.0 release) uses the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1649,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "mature_method (str, optional): \"amplitude\" (default since item 31) or \"derivative\" (the default before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1657,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Default 0.90."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1672,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) admits every valley and"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1707,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) switches the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1718,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "Default 0.3 since item 31; None (the default before item 31; not a parameter of the 2.0.0 release) disables this check, reproducing the exact behaviour"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1729,
+   "kind": "docstring",
+   "function": "determine_periods",
+   "text": "- **Data Frequency**: The default values for `cutoff_low`, `cutoff_high`, `replace_endpoints_with_lowpass`,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1845,
+   "kind": "comment",
+   "function": "main",
+   "text": "# Test with default parameters"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1850,
+   "kind": "comment",
+   "function": "main",
+   "text": "# Test with default parameters but without filtering"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1855,
+   "kind": "comment",
+   "function": "main",
+   "text": "# Test with default parameters but without smoothing"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 8,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# length_scale: \"global\" (default) vs \"local\""
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 28,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# `length_scale=\"local\"` (opt-in; default remains \"global\" for exact backward"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 79,
+   "kind": "docstring",
+   "function": "_amplitude_mature_bounds",
+   "text": "distance to the neighbouring z_peak (that's the \"derivative\"/default method,"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 89,
+   "kind": "docstring",
+   "function": "_amplitude_mature_bounds",
+   "text": "exactly like the previous/next z_peak pair the default method already uses"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 173,
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "text": "- \"derivative\" (default, unchanged behaviour): the mature window is a fixed"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 176,
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "text": "- \"amplitude\" (opt-in): the mature window is the contiguous stretch of z"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 189,
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "text": "- 'mature_method' (str, optional): \"derivative\" (default) or"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 197,
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "text": "reach to count as mature. Default 0.90. Only used when"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 206,
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "text": "window around one is sized. Default 0.0 admits every valley and"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 207,
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "text": "reproduces the previous behaviour exactly. A series whose z range"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 217,
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "text": "mature_method=\"derivative\" (see note below). 'global' (default)"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 295,
+   "kind": "comment",
+   "function": "find_mature_stage",
+   "text": "# Default 0.0 disables the rule: every valley has D1 >= 0 by construction,"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 452,
+   "kind": "docstring",
+   "function": "find_intensification_period",
+   "text": "than it started. Default 0.0 admits every segment whose drop is"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 453,
+   "kind": "docstring",
+   "function": "find_intensification_period",
+   "text": "non-negative-or-larger, i.e. reproduces the previous behaviour"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 458,
+   "kind": "docstring",
+   "function": "find_intensification_period",
+   "text": "- 'length_scale' (str, optional): 'global' (default) measures both"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 517,
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "text": "# Default 0.0 disables the rule outright: the guard below runs the floor"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 518,
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "text": "# ONLY when it is > 0, so on the default path no depth is computed and no"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 519,
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "text": "# segment can be rejected — the function reproduces its previous behaviour"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 521,
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "text": "# segment that ends shallower than it starts is still admitted by default,"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 523,
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "text": "# default value.)"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 596,
+   "kind": "docstring",
+   "function": "find_decay_period",
+   "text": "- 'length_scale' (str, optional): 'global' (default) measures both"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 666,
+   "kind": "docstring",
+   "function": "find_residual_period",
+   "text": "'decay_tail_amplitude_fraction' note (opt-in, default None: no effect)"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 730,
+   "kind": "docstring",
+   "function": "find_residual_period",
+   "text": "Default None disables this check entirely, reproducing the exact"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 819,
+   "kind": "comment",
+   "function": "find_residual_period",
+   "text": "# decay_tail_amplitude_fraction (opt-in, see docstring above): if the NaN"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 840,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# incipient_method: \"geometric\" (default) vs \"plateau\""
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 844,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# (default 0.4) of the span between the start of the series and the next dz"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 851,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# a median 58 % (author's calibration) / 77 % (package defaults) of its own"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 854,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# `incipient_method=\"plateau\"` (opt-in; default remains \"geometric\", which is"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 855,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# byte-identical to every prior version) replaces that with a direct slope"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 861,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# artifact at t0 has been dealt with. Under bare package defaults the very"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 866,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# report. This is why the method is opt-in and why tau is exposed rather than"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 899,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# before, and `incipient_smooth_window=0` (the default) reproduces the previous"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 932,
+   "kind": "docstring",
+   "function": "_smooth_incipient_probe",
+   "text": "* ``window <= 0`` disables it (the default);"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 964,
+   "kind": "docstring",
+   "function": "_incipient_plateau_rel",
+   "text": "BEFORE differentiating it. 0 (default) disables it, reproducing the"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 965,
+   "kind": "docstring",
+   "function": "_incipient_plateau_rel",
+   "text": "previous behaviour exactly. **Only used when"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 970,
+   "kind": "docstring",
+   "function": "_incipient_plateau_rel",
+   "text": "Default 3."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1039,
+   "kind": "docstring",
+   "function": "_spare_enclosed_intensification",
+   "text": "\"\"\"Item 30 (opt-in): the plateau boundary, pulled back so as not to erase an"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1077,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "``\"geometric\"`` (default, unchanged from every prior version)"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1083,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "``\"plateau\"`` (opt-in)"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1102,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "- 'incipient_method' (str): \"geometric\" (default) or \"plateau\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1104,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "normalised slope. Default 0.20. Only used when method=\"plateau\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1105,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "- 'incipient_plateau_signal' (str): \"derivative\" (default) or"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1107,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "- 'incipient_plateau_crossing' (str): \"single\" (default) or"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1110,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "\"sustained\". Default 3. Only used when crossing=\"sustained\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1113,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "Default 0 (disabled). Only used when method=\"plateau\" AND"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1116,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "pass. Default 3."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1120,
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "text": "plateau branch). Default False. Only used when method=\"plateau\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1127,
+   "kind": "comment",
+   "function": "find_incipient_period",
+   "text": "# .get() with defaults: keeps the function callable with the partial"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1235,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# Modify the array_vorticity_args if provided, otherwise use defaults"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 6,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# boundary_padding: \"reflect\" (default) vs \"zero\" / \"edge\""
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 41,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "#   \"reflect\" -- DEFAULT since the boundary-artifact fix.  Pads with the"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 48,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "#                the default changed."
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 54,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# The DEFAULT IS NOW \"reflect\".  This is a deliberate behaviour change: leaving"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 55,
+   "kind": "comment",
+   "function": "<module>",
+   "text": "# a documented, quantified artefact on by default was the larger cost.  Anyone"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 83,
+   "kind": "docstring",
+   "function": "_convolve_same",
+   "text": "With \"reflect\" (the default) or \"edge\" the input is padded explicitly with"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 168,
+   "kind": "docstring",
+   "function": "lanczos_filter",
+   "text": "own ends before convolution. ``\"reflect\"`` (default) and ``\"edge\"``"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 170,
+   "kind": "docstring",
+   "function": "lanczos_filter",
+   "text": "reproduces the behaviour of versions before this default changed."
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 226,
+   "kind": "docstring",
+   "function": "lanczos_bandpass_filter",
+   "text": "own ends before convolution. ``\"reflect\"`` (default) and ``\"edge\"``"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 228,
+   "kind": "docstring",
+   "function": "lanczos_bandpass_filter",
+   "text": "reproduces the behaviour of versions before this default changed."
+  }
+ ]
+}

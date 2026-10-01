@@ -9,7 +9,7 @@ set -eu
 MODE="$1"
 cd "$(git rev-parse --show-toplevel)"
 PY="${PY:-python}"
-OUT=research/cleanup/passo4/digest_16b_${MODE}_raw.txt
+OUT=research/cleanup/passo4/digest_${TAG:-16b}_${MODE}_raw.txt   # TAG: 16b (default), 16d, ...
 LEDGER=research/labels/diagnostics/front_b/default_behaviour_sha256.txt
 if [ "$MODE" = before ]; then
   test -z "$(git status --porcelain -- cyclophaser research tests tools docs ":(exclude)research/cleanup")" || { echo "ABORT: tree not clean"; exit 1; }

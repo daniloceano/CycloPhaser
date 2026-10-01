@@ -83,3 +83,17 @@ O commit só de docstring é o 16b.
 | id | previsão |
 |---|---|
 | D1a | 0 divergências FORA de `docs/*.rst` após o commit 17 (verificador corrigido) |
+
+## Mudança de portão (2) — decisão do Danilo, 2026-09-29 — seção acrescentada no commit 16d
+
+As previsões e a seção anterior não foram editadas.
+
+> "Única mudança de comportamento no pacote: C1 (742e685). Fora dele, só commits
+> de docstring ou comentário em cyclophaser/, cada um verificado por (i) árvore
+> sintática sem docstrings idêntica antes e depois e (ii) digest default igual na
+> mesma sessão."
+
+Motivo: a varredura de docstrings e comentários de `cyclophaser/` (commit 16d,
+`passo4/sweep_16d.py`), que acha afirmações de default e de "opt-in" defasadas
+desde o item 31. Comentários não entram na árvore sintática, então o critério
+(i) cobre também os commits só de comentário.

@@ -592,7 +592,8 @@ def process_vorticity(
     **harmful**. Under reflect padding both the bandpass and the lowpass carry
     full amplitude at the edge instead of both being suppressed toward zero, so
     the difference in their gains no longer cancels and the 5 % splice becomes a
-    visible STEP. Measured over the 51 tracks with the package defaults, the
+    visible STEP. Measured over the 51 tracks with the package defaults of that
+    time (before item 31), the
     number of tracks whose detected life cycle OPENS with a spurious ``decay``
     phase goes:
 
@@ -972,8 +973,8 @@ def get_periods(vorticity,
     ------------------
     ``threshold_intensification_length``, ``threshold_intensification_gap``,
     ``threshold_mature_length``, ``threshold_decay_length`` and
-    ``threshold_decay_gap`` are all fractions of a *length*.  With the default
-    ``length_scale="global"`` that length is the whole input series
+    ``threshold_decay_gap`` are all fractions of a *length*.  With
+    ``length_scale="global"`` (the default before item 31) that length is the whole input series
     (``df.index[-1] - df.index[0]``) — the historical behaviour, unchanged.
     With ``length_scale="local"`` each candidate segment is instead checked
     against the span of the local oscillation it belongs to (see
@@ -1161,7 +1162,7 @@ def get_periods(vorticity,
             "derivative" is the original method: the mature window is a fixed
             proportion (``threshold_mature_distance``) of the *time* distance
             between the z_valley and each neighbouring z_peak. "amplitude"
-            (opt-in) instead defines the mature window as the contiguous
+            (the default since item 31) instead defines the mature window as the contiguous
             stretch of z around the z_valley that stays within
             ``mature_amplitude_fraction`` of the cycle's own peak-to-valley
             amplitude on each side — anchored on z's amplitude rather than on
@@ -1478,8 +1479,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         hemisphere (str, optional): Hemisphere of the data. Set to `"southern"` (default) to apply southern hemisphere 
             conventions, or `"northern"` to automatically multiply input values by `-1` for northern hemisphere compatibility.
             **Note**: This setting is particularly relevant for vorticity data, where conventions vary by hemisphere. 
-            When working with **wind speed data**, use `"northern"` to detect maxima in both hemispheres. For **sea level 
-            pressure (SLP) data**, set to `"southern"` as the default convention.
+            When working with **wind speed data**, use `"northern"` to detect maxima in both hemispheres. For
+            **sea level pressure (SLP) data**, set to `"southern"` as the default convention.
         
         use_filter (Union[str, bool, int], optional): Apply a Lanczos filter to the vorticity data. Choose `'auto'`
             — or `True`, which is equivalent — to adapt the window length based on the data size (half of dataset
@@ -1504,8 +1505,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         use_smoothing_twice (Union[bool, str, int], optional): Apply a second Savitzky-Golay smoothing pass for additional 
             noise reduction. Choose `True`, `False`, or specify an integer. Default is `False` (`'auto'` up to 2.0.0).
         
-        savgol_polynomial (int, optional): Polynomial order for Savitzky-Golay smoothing. **Must be less than or equal 
-            to the window length specified in `use_smoothing` and `use_smoothing_twice`.** Default is 3.
+        savgol_polynomial (int, optional): Polynomial order for Savitzky-Golay smoothing. Must be less than or equal
+            to the window length specified in `use_smoothing` and `use_smoothing_twice`. Default is 3.
         
         cutoff_low (float, optional): Low-frequency cutoff for the Lanczos filter to reduce low-frequency noise. Suitable 
             for hourly data. **Units:** Time steps. Default is 168.
@@ -1519,7 +1520,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             The pre-fix `"zero"` behaviour comes from
             `scipy.signal.convolve(..., mode="same")` and injects a spurious deepening
             ramp worth a median of 74 % of the cyclone's amplitude over roughly 48 % of
-            every series; `"reflect"` takes the normalised |dz| at t0 from a median 0.95
+            every series; `"reflect"` takes the normalised ``|dz|`` at t0 from a median 0.95
             down to 0.42 on the 51-track calibration set. Pass `"zero"` explicitly to
             reproduce results from a version before this default changed — see the
             "boundary_padding note" in `process_vorticity` for the full mechanism,

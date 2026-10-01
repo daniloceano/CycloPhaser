@@ -1,0 +1,164 @@
+[
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "# length_scale: \"global\" (default) vs \"local\"\n",
+  "new": "# length_scale: \"global\" vs \"local\" (\"local\" is the get_periods default since item 31)\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "# `length_scale=\"local\"` (opt-in; default remains \"global\" for exact backward\n# compatibility) makes the five global thresholds",
+  "new": "# `length_scale=\"local\"` (introduced as opt-in; the get_periods default since\n# item 31, while the stage functions below fall back to \"global\" when called\n# directly without the key) makes the five global thresholds"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "# incipient_method: \"geometric\" (default) vs \"plateau\"\n",
+  "new": "# incipient_method: \"geometric\" vs \"plateau\" (\"plateau\" is the get_periods default since item 31)\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "# `incipient_method=\"plateau\"` (opt-in; default remains \"geometric\", which is\n# byte-identical to every prior version) replaces",
+  "new": "# `incipient_method=\"plateau\"` (introduced as opt-in, \"geometric\" staying the\n# default and byte-identical to every prior version; the get_periods default\n# since item 31) replaces"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "# artifact at t0 has been dealt with. Under bare package defaults the very\n",
+  "new": "# artifact at t0 has been dealt with. Under the bare package defaults of that\n# measurement (01c4492, above) the very\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "This is why the method is opt-in and why tau",
+  "new": "This is why the method was introduced as opt-in and why tau"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "# before, and `incipient_smooth_window=0` (the default) reproduces the previous\n",
+  "new": "# before, and `incipient_smooth_window=0` (the default before item 31, and the\n# fallback of find_incipient_period on a direct call) reproduces the previous\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 5,
+  "old": "thresholds, including:",
+  "new": "thresholds. A default named below is this function's own fallback for\n            a key absent from args_periods, which only a direct call produces:\n            get_periods always passes every key, with its own defaults. Including:"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "(that's the \"derivative\"/default method,",
+  "new": "(that's the \"derivative\" method,"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "exactly like the previous/next z_peak pair the default method already uses",
+  "new": "exactly like the previous/next z_peak pair the \"derivative\" method already uses"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    - \"derivative\" (default, unchanged behaviour): the mature window is a fixed\n",
+  "new": "    - \"derivative\" (the fallback on a direct call without the key): the mature\n      window is a fixed\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    - \"amplitude\" (opt-in): the mature window is the contiguous stretch of z\n",
+  "new": "    - \"amplitude\" (the get_periods default since item 31): the mature window is\n      the contiguous stretch of z\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    # Default 0.0 disables the rule: every valley has D1 >= 0 by construction,\n",
+  "new": "    # The fallback 0.0 (a direct call without the key; get_periods passes its own\n    # default) disables the rule: every valley has D1 >= 0 by construction,\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    # Default 0.0 disables the rule outright: the guard below runs the floor\n    # ONLY when it is > 0, so on the default path no depth is computed and no\n",
+  "new": "    # The fallback 0.0 (a direct call without the key; get_periods passes its own\n    # default) disables the rule outright: the guard below runs the floor\n    # ONLY when it is > 0, so on that path no depth is computed and no\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    # segment that ends shallower than it starts is still admitted by default,\n",
+  "new": "    # segment that ends shallower than it starts is still admitted under 0.0,\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    'decay_tail_amplitude_fraction' note (opt-in, default None: no effect)\n    ------------------------------------------------------------------------\n",
+  "new": "    'decay_tail_amplitude_fraction' note (fallback None on a direct call: no effect)\n    --------------------------------------------------------------------------------\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "# decay_tail_amplitude_fraction (opt-in, see docstring above): if the NaN\n",
+  "new": "# decay_tail_amplitude_fraction (see the docstring above; None switches it off): if the NaN\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "      * ``window <= 0`` disables it (the default);\n",
+  "new": "      * ``window <= 0`` disables it (the fallback of find_incipient_period on a\n        direct call);\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    \"\"\"Item 30 (opt-in): the plateau boundary, pulled back so as not to erase an\n",
+  "new": "    \"\"\"Item 30 (the get_periods default since item 31): the plateau boundary,\n    pulled back so as not to erase an\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    ``\"geometric\"`` (default, unchanged from every prior version)\n",
+  "new": "    ``\"geometric\"`` (the fallback on a direct call without the key; unchanged from every prior version)\n"
+ },
+ {
+  "file": "cyclophaser/find_stages.py",
+  "count": 1,
+  "old": "    ``\"plateau\"`` (opt-in)\n",
+  "new": "    ``\"plateau\"`` (the get_periods default since item 31)\n"
+ },
+ {
+  "file": "cyclophaser/determine_periods.py",
+  "count": 1,
+  "old": "are all fractions of a *length*.  With the default\n    ``length_scale=\"global\"`` that length is the whole input series\n",
+  "new": "are all fractions of a *length*.  With\n    ``length_scale=\"global\"`` (the default before item 31) that length is the whole input series\n"
+ },
+ {
+  "file": "cyclophaser/determine_periods.py",
+  "count": 1,
+  "old": "visible STEP. Measured over the 51 tracks with the package defaults, the\n",
+  "new": "visible STEP. Measured over the 51 tracks with the package defaults of that\n    time (before item 31), the\n"
+ },
+ {
+  "file": "cyclophaser/determine_periods.py",
+  "count": 1,
+  "old": "\"amplitude\"\n            (opt-in) instead defines the mature window",
+  "new": "\"amplitude\"\n            (the default since item 31) instead defines the mature window"
+ },
+ {
+  "file": "cyclophaser/determine_periods.py",
+  "count": 1,
+  "old": "use `\"northern\"` to detect maxima in both hemispheres. For **sea level \n            pressure (SLP) data**, set to",
+  "new": "use `\"northern\"` to detect maxima in both hemispheres. For\n            **sea level pressure (SLP) data**, set to"
+ },
+ {
+  "file": "cyclophaser/determine_periods.py",
+  "count": 1,
+  "old": "Polynomial order for Savitzky-Golay smoothing. **Must be less than or equal \n            to the window length specified in `use_smoothing` and `use_smoothing_twice`.** Default is 3.",
+  "new": "Polynomial order for Savitzky-Golay smoothing. Must be less than or equal\n            to the window length specified in `use_smoothing` and `use_smoothing_twice`. Default is 3."
+ },
+ {
+  "file": "cyclophaser/determine_periods.py",
+  "count": 1,
+  "old": "`\"reflect\"` takes the normalised |dz| at t0 from a median 0.95",
+  "new": "`\"reflect\"` takes the normalised ``|dz|`` at t0 from a median 0.95"
+ }
+]
