@@ -59,5 +59,9 @@
  "research/cleanup/passo4/suite_after17_raw.txt": {
   "<env>": 9,
   "<repo>": 2
+ },
+ "research/cleanup/passo4/suite_faseC_raw.txt": {
+  "<env>": 9,
+  "<repo>": 2
  }
 }
