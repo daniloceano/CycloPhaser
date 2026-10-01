@@ -27,4 +27,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.extlinks']
+
+# Links into the repository (research records, the calibration app's README,
+# the CHANGELOG). One place for the branch they point to.
+REPO_BLOB = 'https://github.com/daniloceano/CycloPhaser/blob/master/'
+extlinks = {'repo': (REPO_BLOB + '%s', '%s')}

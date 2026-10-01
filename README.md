@@ -5,7 +5,7 @@
 [![PyPI version](https://badge.fury.io/py/cyclophaser.svg)](https://badge.fury.io/py/cyclophaser)
 [![PyPI Downloads](https://pepy.tech/badge/cyclophaser)](https://pepy.tech/project/cyclophaser)
 [![CircleCI](https://circleci.com/gh/daniloceano/CycloPhaser.svg?style=shield)](https://circleci.com/gh/daniloceano/CycloPhaser)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3 or later](https://img.shields.io/badge/License-GPLv3%2B-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python Versions](https://img.shields.io/pypi/pyversions/cyclophaser)](https://pypi.org/project/cyclophaser/)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.07363/status.svg)](https://doi.org/10.21105/joss.07363)
 
@@ -104,7 +104,7 @@ For support, feature requests, or any queries, please open an issue on the GitHu
 
 # License
 
-This project is licensed under the GNU General Public License v3.0. You may obtain a copy of the license at https://www.gnu.org/licenses/gpl-3.0.html.
+This project is licensed under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later), as declared in `setup.py`. The licence text is in `LICENSE`; it is also available at https://www.gnu.org/licenses/gpl-3.0.html.
 
 
 ### References

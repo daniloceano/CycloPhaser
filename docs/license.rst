@@ -1,7 +1,7 @@
 License
 =======
 
-CycloPhaser is licensed under the GNU General Public License Version 3 (GPL-3.0).
+CycloPhaser is licensed under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later).
 
 Under this license, you are free to:
 
@@ -10,9 +10,9 @@ Under this license, you are free to:
 - **Distribute**: You can share the original or modified versions of CycloPhaser.
 - **Contribute**: Contributions to the project are welcome.
 
-However, the GPL-3.0 license comes with the following obligations:
+However, the GPL comes with the following obligations:
 
-- **Copyleft**: Any distributed versions of CycloPhaser, whether modified or not, must be licensed under the same GPL-3.0 terms.
+- **Copyleft**: Any distributed versions of CycloPhaser, whether modified or not, must be licensed under the same terms (GPL-3.0-or-later).
 - **Source Code**: You must make the source code available when distributing modified versions.
 - **Disclaimer**: There is no warranty for the software.
 

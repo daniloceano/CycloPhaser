@@ -1,32 +1,90 @@
-Procedure Overview
-==================
+How it works
+============
 
-The **CycloPhaser** program identifies distinct phases of cyclone life cycles by analyzing the relative vorticity time series at the cyclone center and its first derivative. This method enables precise detection of four main stages: **incipient**, **intensification**, **mature**, and **decay**. 
+CycloPhaser works in two steps. It first **filters** the vorticity series, to
+remove the noise and the slow background. It then **detects phases** on the
+filtered series, from its peaks and valleys. The figure follows one synthetic
+cyclone through both steps. Every panel is the package's own output, run with
+the defaults (made by ``docs/figures/make_methodology_figure.py`` in the
+repository).
 
-.. figure:: _images/cyclophaser_methodology.jpg
-   :scale: 50%
-   :align: left
+.. figure:: generated/methodology.png
+   :alt: The filtering and phase-detection steps of CycloPhaser, panels A to K
+   :width: 100%
 
-   **Figure**: **Illustration of CycloPhaser Methodology**: (A) Raw vorticity time series showing the initial data used for phase detection. (B) Smoothed vorticity after applying the Lanczos filter to remove high-frequency noise. The dashed circles highlight spurious oscillations due to the discontinuities at the endpoints. (C) Series after the use of Savitzky-Golay filter for the smoothing process, which is applied twice (D). (E) Peaks and valleys of the smoothed vorticity series. (F) Detection of the intensification stage (highlighted in yellow).(G) Detection of the decay stages (highlighted in green). (H) Detection of the mature stage (highlighted in red). (I) Detection of the residual stage (highlighted in gray). (J) The incipient stage (highlighted in blue) is the final phase to be detected, representing the early development of the cyclone. (K) Full cyclone life cycle phases. Figure from de Souza et al. (2024).
+   From the raw vorticity series (A) to the final phases (K). In the
+   Southern-Hemisphere convention used here, a deeper cyclone has a lower
+   (more negative) vorticity, so a deepening is a descent of the curve.
 
-1. **Preprocessing and Filtering**: The program begins by applying optional preprocessing:
+Filtering
+---------
 
-   - Firstly, the **Lanczos filter** is used to remove noise from the vorticity series. As a spectral filter, discontinuities at the endpoints can generate spurious oscillations, which are removed.
-  
-   - Following this, the **Savitzky-Golay filter** is applied to smooth the data, ensuring a sinusoidal pattern in the vorticity series and its derivative, thus avoiding the appearance of high-frequency noise in the derivative series.
-  
-2. **Phase Detection**: The program automatically identifies peaks and valleys in the smoothed vorticity data, which are used to detect key life cycle phases. These phases include:
+**(A) Raw series.** The relative vorticity at the cyclone's centre, one value
+per time step, as it comes from the tracking.
 
-   - **Incipient Stage**: Detected from unassigned periods at the beginning of the cyclone life cycle (although it is the first cyclone phase, it is the last to be detected).
-   
-   - **Intensification Stage**: Marked by an increase in vorticity intensity (more negative in the Southern Hemisphere) from one peak to a subsequent valley along the vorticity series.
-   
-   - **Mature Stage**: Identified as the interval between a derivative valley and its following derivative peak, representing the cyclone’s peak strength (minimum central vorticity in the Southern Hemisphere).
-   
-   - **Decay Stage**: Detected as the decrease in vorticity after the mature phase until the system dissipates.
+**(B) Filtered series.** A Lanczos band-pass filter keeps the variations whose
+period lies between two cutoffs: it removes the fast noise and the slow
+background. Before filtering, the series is extended beyond its two ends by
+mirroring it (``boundary_padding="reflect"``), so the filter does not invent a
+jump at the start or the end of the track.
 
-3. **Residual Stage**: This stage accounts for systems that re-intensify without progressing to maturity.
+**(C) Smoothing (optional).** A Savitzky-Golay smoothing, once or twice, can be
+applied after the filter. It is **off by default**.
 
-Although the program is calibrated for the Southern Hemisphere, users can apply it to Northern Hemisphere vorticity series by multiplying the values by -1. The program is fully customizable for use with different datasets, allowing users to adjust parameters such as the window length for Lanczos filtering or Savitzky-Golay smoothing.
+**(D) Series used for detection.** The series the phases are read from. With
+the defaults, smoothing is off, so it is the filtered series of (B). Its first
+and second time derivatives are computed too.
 
-For more detailed information, you can refer to the original publication: de Souza et al. (2024). *New perspectives on South Atlantic storm track through an automatic method for detecting extratropical cyclones' lifecycle*. International Journal of Climatology.
+Phase detection
+---------------
+
+**(E) Peaks and valleys.** The detection works on the peaks (filled dots) and
+valleys (open dots) of the series. An oscillation that is weak compared with the
+strongest one in the same series is discarded (the crossed-out valley and peak,
+during the decay): it is too small to mark a change of phase. The type of the very first point is checked
+against the next extremum that survives.
+
+The phases are then assigned by one rule after another, in this order. A later
+rule can overwrite what an earlier one wrote.
+
+**(F) Intensification.** A stretch from a peak to the following valley, where
+the cyclone deepens. It has to last long enough and to deepen enough compared
+with the whole series.
+
+**(G) Decay.** A stretch from a valley to the following peak, where the
+cyclone weakens. It, too, has to last long enough.
+
+**(H) Mature.** Around each valley deep enough compared with the whole series,
+the stretch where the vorticity stays close to its extreme value: still at least
+a given fraction as intense, on each side, as the peak-to-valley amplitude of
+that cycle.
+
+**(I) Residual.** What remains after the last decay. Here, the cyclone deepens
+again at the end without reaching a mature phase, so that stretch is residual.
+When the stretch after the last decay is flat instead, without a real
+re-deepening, the decay is extended over it rather than leaving it residual.
+
+Between (I) and (J), short gaps between phases are filled and phases too short
+to stand on their own are removed.
+
+**(J) Incipient.** The last rule to run, although incipient is the first phase.
+It is the flat stretch at the start of the track, while the vorticity still
+changes slowly, and it ends where it starts to change faster. It does not erase
+an intensification that lies wholly before that point.
+
+**(K) Final phases.** The phase of every time step, over the series used for
+detection (black) and the raw series (grey).
+
+Entry points
+------------
+
+* ``determine_periods(series, ...)`` does both steps, and can also save a
+  figure and a table of the phases (see :doc:`usage`).
+* ``process_vorticity(...)`` does the filtering (A to D), and
+  ``get_periods(vorticity, ...)`` does the phase detection (E to K) on its
+  output. Use them to run the two steps separately.
+
+The rules of (F) to (J) are functions of ``cyclophaser.find_stages``. They are
+**internal**: ``get_periods`` calls them with every parameter set. Called
+directly without a parameter, they fall back to older values that are not the
+package defaults.

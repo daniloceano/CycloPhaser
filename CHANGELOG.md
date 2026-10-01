@@ -148,6 +148,30 @@ DESIGN §11):
 * The inspector's fallback table follows the package defaults, and an explicit
   `decay_tail_amplitude_fraction=None` is no longer replaced by the default.
 
+### Changed — documentation site rewritten for package users (clean-up front)
+
+The Read the Docs pages were rewritten. They now follow the package's current
+defaults, and every value and figure on them comes from the code. A new
+"How it works" page explains the method panel by panel, with a methodology
+figure drawn from the package's own output
+(`docs/figures/make_methodology_figure.py`). A new "Defaults and what was
+calibrated" page has tables generated from the function signatures
+(`docs/figures/make_doc_tables.py`) and states what was and was not calibrated.
+The usage guide runs an hourly example track (`docs/data/`). The API reference
+is autodoc with napoleon, and the build installs the package
+(`.readthedocs.yml`). The licence wording of `docs/license.rst` and `README.md`
+now says GPL-3.0-or-later, as `setup.py` does. The documentation tab inside the
+calibration app was removed and replaced by a link to the site.
+
+### Fixed — calibration app: switched-off checks are exported as null
+
+The YAML export left out `prominence`, `prominence_relative` and
+`decay_tail_amplitude_fraction` when their check was off. Passed to
+`determine_periods`, a missing key takes the package default, which for the
+last two is not off, so the file described a different configuration. The
+export now writes them as `null`, and the import reads `null` (or a missing key,
+in older files) as off (`tests/test_app_yaml_null_export.py`).
+
 ### Changed — repository clean-up: research diagnostics archived (clean-up front)
 
 Research diagnostics that no live file needs were removed from the tree:
@@ -302,8 +326,8 @@ The rule needs an extremum to have been *removed* between index 0 and E1.
 Raw `argrelextrema` output alternates, so the extremum right after a valley at
 index 0 is a peak the series rose to and cannot lie below it; symmetrically for
 a peak. What breaks that alternation is the prominence filter. **With
-`prominence` and `prominence_relative` both None — which is what the package
-defaults give you — the rule never fires: measured identical output with and
+`prominence` and `prominence_relative` both None — the package defaults before
+item 31 — the rule never fires: measured identical output with and
 without it on all 64 series tried** (51 calibration tracks, 12 synthetic series,
 the packaged example file;
 `archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/frontA_idx0_c2/stage2_defaults_check.py`). So this
@@ -634,8 +658,8 @@ dominant remaining source of the boundary artifact.
 Only the explicit `use_smoothing is False` case changes. `use_smoothing='auto'` and
 an explicit integer window are untouched, and so are the two Savgol passes on `z`
 itself. Other falsy values (`0`, `''`) keep their previous behaviour. A bare
-`determine_periods(series)` call is unaffected — `r(t₀)` under package defaults
-stays at its measured 0.526.
+`determine_periods(series)` call was unaffected — `r(t₀)` under the package
+defaults of the time stayed at its measured 0.526.
 
 > **Scope of validation:** measured and validated on TRACK (Gramcianinov)
 > vorticity, which already carries upstream spatial smoothing. **Not validated on

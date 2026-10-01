@@ -1,205 +1,142 @@
 .. _usage:
 
-Usage Guide
+Usage guide
 ===========
 
 .. contents::
    :local:
-   :depth: 2
+   :depth: 1
 
-Introduction
-------------
+Use the defaults
+----------------
 
-The example provided in this guide demonstrates how to use the CycloPhaser package to analyze the life cycle phases of an extratropical cyclone. The data used in this example corresponds to the track file of a specific extratropical cyclone whose genesis occurred near the eastern coast of Argentina. This track file was produced using the LorenzCycleToolkit (https://github.com/daniloceano/LorenzCycleToolkit). The file contains the cyclone's position, as well as information regarding the minimum relative vorticity, geopotential height, and maximum wind speeds within a defined domain centered on the cyclone. CycloPhaser helps in dissecting this cyclone into distinct life cycle phases using the minimum vorticity time series.
+This is the preferred way to run CycloPhaser. The example below uses an hourly
+track of one South-Atlantic extratropical cyclone from ERA5,
+:repo:`docs/data/example_track_hourly.csv` (origin in
+:repo:`docs/data/README.md`). It is a semicolon-separated file whose first lines
+are:
 
-The data used in CycloPhaser should be structured in a specific format for seamless processing. Below is an example of the required format for the track file, which includes columns for `time`, `Lat`, and `Lon`. The data is separated by semicolons (`;`), and the `Lat` and `Lon` values represent the cyclone's latitude and longitude, respectively.
+.. literalinclude:: data/example_track_hourly.csv
+   :lines: 1-3
 
-Example data format:
+The column ``min_max_zeta_850`` is the 850 hPa relative vorticity at the
+cyclone's centre. Pass that column, indexed by time, to ``determine_periods``:
 
-.. code-block:: text
+.. code-block:: python
 
-    time;Lat;Lon
-    2008-08-15-2100;-45.66;-56.87
-    2008-08-16-0000;-45.42;-54.98
-    2008-08-16-0300;-45.15;-53.52
-    2008-08-16-0600;-44.94;-52.16
-    2008-08-16-0900;-44.61;-51.08
-    2008-08-16-1200;-44.82;-49.75
-    2008-08-16-1500;-45.1;-48.02
-    2008-08-16-1800;-45.07;-46.09
-    2008-08-16-2100;-45.63;-43.37
-    2008-08-17-0000;-46.07;-40.66
-    2008-08-17-0300;-47.04;-38.5
-    2008-08-17-0600;-50.11;-34.48
-    2008-08-17-0900;-51.64;-31.25
-    2008-08-17-1200;-53.52;-27.45
-    2008-08-17-1500;-55.41;-23.27
-    2008-08-17-1800;-57.23;-19.46
-    2008-08-17-2100;-58.79;-16.03
-    2008-08-18-0000;-60.05;-13.02
-    2008-08-18-0300;-61.65;-10.61
-    2008-08-18-0600;-63.02;-8.55
-    2008-08-18-0900;-64.47;-7.37
+   import pandas as pd
+   from cyclophaser import determine_periods
 
-Arguments and Parameters for determine_periods
-----------------------------------------------
+   track = pd.read_csv("example_track_hourly.csv", parse_dates=[0], delimiter=";", index_col=[0])
+   series = track["min_max_zeta_850"]
 
-- **series**: (list, np.ndarray, pd.Series, xr.DataArray) A time series of vorticity values to be analyzed. **Note:** The algorithm is optimized for vorticity data, though it can potentially handle other meteorological fields like sea level pressure (SLP) or geopotential height. Use caution with these as they are untested for precise cyclone phase detection.
+   result = determine_periods(series)
 
-- **x**: (list, pd.DatetimeIndex, optional) Temporal labels corresponding to the `series`. This parameter expects a list of labels with the same length as `series`. **Default**: None. When using a pandas Series or xarray DataArray for `series`, `x` is inferred from the index. For list or numpy array inputs in `series`, `x` must be explicitly provided. If `x` consists of integers, the function will detect phases based on the series' time steps rather than actual dates or times.
+.. important::
 
-- **hemisphere**: (str, optional) Hemisphere of the data. Set to `"southern"` (default) to apply Southern Hemisphere conventions, or `"northern"` to automatically multiply input values by -1 for Northern Hemisphere compatibility. **Note**: This setting is especially relevant for vorticity data, where conventions vary by hemisphere. When using **wind speed data**, set `"northern"` for detection maxima in both hemispheres. For **sea level pressure (SLP) data**, keep `"southern"` as the default.
+   **The defaults assume one value per hour.** The filtering parameters are
+   counted in time steps, and their defaults were set for hourly series. For a
+   series with another time step, convert the parameters that are counted in
+   time steps (listed in :doc:`defaults`, "Other inputs") before using them.
 
-- **plot**: (str or bool, optional) Path for saving generated plots. Set to `False` to disable plotting. **Default**: False.
+``result`` is a ``pandas.DataFrame`` indexed by time. Its ``periods`` column
+holds the phase of every time step. The other columns hold the series the phases
+were read from (see :doc:`overview`).
 
-- **plot_steps**: (str or bool, optional) Path for saving detailed step-by-step plots to illustrate each processing stage. Set to `False` to disable step-wise plotting. **Default**: False.
+To also save a figure and a table of the phases, pass a file name (without
+extension) to ``plot`` and ``export_dict``:
 
-- **export_dict**: (str or bool, optional) Path for exporting detected cyclone periods as a CSV file. Set to `False` to skip exporting. **Default**: False.
+.. code-block:: python
 
-- **use_filter**: (str or int, optional) Apply a Lanczos filter to the `series`. Specify a window length as an integer to customize or use `'auto'` for adaptive length based on dataset size (half of series length). **Units**: Time steps. **Default**: 'auto'.  
-  **Recommendation**: If using relative vorticity series, turn off `use_filter` if the tracking procedure already applies spatial filtering to avoid over-filtering and signal loss. For hourly ERA5 data, `'auto'` is typically effective, though this may need adjustment for different temporal resolutions and spatial resolutions. Use smoothing also if noise levels are too high.
+   result = determine_periods(series, plot="example", export_dict="example")
 
-- **replace_endpoints_with_lowpass**: (int, optional) Applies a lowpass filter to smooth the series endpoints, which helps stabilize edge effects during filtering. Specify the window length. **Units**: Time steps. **Default**: 0 (disabled; deprecated — it was 24 up to the filter fix, see the `process_vorticity` docstring).  
-  **Recommendation**: For hourly relative vorticity data, a 24-hour (24 time steps) setting is effective. Adjust this based on the temporal and spatial resolution of the original data, especially if using data with higher spatial resolution.
+This writes ``example.png`` and ``example.csv``. For the example track, with the
+defaults:
 
-- **use_smoothing**: (str, int, optional) Apply Savgol smoothing to filtered vorticity data. Set to `'auto'` to automatically choose an appropriate window length, or provide an integer window length directly. **Note**: The specified window length must be an odd number and greater than or equal to `savgol_polynomial`. Set `use_smoothing=False` to deactivate. **Units**: Time steps. **Default**: False (it was 'auto' up to 2.0.0).  
-  **Recommendation**: This setting is sensitive to the length of the time series. The `'auto'` setting uses a window length approximately 1/4 of the series length for series >8 days; otherwise, it uses about 1/2. For lower-noise data, this value can be decreased, and for higher-noise data, increase it accordingly.
+.. figure:: generated/example_default.png
+   :alt: The example track with its detected phases
 
-- **use_smoothing_twice**: (str, int, optional) Apply a second pass of Savgol smoothing for further noise reduction. This uses similar parameters to `use_smoothing`. **Default**: False (it was 'auto' up to 2.0.0).  
-  **Recommendation**: This should be a gentler smoothing than the initial `use_smoothing`. The `'auto'` setting applies half the window length used in the first pass.
+   The hourly example track and the phases detected with the defaults. Grey:
+   the raw vorticity; red: the series the phases were read from.
 
-- **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing, which must be less than or equal to the window length specified in `use_smoothing` and `use_smoothing_twice`. **Default**: 3.  
-  **Recommendation**: Higher values retain sharper peaks and more detailed features but can increase noise; lower values provide a smoother output that may oversmooth finer details. For noisier data, a lower polynomial value is preferable, and for cleaner data, a higher value helps preserve more details.
+.. csv-table:: ``example.csv``: one row per phase, with its first and last time step. A phase that occurs more than once gets a number (``decay 2``).
+   :file: generated/example_default_phases.csv
+   :header-rows: 1
 
-- **cutoff_low**: (float, optional) Low-frequency cutoff for the Lanczos filter, designed for data with hourly resolution. **Units**: Time steps. **Default**: 168.  
-  **Recommendation**: Set this to the equivalent of 7 days in time steps to filter out planetary wave influences on vorticity.
+If ``series`` is a list or a NumPy array, also pass the times as ``x``. For
+Northern-Hemisphere vorticity (cyclones are positive), pass
+``hemisphere="northern"``: the series is multiplied by -1 before the detection.
 
-- **cutoff_high**: (float, optional) High-frequency cutoff for the Lanczos filter, suitable for reducing high-frequency noise in hourly data. **Units**: Time steps. **Default**: 18 (it was 48, i.e. 2 days, up to 2.0.0).  
-  **Recommendation**: 18 was calibrated for hourly 850 hPa track vorticity (see the note below). 48 (2 days) filters out more of the mesoscale signal and was the 2.0.0 default; it is not calibrated for the current phase defaults.
+.. warning::
 
-- **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolution: `"reflect"`, `"edge"` or `"zero"`. **Default**: `"reflect"`. The 2.0.0 release has no such parameter and always zero-pads; after it, development used `"reflect"`, then `"edge"` (item 31), then `"reflect"` again. `"edge"` is the padding of the ``params-track`` preset, the only configuration with measured scores (see below). `"zero"` reproduces the pre-fix boundary artefact.
+   **What the filtering was validated for.** The default filtering was tested
+   and validated only for series that already come from a tracking algorithm
+   that applies filtering. Other inputs (other levels or variables, other time
+   steps, series that were not filtered by the tracking) may need a different
+   filtering. See :doc:`defaults`.
 
-**Note on Default Values and Data Frequency**: The above default settings assume hourly data frequency. For datasets with different time resolutions (e.g., daily or sub-hourly), adjustments are recommended for parameters like `cutoff_low`, `cutoff_high`, `replace_endpoints_with_lowpass`, and `use_smoothing`. For example, if using daily data, reduce cutoff values by a factor of 24 to adapt accordingly.
+Customise the filtering
+-----------------------
 
-Defaults: what was calibrated, and for what
--------------------------------------------
+Before detecting phases, ``determine_periods`` filters the series (the
+``process_vorticity`` step, see :doc:`overview`). These arguments control it:
 
-The defaults of ``determine_periods`` (and of ``process_vorticity`` /
-``get_periods``) are the calibration preset ``params-track``
-(``research/labels/configs/cyclophaser_params-track.yaml`` in the repository)
-with **one exception**: ``boundary_padding`` defaults to ``"reflect"``, while
-``params-track`` sets ``"edge"``. ``params-track`` is the only configuration
-with measured scores, and those scores were measured under ``"edge"``: they
-describe ``params-track``, not the package defaults. **If you work with TRACK
-input and want the measured behaviour, pass ``params-track`` explicitly** (its
-filter and phase parameters as keyword arguments). This is a change of default
-behaviour relative to 2.0.0; every parameter is listed in ``CHANGELOG.md``
-(``[Unreleased]`` → Changed). The defaults fall in two groups:
+* ``use_filter``: the Lanczos band-pass filter; ``'auto'``, a window length in
+  time steps, or ``False`` to switch it off;
+* ``cutoff_low`` and ``cutoff_high``: the longest and the shortest periods the
+  filter keeps, in time steps;
+* ``boundary_padding``: how the series is extended beyond its ends before
+  filtering (``"reflect"``, ``"edge"`` or ``"zero"``);
+* ``use_smoothing`` and ``use_smoothing_twice``: Savitzky-Golay smoothing after
+  the filter, once or twice; ``'auto'``, a window length in time steps, or
+  ``False``;
+* ``savgol_polynomial``: the polynomial order of that smoothing.
 
-* **Phase defaults** — the thresholds, ``length_scale="local"``,
-  ``mature_method="amplitude"``, the depth floors, ``incipient_method="plateau"``
-  and its ``incipient_*`` settings, ``prominence_relative=0.3`` and
-  ``decay_tail_amplitude_fraction=0.3``. They were calibrated against manual
-  labels of cyclone phase sequences.
-* **Filtering defaults** — ``cutoff_high=18``, ``use_smoothing=False``,
-  ``use_smoothing_twice=False``, ``use_filter='auto'``, and
-  ``boundary_padding="reflect"``. **Only the filtering for TRACK input was
-  calibrated**, and only together with ``boundary_padding="edge"``: hourly
-  850 hPa relative vorticity along South-Atlantic cyclone tracks. The default
-  ``"reflect"`` was not part of that calibration.
-  Other inputs — other levels or variables (SLP, wind speed), other sampling
-  intervals, gridded or spatially pre-filtered data — may need a different
-  filtering, which has not been calibrated.
+Their defaults are listed in :doc:`defaults`, and every argument is described
+in the :doc:`api`.
 
-The rule ``incipient_plateau_spare_intensification=True`` (item 30) is
-**"adotada sem validação independente"**: it was adopted without an independent
-validation. The defaults before item 31 are frozen in
-``research/labels/defaults_2.0.0.json`` in the repository; pass them explicitly
-to reproduce that behaviour. Despite its name, that table is the development
-line before item 31, **not** the 2.0.0 release: 2.0.0 has no
-``boundary_padding`` (it always zero-pads), uses
-``replace_endpoints_with_lowpass=24``, and lacks most of the phase parameters.
+As an illustration, the example track with added noise, first with the defaults
+and then with the smoothing switched on (``noisy_series`` is the example
+series plus noise):
 
-Example Usage
+.. code-block:: python
+
+   result_default = determine_periods(noisy_series)
+   result_custom = determine_periods(noisy_series, use_smoothing="auto", use_smoothing_twice="auto")
+
+.. figure:: generated/example_noisy_default.png
+   :alt: The noisy example track with the defaults
+
+   The example track with added noise, detected with the defaults.
+
+.. figure:: generated/example_noisy_custom.png
+   :alt: The noisy example track with smoothing switched on
+
+   The same noisy track with ``use_smoothing="auto"`` and
+   ``use_smoothing_twice="auto"``. Orange: the filtered series; dark blue:
+   after one smoothing pass; red: after two, the series the phases are read
+   from. **This only illustrates how to
+   customise the filtering. It is not a validated configuration.**
+
+The noise and both figures are made by ``docs/figures/make_noisy_example.py``
+in the repository.
+
+Other options
 -------------
 
-Below is an example of using the CycloPhaser package with default options. The function will generate plots and a CSV file that contains detected cyclone life cycle phases.
+``determine_periods`` also takes the parameters of the phase detection: the
+duration thresholds, the method for the mature and the incipient phases, the
+depth floors, the prominence filter on the extrema, and others. They are
+described in the :doc:`api` and listed with their defaults in :doc:`defaults`.
 
-.. code-block:: python
+.. warning::
 
-   from cyclophaser import determine_periods, example_file
-   import pandas as pd
+   The phase-detection defaults were calibrated against manually labelled
+   cyclones. Changing them can produce spurious detections: phases that start or
+   end in the wrong place, or that should not be there at all. Inspect the
+   result whenever you change them.
 
-   # Load test data
-   track = pd.read_csv(example_file, parse_dates=[0], delimiter=';', index_col=[0])
-   series = track['min_max_zeta_850']
-
-   # Example options for using CycloPhaser with default settings
-   result = determine_periods(series, plot="test_default", plot_steps="test_steps_default", export_dict="test_default")
-
-Output Examples
----------------
-
-1. **Vorticity Data with Detected Periods**:
-
-.. figure:: _images/test_default.png
-   :alt: Vorticity Data with Detected Periods
-
-   This plot shows the vorticity data with key cyclone life cycle phases, such as intensification, decay, mature, and residual stages.
-
-2. **Step-by-Step Didactic Plot**:
-
-.. figure:: _images/test_steps_default.png
-   :alt: Step-by-Step Didactic Plot
-
-   The step-by-step plot provides a detailed breakdown of how the vorticity data is processed and how each cyclone phase is detected. This plot illustrates the filtering, smoothing, and phase detection processes.
-
-3. **CSV Output**:
-
-   The results of the detected cyclone life cycle phases are also exported as a CSV file, allowing for further analysis. Below is a preview of the CSV content:
-
-.. code-block::
-
-   phase,start,end
-   intensification,2008-08-17,2008-08-19
-   mature,2008-08-19,2008-08-20
-   decay,2008-08-20,2008-08-22
-   residual,2008-08-22,2008-08-24
-
-This example showcases how users can utilize the CycloPhaser package to automatically detect and visualize extratropical cyclone life cycle phases from vorticity data.
-
-Customizing Filtering
----------------------
-
-In the previous example, the phase positioning might not match expectations for all datasets. To improve results, you can easily customize the filtering parameters:
-
-.. code-block:: python
-
-    from cyclophaser import determine_periods
-
-    # Example options for custom filtering
-    process_vorticity_args = {
-        'cutoff_low': 100,
-        'cutoff_high': 20,
-        'use_filter': True,
-        'use_smoothing': 10,
-        'use_smoothing_twice': False,
-    }
-
-    # Example usage with custom parameters
-    result = determine_periods(series, x=x, plot='test_custom', **process_vorticity_args)
-
-.. figure:: _images/test_custom.png
-    :alt: Vorticity Data with Detected Periods and Custom Parameters
-
-    Cyclone phases positioning corrected using default parameters.
-
-
-Important Notes
----------------
-
-- **Hemisphere Support**: The tool is primarily set up for vorticity data from the southern hemisphere (negative vorticity). For northern hemisphere data, such as wind data or when working with vorticity from the northern hemisphere, set the `hemisphere` parameter to `'northern'` to automatically invert the values.
-  
-- **Oscillation Warning**: If excessive oscillations are detected at the start or end of the series, a warning will be issued, suggesting that the user adjusts parameters like `use_filter`, `replace_endpoints_with_lowpass`, or `use_smoothing` to reduce these effects.
-
-- **Customization**: Most parameters, including filtering options and threshold values, can be customized to fit your dataset.
+``determine_periods`` runs two steps, ``process_vorticity`` (filtering) and
+``get_periods`` (phase detection). To run them separately, for example to look
+at the filtered series before detecting phases, call them in that order (see
+:doc:`overview`).
