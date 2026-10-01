@@ -1,0 +1,110 @@
+[
+ {
+  "why": "unmatched bold",
+  "count": 1,
+  "old": "**Must match the length of `series**`.",
+  "new": "**Must match the length of** `series`."
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)\n    ------------------------------------------------------------------------------",
+  "new": "    **Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)**\n",
+  "line": 427
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    use_filter=True note (behaviour change)\n    ----------------------------------------",
+  "new": "    **use_filter=True note (behaviour change)**\n",
+  "line": 503
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    boundary_padding note\n    ----------------------",
+  "new": "    **boundary_padding note**\n",
+  "line": 525
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    replace_endpoints_with_lowpass deprecation note\n    ------------------------------------------------",
+  "new": "    **replace_endpoints_with_lowpass deprecation note**\n",
+  "line": 576
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)\n    ------------------------------------------------------------------------------",
+  "new": "    **Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)**\n",
+  "line": 886
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    Detection pipeline and phase precedence\n    ----------------------------------------",
+  "new": "    **Detection pipeline and phase precedence**\n",
+  "line": 921
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    decay_tail_amplitude_fraction note\n    ------------------------------------",
+  "new": "    **decay_tail_amplitude_fraction note**\n",
+  "line": 939
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    Threshold calibration note\n    ---------------------------",
+  "new": "    **Threshold calibration note**\n",
+  "line": 962
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    length_scale note\n    ------------------",
+  "new": "    **length_scale note**\n",
+  "line": 972
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    mature_method note\n    -------------------",
+  "new": "    **mature_method note**\n",
+  "line": 991
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    Phase detection lag note\n    ------------------------",
+  "new": "    **Phase detection lag note**\n",
+  "line": 1032
+ },
+ {
+  "why": "section title -> bold paragraph",
+  "count": 1,
+  "old": "    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)\n    ------------------------------------------------------------------------------",
+  "new": "    **Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)**\n",
+  "line": 1426
+ },
+ {
+  "why": "Portuguese quotation -> English translation",
+  "count": 3,
+  "old": "is **\"adotada sem\n      validação independente\"** (item 30): no independent validation exists.",
+  "new": "was **\"adopted without independent validation\"** (English\n      translation of the record's wording; item 30): no independent validation exists."
+ },
+ {
+  "why": "Portuguese quotation -> English translation",
+  "count": 2,
+  "old": "Default True since item 31 — **adotada sem validação independente** (item 30);",
+  "new": "Default True since item 31 — **adopted without independent validation** (English translation of the record's wording; item 30);"
+ },
+ {
+  "why": "prominence / prominence_relative documented (defaults from the signature)",
+  "count": 1,
+  "old": "            ``incipient_method=\"plateau\"``. See ``find_incipient_period``.\n        reclassify_index0 (bool, optional): Rule C2' — retype the extremum at\n",
+  "new": "            ``incipient_method=\"plateau\"``. See ``find_incipient_period``.\n        prominence (float, optional): Absolute minimum prominence threshold for\n            z-extrema filtering. Default None. See ``find_peaks_valleys``\n            for the full description of prominence modes.\n        prominence_relative (float, optional): Relative prominence threshold as a\n            fraction of the most prominent interior z-extremum. Default\n            0.3. See ``find_peaks_valleys``.\n        reclassify_index0 (bool, optional): Rule C2' — retype the extremum at\n"
+ }
+]

@@ -424,8 +424,8 @@ def process_vorticity(
     """
     Calculate derivatives of vorticity and perform filtering and smoothing.
 
-    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)
-    ------------------------------------------------------------------------------
+    **Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)**
+
     The defaults are the calibration preset ``params-track``
     (research/labels/configs/cyclophaser_params-track.yaml) with ONE exception:
     ``boundary_padding`` defaults to ``"reflect"``, while params-track sets
@@ -449,8 +449,8 @@ def process_vorticity(
       Other inputs (other levels, other sampling, sea-level pressure, wind
       speed, gridded fields) may need a different filtering, which has NOT been
       calibrated here.
-    * ``incipient_plateau_spare_intensification=True`` is **"adotada sem
-      validação independente"** (item 30): no independent validation exists.
+    * ``incipient_plateau_spare_intensification=True`` was **"adopted without independent validation"** (English
+      translation of the record's wording; item 30): no independent validation exists.
 
     The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;
     pass them explicitly to reproduce that behaviour. Despite its name, that
@@ -500,8 +500,8 @@ def process_vorticity(
             (``"edge"`` from item 31 until the cleanup front's change C1; the 2.0.0 release has no such
             parameter and always zero-pads).
 
-    use_filter=True note (behaviour change)
-    ----------------------------------------
+    **use_filter=True note (behaviour change)**
+
     ``use_filter=True`` now means the same as ``use_filter='auto'``: filtering on,
     window length ``len(series)//2``. It emits a ``UserWarning`` saying so.
 
@@ -522,8 +522,8 @@ def process_vorticity(
     runs before the int check, so ``True`` and ``1`` are no longer conflated.
     ``use_filter=False`` still disables filtering.
 
-    boundary_padding note
-    ----------------------
+    **boundary_padding note**
+
     ``lanczos_bandpass_filter`` and ``lanczos_filter`` have always convolved via
     ``scipy.signal.convolve(..., mode="same")``, which implicitly ZERO-PADS the
     input beyond its own ends. Vorticity has a non-zero floor (order -5e-5 s^-1),
@@ -573,8 +573,8 @@ def process_vorticity(
     and the Savitzky-Golay stages are NOT affected by this option: the correction
     is purely a boundary condition on the convolution.
 
-    replace_endpoints_with_lowpass deprecation note
-    ------------------------------------------------
+    **replace_endpoints_with_lowpass deprecation note**
+
     ``replace_endpoints_with_lowpass`` is **DEPRECATED** and its default changed
     from 24 to **0** together with the ``boundary_padding`` default above. Passing
     a non-zero value emits a ``DeprecationWarning``. The parameter is kept, not
@@ -883,8 +883,8 @@ def get_periods(vorticity,
     """
     Detect life cycle periods (e.g., intensification, decay, mature stages) from data.
 
-    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)
-    ------------------------------------------------------------------------------
+    **Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)**
+
     The defaults are the calibration preset ``params-track``
     (research/labels/configs/cyclophaser_params-track.yaml) with ONE exception:
     ``boundary_padding`` defaults to ``"reflect"``, while params-track sets
@@ -908,8 +908,8 @@ def get_periods(vorticity,
       Other inputs (other levels, other sampling, sea-level pressure, wind
       speed, gridded fields) may need a different filtering, which has NOT been
       calibrated here.
-    * ``incipient_plateau_spare_intensification=True`` is **"adotada sem
-      validação independente"** (item 30): no independent validation exists.
+    * ``incipient_plateau_spare_intensification=True`` was **"adopted without independent validation"** (English
+      translation of the record's wording; item 30): no independent validation exists.
 
     The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;
     pass them explicitly to reproduce that behaviour. Despite its name, that
@@ -918,8 +918,8 @@ def get_periods(vorticity,
     ``replace_endpoints_with_lowpass=24``, and lacks most of the phase
     parameters documented here.
 
-    Detection pipeline and phase precedence
-    ----------------------------------------
+    **Detection pipeline and phase precedence**
+
     The detection functions are called in the following fixed order:
 
         1. find_intensification_period
@@ -936,8 +936,8 @@ def get_periods(vorticity,
     marked, because both functions scan the same z-peaks/valleys and their
     detected intervals can overlap.
 
-    decay_tail_amplitude_fraction note
-    ------------------------------------
+    **decay_tail_amplitude_fraction note**
+
     ``find_residual_period`` (step 4) has a catch-all rule that labels the NaN
     tail after the last 'decay' block 'residual'. On a single-cycle series this
     can be triggered by an "orphan" interior z_peak — a peak with no surviving
@@ -959,8 +959,8 @@ def get_periods(vorticity,
     and the validated calibration (0.05, confirmed safe over (0.0356, 0.0651]
     on the research/adaptive-thresholds 51-track calibration set).
 
-    Threshold calibration note
-    ---------------------------
+    **Threshold calibration note**
+
     Because of this precedence, the practical effect of a threshold may be
     smaller than expected.  For example, ``threshold_intensification_gap``
     controls the maximum gap that is bridged between two intensification blocks;
@@ -969,8 +969,8 @@ def get_periods(vorticity,
     calibrating thresholds, always inspect the final 'periods' column rather than
     assuming each parameter acts in isolation.
 
-    length_scale note
-    ------------------
+    **length_scale note**
+
     ``threshold_intensification_length``, ``threshold_intensification_gap``,
     ``threshold_mature_length``, ``threshold_decay_length`` and
     ``threshold_decay_gap`` are all fractions of a *length*.  With
@@ -988,8 +988,8 @@ def get_periods(vorticity,
     track). ``threshold_mature_distance`` and ``threshold_incipient_length``
     are unaffected by this option — they were already local.
 
-    mature_method note
-    -------------------
+    **mature_method note**
+
     With ``mature_method="derivative"`` (the default before item 31; not a parameter of the 2.0.0 release) the mature window around
     each z_valley is sized as a fixed proportion (``threshold_mature_distance``)
     of the *time* distance to the neighbouring z_peak — the historical
@@ -1029,8 +1029,8 @@ def get_periods(vorticity,
     replacement minimum-duration safeguard exists for "amplitude" at this
     time (deliberate, to evaluate the method unconstrained first).
 
-    Phase detection lag note
-    ------------------------
+    **Phase detection lag note**
+
     The detected *start* of a phase may lag the true onset of that phase in the
     input vorticity series by up to approximately 15–18 h (5–6 timesteps at
     3-hourly resolution).  This lag is an inherent consequence of the Lanczos +
@@ -1114,7 +1114,7 @@ def get_periods(vorticity,
             When True, let E be the first intensification block of the map the
             incipient stage receives that STARTS before the boundary; if E also
             ENDS before it, the boundary moves back to E's start (a boundary of 0
-            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when
+            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adopted without independent validation** (English translation of the record's wording; item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when
             ``incipient_method="plateau"``. See ``find_incipient_period``.
         prominence (float, optional): Absolute minimum prominence threshold for
             z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``
@@ -1423,8 +1423,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
     """
     Determine meteorological periods from a series of vorticity data.
 
-    Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)
-    ------------------------------------------------------------------------------
+    **Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)**
+
     The defaults are the calibration preset ``params-track``
     (research/labels/configs/cyclophaser_params-track.yaml) with ONE exception:
     ``boundary_padding`` defaults to ``"reflect"``, while params-track sets
@@ -1448,8 +1448,8 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
       Other inputs (other levels, other sampling, sea-level pressure, wind
       speed, gridded fields) may need a different filtering, which has NOT been
       calibrated here.
-    * ``incipient_plateau_spare_intensification=True`` is **"adotada sem
-      validação independente"** (item 30): no independent validation exists.
+    * ``incipient_plateau_spare_intensification=True`` was **"adopted without independent validation"** (English
+      translation of the record's wording; item 30): no independent validation exists.
 
     The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;
     pass them explicitly to reproduce that behaviour. Despite its name, that
@@ -1466,7 +1466,7 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
         
         x (Union[list, pd.DatetimeIndex], optional): Temporal labels for `series`, expected as a list of datetime values 
             or a `pd.DatetimeIndex`. Only required if `series` is a list or array; automatically inferred from the `series` 
-            index if using `pd.Series` or `xr.DataArray`. **Must match the length of `series**`.
+            index if using `pd.Series` or `xr.DataArray`. **Must match the length of** `series`.
         
         plot (Union[str, bool], optional): Path to save generated plots. Set to `False` to skip plotting. Default is `False`.
         
@@ -1603,8 +1603,14 @@ def determine_periods(series: Union[list, np.ndarray, pd.Series, xr.DataArray],
             When True, let E be the first intensification block of the map the
             incipient stage receives that STARTS before the boundary; if E also
             ENDS before it, the boundary moves back to E's start (a boundary of 0
-            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when
+            writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adopted without independent validation** (English translation of the record's wording; item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when
             ``incipient_method="plateau"``. See ``find_incipient_period``.
+        prominence (float, optional): Absolute minimum prominence threshold for
+            z-extrema filtering. Default None. See ``find_peaks_valleys``
+            for the full description of prominence modes.
+        prominence_relative (float, optional): Relative prominence threshold as a
+            fraction of the most prominent interior z-extremum. Default
+            0.3. See ``find_peaks_valleys``.
         reclassify_index0 (bool, optional): Rule C2' — retype the extremum at
             index 0 against the next extremum that survives the filters, instead
             of leaving its type to the single boundary difference
