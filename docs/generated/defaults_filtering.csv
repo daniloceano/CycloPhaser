@@ -1,0 +1,9 @@
+parameter,default,default in determine_periods
+``use_filter``,``'auto'``,``'auto'``
+``replace_endpoints_with_lowpass``,``0``,``0``
+``use_smoothing``,``False``,``False``
+``use_smoothing_twice``,``False``,``False``
+``savgol_polynomial``,``3``,``3``
+``cutoff_low``,``168``,``168``
+``cutoff_high``,``18.0``,``18.0``
+``boundary_padding``,``'reflect'``,``'reflect'``
