@@ -1,0 +1,184 @@
+{
+ "remote_branches_now": [
+  "chore/repo-cleanup",
+  "develop-v2.1",
+  "master"
+ ],
+ "remote_branch_tips": {
+  "chore/repo-cleanup": "fbeff00",
+  "develop-v2.1": "06d8550",
+  "master": "0df0ef5"
+ },
+ "remote_branches_before": 41,
+ "deleted_remote": [
+  "chore/b-remove-distance",
+  "diag/front-b-distance-inert",
+  "diag/series-sha256-mismatch",
+  "docs/front-a-findings",
+  "docs/front-f-i-ii-iii-findings",
+  "docs/front-g-closing",
+  "docs/front-g-series-sha256-findings",
+  "docs/frontC-hash-provenance",
+  "docs/item13-close",
+  "docs/memory-g-e-closing",
+  "docs/session-findings-register",
+  "docs/session-findings-register-2",
+  "feat/app-flexible-track-reader",
+  "feat/dedicated-conda-env",
+  "feat/freeze-synthetic-series",
+  "feat/front-g-manual-labels-source",
+  "feat/label-tab-navigation-overlays",
+  "feat/label-tab-toplevel",
+  "fix/app-inert-params-signaling",
+  "fix/idx0-boundary-extremum-type",
+  "fix/inspector-crossing-layer-and-legend",
+  "fix/inspector-depth-params",
+  "fix/inspector-min-depth-params",
+  "frontA-idx0-c2",
+  "joss-submission",
+  "research/frontA-reverify",
+  "research/frontC-intensification-depth",
+  "research/frontD-stage0-census",
+  "research/incipient-refusal-stage1",
+  "research/item19-mature-prominence",
+  "research/item20a-maf-090",
+  "research/item20b-depth-rule",
+  "research/item20c-duration-ratio",
+  "research/item30-plateau-overwrite",
+  "research/item31-params15-default",
+  "research/item31-stage2b-checkpoint",
+  "research/item5-benchmark-tab",
+  "research/v3-topology-proxy"
+ ],
+ "deleted_equals_authorised": true,
+ "deleted_not_authorised": [],
+ "authorised_not_deleted": [],
+ "new_remote_branches_since_6a": [],
+ "local_branches_now": [
+  "chore/b-remove-distance",
+  "chore/repo-cleanup",
+  "develop-v2.1",
+  "diag/front-b-distance-inert",
+  "diag/series-sha256-mismatch",
+  "docs/front-a-findings",
+  "docs/front-f-i-ii-iii-findings",
+  "docs/front-g-closing",
+  "docs/front-g-series-sha256-findings",
+  "docs/frontC-hash-provenance",
+  "docs/item13-close",
+  "docs/memory-g-e-closing",
+  "docs/session-findings-register",
+  "docs/session-findings-register-2",
+  "feat/app-flexible-track-reader",
+  "feat/dedicated-conda-env",
+  "feat/freeze-synthetic-series",
+  "feat/front-g-manual-labels-source",
+  "feat/label-tab-navigation-overlays",
+  "feat/label-tab-toplevel",
+  "fix/app-inert-params-signaling",
+  "fix/idx0-boundary-extremum-type",
+  "fix/inspector-crossing-layer-and-legend",
+  "fix/inspector-depth-params",
+  "fix/inspector-min-depth-params",
+  "frontA-idx0-c2",
+  "joss-submission",
+  "master",
+  "research/frontA-reverify",
+  "research/frontC-intensification-depth",
+  "research/frontD-stage0-census",
+  "research/incipient-refusal-stage1",
+  "research/item19-mature-prominence",
+  "research/item20a-maf-090",
+  "research/item20b-depth-rule",
+  "research/item20c-duration-ratio",
+  "research/item30-plateau-overwrite",
+  "research/item31-params15-default",
+  "research/item31-stage2b-checkpoint",
+  "research/item5-benchmark-tab",
+  "research/v3-topology-proxy"
+ ],
+ "tags": [
+  {
+   "tag": "archive/diag/front-b-distance-inert",
+   "tip": "491a5d0",
+   "origin": "491a5d0",
+   "ok": true
+  },
+  {
+   "tag": "archive/diag/series-sha256-mismatch",
+   "tip": "3ae6082",
+   "origin": "3ae6082",
+   "ok": true
+  },
+  {
+   "tag": "archive/feat/label-tab-toplevel",
+   "tip": "0c63145",
+   "origin": "0c63145",
+   "ok": true
+  },
+  {
+   "tag": "archive/fix/idx0-boundary-extremum-type",
+   "tip": "6060c6d",
+   "origin": "6060c6d",
+   "ok": true
+  },
+  {
+   "tag": "archive/fix/inspector-min-depth-params",
+   "tip": "a2b639e",
+   "origin": "a2b639e",
+   "ok": true
+  },
+  {
+   "tag": "archive/joss-submission",
+   "tip": "8348caf",
+   "origin": "8348caf",
+   "ok": true
+  },
+  {
+   "tag": "archive/research/item20c-duration-ratio",
+   "tip": "e7792d3",
+   "origin": "e7792d3",
+   "ok": true
+  },
+  {
+   "tag": "archive/research/v3-topology-proxy",
+   "tip": "c508730",
+   "origin": "c508730",
+   "ok": true
+  },
+  {
+   "tag": "archive/exp/pre-peak-normalization",
+   "tip": "1faf0c8",
+   "origin": "1faf0c8",
+   "ok": true
+  }
+ ],
+ "tags_ok": true,
+ "tags_on_origin": [
+  "archive/app-phase-focus",
+  "archive/diag/front-b-distance-inert",
+  "archive/diag/series-sha256-mismatch",
+  "archive/exp/pre-peak-normalization",
+  "archive/feat/label-tab-toplevel",
+  "archive/fix/idx0-boundary-extremum-type",
+  "archive/fix/inspector-min-depth-params",
+  "archive/joss-submission",
+  "archive/research-diagnostics-pre-cleanup",
+  "archive/research/item20c-duration-ratio",
+  "archive/research/v3-topology-proxy",
+  "v1.9.4",
+  "v2.0.0"
+ ],
+ "hex_tokens": 5746,
+ "tokens_resolving_to_commits": 296,
+ "distinct_cited_commits": 221,
+ "unreachable_from_origin": 1,
+ "unreachable_rows": [
+  {
+   "token": "f7d8fd99cbd2881e268c8e3bd3829232e78ea3d3",
+   "commit": "f7d8fd99cb",
+   "first_citation": "research/labels/diagnostics/front_b/default_behaviour_sha256.txt:118"
+  }
+ ],
+ "unreachable_from_all_local_refs": 0
+}

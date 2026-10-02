@@ -1,0 +1,35 @@
+assert OK: cyclophaser from the worktree | sys.prefix = ~/miniconda3/envs/cyclophaser
+
+==================================== ERRORS ====================================
+_________ ERROR collecting research/cleanup/passo6/test_ids_in_text.py _________
+research/cleanup/passo6/test_ids_in_text.py:38: in <module>
+    files = subprocess.check_output(ls, cwd=ROOT, text=True).split()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~/miniconda3/envs/cyclophaser/lib/python3.12/subprocess.py:466: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+~/miniconda3/envs/cyclophaser/lib/python3.12/subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['git', 'ls-tree', '-r', '--name-only', 'not browser', '--', '-q', '-p', 'no:cacheprovider', '-rf', '--junitxml=<scratch>/suite.xml']' returned non-zero exit status 128.
+------------------------------- Captured stderr --------------------------------
+fatal: Not a valid object name not browser
+=============================== warnings summary ===============================
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+29 deselected, 88 warnings, 1 error in 6.03s
+EXIT 2

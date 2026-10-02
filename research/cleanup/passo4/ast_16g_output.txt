@@ -1,0 +1,6 @@
+cyclophaser/__init__.py: AST w/o docstrings identical=True, source identical=True
+cyclophaser/determine_periods.py: AST w/o docstrings identical=True, source identical=False
+cyclophaser/find_stages.py: AST w/o docstrings identical=True, source identical=True
+cyclophaser/lanczos_filter.py: AST w/o docstrings identical=True, source identical=True
+cyclophaser/plots.py: AST w/o docstrings identical=True, source identical=True
+f0f2b56 → WORKTREE: 5 files; identical without docstrings: True

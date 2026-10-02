@@ -1,0 +1,134 @@
+{
+ "root_file_exists": true,
+ "readers": [
+  "user docs: docs/contribute.rst:43",
+  "user docs: docs/installation.rst:27",
+  "user docs: docs/installation.rst:66"
+ ],
+ "groups_reading_root": {
+  "CI": false,
+  "docs build (RTD)": false,
+  "setup / packaging": false,
+  "Streamlit app": false,
+  "conda env": false,
+  "user docs": true
+ },
+ "app_has_own_requirements": true,
+ "detail": {
+  "CI": [],
+  "docs build (RTD)": [
+   {
+    "where": ".readthedocs.yml:26",
+    "kind": "comentário (cita, não instala)",
+    "text": "# Optional but recommended, declare the Python requirements required"
+   },
+   {
+    "where": ".readthedocs.yml:31",
+    "kind": "outro arquivo: docs/requirements.txt",
+    "text": "- requirements: docs/requirements.txt"
+   }
+  ],
+  "setup / packaging": [
+   {
+    "where": "MANIFEST.in",
+    "kind": "(arquivo ausente)"
+   }
+  ],
+  "Streamlit app": [
+   {
+    "where": "tools/calibration_app/README.md:12",
+    "kind": "outro arquivo: requirements-app.txt",
+    "text": "pip install -r requirements-app.txt"
+   },
+   {
+    "where": "tools/calibration_app/README.md:15",
+    "kind": "outro arquivo: requirements-app.txt",
+    "text": "O `-e ../..` em `requirements-app.txt` instala o CycloPhaser em modo"
+   }
+  ],
+  "conda env": [
+   {
+    "where": "environment.yml:21",
+    "kind": "comentário (cita, não instala)",
+    "text": "# docs toolchain (sphinx and friends) stays in requirements.txt."
+   },
+   {
+    "where": "environment.yml:60",
+    "kind": "comentário (cita, não instala)",
+    "text": "# app.py) -- floor matches tools/calibration_app/requirements.txt. Was"
+   },
+   {
+    "where": "environment.yml:61",
+    "kind": "comentário (cita, não instala)",
+    "text": "# undeclared here and in every root dependency file (requirements.txt,"
+   },
+   {
+    "where": "environment.yml:62",
+    "kind": "comentário (cita, não instala)",
+    "text": "# Pipfile, setup.py) until this front; only the app's own two requirements"
+   },
+   {
+    "where": "environment.yml:63",
+    "kind": "comentário (cita, não instala)",
+    "text": "# files (requirements.txt, requirements-app.txt) already knew about it."
+   }
+  ],
+  "user docs": [
+   {
+    "where": "docs/api.rst:24",
+    "kind": "prosa (não aponta arquivo)",
+    "text": "- **use_smoothing_twice**: (str or int, optional) Apply Savgol smoothing twice for additional noise reduction. Same requirements as `use_smo"
+   },
+   {
+    "where": "docs/calibration_tool.rst:68",
+    "kind": "outro arquivo: calibration_app/requirements.txt",
+    "text": "pip install -r tools/calibration_app/requirements.txt"
+   },
+   {
+    "where": "docs/calibration_tool.rst:78",
+    "kind": "outro arquivo: calibration_app/requirements-app.txt",
+    "text": "pip install -r tools/calibration_app/requirements-app.txt"
+   },
+   {
+    "where": "docs/contribute.rst:43",
+    "kind": "LÊ a raiz requirements.txt",
+    "text": "pip install -r requirements.txt"
+   },
+   {
+    "where": "docs/installation.rst:21",
+    "kind": "prosa (não aponta arquivo)",
+    "text": "3. **Install dependencies from the requirements file**:"
+   },
+   {
+    "where": "docs/installation.rst:23",
+    "kind": "prosa (não aponta arquivo)",
+    "text": "Make sure you’re in the directory containing the requirements file. Then, run:"
+   },
+   {
+    "where": "docs/installation.rst:27",
+    "kind": "LÊ a raiz requirements.txt",
+    "text": "pip install -r requirements.txt"
+   },
+   {
+    "where": "docs/installation.rst:62",
+    "kind": "prosa (não aponta arquivo)",
+    "text": "3. **Install dependencies from the requirements file**:"
+   },
+   {
+    "where": "docs/installation.rst:66",
+    "kind": "LÊ a raiz requirements.txt",
+    "text": "pip install -r requirements.txt"
+   },
+   {
+    "where": "README.md:52",
+    "kind": "outro arquivo: calibration_app/requirements.txt",
+    "text": "pip install -r tools/calibration_app/requirements.txt"
+   },
+   {
+    "where": "README.md:62",
+    "kind": "outro arquivo: calibration_app/requirements-app.txt",
+    "text": "pip install -r tools/calibration_app/requirements-app.txt"
+   }
+  ]
+ }
+}

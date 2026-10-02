@@ -1,0 +1,48 @@
+stage 1: 6 noise-free shapes qualify (n, deepening fraction, recovery fraction, ripple position, ripple amplitude, ripple width, tail amplitude, onset bump)
+shape=(240, 0.3, 0.62, 0.55, 3e-06, 0.03, 1.5e-05, 0) noise=3.0e-06: seeds [13, 15, 27]
+  seed 13: discarded [np.int64(169), np.int64(176)]; fractions decay 0.550, intensification 0.183, incipient 0.096, mature 0.117, residual 0.054
+  seed 15: discarded [np.int64(169), np.int64(176)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+  seed 27: discarded [np.int64(169), np.int64(176)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.55, 3e-06, 0.03, 1.5e-05, 3e-06) noise=3.0e-06: seeds [13, 15, 16, 27]
+  seed 13: discarded [np.int64(169), np.int64(176)]; fractions decay 0.550, intensification 0.212, incipient 0.067, mature 0.117, residual 0.054
+  seed 15: discarded [np.int64(169), np.int64(176)]; fractions decay 0.550, intensification 0.204, incipient 0.075, mature 0.117, residual 0.054
+  seed 16: discarded [np.int64(169), np.int64(176)]; fractions decay 0.546, intensification 0.192, incipient 0.087, mature 0.117, residual 0.058
+  seed 27: discarded [np.int64(169), np.int64(176)]; fractions decay 0.550, intensification 0.217, incipient 0.062, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.55, 3e-06, 0.03, 1.5e-05, 3e-06) noise=6.0e-06: seeds [13, 26, 29]
+  seed 13: discarded [np.int64(169), np.int64(176)]; fractions decay 0.546, intensification 0.183, incipient 0.096, mature 0.117, residual 0.058
+  seed 26: discarded [np.int64(169), np.int64(176)]; fractions decay 0.546, intensification 0.208, incipient 0.071, mature 0.117, residual 0.058
+  seed 29: discarded [np.int64(169), np.int64(176)]; fractions decay 0.550, intensification 0.212, incipient 0.067, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.55, 5e-06, 0.05, 1.5e-05, 0) noise=3.0e-06: seeds [13, 15, 17, 24, 25, 27]
+  seed 13: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.183, incipient 0.096, mature 0.117, residual 0.054
+  seed 15: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+  seed 17: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+  seed 24: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+  seed 25: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+  seed 27: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.55, 5e-06, 0.05, 1.5e-05, 0) noise=6.0e-06: seeds [24]
+  seed 24: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.55, 5e-06, 0.05, 1.5e-05, 3e-06) noise=3.0e-06: seeds [13, 15, 24, 25, 27]
+  seed 13: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.212, incipient 0.067, mature 0.117, residual 0.054
+  seed 15: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.204, incipient 0.075, mature 0.117, residual 0.054
+  seed 24: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.204, incipient 0.075, mature 0.117, residual 0.054
+  seed 25: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.217, incipient 0.062, mature 0.117, residual 0.054
+  seed 27: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.217, incipient 0.062, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.55, 5e-06, 0.05, 1.5e-05, 3e-06) noise=6.0e-06: seeds [24, 25]
+  seed 24: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.217, incipient 0.062, mature 0.117, residual 0.054
+  seed 25: discarded [np.int64(169), np.int64(181)]; fractions decay 0.550, intensification 0.208, incipient 0.071, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.7, 3e-06, 0.05, 1.5e-05, 0) noise=3.0e-06: seeds [13, 24, 25, 27]
+  seed 13: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.183, incipient 0.096, mature 0.117, residual 0.054
+  seed 24: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+  seed 25: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+  seed 27: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.200, incipient 0.079, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.7, 3e-06, 0.05, 1.5e-05, 3e-06) noise=3.0e-06: seeds [13, 15, 16, 24, 25, 27]
+  seed 13: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.212, incipient 0.067, mature 0.117, residual 0.054
+  seed 15: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.204, incipient 0.075, mature 0.117, residual 0.054
+  seed 16: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.192, incipient 0.087, mature 0.117, residual 0.054
+  seed 24: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.204, incipient 0.075, mature 0.117, residual 0.054
+  seed 25: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.217, incipient 0.062, mature 0.117, residual 0.054
+  seed 27: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.217, incipient 0.062, mature 0.117, residual 0.054
+shape=(240, 0.3, 0.62, 0.7, 3e-06, 0.05, 1.5e-05, 3e-06) noise=6.0e-06: seeds [13, 26, 29]
+  seed 13: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.183, incipient 0.096, mature 0.117, residual 0.054
+  seed 26: discarded [np.int64(193), np.int64(202)]; fractions decay 0.550, intensification 0.208, incipient 0.071, mature 0.117, residual 0.054
+  seed 29: discarded [np.int64(193), np.int64(201)]; fractions decay 0.550, intensification 0.212, incipient 0.067, mature 0.117, residual 0.054

@@ -1,0 +1,6 @@
+{
+ "file": "cyclophaser/determine_periods.py",
+ "line": 600,
+ "old": "    ============================================  ========  ===========\n    configuration                                 \"zero\"    \"reflect\"\n    ============================================  ========  ===========\n    defaults with replace_endpoints_with_lowpass=24   4/51      28/51\n    defaults with replace_endpoints_with_lowpass=0    0/51       0/51\n    ============================================  ========  ===========",
+ "new": "    ===============================================  ======  =========\n    configuration                                    \"zero\"  \"reflect\"\n    ===============================================  ======  =========\n    defaults with replace_endpoints_with_lowpass=24  4/51    28/51\n    defaults with replace_endpoints_with_lowpass=0   0/51    0/51\n    ===============================================  ======  ========="
+}

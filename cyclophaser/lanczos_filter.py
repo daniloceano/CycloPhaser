@@ -3,7 +3,7 @@ import numpy as np
 from scipy.signal import convolve
 
 # ---------------------------------------------------------------------------
-# boundary_padding: "zero" (default) vs "reflect" / "edge"
+# boundary_padding: "reflect" (default) vs "zero" / "edge"
 # ---------------------------------------------------------------------------
 # Both filters below convolve the input against a Lanczos kernel.  Historically
 # that convolution was always ``scipy.signal.convolve(variable, weights,

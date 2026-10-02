@@ -13,7 +13,8 @@ What this script does, in order, and refuses to do twice:
    scanned to find where blocks end.
 2. **Counterfactual.** Recomputed with the code that produced `1a3ad76`
    (`diagnostics/item30/figs_cf.py`, unchanged since), under params-14, and
-   asserted equal to the sequences recorded in `REPORT_figs_cf.md`.
+   asserted equal to the sequences recorded in
+   `archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/REPORT_figs_cf.md`.
 3. **Records.** Built by `make_label_record` (validated like any label), through
    `upsert_label`, so the original also stays in the record's `superseded`.
    * `series_sha256` asserted equal to the original's.
@@ -51,7 +52,8 @@ import item30_core as core  # noqa: E402
 lc = core.lc
 SNAPSHOT = HERE / "labels_v1_snapshot.yaml"
 ADJ = ["20120297", "19940445", "19810854", "19860380", "19870927"]
-# REPORT_figs_cf.md (1a3ad76), counterfactual column.
+# archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item30/REPORT_figs_cf.md (1a3ad76),
+# counterfactual column.
 EXPECTED = {
     "20120297": "intensification > mature > decay > residual",
     "19940445": "intensification > mature > decay",

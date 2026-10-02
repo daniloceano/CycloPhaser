@@ -1,0 +1,7 @@
+{
+ "script": "research/labels/evaluate_against_labels.py",
+ "args": [],
+ "exit": 0,
+ "csv_opened_under_calibration_data": 35,
+ "of_which_test_split": 0
+}

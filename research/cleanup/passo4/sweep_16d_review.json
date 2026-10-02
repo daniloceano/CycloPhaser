@@ -1,0 +1,1799 @@
+{
+ "before": "0522992",
+ "hits": 199,
+ "corrected": 27,
+ "kept": 172,
+ "rows": [
+  {
+   "hit": "cyclophaser/determine_periods.py:139",
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "reference": "find_peaks_valleys signature: —",
+   "verdict": "kept",
+   "reason": "about scipy's argrelextrema, not a package default",
+   "text": "NOTE (#14 — pending fix): argrelextrema uses mode='clip' by default, which"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:172",
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "reference": "find_peaks_valleys signature: —; verifier: prominence=None vs code {'get_periods': 'None', 'determine_periods': 'None', 'find_peaks_valleys': 'None'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Default None disables absolute filtering (no-op)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:176",
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "reference": "find_peaks_valleys signature: —; verifier: prominence=None vs code {'get_periods': 'None', 'determine_periods': 'None', 'find_peaks_valleys': 'None'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "below 10 % of the most prominent one.  Default None"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:179",
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "reference": "find_peaks_valleys signature: —; verifier: reclassify_index0=False vs code {'get_periods': 'True', 'determine_periods': 'True', 'find_peaks_valleys': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "find_peaks_valleys' own default (False) against get_periods/determine_periods (True): both stated and both true",
+   "text": "see ``_reclassify_index0``. **Default False here,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:181",
+   "kind": "docstring",
+   "function": "find_peaks_valleys",
+   "reference": "find_peaks_valleys signature: —",
+   "verdict": "kept",
+   "reason": "same sentence as :179",
+   "text": "default it to True.** The asymmetry is deliberate:"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:427",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:429",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "The defaults are the calibration preset ``params-track``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:431",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: boundary_padding='reflect'; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:434",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "params-track, not these defaults. Callers working with TRACK input who want"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:435",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:438",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:442",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: cutoff_high=18.0",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:447",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: boundary_padding='reflect'; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:455",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:466",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: use_filter='auto'",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "(or `True`, which is equivalent — see the \"use_filter=True note\" below) for the default window"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:468",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —; verifier: use_filter=auto vs code {'process_vorticity': \"'auto'\", 'determine_periods': \"'auto'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "window length explicitly in time steps. **Units**: Time steps. Default is `'auto'`."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:472",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —; verifier: replace_endpoints_with_lowpass=0 vs code {'process_vorticity': '0', 'determine_periods': '0'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Default is 0 (disabled) — it was 24 in versions up to and including 2.0.0. Passing a non-zero"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:477",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "'default window length' describes what 'auto' picks, not a parameter default",
+   "text": "default window length or specify an integer value as the desired window length. Must be greater than or equal"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:478",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: savgol_polynomial=3, use_smoothing=False; verifier: use_smoothing=False vs code {'process_vorticity': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "to `savgol_polynomial`. **Units**: Time steps. Default is `False` (`'auto'` up to 2.0.0). **To deactivate**, set `use_smoothing`"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:483",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: use_smoothing=False; verifier: use_smoothing_twice=False vs code {'process_vorticity': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Same requirements as `use_smoothing`. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:486",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: use_smoothing=False, use_smoothing_twice=False; verifier: savgol_polynomial=3 vs code {'process_vorticity': '3', 'determine_periods': '3'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "window length (`use_smoothing` or `use_smoothing_twice` if specified). Default is 3."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:489",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —; verifier: cutoff_low=168 vs code {'process_vorticity': '168', 'determine_periods': '168'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "noise. Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 168."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:492",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —; verifier: cutoff_high=18.0 vs code {'process_vorticity': '18.0', 'determine_periods': '18.0'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 18.0 (48.0 up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:495",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "boundary_padding: process_vorticity signature 'reflect'",
+   "text": "ends before the Lanczos convolution. ``\"reflect\"`` (the default) and ``\"edge\"``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:499",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: use_filter='auto'; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "meaningful when ``use_filter`` is truthy. Default is ``\"reflect\"``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:559",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``\"reflect\"`` became the DEFAULT here (behaviour change): leaving a"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:560",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "history of the boundary_padding default, labelled",
+   "text": "quantified artefact switched on by default was judged the larger cost."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:561",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Item 31 moved the default to ``\"edge\"``, the padding of the calibration"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:566",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "results from a version before the default changed, pass"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:578",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: replace_endpoints_with_lowpass=0",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``replace_endpoints_with_lowpass`` is **DEPRECATED** and its default changed"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:579",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: boundary_padding='reflect'",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "from 24 to **0** together with the ``boundary_padding`` default above. Passing"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:595",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "visible STEP. Measured over the 51 tracks with the package defaults, the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:602",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: replace_endpoints_with_lowpass=0",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "defaults with replace_endpoints_with_lowpass=24   4/51      28/51"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:603",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: replace_endpoints_with_lowpass=0",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "defaults with replace_endpoints_with_lowpass=0    0/51       0/51"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:607",
+   "kind": "docstring",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "history: why two defaults moved together",
+   "text": "artefact, not a finding. Hence the two defaults had to move together: a"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:741",
+   "kind": "comment",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: use_smoothing=False",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "# differentiate('time'). Item 31 made use_smoothing=False the default,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:810",
+   "kind": "comment",
+   "function": "process_vorticity",
+   "reference": "process_vorticity signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "# test: other falsy values (0, '') keep their previous behaviour, which the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:885",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:887",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "The defaults are the calibration preset ``params-track``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:889",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:892",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "params-track, not these defaults. Callers working with TRACK input who want"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:893",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:896",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: length_scale='local'",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:900",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:905",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:913",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:948",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: decay_tail_amplitude_fraction=0.3 vs code {'get_periods': '0.3', 'determine_periods': '0.3'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "(default 0.3; ``None`` switches the check off and leaves the tail to the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:975",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_decay_gap=0.075",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "``threshold_decay_gap`` are all fractions of a *length*.  With the default"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:992",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: mature_method='amplitude'",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "With ``mature_method=\"derivative\"`` (the default before item 31; not a parameter of the 2.0.0 release) the mature window around"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1048",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: plot=False; verifier: plot=False vs code {'get_periods': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "plot (Union[str, bool], optional): Path to save plots or False to disable plotting. Default is False."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1049",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: plot_steps=False; verifier: plot_steps=False vs code {'get_periods': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "plot_steps (Union[str, bool], optional): Path to save step-by-step plots or False to disable. Default is False."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1050",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: export_dict=False; verifier: export_dict=False vs code {'get_periods': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "export_dict (Union[str, bool], optional): Path to export periods to CSV or False to disable. Default is False."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1051",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_intensification_length=0.075; verifier: threshold_intensification_length=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "threshold_intensification_length (float, optional): Minimum intensification length. Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1052",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_intensification_gap=0.075; verifier: threshold_intensification_gap=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "threshold_intensification_gap (float, optional): Maximum gap in intensification periods. Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1053",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_mature_distance=0.18; verifier: threshold_mature_distance=0.18 vs code {'get_periods': '0.18', 'determine_periods': '0.18'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "threshold_mature_distance (float, optional): Distance threshold for mature stage detection. Default is 0.18 (0.125 up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1054",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_mature_length=0.15; verifier: threshold_mature_length=0.15 vs code {'get_periods': '0.15', 'determine_periods': '0.15'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "threshold_mature_length (float, optional): Minimum mature stage length. Default is 0.15 (0.03 up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1055",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_decay_length=0.075; verifier: threshold_decay_length=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "threshold_decay_length (float, optional): Minimum decay stage length. Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1056",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_decay_gap=0.075; verifier: threshold_decay_gap=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1057",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: threshold_incipient_length=0.4; verifier: threshold_incipient_length=0.4 vs code {'get_periods': '0.4', 'determine_periods': '0.4'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1059",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``\"geometric\"`` (the default before item 31; not a parameter of the 2.0.0 release) is the historical rule: the incipient phase runs"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1062",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "case A/B/C dispatch. ``\"plateau\"`` (the default since item 31) instead marks the leading stretch over"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1068",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "states a measurement under the 2.0.0 defaults; not a claim about the current default (provenance not re-measured here)",
+   "text": "artifact at t0 has been controlled. Under the 2.0.0 package defaults the first"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1072",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: incipient_method=plateau vs code {'get_periods': \"'plateau'\", 'determine_periods': \"'plateau'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1076",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: incipient_method='plateau'; verifier: incipient_plateau_tau=0.20 vs code {'get_periods': '0.2', 'determine_periods': '0.2'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Only used when ``incipient_method=\"plateau\"``. Default is 0.20."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1079",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "on. ``\"derivative\"`` (the default before item 31; not a parameter of the 2.0.0 release) uses ``|dz_dt_smoothed2|`` normalised by its"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1081",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``\"vorticity\"`` (the default since item 31) uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1086",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "detected. ``\"single\"`` (the default before item 31; not a parameter of the 2.0.0 release) ends it at the first sample with"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1087",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: incipient_plateau_k=5",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``rel >= tau``. ``\"sustained\"`` (the default since item 31) requires ``incipient_plateau_k``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1094",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: incipient_plateau_crossing='sustained'; verifier: incipient_plateau_k=5 vs code {'get_periods': '5', 'determine_periods': '5'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``incipient_plateau_crossing=\"sustained\"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1100",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: incipient_smooth_window=5 vs code {'get_periods': '5', 'determine_periods': '5'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1108",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: incipient_smooth_polyorder=3 vs code {'get_periods': '3', 'determine_periods': '3'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Savitzky-Golay pass. Default is 3. A window at or below this order cannot"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1116",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1119",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: prominence=None vs code {'get_periods': 'None', 'determine_periods': 'None', 'find_peaks_valleys': 'None'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "z-extrema filtering. Default None (no-op). See ``find_peaks_valleys``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1126",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: prominence=None; verifier: prominence_relative=0.3 vs code {'get_periods': '0.3', 'determine_periods': '0.3', 'find_peaks_valleys': 'None'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "prominence. Default 0.3 since item 31 (None, a no-op, before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1141",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: prominence_relative=0.3",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1147",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "reclassify_index0: get_periods signature True",
+   "text": "**Default True — this is a change of default behaviour.** Index 0 is"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1158",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: length_scale='local'; verifier: length_scale=local vs code {'get_periods': \"'local'\", 'determine_periods': \"'local'\"} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "length_scale (str, optional): \"local\" (default since item 31) or \"global\" (the default before item 31; not a parameter of the 2.0.0 release). See the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1160",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: mature_method='amplitude'; verifier: mature_method=amplitude vs code {'get_periods': \"'amplitude'\", 'determine_periods': \"'amplitude'\"} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "mature_method (str, optional): \"amplitude\" (default since item 31) or \"derivative\" (the default before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1164",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "(opt-in) instead defines the mature window as the contiguous"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1176",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: mature_amplitude_fraction=0.90 vs code {'get_periods': '0.9', 'determine_periods': '0.9'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Default 0.90."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1191",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: mature_min_depth=0.8 vs code {'get_periods': '0.8', 'determine_periods': '0.8'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) admits every valley and"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1225",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) switches the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1231",
+   "kind": "docstring",
+   "function": "get_periods",
+   "reference": "get_periods signature: —; verifier: decay_tail_amplitude_fraction=0.3 vs code {'get_periods': '0.3', 'determine_periods': '0.3'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "mechanism. Default 0.3 since item 31; None (the default before item 31; not a parameter of the 2.0.0 release) disables this check, reproducing the exact"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1425",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Defaults (item 31, then C1 — a change of default behaviour relative to 2.0.0)"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1427",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "The defaults are the calibration preset ``params-track``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1429",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: boundary_padding='reflect'; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1432",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "params-track, not these defaults. Callers working with TRACK input who want"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1433",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "the 'Defaults (item 31, then C1)' section, written and checked against the signatures in C1 (Passo 1)",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1436",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: length_scale='local'",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1440",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: cutoff_high=18.0",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1445",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: boundary_padding='reflect'; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1453",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "The defaults before item 31 are frozen in research/labels/defaults_2.0.0.json;"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1470",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: plot=False; verifier: plot=False vs code {'get_periods': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "plot (Union[str, bool], optional): Path to save generated plots. Set to `False` to skip plotting. Default is `False`."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1473",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: plot_steps=False vs code {'get_periods': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "phase of the algorithm. Set to `False` to disable. Default is `False`."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1476",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: export_dict=False vs code {'get_periods': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "exporting. Default is `False`."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1478",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: hemisphere='southern'; verifier: hemisphere=southern vs code {'determine_periods': \"'southern'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "hemisphere (str, optional): Hemisphere of the data. Set to `\"southern\"` (default) to apply southern hemisphere"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1482",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "pressure (SLP) data**, set to `\"southern\"` as the default convention."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1490",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: use_filter=auto vs code {'process_vorticity': \"'auto'\", 'determine_periods': \"'auto'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Default is `'auto'`."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1493",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: replace_endpoints_with_lowpass=0 vs code {'process_vorticity': '0', 'determine_periods': '0'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "filtered series with a lowpass estimate. **Units:** Time steps. Default is 0 (disabled) — it was 24"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1501",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "'a default window' describes what True/'auto' picks, not a parameter default",
+   "text": "`True` to use a default window, specify an integer window length, or use `'auto'` to adapt the length based"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1502",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: savgol_polynomial=3; verifier: use_smoothing=False vs code {'process_vorticity': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "on data. **Must be greater than or equal to `savgol_polynomial`** to avoid errors. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1505",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: use_smoothing_twice=False vs code {'process_vorticity': 'False', 'determine_periods': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "noise reduction. Choose `True`, `False`, or specify an integer. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1508",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: use_smoothing=False, use_smoothing_twice=False",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "to the window length specified in `use_smoothing` and `use_smoothing_twice`.** Default is 3."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1511",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: cutoff_low=168 vs code {'process_vorticity': '168', 'determine_periods': '168'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "for hourly data. **Units:** Time steps. Default is 168."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1514",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: cutoff_high=18.0 vs code {'process_vorticity': '18.0', 'determine_periods': '18.0'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "for hourly data. **Units:** Time steps. Default is 18.0 (48.0 up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1517",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "before the Lanczos convolution: `\"reflect\"` (default; `\"edge\"` from item 31 until the cleanup front's change C1, and still the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1524",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "reproduce results from a version before this default changed — see the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1529",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: threshold_intensification_length=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "of the dataset. Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1531",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: threshold_intensification_gap=0.075; verifier: threshold_intensification_gap=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "threshold_intensification_gap (float, optional): Maximum allowed gap in intensification phase. Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1534",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: threshold_mature_distance=0.18 vs code {'get_periods': '0.18', 'determine_periods': '0.18'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "of the mature stage. Default is 0.18 (0.125 up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1537",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: threshold_mature_length=0.15 vs code {'get_periods': '0.15', 'determine_periods': '0.15'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Default is 0.15 (0.03 up to 2.0.0)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1540",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: threshold_decay_length=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1542",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: threshold_decay_gap=0.075; verifier: threshold_decay_gap=0.075 vs code {'get_periods': '0.075', 'determine_periods': '0.075'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "threshold_decay_gap (float, optional): Maximum allowed gap in decay phase. Default is 0.075."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1545",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: threshold_incipient_length=0.4 vs code {'get_periods': '0.4', 'determine_periods': '0.4'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "dataset. Default is 0.4."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1548",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``\"geometric\"`` (the default before item 31; not a parameter of the 2.0.0 release) is the historical rule: the incipient phase runs"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1551",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "case A/B/C dispatch. ``\"plateau\"`` (the default since item 31) instead marks the leading stretch over"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1557",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "same sentence as :1068 (determine_periods' copy)",
+   "text": "artifact at t0 has been controlled. Under the 2.0.0 package defaults the first"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1561",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: boundary_padding='reflect', use_smoothing=False; verifier: incipient_method=plateau vs code {'get_periods': \"'plateau'\", 'determine_periods': \"'plateau'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1565",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: incipient_method='plateau'; verifier: incipient_plateau_tau=0.20 vs code {'get_periods': '0.2', 'determine_periods': '0.2'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Only used when ``incipient_method=\"plateau\"``. Default is 0.20."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1568",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "on. ``\"derivative\"`` (the default before item 31; not a parameter of the 2.0.0 release) uses ``|dz_dt_smoothed2|`` normalised by its"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1570",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``\"vorticity\"`` (the default since item 31) uses ``|d(zeta)/dt|`` computed with ``np.gradient`` on the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1575",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "detected. ``\"single\"`` (the default before item 31; not a parameter of the 2.0.0 release) ends it at the first sample with"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1576",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: incipient_plateau_k=5",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``rel >= tau``. ``\"sustained\"`` (the default since item 31) requires ``incipient_plateau_k``"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1583",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: incipient_plateau_crossing='sustained'; verifier: incipient_plateau_k=5 vs code {'get_periods': '5', 'determine_periods': '5'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``incipient_plateau_crossing=\"sustained\"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1589",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: incipient_smooth_window=5 vs code {'get_periods': '5', 'determine_periods': '5'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1597",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: incipient_smooth_polyorder=3 vs code {'get_periods': '3', 'determine_periods': '3'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Savitzky-Golay pass. Default is 3. A window at or below this order cannot"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1605",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "writes no incipient at all). Otherwise nothing changes. Default True since item 31 — **adotada sem validação independente** (item 30); False reproduces the behaviour before item 31 (not a parameter of the 2.0.0 release). Only used when"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1621",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: prominence_relative=0.3",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1627",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "reclassify_index0: determine_periods signature True",
+   "text": "**Default True — this is a change of default behaviour.** Index 0 is"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1638",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: length_scale='local'; verifier: length_scale=local vs code {'get_periods': \"'local'\", 'determine_periods': \"'local'\"} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "length_scale (str, optional): \"local\" (default since item 31) or \"global\" (the default before item 31; not a parameter of the 2.0.0 release). Controls what"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1641",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: threshold_decay_gap=0.075",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``threshold_decay_gap`` are fractions *of*. \"global\" (the default before item 31; not a parameter of the 2.0.0 release) uses the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1649",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: mature_method='amplitude'; verifier: mature_method=amplitude vs code {'get_periods': \"'amplitude'\", 'determine_periods': \"'amplitude'\"} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "mature_method (str, optional): \"amplitude\" (default since item 31) or \"derivative\" (the default before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1657",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: mature_amplitude_fraction=0.90 vs code {'get_periods': '0.9', 'determine_periods': '0.9'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Default 0.90."
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1672",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: mature_min_depth=0.8 vs code {'get_periods': '0.8', 'determine_periods': '0.8'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``find_stages.find_mature_stage``. Default 0.8 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) admits every valley and"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1707",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "``find_stages.find_intensification_period``. Default 0.05 since item 31; 0.0 (the default before item 31; not a parameter of the 2.0.0 release) switches the"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1718",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: —; verifier: decay_tail_amplitude_fraction=0.3 vs code {'get_periods': '0.3', 'determine_periods': '0.3'} → ok",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "Default 0.3 since item 31; None (the default before item 31; not a parameter of the 2.0.0 release) disables this check, reproducing the exact behaviour"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1729",
+   "kind": "docstring",
+   "function": "determine_periods",
+   "reference": "determine_periods signature: cutoff_high=18.0, cutoff_low=168, replace_endpoints_with_lowpass=0",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "- **Data Frequency**: The default values for `cutoff_low`, `cutoff_high`, `replace_endpoints_with_lowpass`,"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1845",
+   "kind": "comment",
+   "function": "main",
+   "reference": "main signature: —",
+   "verdict": "kept",
+   "reason": "comment in main(): it calls with default parameters",
+   "text": "# Test with default parameters"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1850",
+   "kind": "comment",
+   "function": "main",
+   "reference": "main signature: —",
+   "verdict": "kept",
+   "reason": "comment in main()",
+   "text": "# Test with default parameters but without filtering"
+  },
+  {
+   "hit": "cyclophaser/determine_periods.py:1855",
+   "kind": "comment",
+   "function": "main",
+   "reference": "main signature: —",
+   "verdict": "kept",
+   "reason": "comment in main()",
+   "text": "# Test with default parameters but without smoothing"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:8",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: length_scale='local'",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# length_scale: \"global\" (default) vs \"local\""
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:28",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: length_scale='local'",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# `length_scale=\"local\"` (opt-in; default remains \"global\" for exact backward"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:79",
+   "kind": "docstring",
+   "function": "_amplitude_mature_bounds",
+   "reference": "_amplitude_mature_bounds signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "distance to the neighbouring z_peak (that's the \"derivative\"/default method,"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:89",
+   "kind": "docstring",
+   "function": "_amplitude_mature_bounds",
+   "reference": "_amplitude_mature_bounds signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "exactly like the previous/next z_peak pair the default method already uses"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:173",
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "- \"derivative\" (default, unchanged behaviour): the mature window is a fixed"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:176",
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "- \"amplitude\" (opt-in): the mature window is the contiguous stretch of z"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:189",
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "reference": "own fallback: mature_method='derivative'; verifier: mature_method=derivative vs code {'find_stages args_periods fallback': \"'derivative'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "- 'mature_method' (str, optional): \"derivative\" (default) or"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:197",
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "reference": "own fallback: —; verifier: mature_amplitude_fraction=0.90 vs code {'find_stages args_periods fallback': '0.9'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "reach to count as mature. Default 0.90. Only used when"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:206",
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "reference": "own fallback: —; verifier: mature_min_depth=0.0 vs code {'find_stages args_periods fallback': '0.0'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "window around one is sized. Default 0.0 admits every valley and"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:207",
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "reference": "own fallback: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "reproduces the previous behaviour exactly. A series whose z range"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:217",
+   "kind": "docstring",
+   "function": "find_mature_stage",
+   "reference": "own fallback: mature_method='derivative'; verifier: length_scale=global vs code {'find_stages args_periods fallback': \"'global'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "mature_method=\"derivative\" (see note below). 'global' (default)"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:295",
+   "kind": "comment",
+   "function": "find_mature_stage",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# Default 0.0 disables the rule: every valley has D1 >= 0 by construction,"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:452",
+   "kind": "docstring",
+   "function": "find_intensification_period",
+   "reference": "own fallback: —",
+   "verdict": "kept",
+   "reason": "intensification_min_depth: find_intensification_period's own fallback 0.0 (the docstring now says these are direct-call fallbacks)",
+   "text": "than it started. Default 0.0 admits every segment whose drop is"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:453",
+   "kind": "docstring",
+   "function": "find_intensification_period",
+   "reference": "own fallback: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "non-negative-or-larger, i.e. reproduces the previous behaviour"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:458",
+   "kind": "docstring",
+   "function": "find_intensification_period",
+   "reference": "own fallback: length_scale='global'; verifier: length_scale=global vs code {'find_stages args_periods fallback': \"'global'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "- 'length_scale' (str, optional): 'global' (default) measures both"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:517",
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# Default 0.0 disables the rule outright: the guard below runs the floor"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:518",
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# ONLY when it is > 0, so on the default path no depth is computed and no"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:519",
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "reference": "own fallback: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "# segment can be rejected — the function reproduces its previous behaviour"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:521",
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# segment that ends shallower than it starts is still admitted by default,"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:523",
+   "kind": "comment",
+   "function": "find_intensification_period",
+   "reference": "own fallback: —",
+   "verdict": "kept",
+   "reason": "'smuggled in under a default value' is not a claim about a default",
+   "text": "# default value.)"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:596",
+   "kind": "docstring",
+   "function": "find_decay_period",
+   "reference": "own fallback: length_scale='global'; verifier: length_scale=global vs code {'find_stages args_periods fallback': \"'global'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "- 'length_scale' (str, optional): 'global' (default) measures both"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:666",
+   "kind": "docstring",
+   "function": "find_residual_period",
+   "reference": "own fallback: decay_tail_amplitude_fraction=None",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "'decay_tail_amplitude_fraction' note (opt-in, default None: no effect)"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:730",
+   "kind": "docstring",
+   "function": "find_residual_period",
+   "reference": "own fallback: —; verifier: decay_tail_amplitude_fraction=None vs code {'find_stages args_periods fallback': 'None'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Default None disables this check entirely, reproducing the exact"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:819",
+   "kind": "comment",
+   "function": "find_residual_period",
+   "reference": "own fallback: decay_tail_amplitude_fraction=None",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# decay_tail_amplitude_fraction (opt-in, see docstring above): if the NaN"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:840",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: incipient_method='plateau'",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# incipient_method: \"geometric\" (default) vs \"plateau\""
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:844",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: —; verifier: threshold_incipient_length=0.4 vs code {'get_periods': '0.4', 'determine_periods': '0.4'} → ok",
+   "verdict": "kept",
+   "reason": "threshold_incipient_length default 0.4 in the get_periods signature",
+   "text": "# (default 0.4) of the span between the start of the series and the next dz"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:851",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "dated measurement ('at 01c4492' two lines above)",
+   "text": "# a median 58 % (author's calibration) / 77 % (package defaults) of its own"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:854",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: incipient_method='plateau'",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# `incipient_method=\"plateau\"` (opt-in; default remains \"geometric\", which is"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:855",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# byte-identical to every prior version) replaces that with a direct slope"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:861",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# artifact at t0 has been dealt with. Under bare package defaults the very"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:866",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# report. This is why the method is opt-in and why tau is exposed rather than"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:899",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: incipient_smooth_window=5",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "# before, and `incipient_smooth_window=0` (the default) reproduces the previous"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:932",
+   "kind": "docstring",
+   "function": "_smooth_incipient_probe",
+   "reference": "_smooth_incipient_probe signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "* ``window <= 0`` disables it (the default);"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:964",
+   "kind": "docstring",
+   "function": "_incipient_plateau_rel",
+   "reference": "_incipient_plateau_rel signature: —",
+   "verdict": "kept",
+   "reason": "_incipient_plateau_rel's own signature default (smooth_window=0)",
+   "text": "BEFORE differentiating it. 0 (default) disables it, reproducing the"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:965",
+   "kind": "docstring",
+   "function": "_incipient_plateau_rel",
+   "reference": "_incipient_plateau_rel signature: —",
+   "verdict": "kept",
+   "reason": "same sentence as :964",
+   "text": "previous behaviour exactly. **Only used when"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:970",
+   "kind": "docstring",
+   "function": "_incipient_plateau_rel",
+   "reference": "_incipient_plateau_rel signature: —",
+   "verdict": "kept",
+   "reason": "_incipient_plateau_rel's own signature default (smooth_polyorder=3)",
+   "text": "Default 3."
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1039",
+   "kind": "docstring",
+   "function": "_spare_enclosed_intensification",
+   "reference": "_spare_enclosed_intensification signature: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "\"\"\"Item 30 (opt-in): the plateau boundary, pulled back so as not to erase an"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1077",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "``\"geometric\"`` (default, unchanged from every prior version)"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1083",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —",
+   "verdict": "corrected",
+   "reason": "false as written (see edit_16d_log.json)",
+   "text": "``\"plateau\"`` (opt-in)"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1102",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: incipient_method='geometric'; verifier: incipient_method=geometric vs code {'find_stages args_periods fallback': \"'geometric'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "- 'incipient_method' (str): \"geometric\" (default) or \"plateau\"."
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1104",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —; verifier: incipient_plateau_tau=0.20 vs code {'find_stages args_periods fallback': '0.2'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "normalised slope. Default 0.20. Only used when method=\"plateau\"."
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1105",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: incipient_plateau_signal='derivative'; verifier: incipient_plateau_signal=derivative vs code {'find_stages args_periods fallback': \"'derivative'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "- 'incipient_plateau_signal' (str): \"derivative\" (default) or"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1107",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: incipient_plateau_crossing='single'; verifier: incipient_plateau_crossing=single vs code {'find_stages args_periods fallback': \"'single'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "- 'incipient_plateau_crossing' (str): \"single\" (default) or"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1110",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —; verifier: incipient_plateau_k=3 vs code {'find_stages args_periods fallback': '3'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "\"sustained\". Default 3. Only used when crossing=\"sustained\"."
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1113",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —; verifier: incipient_smooth_window=0 vs code {'find_stages args_periods fallback': '0'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "Default 0 (disabled). Only used when method=\"plateau\" AND"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1116",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —; verifier: incipient_smooth_polyorder=3 vs code {'find_stages args_periods fallback': '3'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "pass. Default 3."
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1120",
+   "kind": "docstring",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —; verifier: incipient_plateau_spare_intensification=False vs code {'find_stages args_periods fallback': 'False'} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "plateau branch). Default False. Only used when method=\"plateau\"."
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1127",
+   "kind": "comment",
+   "function": "find_incipient_period",
+   "reference": "own fallback: —",
+   "verdict": "kept",
+   "reason": "explains why the stage function uses .get() fallbacks; true",
+   "text": "# .get() with defaults: keeps the function callable with the partial"
+  },
+  {
+   "hit": "cyclophaser/find_stages.py:1235",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "get_periods signature: —",
+   "verdict": "kept",
+   "reason": "comment in main()",
+   "text": "# Modify the array_vorticity_args if provided, otherwise use defaults"
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:6",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "lanczos_filter / lanczos_bandpass_filter signature: boundary_padding='reflect'; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "# boundary_padding: \"reflect\" (default) vs \"zero\" / \"edge\""
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:41",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "—",
+   "verdict": "kept",
+   "reason": "boundary_padding: lanczos_filter signature 'reflect'",
+   "text": "#   \"reflect\" -- DEFAULT since the boundary-artifact fix.  Pads with the"
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:48",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "—",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "#                the default changed."
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:54",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "—",
+   "verdict": "kept",
+   "reason": "boundary_padding: lanczos_filter signature 'reflect'",
+   "text": "# The DEFAULT IS NOW \"reflect\".  This is a deliberate behaviour change: leaving"
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:55",
+   "kind": "comment",
+   "function": "<module>",
+   "reference": "—",
+   "verdict": "kept",
+   "reason": "same sentence as :54",
+   "text": "# a documented, quantified artefact on by default was the larger cost.  Anyone"
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:83",
+   "kind": "docstring",
+   "function": "_convolve_same",
+   "reference": "_convolve_same signature: —",
+   "verdict": "kept",
+   "reason": "boundary_padding: _convolve_same signature 'reflect'",
+   "text": "With \"reflect\" (the default) or \"edge\" the input is padded explicitly with"
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:168",
+   "kind": "docstring",
+   "function": "lanczos_filter",
+   "reference": "lanczos_filter signature: —; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "own ends before convolution. ``\"reflect\"`` (default) and ``\"edge\"``"
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:170",
+   "kind": "docstring",
+   "function": "lanczos_filter",
+   "reference": "lanczos_filter signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "reproduces the behaviour of versions before this default changed."
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:226",
+   "kind": "docstring",
+   "function": "lanczos_bandpass_filter",
+   "reference": "lanczos_bandpass_filter signature: —; verifier: boundary_padding=reflect vs code {'process_vorticity': \"'reflect'\", 'determine_periods': \"'reflect'\", 'lanczos_filter': \"'reflect'\", 'lanczos_bandpass_filter': \"'reflect'\"} → ok",
+   "verdict": "kept",
+   "reason": "matches the reference",
+   "text": "own ends before convolution. ``\"reflect\"`` (default) and ``\"edge\"``"
+  },
+  {
+   "hit": "cyclophaser/lanczos_filter.py:228",
+   "kind": "docstring",
+   "function": "lanczos_bandpass_filter",
+   "reference": "lanczos_bandpass_filter signature: —",
+   "verdict": "kept",
+   "reason": "historical statement, labelled as such",
+   "text": "reproduces the behaviour of versions before this default changed."
+  }
+ ]
+}

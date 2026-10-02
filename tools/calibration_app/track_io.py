@@ -235,6 +235,32 @@ def _pick(df: pd.DataFrame, col: str, header: bool, what: str) -> pd.Series:
     return df.iloc[:, int(col) - 1]
 
 
+# Leading bytes of the binary formats a track is most often saved as by mistake.
+_BINARY_SIGNATURES = (
+    (b"PAR1", "Parquet"),
+    (b"PK\x03\x04", "a zip archive (e.g. .xlsx)"),
+    (b"\x89HDF\r\n\x1a\n", "HDF5 / netCDF-4"),
+    (b"CDF\x01", "netCDF"),
+    (b"CDF\x02", "netCDF"),
+    (b"GRIB", "GRIB"),
+    (b"\x1f\x8b", "gzip"),
+)
+
+
+def binary_kind(data: bytes) -> str | None:
+    """The binary format `data` is in, or None for text.
+
+    A known signature at the start names the format; otherwise a NUL byte in
+    the first 4 KiB marks the file as binary (no text track contains one).
+    """
+    for sig, kind in _BINARY_SIGNATURES:
+        if data.startswith(sig):
+            return kind
+    if b"\x00" in data[:4096]:
+        return "an unrecognised binary format"
+    return None
+
+
 def normalize_track(data: bytes, fmt: CustomFormat | None = None) -> bytes:
     """Any accepted track → standard-layout bytes.
 
@@ -243,6 +269,12 @@ def normalize_track(data: bytes, fmt: CustomFormat | None = None) -> bytes:
     rewritten as ``time;min_max_zeta_850`` with its vorticity tokens verbatim.
     The result still has to pass ``read_track``; this function only reshapes.
     """
+    kind = binary_kind(data)
+    if kind is not None:
+        raise TrackFormatError(
+            f"this is a binary file ({kind}), not a text track. Save the track as a "
+            f"text file (.csv or .txt) with a date column and a vorticity column, "
+            f"then upload that.")
     if is_standard(data):
         return data
     if fmt is None:

@@ -1,17 +1,20 @@
 """Item 31, stage 2a, step 1 — recovery table for the configs removed by this front.
 
-Danilo's decision (2026-09-28, DESIGN.md §8): params-1 … params-14 are REMOVED
+Danilo's decision (2026-09-28, archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/DESIGN.md §8):
+params-1 … params-14 are REMOVED
 from research/labels/configs/; params-15 stays. Before anything is deleted,
 this script records, for every file to be removed:
 
     file | sha256 | last commit in which it exists | command to recover it
 
 "Last commit in which it exists" is HEAD at generation time, which must be the
-PARENT of the commit that deletes the files (asserted by gate_2a.py). Each row
+PARENT of the commit that deletes the files (asserted by
+archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/gate_2a.py). Each row
 is VERIFIED here: `git show <commit>:<path>` is hashed and must equal both the
 working-tree file and the sha256 recorded in research/labels/README.md's table.
 
-Output: recovery_table.md (pasted into DESIGN.md §10), recovery_table.json.
+Output: recovery_table.md (pasted into
+archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/DESIGN.md §10), recovery_table.json.
 Run: python -P research/labels/diagnostics/item31/recovery_table.py
 """
 

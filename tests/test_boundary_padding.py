@@ -24,8 +24,8 @@
 # accounts for >= 80% of the slope measured at t0 in 51/51 tracks
 # (research/boundary-artifacts branch diagnostic).
 #
-# ``boundary_padding`` (opt-in; default "zero" reproduces prior behaviour
-# exactly) selects the padding used instead.  The kernels themselves are NOT
+# ``boundary_padding`` selects the padding used instead (default "reflect";
+# "zero" reproduces the pre-fix convolution exactly and stays reachable).  The kernels themselves are NOT
 # touched -- the correction is purely a boundary condition on the convolution.
 #
 # What this module locks in
@@ -201,9 +201,11 @@ def test_default_differs_from_explicit_zero(n):
 @pytest.mark.parametrize("filter_params", [_FILTER_PARAMS_INERT, _FILTER_PARAMS_ACTIVE],
                          ids=["inert", "active"])
 @pytest.mark.parametrize("cyclone_id", _ALL_TRACK_IDS)
-def test_process_vorticity_default_is_edge(cyclone_id, filter_params):
-    """process_vorticity: omitting the parameter == boundary_padding='edge'
-    (the default since item 31; it was 'reflect' up to 2.0.0).
+def test_process_vorticity_default_is_reflect(cyclone_id, filter_params):
+    """process_vorticity: omitting the parameter == boundary_padding='reflect'
+    (the default since C1 of the cleanup front; 'edge' from item 31 until then,
+    and still the padding of params-track; the 2.0.0 release has no such
+    parameter).
 
     Checked on both the inert path (``use_filter=1``, a single-tap kernel) and
     the real one (``use_filter='auto'``), because only the latter runs an actual
@@ -215,7 +217,7 @@ def test_process_vorticity_default_is_edge(cyclone_id, filter_params):
         warnings.simplefilter("ignore")
         base = process_vorticity(zeta_df.copy(), **filter_params)
         explicit = process_vorticity(
-            zeta_df.copy(), boundary_padding="edge", **filter_params
+            zeta_df.copy(), boundary_padding="reflect", **filter_params
         )
     for var in base.data_vars:
         np.testing.assert_array_equal(
@@ -248,29 +250,29 @@ def test_process_vorticity_explicit_zero_still_reproduces_scipy_same(cyclone_id)
 
 
 @pytest.mark.parametrize("cyclone_id", _ALL_TRACK_IDS)
-def test_determine_periods_default_is_edge(cyclone_id):
-    """End-to-end phases: omitting the parameter == boundary_padding='edge' (item 31)."""
+def test_determine_periods_default_is_reflect(cyclone_id):
+    """End-to-end phases: omitting the parameter == boundary_padding='reflect' (C1)."""
     series = _load_track(cyclone_id)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         base = determine_periods(series, **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS)
         explicit = determine_periods(
-            series, boundary_padding="edge", **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS
+            series, boundary_padding="reflect", **_FILTER_PARAMS_ACTIVE, **_PHASE_PARAMS
         )
     pd.testing.assert_frame_equal(base, explicit)
 
 
-def test_package_defaults_use_edge_end_to_end():
+def test_package_defaults_use_reflect_end_to_end():
     """A bare determine_periods() call on the shipped example must equal the same
-    call with boundary_padding="edge" spelled out -- i.e. the package default
-    really is edge on the all-defaults path, not just in the signature
-    (item 31; it was reflect up to 2.0.0)."""
+    call with boundary_padding="reflect" spelled out -- i.e. the package default
+    really is reflect on the all-defaults path, not just in the signature
+    (C1; it was edge from item 31 until then)."""
     track = pd.read_csv(example_file, parse_dates=[0], delimiter=";", index_col=[0])
     series = track["min_max_zeta_850"]
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         base = determine_periods(series, x=track.index)
-        explicit = determine_periods(series, x=track.index, boundary_padding="edge")
+        explicit = determine_periods(series, x=track.index, boundary_padding="reflect")
     pd.testing.assert_frame_equal(base, explicit)
 
 

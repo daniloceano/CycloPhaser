@@ -1,0 +1,1 @@
+Removing worktrees/wt_exp: gitdir file points to non-existent location

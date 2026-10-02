@@ -69,14 +69,15 @@ def test_inspector_renders_with_the_depth_floors_set():
 
     tables = {("Verdict" in d.value.columns): d.value for d in at.dataframe}
     ledger, mature = tables[True], tables[False]
-    assert "Depth (D2)" in ledger.columns
+    assert "Segment depth (intensification_min_depth)" in ledger.columns
+    assert not any("D2" in c for c in ledger.columns)  # no clash with the refuted D2 metric (item 20b)
     assert "Depth (D1)" in mature.columns
 
     accepted = ledger[(ledger["Step"] == "intensification")
                       & ledger["Type"].str.startswith("candidate")
                       & (ledger["Verdict"] == "ACCEPTED")]
     assert len(accepted) > 0
-    assert (accepted["Depth (D2)"].astype(float) >= 0.50).all()
+    assert (accepted["Segment depth (intensification_min_depth)"].astype(float) >= 0.50).all()
 
     assert "below mature_min_depth" in mature["Discard reason"].tolist()
     below = mature[mature["Discard reason"] == "below mature_min_depth"]

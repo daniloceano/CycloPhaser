@@ -1,0 +1,8 @@
+{
+ "warnings": 1,
+ "errors": 0,
+ "warning_lines": [
+  "WARNING: html_static_path entry '_static' does not exist"
+ ],
+ "error_lines": []
+}

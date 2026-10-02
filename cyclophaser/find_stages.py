@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.signal import savgol_filter
 
 # ---------------------------------------------------------------------------
-# length_scale: "global" (default) vs "local"
+# length_scale: "global" vs "local" ("local" is the get_periods default since item 31)
 # ---------------------------------------------------------------------------
 # Five of the seven detection thresholds (threshold_intensification_length,
 # threshold_intensification_gap, threshold_mature_length, threshold_decay_length,
@@ -25,8 +25,9 @@ from scipy.signal import savgol_filter
 # dominated by the larger one, so the smaller cycle's segments are rejected
 # wholesale.
 #
-# `length_scale="local"` (opt-in; default remains "global" for exact backward
-# compatibility) makes the five global thresholds behave like the two that were
+# `length_scale="local"` (introduced as opt-in; the get_periods default since
+# item 31, while the stage functions below fall back to "global" when called
+# directly without the key) makes the five global thresholds behave like the two that were
 # already local: each candidate segment is checked against the span of the
 # *local* oscillation it belongs to, not the whole series. See
 # `_local_cycle_scale` below for the precise definition used by
@@ -76,7 +77,7 @@ def _amplitude_mature_bounds(df, previous_z_peak, z_valley, next_z_peak, mature_
     window as the CONTIGUOUS stretch of z around z_valley that stays within
     ``mature_amplitude_fraction`` of the cycle's amplitude — i.e. "still at least
     X% as intense as the peak" — rather than a fixed proportion of the *time*
-    distance to the neighbouring z_peak (that's the "derivative"/default method,
+    distance to the neighbouring z_peak (that's the "derivative" method,
     which anchors on dz extrema and can drift off-centre when the smoothed
     derivative lags the true z minimum; see the mature_method note in
     get_periods).
@@ -86,7 +87,7 @@ def _amplitude_mature_bounds(df, previous_z_peak, z_valley, next_z_peak, mature_
     meaningful fraction on its own (same reasoning as prominence_relative in
     find_peaks_valleys). Instead the amplitude is measured relative to the
     z_peak that bounds the cycle on each side — the peak-to-valley drop —
-    exactly like the previous/next z_peak pair the default method already uses
+    exactly like the previous/next z_peak pair the "derivative" method already uses
     to size its window via threshold_mature_distance:
 
         amplitude_prev = z[previous_z_peak] - z[z_valley]   (intensification side)
@@ -170,10 +171,12 @@ def find_mature_stage(df, **args_periods):
 
     Two mutually exclusive detection methods are available via 'mature_method':
 
-    - "derivative" (default, unchanged behaviour): the mature window is a fixed
+    - "derivative" (the fallback on a direct call without the key): the mature
+      window is a fixed
       proportion (threshold_mature_distance) of the *time* distance between the
       z_valley and each neighbouring z_peak. This is the original method.
-    - "amplitude" (opt-in): the mature window is the contiguous stretch of z
+    - "amplitude" (the get_periods default since item 31): the mature window is
+      the contiguous stretch of z
       around the z_valley that stays within mature_amplitude_fraction of the
       cycle's peak-to-valley amplitude on each side. See
       _amplitude_mature_bounds for the full definition and rationale (fixes a
@@ -185,7 +188,9 @@ def find_mature_stage(df, **args_periods):
         df (pd.DataFrame): DataFrame containing vorticity data with columns for
             'z_peaks_valleys' and 'periods'.
         **args_periods: Variable length argument list containing period-specific
-            thresholds, including:
+            thresholds. A default named below is this function's own fallback for
+            a key absent from args_periods, which only a direct call produces:
+            get_periods always passes every key, with its own defaults. Including:
             - 'mature_method' (str, optional): "derivative" (default) or
               "amplitude". See above.
             - 'threshold_mature_distance' (float): Factor to calculate mature
@@ -292,7 +297,8 @@ def find_mature_stage(df, **args_periods):
     # question from how the window around it is sized, so the floor applies to
     # "derivative" and "amplitude" alike.
     #
-    # Default 0.0 disables the rule: every valley has D1 >= 0 by construction,
+    # The fallback 0.0 (a direct call without the key; get_periods passes its own
+    # default) disables the rule: every valley has D1 >= 0 by construction,
     # so the filter below is a no-op and the function reproduces its previous
     # behaviour exactly.
     if mature_min_depth > 0 and len(z_valleys) > 0:
@@ -430,7 +436,9 @@ def find_intensification_period(df, **args_periods):
         df (pd.DataFrame): DataFrame containing vorticity data with columns
             for 'z_peaks_valleys' and 'periods'.
         **args_periods: Variable length argument list containing period-specific
-            thresholds, including:
+            thresholds. A default named below is this function's own fallback for
+            a key absent from args_periods, which only a direct call produces:
+            get_periods always passes every key, with its own defaults. Including:
             - 'threshold_intensification_length' (float): Minimum length for an
               intensification stage, as a fraction of a length that depends on
               'length_scale'.
@@ -514,11 +522,12 @@ def find_intensification_period(df, **args_periods):
     # deepened, or positive where neither did. Judging after the stitch would
     # measure a different quantity from the one this floor is defined on.
     #
-    # Default 0.0 disables the rule outright: the guard below runs the floor
-    # ONLY when it is > 0, so on the default path no depth is computed and no
+    # The fallback 0.0 (a direct call without the key; get_periods passes its own
+    # default) disables the rule outright: the guard below runs the floor
+    # ONLY when it is > 0, so on that path no depth is computed and no
     # segment can be rejected — the function reproduces its previous behaviour
     # exactly. (0.0 is deliberately "off" rather than "accept D2 >= 0": a
-    # segment that ends shallower than it starts is still admitted by default,
+    # segment that ends shallower than it starts is still admitted under 0.0,
     # because changing that would be a behaviour change smuggled in under a
     # default value.)
     z_range = np.nan
@@ -588,7 +597,9 @@ def find_decay_period(df, **args_periods):
         df (pd.DataFrame): DataFrame containing vorticity data with columns for
             'z_peaks_valleys' and 'periods'.
         **args_periods: Variable length argument list containing period-specific
-            thresholds, including:
+            thresholds. A default named below is this function's own fallback for
+            a key absent from args_periods, which only a direct call produces:
+            get_periods always passes every key, with its own defaults. Including:
             - 'threshold_decay_length' (float): Minimum decay length, as a
               fraction of a length that depends on 'length_scale'.
             - 'threshold_decay_gap' (float): Maximum gap in decay periods, as a
@@ -663,8 +674,8 @@ def find_residual_period(df, **args_periods):
     should be applied, particularly after mature and intensification stages if no subsequent
     decay or mature stages are detected.
 
-    'decay_tail_amplitude_fraction' note (opt-in, default None: no effect)
-    ------------------------------------------------------------------------
+    'decay_tail_amplitude_fraction' note (fallback None on a direct call: no effect)
+    --------------------------------------------------------------------------------
     The catch-all rule that fills the NaN tail after the last 'decay' block with
     'residual' (below) can be triggered by an artifact rather than a genuine
     re-intensification: on a single-cycle series, ``find_peaks_valleys``'
@@ -724,7 +735,9 @@ def find_residual_period(df, **args_periods):
         df (pd.DataFrame): DataFrame containing vorticity data with a 'periods'
             column and a 'z' column (smoothed vorticity).
         **args_periods: Variable length argument list containing period-specific
-            thresholds, including:
+            thresholds. A default named below is this function's own fallback for
+            a key absent from args_periods, which only a direct call produces:
+            get_periods always passes every key, with its own defaults. Including:
             - 'decay_tail_amplitude_fraction' (float, optional): Fraction (0, 1]
               of the cycle's peak-to-valley amplitude. See the note above.
               Default None disables this check entirely, reproducing the exact
@@ -816,7 +829,7 @@ def find_residual_period(df, **args_periods):
         if 'decay' in unique_phases:
             last_decay_index = df[df['periods'] == 'decay'].index[-1]
 
-            # decay_tail_amplitude_fraction (opt-in, see docstring above): if the NaN
+            # decay_tail_amplitude_fraction (see the docstring above; None switches it off): if the NaN
             # tail right after this decay block is not a genuine re-deepening, extend
             # decay over it instead of letting the catch-all below mark it residual.
             if decay_tail_amplitude_fraction is not None:
@@ -837,7 +850,7 @@ def find_residual_period(df, **args_periods):
     return df
 
 # ---------------------------------------------------------------------------
-# incipient_method: "geometric" (default) vs "plateau"
+# incipient_method: "geometric" vs "plateau" ("plateau" is the get_periods default since item 31)
 # ---------------------------------------------------------------------------
 # The historical ("geometric") incipient rule places the incipient/next-phase
 # boundary at a fixed FRACTION OF A DISTANCE: `threshold_incipient_length`
@@ -851,19 +864,21 @@ def find_residual_period(df, **args_periods):
 # a median 58 % (author's calibration) / 77 % (package defaults) of its own
 # maximum. The boundary is not sitting on a low-slope start.
 #
-# `incipient_method="plateau"` (opt-in; default remains "geometric", which is
-# byte-identical to every prior version) replaces that with a direct slope
+# `incipient_method="plateau"` (introduced as opt-in, "geometric" staying the
+# default and byte-identical to every prior version; the get_periods default
+# since item 31) replaces that with a direct slope
 # criterion: the incipient phase is the leading stretch over which the
 # normalised slope stays below `incipient_plateau_tau`, i.e. the initial
 # "plateau" before the cyclone starts deepening in earnest.
 #
 # IMPORTANT MEASURED CAVEAT: this criterion is only DEFINABLE when the boundary
-# artifact at t0 has been dealt with. Under bare package defaults the very
+# artifact at t0 has been dealt with. Under the bare package defaults of that
+# measurement (01c4492, above) the very
 # first sample already exceeds every tau up to 0.30 on 35-50 of the 51 tracks
 # (r(t0) median 0.526), so the rule degenerates to "no incipient phase". Under
 # the author's validated calibration (r(t0) median 0.068) a plateau exists, but
 # it is short - a median of 1-3 timesteps depending on tau. See section 3 of the
-# report. This is why the method is opt-in and why tau is exposed rather than
+# report. This is why the method was introduced as opt-in and why tau is exposed rather than
 # hard-coded.
 #
 # Unlike the geometric rule, the plateau rule is SELF-CONTAINED: it scans from
@@ -896,7 +911,8 @@ def find_residual_period(df, **args_periods):
 # better. Instead the probe gets its own light denoising, applied to the raw
 # vorticity before differentiating it, and applied ONLY here: `df['z']` and
 # `df['dz']` are untouched, so every other phase sees exactly what it saw
-# before, and `incipient_smooth_window=0` (the default) reproduces the previous
+# before, and `incipient_smooth_window=0` (the default before item 31, and the
+# fallback of find_incipient_period on a direct call) reproduces the previous
 # behaviour byte for byte.
 #
 # The goal is denoising towards the underlying sinusoid, NOT smoothing the
@@ -929,7 +945,8 @@ def _smooth_incipient_probe(x, window, polyorder):
     unchanged rather than raising, because this is a probe-side convenience and
     a bad window should degrade to "no smoothing", not break phase detection:
 
-      * ``window <= 0`` disables it (the default);
+      * ``window <= 0`` disables it (the fallback of find_incipient_period on a
+        direct call);
       * an even window is rounded up to odd (``| 1``), as ``savgol_filter``
         requires, matching the ``len // 4 | 1`` idiom used elsewhere;
       * a window longer than the series is clamped to the longest odd length
@@ -1036,7 +1053,8 @@ def _incipient_plateau_boundary(rel, tau, crossing, k):
 
 
 def _spare_enclosed_intensification(periods, boundary: int) -> int:
-    """Item 30 (opt-in): the plateau boundary, pulled back so as not to erase an
+    """Item 30 (the get_periods default since item 31): the plateau boundary,
+    pulled back so as not to erase an
     intensification that lies wholly before it.
 
     The plateau overwrite writes ``incipient`` over ``[0, boundary)``. When the
@@ -1074,13 +1092,13 @@ def find_incipient_period(df, **args_periods):
 
     Two methods are available, selected by ``incipient_method``:
 
-    ``"geometric"`` (default, unchanged from every prior version)
+    ``"geometric"`` (the fallback on a direct call without the key; unchanged from every prior version)
         The incipient phase runs from the start of the first intensification or
         decay segment to ``threshold_incipient_length`` of the way to the next
         dz valley/peak, dispatched through three cases on the phase order
         (see the case A/B/C branches below).
 
-    ``"plateau"`` (opt-in)
+    ``"plateau"`` (the get_periods default since item 31)
         The incipient phase is the leading stretch over which the normalised
         slope stays below ``incipient_plateau_tau``. Self-contained: it scans
         from t0 and does not use the case A/B/C dispatch or
@@ -1092,7 +1110,9 @@ def find_incipient_period(df, **args_periods):
             'periods', 'dz_peaks_valleys', and — for the plateau method — 'dz'
             and 'z_unfil'.
         **args_periods: Variable length argument list containing period-specific
-            thresholds, including:
+            thresholds. A default named below is this function's own fallback for
+            a key absent from args_periods, which only a direct call produces:
+            get_periods always passes every key, with its own defaults. Including:
             - 'threshold_incipient_length' (float): Fraction of the time range
               between the start of intensification or decay and the next dz
               valley/peak to be marked as incipient. **Ignored when**

@@ -1,0 +1,4 @@
+HEAD: 06d85504474b72a894b4e7f72b2944fc577fd139
+python: <env>/bin/python
+sys.executable: <env>/bin/python
+cyclophaser.__file__: <repo>/cyclophaser/__init__.py

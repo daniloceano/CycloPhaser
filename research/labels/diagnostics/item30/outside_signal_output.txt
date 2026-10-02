@@ -1,8 +1,0 @@
-cyclophaser.__file__ = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
-layer_inspector.__file__ = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/tools/calibration_app/layer_inspector.py
-STEP 1: the 5 changed outside the prediction: 19850338, 19890443, 20011085, 20040726, 20110785
-STEP 1: none is TEST (True), VALIDATION (True) or in a labelled batch (True)
-STEP 1 (aggregate): marked bad 3/5; signal 0/5; c3 = 1 in 5/5; a z valley between E and the boundary in 5/5
-STEP 2 replica fidelity (full rule replicated == params-15): TRAIN 54/54, swell 196/196
-STEP 2 TRAIN: narrow variant changes 5: 19810854, 19860380, 19870927, 19940445, 20120297 | same set as the rule (R1): True
-STEP 2 swell: narrow variant changes 10 | == the 10 predicted: True | of the 5 outside the signal: 0

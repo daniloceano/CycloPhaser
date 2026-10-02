@@ -1,0 +1,19 @@
+{
+ "research/cleanup/MANIFEST.md": {
+  "<env> <- env prefix": 41
+ },
+ "research/cleanup/passo0/baseline_digest_raw.txt": {
+  "<repo> <- repo root": 2
+ },
+ "research/cleanup/passo0/baseline_env.txt": {
+  "<env> <- env prefix": 2,
+  "<repo> <- repo root": 1
+ },
+ "research/cleanup/passo0/baseline_suite_raw.txt": {
+  "<env> <- env prefix": 8,
+  "<repo> <- repo root": 1
+ },
+ "research/cleanup/passo0/inventory.json": {
+  "<env> <- env prefix": 41
+ }
+}

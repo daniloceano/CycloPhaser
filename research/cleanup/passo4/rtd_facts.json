@@ -1,0 +1,344 @@
+{
+ "signature_n_params": {
+  "determine_periods": 38,
+  "get_periods": 28,
+  "process_vorticity": 9
+ },
+ "defaults": {
+  "x": "None",
+  "plot": "False",
+  "plot_steps": "False",
+  "export_dict": "False",
+  "hemisphere": "'southern'",
+  "use_filter": "'auto'",
+  "replace_endpoints_with_lowpass": "0",
+  "use_smoothing": "False",
+  "use_smoothing_twice": "False",
+  "savgol_polynomial": "3",
+  "cutoff_low": "168",
+  "cutoff_high": "18.0",
+  "boundary_padding": "'reflect'",
+  "threshold_intensification_length": "0.075",
+  "threshold_intensification_gap": "0.075",
+  "threshold_mature_distance": "0.18",
+  "threshold_mature_length": "0.15",
+  "threshold_decay_length": "0.075",
+  "threshold_decay_gap": "0.075",
+  "threshold_incipient_length": "0.4",
+  "prominence": "None",
+  "prominence_relative": "0.3",
+  "reclassify_index0": "True",
+  "length_scale": "'local'",
+  "mature_method": "'amplitude'",
+  "mature_amplitude_fraction": "0.9",
+  "mature_min_depth": "0.8",
+  "intensification_min_depth": "0.05",
+  "decay_tail_amplitude_fraction": "0.3",
+  "incipient_method": "'plateau'",
+  "incipient_plateau_tau": "0.2",
+  "incipient_plateau_signal": "'vorticity'",
+  "incipient_plateau_crossing": "'sustained'",
+  "incipient_plateau_k": "5",
+  "incipient_smooth_window": "5",
+  "incipient_smooth_polyorder": "3",
+  "incipient_plateau_spare_intensification": "True"
+ },
+ "threshold_params": [
+  "threshold_decay_gap",
+  "threshold_decay_length",
+  "threshold_incipient_length",
+  "threshold_intensification_gap",
+  "threshold_intensification_length",
+  "threshold_mature_distance",
+  "threshold_mature_length"
+ ],
+ "default_divergences_in_docs": [
+  {
+   "file": "docs/api.rst",
+   "line": 22,
+   "param": "replace_endpoints_with_lowpass",
+   "stated": "24",
+   "code": {
+    "process_vorticity": "0",
+    "determine_periods": "0"
+   }
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 24,
+   "param": "use_smoothing_twice",
+   "stated": "auto",
+   "code": {
+    "process_vorticity": "False",
+    "determine_periods": "False"
+   }
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 29,
+   "param": "threshold_mature_distance",
+   "stated": "0.125",
+   "code": {
+    "get_periods": "0.18",
+    "determine_periods": "0.18"
+   }
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 30,
+   "param": "threshold_mature_length",
+   "stated": "0.03",
+   "code": {
+    "get_periods": "0.15",
+    "determine_periods": "0.15"
+   }
+  }
+ ],
+ "api_cutoff_sentence": {
+  "line": [
+   26
+  ],
+  "code_cutoff_low": 168,
+  "code_cutoff_high": 18.0
+ },
+ "api_documented_params": [
+  "cutoff_low",
+  "export_dict",
+  "hemisphere",
+  "plot",
+  "plot_steps",
+  "replace_endpoints_with_lowpass",
+  "savgol_polynomial",
+  "series",
+  "threshold_decay_gap",
+  "threshold_decay_length",
+  "threshold_incipient_length",
+  "threshold_intensification_gap",
+  "threshold_intensification_length",
+  "threshold_mature_distance",
+  "threshold_mature_length",
+  "use_filter",
+  "use_smoothing",
+  "use_smoothing_twice",
+  "x"
+ ],
+ "api_autofunctions": [
+  "cyclophaser.determine_periods"
+ ],
+ "api_example_column": [
+  "min_zeta_850"
+ ],
+ "tests_test_csv_columns": [
+  "time",
+  "Lat",
+  "Lon",
+  "length",
+  "width",
+  "min_lon",
+  "max_lon",
+  "min_lat",
+  "max_lat",
+  "min_max_zeta_850_lat",
+  "min_max_zeta_850_lon",
+  "min_max_zeta_850",
+  "min_hgt_850_lat",
+  "min_hgt_850_lon",
+  "min_hgt_850",
+  "max_wind_850_lat",
+  "max_wind_850_lon",
+  "max_wind_850"
+ ],
+ "example_file_columns": [
+  "time",
+  "Lat",
+  "Lon",
+  "length",
+  "width",
+  "min_lon",
+  "max_lon",
+  "min_lat",
+  "max_lat",
+  "min_max_zeta_850_lat",
+  "min_max_zeta_850_lon",
+  "min_max_zeta_850",
+  "min_hgt_850_lat",
+  "min_hgt_850_lon",
+  "min_hgt_850",
+  "max_wind_850_lat",
+  "max_wind_850_lon",
+  "max_wind_850"
+ ],
+ "api_example_uses_undefined_x": {
+  "x=x": true,
+  "x assigned": false
+ },
+ "api_example_option_values": {
+  "plot": "'path/to/save/plots'",
+  "plot_steps": "'path/to/save/plot_steps'",
+  "export_dict": "'path/to/export/csv'",
+  "use_filter": "'auto'",
+  "replace_endpoints_with_lowpass": "24",
+  "use_smoothing": "'auto'",
+  "use_smoothing_twice": "'auto'",
+  "savgol_polynomial": "3",
+  "cutoff_low": "168",
+  "cutoff_high": "48",
+  "threshold_intensification_length": "0.075",
+  "threshold_intensification_gap": "0.075",
+  "threshold_mature_distance": "0.125",
+  "threshold_mature_length": "0.03",
+  "threshold_decay_length": "0.075",
+  "threshold_decay_gap": "0.075",
+  "threshold_incipient_length": "0.4"
+ },
+ "app_yaml_sections": [
+  "filter_params",
+  "phase_params"
+ ],
+ "calibration_tool_yaml_sections": [
+  "filter_options",
+  "period_options"
+ ],
+ "calibration_tool_lines": {
+  "seven thresholds": [
+   27
+  ],
+  "STREAMLIT_APP_URL placeholder": [
+   47,
+   51
+  ],
+  "use_filter=True in PARAMS": [
+   146
+  ],
+  "pop(..., 24)": [
+   214
+  ],
+  "cutoff_high=48 in PARAMS": [
+   148
+  ],
+  "cyclophaser >= 2.0.0 from PyPI": [
+   70
+  ]
+ },
+ "app_requirements_cyclophaser": [
+  "cyclophaser>=2.0.0"
+ ],
+ "use_filter_true_warns": true,
+ "overview_lines": {
+  "Savitzky-Golay applied": [
+   16
+  ],
+  "mature = derivative valley..peak": [
+   24
+  ],
+  "incipient from unassigned periods": [
+   20
+  ],
+  "Lanczos endpoint oscillations removed": [
+   14
+  ]
+ },
+ "overview_relevant_defaults": {
+  "use_smoothing": "False",
+  "use_smoothing_twice": "False",
+  "mature_method": "'amplitude'",
+  "incipient_method": "'plateau'",
+  "replace_endpoints_with_lowpass": "0",
+  "boundary_padding": "'reflect'"
+ },
+ "usage_lines": {
+  "data format shows only time;Lat;Lon": [
+   21
+  ],
+  "x=x in custom example": [
+   190
+  ],
+  "use_filter True in custom example": [
+   184
+  ],
+  "caption 'corrected using default parameters'": [
+   195
+  ],
+  "defaults_2.0.0.json cited": [
+   117
+  ],
+  "adotada sem validacao (Portuguese quote)": [
+   115
+  ]
+ },
+ "images_last_commit": {
+  ".DS_Store": "",
+  "cyclophaser_methodology.jpg": "107152a 2024-09-27",
+  "test_custom.png": "a6842d9 2024-10-18",
+  "test_default.png": "a6842d9 2024-10-18",
+  "test_steps_default.png": "598fc88 2024-10-03"
+ },
+ "package_code_last_commit": "129b04d 2026-09-30",
+ "setup_version": "2.0.0",
+ "setup_python_requires": [],
+ "installation_python_claim_lines": [
+  9,
+  13,
+  78
+ ],
+ "conf_release": "2.0.0",
+ "pytest_browser_marker": true,
+ "testing_command_lines": [
+  8
+ ],
+ "n_test_files": 27,
+ "default_branch": "master",
+ "contribute_lines": {
+  "PR to main": [
+   68
+  ],
+  "markdown link syntax": [
+   8,
+   82
+  ],
+  "markdown heading": [
+   80
+  ],
+  "flake8/black": [
+   84,
+   88,
+   89,
+   90
+  ]
+ },
+ "lint_configs_present": [],
+ "contribute_html_raw_markdown": {
+  "'### Additional Notes' shown raw": true,
+  "'](https://' shown raw": false
+ },
+ "index_lines": {
+  "under review": [
+   9,
+   42
+  ],
+  "toctree pages": [
+   "overview",
+   "installation",
+   "usage",
+   "calibration_tool",
+   "testing",
+   "api",
+   "contribute",
+   "license"
+  ]
+ },
+ "docs_not_in_toctree": [
+  "findings.md",
+  "future_work.md"
+ ],
+ "api_html_renders_signature": true,
+ "stage_functions_public_in_init": [
+  "determine_periods",
+  "example_file",
+  "find_stages",
+  "here",
+  "lanczos_filter",
+  "pathlib",
+  "plots"
+ ]
+}

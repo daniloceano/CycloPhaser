@@ -1,0 +1,3 @@
+Score lines 188; flagged 53 (carried from `ff4eb3b` 53, reviewed on this branch 0); without a verdict 0; attributing an edge-measured score to the current default: **0**.
+
+EXIT 0

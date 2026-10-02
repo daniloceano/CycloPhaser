@@ -1,0 +1,44 @@
+{
+ "section": [
+  10,
+  774
+ ],
+ "references": 7,
+ "refs": [
+  {
+   "line": 90,
+   "removed": "research/labels/diagnostics/item31/stage1_output.txt",
+   "text": "stage 1 of item 31 (`research/labels/diagnostics/item31/stage1_output.txt`):"
+  },
+  {
+   "line": 96,
+   "removed": "research/labels/diagnostics/item31/DESIGN.md",
+   "text": "the same assessor's judgement (`research/labels/diagnostics/item31/DESIGN.md`,"
+  },
+  {
+   "line": 166,
+   "removed": "research/labels/diagnostics/item31/sidebar_table_2c.md",
+   "text": "before/after table is `research/labels/diagnostics/item31/sidebar_table_2c.md`."
+  },
+  {
+   "line": 190,
+   "removed": "research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt",
+   "text": "crashed now run (`research/labels/diagnostics/item31/fix_use_filter_false_equivalence.txt`)."
+  },
+  {
+   "line": 206,
+   "removed": "research/labels/diagnostics/item31/stale_scripts.md",
+   "text": "migrated (`stale_scripts.md`)."
+  },
+  {
+   "line": 298,
+   "removed": "research/labels/diagnostics/frontA_idx0_c2/stage2_defaults_check.py",
+   "text": "`research/labels/diagnostics/frontA_idx0_c2/stage2_defaults_check.py`). So this"
+  },
+  {
+   "line": 544,
+   "removed": "research/incipient_plateau/REPORT_incipient_smoothing.md",
+   "text": "`REPORT_incipient_smoothing.md`): a window of 5–9 takes the designed-Ic cases"
+  }
+ ]
+}

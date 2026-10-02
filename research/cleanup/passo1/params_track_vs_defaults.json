@@ -1,0 +1,46 @@
+{
+ "pre_ref": "d8a19cc",
+ "sha256_params15_before": "5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04",
+ "sha256_params_track_after": "5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04",
+ "identical_bytes": true,
+ "n_yaml_keys": 31,
+ "differing": [
+  {
+   "group": "filter_params",
+   "key": "use_filter",
+   "yaml": true,
+   "default": "auto",
+   "equal": false
+  },
+  {
+   "group": "filter_params",
+   "key": "boundary_padding",
+   "yaml": "edge",
+   "default": "reflect",
+   "equal": false
+  }
+ ],
+ "signature_keys_absent_from_yaml": [
+  {
+   "group": "phase_params",
+   "key": "plot",
+   "default": false
+  },
+  {
+   "group": "phase_params",
+   "key": "plot_steps",
+   "default": false
+  },
+  {
+   "group": "phase_params",
+   "key": "export_dict",
+   "default": false
+  },
+  {
+   "group": "phase_params",
+   "key": "prominence",
+   "default": null
+  }
+ ],
+ "cyclophaser_file": "cyclophaser/__init__.py"
+}

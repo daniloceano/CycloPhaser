@@ -1,0 +1,92 @@
+{
+ "before_ref": "d8a19cc",
+ "n_head": 263,
+ "counts": {
+  "CORRESPONDÊNCIA": 12,
+  "HISTÓRICA": 251
+ },
+ "live_remaining": [],
+ "hist_before": 251,
+ "hist_head": 251,
+ "hist_identical": true,
+ "hist_only_before": [],
+ "hist_only_head": [],
+ "correspondence": [
+  {
+   "file": "CHANGELOG.md",
+   "line": 21,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "then named `params-15` the package defaults, `\"edge\"` included."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 22,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "* C1 of the cleanup front renamed `params-15` to `params-track` (identical"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 165,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "the params-15 column (the preset now named params-track)."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 189,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "* **`research/labels/configs/` holds only `params-15`** (renamed `params-track` in the cleanup front). params-1 to params-14"
+  },
+  {
+   "file": "docs/future_work.md",
+   "line": 4024,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "> **Nota de correspondência (2026-09-28).** params-15 foi renomeado para"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 55,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "> **Correspondence (2026-09-28).** params-15 foi renomeado para params-track"
+  },
+  {
+   "file": "research/labels/README.md",
+   "line": 86,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "| **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibratio"
+  },
+  {
+   "file": "tests/legacy_defaults.py",
+   "line": 7,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "Item 31 moved the package defaults to params-15 (renamed params-track; since C1"
+  },
+  {
+   "file": "tests/test_benchmark_apptest.py",
+   "line": 51,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "# params-track (named params-15 until the cleanup front), the calibration preset"
+  },
+  {
+   "file": "tests/test_regression_baseline.py",
+   "line": 79,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "# The package defaults moved to params-15 (item 31; renamed params-track), so"
+  },
+  {
+   "file": "tools/calibration_app/README.md",
+   "line": 164,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "file in `research/labels/configs/` (since item 31 only params-15, renamed params-track in the cleanup front; params-1..14"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 146,
+   "cls": "CORRESPONDÊNCIA",
+   "text": "# Item 31: the package defaults moved to params-15 (now params-track, whose"
+  }
+ ],
+ "before_counts": {
+  "VIVA": 66,
+  "HISTÓRICA": 251
+ }
+}

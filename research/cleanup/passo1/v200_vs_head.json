@@ -1,0 +1,330 @@
+{
+ "tag": "v2.0.0",
+ "tag_commit": "5d99ae3848ad04703a07c7160fe5e3696cd06252",
+ "rows": {
+  "filter": [
+   {
+    "param": "use_filter",
+    "tag": "auto",
+    "head": "auto",
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`\"auto\"`",
+    "head_fmt": "`\"auto\"`"
+   },
+   {
+    "param": "replace_endpoints_with_lowpass",
+    "tag": 24,
+    "head": 0,
+    "in_tag": true,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "`24`",
+    "head_fmt": "`0`"
+   },
+   {
+    "param": "use_smoothing",
+    "tag": "auto",
+    "head": false,
+    "in_tag": true,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "`\"auto\"`",
+    "head_fmt": "`False`"
+   },
+   {
+    "param": "use_smoothing_twice",
+    "tag": "auto",
+    "head": false,
+    "in_tag": true,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "`\"auto\"`",
+    "head_fmt": "`False`"
+   },
+   {
+    "param": "savgol_polynomial",
+    "tag": 3,
+    "head": 3,
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`3`",
+    "head_fmt": "`3`"
+   },
+   {
+    "param": "cutoff_low",
+    "tag": 168,
+    "head": 168,
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`168`",
+    "head_fmt": "`168`"
+   },
+   {
+    "param": "cutoff_high",
+    "tag": 48.0,
+    "head": 18.0,
+    "in_tag": true,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "`48.0`",
+    "head_fmt": "`18.0`"
+   },
+   {
+    "param": "boundary_padding",
+    "tag": null,
+    "head": "reflect",
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`\"reflect\"`"
+   }
+  ],
+  "phase": [
+   {
+    "param": "threshold_intensification_length",
+    "tag": 0.075,
+    "head": 0.075,
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`0.075`",
+    "head_fmt": "`0.075`"
+   },
+   {
+    "param": "threshold_intensification_gap",
+    "tag": 0.075,
+    "head": 0.075,
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`0.075`",
+    "head_fmt": "`0.075`"
+   },
+   {
+    "param": "threshold_mature_distance",
+    "tag": 0.125,
+    "head": 0.18,
+    "in_tag": true,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "`0.125`",
+    "head_fmt": "`0.18`"
+   },
+   {
+    "param": "threshold_mature_length",
+    "tag": 0.03,
+    "head": 0.15,
+    "in_tag": true,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "`0.03`",
+    "head_fmt": "`0.15`"
+   },
+   {
+    "param": "threshold_decay_length",
+    "tag": 0.075,
+    "head": 0.075,
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`0.075`",
+    "head_fmt": "`0.075`"
+   },
+   {
+    "param": "threshold_decay_gap",
+    "tag": 0.075,
+    "head": 0.075,
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`0.075`",
+    "head_fmt": "`0.075`"
+   },
+   {
+    "param": "threshold_incipient_length",
+    "tag": 0.4,
+    "head": 0.4,
+    "in_tag": true,
+    "in_head": true,
+    "changed": false,
+    "tag_fmt": "`0.4`",
+    "head_fmt": "`0.4`"
+   },
+   {
+    "param": "prominence",
+    "tag": null,
+    "head": null,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`None`"
+   },
+   {
+    "param": "prominence_relative",
+    "tag": null,
+    "head": 0.3,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`0.3`"
+   },
+   {
+    "param": "reclassify_index0",
+    "tag": null,
+    "head": true,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`True`"
+   },
+   {
+    "param": "length_scale",
+    "tag": null,
+    "head": "local",
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`\"local\"`"
+   },
+   {
+    "param": "mature_method",
+    "tag": null,
+    "head": "amplitude",
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`\"amplitude\"`"
+   },
+   {
+    "param": "mature_amplitude_fraction",
+    "tag": null,
+    "head": 0.9,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`0.9`"
+   },
+   {
+    "param": "mature_min_depth",
+    "tag": null,
+    "head": 0.8,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`0.8`"
+   },
+   {
+    "param": "intensification_min_depth",
+    "tag": null,
+    "head": 0.05,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`0.05`"
+   },
+   {
+    "param": "decay_tail_amplitude_fraction",
+    "tag": null,
+    "head": 0.3,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`0.3`"
+   },
+   {
+    "param": "incipient_method",
+    "tag": null,
+    "head": "plateau",
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`\"plateau\"`"
+   },
+   {
+    "param": "incipient_plateau_tau",
+    "tag": null,
+    "head": 0.2,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`0.2`"
+   },
+   {
+    "param": "incipient_plateau_signal",
+    "tag": null,
+    "head": "vorticity",
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`\"vorticity\"`"
+   },
+   {
+    "param": "incipient_plateau_crossing",
+    "tag": null,
+    "head": "sustained",
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`\"sustained\"`"
+   },
+   {
+    "param": "incipient_plateau_k",
+    "tag": null,
+    "head": 5,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`5`"
+   },
+   {
+    "param": "incipient_smooth_window",
+    "tag": null,
+    "head": 5,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`5`"
+   },
+   {
+    "param": "incipient_smooth_polyorder",
+    "tag": null,
+    "head": 3,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`3`"
+   },
+   {
+    "param": "incipient_plateau_spare_intensification",
+    "tag": null,
+    "head": true,
+    "in_tag": false,
+    "in_head": true,
+    "changed": true,
+    "tag_fmt": "\u2014",
+    "head_fmt": "`True`"
+   }
+  ]
+ }
+}

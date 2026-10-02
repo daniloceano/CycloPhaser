@@ -1,0 +1,6 @@
+remote branches now: ['chore/repo-cleanup', 'develop-v2.1', 'master']
+deleted on origin: 38 (before 41); equals the authorised list: True; new since 6a: []
+archive tags on origin at their tips: 9/9
+cited commits: 221 distinct; unreachable from origin: 1; from all local refs: 0
+   {'token': 'f7d8fd99cbd2881e268c8e3bd3829232e78ea3d3', 'commit': 'f7d8fd99cb', 'first_citation': 'research/labels/diagnostics/front_b/default_behaviour_sha256.txt:118'}
+EXIT 0

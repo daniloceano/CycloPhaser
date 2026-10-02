@@ -48,18 +48,20 @@ import benchmark_core as bc  # noqa: E402
 
 # Item 31: params-1 … params-14 left research/labels/configs/, so the two
 # columns are no longer two files. Column A is the SIDEBAR and column B is
-# params-15, the calibration reference (Danilo's addendum, 2026-09-28). Since
-# stage 2c the sidebar OPENS with the package defaults, which ARE params-15, so
-# an untouched sidebar column would equal column B. The sidebar column is
+# params-track (named params-15 until the cleanup front), the calibration preset
+# (Danilo's addendum, 2026-09-28). Since stage 2c the sidebar OPENS with the
+# package defaults, which are params-track except boundary_padding (reflect in the
+# package since C1, edge in params-track); the declared difference below keeps the
+# two columns apart whatever that one key does. The sidebar column is
 # therefore taken after ONE declared non-default value is set in the sidebar:
-# filter_params.cutoff_high = 48 (package default and params-15: 18). It changes
+# filter_params.cutoff_high = 48 (package default and params-track: 18). It changes
 # both the smoothed series (the 30c tests below need that) and the phases.
-# `test_the_sidebar_differs_from_params15_in_a_declared_parameter` asserts it;
+# `test_the_sidebar_differs_from_params_track_in_a_declared_parameter` asserts it;
 # the output-level control is `test_the_two_configurations_are_actually_
 # distinguishable`, and swapping the columns must fail the pin.
 SIDEBAR = "sidebar"
 CFG_A = SIDEBAR
-CFG_B = "cyclophaser_params-15.yaml"
+CFG_B = "cyclophaser_params-track.yaml"
 DECLARED_DIFF = ("filter_params", "cutoff_high", 48, 18)
 
 
@@ -127,6 +129,20 @@ def _doc_for(source) -> dict:
     return yaml.safe_load((bc.CONFIGS_DIR / source).read_text())
 
 
+def _train_ids(ms, n):
+    """The first `n` TRAIN records offered by the multiselect, as raw ids.
+
+    `ms.options` holds the formatted labels ("<id> (<source>/<split>)"), not the
+    values. Passing labels to `set_value` works on streamlit 1.63, but the
+    AppTest of streamlit 1.58 (the version pinned in requirements-app.txt)
+    applies `format_func` to them again and fails inside the harness with a
+    KeyError, while the app itself is fine (passo5). Raw ids work on both. Only
+    train records are taken: the test split is spent and no test reads it."""
+    ids = [o.split(" ")[0] for o in ms.options if "/train" in o]
+    assert len(ids) >= n
+    return ids[:n]
+
+
 def _select(at, ids):
     _widget(at, "multiselect", "bench_ids_widget").set_value(list(ids))
     at.run()
@@ -150,7 +166,7 @@ def _loaded(at):
 def _two_column_app(n_cyclones=3, run=True) -> AppTest:
     at = _app()
     ms = _widget(at, "multiselect", "bench_ids_widget")
-    _select(at, list(ms.options[:n_cyclones]))
+    _select(at, _train_ids(ms, n_cyclones))
     _add_column(at, CFG_A)
     _add_column(at, CFG_B)
     if run:
@@ -195,7 +211,7 @@ def test_every_column_reports_on_exactly_the_selected_cyclones():
 def test_changing_the_selection_repoints_every_column_together():
     at = _two_column_app(n_cyclones=2)
     ms = _widget(at, "multiselect", "bench_ids_widget")
-    _select(at, list(ms.options[:5]))
+    _select(at, _train_ids(ms, 5))
     _run(at)
     selected = at.session_state["bench_selected_ids"]
     for col in _loaded(at):
@@ -209,7 +225,7 @@ def test_changing_the_selection_repoints_every_column_together():
 def test_no_results_exist_before_run():
     at = _app()
     ms = _widget(at, "multiselect", "bench_ids_widget")
-    _select(at, list(ms.options[:2]))
+    _select(at, _train_ids(ms, 2))
     _add_column(at, CFG_A)
     assert "bench_last_results" not in at.session_state, (
         "results appeared without Run being pressed")
@@ -270,10 +286,10 @@ def test_reference_defaults_to_the_manual_label_when_labels_exist():
 def test_reference_can_be_pointed_at_a_configuration_column():
     at = _two_column_app()
     ref = _widget(at, "selectbox", "bench_reference")
-    assert "params-15" in ref.options
-    ref.set_value("params-15")
+    assert "params-track" in ref.options
+    ref.set_value("params-track")
     at.run()
-    assert at.session_state["bench_reference"] == "params-15"
+    assert at.session_state["bench_reference"] == "params-track"
     assert not at.exception, [str(e) for e in at.exception]
 
 
@@ -348,16 +364,16 @@ def _expected_for(filename, ids):
     return out
 
 
-def test_the_sidebar_differs_from_params15_in_a_declared_parameter():
+def test_the_sidebar_differs_from_params_track_in_a_declared_parameter():
     """Addendum guard (item 31): the two sources differ in the parameter the
     header declares, with the declared values — so the sidebar column cannot
-    silently become a second copy of params-15."""
+    silently become a second copy of params-track."""
     import inspect
 
     from cyclophaser.determine_periods import process_vorticity
-    sec, key, in_sidebar, in_params15 = DECLARED_DIFF
+    sec, key, in_sidebar, in_params_track = DECLARED_DIFF
     assert _doc_for(CFG_A)[sec][key] == in_sidebar
-    assert _doc_for(CFG_B)[sec][key] == in_params15
+    assert _doc_for(CFG_B)[sec][key] == in_params_track
     # ... and the sidebar value really is a NON-default one (stage 2c)
     assert inspect.signature(process_vorticity).parameters[key].default != in_sidebar
 
@@ -369,7 +385,7 @@ def test_the_two_configurations_are_actually_distinguishable():
     a, b = _loaded(at)
     differing = [s for s in ids if a["series"][s] != b["series"][s]]
     assert differing, (
-        "the sidebar and params-15 agree on all of "
+        "the sidebar and params-track agree on all of "
         f"{ids} — pick series where they differ or the isolation test is vacuous")
 
 
@@ -378,7 +394,7 @@ def test_each_column_carries_its_own_configuration_not_its_neighbours():
     ids = at.session_state["bench_selected_ids"]
     a, b = _loaded(at)
     assert a["series"] == _expected_for(CFG_A, ids), "column 0 is not the sidebar"
-    assert b["series"] == _expected_for(CFG_B, ids), "column 1 is not params-15"
+    assert b["series"] == _expected_for(CFG_B, ids), "column 1 is not params-track"
 
 
 def test_swapping_the_columns_would_fail_the_pin():

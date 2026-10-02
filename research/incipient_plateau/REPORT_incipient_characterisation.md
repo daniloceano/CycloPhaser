@@ -1,3 +1,4 @@
+> Files this report cites that are no longer in the tree were removed in the repository clean-up and are kept at `archive/research-diagnostics-pre-cleanup:research/incipient_plateau/`.
 # Characterisation of the incipient phase under the current pipeline
 
 **Status: measurement only. No threshold chosen, no redefinition implemented,

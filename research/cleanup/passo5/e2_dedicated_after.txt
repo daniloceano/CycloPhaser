@@ -1,0 +1,140 @@
+HEAD: 0b68e5140e83bf44f02b5a66780a03f12e74dae6; working-tree changes under tools/ tests/: 7
+python 3.12.14 | streamlit 1.63.0 | pandas 3.0.5 | numpy 2.5.3
+cyclophaser from the working tree: True
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 32%]
+........................................................................ [ 43%]
+........................................................................ [ 54%]
+........................................................................ [ 65%]
+........................................................................ [ 76%]
+..................................................F..................... [ 87%]
+........................................................................ [ 98%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+____________ test_the_evaluator_never_reaches_the_validation_batch _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1b86a7a70>
+
+    def test_the_evaluator_never_reaches_the_validation_batch(monkeypatch):
+        import evaluate_against_labels as ev
+        seen = set()
+    
+        def run_detector(series, pv, gp):
+            seen.update(series)
+            return {k: None for k in series}, {k: [] for k in series}
+    
+        monkeypatch.setattr(ev, "run_detector", run_detector)
+        monkeypatch.setattr(ev, "score_labels", lambda sel, d: {"n_scored": len(sel)})
+        monkeypatch.setattr(ev, "score_phase_sequences", lambda sel, d: {})
+        monkeypatch.setattr(ev, "_fmt", lambda m: "")
+        monkeypatch.setattr(ev, "_fmt_phases", lambda m: "")
+        for argv in ([], ["--batch-train", lc.SWELL_BATCH],
+                     ["--batch-train", lc.VALIDATION_BATCH]):
+>           ev.main(argv)
+
+tests/test_swell_batch.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+argv = []
+
+        modal, k = seqs.most_common(1)[0]
+        return "\n".join([
+            "   ── constant baselines (ignore the series; best constant chosen on this selection) ──",
+            f"     incipient end, always {'no incipient' if const is None else const}: "
+            f"hit {m['n_hit']}/{m['n_boundary']} ({hit}), MAE {mae}, worst {m['worst']}; "
+            f"none agreed {m['n_none_agreed']}/{m['n_none']}",
+            f"     phase sequence, always the modal labelled one "
+            f"({' -> '.join(modal)}): {k}/{len(sel)} exact"])
+    
+    
+    def main(argv=None) -> int:
+        ap = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+        ap.add_argument("--config", type=Path, default=None,
+                        help="calibration-app YAML; omitted means package defaults")
+        ap.add_argument("--test", action="store_true",
+                        help="also score the held-out test split (see the warning)")
+        ap.add_argument("--against", choices=("current", "first-blind"), default="current",
+                        help="'current' (default) scores the vigente record, i.e. the "
+                             "most recent save for each case, whether or not an overlay "
+                             "was on screen when it was written. 'first-blind' scores "
+                             "the EARLIEST version of each case's label that was saved "
+                             "with no overlay shown (schema-3 records qualify: overlays "
+                             "did not exist yet) — cases where every saved version had "
+                             "an overlay on screen are excluded, the same way a stale "
+                             "or legacy one is.")
+        ap.add_argument("--batch-train", metavar="BATCH", default=None,
+                        help="also score the TRAIN part of this frozen batch of "
+                             "split.yaml (e.g. swell_item30), in its own block, never "
+                             "pooled with the 47. Every label that is not TRAIN (of "
+                             "the split or of the batch) is dropped by id right after "
+                             "reading, before any check reads it. Not combinable "
+                             "with --test.")
+        args = ap.parse_args(argv)
+        if args.batch_train and args.test:
+            ap.error("--batch-train is train-only; it cannot be combined with --test")
+    
+        records = read_labels()
+        if not records:
+            print("manual_labels.yaml holds no labels yet — nothing to score.\n"
+                  "Label the queue first: streamlit run tools/calibration_app/app.py, "
+                  "then choose the 'Label' display mode.")
+            return 0
+    
+        batch_train: set[str] = set()
+        if args.batch_train:
+            membership = batch_membership(args.batch_train)
+            if not membership:
+                ap.error(f"split.yaml has no batch {args.batch_train!r}")
+            batch_train = {sid for sid, m in membership.items() if m == "train"}
+            keep = set(read_split()["train"]) | batch_train
+            records = {sid: r for sid, r in records.items() if sid in keep}
+    
+        # Scope first. Only the labels and series of the groups being scored are
+        # used, and before anything could name them: the test split is spent, so
+        # without --test its labels are dropped here and its files are never opened.
+        split = read_split()
+        train, test = set(split["train"]), set(split["test"])
+        in_scope = train | (test if args.test else set()) | batch_train
+        records = {sid: r for sid, r in records.items() if sid in in_scope}
+    
+        # Read from the VIGENTE record, before --against first-blind can swap in an
+        # older version that does not carry the note.
+        adjudicated = {sid for sid, r in records.items() if is_adjudicated(r)}
+    
+        if args.against == "first-blind":
+            never_blind = sorted(sid for sid, r in records.items()
+                                 if first_blind_record(r) is None)
+>           records = {sid: (first_blind_record(r) or r) for sid, r in records.items()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                      if sid not in never_blind}
+E                     TypeError: load_real_series() got an unexpected keyword argument 'ids'
+
+research/labels/evaluate_against_labels.py:318: TypeError
+=============================== warnings summary ===============================
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  ~/Documents/Programs_and_scripts/CycloPhaser/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_swell_batch.py::test_the_evaluator_never_reaches_the_validation_batch
+1 failed, 657 passed, 89 warnings in 427.66s (0:07:07)
+EXIT 1

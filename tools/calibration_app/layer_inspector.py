@@ -60,7 +60,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import peak_prominences
 
-from cyclophaser.determine_periods import find_peaks_valleys, post_process_periods
+from cyclophaser.determine_periods import find_peaks_valleys, get_periods, post_process_periods
 from cyclophaser.find_stages import (
     _amplitude_mature_bounds,
     _incipient_plateau_boundary,
@@ -143,8 +143,10 @@ STEP_NAMES = (
 # were once missing here, and build_args_periods then rejected every run the
 # app made (item 30a).
 _ARGS_PERIODS_DEFAULTS = {
-    # Item 31: the package defaults moved to params-15; these follow them (the
-    # test named above pins value for value). The 2.0.0 values are the frozen
+    # Item 31: the package defaults moved to params-15 (now params-track, whose
+    # phase parameters ARE the package's; C1 changed a filter default only);
+    # these follow them (the
+    # test named above pins value for value). The pre-item-31 values are the frozen
     # table research/labels/defaults_2.0.0.json.
     "threshold_intensification_length": 0.075,
     "threshold_intensification_gap": 0.075,
@@ -168,6 +170,12 @@ _ARGS_PERIODS_DEFAULTS = {
     "incipient_smooth_polyorder": 3,
     "incipient_plateau_spare_intensification": True,
 }
+
+
+def _gp_default(name: str):
+    """The default of `name` in get_periods' signature."""
+    import inspect
+    return inspect.signature(get_periods).parameters[name].default
 
 
 def build_args_periods(**overrides) -> dict:
@@ -541,7 +549,8 @@ def _segment_ledger(df: pd.DataFrame, kind: str,
     ``tests/test_layer_inspector.py``: the union of the accepted candidates and
     the filled gaps must equal, bit for bit, the mask the package function
     itself writes on a fresh frame, over 20+ tracks x several prominence
-    settings, and under params-14 with the depth floor active.
+    settings, and under params-track (params-14 before item 31) with the depth
+    floor active.
 
     Returns:
         dict with ``candidates`` (list of records), ``gaps`` (list of records)
@@ -855,7 +864,7 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
         ``written=False`` and the reason "below mature_min_depth";
       * the confirmed set is pinned by a fidelity test against
         ``find_mature_stage``'s actual output on real tracks, including under
-        params-14 with the floor active.
+        params-track (params-14 before item 31) with the floor active.
 
     Reading the neighbours from the INPUT frame (the state after step 2) is
     equivalent to what the package does after writing the windows: a block's
@@ -876,10 +885,14 @@ def mature_ledger(df_after_decay: pd.DataFrame, **args_periods) -> list[dict]:
     """
     threshold_mature_distance = args_periods['threshold_mature_distance']
     threshold_mature_length = args_periods['threshold_mature_length']
-    length_scale = args_periods.get('length_scale', 'global')
-    mature_method = args_periods.get('mature_method', 'derivative')
-    mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction', 0.90)
-    mature_min_depth = args_periods.get('mature_min_depth', 0.0)
+    # Fallbacks read from get_periods' signature, never typed here (clean-up
+    # front, Passo 4). In the app the keys always arrive: build_args_periods
+    # fills every one of them from _ARGS_PERIODS_DEFAULTS.
+    length_scale = args_periods.get('length_scale', _gp_default('length_scale'))
+    mature_method = args_periods.get('mature_method', _gp_default('mature_method'))
+    mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction',
+                                                 _gp_default('mature_amplitude_fraction'))
+    mature_min_depth = args_periods.get('mature_min_depth', _gp_default('mature_min_depth'))
     if not 0 <= mature_min_depth <= 1:
         raise ValueError(
             f"mature_min_depth must be in [0, 1], got {mature_min_depth!r}.")

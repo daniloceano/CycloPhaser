@@ -41,7 +41,7 @@ the manual label is the source of truth for every phase, `mature` included.
 | `split.yaml` | **Committed artefact.** The frozen split. |
 | `manual_labels.yaml` | **Committed artefact — the deliverable.** Written incrementally by the app. |
 | `evaluate_against_labels.py` | Runs the detector, scores it against the labels. |
-| `config_defaults.py`, `defaults_2.0.0.json` | Fills keys a config does not carry with the frozen 2.0.0 defaults, and lists them (item 31, decision (a)). |
+| `config_defaults.py`, `defaults_2.0.0.json` | Fills keys a config does not carry with the frozen pre-item-31 defaults (the file name says 2.0.0; see below), and lists them (item 31, decision (a)). |
 
 The labelling UI itself is `tools/calibration_app/label_tab.py`, reached through
 the **Label** display mode of the calibration app. Tests are in
@@ -50,7 +50,22 @@ the **Label** display mode of the calibration app. Tests are in
 ## Calibration configurations
 
 **Since item 31 (2026-09-28), `research/labels/configs/` holds one file:
-`cyclophaser_params-15.yaml`, the calibration reference.** params-1 to
+`cyclophaser_params-track.yaml`, the calibration preset.**
+
+> **Correspondence (2026-09-28).** params-15 foi renomeado para params-track
+> (conteúdo idêntico, sha256 `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04`); registros anteriores citam o nome antigo.
+
+**params-track = the package defaults except `boundary_padding: edge`** (the
+package default is `"reflect"`). Two further differences are of form only:
+the file carries `use_filter: true`, which the package treats as `'auto'` (with a
+`UserWarning`), and carries no `prominence` key, whose default is `None`
+(`research/cleanup/passo1/params_track_vs_defaults.json`, generated). It is
+the **only configuration with measured scores**, and every score was measured
+under `edge`: those scores belong to params-track, not to the package defaults.
+Anyone working with TRACK series who wants the measured behaviour must pass
+params-track explicitly.
+
+params-1 to
 params-14 were removed by Danilo's decision. They are not lost: each one is
 recoverable byte for byte with the command in
 `diagnostics/item31/recovery_table.md` (`git show 33ea489358d9:<path>`), and the
@@ -68,15 +83,15 @@ config by its hash, never by its file name**: an app export called
 | `cyclophaser_params-12.yaml` | `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3` | removed (item 31); params-11 + `mature_min_depth` 0.80 (item 22) |
 | `cyclophaser_params-13.yaml` | `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` | removed (item 31); params-12 + `intensification_min_depth` 0.05 (item 24) |
 | `cyclophaser_params-14.yaml` | `acf4985339e8849603711012b2049d8913997e329a3c56d5399f6700e2d1159e` | removed (item 31); params-13 + `reclassify_index0` true (item 28) |
-| **`cyclophaser_params-15.yaml`** | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration reference** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
+| **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration preset** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
 
-**Do not normalise or reformat params-15.** Its identity is its file hash: the
+**Do not normalise or reformat params-track.** Its identity is its file hash: the
 Benchmark shows that hash as a column's provenance, and every later record
 cites it. It was written by hand from params-14 (plus one line), so its
 `metadata` block is params-14's, timestamp included.
 
 **Incomplete configs** (item 31, decision (a)). A key a config does not carry is
-filled with its **cyclophaser 2.0.0 default** from the frozen table
+filled with its **pre-item-31 default** from the frozen table
 `defaults_2.0.0.json` (generated from item 31's parameter table, never edited by
 hand; helper `config_defaults.py`), and the filled keys are always listed —
 by `evaluate_against_labels.py` (stderr), by the Benchmark column's provenance
@@ -84,11 +99,26 @@ by `evaluate_against_labels.py` (stderr), by the Benchmark column's provenance
 changed. This keeps an old or hand-trimmed config meaning what it meant when it
 was written, whatever the package defaults become.
 
+**What "2.0.0" means in these file names.** `defaults_2.0.0.json`,
+`tests/legacy_defaults.py` and `tests/baselines/*_2_0_0.csv` hold the defaults of
+the development line **before item 31**, not those of the published 2.0.0
+release: the release has no `boundary_padding` (its Lanczos convolution always
+zero-pads) and uses `replace_endpoints_with_lowpass=24`, and it has none of the
+later phase parameters. The names are historical; `CHANGELOG.md`
+([Unreleased], "The pre-item-31 table is not 2.0.0") lists the differences.
+
+**The published 2.0.0 itself** is in `research/snapshots/v2.0.0.json`: the phase
+detections produced by running the 2.0.0 wheel from PyPI with its package
+defaults over 63 series (51 real + 12 synthetic). Its recorded public
+signature matches the `v2.0.0` tag parameter for parameter (`determine_periods` 19, `process_vorticity` 7, `get_periods` 10 defaults;
+0 differ), and its sha256 is listed in `research/snapshots/SHA256SUMS`
+(checked by `research/cleanup/passo4/snapshot_vs_tag.py`).
+
 **`item19_core.py` no longer has a default config.** `pair_by_overlap` and
 `MARGIN`, which the Benchmark imports, are unchanged. `load_config()` without a
 path raises and names the recovery commit. The item 19/20 scripts, and every
 other closed-front script that loads a removed config, are listed in
-`diagnostics/item31/stale_scripts.md` and reproduce from `33ea489358d9`.
+`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/stale_scripts.md` and reproduce from `33ea489358d9`.
 
 Two instruments score matures and they are **not** interchangeable:
 `evaluate_against_labels.py` / `score_phase_sequences` scores only series whose

@@ -1,0 +1,14 @@
+# outputs written by the kept script itself (not live references): 13
+research/incipient_plateau/measure_incipient_smoothing.py:387 -> research/incipient_plateau/incipient_smoothing_sweep.csv
+research/incipient_plateau/measure_incipient_smoothing.py:388 -> research/incipient_plateau/incipient_smoothing_sweep.csv
+research/incipient_plateau/measure_incipient_smoothing.py:392 -> research/incipient_plateau/incipient_smoothing_real_rel0.csv
+research/incipient_plateau/measure_incipient_smoothing.py:395 -> research/incipient_plateau/incipient_smoothing_tables.txt
+research/incipient_plateau/measure_incipient_smoothing.py:396 -> research/incipient_plateau/incipient_smoothing_tables.txt
+research/labels/diagnostics/item30/figs_cf.py:22 -> research/labels/diagnostics/item30/REPORT_figs_cf.md
+research/labels/diagnostics/item30/figs_cf.py:22 -> research/labels/diagnostics/item30/figs_cf/board_8_cases.png
+research/labels/diagnostics/item30/figs_cf.py:213 -> research/labels/diagnostics/item30/figs_cf/board_8_cases.png
+research/labels/diagnostics/item30/figs_cf.py:229 -> research/labels/diagnostics/item30/figs_cf/board_8_cases.png
+research/labels/diagnostics/item30/figs_cf.py:265 -> research/labels/diagnostics/item30/REPORT_figs_cf.md
+research/labels/diagnostics/item30/separability.py:194 -> research/labels/diagnostics/item30/separability_criterion.json
+research/labels/diagnostics/item31/param_table.py:26 -> research/labels/diagnostics/item31/param_table.md
+research/labels/diagnostics/item31/param_table.py:166 -> research/labels/diagnostics/item31/param_table.md

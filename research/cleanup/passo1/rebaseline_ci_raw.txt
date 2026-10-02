@@ -1,0 +1,9 @@
+baseline_default_2_0_0.csv reproduced by the explicit 2.0.0 table: OK
+baseline_smoothing_2_0_0.csv reproduced by the explicit 2.0.0 table: OK
+wrote tests/baselines/baseline_default.csv
+wrote tests/baselines/baseline_smoothing.csv
+<tmp>/tmp947fio2x/expected_default.csv written.
+wrote tests/expected_default.csv
+<tmp>/tmphf07ublb/expected_no_filter.csv written.
+wrote tests/expected_no_filter.csv
+EXIT 0

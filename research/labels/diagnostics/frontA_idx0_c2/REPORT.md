@@ -1,3 +1,5 @@
+> Files this report cites that are no longer in the tree were removed in the repository clean-up and are kept at `archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/frontA_idx0_c2/`.
+> Clean-up front, Passo 5: the home directory in the `sys.prefix` line below (line 16 of this file) is written as `~`; nothing else changed.
 # Front A / item 28 — conditional reclassification of the extremum at index 0 (rule C2), stage 1
 
 **Measurement only. Nothing under `cyclophaser/` or `tests/` was touched.** The
@@ -11,7 +13,7 @@ sha256 `c1ab8ce02631f1270b3a633cff2ef43fb5caff64dd492642f56cf5a96e483973` —
 the signature filter dropped **no** key from `phase_params` (21 of 21 accepted).
 
 Environment: the dedicated `cyclophaser` conda env, never base.
-`sys.prefix` = `/Users/danilocoutodesouza/miniconda3/envs/cyclophaser`
+`sys.prefix` = `~/miniconda3/envs/cyclophaser`
 (python 3.12.14, numpy 2.5.3, scipy 1.18.0, pandas 3.0.5).
 `cyclophaser.__file__` = this checkout, asserted in-process before every script
 body (`common.provenance`), with the sha256 of the two modules actually loaded:

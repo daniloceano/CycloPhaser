@@ -66,9 +66,10 @@ from cyclophaser.find_stages import find_intensification_period
 
 _CALIBRATION_DATA_DIR = os.path.join(os.path.dirname(__file__), "calibration_data")
 
-# params-13 = params-12 + intensification_min_depth. Kept in sync with
-# research/labels/configs/cyclophaser_params-13.yaml by
-# test_params13_yaml_matches_this_module.
+# params-13 = params-12 + intensification_min_depth (params-13 left the repo in
+# item 31; recoverable from 33ea489). Kept in sync with
+# research/labels/configs/cyclophaser_params-track.yaml — params-13 plus two keys
+# this module does not set — by test_params_track_yaml_matches_this_module.
 _FILTER_PARAMS = dict(
     use_filter=True,
     cutoff_low=168,
@@ -153,7 +154,7 @@ def calibration_tracks():
 # ── The default is a strict no-op ───────────────────────────────────────────────
 
 
-# Item 31: the package default of intensification_min_depth moved (0.0 up to 2.0.0).
+# Item 31: the package default of intensification_min_depth moved (0.0 before item 31).
 # These tests pin that the CURRENT default is forwarded exactly as if
 # passed explicitly — read from the signature, not typed here.
 _DEFAULT_NOW = inspect.signature(determine_periods).parameters["intensification_min_depth"].default
@@ -436,14 +437,14 @@ def test_zero_amplitude_series_is_not_warned_about_at_the_default():
 # ── The config on disk agrees with this module ─────────────────────────────────
 
 
-def test_params15_yaml_matches_this_module():
-    """params-15 is the calibration reference (params-13 left the repo in item 31;
-    params-15 = params-13 + reclassify_index0 + incipient_plateau_spare_intensification,
+def test_params_track_yaml_matches_this_module():
+    """params-track is the calibration reference (params-13 left the repo in item 31;
+    params-track = params-13 + reclassify_index0 + incipient_plateau_spare_intensification,
     neither of which this module sets). If it drifts from the values exercised
     here, these tests stop describing it."""
     import yaml
     path = os.path.join(os.path.dirname(__file__), os.pardir, "research", "labels",
-                        "configs", "cyclophaser_params-15.yaml")
+                        "configs", "cyclophaser_params-track.yaml")
     doc = yaml.safe_load(open(path))
     assert doc["phase_params"]["intensification_min_depth"] == X
     for key, value in _PHASE_PARAMS.items():

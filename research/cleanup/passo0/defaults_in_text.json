@@ -1,0 +1,6735 @@
+{
+ "signature_defaults": {
+  "use_filter": {
+   "process_vorticity": "'auto'",
+   "determine_periods": "'auto'"
+  },
+  "replace_endpoints_with_lowpass": {
+   "process_vorticity": "0",
+   "determine_periods": "0"
+  },
+  "use_smoothing": {
+   "process_vorticity": "False",
+   "determine_periods": "False"
+  },
+  "use_smoothing_twice": {
+   "process_vorticity": "False",
+   "determine_periods": "False"
+  },
+  "savgol_polynomial": {
+   "process_vorticity": "3",
+   "determine_periods": "3"
+  },
+  "cutoff_low": {
+   "process_vorticity": "168",
+   "determine_periods": "168"
+  },
+  "cutoff_high": {
+   "process_vorticity": "18.0",
+   "determine_periods": "18.0"
+  },
+  "boundary_padding": {
+   "process_vorticity": "'reflect'",
+   "determine_periods": "'reflect'",
+   "lanczos_filter": "'reflect'",
+   "lanczos_bandpass_filter": "'reflect'"
+  },
+  "plot": {
+   "get_periods": "False",
+   "determine_periods": "False"
+  },
+  "plot_steps": {
+   "get_periods": "False",
+   "determine_periods": "False"
+  },
+  "export_dict": {
+   "get_periods": "False",
+   "determine_periods": "False"
+  },
+  "threshold_intensification_length": {
+   "get_periods": "0.075",
+   "determine_periods": "0.075"
+  },
+  "threshold_intensification_gap": {
+   "get_periods": "0.075",
+   "determine_periods": "0.075"
+  },
+  "threshold_mature_distance": {
+   "get_periods": "0.18",
+   "determine_periods": "0.18"
+  },
+  "threshold_mature_length": {
+   "get_periods": "0.15",
+   "determine_periods": "0.15"
+  },
+  "threshold_decay_length": {
+   "get_periods": "0.075",
+   "determine_periods": "0.075"
+  },
+  "threshold_decay_gap": {
+   "get_periods": "0.075",
+   "determine_periods": "0.075"
+  },
+  "threshold_incipient_length": {
+   "get_periods": "0.4",
+   "determine_periods": "0.4"
+  },
+  "prominence": {
+   "get_periods": "None",
+   "determine_periods": "None",
+   "find_peaks_valleys": "None"
+  },
+  "prominence_relative": {
+   "get_periods": "0.3",
+   "determine_periods": "0.3",
+   "find_peaks_valleys": "None"
+  },
+  "reclassify_index0": {
+   "get_periods": "True",
+   "determine_periods": "True",
+   "find_peaks_valleys": "False"
+  },
+  "length_scale": {
+   "get_periods": "'local'",
+   "determine_periods": "'local'"
+  },
+  "mature_method": {
+   "get_periods": "'amplitude'",
+   "determine_periods": "'amplitude'"
+  },
+  "mature_amplitude_fraction": {
+   "get_periods": "0.9",
+   "determine_periods": "0.9"
+  },
+  "mature_min_depth": {
+   "get_periods": "0.8",
+   "determine_periods": "0.8"
+  },
+  "intensification_min_depth": {
+   "get_periods": "0.05",
+   "determine_periods": "0.05"
+  },
+  "decay_tail_amplitude_fraction": {
+   "get_periods": "0.3",
+   "determine_periods": "0.3"
+  },
+  "incipient_method": {
+   "get_periods": "'plateau'",
+   "determine_periods": "'plateau'"
+  },
+  "incipient_plateau_tau": {
+   "get_periods": "0.2",
+   "determine_periods": "0.2"
+  },
+  "incipient_plateau_signal": {
+   "get_periods": "'vorticity'",
+   "determine_periods": "'vorticity'"
+  },
+  "incipient_plateau_crossing": {
+   "get_periods": "'sustained'",
+   "determine_periods": "'sustained'"
+  },
+  "incipient_plateau_k": {
+   "get_periods": "5",
+   "determine_periods": "5"
+  },
+  "incipient_smooth_window": {
+   "get_periods": "5",
+   "determine_periods": "5"
+  },
+  "incipient_smooth_polyorder": {
+   "get_periods": "3",
+   "determine_periods": "3"
+  },
+  "incipient_plateau_spare_intensification": {
+   "get_periods": "True",
+   "determine_periods": "True"
+  },
+  "x": {
+   "determine_periods": "None"
+  },
+  "hemisphere": {
+   "determine_periods": "'southern'"
+  }
+ },
+ "rows": [
+  {
+   "file": "CHANGELOG.md",
+   "line": 12,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "### Changed — default behaviour: the package defaults are `params-track`, except `boundary_padding=\"reflect\"` (item 31, then C1 of the cleanup front)"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 17,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "with **one exception**: `boundary_padding` defaults to `\"reflect\"`, while"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 23,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "bytes, sha256 `5aa61f2dec71…`) and moved the `boundary_padding` default to"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 26,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "The file says `use_filter: true`, which the package treats as `'auto'` (with a"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 27,
+   "params": [
+    "prominence"
+   ],
+   "why": "names+default",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "`UserWarning`). It carries no `prominence`, whose default is `None`."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 32,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "`boundary_padding=\"edge\"`, so they describe params-track. If you work with"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 42,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "table-row",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "| `replace_endpoints_with_lowpass` | `24` | `0` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 43,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "table-row",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "| `use_smoothing` | `\"auto\"` | `False` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 44,
+   "params": [
+    "use_smoothing_twice"
+   ],
+   "why": "table-row",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "| `use_smoothing_twice` | `\"auto\"` | `False` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 45,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "table-row",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "| `cutoff_high` | `48.0` | `18.0` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 46,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "table-row",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "| `boundary_padding` | — (no such parameter) | `\"reflect\"` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 47,
+   "params": [
+    "cutoff_low",
+    "savgol_polynomial",
+    "use_filter"
+   ],
+   "why": "table-row",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    },
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "| `use_filter`, `savgol_polynomial`, `cutoff_low` | unchanged (`\"auto\"`, `3`, `168`) | unchanged |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 49,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "2.0.0 has no `boundary_padding`: its Lanczos convolution always zero-pads,"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 50,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "which is `boundary_padding=\"zero\"` now."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 56,
+   "params": [
+    "threshold_mature_distance"
+   ],
+   "why": "table-row",
+   "code": {
+    "threshold_mature_distance": {
+     "get_periods": "0.18",
+     "determine_periods": "0.18"
+    }
+   },
+   "text": "| `threshold_mature_distance` | `0.125` | `0.18` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 57,
+   "params": [
+    "threshold_mature_length"
+   ],
+   "why": "table-row",
+   "code": {
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "| `threshold_mature_length` | `0.03` | `0.15` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 58,
+   "params": [
+    "prominence"
+   ],
+   "why": "table-row",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "| `prominence` | — (no such parameter) | `None` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 59,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "table-row",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "| `prominence_relative` | — (no such parameter) | `0.3` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 60,
+   "params": [
+    "reclassify_index0"
+   ],
+   "why": "table-row",
+   "code": {
+    "reclassify_index0": {
+     "get_periods": "True",
+     "determine_periods": "True",
+     "find_peaks_valleys": "False"
+    }
+   },
+   "text": "| `reclassify_index0` | — (no such parameter) | `True` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 61,
+   "params": [
+    "length_scale"
+   ],
+   "why": "table-row",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "| `length_scale` | — (no such parameter) | `\"local\"` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 62,
+   "params": [
+    "mature_method"
+   ],
+   "why": "table-row",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "| `mature_method` | — (no such parameter) | `\"amplitude\"` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 63,
+   "params": [
+    "mature_amplitude_fraction"
+   ],
+   "why": "table-row",
+   "code": {
+    "mature_amplitude_fraction": {
+     "get_periods": "0.9",
+     "determine_periods": "0.9"
+    }
+   },
+   "text": "| `mature_amplitude_fraction` | — (no such parameter) | `0.9` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 64,
+   "params": [
+    "mature_min_depth"
+   ],
+   "why": "table-row",
+   "code": {
+    "mature_min_depth": {
+     "get_periods": "0.8",
+     "determine_periods": "0.8"
+    }
+   },
+   "text": "| `mature_min_depth` | — (no such parameter) | `0.8` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 65,
+   "params": [
+    "intensification_min_depth"
+   ],
+   "why": "table-row",
+   "code": {
+    "intensification_min_depth": {
+     "get_periods": "0.05",
+     "determine_periods": "0.05"
+    }
+   },
+   "text": "| `intensification_min_depth` | — (no such parameter) | `0.05` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 66,
+   "params": [
+    "decay_tail_amplitude_fraction"
+   ],
+   "why": "table-row",
+   "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    }
+   },
+   "text": "| `decay_tail_amplitude_fraction` | — (no such parameter) | `0.3` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 67,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "| `incipient_method` | — (no such parameter) | `\"plateau\"` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 68,
+   "params": [
+    "incipient_plateau_tau"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_plateau_tau": {
+     "get_periods": "0.2",
+     "determine_periods": "0.2"
+    }
+   },
+   "text": "| `incipient_plateau_tau` | — (no such parameter) | `0.2` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 69,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "| `incipient_plateau_signal` | — (no such parameter) | `\"vorticity\"` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 70,
+   "params": [
+    "incipient_plateau_crossing"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_plateau_crossing": {
+     "get_periods": "'sustained'",
+     "determine_periods": "'sustained'"
+    }
+   },
+   "text": "| `incipient_plateau_crossing` | — (no such parameter) | `\"sustained\"` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 71,
+   "params": [
+    "incipient_plateau_k"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_plateau_k": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "| `incipient_plateau_k` | — (no such parameter) | `5` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 72,
+   "params": [
+    "incipient_smooth_window"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_smooth_window": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "| `incipient_smooth_window` | — (no such parameter) | `5` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 73,
+   "params": [
+    "incipient_smooth_polyorder"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_smooth_polyorder": {
+     "get_periods": "3",
+     "determine_periods": "3"
+    }
+   },
+   "text": "| `incipient_smooth_polyorder` | — (no such parameter) | `3` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 74,
+   "params": [
+    "incipient_plateau_spare_intensification"
+   ],
+   "why": "table-row",
+   "code": {
+    "incipient_plateau_spare_intensification": {
+     "get_periods": "True",
+     "determine_periods": "True"
+    }
+   },
+   "text": "| `incipient_plateau_spare_intensification` | — (no such parameter) | `True` |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 75,
+   "params": [
+    "threshold_decay_gap",
+    "threshold_decay_length",
+    "threshold_incipient_length",
+    "threshold_intensification_gap",
+    "threshold_intensification_length"
+   ],
+   "why": "table-row",
+   "code": {
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    },
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    },
+    "threshold_decay_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    },
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    },
+    "threshold_intensification_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "| `threshold_intensification_length`, `threshold_intensification_gap`, `threshold_decay_length`, `threshold_decay_gap`, `threshold_incipient_length` | unchanged (`0.075`, `0.075`, `0.075`, `0.075`, `0.4`) | unchanged |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 79,
+   "params": [
+    "boundary_padding",
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    },
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "has `boundary_padding=\"reflect\"`, `replace_endpoints_with_lowpass=0` and"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 80,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "`incipient_method=\"geometric\"`. Its name is historical, and a later step"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 87,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "(`min_max_zeta_850`). That calibration was done with `boundary_padding=\"edge\"`,"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 92,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "with `boundary_padding=\"edge\"`, not with the current default. It is weak"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 99,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "**The `reflect` default.** `boundary_padding=\"reflect\"` is the default by the"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 110,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "and `boundary_padding=\"edge\"` on **19/54**. The phase sequence differs on"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 114,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "`incipient_plateau_signal=\"vorticity\"` reads the plateau from the RAW input,"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 115,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "so the padding cannot reach it. With `incipient_plateau_signal=\"derivative\"`"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 149,
+   "params": [
+    "decay_tail_amplitude_fraction"
+   ],
+   "why": "names+default",
+   "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    }
+   },
+   "text": "`decay_tail_amplitude_fraction=None` is no longer replaced by the default."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 162,
+   "params": [
+    "prominence"
+   ],
+   "why": "names+default",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence 0.3, decay tail 0.3). A value widget whose parameter defaults to"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 174,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "* that equality can fail: `cutoff_high=48` makes the column differ."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 176,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "value (`cutoff_high=48`) before being added. An untouched sidebar would equal"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 179,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "### Fixed — `process_vorticity(use_filter=False)` crashed on an unnamed index (item 31, `a1784b5`; approved by Danilo 2026-09-28)"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 181,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "With `use_filter=False` the raw series kept the input index's own dimension"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 184,
+   "params": [
+    "use_filter",
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "`use_filter=False` together with `use_smoothing=False` raised"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 186,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "with both passed explicitly, but the new default `use_smoothing=False` made it"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 187,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "reachable with `use_filter=False` alone. The unfiltered branch now builds the"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 234,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "### Fixed — calibration app: no `use_filter=True` warning per cyclone (item 29, merge `84b63ec`)"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 237,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "warns on `use_filter=True` — so the grid showed one copy of that warning per"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 252,
+   "params": [
+    "prominence"
+   ],
+   "why": "names+default",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "**on by default**. On the final z extremum list — after the prominence filter"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 305,
+   "params": [
+    "reclassify_index0"
+   ],
+   "why": "assignment",
+   "code": {
+    "reclassify_index0": {
+     "get_periods": "True",
+     "determine_periods": "True",
+     "find_peaks_valleys": "False"
+    }
+   },
+   "text": "— pass `reclassify_index0=False`. `research/labels/configs/cyclophaser_params-14.yaml`"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 421,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "(`prominence_relative=0.30`, `distance=5`) it removed **0 extrema**: nothing is"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 432,
+   "params": [
+    "length_scale",
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "`length_scale` is **not** removed. Under `mature_method=\"amplitude\"` it no longer"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 469,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "**Opt-in `incipient_method=\"plateau\"` — a slope-based incipient boundary (behaviour"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 472,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "`determine_periods(..., incipient_method=\"plateau\")` places the incipient/next-phase"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 475,
+   "params": [
+    "threshold_incipient_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    }
+   },
+   "text": "(default 0.20) — instead of at `threshold_incipient_length` (0.4) of the distance to"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 494,
+   "params": [
+    "mature_method",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "under `\"plateau\"`, as `threshold_mature_length` is under `mature_method=\"amplitude\"`."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 499,
+   "params": [
+    "incipient_plateau_crossing"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_plateau_crossing": {
+     "get_periods": "'sustained'",
+     "determine_periods": "'sustained'"
+    }
+   },
+   "text": "`incipient_plateau_crossing` (`\"single\"`, default; or `\"sustained\"` requiring"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 526,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "`incipient_plateau_signal=\"vorticity\"` reads the rate on `d(zeta_raw)/dt`, which"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 533,
+   "params": [
+    "incipient_smooth_window"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_smooth_window": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "differentiates it, controlled by `incipient_smooth_window` (default `0`,"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 538,
+   "params": [
+    "incipient_method",
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    },
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "`incipient_method=\"plateau\"` with `incipient_plateau_signal=\"vorticity\"`."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 560,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "**`incipient_method=\"amplitude\"` — discarded by construction, not by calibration**"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 565,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "analogue of `mature_method=\"amplitude\"`."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 585,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "**`use_smoothing=False` now disables the derivative smoothing too (behaviour change)**"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 587,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "`use_smoothing=False` skipped both Savitzky-Golay passes on the vorticity `z`, but"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 593,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "requested. `use_smoothing=False` now means what its name says: the derivatives"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 599,
+   "params": [
+    "cutoff_high",
+    "length_scale",
+    "use_filter",
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "(`use_filter=true`, `cutoff_high=18`, `use_smoothing=false`, `length_scale=local`,"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 600,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "`mature_method=amplitude`):"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 612,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "(`boundary_padding=\"reflect\"`, see below), the derivative Savgol had become the"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 615,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "Only the explicit `use_smoothing is False` case changes. `use_smoothing='auto'` and"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 626,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "> — e.g. `use_smoothing=len(series)//4 | 1` for series longer than 8 days, or"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 628,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "> this also re-enables the Savgol passes on `z`, which `use_smoothing=False` still"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 635,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "table-row",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "| `boundary_padding` | `\"zero\"` | **`\"reflect\"`** |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 636,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "table-row",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "| `replace_endpoints_with_lowpass` | `24` | **`0`** (and deprecated) |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 638,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "They had to move together: with `boundary_padding=\"reflect\"` and a non-zero"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 647,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "| `replace_endpoints_with_lowpass=24` | 4/51 | **28/51** |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 648,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "| `replace_endpoints_with_lowpass=0` | 0/51 | **0/51** |"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 654,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "**`boundary_padding` now defaults to `\"reflect\"`**"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 675,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "> **How to reproduce earlier results:** pass `boundary_padding=\"zero\"` **and**"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 676,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "> `replace_endpoints_with_lowpass=24` explicitly. Together these restore the"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 694,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "whereas `boundary_padding=\"reflect\"` takes it to 0.42 at no amplitude cost."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 696,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "With `boundary_padding=\"reflect\"` it is worse than redundant, it is harmful — see"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 701,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "**`use_filter=True` silently disabled the Lanczos filter (behaviour change)**"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 705,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "Because `bool` is a subclass of `int` in Python, `use_filter=True` fell into the"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 707,
+   "params": [
+    "cutoff_high",
+    "cutoff_low"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "single scalar multiply (0.0714 for `cutoff_low=168` / `cutoff_high=24`), not a"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 709,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "differed from `use_filter=False` only by a constant factor that every downstream"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 712,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "`use_filter=True` is now equivalent to `use_filter='auto'` (window"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 714,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "`use_filter=False` still disables filtering; an explicit integer is still a"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 715,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "literal window length, and `use_filter=1` is no longer conflated with `True`"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 719,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "> `use_filter=True` on version 2.0.0 or earlier was effectively **unfiltered**."
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 747,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "`use_filter='auto'` (normalised `|dz|` at the first/last sample, median):"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 766,
+   "params": [
+    "boundary_padding",
+    "cutoff_high",
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    },
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    },
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "0/51 bad cases with `use_filter=true`, `cutoff_high=18`, `boundary_padding=reflect`"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 768,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "(`use_smoothing=false`, `use_smoothing_twice=false`). See"
+  },
+  {
+   "file": "CHANGELOG.md",
+   "line": 770,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "caveat that `use_smoothing=false` disables Savgol on `z` but leaves the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 171,
+   "params": [
+    "prominence"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence:          float or None. Absolute minimum prominence threshold."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 173,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence_relative: float or None. Relative threshold as a fraction of"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 178,
+   "params": [
+    "reclassify_index0"
+   ],
+   "why": "assignment",
+   "code": {
+    "reclassify_index0": {
+     "get_periods": "True",
+     "determine_periods": "True",
+     "find_peaks_valleys": "False"
+    }
+   },
+   "text": "reclassify_index0:   bool. Apply rule C2' to index 0 after filtering —"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 255,
+   "params": [
+    "prominence"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence:          float absolute threshold, or None."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 256,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence_relative: float relative threshold (fraction of max interior"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 431,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 438,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 442,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 443,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "``use_smoothing=False``, ``use_smoothing_twice=False``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 444,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "``use_filter='auto'``) were calibrated ONLY, and only together with"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 445,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"edge\"``, for the TRACK input the calibration used:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 447,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 452,
+   "params": [
+    "incipient_plateau_spare_intensification"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_spare_intensification": {
+     "get_periods": "True",
+     "determine_periods": "True"
+    }
+   },
+   "text": "* ``incipient_plateau_spare_intensification=True`` is **\"adotada sem"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 459,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "``replace_endpoints_with_lowpass=24``, and lacks most of the phase"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 466,
+   "params": [
+    "use_filter"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "(or `True`, which is equivalent — see the \"use_filter=True note\" below) for the default window"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 468,
+   "params": [
+    "use_filter"
+   ],
+   "why": "default-line (header 465)",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "window length explicitly in time steps. **Units**: Time steps. Default is `'auto'`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 472,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "default-line (header 470)",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "Default is 0 (disabled) — it was 24 in versions up to and including 2.0.0. Passing a non-zero"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 478,
+   "params": [
+    "savgol_polynomial",
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "to `savgol_polynomial`. **Units**: Time steps. Default is `False` (`'auto'` up to 2.0.0). **To deactivate**, set `use_smoothing`"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 483,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "Same requirements as `use_smoothing`. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 486,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "window length (`use_smoothing` or `use_smoothing_twice` if specified). Default is 3."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 489,
+   "params": [
+    "cutoff_low"
+   ],
+   "why": "default-line (header 488)",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    }
+   },
+   "text": "noise. Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 168."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 492,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "default-line (header 491)",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "Suitable for time series data with hourly resolution. **Units**: Time steps. Default is 18.0 (48.0 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 499,
+   "params": [
+    "use_filter"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "meaningful when ``use_filter`` is truthy. Default is ``\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 503,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "use_filter=True note (behaviour change)"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 505,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "``use_filter=True`` now means the same as ``use_filter='auto'``: filtering on,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 512,
+   "params": [
+    "cutoff_high",
+    "cutoff_low"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "``cutoff_low=168``/``cutoff_high=24``), i.e. no convolution at all — so a"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 514,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "from ``use_filter=False`` only by a constant factor that every downstream"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 517,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "**Any series processed with ``use_filter=True`` on an earlier version was"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 521,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "``use_filter=1`` still means a literal window length of 1 — the bool check"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 523,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "``use_filter=False`` still disables filtering."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 533,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "len(zeta) // 2`` under ``use_filter='auto'``; measured kernel/series length"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 567,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"zero\"`` explicitly. Note that switching modes changes"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 578,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "names+default",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "``replace_endpoints_with_lowpass`` is **DEPRECATED** and its default changed"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 579,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "from 24 to **0** together with the ``boundary_padding`` default above. Passing"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 591,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "With ``boundary_padding=\"reflect\"`` it is worse than redundant, it is"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 602,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "names+default",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "defaults with replace_endpoints_with_lowpass=24   4/51      28/51"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 603,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "names+default",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "defaults with replace_endpoints_with_lowpass=0    0/51       0/51"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 609,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"reflect\"`` trades one boundary artefact for another."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 622,
+   "params": [
+    "savgol_polynomial",
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "to `savgol_polynomial` to avoid errors. For example, if `savgol_polynomial=3`, then `use_smoothing` must be"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 626,
+   "params": [
+    "cutoff_high",
+    "cutoff_low"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": ">>> df = process_vorticity(zeta_df, cutoff_low=168, cutoff_high=24)"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 633,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "names+default",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "\"replace_endpoints_with_lowpass is deprecated and its default changed \""
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 637,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "\"Combined with boundary_padding='reflect' it is actively harmful: \""
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 640,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "\"replace_endpoints_with_lowpass=0). Pass 0, or omit it, to silence \""
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 653,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "# filtering with use_filter=True disabled it instead (see the \"use_filter=True"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 657,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "# False falls through to the `if use_filter:` guard below and skips"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 662,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "\"use_filter=True is interpreted as 'auto' (Lanczos window = \""
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 666,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "\"effectively disabled it -- results obtained with use_filter=True \""
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 667,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "\"on earlier versions were UNFILTERED. Pass use_filter='auto' to \""
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 740,
+   "params": [
+    "use_filter",
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "# so use_filter=False with use_smoothing=False raised in"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 741,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "# differentiate('time'). Item 31 made use_smoothing=False the default,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 742,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "# which made that reachable with use_filter=False alone."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 889,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 896,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 900,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 901,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "``use_smoothing=False``, ``use_smoothing_twice=False``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 902,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "``use_filter='auto'``) were calibrated ONLY, and only together with"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 903,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"edge\"``, for the TRACK input the calibration used:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 905,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 910,
+   "params": [
+    "incipient_plateau_spare_intensification"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_spare_intensification": {
+     "get_periods": "True",
+     "determine_periods": "True"
+    }
+   },
+   "text": "* ``incipient_plateau_spare_intensification=True`` is **\"adotada sem"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 917,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "``replace_endpoints_with_lowpass=24``, and lacks most of the phase"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 974,
+   "params": [
+    "threshold_decay_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "``threshold_decay_gap`` are all fractions of a *length*.  With the default"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 975,
+   "params": [
+    "length_scale"
+   ],
+   "why": "assignment",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "``length_scale=\"global\"`` that length is the whole input series"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 977,
+   "params": [
+    "length_scale"
+   ],
+   "why": "assignment",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "With ``length_scale=\"local\"`` each candidate segment is instead checked"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 991,
+   "params": [
+    "mature_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "With ``mature_method=\"derivative\"`` (the default before item 31; not a parameter of the 2.0.0 release) the mature window around"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 994,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "behaviour, unchanged. With ``mature_method=\"amplitude\"`` the window is"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1021,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "``mature_method=\"derivative\"``. In \"amplitude\" mode they have NO effect:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1047,
+   "params": [
+    "plot"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "plot (Union[str, bool], optional): Path to save plots or False to disable plotting. Default is False."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1048,
+   "params": [
+    "plot_steps"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot_steps": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "plot_steps (Union[str, bool], optional): Path to save step-by-step plots or False to disable. Default is False."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1049,
+   "params": [
+    "export_dict"
+   ],
+   "why": "names+default",
+   "code": {
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "export_dict (Union[str, bool], optional): Path to export periods to CSV or False to disable. Default is False."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1050,
+   "params": [
+    "threshold_intensification_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "threshold_intensification_length (float, optional): Minimum intensification length. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1051,
+   "params": [
+    "threshold_intensification_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_intensification_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "threshold_intensification_gap (float, optional): Maximum gap in intensification periods. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1052,
+   "params": [
+    "threshold_mature_distance"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_mature_distance": {
+     "get_periods": "0.18",
+     "determine_periods": "0.18"
+    }
+   },
+   "text": "threshold_mature_distance (float, optional): Distance threshold for mature stage detection. Default is 0.18 (0.125 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1053,
+   "params": [
+    "threshold_mature_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "threshold_mature_length (float, optional): Minimum mature stage length. Default is 0.15 (0.03 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1054,
+   "params": [
+    "threshold_decay_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_decay_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "threshold_decay_length (float, optional): Minimum decay stage length. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1055,
+   "params": [
+    "threshold_decay_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "threshold_decay_gap (float, optional): Maximum gap in decay periods. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1056,
+   "params": [
+    "threshold_incipient_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    }
+   },
+   "text": "threshold_incipient_length (float, optional): Minimum incipient length. Default is 0.4."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1065,
+   "params": [
+    "mature_method",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "``mature_method=\"amplitude\"`` ignores ``threshold_mature_length``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1071,
+   "params": [
+    "boundary_padding",
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1075,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "Only used when ``incipient_method=\"plateau\"``. Default is 0.20."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1082,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "noisier. Only used when ``incipient_method=\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1086,
+   "params": [
+    "incipient_plateau_k"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_plateau_k": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "``rel >= tau``. ``\"sustained\"`` (the default since item 31) requires ``incipient_plateau_k``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1090,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "Only used when ``incipient_method=\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1093,
+   "params": [
+    "incipient_plateau_crossing"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_plateau_crossing": {
+     "get_periods": "'sustained'",
+     "determine_periods": "'sustained'"
+    }
+   },
+   "text": "``incipient_plateau_crossing=\"sustained\"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1099,
+   "params": [
+    "incipient_smooth_window"
+   ],
+   "why": "default-line (header 1095)",
+   "code": {
+    "incipient_smooth_window": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1100,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "``incipient_method=\"plateau\"`` **and**"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1101,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "``incipient_plateau_signal=\"vorticity\"``; the ``\"derivative\"`` path already"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1107,
+   "params": [
+    "incipient_smooth_polyorder"
+   ],
+   "why": "default-line (header 1106)",
+   "code": {
+    "incipient_smooth_polyorder": {
+     "get_periods": "3",
+     "determine_periods": "3"
+    }
+   },
+   "text": "Savitzky-Golay pass. Default is 3. A window at or below this order cannot"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1116,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "``incipient_method=\"plateau\"``. See ``find_incipient_period``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1125,
+   "params": [
+    "prominence"
+   ],
+   "why": "names+default",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence. Default 0.3 since item 31 (None, a no-op, before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1140,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "names+default",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1157,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "length_scale (str, optional): \"local\" (default since item 31) or \"global\" (the default before item 31; not a parameter of the 2.0.0 release). See the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1159,
+   "params": [
+    "mature_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "mature_method (str, optional): \"amplitude\" (default since item 31) or \"derivative\" (the default before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1174,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "count as mature. Only used when ``mature_method=\"amplitude\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1428,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding`` defaults to ``\"reflect\"``, while params-track sets"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1435,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "* **Phase defaults** (``get_periods``: thresholds, ``length_scale``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1439,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "* **Filtering defaults** (``process_vorticity``: ``cutoff_high=18.0``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1440,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "``use_smoothing=False``, ``use_smoothing_twice=False``,"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1441,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "``use_filter='auto'``) were calibrated ONLY, and only together with"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1442,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"edge\"``, for the TRACK input the calibration used:"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1444,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "South-Atlantic cyclone tracks. The default ``boundary_padding=\"reflect\"``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1449,
+   "params": [
+    "incipient_plateau_spare_intensification"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_spare_intensification": {
+     "get_periods": "True",
+     "determine_periods": "True"
+    }
+   },
+   "text": "* ``incipient_plateau_spare_intensification=True`` is **\"adotada sem"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1456,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "``replace_endpoints_with_lowpass=24``, and lacks most of the phase"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1469,
+   "params": [
+    "plot"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "plot (Union[str, bool], optional): Path to save generated plots. Set to `False` to skip plotting. Default is `False`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1472,
+   "params": [
+    "plot_steps"
+   ],
+   "why": "default-line (header 1471)",
+   "code": {
+    "plot_steps": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "phase of the algorithm. Set to `False` to disable. Default is `False`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1475,
+   "params": [
+    "export_dict"
+   ],
+   "why": "default-line (header 1474)",
+   "code": {
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "exporting. Default is `False`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1477,
+   "params": [
+    "hemisphere"
+   ],
+   "why": "names+default",
+   "code": {
+    "hemisphere": {
+     "determine_periods": "'southern'"
+    }
+   },
+   "text": "hemisphere (str, optional): Hemisphere of the data. Set to `\"southern\"` (default) to apply southern hemisphere"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1487,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "kernel that disabled filtering altogether, so results obtained with `use_filter=True` on earlier"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1488,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "versions were UNFILTERED. See the \"use_filter=True note\" in `process_vorticity`. **Units:** Time steps."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1489,
+   "params": [
+    "use_filter"
+   ],
+   "why": "default-line (header 1483)",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "Default is `'auto'`."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1492,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "default-line (header 1491)",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "filtered series with a lowpass estimate. **Units:** Time steps. Default is 0 (disabled) — it was 24"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1495,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "and combined with `boundary_padding=\"reflect\"` it is harmful (the endpoint splice becomes a step;"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1501,
+   "params": [
+    "savgol_polynomial"
+   ],
+   "why": "names+default",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    }
+   },
+   "text": "on data. **Must be greater than or equal to `savgol_polynomial`** to avoid errors. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1504,
+   "params": [
+    "use_smoothing_twice"
+   ],
+   "why": "default-line (header 1503)",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "noise reduction. Choose `True`, `False`, or specify an integer. Default is `False` (`'auto'` up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1507,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "to the window length specified in `use_smoothing` and `use_smoothing_twice`.** Default is 3."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1510,
+   "params": [
+    "cutoff_low"
+   ],
+   "why": "default-line (header 1509)",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    }
+   },
+   "text": "for hourly data. **Units:** Time steps. Default is 168."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1513,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "default-line (header 1512)",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "for hourly data. **Units:** Time steps. Default is 18.0 (48.0 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1528,
+   "params": [
+    "threshold_intensification_length"
+   ],
+   "why": "default-line (header 1527)",
+   "code": {
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "of the dataset. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1530,
+   "params": [
+    "threshold_intensification_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_intensification_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "threshold_intensification_gap (float, optional): Maximum allowed gap in intensification phase. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1533,
+   "params": [
+    "threshold_mature_distance"
+   ],
+   "why": "default-line (header 1532)",
+   "code": {
+    "threshold_mature_distance": {
+     "get_periods": "0.18",
+     "determine_periods": "0.18"
+    }
+   },
+   "text": "of the mature stage. Default is 0.18 (0.125 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1536,
+   "params": [
+    "threshold_mature_length"
+   ],
+   "why": "default-line (header 1535)",
+   "code": {
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "Default is 0.15 (0.03 up to 2.0.0)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1539,
+   "params": [
+    "threshold_decay_length"
+   ],
+   "why": "default-line (header 1538)",
+   "code": {
+    "threshold_decay_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1541,
+   "params": [
+    "threshold_decay_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "threshold_decay_gap (float, optional): Maximum allowed gap in decay phase. Default is 0.075."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1544,
+   "params": [
+    "threshold_incipient_length"
+   ],
+   "why": "default-line (header 1543)",
+   "code": {
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    }
+   },
+   "text": "dataset. Default is 0.4."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1554,
+   "params": [
+    "mature_method",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "``mature_method=\"amplitude\"`` ignores ``threshold_mature_length``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1560,
+   "params": [
+    "boundary_padding",
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"reflect\"`` and ``use_smoothing=False``) — as the current defaults are. Default is ``\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1564,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "Only used when ``incipient_method=\"plateau\"``. Default is 0.20."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1571,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "noisier. Only used when ``incipient_method=\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1575,
+   "params": [
+    "incipient_plateau_k"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_plateau_k": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "``rel >= tau``. ``\"sustained\"`` (the default since item 31) requires ``incipient_plateau_k``"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1579,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "Only used when ``incipient_method=\"plateau\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1582,
+   "params": [
+    "incipient_plateau_crossing"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_plateau_crossing": {
+     "get_periods": "'sustained'",
+     "determine_periods": "'sustained'"
+    }
+   },
+   "text": "``incipient_plateau_crossing=\"sustained\"``. Default is 5 (3 before item 31; not a parameter of the 2.0.0 release). Ignored for"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1588,
+   "params": [
+    "incipient_smooth_window"
+   ],
+   "why": "default-line (header 1584)",
+   "code": {
+    "incipient_smooth_window": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "therefore every other phase, are untouched. 0 disables it (the default before item 31; not a parameter of the 2.0.0 release). Default is 5. Only used when"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1589,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "``incipient_method=\"plateau\"`` **and**"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1590,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "``incipient_plateau_signal=\"vorticity\"``; the ``\"derivative\"`` path already"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1596,
+   "params": [
+    "incipient_smooth_polyorder"
+   ],
+   "why": "default-line (header 1595)",
+   "code": {
+    "incipient_smooth_polyorder": {
+     "get_periods": "3",
+     "determine_periods": "3"
+    }
+   },
+   "text": "Savitzky-Golay pass. Default is 3. A window at or below this order cannot"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1605,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "``incipient_method=\"plateau\"``. See ``find_incipient_period``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1620,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "names+default",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "``prominence_relative`` both None — the defaults before item 31; neither is a parameter of the 2.0.0 release — the rule"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1637,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "length_scale (str, optional): \"local\" (default since item 31) or \"global\" (the default before item 31; not a parameter of the 2.0.0 release). Controls what"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1640,
+   "params": [
+    "threshold_decay_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "``threshold_decay_gap`` are fractions *of*. \"global\" (the default before item 31; not a parameter of the 2.0.0 release) uses the"
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1648,
+   "params": [
+    "mature_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "mature_method (str, optional): \"amplitude\" (default since item 31) or \"derivative\" (the default before item 31; not a parameter of the 2.0.0 release)."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1655,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "count as mature. Only used when ``mature_method=\"amplitude\"``."
+  },
+  {
+   "file": "cyclophaser/determine_periods.py",
+   "line": 1728,
+   "params": [
+    "cutoff_high",
+    "cutoff_low",
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    },
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "- **Data Frequency**: The default values for `cutoff_low`, `cutoff_high`, `replace_endpoints_with_lowpass`,"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 8,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "# length_scale: \"global\" (default) vs \"local\""
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 28,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "# `length_scale=\"local\"` (opt-in; default remains \"global\" for exact backward"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 75,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "Used by find_mature_stage when mature_method=\"amplitude\". Defines the mature"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 115,
+   "params": [
+    "length_scale",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "Interaction with length_scale / threshold_mature_length: NONE — this window"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 120,
+   "params": [
+    "mature_method",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "mature_method=\"amplitude\", by design (see the threshold_mature_length /"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 132,
+   "params": [
+    "mature_amplitude_fraction"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_amplitude_fraction": {
+     "get_periods": "0.9",
+     "determine_periods": "0.9"
+    }
+   },
+   "text": "mature_amplitude_fraction: float in (0, 1]. Fraction of each side's"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 189,
+   "params": [
+    "mature_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "- 'mature_method' (str, optional): \"derivative\" (default) or"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 194,
+   "params": [
+    "length_scale",
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "'length_scale'. Only used when mature_method=\"derivative\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 198,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "mature_method=\"amplitude\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 215,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "Only used when mature_method=\"derivative\" — see the note below."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 217,
+   "params": [
+    "mature_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "mature_method=\"derivative\" (see note below). 'global' (default)"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 227,
+   "params": [
+    "mature_method",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "threshold_mature_length is applied ONLY when mature_method=\"derivative\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 271,
+   "params": [
+    "mature_min_depth"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_min_depth": {
+     "get_periods": "0.8",
+     "determine_periods": "0.8"
+    }
+   },
+   "text": "# --- mature_min_depth: a per-valley depth floor on eligibility -----------"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 291,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "# It is independent of mature_method: eligibility of a valley is a separate"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 458,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "- 'length_scale' (str, optional): 'global' (default) measures both"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 487,
+   "params": [
+    "intensification_min_depth"
+   ],
+   "why": "assignment",
+   "code": {
+    "intensification_min_depth": {
+     "get_periods": "0.05",
+     "determine_periods": "0.05"
+    }
+   },
+   "text": "# --- intensification_min_depth: a per-segment depth floor -----------------"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 596,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "- 'length_scale' (str, optional): 'global' (default) measures both"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 666,
+   "params": [
+    "decay_tail_amplitude_fraction"
+   ],
+   "why": "names+default",
+   "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    }
+   },
+   "text": "'decay_tail_amplitude_fraction' note (opt-in, default None: no effect)"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 717,
+   "params": [
+    "decay_tail_amplitude_fraction"
+   ],
+   "why": "assignment",
+   "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    }
+   },
+   "text": "``decay_tail_amplitude_fraction=0.05`` sits in the middle of a confirmed"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 840,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "# incipient_method: \"geometric\" (default) vs \"plateau\""
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 854,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "# `incipient_method=\"plateau\"` (opt-in; default remains \"geometric\", which is"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 877,
+   "params": [
+    "incipient_method",
+    "threshold_incipient_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    },
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    }
+   },
+   "text": "# `threshold_incipient_length` is IGNORED when incipient_method=\"plateau\", in"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 879,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "# mature_method=\"amplitude\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 885,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "# `incipient_plateau_signal=\"vorticity\"` reads d(zeta_raw)/dt on the UNFILTERED"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 899,
+   "params": [
+    "incipient_smooth_window"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_smooth_window": {
+     "get_periods": "5",
+     "determine_periods": "5"
+    }
+   },
+   "text": "# before, and `incipient_smooth_window=0` (the default) reproduces the previous"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 909,
+   "params": [
+    "incipient_method",
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    },
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "# `incipient_method=\"plateau\"` with `incipient_plateau_signal=\"vorticity\"`, in"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 911,
+   "params": [
+    "mature_method",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "# `threshold_mature_length` under `mature_method=\"amplitude\"`."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1099,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "``incipient_method=\"plateau\"``, in the same way"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1101,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "``mature_method=\"amplitude\"``."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1102,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "- 'incipient_method' (str): \"geometric\" (default) or \"plateau\"."
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1105,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "- 'incipient_plateau_signal' (str): \"derivative\" (default) or"
+  },
+  {
+   "file": "cyclophaser/find_stages.py",
+   "line": 1107,
+   "params": [
+    "incipient_plateau_crossing"
+   ],
+   "why": "names+default",
+   "code": {
+    "incipient_plateau_crossing": {
+     "get_periods": "'sustained'",
+     "determine_periods": "'sustained'"
+    }
+   },
+   "text": "- 'incipient_plateau_crossing' (str): \"single\" (default) or"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 6,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "# boundary_padding: \"reflect\" (default) vs \"zero\" / \"edge\""
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 18,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "#     ``window_length_lanczo = len(zeta) // 2`` for ``use_filter='auto'``, and"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 56,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "# who needs the old output must now pass ``boundary_padding=\"zero\"``"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 62,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "# zero-padded lowpass endpoints.  With ``boundary_padding=\"reflect\"`` it loses"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 84,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``np.pad`` and convolved in \"valid\" mode.  With ``boundary_padding=\"zero\"``"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 193,
+   "params": [
+    "cutoff_low"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    }
+   },
+   "text": "cutoff_low: float"
+  },
+  {
+   "file": "cyclophaser/lanczos_filter.py",
+   "line": 196,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "cutoff_high: float"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 17,
+   "params": [
+    "plot"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **plot**: (str or bool, optional) Path for saving generated plots. Set to `False` to disable plotting. Default is False."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 18,
+   "params": [
+    "plot_steps"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot_steps": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **plot_steps**: (str or bool, optional) Path for saving step-by-step didactic plots. Set to `False` to disable step-wise plotting. Default is False."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 19,
+   "params": [
+    "export_dict"
+   ],
+   "why": "names+default",
+   "code": {
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **export_dict**: (str or bool, optional) Path for exporting the detected periods as a CSV file. Set to `False` to skip exporting. Default is False."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 20,
+   "params": [
+    "hemisphere"
+   ],
+   "why": "names+default",
+   "code": {
+    "hemisphere": {
+     "determine_periods": "'southern'"
+    }
+   },
+   "text": "- **hemisphere**: (str, optional) Hemisphere of the data. Set to `\"southern\"` (default) to apply Southern Hemisphere conventions, or `\"northern\"` to automatically multiply input values by -1 for Northern Hemisphere compa"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 21,
+   "params": [
+    "use_filter"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "- **use_filter**: (str or int, optional) Apply a Lanczos filter to the vorticity data. Set to `'auto'` for a default window length or specify an integer. **Units:** Time steps. Default is 'auto'."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 22,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "names+default",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "- **replace_endpoints_with_lowpass**: (int, optional) Replace the endpoints of the series with a lowpass filter. **Units:** Time steps. Default is 24."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 24,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **use_smoothing_twice**: (str or int, optional) Apply Savgol smoothing twice for additional noise reduction. Same requirements as `use_smoothing`. Default is 'auto'."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 25,
+   "params": [
+    "savgol_polynomial",
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing. **Note:** This must be less than or equal to the window length specified in `use_smoothing`. Default is 3."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 26,
+   "params": [
+    "cutoff_high",
+    "cutoff_low"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "- **cutoff_low** and **cutoff_high**: (float, optional) Low and high-frequency cutoffs for the Lanczos filter, respectively. **Units:** Time steps. Default values are 168 and 48, respectively."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 27,
+   "params": [
+    "threshold_intensification_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "- **threshold_intensification_length**: (float, optional) Minimum required length for intensification periods as a fraction of the series length. Default is 0.075."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 28,
+   "params": [
+    "threshold_intensification_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_intensification_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "- **threshold_intensification_gap**: (float, optional) Maximum gap allowed in intensification periods. Default is 0.075."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 29,
+   "params": [
+    "threshold_mature_distance"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_mature_distance": {
+     "get_periods": "0.18",
+     "determine_periods": "0.18"
+    }
+   },
+   "text": "- **threshold_mature_distance**: (float, optional) Distance threshold for detecting the mature stage. Default is 0.125."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 30,
+   "params": [
+    "threshold_mature_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "- **threshold_mature_length**: (float, optional) Minimum required length for mature periods as a fraction of the series length. Default is 0.03."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 31,
+   "params": [
+    "threshold_decay_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_decay_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "- **threshold_decay_length**: (float, optional) Minimum required length for decay periods as a fraction of the series length. Default is 0.075."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 32,
+   "params": [
+    "threshold_decay_gap"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "- **threshold_decay_gap**: (float, optional) Maximum gap allowed in decay periods. Default is 0.075."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 33,
+   "params": [
+    "threshold_incipient_length"
+   ],
+   "why": "names+default",
+   "code": {
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    }
+   },
+   "text": "- **threshold_incipient_length**: (float, optional) Minimum required length for incipient periods as a fraction of the series length. Default is 0.4."
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 51,
+   "params": [
+    "plot"
+   ],
+   "why": "assignment",
+   "code": {
+    "plot": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\"plot\": 'path/to/save/plots',"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 52,
+   "params": [
+    "plot_steps"
+   ],
+   "why": "assignment",
+   "code": {
+    "plot_steps": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\"plot_steps\": 'path/to/save/plot_steps',"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 53,
+   "params": [
+    "export_dict"
+   ],
+   "why": "assignment",
+   "code": {
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\"export_dict\": 'path/to/export/csv',"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 54,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "\"use_filter\": 'auto',"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 55,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "\"replace_endpoints_with_lowpass\": 24,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 56,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\"use_smoothing\": 'auto',"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 57,
+   "params": [
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\"use_smoothing_twice\": 'auto',"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 58,
+   "params": [
+    "savgol_polynomial"
+   ],
+   "why": "assignment",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    }
+   },
+   "text": "\"savgol_polynomial\": 3,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 59,
+   "params": [
+    "cutoff_low"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    }
+   },
+   "text": "\"cutoff_low\": 168,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 60,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "\"cutoff_high\": 48,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 61,
+   "params": [
+    "threshold_intensification_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "\"threshold_intensification_length\": 0.075,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 62,
+   "params": [
+    "threshold_intensification_gap"
+   ],
+   "why": "assignment",
+   "code": {
+    "threshold_intensification_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "\"threshold_intensification_gap\": 0.075,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 63,
+   "params": [
+    "threshold_mature_distance"
+   ],
+   "why": "assignment",
+   "code": {
+    "threshold_mature_distance": {
+     "get_periods": "0.18",
+     "determine_periods": "0.18"
+    }
+   },
+   "text": "\"threshold_mature_distance\": 0.125,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 64,
+   "params": [
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "\"threshold_mature_length\": 0.03,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 65,
+   "params": [
+    "threshold_decay_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "threshold_decay_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "\"threshold_decay_length\": 0.075,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 66,
+   "params": [
+    "threshold_decay_gap"
+   ],
+   "why": "assignment",
+   "code": {
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "\"threshold_decay_gap\": 0.075,"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 67,
+   "params": [
+    "threshold_incipient_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    }
+   },
+   "text": "\"threshold_incipient_length\": 0.4"
+  },
+  {
+   "file": "docs/api.rst",
+   "line": 70,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "result = determine_periods(series, x=x, **options)"
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 145,
+   "params": [
+    "hemisphere"
+   ],
+   "why": "assignment",
+   "code": {
+    "hemisphere": {
+     "determine_periods": "'southern'"
+    }
+   },
+   "text": "hemisphere=\"southern\","
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 146,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "use_filter=True,"
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 147,
+   "params": [
+    "cutoff_low"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    }
+   },
+   "text": "cutoff_low=168,"
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 148,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "cutoff_high=48,"
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 149,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "replace_endpoints_with_lowpass=24,"
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 150,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "use_smoothing=\"auto\","
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 151,
+   "params": [
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "use_smoothing_twice=\"auto\","
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 152,
+   "params": [
+    "savgol_polynomial"
+   ],
+   "why": "assignment",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    }
+   },
+   "text": "savgol_polynomial=3,"
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 171,
+   "params": [
+    "export_dict"
+   ],
+   "why": "assignment",
+   "code": {
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "determine_periods(series, export_dict=out_csv, **PARAMS)"
+  },
+  {
+   "file": "docs/calibration_tool.rst",
+   "line": 216,
+   "params": [
+    "export_dict"
+   ],
+   "why": "assignment",
+   "code": {
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "determine_periods(series, export_dict=out_csv, **params)"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 49,
+   "params": [
+    "x"
+   ],
+   "why": "names+default",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "- **x**: (list, pd.DatetimeIndex, optional) Temporal labels corresponding to the `series`. This parameter expects a list of labels with the same length as `series`. **Default**: None. When using a pandas Series or xarray"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 51,
+   "params": [
+    "hemisphere"
+   ],
+   "why": "names+default",
+   "code": {
+    "hemisphere": {
+     "determine_periods": "'southern'"
+    }
+   },
+   "text": "- **hemisphere**: (str, optional) Hemisphere of the data. Set to `\"southern\"` (default) to apply Southern Hemisphere conventions, or `\"northern\"` to automatically multiply input values by -1 for Northern Hemisphere compa"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 53,
+   "params": [
+    "plot"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **plot**: (str or bool, optional) Path for saving generated plots. Set to `False` to disable plotting. **Default**: False."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 55,
+   "params": [
+    "plot_steps"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot_steps": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **plot_steps**: (str or bool, optional) Path for saving detailed step-by-step plots to illustrate each processing stage. Set to `False` to disable step-wise plotting. **Default**: False."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 57,
+   "params": [
+    "export_dict"
+   ],
+   "why": "names+default",
+   "code": {
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **export_dict**: (str or bool, optional) Path for exporting detected cyclone periods as a CSV file. Set to `False` to skip exporting. **Default**: False."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 59,
+   "params": [
+    "use_filter"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "- **use_filter**: (str or int, optional) Apply a Lanczos filter to the `series`. Specify a window length as an integer to customize or use `'auto'` for adaptive length based on dataset size (half of series length). **Uni"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 62,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "names+default",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "- **replace_endpoints_with_lowpass**: (int, optional) Applies a lowpass filter to smooth the series endpoints, which helps stabilize edge effects during filtering. Specify the window length. **Units**: Time steps. **Defa"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 65,
+   "params": [
+    "savgol_polynomial",
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **use_smoothing**: (str, int, optional) Apply Savgol smoothing to filtered vorticity data. Set to `'auto'` to automatically choose an appropriate window length, or provide an integer window length directly. **Note**: T"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 68,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "names+default",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **use_smoothing_twice**: (str, int, optional) Apply a second pass of Savgol smoothing for further noise reduction. This uses similar parameters to `use_smoothing`. **Default**: False (it was 'auto' up to 2.0.0)."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 71,
+   "params": [
+    "savgol_polynomial",
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "names+default",
+   "code": {
+    "savgol_polynomial": {
+     "process_vorticity": "3",
+     "determine_periods": "3"
+    },
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "- **savgol_polynomial**: (int, optional) Polynomial order for Savgol smoothing, which must be less than or equal to the window length specified in `use_smoothing` and `use_smoothing_twice`. **Default**: 3."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 74,
+   "params": [
+    "cutoff_low"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    }
+   },
+   "text": "- **cutoff_low**: (float, optional) Low-frequency cutoff for the Lanczos filter, designed for data with hourly resolution. **Units**: Time steps. **Default**: 168."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 77,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "- **cutoff_high**: (float, optional) High-frequency cutoff for the Lanczos filter, suitable for reducing high-frequency noise in hourly data. **Units**: Time steps. **Default**: 18 (it was 48, i.e. 2 days, up to 2.0.0)."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 80,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "- **boundary_padding**: (str, optional) How the series is extended beyond its ends before the Lanczos convolution: `\"reflect\"`, `\"edge\"` or `\"zero\"`. **Default**: `\"reflect\"`. The 2.0.0 release has no such parameter and "
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 82,
+   "params": [
+    "cutoff_high",
+    "cutoff_low",
+    "replace_endpoints_with_lowpass",
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    },
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "**Note on Default Values and Data Frequency**: The above default settings assume hourly data frequency. For datasets with different time resolutions (e.g., daily or sub-hourly), adjustments are recommended for parameters"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 90,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "names+default",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "with **one exception**: ``boundary_padding`` defaults to ``\"reflect\"``, while"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 99,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "* **Phase defaults** — the thresholds, ``length_scale=\"local\"``,"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 100,
+   "params": [
+    "incipient_method",
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    },
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "``mature_method=\"amplitude\"``, the depth floors, ``incipient_method=\"plateau\"``"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 101,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "and its ``incipient_*`` settings, ``prominence_relative=0.3`` and"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 102,
+   "params": [
+    "decay_tail_amplitude_fraction"
+   ],
+   "why": "assignment",
+   "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    }
+   },
+   "text": "``decay_tail_amplitude_fraction=0.3``. They were calibrated against manual"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 104,
+   "params": [
+    "cutoff_high",
+    "use_smoothing"
+   ],
+   "why": "names+default",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "* **Filtering defaults** — ``cutoff_high=18``, ``use_smoothing=False``,"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 105,
+   "params": [
+    "use_filter",
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    },
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "``use_smoothing_twice=False``, ``use_filter='auto'``, and"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 106,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "``boundary_padding=\"reflect\"``. **Only the filtering for TRACK input was"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 107,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "calibrated**, and only together with ``boundary_padding=\"edge\"``: hourly"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 114,
+   "params": [
+    "incipient_plateau_spare_intensification"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_spare_intensification": {
+     "get_periods": "True",
+     "determine_periods": "True"
+    }
+   },
+   "text": "The rule ``incipient_plateau_spare_intensification=True`` (item 30) is"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 121,
+   "params": [
+    "replace_endpoints_with_lowpass"
+   ],
+   "why": "assignment",
+   "code": {
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "``replace_endpoints_with_lowpass=24``, and lacks most of the phase parameters."
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 138,
+   "params": [
+    "export_dict",
+    "plot",
+    "plot_steps"
+   ],
+   "why": "names+default",
+   "code": {
+    "plot_steps": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    },
+    "plot": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    },
+    "export_dict": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "result = determine_periods(series, plot=\"test_default\", plot_steps=\"test_steps_default\", export_dict=\"test_default\")"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 182,
+   "params": [
+    "cutoff_low"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_low": {
+     "process_vorticity": "168",
+     "determine_periods": "168"
+    }
+   },
+   "text": "'cutoff_low': 100,"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 183,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "'cutoff_high': 20,"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 184,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "'use_filter': True,"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 185,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "'use_smoothing': 10,"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 186,
+   "params": [
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "'use_smoothing_twice': False,"
+  },
+  {
+   "file": "docs/usage.rst",
+   "line": 190,
+   "params": [
+    "plot",
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    },
+    "plot": {
+     "get_periods": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "result = determine_periods(series, x=x, plot='test_custom', **process_vorticity_args)"
+  },
+  {
+   "file": "tools/calibration_app/README.md",
+   "line": 119,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "`incipient_method=\"plateau\"` as camadas de rel/τ/sondagem não existem e"
+  },
+  {
+   "file": "tools/calibration_app/README.md",
+   "line": 179,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "This is not cosmetic: the v1–v5 YAMLs carry `use_filter: true`, and in the"
+  },
+  {
+   "file": "tools/calibration_app/README.md",
+   "line": 248,
+   "params": [
+    "x"
+   ],
+   "why": "names+default",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "(default) and `Stacked`, which puts the panels on a shared x axis and a shared y"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1626,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "\"Combined with `boundary_padding=reflect` it is actively harmful: both filters \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1633,
+   "params": [
+    "replace_endpoints_with_lowpass",
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    },
+    "replace_endpoints_with_lowpass": {
+     "process_vorticity": "0",
+     "determine_periods": "0"
+    }
+   },
+   "text": "\"(`if use_filter and replace_endpoints_with_lowpass:`).\")"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1678,
+   "params": [
+    "use_smoothing",
+    "use_smoothing_twice"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing_twice": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    },
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\"(`if use_smoothing: ... if use_smoothing_twice: ...`) — with \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1679,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\"`use_smoothing='off'` the first pass never runs, so this mode/window \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1694,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\" **Inactive**: `use_smoothing='off'` skips the pass this window feeds.\")"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1713,
+   "params": [
+    "use_smoothing"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_smoothing": {
+     "process_vorticity": "False",
+     "determine_periods": "False"
+    }
+   },
+   "text": "\" **Inactive**: `use_smoothing='off'` skips every Savgol pass this \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2105,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "# mature_method='amplitude': the parameter is genuinely ignored, and"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2109,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "\"`Min. incipient length` is ignored under `incipient_method='plateau'` \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2110,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "\"(as `Min. mature length` is under `mature_method='amplitude'`).\""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2231,
+   "params": [
+    "incipient_plateau_signal"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_plateau_signal": {
+     "get_periods": "'vorticity'",
+     "determine_periods": "'vorticity'"
+    }
+   },
+   "text": "\"`incipient_plateau_signal='vorticity'` — the 'derivative' \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2269,
+   "params": [
+    "prominence_relative"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "# now those of params-track (prominence_relative=0.3,"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2270,
+   "params": [
+    "decay_tail_amplitude_fraction"
+   ],
+   "why": "assignment",
+   "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    }
+   },
+   "text": "# decay_tail_amplitude_fraction=0.3), so an"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2362,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "\"(cutoff_high=18), Savgol off, mirroring the author's validated \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2393,
+   "params": [
+    "cutoff_high"
+   ],
+   "why": "assignment",
+   "code": {
+    "cutoff_high": {
+     "process_vorticity": "18.0",
+     "determine_periods": "18.0"
+    }
+   },
+   "text": "\"section-3c calibration (Lanczos on, cutoff_high=18, Savgol off), so \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 2904,
+   "params": [
+    "incipient_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "incipient_method": {
+     "get_periods": "'plateau'",
+     "determine_periods": "'plateau'"
+    }
+   },
+   "text": "\"Outside `incipient_method=\\\"plateau\\\"` there is no \""
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3154,
+   "params": [
+    "boundary_padding"
+   ],
+   "why": "assignment",
+   "code": {
+    "boundary_padding": {
+     "process_vorticity": "'reflect'",
+     "determine_periods": "'reflect'",
+     "lanczos_filter": "'reflect'",
+     "lanczos_bandpass_filter": "'reflect'"
+    }
+   },
+   "text": "`boundary_padding=reflect` it is **harmful**: both filters carry full amplitude at the edge, so the 5 %"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3174,
+   "params": [
+    "length_scale"
+   ],
+   "why": "names+default",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "Which length depends on `length_scale` (see below): by default the whole series;"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3179,
+   "params": [
+    "threshold_intensification_length"
+   ],
+   "why": "table-row",
+   "code": {
+    "threshold_intensification_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "| `threshold_intensification_length` | 0.075 | Min. duration of an intensification segment. |"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3180,
+   "params": [
+    "threshold_decay_length"
+   ],
+   "why": "table-row",
+   "code": {
+    "threshold_decay_length": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "| `threshold_decay_length` | 0.075 | Min. duration of a decay segment. |"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3181,
+   "params": [
+    "mature_method",
+    "threshold_mature_length"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_length": {
+     "get_periods": "0.15",
+     "determine_periods": "0.15"
+    }
+   },
+   "text": "| `threshold_mature_length` | 0.030 | Min. duration of the mature stage. Only used when `mature_method=\"derivative\"` — see below. |"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3182,
+   "params": [
+    "length_scale",
+    "mature_method",
+    "threshold_mature_distance"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    },
+    "threshold_mature_distance": {
+     "get_periods": "0.18",
+     "determine_periods": "0.18"
+    },
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "| `threshold_mature_distance` | 0.125 | Max. distance between vorticity minimum and mature segment centre. Already local — unaffected by `length_scale`. Only used when `mature_method=\"derivative\"` — see below. |"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3183,
+   "params": [
+    "threshold_intensification_gap"
+   ],
+   "why": "table-row",
+   "code": {
+    "threshold_intensification_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "| `threshold_intensification_gap` | 0.075 | Max. gap between consecutive intensification segments for merging. |"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3184,
+   "params": [
+    "threshold_decay_gap"
+   ],
+   "why": "table-row",
+   "code": {
+    "threshold_decay_gap": {
+     "get_periods": "0.075",
+     "determine_periods": "0.075"
+    }
+   },
+   "text": "| `threshold_decay_gap` | 0.075 | Max. gap between consecutive decay segments for merging. |"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3185,
+   "params": [
+    "length_scale",
+    "threshold_incipient_length"
+   ],
+   "why": "table-row",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    },
+    "threshold_incipient_length": {
+     "get_periods": "0.4",
+     "determine_periods": "0.4"
+    }
+   },
+   "text": "| `threshold_incipient_length` | 0.400 | Min. duration of the incipient phase. Already local — unaffected by `length_scale`. |"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 3216,
+   "params": [
+    "mature_method"
+   ],
+   "why": "assignment",
+   "code": {
+    "mature_method": {
+     "get_periods": "'amplitude'",
+     "determine_periods": "'amplitude'"
+    }
+   },
+   "text": "`mature_method=\"amplitude\"`.** That minimum-duration floor was calibrated for"
+  },
+  {
+   "file": "tools/calibration_app/benchmark_core.py",
+   "line": 109,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "\"fix. It was exported when `use_filter: true` was read as the integer window \""
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 308,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: '#ffffff' }));"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 326,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "const x = sx(i);"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 330,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "x: x, y: MT + PH_ + 20, 'text-anchor': 'middle', 'font-size': 12,"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 341,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "x: ML - 8, y: y + 4, 'text-anchor': 'end', 'font-size': 11,"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 347,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "x: ML + PW / 2, y: H - 8, 'text-anchor': 'middle', 'font-size': 12,"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 394,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "x: ML + PW - 100, y: ly, 'font-size': 11, fill: '#33414f',"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 432,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "x: ML + 8, y: MT + 36, 'font-size': 13, fill: '#c1121f', 'font-weight': '600',"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 449,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "const x = svg.contains(e.target) ? at(e) : null;"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 463,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "const ts = el('tspan', { x: tx, y: MT + PH_ - 8 - (lines.length - 1 - j) * 13 });"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 546,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "p.x = e.clientX;"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 608,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "const x = at(e);"
+  },
+  {
+   "file": "tools/calibration_app/label_tab.py",
+   "line": 635,
+   "params": [
+    "x"
+   ],
+   "why": "assignment",
+   "code": {
+    "x": {
+     "determine_periods": "None"
+    }
+   },
+   "text": "const x = at(e);"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 188,
+   "params": [
+    "decay_tail_amplitude_fraction"
+   ],
+   "why": "assignment",
+   "code": {
+    "decay_tail_amplitude_fraction": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3"
+    }
+   },
+   "text": "# package accepts: decay_tail_amplitude_fraction=None switches the check"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 228,
+   "params": [
+    "prominence",
+    "prominence_relative"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    },
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence, prominence_relative: the z-extrema filter"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 230,
+   "params": [
+    "reclassify_index0"
+   ],
+   "why": "names+default",
+   "code": {
+    "reclassify_index0": {
+     "get_periods": "True",
+     "determine_periods": "True",
+     "find_peaks_valleys": "False"
+    }
+   },
+   "text": "reclassify_index0: rule C2' on the first point. **Default True, like"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 531,
+   "params": [
+    "length_scale"
+   ],
+   "why": "assignment",
+   "code": {
+    "length_scale": {
+     "get_periods": "'local'",
+     "determine_periods": "'local'"
+    }
+   },
+   "text": "package, never rewritten — under ``length_scale='local'``."
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 779,
+   "params": [
+    "prominence",
+    "prominence_relative"
+   ],
+   "why": "assignment",
+   "code": {
+    "prominence": {
+     "get_periods": "None",
+     "determine_periods": "None",
+     "find_peaks_valleys": "None"
+    },
+    "prominence_relative": {
+     "get_periods": "0.3",
+     "determine_periods": "0.3",
+     "find_peaks_valleys": "None"
+    }
+   },
+   "text": "prominence, prominence_relative: the extrema-filter"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 781,
+   "params": [
+    "reclassify_index0"
+   ],
+   "why": "names+default",
+   "code": {
+    "reclassify_index0": {
+     "get_periods": "True",
+     "determine_periods": "True",
+     "find_peaks_valleys": "False"
+    }
+   },
+   "text": "reclassify_index0: rule C2' on the first point — default True, like"
+  },
+  {
+   "file": "tools/calibration_app/package_args.py",
+   "line": 6,
+   "params": [
+    "use_filter"
+   ],
+   "why": "assignment",
+   "code": {
+    "use_filter": {
+     "process_vorticity": "'auto'",
+     "determine_periods": "'auto'"
+    }
+   },
+   "text": "off. The package, however, warns on ``use_filter=True`` (\"interpreted as"
+  }
+ ],
+ "app_literal_fallbacks": [
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1436,
+   "param": "use_filter",
+   "literal": "False",
+   "code": {
+    "process_vorticity": "'auto'",
+    "determine_periods": "'auto'"
+   },
+   "text": "\"use_filter\":        bool(preset.get(\"use_filter\", False)),"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1437,
+   "param": "replace_endpoints_with_lowpass",
+   "literal": "0",
+   "code": {
+    "process_vorticity": "0",
+    "determine_periods": "0"
+   },
+   "text": "\"replace_endpoints\": int(preset.get(\"replace_endpoints_with_lowpass\", 0)),"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1438,
+   "param": "savgol_polynomial",
+   "literal": "3",
+   "code": {
+    "process_vorticity": "3",
+    "determine_periods": "3"
+   },
+   "text": "\"savgol_poly\":       int(preset.get(\"savgol_polynomial\", 3)),"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1439,
+   "param": "boundary_padding",
+   "literal": "\"reflect\"",
+   "code": {
+    "process_vorticity": "'reflect'",
+    "determine_periods": "'reflect'",
+    "lanczos_filter": "'reflect'",
+    "lanczos_bandpass_filter": "'reflect'"
+   },
+   "text": "\"boundary_padding\":  str(preset.get(\"boundary_padding\", \"reflect\")),"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1440,
+   "param": "cutoff_low",
+   "literal": "168",
+   "code": {
+    "process_vorticity": "168",
+    "determine_periods": "168"
+   },
+   "text": "\"cutoff_low\":        int(preset.get(\"cutoff_low\", 168)),"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1441,
+   "param": "cutoff_high",
+   "literal": "48",
+   "code": {
+    "process_vorticity": "18.0",
+    "determine_periods": "18.0"
+   },
+   "text": "\"cutoff_high\":       int(preset.get(\"cutoff_high\", 48)),"
+  },
+  {
+   "file": "tools/calibration_app/app.py",
+   "line": 1815,
+   "param": "mature_method",
+   "literal": "_DEFAULTS[\"mature_method\"]",
+   "code": {
+    "get_periods": "'amplitude'",
+    "determine_periods": "'amplitude'"
+   },
+   "text": "st.session_state.get(\"mature_method\", _DEFAULTS[\"mature_method\"]) == \"derivative\")"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 882,
+   "param": "length_scale",
+   "literal": "'global'",
+   "code": {
+    "get_periods": "'local'",
+    "determine_periods": "'local'"
+   },
+   "text": "length_scale = args_periods.get('length_scale', 'global')"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 883,
+   "param": "mature_method",
+   "literal": "'derivative'",
+   "code": {
+    "get_periods": "'amplitude'",
+    "determine_periods": "'amplitude'"
+   },
+   "text": "mature_method = args_periods.get('mature_method', 'derivative')"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 884,
+   "param": "mature_amplitude_fraction",
+   "literal": "0.90",
+   "code": {
+    "get_periods": "0.9",
+    "determine_periods": "0.9"
+   },
+   "text": "mature_amplitude_fraction = args_periods.get('mature_amplitude_fraction', 0.90)"
+  },
+  {
+   "file": "tools/calibration_app/layer_inspector.py",
+   "line": 885,
+   "param": "mature_min_depth",
+   "literal": "0.0",
+   "code": {
+    "get_periods": "0.8",
+    "determine_periods": "0.8"
+   },
+   "text": "mature_min_depth = args_periods.get('mature_min_depth', 0.0)"
+  }
+ ]
+}

@@ -1,0 +1,347 @@
+{
+ "authorised_list": "fbeff00:research/cleanup/passo6/removal_list.md",
+ "counts": {
+  "remote": 38,
+  "local_only": 4
+ },
+ "ok": 42,
+ "failing": [],
+ "log": [
+  {
+   "branch": "chore/b-remove-distance",
+   "section": "remote",
+   "group": "A",
+   "tip": "2bb2bad6161f208b69fa6d0777897ba44630c3bd",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         chore/b-remove-distance"
+  },
+  {
+   "branch": "docs/front-a-findings",
+   "section": "remote",
+   "group": "A",
+   "tip": "2ee2414931f93630853bfee1101ab24b1f92c367",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/front-a-findings"
+  },
+  {
+   "branch": "docs/front-f-i-ii-iii-findings",
+   "section": "remote",
+   "group": "A",
+   "tip": "3aae83dd7c39524676e9af2e8b4c4aaae2e88c3a",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/front-f-i-ii-iii-findings"
+  },
+  {
+   "branch": "docs/front-g-closing",
+   "section": "remote",
+   "group": "A",
+   "tip": "1ccb3db4a56a45e6fcc0a12ba8741e780b837789",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/front-g-closing"
+  },
+  {
+   "branch": "docs/front-g-series-sha256-findings",
+   "section": "remote",
+   "group": "A",
+   "tip": "02fe6f74eed7ddcbc7d2d8835c14792c5e8cfdf7",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/front-g-series-sha256-findings"
+  },
+  {
+   "branch": "docs/frontC-hash-provenance",
+   "section": "remote",
+   "group": "A",
+   "tip": "e1b29cc941e722f0c0c75c022d8a6c57e798f634",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/frontC-hash-provenance"
+  },
+  {
+   "branch": "docs/item13-close",
+   "section": "remote",
+   "group": "A",
+   "tip": "1b99a579d6a1107f922d61c835f557802fa75db5",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/item13-close"
+  },
+  {
+   "branch": "docs/memory-g-e-closing",
+   "section": "remote",
+   "group": "A",
+   "tip": "0f680c514138278fdfc151975f4f9f5793979e45",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/memory-g-e-closing"
+  },
+  {
+   "branch": "docs/session-findings-register",
+   "section": "remote",
+   "group": "A",
+   "tip": "e2ccdad15f518d68c4ebbc0443b5ee19130540af",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/session-findings-register"
+  },
+  {
+   "branch": "docs/session-findings-register-2",
+   "section": "remote",
+   "group": "A",
+   "tip": "a06a2aabdc31c9c37c2ebd1329cccd9f7adbc2b3",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         docs/session-findings-register-2"
+  },
+  {
+   "branch": "feat/app-flexible-track-reader",
+   "section": "remote",
+   "group": "A",
+   "tip": "ba9af460e37eeed836de90c777c594a284098a31",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         feat/app-flexible-track-reader"
+  },
+  {
+   "branch": "feat/dedicated-conda-env",
+   "section": "remote",
+   "group": "A",
+   "tip": "d876a71e8d1ee6cb638d6cdf96b1f31eb5df5c2c",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         feat/dedicated-conda-env"
+  },
+  {
+   "branch": "feat/freeze-synthetic-series",
+   "section": "remote",
+   "group": "A",
+   "tip": "6e0546774094c8165ecfa94e9aab12ebcad7cbea",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         feat/freeze-synthetic-series"
+  },
+  {
+   "branch": "feat/front-g-manual-labels-source",
+   "section": "remote",
+   "group": "A",
+   "tip": "727efd2a324bdcea63e46e98094cb8c8b72be02d",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         feat/front-g-manual-labels-source"
+  },
+  {
+   "branch": "feat/label-tab-navigation-overlays",
+   "section": "remote",
+   "group": "A",
+   "tip": "f3004201d2de3bde03dcb3c258cbbb681742801f",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         feat/label-tab-navigation-overlays"
+  },
+  {
+   "branch": "fix/app-inert-params-signaling",
+   "section": "remote",
+   "group": "A",
+   "tip": "20e003d285c46551b17690421fad511072aa97db",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         fix/app-inert-params-signaling"
+  },
+  {
+   "branch": "fix/inspector-crossing-layer-and-legend",
+   "section": "remote",
+   "group": "A",
+   "tip": "71335706878aeb97962cf490203124e78718118e",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         fix/inspector-crossing-layer-and-legend"
+  },
+  {
+   "branch": "fix/inspector-depth-params",
+   "section": "remote",
+   "group": "A",
+   "tip": "52ecb04cb4ef7d55db399a37c1afcc99d017a90c",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         fix/inspector-depth-params"
+  },
+  {
+   "branch": "frontA-idx0-c2",
+   "section": "remote",
+   "group": "A",
+   "tip": "e97eb17b6a5c6cd523bb5593bc9bf0e482ec7f1d",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         frontA-idx0-c2"
+  },
+  {
+   "branch": "research/frontA-reverify",
+   "section": "remote",
+   "group": "A",
+   "tip": "077d27380fdc3cc021939b488d6f7edda2e2e14a",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/frontA-reverify"
+  },
+  {
+   "branch": "research/frontC-intensification-depth",
+   "section": "remote",
+   "group": "A",
+   "tip": "38951f73cbf628c0be77a688b1fc645bb26d0818",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/frontC-intensification-depth"
+  },
+  {
+   "branch": "research/frontD-stage0-census",
+   "section": "remote",
+   "group": "A",
+   "tip": "80e05517655ac533f6d30a4ccc4d301d44e5619a",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/frontD-stage0-census"
+  },
+  {
+   "branch": "research/incipient-refusal-stage1",
+   "section": "remote",
+   "group": "A",
+   "tip": "edb1a990269a13a0b1fb752e9586e3895029b0a7",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/incipient-refusal-stage1"
+  },
+  {
+   "branch": "research/item19-mature-prominence",
+   "section": "remote",
+   "group": "A",
+   "tip": "f376a03f636fc82ab1d2d77c0abb0db50507c5e3",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item19-mature-prominence"
+  },
+  {
+   "branch": "research/item20a-maf-090",
+   "section": "remote",
+   "group": "A",
+   "tip": "eea6470476bfd6de835ab88dcea346b2b88fae62",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item20a-maf-090"
+  },
+  {
+   "branch": "research/item20b-depth-rule",
+   "section": "remote",
+   "group": "A",
+   "tip": "e68697223add51906215d3fa96983cd3b70f4c4a",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item20b-depth-rule"
+  },
+  {
+   "branch": "research/item30-plateau-overwrite",
+   "section": "remote",
+   "group": "A",
+   "tip": "2319609ec0aa4e87dfa9a19e0e94f2a69ad4ac2f",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item30-plateau-overwrite"
+  },
+  {
+   "branch": "research/item31-params15-default",
+   "section": "remote",
+   "group": "A",
+   "tip": "e31b727269c9536abfbea7b19f84c3818114ed3b",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item31-params15-default"
+  },
+  {
+   "branch": "research/item31-stage2b-checkpoint",
+   "section": "remote",
+   "group": "A",
+   "tip": "45f060012ddc593b45fb8391067b6b6995593f44",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item31-stage2b-checkpoint"
+  },
+  {
+   "branch": "research/item5-benchmark-tab",
+   "section": "remote",
+   "group": "A",
+   "tip": "4c64cebf50652652571c88774c9213b6724cad2b",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item5-benchmark-tab"
+  },
+  {
+   "branch": "diag/front-b-distance-inert",
+   "section": "remote",
+   "group": "B",
+   "tip": "491a5d09f9eb4e43c9f117c34be394dd0feb6fd1",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         diag/front-b-distance-inert"
+  },
+  {
+   "branch": "diag/series-sha256-mismatch",
+   "section": "remote",
+   "group": "B",
+   "tip": "3ae6082c8fb004f53500f6e55264a21debcad9a0",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         diag/series-sha256-mismatch"
+  },
+  {
+   "branch": "feat/label-tab-toplevel",
+   "section": "remote",
+   "group": "B",
+   "tip": "0c63145b52042191978a7ff131335e8db4bd8c15",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         feat/label-tab-toplevel"
+  },
+  {
+   "branch": "fix/idx0-boundary-extremum-type",
+   "section": "remote",
+   "group": "B",
+   "tip": "6060c6deac9108356567c719cd438efb0ee1a157",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         fix/idx0-boundary-extremum-type"
+  },
+  {
+   "branch": "fix/inspector-min-depth-params",
+   "section": "remote",
+   "group": "B",
+   "tip": "a2b639eba87d2b38b6450aa7131f353752e573a3",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         fix/inspector-min-depth-params"
+  },
+  {
+   "branch": "joss-submission",
+   "section": "remote",
+   "group": "B",
+   "tip": "8348caf98fb8838a209aa8cde1114c2107c6a8da",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         joss-submission"
+  },
+  {
+   "branch": "research/item20c-duration-ratio",
+   "section": "remote",
+   "group": "B",
+   "tip": "e7792d3ce285077b41d95ae65f55acdc69e0b20d",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/item20c-duration-ratio"
+  },
+  {
+   "branch": "research/v3-topology-proxy",
+   "section": "remote",
+   "group": "B",
+   "tip": "c508730bf2f2b35600997552ee7f0faa2d78e007",
+   "deleted": true,
+   "output": "To https://github.com/daniloceano/CycloPhaser.git\n - [deleted]         research/v3-topology-proxy"
+  },
+  {
+   "branch": "fix/b-distance-length-scale",
+   "section": "local_only",
+   "group": "A",
+   "tip": "ab7f2449589815f771f0d276de110f0784025b21",
+   "deleted": true,
+   "output": "Deleted branch fix/b-distance-length-scale (was ab7f244)."
+  },
+  {
+   "branch": "fix/core-bugs",
+   "section": "local_only",
+   "group": "A",
+   "tip": "38c9461dc468165fd7e520dec924de2bb04f1051",
+   "deleted": true,
+   "output": "Deleted branch fix/core-bugs (was 38c9461)."
+  },
+  {
+   "branch": "input-data",
+   "section": "local_only",
+   "group": "A",
+   "tip": "c59d26b9b367ac3b4a54fc6fd10fc345c7f61ad9",
+   "deleted": true,
+   "output": "Deleted branch input-data (was c59d26b)."
+  },
+  {
+   "branch": "exp/pre-peak-normalization",
+   "section": "local_only",
+   "group": "B",
+   "tip": "1faf0c89404c18b82d88c805c6b68cc51bd0dfe0",
+   "deleted": true,
+   "output": "Deleted branch exp/pre-peak-normalization (was 1faf0c8)."
+  }
+ ]
+}

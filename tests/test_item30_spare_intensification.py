@@ -103,7 +103,7 @@ def test_the_geometric_method_never_reads_the_key(monkeypatch):
     assert seen == []
 
 
-# ── default True in every public signature (item 31; False up to 2.0.0), ─────
+# ── default True in every public signature (item 31; False before it), ─────
 #    forwarded as given ──────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("fn", [get_periods, determine_periods])
@@ -132,18 +132,18 @@ def test_get_periods_forwards_the_key_to_the_stages(monkeypatch):
     assert got[KEY] is False
 
 
-# ── the 5 adjudicated TRAIN cases: params-15 == the counterfactual ──────────
+# ── the 5 adjudicated TRAIN cases: params-track == the counterfactual ──────────
 
-def test_params15_reproduces_the_counterfactual_in_the_five():
+def test_params_track_reproduces_the_counterfactual_in_the_five():
     pytest.importorskip("yaml")
     sys.path.insert(0, str(REPO_ROOT / "research" / "labels" / "diagnostics" / "item30"))
     import figs_cf
     import item30_core as core
 
     batch = core.lc.load_batch_series()
-    # params-14 left the repo in item 31. It was params-15 minus this one key
-    # (asserted in item 31, stage 0), so it is params-15 with the key OFF.
-    cfg15 = core.load_config("params-15")
+    # params-14 left the repo in item 31. It was params-track minus this one key
+    # (asserted in item 31, stage 0), so it is params-track with the key OFF.
+    cfg15 = core.load_config("params-track")
     cfg14 = (cfg15[0], {**cfg15[1], KEY: False})
     for sid in ("20120297", "19940445", "19810854", "19860380", "19870927"):
         r14 = core.run_series(batch[sid], *cfg14)
@@ -186,9 +186,9 @@ def _config_bytes(name):
 
 
 def _without_key_bytes():
-    """params-15's text with the key's line removed — a real config without the
+    """params-track's text with the key's line removed — a real config without the
     key (params-14 was exactly that, and left the repo in item 31)."""
-    lines = _config_bytes("params-15").decode().splitlines(keepends=True)
+    lines = _config_bytes("params-track").decode().splitlines(keepends=True)
     kept = [ln for ln in lines if not ln.strip().startswith(f"{KEY}:")]
     assert len(kept) == len(lines) - 1
     return "".join(kept).encode()
@@ -206,11 +206,11 @@ def test_importing_a_config_without_the_key_turns_the_rule_off_even_if_it_was_on
     assert f"phase_params.{KEY}" in res["missing"]
 
 
-def test_importing_params15_turns_the_rule_on():
+def test_importing_params_track_turns_the_rule_on():
     """POSITIVE CONTROL for the test above: the same loader does set True when
     the file says so, so the False above is the absence rule, not a loader that
     never writes the key."""
     load, state = _app_yaml_loader()
     state[KEY] = False
-    res = load(_config_bytes("params-15"))
+    res = load(_config_bytes("params-track"))
     assert res["error"] is None and state[KEY] is True

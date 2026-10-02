@@ -1,15 +1,18 @@
-"""Filling incomplete calibration configs with the FROZEN 2.0.0 defaults.
+"""Filling incomplete calibration configs with the FROZEN pre-item-31 defaults.
 
-Decision (a) of item 31 (Danilo, 2026-09-28; research/labels/diagnostics/item31/
-DESIGN.md §8.1): a config that does not carry a key is run with that key's
-**cyclophaser 2.0.0 default**, and the keys filled are always listed.
+Decision (a) of item 31 (Danilo, 2026-09-28;
+archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/DESIGN.md §8.1):
+a config that does not carry a key is run with that key's
+**pre-item-31 default** (the file name says 2.0.0; it is not the 2.0.0
+release, see research/labels/README.md), and the keys filled are always listed.
 
 Why frozen and not "the current default": a config file is a record of what was
 run. Once the package defaults move (item 31, stage 2b), "absent" would silently
 start meaning something else — a config exported with the decay-tail check OFF
 (the app omits None) would run with the new default ON. The table is
 `defaults_2.0.0.json`, generated from the stage-0 parameter table
-(`diagnostics/item31/make_defaults_2_0_0.py`), never edited by hand.
+(`archive/research-diagnostics-pre-cleanup:research/labels/diagnostics/item31/make_defaults_2_0_0.py`),
+never edited by hand.
 
 Used by `evaluate_against_labels.load_config`, `tools/calibration_app/
 benchmark_core.split_config` / `signature_audit`, and the app's YAML import.
@@ -64,4 +67,4 @@ def fill_warning(filled: list[tuple[str, object]]) -> str:
         return ""
     items = ", ".join(f"{k}={v!r}" for k, v in filled)
     return (f"{len(filled)} key(s) absent from this config were filled with the "
-            f"cyclophaser 2.0.0 defaults (frozen table {DEFAULTS_PATH.name}): {items}")
+            f"pre-item-31 defaults (frozen table {DEFAULTS_PATH.name}): {items}")

@@ -1,9 +1,0 @@
-Item 31 — expected default-behaviour digest after stage 2 (front_b layout)
-environment: {"cyclophaser.__file__": "cyclophaser/__init__.py", "sys.prefix": "cyclophaser", "python": "3.12.14", "numpy": "2.5.3", "scipy": "1.18.0", "pandas": "3.0.5"}
-series: 47 TRAIN ids of split.yaml, sorted; series_sha256 verified
-positive control (no kwargs) = b500d2e0b0112e5250073385639a030155e06fc21c15509fdcda88254226c4a5
-  == front_b record b500d2e0… : True
-EXPECTED after stage 2 (params-15 explicit, use_filter='auto') = 3a6de26501c6fed05091025480cacf7502fe2d7d0076ba8479a9ecca81703b99
-  same 47 under params-14 = 3a6de26501c6fed05091025480cacf7502fe2d7d0076ba8479a9ecca81703b99  (identical to params-15: True — the 47 do NOT exercise spare_intensification)
-EXPECTED over 54 (47 + 7 batch TRAIN, same layout), params-15 = 923e1a0389ae1fb627172564ea35063791523ae035d867b3a01d18a0546ac97a
-  same 54 under params-14 = 3756392e9b4ad26a33af33d93166118dd75616928cc0c9ce22d9be79a21c3e54  (differs: True — the 54 DO exercise it)

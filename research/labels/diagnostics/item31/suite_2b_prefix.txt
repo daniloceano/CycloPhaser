@@ -1,2 +1,0 @@
-suite (-m "not browser", HEAD 55a4780): 1 failed, 1432 passed, 1 skipped, 29 deselected, 89 warnings in 409.67s (0:06:49) | EXIT 1
-(corrected 2026-09-28, item 31 stage 2c: the first version of this file held only the EXIT line — tail -1 of a log ending in an appended EXIT line; the summary above is from the full pytest log of that run)

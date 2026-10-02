@@ -12,7 +12,9 @@ WHAT IS HASHED - exact definition
    see that function's docstring for why not round_trip). Synthetic series are
    read by `labels_core.load_synthetic_series()` from the FROZEN CSVs in
    `tests/synthetic/data/`, never regenerated from `cases.py`.
-   The 16 TEST ids are not read at all.
+   The 16 TEST ids are not read at all: only the training files are opened
+   (`load_real_series(ids=train)`; before the clean-up front's Passo 5 every CSV
+   was read and the test ones dropped afterwards, despite this sentence).
 
 2. CONFIG. `get_periods(process_vorticity(df))` with NO arguments beyond the
    frame - i.e. cyclophaser PACKAGE DEFAULTS, not `cyclophaser_params-9.yaml`.
@@ -91,7 +93,9 @@ def main():
 
     split = read_split()
     train = set(split["train"])
-    real = {k: v for k, v in load_real_series().items() if k in train}
+    # Only the training files are opened (ids=train): reading every CSV and
+    # filtering afterwards also opened the 16 test files (clean-up front, Passo 5).
+    real = load_real_series(ids=train)
     syn = {k: v for k, v in load_synthetic_series()[0].items() if k in train}
     series = {**real, **syn}
     assert len(series) == len(train), f"{len(series)} != {len(train)}"

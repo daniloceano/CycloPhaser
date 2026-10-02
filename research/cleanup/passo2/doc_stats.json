@@ -1,0 +1,81 @@
+{
+ "total_lines": 548,
+ "per_section": {
+  "S01": {
+   "Confirmed causes": 8,
+   "Decisions": 3,
+   "Open": 1,
+   "total": 12
+  },
+  "S02": {
+   "Confirmed causes": 11,
+   "Refuted hypotheses": 5,
+   "Decisions": 2,
+   "Geometric against plateau incipient length (the only copy of this table)": 2,
+   "table row": 18,
+   "total": 38
+  },
+  "S03": {
+   "Confirmed causes": 5,
+   "Refuted hypotheses": 4,
+   "Decisions": 3,
+   "Open": 1,
+   "total": 13
+  },
+  "S04": {
+   "Confirmed causes": 11,
+   "Refuted hypotheses": 2,
+   "Decisions": 6,
+   "Open": 3,
+   "total": 22
+  },
+  "S05": {
+   "Confirmed causes": 3,
+   "Decisions": 2,
+   "Refuted hypotheses": 1,
+   "total": 6
+  },
+  "S06": {
+   "Confirmed causes": 3,
+   "Refuted hypotheses": 2,
+   "Decisions": 1,
+   "Open": 3,
+   "total": 9
+  },
+  "S07": {
+   "Confirmed causes": 4,
+   "Refuted hypotheses": 5,
+   "Decisions": 5,
+   "total": 14
+  },
+  "S08": {
+   "Confirmed causes": 5,
+   "Scores belong to params-track, not to the current default": 4,
+   "Stage 1 of item 31 (the single scoring run on the test split)": 6,
+   "Decisions": 2,
+   "total": 17
+  },
+  "S09": {
+   "Confirmed causes": 4,
+   "Decisions": 2,
+   "Open": 1,
+   "total": 7
+  },
+  "S10": {
+   "(section)": 1,
+   "table row": 204,
+   "total": 205
+  },
+  "S11": {
+   "(section)": 15,
+   "total": 15
+  },
+  "S12": {
+   "(section)": 12,
+   "total": 12
+  }
+ },
+ "refuted_hypotheses": 19,
+ "s11_open_items": 15,
+ "cyclophaser_diff_33dc4e1_HEAD": "(empty)"
+}
