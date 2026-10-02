@@ -1105,7 +1105,7 @@ def _ledger_table(ledgers: dict, ribbon) -> pd.DataFrame:
                 "Duration": _fmt_td(rec["duration"]),
                 "Scale": _fmt_td(rec["scale"]),
                 ("Max. allowed" if is_gap else "Min. required"): _fmt_td(rec["minimum"]),
-                "Depth (D2)": ("" if rec.get("depth") is None
+                "Segment depth (intensification_min_depth)": ("" if rec.get("depth") is None
                                else f"{rec['depth']:.3f}"),
                 "Verdict": ("filled" if rec["accepted"] else "left open") if is_gap
                            else ("ACCEPTED" if rec["accepted"] else
@@ -2342,282 +2342,289 @@ st.session_state["_bench_live_config"] = {
     "phase_params": dict(_PHASE_PARAMS),
 }
 
-# ── File upload ──────────────────────────────────────────────────────────────────
-uploaded = st.file_uploader(
-    "Upload cyclone track(s) — .csv or .txt, ';'-delimited with columns 'time' "
-    "and 'min_max_zeta_850' (or a custom format, below)",
-    type=["csv", "txt"], accept_multiple_files=True, key="track_upload",
-    help=track_format_ui.UPLOAD_HELP,
-)
-# Every upload is validated here, and a non-standard one is previewed and must
-# be confirmed; what comes out is standard-layout bytes, so nothing downstream
-# knows or cares which layout the file arrived in. See track_io.
-_custom_fmt = track_format_ui.format_controls()
-_uploaded_tracks = track_format_ui.accept_uploads(uploaded, _custom_fmt,
-                                                  confirm_prefix="track_custom_ok_")
-
-_calib_data_files = sorted(_CALIBRATION_DATA_DIR.glob("*.csv")) if _CALIBRATION_DATA_DIR.is_dir() else []
-load_all_test_cyclones = st.checkbox(
-    f"Load all test cyclones (tests/calibration_data — {len(_calib_data_files)} tracks)"
-    if _calib_data_files else
-    "Load all test cyclones (tests/calibration_data — unavailable in this environment)",
-    value=False,
-    key="load_all_test_cyclones",
-    disabled=not bool(_calib_data_files),
-    help=(
-        f"Loads all {len(_calib_data_files)} real cyclone tracks bundled in "
-        "tests/calibration_data for bulk calibration/validation. If you also "
-        "upload files above, both sets are combined; an uploaded file takes "
-        "precedence over a bundled one with the same cyclone ID."
-        if _calib_data_files else
-        "tests/calibration_data was not found next to this app (this checkout "
-        "may not include the full repository) — this option is unavailable."
-    ),
-)
-
-_synth_files, _synth_gt, _synth_groups, _synth_err = _load_synthetic_cases()
-_clean_ids = _synth_groups.get("clean", {}).get("ids", ())
-_noisy_ids = _synth_groups.get("noisy", {}).get("ids", ())
-_plateau_start_ids = set(_synth_groups.get("plateau_start", ()))
-_steep_start_ids = set(_synth_groups.get("steep_start", ()))
-
-# Two separate options rather than one: the clean and noisy populations need
-# DIFFERENT pre-processing, so loading them together would force a single preset
-# onto both. See the presets' block comment in tests/synthetic/cases.py.
-_sc1, _sc2 = st.columns(2)
-with _sc1:
-    load_synthetic_clean = st.checkbox(
-        f"Load synthetic — clean ({len(_clean_ids)} cases, no noise)"
-        if _clean_ids else "Load synthetic — clean (unavailable)",
-        value=False, key="load_synthetic_clean", disabled=not bool(_clean_ids),
-        help=(
-            "The noise-free synthetic cases: "
-            + ", ".join(_clean_ids) + ".\n\n"
-            "Pre-processing is set to SYNTHETIC_CLEAN_PRESET — Lanczos off, one "
-            "Savgol pass. These series have nothing to denoise, so the band-pass "
-            "is dropped; the single smoothing pass is the minimum that survives "
-            "the kink at each segment join. Measured: sequence 3/3, no timing "
-            "failures."
-            if _clean_ids else
-            f"tests/synthetic could not be imported ({_synth_err})."
-        ),
-    )
-with _sc2:
-    load_synthetic_noisy = st.checkbox(
-        f"Load synthetic — noisy ({len(_noisy_ids)} cases, 2 % noise)"
-        if _noisy_ids else "Load synthetic — noisy (unavailable)",
-        value=False, key="load_synthetic_noisy", disabled=not bool(_noisy_ids),
-        help=(
-            "The synthetic cases carrying 2 % Gaussian noise.\n\n"
-            "Pre-processing is set to SYNTHETIC_NOISY_PRESET — Lanczos ACTIVE "
-            "(cutoff_high=18), Savgol off, mirroring the author's validated "
-            "section-3c calibration. These series genuinely need the noise "
-            "suppressed, and it is the band-pass that does it here. Measured: "
-            "sequence 6/8, no timing failures; DItMD_noisy and "
-            "DItMD_residual_noisy are the two that miss."
-            if _noisy_ids else
-            f"tests/synthetic could not be imported ({_synth_err})."
-        ),
-    )
-
-load_synthetic_cases = bool(load_synthetic_clean or load_synthetic_noisy)
-
-if _synth_err and not _synth_files:
-    st.caption(f"⚠ tests/synthetic unavailable: {_synth_err}")
-
-if load_synthetic_cases:
-    _active = "noisy" if load_synthetic_noisy else "clean"
-    _both = load_synthetic_clean and load_synthetic_noisy
-    st.caption(
-        f"**Synthetic mode — {_active} preset applied.** "
-        "These series are analytic, so the real-track Lanczos band-pass would "
-        "round off the very segment boundaries under test. "
-        "**Pre-processing conclusions do not transfer from synthetic to real "
-        "tracks; phase-detection conclusions do.** The phase controls are "
-        "unaffected and remain fully editable; so is the pre-processing, which "
-        "the preset only seeds."
-        + (" Both groups are loaded, so the *noisy* preset is applied — it is "
-           "also correct on all four clean cases, whereas the clean preset is "
-           "not usable on the noisy ones." if _both else "")
-        + ("\n\n**Combined with the real tracks above.** This is a coherent "
-           "pairing, not an accident: SYNTHETIC_NOISY_PRESET *is* the author's "
-           "section-3c calibration (Lanczos on, cutoff_high=18, Savgol off), so "
-           "both sets are being processed identically and can be judged side by "
-           "side." if (load_synthetic_noisy and load_all_test_cyclones) else "")
-        + ("\n\nKnown limitation of the noisy preset: it keeps the incipient "
-           "plateau measurable (Savgol off keeps r(t₀) low) at the cost of 2/8 "
-           "sequences — `DItMD_noisy` and `DItMD_residual_noisy`, which also "
-           "pick up a 1-step spurious incipient. The alternative (two Savgol "
-           "passes) gets 8/8 sequences but puts the edge artifact back at t₀, "
-           "collapsing the plateau rule to 'no incipient phase' on 4 of the 5 "
-           "designed-Ic cases." if load_synthetic_noisy else "")
-    )
-    # Derived from the checkbox state, not from `files` — that dict is built
-    # further down the page, after this caption renders.
-    _sel_ids = ((set(_clean_ids) if load_synthetic_clean else set())
-                | (set(_noisy_ids) if load_synthetic_noisy else set()))
-    _loaded_syn = [k for k in _synth_files if k in _sel_ids]
-    _flat = [k for k in _loaded_syn if k in _plateau_start_ids]
-    _steep = [k for k in _loaded_syn if k in _steep_start_ids]
-    st.caption(
-        f"**Initial plateau: {len(_flat)} of {len(_loaded_syn)} loaded cases "
-        "start flat.** An initial plateau is a property of the generator, not "
-        "of the designed life cycle: `_ramp_sine` is a half-period cosine with "
-        "zero derivative at its endpoints, so a series opening with a sine "
-        "It/D segment starts flat just as an `Ic` segment would. An incipient "
-        "phase on these is CORRECT, not over-detection — the suite's own "
-        "`expected_phases` already contains `incipient` in 9 of the 12 cases, "
-        "five of them with no designed `Ic` segment."
-        + (f"\n\nTrue negatives (built with a `linear` opening ramp, non-zero "
-           f"slope from the first sample): **{', '.join(_steep)}**. Note these "
-           "still pick up a 1-step incipient under `signal='derivative'`, "
-           "because the Lanczos smooths their abrupt onset (normalised |dz| at "
-           "t₀ goes 0.94/0.66 raw → 0.147/0.150 filtered); "
-           "`signal='vorticity'` reads the unfiltered series and rejects them "
-           "correctly." if _steep else "")
-        + ("\n\nGreen dotted line = designed `Ic` boundary, drawn only for the "
-           "cases that have an explicit `Ic` segment; the other flat-opening "
-           "cases have a real plateau but no designed boundary index to check "
-           "against." if _flat else "")
-    )
-
-with st.sidebar:
-    st.divider()
-    st.subheader("Manual labelling")
-    label_default_tolerance = st.number_input(
-        "Default ± steps for a new boundary", min_value=0, max_value=50, value=5,
-        step=1, key="label_default_tolerance",
-        help=(
-            "Starting value for each boundary's margin in the **Label** display "
-            "mode. It is only a starting value: the margin is stored per "
-            "BOUNDARY, because the subjectivity is not uniform even within one "
-            "cyclone — an incipient knee can be unmistakable on a track whose "
-            "mature→decay transition is a long gentle roll. A single global "
-            "margin would force the worst case onto every boundary and hide "
-            "exactly that difference.\n\nThe margin is drawn on the chart as a "
-            "shaded band and a double-headed arrow, because a number in a table "
-            "gives no sense of how much of the curve it actually forgives.\n\n"
-            "Does not affect detection and is not exported to YAML."
-        ),
-    )
-
-_EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
-
-# Precedence when both an upload and "load all test cyclones" are active: the
-# two sets are combined (union), and an uploaded file wins on a cyclone-ID
-# collision with a bundled one -- chosen because a user re-uploading a track
-# under its bundled ID is more likely re-testing a specific variant of it than
-# asking for it to be silently dropped.
-files: dict[str, bytes] = {}
-if load_all_test_cyclones and _calib_data_files:
-    files.update({p.stem: p.read_bytes() for p in _calib_data_files})
-if _synth_files:
-    _wanted = ((set(_clean_ids) if load_synthetic_clean else set())
-               | (set(_noisy_ids) if load_synthetic_noisy else set()))
-    files.update({k: v for k, v in _synth_files.items() if k in _wanted})
-if _uploaded_tracks:
-    files.update(_uploaded_tracks)
-if not files:
-    files = {"example_file": _EXAMPLE.read_bytes()}
-    st.caption(f"No file uploaded — using `{_EXAMPLE.name}` as default.")
-elif load_all_test_cyclones and _uploaded_tracks:
-    st.caption(
-        f"Combined {len(_calib_data_files)} bundled test cyclone(s) with "
-        f"{len(_uploaded_tracks)} uploaded file(s) — {len(files)} total (uploads take "
-        "precedence on ID collision)."
-    )
-
-cyclone_names = list(files.keys())
-
-# ── Sidebar: YAML export ─────────────────────────────────────────────────────────
-with st.sidebar:
-    st.divider()
-    st.download_button(
-        "📥 Export parameters (YAML)",
-        data=_build_yaml(cyclone_names).encode("utf-8"),
-        file_name="cyclophaser_params.yaml",
-        mime="text/yaml",
-        use_container_width=True,
-    )
-
-def _gt_boundary_iso(name: str, file_bytes: bytes) -> str | None:
-    """ISO timestamp of the designed incipient boundary, for synthetic cases.
-
-    Returns None for real tracks and for synthetic cases with no designed Ic
-    segment (those have no checkable boundary — see section 5 of
-    research/incipient_plateau/REPORT_incipient_characterisation.md).
-    """
-    if not (load_synthetic_cases and _synth_files):
-        return None
-    idx = _synth_gt.get(name)
-    if idx is None:
-        return None
-    try:
-        return track_io.read_track(file_bytes).index[int(idx)].isoformat()
-    except Exception:
-        return None
-
-
-# ── Pre-process all cyclones ─────────────────────────────────────────────────────
-# Done before rendering tabs so export data (CSV + PNG) is ready for the ZIP button.
-all_results: dict[str, dict] = {}
-
-for _cname, _fbytes in files.items():
-    _res: dict = {"ok": False, "name": _cname}
-
-    try:
-        _vort, _fwarns = _run_process_vorticity(
-            _fbytes, use_filter, cutoff_low, cutoff_high,
-            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-            boundary_padding,
-        )
-    except Exception as _exc:
-        _res["error"] = f"Vorticity processing failed: {_exc}"
-        all_results[_cname] = _res
-        continue
-
-    try:
-        _df, _pdict, _pwarns = _run_get_periods(
-            _fbytes, use_filter, cutoff_low, cutoff_high,
-            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-            boundary_padding,
-            _phase_params_tuple,
-        )
-    except Exception as _exc:
-        _res["error"] = f"Phase detection failed: {_exc}"
-        _res["filter_warns"] = _fwarns
-        all_results[_cname] = _res
-        continue
-
-    try:
-        _png = _render_periods_png(
-            _fbytes, use_filter, cutoff_low, cutoff_high,
-            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-            boundary_padding,
-            _phase_params_tuple, _cname, figsize=(12, 5), show_title=True,
-            gt_boundary_iso=_gt_boundary_iso(_cname, _fbytes),
-        )
-    except Exception:
-        _png = b""
-
-    _res.update({
-        "ok":           True,
-        "vort":         _vort,
-        "df_result":    _df,
-        "periods_dict": _pdict,
-        "filter_warns": _fwarns,
-        "phase_warns":  _pwarns,
-        "diag":         _compute_diagnostics(_cname, _pdict, _df, _fwarns + _pwarns),
-        "csv_bytes":    _render_csv(_pdict),
-        "png_bytes":    _png,
-    })
-    all_results[_cname] = _res
-
-_ok_results = {n: r for n, r in all_results.items() if r["ok"]}
-_zip_bytes  = _build_zip(_ok_results, _build_yaml(cyclone_names))
-
 # ── Tabs ─────────────────────────────────────────────────────────────────────────
+# Created BEFORE the track upload and the dataset choice, so those widgets live in
+# the Calibration tab only: drawn above the tabs, they also showed in the
+# Benchmark tab, with captions that are false there (Benchmark has its own
+# sources). Everything below stays module-level code; only where Streamlit
+# draws the widgets changes.
 tab_cal, tab_bench = st.tabs(["Calibration", "Benchmark"])
+
+with tab_cal:
+    # ── File upload ──────────────────────────────────────────────────────────────────
+    uploaded = st.file_uploader(
+        "Upload cyclone track(s) — .csv or .txt, ';'-delimited with columns 'time' "
+        "and 'min_max_zeta_850' (or a custom format, below)",
+        type=["csv", "txt"], accept_multiple_files=True, key="track_upload",
+        help=track_format_ui.UPLOAD_HELP,
+    )
+    # Every upload is validated here, and a non-standard one is previewed and must
+    # be confirmed; what comes out is standard-layout bytes, so nothing downstream
+    # knows or cares which layout the file arrived in. See track_io.
+    _custom_fmt = track_format_ui.format_controls()
+    _uploaded_tracks = track_format_ui.accept_uploads(uploaded, _custom_fmt,
+                                                      confirm_prefix="track_custom_ok_")
+
+    _calib_data_files = sorted(_CALIBRATION_DATA_DIR.glob("*.csv")) if _CALIBRATION_DATA_DIR.is_dir() else []
+    load_all_test_cyclones = st.checkbox(
+        f"Load all test cyclones (tests/calibration_data — {len(_calib_data_files)} tracks)"
+        if _calib_data_files else
+        "Load all test cyclones (tests/calibration_data — unavailable in this environment)",
+        value=False,
+        key="load_all_test_cyclones",
+        disabled=not bool(_calib_data_files),
+        help=(
+            f"Loads all {len(_calib_data_files)} real cyclone tracks bundled in "
+            "tests/calibration_data for bulk calibration/validation. If you also "
+            "upload files above, both sets are combined; an uploaded file takes "
+            "precedence over a bundled one with the same cyclone ID."
+            if _calib_data_files else
+            "tests/calibration_data was not found next to this app (this checkout "
+            "may not include the full repository) — this option is unavailable."
+        ),
+    )
+
+    _synth_files, _synth_gt, _synth_groups, _synth_err = _load_synthetic_cases()
+    _clean_ids = _synth_groups.get("clean", {}).get("ids", ())
+    _noisy_ids = _synth_groups.get("noisy", {}).get("ids", ())
+    _plateau_start_ids = set(_synth_groups.get("plateau_start", ()))
+    _steep_start_ids = set(_synth_groups.get("steep_start", ()))
+
+    # Two separate options rather than one: the clean and noisy populations need
+    # DIFFERENT pre-processing, so loading them together would force a single preset
+    # onto both. See the presets' block comment in tests/synthetic/cases.py.
+    _sc1, _sc2 = st.columns(2)
+    with _sc1:
+        load_synthetic_clean = st.checkbox(
+            f"Load synthetic — clean ({len(_clean_ids)} cases, no noise)"
+            if _clean_ids else "Load synthetic — clean (unavailable)",
+            value=False, key="load_synthetic_clean", disabled=not bool(_clean_ids),
+            help=(
+                "The noise-free synthetic cases: "
+                + ", ".join(_clean_ids) + ".\n\n"
+                "Pre-processing is set to SYNTHETIC_CLEAN_PRESET — Lanczos off, one "
+                "Savgol pass. These series have nothing to denoise, so the band-pass "
+                "is dropped; the single smoothing pass is the minimum that survives "
+                "the kink at each segment join. Measured: sequence 3/3, no timing "
+                "failures."
+                if _clean_ids else
+                f"tests/synthetic could not be imported ({_synth_err})."
+            ),
+        )
+    with _sc2:
+        load_synthetic_noisy = st.checkbox(
+            f"Load synthetic — noisy ({len(_noisy_ids)} cases, 2 % noise)"
+            if _noisy_ids else "Load synthetic — noisy (unavailable)",
+            value=False, key="load_synthetic_noisy", disabled=not bool(_noisy_ids),
+            help=(
+                "The synthetic cases carrying 2 % Gaussian noise.\n\n"
+                "Pre-processing is set to SYNTHETIC_NOISY_PRESET — Lanczos ACTIVE "
+                "(cutoff_high=18), Savgol off, mirroring the author's validated "
+                "section-3c calibration. These series genuinely need the noise "
+                "suppressed, and it is the band-pass that does it here. Measured: "
+                "sequence 6/8, no timing failures; DItMD_noisy and "
+                "DItMD_residual_noisy are the two that miss."
+                if _noisy_ids else
+                f"tests/synthetic could not be imported ({_synth_err})."
+            ),
+        )
+
+    load_synthetic_cases = bool(load_synthetic_clean or load_synthetic_noisy)
+
+    if _synth_err and not _synth_files:
+        st.caption(f"⚠ tests/synthetic unavailable: {_synth_err}")
+
+    if load_synthetic_cases:
+        _active = "noisy" if load_synthetic_noisy else "clean"
+        _both = load_synthetic_clean and load_synthetic_noisy
+        st.caption(
+            f"**Synthetic mode — {_active} preset applied.** "
+            "These series are analytic, so the real-track Lanczos band-pass would "
+            "round off the very segment boundaries under test. "
+            "**Pre-processing conclusions do not transfer from synthetic to real "
+            "tracks; phase-detection conclusions do.** The phase controls are "
+            "unaffected and remain fully editable; so is the pre-processing, which "
+            "the preset only seeds."
+            + (" Both groups are loaded, so the *noisy* preset is applied — it is "
+               "also correct on all four clean cases, whereas the clean preset is "
+               "not usable on the noisy ones." if _both else "")
+            + ("\n\n**Combined with the real tracks above.** This is a coherent "
+               "pairing, not an accident: SYNTHETIC_NOISY_PRESET *is* the author's "
+               "section-3c calibration (Lanczos on, cutoff_high=18, Savgol off), so "
+               "both sets are being processed identically and can be judged side by "
+               "side." if (load_synthetic_noisy and load_all_test_cyclones) else "")
+            + ("\n\nKnown limitation of the noisy preset: it keeps the incipient "
+               "plateau measurable (Savgol off keeps r(t₀) low) at the cost of 2/8 "
+               "sequences — `DItMD_noisy` and `DItMD_residual_noisy`, which also "
+               "pick up a 1-step spurious incipient. The alternative (two Savgol "
+               "passes) gets 8/8 sequences but puts the edge artifact back at t₀, "
+               "collapsing the plateau rule to 'no incipient phase' on 4 of the 5 "
+               "designed-Ic cases." if load_synthetic_noisy else "")
+        )
+        # Derived from the checkbox state, not from `files` — that dict is built
+        # further down the page, after this caption renders.
+        _sel_ids = ((set(_clean_ids) if load_synthetic_clean else set())
+                    | (set(_noisy_ids) if load_synthetic_noisy else set()))
+        _loaded_syn = [k for k in _synth_files if k in _sel_ids]
+        _flat = [k for k in _loaded_syn if k in _plateau_start_ids]
+        _steep = [k for k in _loaded_syn if k in _steep_start_ids]
+        st.caption(
+            f"**Initial plateau: {len(_flat)} of {len(_loaded_syn)} loaded cases "
+            "start flat.** An initial plateau is a property of the generator, not "
+            "of the designed life cycle: `_ramp_sine` is a half-period cosine with "
+            "zero derivative at its endpoints, so a series opening with a sine "
+            "It/D segment starts flat just as an `Ic` segment would. An incipient "
+            "phase on these is CORRECT, not over-detection — the suite's own "
+            "`expected_phases` already contains `incipient` in 9 of the 12 cases, "
+            "five of them with no designed `Ic` segment."
+            + (f"\n\nTrue negatives (built with a `linear` opening ramp, non-zero "
+               f"slope from the first sample): **{', '.join(_steep)}**. Note these "
+               "still pick up a 1-step incipient under `signal='derivative'`, "
+               "because the Lanczos smooths their abrupt onset (normalised |dz| at "
+               "t₀ goes 0.94/0.66 raw → 0.147/0.150 filtered); "
+               "`signal='vorticity'` reads the unfiltered series and rejects them "
+               "correctly." if _steep else "")
+            + ("\n\nGreen dotted line = designed `Ic` boundary, drawn only for the "
+               "cases that have an explicit `Ic` segment; the other flat-opening "
+               "cases have a real plateau but no designed boundary index to check "
+               "against." if _flat else "")
+        )
+
+    with st.sidebar:
+        st.divider()
+        st.subheader("Manual labelling")
+        label_default_tolerance = st.number_input(
+            "Default ± steps for a new boundary", min_value=0, max_value=50, value=5,
+            step=1, key="label_default_tolerance",
+            help=(
+                "Starting value for each boundary's margin in the **Label** display "
+                "mode. It is only a starting value: the margin is stored per "
+                "BOUNDARY, because the subjectivity is not uniform even within one "
+                "cyclone — an incipient knee can be unmistakable on a track whose "
+                "mature→decay transition is a long gentle roll. A single global "
+                "margin would force the worst case onto every boundary and hide "
+                "exactly that difference.\n\nThe margin is drawn on the chart as a "
+                "shaded band and a double-headed arrow, because a number in a table "
+                "gives no sense of how much of the curve it actually forgives.\n\n"
+                "Does not affect detection and is not exported to YAML."
+            ),
+        )
+
+    _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
+
+    # Precedence when both an upload and "load all test cyclones" are active: the
+    # two sets are combined (union), and an uploaded file wins on a cyclone-ID
+    # collision with a bundled one -- chosen because a user re-uploading a track
+    # under its bundled ID is more likely re-testing a specific variant of it than
+    # asking for it to be silently dropped.
+    files: dict[str, bytes] = {}
+    if load_all_test_cyclones and _calib_data_files:
+        files.update({p.stem: p.read_bytes() for p in _calib_data_files})
+    if _synth_files:
+        _wanted = ((set(_clean_ids) if load_synthetic_clean else set())
+                   | (set(_noisy_ids) if load_synthetic_noisy else set()))
+        files.update({k: v for k, v in _synth_files.items() if k in _wanted})
+    if _uploaded_tracks:
+        files.update(_uploaded_tracks)
+    if not files:
+        files = {"example_file": _EXAMPLE.read_bytes()}
+        st.caption(f"No file uploaded — using `{_EXAMPLE.name}` as default.")
+    elif load_all_test_cyclones and _uploaded_tracks:
+        st.caption(
+            f"Combined {len(_calib_data_files)} bundled test cyclone(s) with "
+            f"{len(_uploaded_tracks)} uploaded file(s) — {len(files)} total (uploads take "
+            "precedence on ID collision)."
+        )
+
+    cyclone_names = list(files.keys())
+
+    # ── Sidebar: YAML export ─────────────────────────────────────────────────────────
+    with st.sidebar:
+        st.divider()
+        st.download_button(
+            "📥 Export parameters (YAML)",
+            data=_build_yaml(cyclone_names).encode("utf-8"),
+            file_name="cyclophaser_params.yaml",
+            mime="text/yaml",
+            use_container_width=True,
+        )
+
+    def _gt_boundary_iso(name: str, file_bytes: bytes) -> str | None:
+        """ISO timestamp of the designed incipient boundary, for synthetic cases.
+
+        Returns None for real tracks and for synthetic cases with no designed Ic
+        segment (those have no checkable boundary — see section 5 of
+        research/incipient_plateau/REPORT_incipient_characterisation.md).
+        """
+        if not (load_synthetic_cases and _synth_files):
+            return None
+        idx = _synth_gt.get(name)
+        if idx is None:
+            return None
+        try:
+            return track_io.read_track(file_bytes).index[int(idx)].isoformat()
+        except Exception:
+            return None
+
+
+    # ── Pre-process all cyclones ─────────────────────────────────────────────────────
+    # Done before rendering tabs so export data (CSV + PNG) is ready for the ZIP button.
+    all_results: dict[str, dict] = {}
+
+    for _cname, _fbytes in files.items():
+        _res: dict = {"ok": False, "name": _cname}
+
+        try:
+            _vort, _fwarns = _run_process_vorticity(
+                _fbytes, use_filter, cutoff_low, cutoff_high,
+                use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                boundary_padding,
+            )
+        except Exception as _exc:
+            _res["error"] = f"Vorticity processing failed: {_exc}"
+            all_results[_cname] = _res
+            continue
+
+        try:
+            _df, _pdict, _pwarns = _run_get_periods(
+                _fbytes, use_filter, cutoff_low, cutoff_high,
+                use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                boundary_padding,
+                _phase_params_tuple,
+            )
+        except Exception as _exc:
+            _res["error"] = f"Phase detection failed: {_exc}"
+            _res["filter_warns"] = _fwarns
+            all_results[_cname] = _res
+            continue
+
+        try:
+            _png = _render_periods_png(
+                _fbytes, use_filter, cutoff_low, cutoff_high,
+                use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                boundary_padding,
+                _phase_params_tuple, _cname, figsize=(12, 5), show_title=True,
+                gt_boundary_iso=_gt_boundary_iso(_cname, _fbytes),
+            )
+        except Exception:
+            _png = b""
+
+        _res.update({
+            "ok":           True,
+            "vort":         _vort,
+            "df_result":    _df,
+            "periods_dict": _pdict,
+            "filter_warns": _fwarns,
+            "phase_warns":  _pwarns,
+            "diag":         _compute_diagnostics(_cname, _pdict, _df, _fwarns + _pwarns),
+            "csv_bytes":    _render_csv(_pdict),
+            "png_bytes":    _png,
+        })
+        all_results[_cname] = _res
+
+    _ok_results = {n: r for n, r in all_results.items() if r["ok"]}
+    _zip_bytes  = _build_zip(_ok_results, _build_yaml(cyclone_names))
+
 
 # ══════════════════════════════════════════════════════════════════════════════════
 # TAB 1 — Calibration

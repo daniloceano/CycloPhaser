@@ -292,13 +292,24 @@ def test_ribbon_shows_a_later_step_overwriting_an_earlier_one(vort_cache):
 # 3. Mature fidelity
 # ══════════════════════════════════════════════════════════════════════════════
 
-MATURE_TRACKS = ["20150377", "20190325", "20203373", "20203947", "20206498"]
+MATURE_TRACKS = ["20190325", "20203947"]
 MATURE_CONFIGS = [
     dict(),
     dict(prominence_relative=0.30),
     dict(mature_method="amplitude", mature_amplitude_fraction=0.95),
     dict(length_scale="local", threshold_mature_length=0.06),
 ]
+
+
+def test_mature_tracks_are_not_in_the_test_split():
+    """The test split is spent: no test reads it (passo5). Guarded against split.yaml
+    itself, never against a copied id list."""
+    import yaml
+    split = yaml.safe_load((REPO_ROOT / "research" / "labels" / "split.yaml").read_text())
+    test = {str(i) for i in split["test"]}
+    for batch in (split.get("batches") or {}).values():
+        test |= {str(i) for i in (batch.get("test") or [])}
+    assert not set(MATURE_TRACKS) & test
 
 
 @pytest.mark.parametrize("track_id", MATURE_TRACKS)

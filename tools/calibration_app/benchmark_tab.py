@@ -79,6 +79,8 @@ FIGURE_LAYOUTS = ["Side by side", "Stacked"]
 # session_state keys — explicit, see the module docstring
 K_COLUMNS = "bench_columns"
 K_IDS = "bench_selected_ids"
+K_IDS_WIDGET = "bench_ids_widget"
+K_IDS_RESYNC = "_bench_ids_resync"
 K_LABELS = "bench_show_labels"
 K_NEXT_ID = "bench_next_id"
 K_MODE = "bench_mode"
@@ -568,6 +570,7 @@ def render() -> None:
     if dropped:
         selected = [s for s in selected if s in selectable]
         st.session_state[K_IDS] = selected
+        st.session_state[K_IDS_WIDGET] = list(selected)
 
     n_real = sum(1 for s in selected if source_of.get(s) == "real")
     n_syn = sum(1 for s in selected if source_of.get(s) == "synthetic")
@@ -596,7 +599,15 @@ def render() -> None:
                     "selection: Validation mode offers labelled sources only.")
 
         def _set(ids):
-            st.session_state[K_IDS] = [s for s in ids if s in selectable]
+            # The preset buttons write BOTH the selection and the multiselect's
+            # own state. The multiselect is keyed, so Streamlit ignores a new
+            # `default` once it has state; writing only K_IDS left the widget
+            # empty, and the comparison below then copied that empty widget back
+            # over K_IDS on the next click (any second preset click emptied the
+            # selection, e.g. Train then Test).
+            ids = [s for s in ids if s in selectable]
+            st.session_state[K_IDS] = ids
+            st.session_state[K_IDS_WIDGET] = list(ids)
 
         s1, s2, s3, s4, s5, s6 = st.columns(6)
         with s1:
@@ -617,23 +628,31 @@ def render() -> None:
                 _set([s for s in selectable if s not in selected])
         with s6:
             if st.button("Clear", key="bench_pick_none", use_container_width=True):
-                st.session_state[K_IDS] = []
+                _set([])
 
+        # The widget's state starts from the selection, and drops whatever the
+        # current options no longer offer (a mode switch can remove sources).
+        current = st.session_state.get(K_IDS_WIDGET)
+        if st.session_state.pop(K_IDS_RESYNC, False):
+            current = None       # code outside the widget changed the selection
+        if current is None or any(s not in selectable for s in current):
+            st.session_state[K_IDS_WIDGET] = [
+                s for s in (st.session_state[K_IDS] if current is None else current)
+                if s in selectable]
         with st.expander("Choose individually", expanded=False):
             picked = st.multiselect(
                 "Any subset of the available records. Not tied to the "
                 "train/test split.",
                 options=selectable,
-                default=[s for s in selected if s in selectable],
-                key="bench_ids_widget",
+                key=K_IDS_WIDGET,
                 format_func=lambda s: (f"{s} ({source_of[s]}/"
                                        f"{membership.get(s, 'unlabelled')}"
                                        + (f"/{BATCH_TAG}" if s in batch_ids
                                           else "") + ")"),
             )
-            if picked != [s for s in selected if s in selectable]:
+            if picked != [s for s in st.session_state[K_IDS] if s in selectable]:
                 st.session_state[K_IDS] = list(picked)
-                selected = list(picked)
+            selected = list(st.session_state[K_IDS])
 
         if mode == "Exploration":
             up = st.file_uploader(
@@ -645,8 +664,8 @@ def render() -> None:
                 help="Uploaded tracks carry no manual label, so they can be "
                      "compared against the reference column but are never "
                      "scored.\n\n" + track_format_ui.UPLOAD_HELP
-                     + "\n\nHere the custom format is the one set on the "
-                       "Calibration page, above the tabs.")
+                     + "\n\nHere the custom format is the one set in the "
+                       "Calibration tab.")
             # Same validation, custom format and preview/confirmation as the
             # Calibration uploader; only files not yet added are considered.
             pending = [f for f in (up or [])
@@ -659,6 +678,9 @@ def render() -> None:
                 st.session_state[K_EXTRA][name] = list(ser.values)
                 st.session_state[K_IDS] = list(st.session_state[K_IDS]) + [name]
             if accepted:
+                # the widget already exists in this run; its state is
+                # rewritten from K_IDS at the top of the next one
+                st.session_state[K_IDS_RESYNC] = True
                 st.rerun()
 
         st.checkbox(

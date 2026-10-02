@@ -129,6 +129,20 @@ def _doc_for(source) -> dict:
     return yaml.safe_load((bc.CONFIGS_DIR / source).read_text())
 
 
+def _train_ids(ms, n):
+    """The first `n` TRAIN records offered by the multiselect, as raw ids.
+
+    `ms.options` holds the formatted labels ("<id> (<source>/<split>)"), not the
+    values. Passing labels to `set_value` works on streamlit 1.63, but the
+    AppTest of streamlit 1.58 (the version pinned in requirements-app.txt)
+    applies `format_func` to them again and fails inside the harness with a
+    KeyError, while the app itself is fine (passo5). Raw ids work on both. Only
+    train records are taken: the test split is spent and no test reads it."""
+    ids = [o.split(" ")[0] for o in ms.options if "/train" in o]
+    assert len(ids) >= n
+    return ids[:n]
+
+
 def _select(at, ids):
     _widget(at, "multiselect", "bench_ids_widget").set_value(list(ids))
     at.run()
@@ -152,7 +166,7 @@ def _loaded(at):
 def _two_column_app(n_cyclones=3, run=True) -> AppTest:
     at = _app()
     ms = _widget(at, "multiselect", "bench_ids_widget")
-    _select(at, list(ms.options[:n_cyclones]))
+    _select(at, _train_ids(ms, n_cyclones))
     _add_column(at, CFG_A)
     _add_column(at, CFG_B)
     if run:
@@ -197,7 +211,7 @@ def test_every_column_reports_on_exactly_the_selected_cyclones():
 def test_changing_the_selection_repoints_every_column_together():
     at = _two_column_app(n_cyclones=2)
     ms = _widget(at, "multiselect", "bench_ids_widget")
-    _select(at, list(ms.options[:5]))
+    _select(at, _train_ids(ms, 5))
     _run(at)
     selected = at.session_state["bench_selected_ids"]
     for col in _loaded(at):
@@ -211,7 +225,7 @@ def test_changing_the_selection_repoints_every_column_together():
 def test_no_results_exist_before_run():
     at = _app()
     ms = _widget(at, "multiselect", "bench_ids_widget")
-    _select(at, list(ms.options[:2]))
+    _select(at, _train_ids(ms, 2))
     _add_column(at, CFG_A)
     assert "bench_last_results" not in at.session_state, (
         "results appeared without Run being pressed")
