@@ -7,7 +7,8 @@
 # selects prebuilt wheels compatible with the running Python. Exact pins
 # forced source compilation (numpy/scipy) and ~45 min build times. The
 # floors below match cyclophaser's own dependency floors (see setup.py).
-# The Python version is pinned separately in .python-version (3.12).
+# The Python version is not read from any file in this repository: it is set
+# in the app's settings on Streamlit Community Cloud.
 streamlit>=1.40
 pandas>=2.2
 matplotlib>=3.9

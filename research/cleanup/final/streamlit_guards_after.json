@@ -1,0 +1,63 @@
+{
+ "label": "streamlit_guards_after",
+ "app_modules_pulling_streamlit": [
+  "app",
+  "benchmark_tab",
+  "label_tab",
+  "track_format_ui"
+ ],
+ "test_files_scanned": 31,
+ "files_reaching_streamlit": 8,
+ "files_with_unguarded": [],
+ "unguarded_imports": 0,
+ "rows": [
+  {
+   "file": "tests/test_app_distance_removed.py",
+   "streamlit_imports": 1,
+   "module_level_guard_line": 36,
+   "unguarded": []
+  },
+  {
+   "file": "tests/test_app_passo5_fixes.py",
+   "streamlit_imports": 1,
+   "module_level_guard_line": null,
+   "unguarded": []
+  },
+  {
+   "file": "tests/test_benchmark_apptest.py",
+   "streamlit_imports": 2,
+   "module_level_guard_line": 42,
+   "unguarded": []
+  },
+  {
+   "file": "tests/test_inspector_apptest.py",
+   "streamlit_imports": 1,
+   "module_level_guard_line": 28,
+   "unguarded": []
+  },
+  {
+   "file": "tests/test_label_apptest.py",
+   "streamlit_imports": 2,
+   "module_level_guard_line": 36,
+   "unguarded": []
+  },
+  {
+   "file": "tests/test_sidebar_coverage.py",
+   "streamlit_imports": 1,
+   "module_level_guard_line": 38,
+   "unguarded": []
+  },
+  {
+   "file": "tests/test_sidebar_defaults.py",
+   "streamlit_imports": 1,
+   "module_level_guard_line": 33,
+   "unguarded": []
+  },
+  {
+   "file": "tests/test_track_upload_apptest.py",
+   "streamlit_imports": 2,
+   "module_level_guard_line": 38,
+   "unguarded": []
+  }
+ ]
+}

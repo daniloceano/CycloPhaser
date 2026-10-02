@@ -183,6 +183,8 @@ Live files that cited a removed path now cite it in that form. The findings the
 removed reports supported are consolidated, with their citations, in
 `docs/findings.md`. Nothing under `cyclophaser/` changed in this step.
 
+`runtime.txt` and `.python-version` were removed: Streamlit Community Cloud does not read these files; the app's Python version is set in the app's settings.
+
 ### Changed — calibration app: the sidebar opens with the package defaults (item 31, stage 2c)
 
 **One source for the sidebar's start-up values: the package signature.**

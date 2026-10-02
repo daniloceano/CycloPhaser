@@ -54,6 +54,9 @@ def test_a_text_track_is_not_taken_for_binary():
 # ── AppTest: upload placement and the Benchmark selection ─────────────────────
 
 def _app():
+    pytest.importorskip("streamlit",
+                        reason="AppTest drives the calibration app; the CI installs "
+                               "only the wheel, pytest and pyyaml")
     from streamlit.testing.v1 import AppTest
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
