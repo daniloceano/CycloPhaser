@@ -136,6 +136,7 @@ def test_the_evaluator_never_reaches_the_validation_batch(monkeypatch):
     monkeypatch.setattr(ev, "score_phase_sequences", lambda sel, d: {})
     monkeypatch.setattr(ev, "_fmt", lambda m: "")
     monkeypatch.setattr(ev, "_fmt_phases", lambda m: "")
+    monkeypatch.setattr(ev, "_fmt_baselines", lambda sel: "")   # passo5: constant baselines
     for argv in ([], ["--batch-train", lc.SWELL_BATCH],
                  ["--batch-train", lc.VALIDATION_BATCH]):
         ev.main(argv)

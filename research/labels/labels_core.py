@@ -175,8 +175,13 @@ def opaque_synthetic_id(case_name: str) -> str:
 
 # ── loading the series populations ───────────────────────────────────────────
 
-def load_real_series(data_dir: Path | None = None) -> dict[str, pd.Series]:
+def load_real_series(data_dir: Path | None = None, ids=None) -> dict[str, pd.Series]:
     """The 51 calibration tracks, as {track_id: raw vorticity Series}.
+
+    `ids` (optional): read only the files of these track ids. A caller that
+    must not touch the spent test split passes the ids it is allowed to read,
+    so the test files are never OPENED, not merely dropped after reading
+    (clean-up front, Passo 5).
 
     Deliberately NOT float_precision="round_trip" here (unlike the synthetic
     loader below): the 51 recorded label hashes were written against pandas'
@@ -187,7 +192,10 @@ def load_real_series(data_dir: Path | None = None) -> dict[str, pd.Series]:
     """
     d = Path(data_dir) if data_dir is not None else CALIBRATION_DATA_DIR
     out = {}
+    wanted = None if ids is None else {str(i) for i in ids}
     for p in sorted(d.glob("*.csv")):
+        if wanted is not None and p.stem not in wanted:
+            continue
         df = pd.read_csv(p, sep=";", index_col="time", parse_dates=True)
         out[p.stem] = df["min_max_zeta_850"].astype("float64")
     return out
@@ -270,8 +278,12 @@ def batch_membership(batch: str = SWELL_BATCH, split_doc: dict | None = None) ->
 
 
 def load_batch_series(batch: str = SWELL_BATCH,
-                      split_doc: dict | None = None) -> dict[str, pd.Series]:
+                      split_doc: dict | None = None, ids=None) -> dict[str, pd.Series]:
     """The series of one frozen batch of split.yaml, as {id: raw vorticity Series}.
+
+    `ids` (optional): read only these ids of the batch — the test cases of a
+    batch are spent like the test split, and a caller that may not read them
+    passes the ids it may (clean-up front, Passo 5).
 
     Same parser as `load_real_series` (pandas' default float parser), so a
     label's `series_sha256` means the same thing for a batch series as for the
@@ -285,8 +297,11 @@ def load_batch_series(batch: str = SWELL_BATCH,
         return {}
     d = REPO_ROOT / blk["data_dir"]
     out = {}
+    wanted = None if ids is None else {str(i) for i in ids}
     for sid in sorted(blk.get("train", []) + blk.get("test", [])
                       + blk.get("validation", [])):
+        if wanted is not None and str(sid) not in wanted:
+            continue
         p = d / f"{sid}.csv"
         got = hashlib.sha256(p.read_bytes()).hexdigest()
         if got != blk["file_sha256"][sid]:

@@ -52,6 +52,16 @@ phase's start is excluded because it is 0 on both sides by construction.
 
 Everything is broken down by split (train/test) and by source (real/synthetic).
 
+Each block ends with the two CONSTANT BASELINES, on the same labels and the
+same ruler: "always answer incipient end N" (N from 0 to 40, or no incipient
+phase; front D's definition) and "always answer the modal labelled phase
+sequence" (item 19's). Both choose their constant on the block's own labels,
+so they are optimistic. The detector should beat them.
+
+Only the labels and series of the groups being scored are used: without
+--test, the test split's labels are dropped before any check and its files are
+never opened (clean-up front, Passo 5).
+
 Why --test is not the default
 -----------------------------
 A test set is spent the first time a parameter choice is made after looking at
@@ -62,6 +72,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections import Counter
 import warnings
 from pathlib import Path
 
@@ -73,7 +84,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from labels_core import (  # noqa: E402
     batch_membership, first_blind_record, is_adjudicated, is_legacy_record,
     load_batch_series,
-    load_real_series, load_synthetic_series, normalize_phase, read_labels,
+    load_real_series, load_synthetic_series, normalize_phase, phase_sequence, read_labels,
     read_split, score_labels, score_phase_sequences, series_sha256,
 )
 
@@ -214,6 +225,38 @@ def _fmt_phases(m: dict) -> str:
     return "\n".join(lines)
 
 
+# The constant baselines: what "ignore the series and always answer the same"
+# scores on the same labels, on the same ruler (score_labels /
+# score_phase_sequences). Made a standing output by the clean-up front
+# (Passo 5) — proposal 8(b) of front D, docs/future_work.md item 25; the
+# definitions are those of front D (incipient end) and item 19 (sequence).
+BASELINE_CONSTANTS = [None] + list(range(0, 41))   # None = "no incipient phase"
+
+
+def _fmt_baselines(sel) -> str:
+    """Both constant baselines on the selection `sel`, the best constant chosen
+    ON that selection (an optimistic baseline: it has seen the answers)."""
+    ids = [r["id"] for r in sel]
+    best = None
+    for const in BASELINE_CONSTANTS:
+        m = score_labels(sel, {sid: const for sid in ids})
+        key = (m["n_hit"], -(m["mae"] if m["mae"] is not None else 1e9))
+        if best is None or key > best[0]:
+            best = (key, const, m)
+    _, const, m = best
+    hit = "—" if m["hit_rate"] is None else f"{100 * m['hit_rate']:.1f}%"
+    mae = "—" if m["mae"] is None else f"{m['mae']:.2f}"
+    seqs = Counter(tuple(p for p, _ in phase_sequence(r)) for r in sel)
+    modal, k = seqs.most_common(1)[0]
+    return "\n".join([
+        "   ── constant baselines (ignore the series; best constant chosen on this selection) ──",
+        f"     incipient end, always {'no incipient' if const is None else const}: "
+        f"hit {m['n_hit']}/{m['n_boundary']} ({hit}), MAE {mae}, worst {m['worst']}; "
+        f"none agreed {m['n_none_agreed']}/{m['n_none']}",
+        f"     phase sequence, always the modal labelled one "
+        f"({' -> '.join(modal)}): {k}/{len(sel)} exact"])
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -257,6 +300,14 @@ def main(argv=None) -> int:
         keep = set(read_split()["train"]) | batch_train
         records = {sid: r for sid, r in records.items() if sid in keep}
 
+    # Scope first. Only the labels and series of the groups being scored are
+    # used, and before anything could name them: the test split is spent, so
+    # without --test its labels are dropped here and its files are never opened.
+    split = read_split()
+    train, test = set(split["train"]), set(split["test"])
+    in_scope = train | (test if args.test else set()) | batch_train
+    records = {sid: r for sid, r in records.items() if sid in in_scope}
+
     # Read from the VIGENTE record, before --against first-blind can swap in an
     # older version that does not carry the note.
     adjudicated = {sid for sid, r in records.items() if is_adjudicated(r)}
@@ -272,16 +323,15 @@ def main(argv=None) -> int:
                   f"EXCLUDED from --against first-blind: "
                   f"{', '.join(never_blind)}\n")
 
-    split = read_split()
-    train, test = set(split["train"]), set(split["test"])
     pv, gp = load_config(args.config)
 
-    real = load_real_series()
+    real = load_real_series(ids=in_scope)
     synth, _names = load_synthetic_series()
+    synth = {k: v for k, v in synth.items() if k in in_scope}
     series = {**real, **synth}
     sources = {k: "real" for k in real} | {k: "synthetic" for k in synth}
     if batch_train:
-        batch = load_batch_series(args.batch_train)
+        batch = load_batch_series(args.batch_train, ids=batch_train)
         series |= {k: v for k, v in batch.items() if k in batch_train}
         sources |= {k: "real" for k in batch_train}
 
@@ -339,6 +389,7 @@ def main(argv=None) -> int:
             print(_fmt(m))
             print("   ── whole phase sequence ──")
             print(_fmt_phases(score_phase_sequences(sel, detected_seqs)))
+            print(_fmt_baselines(sel))
         sel_all = [r for sid, r in sorted(usable.items()) if sid in ids]
         if sel_all:
             m = score_labels(sel_all, detected)
@@ -347,6 +398,7 @@ def main(argv=None) -> int:
             print(_fmt(m))
             print("   ── whole phase sequence ──")
             print(_fmt_phases(score_phase_sequences(sel_all, detected_seqs)))
+            print(_fmt_baselines(sel_all))
 
     if batch_train:
         sel = [r for sid, r in sorted(usable.items())
@@ -359,6 +411,7 @@ def main(argv=None) -> int:
             print(_fmt(m))
             print("   ── whole phase sequence ──")
             print(_fmt_phases(score_phase_sequences(sel, detected_seqs)))
+            print(_fmt_baselines(sel))
 
     sel = [r for sid, r in sorted(usable.items()) if sid in wanted and sid in adjudicated]
     if sel:
@@ -369,6 +422,7 @@ def main(argv=None) -> int:
         print(_fmt(m))
         print("   ── whole phase sequence ──")
         print(_fmt_phases(score_phase_sequences(sel, detected_seqs)))
+        print(_fmt_baselines(sel))
 
     if not args.test:
         print(f"\n  TEST split held out ({len(test)} series). "
