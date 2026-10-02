@@ -2,7 +2,7 @@
 """Passo 5, (b) — literal track ids of the TEST split in the app's and the tests'
 code (read-only). Prints and writes COUNTS and file:line only, never an id.
 
-    python research/cleanup/passo5/test_ids_in_code.py LABEL   # writes LABEL.json next to it
+    python research/cleanup/passo5/scan_test_ids_in_code.py LABEL   # writes LABEL.json next to it
 
 Scans every tracked .py under tools/calibration_app/ and tests/ for quoted
 8-digit literals and intersects them with every `test:` list of

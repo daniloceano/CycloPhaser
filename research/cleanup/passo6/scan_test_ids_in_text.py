@@ -3,7 +3,7 @@
 track id (word-bounded, inside text, comments, strings or code), not only a quoted
 literal. Read-only; counts and file:line only, never an id.
 
-    python research/cleanup/passo6/test_ids_in_text.py LABEL [REV] [PATHS...]
+    python research/cleanup/passo6/scan_test_ids_in_text.py LABEL [REV] [PATHS...]
         REV: a git revision to read the files from (default: the working tree)
         PATHS: default tools/calibration_app docs
 
