@@ -6,6 +6,7 @@ text; none is typed into the template.
 
     python research/cleanup/passo6/future_work_item32.py            # writes future_work_item32.md next to it
     python research/cleanup/passo6/future_work_item32.py --insert   # and inserts it into docs/future_work.md
+    python research/cleanup/passo6/future_work_item32.py --replace  # re-renders item 32 in place (only item 32)
 
 --insert adds the item after the last item (item 31) and before the closing
 "## Note" section, which is not an item; no earlier line is edited. It refuses
@@ -237,6 +238,51 @@ w(f"* **0 test ids in `docs/` (commit 21).** Predicted 0 without excluding the r
   f"`docs/findings.md`. Left for Danilo's decision. *Learned:* a prediction over a folder must say whether "
   f"historical records are in scope.")
 w("")
+# --- final gate (research/cleanup/final/, RELATORIO_FINAL.md) ---
+fin = CLEAN / "final"
+ga = json.loads((fin / "gate_a.json").read_text())
+bs = json.loads((fin / "b_summary.json").read_text())
+b2 = json.loads((fin / "b2_summary.json").read_text())
+b2_dig = re.search(r"SHA256\s*=\s*([0-9a-f]{8})", (fin / "b2_digest_raw.txt").read_text()).group(1)
+b_dig = re.search(r"SHA256\s*=\s*([0-9a-f]{8})", (fin / "b_digest_raw.txt").read_text()).group(1)
+coll = re.search(r"ERROR collecting (\S+)", (fin / "b_suite_raw.txt").read_text()).group(1)
+fc = json.loads((fin / "c_tag_and_trace.json").read_text())
+fv = json.loads((fin / "c_verify_citations.json").read_text())
+fd = json.loads((fin / "d_defaults.json").read_text())
+fe = json.loads((fin / "e_d2.json").read_text())
+ff = json.loads((fin / "f_post_6b.json").read_text())
+verdicts = re.findall(r"^\| \((\w)\) \| \*\*(PASS|FAIL)\*\*", (CLEAN / "RELATORIO_FINAL.md").read_text(), re.M)
+measured_at = re.search(r"worktree HEAD: ([0-9a-f]{7})", (fin / "gate_header.txt").read_text()).group(1)
+b2_at = re.search(r"worktree HEAD: ([0-9a-f]{7})", (fin / "b2_header.txt").read_text()).group(1)
+
+w(f"* **The final gate's (b) — suite with 0 failures.** Measured once at `{measured_at}`: the suite stopped at "
+  f"collection on `{coll}` (commit 21), a research script named `test_*.py` that pytest collects from the "
+  f"root and that runs with pytest's argv; 0 tests ran. The passo-5 scanner `passo5/test_ids_in_code.py` had "
+  f"been collected the same way, silently, in passo 5's suite runs, and wrote `passo5/-m.json`. *Learned:* "
+  f"without a pytest `testpaths`, a research script must never be named `test_*.py`; the suites of passo 5 "
+  f"ran an extra module nobody declared.")
+w("")
+w("### Final gate (`research/cleanup/RELATORIO_FINAL.md`)")
+w("")
+w(f"Measured once, in a clean worktree at `{measured_at}`: "
+  + ", ".join(f"({k}) {v}" for k, v in verdicts) + ".")
+w("")
+w(f"* (a) `cyclophaser/` touched by {', '.join(f'`{c}`' for c in ga['commits_listed'])}: C1 and "
+  f"{len(ga['commits_listed']) - 1} docstring/comment commits, each with an identical docstring-free tree and "
+  f"equal digests; HEAD's docstring-free tree is identical to `742e685`'s: {ga['head_vs_c1']['identical']}.")
+w(f"* (b) FAIL as above. App tests in a fresh venv with `requirements-app.txt`: {bs['app_pinned']['passed']} "
+  f"passed / {bs['app_pinned']['failed']} failed; digest `{b_dig}…`. The two scanners were renamed to "
+  f"`scan_*` and `passo5/-m.json` removed (`d44802e`); a **second measurement** at `{b2_at}`, recorded beside "
+  f"the first, which stands: suite {b2['suite']['passed']} passed / {b2['suite']['failed']} failed, app tests "
+  f"in the same run {b2['app_dedicated']['passed']} passed / {b2['app_dedicated']['failed']} failed, digest "
+  f"`{b2_dig}…`.")
+w(f"* (c) §S10 {fc['R3']['rows']} rows, {len(fc['R3']['failures'])} failures; `verify_citations` "
+  f"{fv['citations_resolved']}/{fv['citations_total']}, {len(fv['failures'])} failures.")
+w(f"* (d) {fd['divergences']} divergences in {fd['claims']} default claims.")
+w(f"* (e) {fe['flagged']} flagged lines, {fe['carried']} with file, text and context identical to the Fase C "
+  f"review; {fe['attributing']} attribute an `edge` score to the current default.")
+w(f"* (f) remote branches deleted = the authorised list: {ff['deleted_equals_authorised']}.")
+w("")
 w("### Pending — for the release front")
 w("")
 w("* **Order:** publish 2.1 on PyPI → raise the app's requirement to `cyclophaser>=2.1` → merge into "
@@ -262,6 +308,15 @@ text = "\n".join(T)
 assert not re.search(r"\{|\}", text.replace("`{", "").replace("}`", "")), "unformatted placeholder"
 (HERE / "future_work_item32.md").write_text(text)
 print(text)
+
+if sys.argv[1:] == ["--replace"]:
+    fw = ROOT / "docs/future_work.md"
+    src = fw.read_text()
+    a = re.search(r"^## 32\.", src, re.M).start()
+    b = src.index("\n## Note\n") + 1
+    assert re.findall(r"^## (\d+)[a-z]?\.", src[a:b], re.M) == ["32"], "replace must touch item 32 only"
+    fw.write_text(src[:a] + text + "\n" + src[b:])
+    print(f"replaced item 32 in {fw.relative_to(ROOT)}")
 
 if sys.argv[1:] == ["--insert"]:
     fw = ROOT / "docs/future_work.md"

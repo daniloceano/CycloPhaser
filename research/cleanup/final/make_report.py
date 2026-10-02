@@ -125,6 +125,16 @@ md += ["", "| critério | resultado | evidência |", "|---|---|---|"]
 md += [f"| {k} | {pf(ok)} | {ev.replace('|', chr(92) + '|')} |" for k, ok, ev in rows]
 md += ["", f"**Portão: {'PASS' if all(ok for _, ok, _ in rows) else 'FAIL'}** "
        f"({sum(ok for _, ok, _ in rows)}/{len(rows)} critérios).", ""]
+if (HERE / "b2_summary.json").exists():
+    b2 = j("b2_summary.json")
+    d2g = re.search(r"SHA256\s*=\s*([0-9a-f]{8})", t("b2_digest_raw.txt")).group(1)
+    md += ["## Segunda medição de (b) — registrada ao lado; o veredito acima não muda", "",
+           f"Depois da correção do erro de coleta, por `final/run_b_second.sh` numa cópia limpa "
+           f"({t('b2_header.txt').strip()}): suíte {b2['suite']['passed']} passed / {b2['suite']['failed']} failed, "
+           f"exit {exit_code('b2_suite_raw.txt')} (`{last_pytest_line('b2_suite_raw.txt')}`); testes do app na mesma "
+           f"rodada {b2['app_dedicated']['passed']} passed / {b2['app_dedicated']['failed']} failed; digest default "
+           f"`{d2g}…`. A rodada com versões fixadas não foi repetida (seleciona os arquivos do app explicitamente; "
+           f"o erro de coleta não a atingiu).", ""]
 if notes:
     md += ["## Notas (lidas das saídas)", ""] + [f"* {n}" for n in notes] + [""]
 (HERE.parent / "RELATORIO_FINAL.md").write_text("\n".join(md))

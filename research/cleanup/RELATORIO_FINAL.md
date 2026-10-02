@@ -16,6 +16,10 @@ Measured once by `research/cleanup/final/run_gate.sh`, in a detached git worktre
 
 **Portão: FAIL** (5/6 critérios).
 
+## Segunda medição de (b) — registrada ao lado; o veredito acima não muda
+
+Depois da correção do erro de coleta, por `final/run_b_second.sh` numa cópia limpa (worktree HEAD: d44802ee57f4ed159aa5e720a685b9db41b2ab84 | changed files: 0 | date: 2026-10-02T16:57:14Z): suíte 1443 passed / 0 failed, exit 0 (`1443 passed, 1 skipped, 29 deselected, 89 warnings in 420.70s (0:07:00)`); testes do app na mesma rodada 658 passed / 0 failed; digest default `7552bc67…`. A rodada com versões fixadas não foi repetida (seleciona os arquivos do app explicitamente; o erro de coleta não a atingiu).
+
 ## Notas (lidas das saídas)
 
 * (b): the suite stopped at collection — `ERROR collecting research/cleanup/passo6/test_ids_in_text.py` (`final/b_suite_raw.txt`): a research script named `test_*.py`, collected by pytest from the repository root, runs its module-level code with pytest's argv. No test ran, so the dedicated-env app tests count 0/0.

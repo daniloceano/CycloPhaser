@@ -1,0 +1,14 @@
+{
+ "suite": {
+  "passed": 1443,
+  "failed": 0,
+  "skipped": 1,
+  "failed_ids": []
+ },
+ "app_dedicated": {
+  "passed": 658,
+  "failed": 0,
+  "skipped": 0,
+  "failed_ids": []
+ }
+}

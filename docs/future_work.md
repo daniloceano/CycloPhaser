@@ -4093,6 +4093,19 @@ Built by `research/cleanup/passo2/make_findings.py` (`b60d57b`), maintained by h
 * **The test-id scanner (passo 5 → commit 21).** The passo-5 scanner counted only quoted 8-digit literals in `.py` files (10 after, none in `tools/calibration_app/`); widened to any word-bounded occurrence, it found 1 in `tools/calibration_app/` text (→ 0 after `dbaacd6`). *Learned:* same as R4 — the scanner was narrower than the question.
 * **0 test ids in `docs/` (commit 21).** Predicted 0 without excluding the records; measured 52 lines before and 52 after — 49 in `docs/future_work.md`, 3 in a table of `docs/findings.md`. Left for Danilo's decision. *Learned:* a prediction over a folder must say whether historical records are in scope.
 
+* **The final gate's (b) — suite with 0 failures.** Measured once at `f7d8fd9`: the suite stopped at collection on `research/cleanup/passo6/test_ids_in_text.py` (commit 21), a research script named `test_*.py` that pytest collects from the root and that runs with pytest's argv; 0 tests ran. The passo-5 scanner `passo5/test_ids_in_code.py` had been collected the same way, silently, in passo 5's suite runs, and wrote `passo5/-m.json`. *Learned:* without a pytest `testpaths`, a research script must never be named `test_*.py`; the suites of passo 5 ran an extra module nobody declared.
+
+### Final gate (`research/cleanup/RELATORIO_FINAL.md`)
+
+Measured once, in a clean worktree at `f7d8fd9`: (a) PASS, (b) FAIL, (c) PASS, (d) PASS, (e) PASS, (f) PASS.
+
+* (a) `cyclophaser/` touched by `32651c8`, `00718d4`, `c5e298b`, `129b04d`, `742e685`: C1 and 4 docstring/comment commits, each with an identical docstring-free tree and equal digests; HEAD's docstring-free tree is identical to `742e685`'s: True.
+* (b) FAIL as above. App tests in a fresh venv with `requirements-app.txt`: 658 passed / 0 failed; digest `7552bc67…`. The two scanners were renamed to `scan_*` and `passo5/-m.json` removed (`d44802e`); a **second measurement** at `d44802e`, recorded beside the first, which stands: suite 1443 passed / 0 failed, app tests in the same run 658 passed / 0 failed, digest `7552bc67…`.
+* (c) §S10 202 rows, 0 failures; `verify_citations` 557/557, 0 failures.
+* (d) 0 divergences in 133 default claims.
+* (e) 53 flagged lines, 53 with file, text and context identical to the Fase C review; 0 attribute an `edge` score to the current default.
+* (f) remote branches deleted = the authorised list: True.
+
 ### Pending — for the release front
 
 * **Order:** publish 2.1 on PyPI → raise the app's requirement to `cyclophaser>=2.1` → merge into `master` → restart the published app. Today the app requires `cyclophaser>=2.0.0` (`tools/calibration_app/requirements.txt`), and the latest PyPI release predates the parameters the app reads (§S11).
