@@ -1,0 +1,48 @@
+worktree at: 79862a0efc2d6893132b0768a27809138bab4120 (clean: 0 changed files)
+package installed from the worktree
+Running Sphinx v7.2.6
+making output directory... done
+WARNING: html_static_path entry '_static' does not exist
+building [mo]: targets for 0 po files that are out of date
+writing output... 
+building [html]: targets for 10 source files that are out of date
+updating environment: [new config] 10 added, 0 changed, 0 removed
+[2Kreading sources... [ 10%] api
+[2Kreading sources... [ 20%] calibration_tool
+[2Kreading sources... [ 30%] contribute
+[2Kreading sources... [ 40%] defaults
+[2Kreading sources... [ 50%] index
+[2Kreading sources... [ 60%] installation
+[2Kreading sources... [ 70%] license
+[2Kreading sources... [ 80%] overview
+[2Kreading sources... [ 90%] testing
+[2Kreading sources... [100%] usage
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... done
+preparing documents... done
+copying assets... copying static files... done
+copying extra files... done
+done
+[2Kwriting output... [ 10%] api
+[2Kwriting output... [ 20%] calibration_tool
+[2Kwriting output... [ 30%] contribute
+[2Kwriting output... [ 40%] defaults
+[2Kwriting output... [ 50%] index
+[2Kwriting output... [ 60%] installation
+[2Kwriting output... [ 70%] license
+[2Kwriting output... [ 80%] overview
+[2Kwriting output... [ 90%] testing
+[2Kwriting output... [100%] usage
+generating indices... genindex done
+writing additional pages... search done
+[2Kcopying images... [ 25%] generated/methodology.png
+[2Kcopying images... [ 50%] generated/example_default.png
+[2Kcopying images... [ 75%] generated/example_noisy_default.png
+[2Kcopying images... [100%] generated/example_noisy_custom.png
+dumping search index in English (code: en)... done
+dumping object inventory... done
+build succeeded, 1 warning.
+
+The HTML pages are in ../../../../../private<tmp-worktree>/wt/docs/_build/html.
+EXIT 0

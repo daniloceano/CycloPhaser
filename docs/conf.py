@@ -25,7 +25,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+# No html_static_path: docs/_static/ is git-ignored, so a clean checkout (Read the
+# Docs) has no such folder and Sphinx warns. Generated files live in docs/generated/.
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.extlinks']
 
