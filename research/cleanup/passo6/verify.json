@@ -1,0 +1,101 @@
+{
+ "tags": [
+  {
+   "tag": "archive/diag/front-b-distance-inert",
+   "tip": "491a5d0",
+   "local": "491a5d0",
+   "remote": "491a5d0",
+   "branch_tip_now": "491a5d0",
+   "ok": true
+  },
+  {
+   "tag": "archive/diag/series-sha256-mismatch",
+   "tip": "3ae6082",
+   "local": "3ae6082",
+   "remote": "3ae6082",
+   "branch_tip_now": "3ae6082",
+   "ok": true
+  },
+  {
+   "tag": "archive/feat/label-tab-toplevel",
+   "tip": "0c63145",
+   "local": "0c63145",
+   "remote": "0c63145",
+   "branch_tip_now": "0c63145",
+   "ok": true
+  },
+  {
+   "tag": "archive/fix/idx0-boundary-extremum-type",
+   "tip": "6060c6d",
+   "local": "6060c6d",
+   "remote": "6060c6d",
+   "branch_tip_now": "6060c6d",
+   "ok": true
+  },
+  {
+   "tag": "archive/fix/inspector-min-depth-params",
+   "tip": "a2b639e",
+   "local": "a2b639e",
+   "remote": "a2b639e",
+   "branch_tip_now": "a2b639e",
+   "ok": true
+  },
+  {
+   "tag": "archive/joss-submission",
+   "tip": "8348caf",
+   "local": "8348caf",
+   "remote": "8348caf",
+   "branch_tip_now": "8348caf",
+   "ok": true
+  },
+  {
+   "tag": "archive/research/item20c-duration-ratio",
+   "tip": "e7792d3",
+   "local": "e7792d3",
+   "remote": "e7792d3",
+   "branch_tip_now": "e7792d3",
+   "ok": true
+  },
+  {
+   "tag": "archive/research/v3-topology-proxy",
+   "tip": "c508730",
+   "local": "c508730",
+   "remote": "c508730",
+   "branch_tip_now": "c508730",
+   "ok": true
+  },
+  {
+   "tag": "archive/exp/pre-peak-normalization",
+   "tip": "1faf0c8",
+   "local": "1faf0c8",
+   "remote": "1faf0c8",
+   "branch_tip_now": "1faf0c8",
+   "ok": true
+  }
+ ],
+ "tags_ok": true,
+ "hex_tokens": 5690,
+ "tokens_resolving_to_commits": 240,
+ "distinct_cited_commits": 211,
+ "unreachable_after_simulated_removal": 0,
+ "unreachable_after_rows": [],
+ "unreachable_from_all_refs_today": 0,
+ "kept_refs": [
+  "origin/master",
+  "origin/develop-v2.1",
+  "origin/chore/repo-cleanup",
+  "refs/tags/archive/app-phase-focus",
+  "refs/tags/archive/diag/front-b-distance-inert",
+  "refs/tags/archive/diag/series-sha256-mismatch",
+  "refs/tags/archive/exp/pre-peak-normalization",
+  "refs/tags/archive/feat/label-tab-toplevel",
+  "refs/tags/archive/fix/idx0-boundary-extremum-type",
+  "refs/tags/archive/fix/inspector-min-depth-params",
+  "refs/tags/archive/joss-submission",
+  "refs/tags/archive/research-diagnostics-pre-cleanup",
+  "refs/tags/archive/research/item20c-duration-ratio",
+  "refs/tags/archive/research/v3-topology-proxy",
+  "refs/tags/v1.9.4",
+  "refs/tags/v2.0.0"
+ ]
+}

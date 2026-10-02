@@ -1,0 +1,65 @@
+[
+ {
+  "tag": "archive/diag/front-b-distance-inert",
+  "branch": "diag/front-b-distance-inert",
+  "section": "remote",
+  "tip": "491a5d09f9eb4e43c9f117c34be394dd0feb6fd1",
+  "message": "Archived branch diag/front-b-distance-inert before the v2.1 clean-up; cited in research/cleanup/MANIFEST.md:1545 or kept as a record."
+ },
+ {
+  "tag": "archive/diag/series-sha256-mismatch",
+  "branch": "diag/series-sha256-mismatch",
+  "section": "remote",
+  "tip": "3ae6082c8fb004f53500f6e55264a21debcad9a0",
+  "message": "Archived branch diag/series-sha256-mismatch before the v2.1 clean-up; cited in docs/future_work.md:917 or kept as a record."
+ },
+ {
+  "tag": "archive/feat/label-tab-toplevel",
+  "branch": "feat/label-tab-toplevel",
+  "section": "remote",
+  "tip": "0c63145b52042191978a7ff131335e8db4bd8c15",
+  "message": "Archived branch feat/label-tab-toplevel before the v2.1 clean-up; cited in docs/findings.md:534 or kept as a record."
+ },
+ {
+  "tag": "archive/fix/idx0-boundary-extremum-type",
+  "branch": "fix/idx0-boundary-extremum-type",
+  "section": "remote",
+  "tip": "6060c6deac9108356567c719cd438efb0ee1a157",
+  "message": "Archived branch fix/idx0-boundary-extremum-type before the v2.1 clean-up; cited in docs/future_work.md:1145 or kept as a record."
+ },
+ {
+  "tag": "archive/fix/inspector-min-depth-params",
+  "branch": "fix/inspector-min-depth-params",
+  "section": "remote",
+  "tip": "a2b639eba87d2b38b6450aa7131f353752e573a3",
+  "message": "Archived branch fix/inspector-min-depth-params before the v2.1 clean-up; cited in docs/future_work.md:3715 or kept as a record."
+ },
+ {
+  "tag": "archive/joss-submission",
+  "branch": "joss-submission",
+  "section": "remote",
+  "tip": "8348caf98fb8838a209aa8cde1114c2107c6a8da",
+  "message": "Archived branch joss-submission before the v2.1 clean-up; cited in research/cleanup/MANIFEST.md:1568 or kept as a record."
+ },
+ {
+  "tag": "archive/research/item20c-duration-ratio",
+  "branch": "research/item20c-duration-ratio",
+  "section": "remote",
+  "tip": "e7792d3ce285077b41d95ae65f55acdc69e0b20d",
+  "message": "Archived branch research/item20c-duration-ratio before the v2.1 clean-up; cited in docs/findings.md:154 or kept as a record."
+ },
+ {
+  "tag": "archive/research/v3-topology-proxy",
+  "branch": "research/v3-topology-proxy",
+  "section": "remote",
+  "tip": "c508730bf2f2b35600997552ee7f0faa2d78e007",
+  "message": "Archived branch research/v3-topology-proxy before the v2.1 clean-up; cited in docs/findings.md:555 or kept as a record."
+ },
+ {
+  "tag": "archive/exp/pre-peak-normalization",
+  "branch": "exp/pre-peak-normalization",
+  "section": "local_only",
+  "tip": "1faf0c89404c18b82d88c805c6b68cc51bd0dfe0",
+  "message": "Archived branch exp/pre-peak-normalization before the v2.1 clean-up; cited in research/labels/diagnostics/item30/item30_core.py:70 or kept as a record."
+ }
+]
