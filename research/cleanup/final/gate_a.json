@@ -1,0 +1,119 @@
+{
+ "head": "f7d8fd9",
+ "merge_base": "06d8550",
+ "commits": [
+  {
+   "commit": "32651c8",
+   "subject": "docs(cyclophaser): 16h \u2014 malformed rst table in process_vorticity's docstring; D4 redeclared",
+   "files": [
+    "cyclophaser/determine_periods.py"
+   ],
+   "only_py": true,
+   "remeasured_parent_vs_commit": {
+    "files": 5,
+    "differing": [],
+    "identical": true
+   },
+   "recorded": {
+    "tree_check": "passo4/ast_16h.json",
+    "tree_identical": true,
+    "digest": "passo4/digest_16h_{before,after}_raw.txt",
+    "digest_before": "7552bc67",
+    "digest_after": "7552bc67",
+    "digest_equal": true
+   },
+   "ok": true
+  },
+  {
+   "commit": "00718d4",
+   "subject": "docs(cyclophaser): 16g \u2014 docstrings render as grouped parameters; English quotation; prominence args",
+   "files": [
+    "cyclophaser/determine_periods.py"
+   ],
+   "only_py": true,
+   "remeasured_parent_vs_commit": {
+    "files": 5,
+    "differing": [],
+    "identical": true
+   },
+   "recorded": {
+    "tree_check": "passo4/ast_16g.json",
+    "tree_identical": true,
+    "digest": "passo4/digest_16g_{before,after}_raw.txt",
+    "digest_before": "7552bc67",
+    "digest_after": "7552bc67",
+    "digest_equal": true
+   },
+   "ok": true
+  },
+  {
+   "commit": "c5e298b",
+   "subject": "docs(cyclophaser): 16d \u2014 docstrings/comments: stale default and opt-in claims; rst fixes",
+   "files": [
+    "cyclophaser/determine_periods.py",
+    "cyclophaser/find_stages.py"
+   ],
+   "only_py": true,
+   "remeasured_parent_vs_commit": {
+    "files": 5,
+    "differing": [],
+    "identical": true
+   },
+   "recorded": {
+    "tree_check": "passo4/ast_16d.json",
+    "tree_identical": true,
+    "digest": "passo4/digest_16d_{before,after}_raw.txt",
+    "digest_before": "7552bc67",
+    "digest_after": "7552bc67",
+    "digest_equal": true
+   },
+   "ok": true
+  },
+  {
+   "commit": "129b04d",
+   "subject": "docs(cyclophaser): 16b \u2014 docstring de decay_tail_amplitude_fraction com o default atual",
+   "files": [
+    "cyclophaser/determine_periods.py"
+   ],
+   "only_py": true,
+   "remeasured_parent_vs_commit": {
+    "files": 5,
+    "differing": [],
+    "identical": true
+   },
+   "recorded": {
+    "tree_check": "passo4/ast_no_docstrings.json",
+    "tree_identical": true,
+    "digest": "passo4/digest_16b_{before,after}_raw.txt",
+    "digest_before": "7552bc67",
+    "digest_after": "7552bc67",
+    "digest_equal": true
+   },
+   "ok": true
+  },
+  {
+   "commit": "742e685",
+   "subject": "feat(C1): default boundary_padding \"reflect\"; params-15 renomeado params-track",
+   "role": "C1 \u2014 the behaviour change"
+  }
+ ],
+ "commits_listed": [
+  "32651c8",
+  "00718d4",
+  "c5e298b",
+  "129b04d",
+  "742e685"
+ ],
+ "expected_others": [
+  "00718d4",
+  "129b04d",
+  "32651c8",
+  "c5e298b"
+ ],
+ "head_vs_c1": {
+  "files": 5,
+  "differing": [],
+  "identical": true
+ },
+ "ok": true
+}

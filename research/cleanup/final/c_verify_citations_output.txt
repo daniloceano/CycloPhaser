@@ -1,0 +1,2 @@
+lines with numbers: 130; numbers checked: 423; citations: 557/557 resolved; failures: 0; weak citations: 45
+EXIT 0

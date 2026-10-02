@@ -1,0 +1,52 @@
+WARNING: The candidate selected for download or install is a yanked version: 'numpy' candidate (version 2.4.0 at https://files.pythonhosted.org/packages/bc/af/acbef97b630ab1bb45e6a7d01d1452e4251aa88ce680ac36e56c272120ec/numpy-2.4.0-cp312-cp312-macosx_14_0_arm64.whl (from https://pypi.org/simple/numpy/) (requires-python:>=3.11))
+Reason for being yanked: Backward compatibility bug
+
+[notice] A new release of pip is available: 25.0 -> 26.2.1
+[notice] To update, run: python3.12 -m pip install --upgrade pip
+pinned venv installed
+python 3.12.9 | streamlit 1.58.0 | pandas 2.3.3 | numpy 2.4.0
+cyclophaser from the worktree: True
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 32%]
+........................................................................ [ 43%]
+........................................................................ [ 54%]
+........................................................................ [ 65%]
+........................................................................ [ 76%]
+........................................................................ [ 87%]
+........................................................................ [ 98%]
+..........                                                               [100%]
+=============================== warnings summary ===============================
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:64
+  <pinned-venv>/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    prop = Group((name + Suppress("=") + comma_separated(value)) | oneOf(_CONSTANTS))
+
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+  <pinned-venv>/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+  <pinned-venv>/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+../pinned_venv/lib/python3.12/site-packages/matplotlib/_mathtext.py:45
+  <pinned-venv>/lib/python3.12/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  <wt>/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+658 passed, 15 warnings in 185.21s (0:03:05)
+EXIT 0

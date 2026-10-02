@@ -1,0 +1,23 @@
+{
+ "app_test_files": 15,
+ "suite": {
+  "passed": 0,
+  "failed": 1,
+  "skipped": 0,
+  "failed_ids": [
+   "::research.cleanup.passo6.test_ids_in_text"
+  ]
+ },
+ "app_dedicated": {
+  "passed": 0,
+  "failed": 0,
+  "skipped": 0,
+  "failed_ids": []
+ },
+ "app_pinned": {
+  "passed": 658,
+  "failed": 0,
+  "skipped": 0,
+  "failed_ids": []
+ }
+}
