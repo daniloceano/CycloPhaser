@@ -1,0 +1,311 @@
+HEAD: f73cd73ab75acc93a85b0e5b53e741702836ba45
+cyclophaser/ diff vs HEAD: 
+assert OK: cyclophaser.__file__ = <repo>/cyclophaser/__init__.py | sys.prefix = <env>
+.........................s.............................................. [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 19%]
+........................................................................ [ 24%]
+........................................................................ [ 29%]
+........................................................................ [ 34%]
+........................................................................ [ 39%]
+...............................FF...FFFF................................ [ 44%]
+........................................................................ [ 49%]
+........................................................................ [ 54%]
+........................................................................ [ 59%]
+........................................................................ [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 74%]
+........................................................................ [ 79%]
+........................................................................ [ 84%]
+........................................................................ [ 89%]
+........................................................................ [ 94%]
+........................................................................ [ 99%]
+....                                                                     [100%]
+=================================== FAILURES ===================================
+___________________ test_batch_train_never_touches_a_test_id ___________________
+
+capture = {'detector': {'19790612', '19810854', '19860380', '19870927', '19940445', '20050893', ...}, 'scored': {'20150069', '20...'20150656', '20160587', ...}, 'checked': {'19790612', '19810854', '19860380', '19870927', '19940445', '20050893', ...}}
+capsys = <_pytest.capture.CaptureFixture object at 0x1bb5c5a90>
+
+    def test_batch_train_never_touches_a_test_id(capture, capsys):
+>       assert ev.main(["--batch-train", BATCH]) == 0
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_evaluate_batch_train.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+research/labels/evaluate_against_labels.py:392: in main
+    print(_fmt_baselines(sel))
+          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sel = [{'id': '20150069', 'source': 'real', 'series_sha256': '7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679e...74ceebdf61e5cc90d2c5028d9640d1bffd5034fab8217e8aa460076a26a9e7a', 'labeled_at': '2026-09-08T14:04:14+00:00', ...}, ...]
+
+    def _fmt_baselines(sel) -> str:
+        """Both constant baselines on the selection `sel`, the best constant chosen
+        ON that selection (an optimistic baseline: it has seen the answers)."""
+        ids = [r["id"] for r in sel]
+        best = None
+        for const in BASELINE_CONSTANTS:
+            m = score_labels(sel, {sid: const for sid in ids})
+>           key = (m["n_hit"], -(m["mae"] if m["mae"] is not None else 1e9))
+                   ^^^^^^^^^^
+E           KeyError: 'n_hit'
+
+research/labels/evaluate_against_labels.py:243: KeyError
+----------------------------- Captured stdout call -----------------------------
+==========================================================================
+Incipient boundary vs manual labels   (54 usable label(s))
+config: package defaults
+against: current
+==========================================================================
+
+  TRAIN · real   (35 labelled)
+   ── incipient boundary ──
+
+   ── whole phase sequence ──
+
+________________ test_batch_train_is_not_pooled_with_the_split _________________
+
+capture = {'detector': {'19790612', '19810854', '19860380', '19870927', '19940445', '20050893', ...}, 'scored': {'20150069', '20...'20150656', '20160587', ...}, 'checked': {'19790612', '19810854', '19860380', '19870927', '19940445', '20050893', ...}}
+
+    def test_batch_train_is_not_pooled_with_the_split(capture):
+>       ev.main(["--batch-train", BATCH])
+
+tests/test_evaluate_batch_train.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+research/labels/evaluate_against_labels.py:392: in main
+    print(_fmt_baselines(sel))
+          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sel = [{'id': '20150069', 'source': 'real', 'series_sha256': '7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679e...74ceebdf61e5cc90d2c5028d9640d1bffd5034fab8217e8aa460076a26a9e7a', 'labeled_at': '2026-09-08T14:04:14+00:00', ...}, ...]
+
+    def _fmt_baselines(sel) -> str:
+        """Both constant baselines on the selection `sel`, the best constant chosen
+        ON that selection (an optimistic baseline: it has seen the answers)."""
+        ids = [r["id"] for r in sel]
+        best = None
+        for const in BASELINE_CONSTANTS:
+            m = score_labels(sel, {sid: const for sid in ids})
+>           key = (m["n_hit"], -(m["mae"] if m["mae"] is not None else 1e9))
+                   ^^^^^^^^^^
+E           KeyError: 'n_hit'
+
+research/labels/evaluate_against_labels.py:243: KeyError
+----------------------------- Captured stdout call -----------------------------
+==========================================================================
+Incipient boundary vs manual labels   (54 usable label(s))
+config: package defaults
+against: current
+==========================================================================
+
+  TRAIN · real   (35 labelled)
+   ── incipient boundary ──
+
+   ── whole phase sequence ──
+
+________ test_adjudicated_labels_score_only_in_their_own_block[current] ________
+
+calls = [{'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}]
+capsys = <_pytest.capture.CaptureFixture object at 0x1bb668260>
+against = 'current'
+
+    @pytest.mark.parametrize("against", ["current", "first-blind"])
+    def test_adjudicated_labels_score_only_in_their_own_block(calls, capsys, against):
+>       ev.main(["--batch-train", BATCH, "--against", against])
+
+tests/test_evaluate_batch_train.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+research/labels/evaluate_against_labels.py:392: in main
+    print(_fmt_baselines(sel))
+          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sel = [{'id': '20150069', 'source': 'real', 'series_sha256': '7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679e...74ceebdf61e5cc90d2c5028d9640d1bffd5034fab8217e8aa460076a26a9e7a', 'labeled_at': '2026-09-08T14:04:14+00:00', ...}, ...]
+
+    def _fmt_baselines(sel) -> str:
+        """Both constant baselines on the selection `sel`, the best constant chosen
+        ON that selection (an optimistic baseline: it has seen the answers)."""
+        ids = [r["id"] for r in sel]
+        best = None
+        for const in BASELINE_CONSTANTS:
+            m = score_labels(sel, {sid: const for sid in ids})
+>           key = (m["n_hit"], -(m["mae"] if m["mae"] is not None else 1e9))
+                   ^^^^^^^^^^
+E           KeyError: 'n_hit'
+
+research/labels/evaluate_against_labels.py:243: KeyError
+----------------------------- Captured stdout call -----------------------------
+==========================================================================
+Incipient boundary vs manual labels   (54 usable label(s))
+config: package defaults
+against: current
+==========================================================================
+
+  TRAIN · real   (35 labelled)
+   ── incipient boundary ──
+
+   ── whole phase sequence ──
+
+______ test_adjudicated_labels_score_only_in_their_own_block[first-blind] ______
+
+calls = [{'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}]
+capsys = <_pytest.capture.CaptureFixture object at 0x1bb61b7d0>
+against = 'first-blind'
+
+    @pytest.mark.parametrize("against", ["current", "first-blind"])
+    def test_adjudicated_labels_score_only_in_their_own_block(calls, capsys, against):
+>       ev.main(["--batch-train", BATCH, "--against", against])
+
+tests/test_evaluate_batch_train.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+research/labels/evaluate_against_labels.py:392: in main
+    print(_fmt_baselines(sel))
+          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sel = [{'id': '20150069', 'source': 'real', 'series_sha256': '7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679e...74ceebdf61e5cc90d2c5028d9640d1bffd5034fab8217e8aa460076a26a9e7a', 'labeled_at': '2026-09-08T14:04:14+00:00', ...}, ...]
+
+    def _fmt_baselines(sel) -> str:
+        """Both constant baselines on the selection `sel`, the best constant chosen
+        ON that selection (an optimistic baseline: it has seen the answers)."""
+        ids = [r["id"] for r in sel]
+        best = None
+        for const in BASELINE_CONSTANTS:
+            m = score_labels(sel, {sid: const for sid in ids})
+>           key = (m["n_hit"], -(m["mae"] if m["mae"] is not None else 1e9))
+                   ^^^^^^^^^^
+E           KeyError: 'n_hit'
+
+research/labels/evaluate_against_labels.py:243: KeyError
+----------------------------- Captured stdout call -----------------------------
+WARNING: 4 label(s) have no blind version on file (an overlay was already shown by the first save) and are EXCLUDED from --against first-blind: 19860380, 19870927, 20050893, 20120297
+
+==========================================================================
+Incipient boundary vs manual labels   (50 usable label(s))
+config: package defaults
+against: first-blind
+==========================================================================
+
+  TRAIN · real   (35 labelled)
+   ── incipient boundary ──
+
+   ── whole phase sequence ──
+
+______________ test_the_default_path_scores_no_adjudicated_label _______________
+
+calls = [{'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}]
+capsys = <_pytest.capture.CaptureFixture object at 0x1bae61ac0>
+
+    def test_the_default_path_scores_no_adjudicated_label(calls, capsys):
+>       ev.main([])
+
+tests/test_evaluate_batch_train.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+research/labels/evaluate_against_labels.py:392: in main
+    print(_fmt_baselines(sel))
+          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sel = [{'id': '20150069', 'source': 'real', 'series_sha256': '7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679e...74ceebdf61e5cc90d2c5028d9640d1bffd5034fab8217e8aa460076a26a9e7a', 'labeled_at': '2026-09-08T14:04:14+00:00', ...}, ...]
+
+    def _fmt_baselines(sel) -> str:
+        """Both constant baselines on the selection `sel`, the best constant chosen
+        ON that selection (an optimistic baseline: it has seen the answers)."""
+        ids = [r["id"] for r in sel]
+        best = None
+        for const in BASELINE_CONSTANTS:
+            m = score_labels(sel, {sid: const for sid in ids})
+>           key = (m["n_hit"], -(m["mae"] if m["mae"] is not None else 1e9))
+                   ^^^^^^^^^^
+E           KeyError: 'n_hit'
+
+research/labels/evaluate_against_labels.py:243: KeyError
+----------------------------- Captured stdout call -----------------------------
+==========================================================================
+Incipient boundary vs manual labels   (47 usable label(s))
+config: package defaults
+against: current
+==========================================================================
+
+  TRAIN · real   (35 labelled)
+   ── incipient boundary ──
+
+   ── whole phase sequence ──
+
+__________________ test_the_pooling_guard_would_catch_a_leak ___________________
+
+calls = [{'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}, {'20150069', '20150436', '20150528', '20150532', '20150656', '20160587', ...}]
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1bb38a570>
+
+    def test_the_pooling_guard_would_catch_a_leak(calls, monkeypatch):
+        """POSITIVE CONTROL: with the note ignored, the five fall into the batch's
+        TRAIN block next to the two others — the pooling the tests above forbid."""
+        monkeypatch.setattr(ev, "is_adjudicated", lambda r: False)
+>       ev.main(["--batch-train", BATCH])
+
+tests/test_evaluate_batch_train.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+research/labels/evaluate_against_labels.py:392: in main
+    print(_fmt_baselines(sel))
+          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sel = [{'id': '20150069', 'source': 'real', 'series_sha256': '7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679e...74ceebdf61e5cc90d2c5028d9640d1bffd5034fab8217e8aa460076a26a9e7a', 'labeled_at': '2026-09-08T14:04:14+00:00', ...}, ...]
+
+    def _fmt_baselines(sel) -> str:
+        """Both constant baselines on the selection `sel`, the best constant chosen
+        ON that selection (an optimistic baseline: it has seen the answers)."""
+        ids = [r["id"] for r in sel]
+        best = None
+        for const in BASELINE_CONSTANTS:
+            m = score_labels(sel, {sid: const for sid in ids})
+>           key = (m["n_hit"], -(m["mae"] if m["mae"] is not None else 1e9))
+                   ^^^^^^^^^^
+E           KeyError: 'n_hit'
+
+research/labels/evaluate_against_labels.py:243: KeyError
+----------------------------- Captured stdout call -----------------------------
+==========================================================================
+Incipient boundary vs manual labels   (54 usable label(s))
+config: package defaults
+against: current
+==========================================================================
+
+  TRAIN · real   (35 labelled)
+   ── incipient boundary ──
+
+   ── whole phase sequence ──
+
+=============================== warnings summary ===============================
+<env>/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  <env>/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+<env>/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  <env>/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+<env>/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  <env>/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+<env>/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  <env>/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  <repo>/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_evaluate_batch_train.py::test_batch_train_never_touches_a_test_id
+FAILED tests/test_evaluate_batch_train.py::test_batch_train_is_not_pooled_with_the_split
+FAILED tests/test_evaluate_batch_train.py::test_adjudicated_labels_score_only_in_their_own_block[current]
+FAILED tests/test_evaluate_batch_train.py::test_adjudicated_labels_score_only_in_their_own_block[first-blind]
+FAILED tests/test_evaluate_batch_train.py::test_the_default_path_scores_no_adjudicated_label
+FAILED tests/test_evaluate_batch_train.py::test_the_pooling_guard_would_catch_a_leak
+6 failed, 1437 passed, 1 skipped, 29 deselected, 89 warnings in 479.95s (0:07:59)
+EXIT 1

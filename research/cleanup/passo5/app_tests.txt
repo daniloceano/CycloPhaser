@@ -1,0 +1,15 @@
+tests/test_app_distance_removed.py
+tests/test_app_passo5_fixes.py
+tests/test_app_yaml_null_export.py
+tests/test_benchmark_apptest.py
+tests/test_config_defaults.py
+tests/test_inspector_apptest.py
+tests/test_item30_spare_intensification.py
+tests/test_label_apptest.py
+tests/test_layer_inspector.py
+tests/test_manual_labels.py
+tests/test_sidebar_coverage.py
+tests/test_sidebar_defaults.py
+tests/test_swell_batch.py
+tests/test_track_io.py
+tests/test_track_upload_apptest.py

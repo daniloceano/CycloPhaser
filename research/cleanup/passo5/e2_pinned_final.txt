@@ -1,0 +1,47 @@
+HEAD: f73cd73ab75acc93a85b0e5b53e741702836ba45; working-tree changes under tools/ tests/: 0
+python 3.12.9 | streamlit 1.58.0 | pandas 2.3.3 | numpy 2.4.0
+cyclophaser from the working tree: True
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 32%]
+........................................................................ [ 43%]
+........................................................................ [ 54%]
+........................................................................ [ 65%]
+........................................................................ [ 76%]
+........................................................................ [ 87%]
+........................................................................ [ 98%]
+..........                                                               [100%]
+=============================== warnings summary ===============================
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:64
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    prop = Group((name + Suppress("=") + comma_separated(value)) | oneOf(_CONSTANTS))
+
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_mathtext.py:45
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  ~/Documents/Programs_and_scripts/CycloPhaser/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+658 passed, 15 warnings in 212.63s (0:03:32)
+EXIT 0

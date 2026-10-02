@@ -1,0 +1,1682 @@
+# tests/test_benchmark_apptest.py at 79862a0 (before the fixes), in the venv of requirements-app.txt (streamlit 1.58.0, pandas 2.3.3)
+FFFFFF...FFFFFFF.FFFFFF....FF.........FF....F........                    [100%]
+=================================== FAILURES ===================================
+_________________ test_two_configurations_load_as_two_columns __________________
+
+    def test_two_configurations_load_as_two_columns():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:56:57.510 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:56:57.998 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:56:57.999 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+___ test_a_third_column_is_added_on_demand_without_disturbing_the_first_two ____
+
+    def test_a_third_column_is_added_on_demand_without_disturbing_the_first_two():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:56:58.232 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:56:58.301 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:56:58.302 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+__________ test_every_column_reports_on_exactly_the_selected_cyclones __________
+
+    def test_every_column_reports_on_exactly_the_selected_cyclones():
+        """Alignment: same ids, same order, in every column."""
+>       at = _two_column_app(n_cyclones=4)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:56:58.487 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:56:58.552 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:56:58.553 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+__________ test_changing_the_selection_repoints_every_column_together __________
+
+    def test_changing_the_selection_repoints_every_column_together():
+>       at = _two_column_app(n_cyclones=2)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:198: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:56:58.777 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:56:58.842 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:56:58.842 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_______________________ test_no_results_exist_before_run _______________________
+
+    def test_no_results_exist_before_run():
+        at = _app()
+        ms = _widget(at, "multiselect", "bench_ids_widget")
+>       _select(at, list(ms.options[:2]))
+
+tests/test_benchmark_apptest.py:214: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:56:59.026 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:56:59.089 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:56:59.090 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_______ test_editing_a_column_after_a_run_marks_the_results_out_of_date ________
+
+    def test_editing_a_column_after_a_run_marks_the_results_out_of_date():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:56:59.273 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:56:59.336 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:56:59.337 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+________ test_reference_defaults_to_the_manual_label_when_labels_exist _________
+
+    def test_reference_defaults_to_the_manual_label_when_labels_exist():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:268: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:00.520 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:00.582 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:00.583 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+___________ test_reference_can_be_pointed_at_a_configuration_column ____________
+
+    def test_reference_can_be_pointed_at_a_configuration_column():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:273: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:00.767 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:00.830 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:00.831 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_____ test_figure_layout_defaults_to_side_by_side_and_switches_to_stacked ______
+
+    def test_figure_layout_defaults_to_side_by_side_and_switches_to_stacked():
+>       at = _two_column_app(n_cyclones=2)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:287: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:01.018 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:01.083 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:01.084 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+________________ test_figure_layout_does_not_change_any_result _________________
+
+    def test_figure_layout_does_not_change_any_result():
+        """Both arrangements show the same data."""
+>       at = _two_column_app(n_cyclones=2)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:01.299 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:01.373 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:01.374 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_________________ test_manual_label_overlay_is_off_by_default __________________
+
+    def test_manual_label_overlay_is_off_by_default():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:01.607 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:01.671 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:01.671 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+______________ test_manual_label_overlay_switches_on_and_back_off ______________
+
+    def test_manual_label_overlay_switches_on_and_back_off():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:316: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:01.858 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:01.922 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:01.923 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+______ test_toggling_the_label_overlay_does_not_change_any_column_result _______
+
+    def test_toggling_the_label_overlay_does_not_change_any_column_result():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:328: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:02.116 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:02.184 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:02.185 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+___________ test_the_two_configurations_are_actually_distinguishable ___________
+
+    def test_the_two_configurations_are_actually_distinguishable():
+        """Guards the test below from being vacuous."""
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:369: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:03.015 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:03.083 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:03.084 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+______ test_each_column_carries_its_own_configuration_not_its_neighbours _______
+
+    def test_each_column_carries_its_own_configuration_not_its_neighbours():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:03.343 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:03.412 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:03.412 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_________________ test_swapping_the_columns_would_fail_the_pin _________________
+
+    def test_swapping_the_columns_would_fail_the_pin():
+        """POSITIVE CONTROL — the pin must reject swapped columns."""
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:388: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:03.666 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:03.736 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:03.737 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+______________ test_editing_one_column_leaves_the_other_untouched ______________
+
+    def test_editing_one_column_leaves_the_other_untouched():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:398: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:03.965 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:04.034 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:04.036 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+________ test_an_edited_column_reports_edited_instead_of_a_source_hash _________
+
+    def test_an_edited_column_reports_edited_instead_of_a_source_hash():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:417: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:04.234 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:04.303 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:04.304 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_______________ test_removing_a_column_leaves_the_others_intact ________________
+
+    def test_removing_a_column_leaves_the_others_intact():
+>       at = _two_column_app()
+             ^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:430: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:04.505 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:04.568 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:04.569 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_____________ test_configuration_cards_render_inside_section_three _____________
+
+    def test_configuration_cards_render_inside_section_three():
+        """The defect this replaced: cards rendered BELOW the section, so collapsing
+        '3 · Configurations' hid the section and left the cards orphaned on screen.
+    
+        A card's own controls must be descendants of that section — then collapsing
+        it hides them, which is what a collapse is supposed to mean.
+        """
+>       at = _two_column_app(n_cyclones=1, run=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:547: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:10.359 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:10.426 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:10.427 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+______ test_run_button_lives_in_section_three_and_results_in_section_four ______
+
+    def test_run_button_lives_in_section_three_and_results_in_section_four():
+>       at = _two_column_app(n_cyclones=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:559: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:10.659 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:10.723 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:10.724 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+____ test_the_parameter_baseline_card_is_labelled_not_diffed_against_itself ____
+
+    def test_the_parameter_baseline_card_is_labelled_not_diffed_against_itself():
+        """With the manual label as reference, the first config column becomes the
+        parameter baseline. Diffing it against itself printed "No parameter differs
+        from params-1" on params-1's own card — true, and unreadable as anything but
+        a claim about the configuration. (Item 31: the baseline is now the sidebar
+        column; its name is read from the session.)"""
+>       at = _two_column_app(n_cyclones=1, run=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:713: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:20.054 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:20.120 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:20.121 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+_____________ test_a_non_baseline_card_still_shows_its_differences _____________
+
+    def test_a_non_baseline_card_still_shows_its_differences():
+        """Guards the test above from passing by suppressing every diff."""
+>       at = _two_column_app(n_cyclones=1, run=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:725: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:20.307 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:20.371 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:20.372 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+______________ test_a_run_keeps_each_columns_own_smoothed_series _______________
+
+    def test_a_run_keeps_each_columns_own_smoothed_series():
+        """End to end through the tab: what the cells are drawn from is the
+        column's own `z`, computed with that column's filter_params."""
+>       at = _two_column_app(n_cyclones=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_benchmark_apptest.py:809: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_benchmark_apptest.py:155: in _two_column_app
+    _select(at, list(ms.options[:n_cyclones]))
+tests/test_benchmark_apptest.py:134: in _select
+    at.run()
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/app_test.py:428: in run
+    return self._tree.run(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2425: in run
+    widget_states = self.get_widget_states()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2408: in get_widget_states
+    w = get_widget_state(node)
+        ^^^^^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:2352: in get_widget_state
+    return node._widget_state
+           ^^^^^^^^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1191: in _widget_state
+    ws.string_array_value.data[:] = self.values
+                                    ^^^^^^^^^^^
+<scratch>/pinned_venv/lib/python3.12/site-packages/streamlit/testing/v1/element_tree.py:1211: in values
+    return [self.format_func(v) for v in self.value]
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = '20150069 (real/train)'
+
+>       format_func=lambda s: (f"{s} ({source_of[s]}/"
+                                       ^^^^^^^^^^^^
+                               f"{membership.get(s, 'unlabelled')}"
+                               + (f"/{BATCH_TAG}" if s in batch_ids
+                                  else "") + ")"),
+    )
+E   KeyError: '20150069 (real/train)'
+
+tools/calibration_app/benchmark_tab.py:629: KeyError
+----------------------------- Captured stderr call -----------------------------
+2026-10-02 07:57:21.213 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-02 07:57:21.277 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-02 07:57:21.278 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+------------------------------ Captured log call -------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:459 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+WARNING  streamlit.deprecation_util:deprecation_util.py:81 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+=============================== warnings summary ===============================
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:64
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    prop = Group((name + Suppress("=") + comma_separated(value)) | oneOf(_CONSTANTS))
+
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+../../../../..<scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_mathtext.py:45
+  <scratch>/pinned_venv/lib/python3.12/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_benchmark_apptest.py::test_two_configurations_load_as_two_columns
+FAILED tests/test_benchmark_apptest.py::test_a_third_column_is_added_on_demand_without_disturbing_the_first_two
+FAILED tests/test_benchmark_apptest.py::test_every_column_reports_on_exactly_the_selected_cyclones
+FAILED tests/test_benchmark_apptest.py::test_changing_the_selection_repoints_every_column_together
+FAILED tests/test_benchmark_apptest.py::test_no_results_exist_before_run - Ke...
+FAILED tests/test_benchmark_apptest.py::test_editing_a_column_after_a_run_marks_the_results_out_of_date
+FAILED tests/test_benchmark_apptest.py::test_reference_defaults_to_the_manual_label_when_labels_exist
+FAILED tests/test_benchmark_apptest.py::test_reference_can_be_pointed_at_a_configuration_column
+FAILED tests/test_benchmark_apptest.py::test_figure_layout_defaults_to_side_by_side_and_switches_to_stacked
+FAILED tests/test_benchmark_apptest.py::test_figure_layout_does_not_change_any_result
+FAILED tests/test_benchmark_apptest.py::test_manual_label_overlay_is_off_by_default
+FAILED tests/test_benchmark_apptest.py::test_manual_label_overlay_switches_on_and_back_off
+FAILED tests/test_benchmark_apptest.py::test_toggling_the_label_overlay_does_not_change_any_column_result
+FAILED tests/test_benchmark_apptest.py::test_the_two_configurations_are_actually_distinguishable
+FAILED tests/test_benchmark_apptest.py::test_each_column_carries_its_own_configuration_not_its_neighbours
+FAILED tests/test_benchmark_apptest.py::test_swapping_the_columns_would_fail_the_pin
+FAILED tests/test_benchmark_apptest.py::test_editing_one_column_leaves_the_other_untouched
+FAILED tests/test_benchmark_apptest.py::test_an_edited_column_reports_edited_instead_of_a_source_hash
+FAILED tests/test_benchmark_apptest.py::test_removing_a_column_leaves_the_others_intact
+FAILED tests/test_benchmark_apptest.py::test_configuration_cards_render_inside_section_three
+FAILED tests/test_benchmark_apptest.py::test_run_button_lives_in_section_three_and_results_in_section_four
+FAILED tests/test_benchmark_apptest.py::test_the_parameter_baseline_card_is_labelled_not_diffed_against_itself
+FAILED tests/test_benchmark_apptest.py::test_a_non_baseline_card_still_shows_its_differences
+FAILED tests/test_benchmark_apptest.py::test_a_run_keeps_each_columns_own_smoothed_series
+24 failed, 29 passed, 14 warnings in 33.22s

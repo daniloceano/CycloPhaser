@@ -1,0 +1,95 @@
+{
+ "label": "e4_before",
+ "occurrences": 3,
+ "allowed": 11,
+ "by_file": {
+  "docs/future_work.md": 2,
+  "research/labels/diagnostics/frontA_idx0_c2/REPORT.md": 1
+ },
+ "rows": [
+  {
+   "file": "docs/future_work.md",
+   "line": 2658,
+   "kind": "occurrence",
+   "identifying": false
+  },
+  {
+   "file": "docs/future_work.md",
+   "line": 2724,
+   "kind": "occurrence",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/MANIFEST.md",
+   "line": 1348,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/MANIFEST.md",
+   "line": 1352,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/MANIFEST.md",
+   "line": 1353,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/MANIFEST.md",
+   "line": 1469,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/passo0/inventory.json",
+   "line": 14248,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/passo0/inventory.json",
+   "line": 14253,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/passo0/inventory.json",
+   "line": 14833,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/passo0/inventory.py",
+   "line": 142,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/passo0/make_manifest.py",
+   "line": 564,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/passo5/PREVISOES.md",
+   "line": 11,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/cleanup/passo5/PREVISOES.md",
+   "line": 36,
+   "kind": "allowed",
+   "identifying": false
+  },
+  {
+   "file": "research/labels/diagnostics/frontA_idx0_c2/REPORT.md",
+   "line": 15,
+   "kind": "occurrence",
+   "identifying": true
+  }
+ ]
+}

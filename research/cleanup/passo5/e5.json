@@ -1,0 +1,17 @@
+{
+ "before_generator_in_normal_tree_by_reading_the_code": {
+  "csv_in_directory": 51,
+  "of_which_test_split": 16
+ },
+ "before_run_in_copy_without_test_files": {
+  "opened": 35,
+  "test": 0,
+  "sha256": "7552bc67ed87b0ea8ac4c46aec1013e5034422b4bbbca53743acd9df77aa500f"
+ },
+ "after_run_in_working_tree": {
+  "opened": 35,
+  "test": 0,
+  "sha256": "7552bc67ed87b0ea8ac4c46aec1013e5034422b4bbbca53743acd9df77aa500f"
+ },
+ "digest_equal": true
+}
