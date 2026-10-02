@@ -254,6 +254,15 @@ ff = json.loads((fin / "f_post_6b.json").read_text())
 verdicts = re.findall(r"^\| \((\w)\) \| \*\*(PASS|FAIL)\*\*", (CLEAN / "RELATORIO_FINAL.md").read_text(), re.M)
 measured_at = re.search(r"worktree HEAD: ([0-9a-f]{7})", (fin / "gate_header.txt").read_text()).group(1)
 b2_at = re.search(r"worktree HEAD: ([0-9a-f]{7})", (fin / "b2_header.txt").read_text()).group(1)
+bci = {k: json.loads((fin / f"bci_{k}_summary.json").read_text()) for k in ("before", "after")}
+bci_at = {k: re.search(r"worktree HEAD: ([0-9a-f]{7})", (fin / f"bci_{k}_header.txt").read_text()).group(1) for k in bci}
+bci_dig = {k: re.search(r"SHA256\s*=\s*([0-9a-f]{8})", (fin / f"bci_{k}_digest_raw.txt").read_text()).group(1) for k in bci}
+bci_mods = bci["before"]["ci"]["failed_by_module"]
+assert list(bci_mods) == ["tests.test_app_passo5_fixes"], bci_mods
+sg_b, sg_a = (json.loads((fin / f"streamlit_guards_{k}.json").read_text()) for k in ("before", "after"))
+cci = (ROOT / ".circleci/config.yml").read_text()
+pub_branch = re.search(r"- pypi_publish:.*?only:\s*\n\s*- (\S+)", cci, re.S).group(1)
+test_pub_branch = re.search(r"- test_pypi_publish:.*?only:\s*\n\s*- (\S+)", cci, re.S).group(1)
 
 w(f"* **The final gate's (b) — suite with 0 failures.** Measured once at `{measured_at}`: the suite stopped at "
   f"collection on `{coll}` (commit 21), a research script named `test_*.py` that pytest collects from the "
@@ -261,21 +270,38 @@ w(f"* **The final gate's (b) — suite with 0 failures.** Measured once at `{mea
   f"been collected the same way, silently, in passo 5's suite runs, and wrote `passo5/-m.json`. *Learned:* "
   f"without a pytest `testpaths`, a research script must never be named `test_*.py`; the suites of passo 5 "
   f"ran an extra module nobody declared.")
+w(f"* **The final gate's (b), in the CI environment.** (b) had been measured only in the conda environment, "
+  f"which has streamlit. The CircleCI job installs the wheel with only pytest and pyyaml; reproduced in a new "
+  f"venv at `{bci_at['before']}`: {bci['before']['ci']['passed']} passed / **{bci['before']['ci']['failed']} "
+  f"failed**, all in `tests/test_app_passo5_fixes.py` (added by `bea55a6`, passo 5), `ModuleNotFoundError: "
+  f"streamlit` — the CI has failed since passo 5. *Learned:* the criterion \"suite with 0 failures\" includes "
+  f"the CI sequence, not only the development environment.")
 w("")
 w("### Final gate (`research/cleanup/RELATORIO_FINAL.md`)")
 w("")
-w(f"Measured once, in a clean worktree at `{measured_at}`: "
+w(f"Measured once, in a clean worktree at `{measured_at}`, except (b): redefined by Danilo on 2026-10-02 to "
+  f"include the CI sequence and measured before and after a correction. Verdicts: "
   + ", ".join(f"({k}) {v}" for k, v in verdicts) + ".")
 w("")
 w(f"* (a) `cyclophaser/` touched by {', '.join(f'`{c}`' for c in ga['commits_listed'])}: C1 and "
   f"{len(ga['commits_listed']) - 1} docstring/comment commits, each with an identical docstring-free tree and "
   f"equal digests; HEAD's docstring-free tree is identical to `742e685`'s: {ga['head_vs_c1']['identical']}.")
-w(f"* (b) FAIL as above. App tests in a fresh venv with `requirements-app.txt`: {bs['app_pinned']['passed']} "
+w(f"* (b) First measurement FAIL, as above. App tests in a fresh venv with `requirements-app.txt`: {bs['app_pinned']['passed']} "
   f"passed / {bs['app_pinned']['failed']} failed; digest `{b_dig}…`. The two scanners were renamed to "
   f"`scan_*` and `passo5/-m.json` removed (`d44802e`); a **second measurement** at `{b2_at}`, recorded beside "
   f"the first, which stands: suite {b2['suite']['passed']} passed / {b2['suite']['failed']} failed, app tests "
   f"in the same run {b2['app_dedicated']['passed']} passed / {b2['app_dedicated']['failed']} failed, digest "
   f"`{b2_dig}…`.")
+w(f"* (b) with the CI sequence (`research/cleanup/final/run_b_ci.sh`; predictions `final/PREVISOES_ci.md`, "
+  f"committed before measuring). Correction `0b21e51`: the `_app()` helper of `tests/test_app_passo5_fixes.py` "
+  f"calls `pytest.importorskip(\"streamlit\")`, so only the tests that drive the app skip without streamlit "
+  f"(unguarded streamlit imports in the test files: {sg_b['unguarded_imports']} before, "
+  f"{sg_a['unguarded_imports']} after, `final/scan_streamlit_guards.py`). CI sequence before → after: "
+  f"{bci['before']['ci']['passed']} / {bci['before']['ci']['failed']} / {bci['before']['ci']['skipped']} → "
+  f"**{bci['after']['ci']['passed']} / {bci['after']['ci']['failed']} / {bci['after']['ci']['skipped']}** "
+  f"(passed / failed / skipped); conda `-m \"not browser\"` after: {bci['after']['conda']['passed']} passed / "
+  f"{bci['after']['conda']['failed']} failed; digest `{bci_dig['before']}…` → `{bci_dig['after']}…`. The same "
+  f"commit removes `runtime.txt` and `.python-version`, which no tracked file reads.")
 w(f"* (c) §S10 {fc['R3']['rows']} rows, {len(fc['R3']['failures'])} failures; `verify_citations` "
   f"{fv['citations_resolved']}/{fv['citations_total']}, {len(fv['failures'])} failures.")
 w(f"* (d) {fd['divergences']} divergences in {fd['claims']} default claims.")
@@ -290,6 +316,12 @@ w("* **Order:** publish 2.1 on PyPI → raise the app's requirement to `cyclopha
   f"Today the app requires {', '.join(f'`{r}`' for r in rtd['app_requirements_cyclophaser'])} "
   "(`tools/calibration_app/requirements.txt`), and the latest PyPI release predates the parameters the app "
   "reads (§S11).")
+w(f"* **(i) `pypi_publish` publishes to PyPI on every push to `{pub_branch}`** (`.circleci/config.yml`), so "
+  f"the version in `setup.py` must change BEFORE the merge into `{pub_branch}`, and the app, which deploys "
+  f"from `{pub_branch}`, must be restarted after the CI has published 2.1.")
+w("* **(ii) Check that the app runs Python 3.12** in its settings on Streamlit Community Cloud "
+  "(`runtime.txt` and `.python-version` were removed; that platform does not read them).")
+w(f"* **(iii) `test_pypi_publish` runs only on the branch `{test_pub_branch}`**, which is still to be created.")
 w(f"* **Version strings:** `setup.py` and `docs/conf.py` still say `{rtd['setup_version']}` / "
   f"`{rtd['conf_release']}`.")
 w("* **Create the permanent `develop` branch**: the contributing page sends pull requests to `develop`, "

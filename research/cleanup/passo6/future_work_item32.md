@@ -65,13 +65,15 @@ Built by `research/cleanup/passo2/make_findings.py` (`b60d57b`), maintained by h
 * **0 test ids in `docs/` (commit 21).** Predicted 0 without excluding the records; measured 52 lines before and 52 after — 49 in `docs/future_work.md`, 3 in a table of `docs/findings.md`. Left for Danilo's decision. *Learned:* a prediction over a folder must say whether historical records are in scope.
 
 * **The final gate's (b) — suite with 0 failures.** Measured once at `f7d8fd9`: the suite stopped at collection on `research/cleanup/passo6/test_ids_in_text.py` (commit 21), a research script named `test_*.py` that pytest collects from the root and that runs with pytest's argv; 0 tests ran. The passo-5 scanner `passo5/test_ids_in_code.py` had been collected the same way, silently, in passo 5's suite runs, and wrote `passo5/-m.json`. *Learned:* without a pytest `testpaths`, a research script must never be named `test_*.py`; the suites of passo 5 ran an extra module nobody declared.
+* **The final gate's (b), in the CI environment.** (b) had been measured only in the conda environment, which has streamlit. The CircleCI job installs the wheel with only pytest and pyyaml; reproduced in a new venv at `40f71b4`: 1279 passed / **7 failed**, all in `tests/test_app_passo5_fixes.py` (added by `bea55a6`, passo 5), `ModuleNotFoundError: streamlit` — the CI has failed since passo 5. *Learned:* the criterion "suite with 0 failures" includes the CI sequence, not only the development environment.
 
 ### Final gate (`research/cleanup/RELATORIO_FINAL.md`)
 
-Measured once, in a clean worktree at `f7d8fd9`: (a) PASS, (b) FAIL, (c) PASS, (d) PASS, (e) PASS, (f) PASS.
+Measured once, in a clean worktree at `f7d8fd9`, except (b): redefined by Danilo on 2026-10-02 to include the CI sequence and measured before and after a correction. Verdicts: (a) PASS, (b) PASS, (c) PASS, (d) PASS, (e) PASS, (f) PASS.
 
 * (a) `cyclophaser/` touched by `32651c8`, `00718d4`, `c5e298b`, `129b04d`, `742e685`: C1 and 4 docstring/comment commits, each with an identical docstring-free tree and equal digests; HEAD's docstring-free tree is identical to `742e685`'s: True.
-* (b) FAIL as above. App tests in a fresh venv with `requirements-app.txt`: 658 passed / 0 failed; digest `7552bc67…`. The two scanners were renamed to `scan_*` and `passo5/-m.json` removed (`d44802e`); a **second measurement** at `d44802e`, recorded beside the first, which stands: suite 1443 passed / 0 failed, app tests in the same run 658 passed / 0 failed, digest `7552bc67…`.
+* (b) First measurement FAIL, as above. App tests in a fresh venv with `requirements-app.txt`: 658 passed / 0 failed; digest `7552bc67…`. The two scanners were renamed to `scan_*` and `passo5/-m.json` removed (`d44802e`); a **second measurement** at `d44802e`, recorded beside the first, which stands: suite 1443 passed / 0 failed, app tests in the same run 658 passed / 0 failed, digest `7552bc67…`.
+* (b) with the CI sequence (`research/cleanup/final/run_b_ci.sh`; predictions `final/PREVISOES_ci.md`, committed before measuring). Correction `0b21e51`: the `_app()` helper of `tests/test_app_passo5_fixes.py` calls `pytest.importorskip("streamlit")`, so only the tests that drive the app skip without streamlit (unguarded streamlit imports in the test files: 1 before, 0 after, `final/scan_streamlit_guards.py`). CI sequence before → after: 1279 / 7 / 28 → **1279 / 0 / 35** (passed / failed / skipped); conda `-m "not browser"` after: 1443 passed / 0 failed; digest `7552bc67…` → `7552bc67…`. The same commit removes `runtime.txt` and `.python-version`, which no tracked file reads.
 * (c) §S10 202 rows, 0 failures; `verify_citations` 557/557, 0 failures.
 * (d) 0 divergences in 133 default claims.
 * (e) 53 flagged lines, 53 with file, text and context identical to the Fase C review; 0 attribute an `edge` score to the current default.
@@ -80,6 +82,9 @@ Measured once, in a clean worktree at `f7d8fd9`: (a) PASS, (b) FAIL, (c) PASS, (
 ### Pending — for the release front
 
 * **Order:** publish 2.1 on PyPI → raise the app's requirement to `cyclophaser>=2.1` → merge into `master` → restart the published app. Today the app requires `cyclophaser>=2.0.0` (`tools/calibration_app/requirements.txt`), and the latest PyPI release predates the parameters the app reads (§S11).
+* **(i) `pypi_publish` publishes to PyPI on every push to `master`** (`.circleci/config.yml`), so the version in `setup.py` must change BEFORE the merge into `master`, and the app, which deploys from `master`, must be restarted after the CI has published 2.1.
+* **(ii) Check that the app runs Python 3.12** in its settings on Streamlit Community Cloud (`runtime.txt` and `.python-version` were removed; that platform does not read them).
+* **(iii) `test_pypi_publish` runs only on the branch `develop`**, which is still to be created.
 * **Version strings:** `setup.py` and `docs/conf.py` still say `2.0.0` / `2.0.0`.
 * **Create the permanent `develop` branch**: the contributing page sends pull requests to `develop`, which does not exist.
 * **Read the Docs keeps building `master`** (the default branch), so the rewritten site is published only after the merge into `master`.
