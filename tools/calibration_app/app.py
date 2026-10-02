@@ -2257,7 +2257,7 @@ with st.sidebar:
                     "incipient phase at all, and makes `sustained k` unnecessary. "
                     "**Goldilocks:** too wide flattens the rise and displaces the "
                     "knee — and on real tracks rel(t₀) is NOT monotone in the "
-                    "window (20170225: 0.44 → 0.66 at w=5 → 0.38 at w=7), so a "
+                    "window (training track 20207822: 0.53 without smoothing → 0.60 at w=5 → 0.51 at w=7), so a "
                     "bigger window is not reliably safer."
                 ),
             )
