@@ -1,0 +1,458 @@
+{
+ "authorised_list": "fbeff00:research/cleanup/passo6/removal_list.md",
+ "counts": {
+  "remote": 38,
+  "local_only": 4
+ },
+ "ok": 42,
+ "failing": [],
+ "rows": [
+  {
+   "branch": "chore/b-remove-distance",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "2bb2bad6161f208b69fa6d0777897ba44630c3bd",
+   "recorded_destination": "A",
+   "current_tip": "2bb2bad6161f208b69fa6d0777897ba44630c3bd",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/front-a-findings",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "2ee2414931f93630853bfee1101ab24b1f92c367",
+   "recorded_destination": "A",
+   "current_tip": "2ee2414931f93630853bfee1101ab24b1f92c367",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/front-f-i-ii-iii-findings",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "3aae83dd7c39524676e9af2e8b4c4aaae2e88c3a",
+   "recorded_destination": "A",
+   "current_tip": "3aae83dd7c39524676e9af2e8b4c4aaae2e88c3a",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/front-g-closing",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "1ccb3db4a56a45e6fcc0a12ba8741e780b837789",
+   "recorded_destination": "A",
+   "current_tip": "1ccb3db4a56a45e6fcc0a12ba8741e780b837789",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/front-g-series-sha256-findings",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "02fe6f74eed7ddcbc7d2d8835c14792c5e8cfdf7",
+   "recorded_destination": "A",
+   "current_tip": "02fe6f74eed7ddcbc7d2d8835c14792c5e8cfdf7",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/frontC-hash-provenance",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "e1b29cc941e722f0c0c75c022d8a6c57e798f634",
+   "recorded_destination": "A",
+   "current_tip": "e1b29cc941e722f0c0c75c022d8a6c57e798f634",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/item13-close",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "1b99a579d6a1107f922d61c835f557802fa75db5",
+   "recorded_destination": "A",
+   "current_tip": "1b99a579d6a1107f922d61c835f557802fa75db5",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/memory-g-e-closing",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "0f680c514138278fdfc151975f4f9f5793979e45",
+   "recorded_destination": "A",
+   "current_tip": "0f680c514138278fdfc151975f4f9f5793979e45",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/session-findings-register",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "e2ccdad15f518d68c4ebbc0443b5ee19130540af",
+   "recorded_destination": "A",
+   "current_tip": "e2ccdad15f518d68c4ebbc0443b5ee19130540af",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "docs/session-findings-register-2",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "a06a2aabdc31c9c37c2ebd1329cccd9f7adbc2b3",
+   "recorded_destination": "A",
+   "current_tip": "a06a2aabdc31c9c37c2ebd1329cccd9f7adbc2b3",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "feat/app-flexible-track-reader",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "ba9af460e37eeed836de90c777c594a284098a31",
+   "recorded_destination": "A",
+   "current_tip": "ba9af460e37eeed836de90c777c594a284098a31",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "feat/dedicated-conda-env",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "d876a71e8d1ee6cb638d6cdf96b1f31eb5df5c2c",
+   "recorded_destination": "A",
+   "current_tip": "d876a71e8d1ee6cb638d6cdf96b1f31eb5df5c2c",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "feat/freeze-synthetic-series",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "6e0546774094c8165ecfa94e9aab12ebcad7cbea",
+   "recorded_destination": "A",
+   "current_tip": "6e0546774094c8165ecfa94e9aab12ebcad7cbea",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "feat/front-g-manual-labels-source",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "727efd2a324bdcea63e46e98094cb8c8b72be02d",
+   "recorded_destination": "A",
+   "current_tip": "727efd2a324bdcea63e46e98094cb8c8b72be02d",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "feat/label-tab-navigation-overlays",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "f3004201d2de3bde03dcb3c258cbbb681742801f",
+   "recorded_destination": "A",
+   "current_tip": "f3004201d2de3bde03dcb3c258cbbb681742801f",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "fix/app-inert-params-signaling",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "20e003d285c46551b17690421fad511072aa97db",
+   "recorded_destination": "A",
+   "current_tip": "20e003d285c46551b17690421fad511072aa97db",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "fix/inspector-crossing-layer-and-legend",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "71335706878aeb97962cf490203124e78718118e",
+   "recorded_destination": "A",
+   "current_tip": "71335706878aeb97962cf490203124e78718118e",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "fix/inspector-depth-params",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "52ecb04cb4ef7d55db399a37c1afcc99d017a90c",
+   "recorded_destination": "A",
+   "current_tip": "52ecb04cb4ef7d55db399a37c1afcc99d017a90c",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "frontA-idx0-c2",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "e97eb17b6a5c6cd523bb5593bc9bf0e482ec7f1d",
+   "recorded_destination": "A",
+   "current_tip": "e97eb17b6a5c6cd523bb5593bc9bf0e482ec7f1d",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/frontA-reverify",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "077d27380fdc3cc021939b488d6f7edda2e2e14a",
+   "recorded_destination": "A",
+   "current_tip": "077d27380fdc3cc021939b488d6f7edda2e2e14a",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/frontC-intensification-depth",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "38951f73cbf628c0be77a688b1fc645bb26d0818",
+   "recorded_destination": "A",
+   "current_tip": "38951f73cbf628c0be77a688b1fc645bb26d0818",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/frontD-stage0-census",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "80e05517655ac533f6d30a4ccc4d301d44e5619a",
+   "recorded_destination": "A",
+   "current_tip": "80e05517655ac533f6d30a4ccc4d301d44e5619a",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/incipient-refusal-stage1",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "edb1a990269a13a0b1fb752e9586e3895029b0a7",
+   "recorded_destination": "A",
+   "current_tip": "edb1a990269a13a0b1fb752e9586e3895029b0a7",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item19-mature-prominence",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "f376a03f636fc82ab1d2d77c0abb0db50507c5e3",
+   "recorded_destination": "A",
+   "current_tip": "f376a03f636fc82ab1d2d77c0abb0db50507c5e3",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item20a-maf-090",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "eea6470476bfd6de835ab88dcea346b2b88fae62",
+   "recorded_destination": "A",
+   "current_tip": "eea6470476bfd6de835ab88dcea346b2b88fae62",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item20b-depth-rule",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "e68697223add51906215d3fa96983cd3b70f4c4a",
+   "recorded_destination": "A",
+   "current_tip": "e68697223add51906215d3fa96983cd3b70f4c4a",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item30-plateau-overwrite",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "2319609ec0aa4e87dfa9a19e0e94f2a69ad4ac2f",
+   "recorded_destination": "A",
+   "current_tip": "2319609ec0aa4e87dfa9a19e0e94f2a69ad4ac2f",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item31-params15-default",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "e31b727269c9536abfbea7b19f84c3818114ed3b",
+   "recorded_destination": "A",
+   "current_tip": "e31b727269c9536abfbea7b19f84c3818114ed3b",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item31-stage2b-checkpoint",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "45f060012ddc593b45fb8391067b6b6995593f44",
+   "recorded_destination": "A",
+   "current_tip": "45f060012ddc593b45fb8391067b6b6995593f44",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item5-benchmark-tab",
+   "section": "remote",
+   "group": "A",
+   "recorded_tip": "4c64cebf50652652571c88774c9213b6724cad2b",
+   "recorded_destination": "A",
+   "current_tip": "4c64cebf50652652571c88774c9213b6724cad2b",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "diag/front-b-distance-inert",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "491a5d09f9eb4e43c9f117c34be394dd0feb6fd1",
+   "recorded_destination": "B",
+   "current_tip": "491a5d09f9eb4e43c9f117c34be394dd0feb6fd1",
+   "tag": "archive/diag/front-b-distance-inert",
+   "tag_local": "491a5d09f9eb4e43c9f117c34be394dd0feb6fd1",
+   "tag_origin": "491a5d09f9eb4e43c9f117c34be394dd0feb6fd1",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "diag/series-sha256-mismatch",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "3ae6082c8fb004f53500f6e55264a21debcad9a0",
+   "recorded_destination": "B",
+   "current_tip": "3ae6082c8fb004f53500f6e55264a21debcad9a0",
+   "tag": "archive/diag/series-sha256-mismatch",
+   "tag_local": "3ae6082c8fb004f53500f6e55264a21debcad9a0",
+   "tag_origin": "3ae6082c8fb004f53500f6e55264a21debcad9a0",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "feat/label-tab-toplevel",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "0c63145b52042191978a7ff131335e8db4bd8c15",
+   "recorded_destination": "B",
+   "current_tip": "0c63145b52042191978a7ff131335e8db4bd8c15",
+   "tag": "archive/feat/label-tab-toplevel",
+   "tag_local": "0c63145b52042191978a7ff131335e8db4bd8c15",
+   "tag_origin": "0c63145b52042191978a7ff131335e8db4bd8c15",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "fix/idx0-boundary-extremum-type",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "6060c6deac9108356567c719cd438efb0ee1a157",
+   "recorded_destination": "B",
+   "current_tip": "6060c6deac9108356567c719cd438efb0ee1a157",
+   "tag": "archive/fix/idx0-boundary-extremum-type",
+   "tag_local": "6060c6deac9108356567c719cd438efb0ee1a157",
+   "tag_origin": "6060c6deac9108356567c719cd438efb0ee1a157",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "fix/inspector-min-depth-params",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "a2b639eba87d2b38b6450aa7131f353752e573a3",
+   "recorded_destination": "B",
+   "current_tip": "a2b639eba87d2b38b6450aa7131f353752e573a3",
+   "tag": "archive/fix/inspector-min-depth-params",
+   "tag_local": "a2b639eba87d2b38b6450aa7131f353752e573a3",
+   "tag_origin": "a2b639eba87d2b38b6450aa7131f353752e573a3",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "joss-submission",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "8348caf98fb8838a209aa8cde1114c2107c6a8da",
+   "recorded_destination": "B",
+   "current_tip": "8348caf98fb8838a209aa8cde1114c2107c6a8da",
+   "tag": "archive/joss-submission",
+   "tag_local": "8348caf98fb8838a209aa8cde1114c2107c6a8da",
+   "tag_origin": "8348caf98fb8838a209aa8cde1114c2107c6a8da",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/item20c-duration-ratio",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "e7792d3ce285077b41d95ae65f55acdc69e0b20d",
+   "recorded_destination": "B",
+   "current_tip": "e7792d3ce285077b41d95ae65f55acdc69e0b20d",
+   "tag": "archive/research/item20c-duration-ratio",
+   "tag_local": "e7792d3ce285077b41d95ae65f55acdc69e0b20d",
+   "tag_origin": "e7792d3ce285077b41d95ae65f55acdc69e0b20d",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "research/v3-topology-proxy",
+   "section": "remote",
+   "group": "B",
+   "recorded_tip": "c508730bf2f2b35600997552ee7f0faa2d78e007",
+   "recorded_destination": "B",
+   "current_tip": "c508730bf2f2b35600997552ee7f0faa2d78e007",
+   "tag": "archive/research/v3-topology-proxy",
+   "tag_local": "c508730bf2f2b35600997552ee7f0faa2d78e007",
+   "tag_origin": "c508730bf2f2b35600997552ee7f0faa2d78e007",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "fix/b-distance-length-scale",
+   "section": "local_only",
+   "group": "A",
+   "recorded_tip": "ab7f2449589815f771f0d276de110f0784025b21",
+   "recorded_destination": "A",
+   "current_tip": "ab7f2449589815f771f0d276de110f0784025b21",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "fix/core-bugs",
+   "section": "local_only",
+   "group": "A",
+   "recorded_tip": "38c9461dc468165fd7e520dec924de2bb04f1051",
+   "recorded_destination": "A",
+   "current_tip": "38c9461dc468165fd7e520dec924de2bb04f1051",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "input-data",
+   "section": "local_only",
+   "group": "A",
+   "recorded_tip": "c59d26b9b367ac3b4a54fc6fd10fc345c7f61ad9",
+   "recorded_destination": "A",
+   "current_tip": "c59d26b9b367ac3b4a54fc6fd10fc345c7f61ad9",
+   "problems": [],
+   "ok": true
+  },
+  {
+   "branch": "exp/pre-peak-normalization",
+   "section": "local_only",
+   "group": "B",
+   "recorded_tip": "1faf0c89404c18b82d88c805c6b68cc51bd0dfe0",
+   "recorded_destination": "B",
+   "current_tip": "1faf0c89404c18b82d88c805c6b68cc51bd0dfe0",
+   "tag": "archive/exp/pre-peak-normalization",
+   "tag_local": "1faf0c89404c18b82d88c805c6b68cc51bd0dfe0",
+   "tag_origin": "1faf0c89404c18b82d88c805c6b68cc51bd0dfe0",
+   "problems": [],
+   "ok": true
+  }
+ ]
+}
