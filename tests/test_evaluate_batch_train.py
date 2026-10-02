@@ -49,6 +49,7 @@ def capture(monkeypatch):
     monkeypatch.setattr(ev, "score_phase_sequences", score)
     monkeypatch.setattr(ev, "_fmt", lambda m: "")
     monkeypatch.setattr(ev, "_fmt_phases", lambda m: "")
+    monkeypatch.setattr(ev, "_fmt_baselines", lambda sel: "")   # passo5: constant baselines
     monkeypatch.setattr(ev, "is_legacy_record", legacy)
     return seen
 
@@ -104,6 +105,7 @@ def calls(monkeypatch):
     monkeypatch.setattr(ev, "score_phase_sequences", score)
     monkeypatch.setattr(ev, "_fmt", lambda m: "")
     monkeypatch.setattr(ev, "_fmt_phases", lambda m: "")
+    monkeypatch.setattr(ev, "_fmt_baselines", lambda sel: "")   # passo5: constant baselines
     return out
 
 
