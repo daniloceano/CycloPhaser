@@ -9,6 +9,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.1.0] - 2026-10-03
+
+### Changed default results
+
+**The same input can give different phases in 2.1.0 than in 2.0.0.** Two
+defaults moved:
+
+* The phase and filtering defaults are now the calibration preset `params-15`
+  (renamed `params-track` in the clean-up front; identical bytes,
+  `research/labels/configs/cyclophaser_params-track.yaml`).
+* `boundary_padding` defaults to `"reflect"`. 2.0.0 had no such parameter and
+  always zero-padded; the preset itself sets `"edge"`.
+
+To reproduce 2.0.0, pin `cyclophaser==2.0.0`. Passing old values to 2.1.0 is
+not enough, because 2.0.0 lacks most of the phase parameters below and always
+zero-pads. The full parameter tables against the 2.0.0 tag are in the first
+"Changed — default behaviour" entry below.
+
+### Added — extrema prominence filter: `prominence`, `prominence_relative` (`9e44c48`)
+
+`find_peaks_valleys` can drop interior extrema whose prominence is below an
+absolute threshold (`prominence`, in the units of the series) or below a
+fraction of the largest interior prominence (`prominence_relative`). Both are
+forwarded by `get_periods` and `determine_periods`. Defaults: `prominence=None`
+(off), `prominence_relative=0.3`.
+
+### Added — `length_scale`, `mature_method`, `mature_amplitude_fraction`, `decay_tail_amplitude_fraction` (`7d489ab`)
+
+* `length_scale`: `"global"` measures the length and gap thresholds against the
+  whole series, as before; `"local"` measures them against the span of the
+  local cycle each segment belongs to. Default `"local"`.
+* `mature_method`: `"derivative"` sizes the mature window from the time
+  distance to the neighbouring peak, as before; `"amplitude"` keeps the
+  contiguous stretch around the valley that stays within
+  `mature_amplitude_fraction` of the cycle's peak-to-valley amplitude. Defaults
+  `"amplitude"` and `0.90`.
+* `decay_tail_amplitude_fraction`: extends `decay` over a NaN tail after the
+  last decay block unless the tail re-deepens by more than this fraction of
+  the cycle amplitude. `None` turns the check off. Default `0.3`.
+
+### Added — `incipient_plateau_spare_intensification` (item 30, `5434d87`)
+
+With `incipient_method="plateau"`, an intensification that lies wholly before
+the plateau boundary is no longer overwritten by `incipient`; the boundary is
+pulled back to its start. It arrived opt-in (default `False`) and became
+`True` with the `params-15` defaults (item 31). It was adopted without
+independent validation.
+
+### Added — calibration app: Layer Inspector, Label tab and Benchmark tab
+
+* **Layer Inspector** (`fba17e5`): every pipeline series and decision of a
+  detection drawn as a layer. Later: the relative panel names the active
+  signal and shows the crossing/`k` evidence (`1f38611`), and the depth
+  parameters reach the Inspector and its ledgers (item 30a, `ad8daca`).
+* **Label tab** (`887c628`): manual labelling of the phase sequence by dragging
+  boundaries, with tolerance as a margin, saved to
+  `research/labels/manual_labels.yaml`. Case navigation, per-boundary
+  uncertainty, selective removal and blind overlays came with `8102334`
+  (schema 4, reads schema 3).
+* **Benchmark tab** (item 5, `e579518`): several configurations side by side on
+  the same cyclones, each column with its own provenance, scored against the
+  manual labels where they exist; frozen snapshots of the published 1.9.4 and
+  2.0.0 releases; the sidebar ordered by the detector's execution order.
+
+### Changed — calibration app: inert parameters are shown as disabled (`f837052`, `402d3f7`)
+
+Parameters that have no effect under the current settings (`cutoff_low`,
+`cutoff_high`, `boundary_padding`, `savgol_poly`, and two more found by the
+closing audit) are disabled with an inline note, backed by a sweep in
+`research/inert_params/REPORT_inertia_sweep.md`.
+
+### Changed — build, CI and distribution
+
+* `python_requires=">=3.12"` and the Python 3.12 classifier. CI tests 3.12 only.
+* `LICENSE` ships in the wheel and sdist again (`License-File` metadata).
+  `f423476`, after 2.0.0 was tagged, had suppressed it with `license_files=[]`
+  because `twine<6` could not read the field; CI already pins `twine>=6.0`.
+* CI (`build_test`) now runs the suite against the **installed wheel**: bare
+  `pytest --import-mode=append` with `CYCLOPHASER_REQUIRE_INSTALLED=1`, which
+  makes `tests/conftest.py` fail the session if `cyclophaser` is not imported
+  from site-packages. Before, `python -m pytest` from the checkout imported the
+  source tree. The one test that needs the source by design (marker
+  `source_tree`) runs in a separate step against the checkout.
+* CI after the 2.0.0 tag: CircleCI configuration modernised (`f0c0661`),
+  workspace and JUnit output fixed (`153111d`), `--skip-existing` on the PyPI
+  upload (`3d25bd5`); `build_test` installs `pyyaml` so the manual-label tests
+  run instead of skipping (`887c628`).
+* `pyproject.toml` added to pin `setuptools>=75` in the isolated build
+  (`b7a1c04`).
+* `environment.yml`: a dedicated `cyclophaser` conda environment with an
+  editable install, for development only; CI keeps the plain wheel install
+  (`77ee919`).
+* Calibration app: Python pinned through `.python-version` and dependency pins
+  relaxed (`0df0ef5`); `.python-version` was later removed (see the clean-up
+  entry below). The app now requires `cyclophaser>=2.1.0`.
+
+### Removed — `.pypirc` and `Pipfile` from the repository (clean-up front, `0d75db3`)
+
+`.pypirc` (`c080f4d`) is no longer tracked and is now ignored. It
+held only a username and an environment-variable placeholder, no
+secret. `Pipfile` was removed as unused.
+
 ### Changed — default behaviour: the package defaults are `params-track`, except `boundary_padding="reflect"` (item 31, then C1 of the cleanup front)
 
 **`determine_periods(series)` with no arguments does not reproduce 2.0.0.**
@@ -942,5 +1046,7 @@ previously silent or erroneous logic.
 
 *(Previous release — see git history for details.)*
 
+[Unreleased]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/daniloceano/CycloPhaser/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/daniloceano/CycloPhaser/compare/v1.9.4...v2.0.0
 [1.9.4]: https://github.com/daniloceano/CycloPhaser/releases/tag/v1.9.4
