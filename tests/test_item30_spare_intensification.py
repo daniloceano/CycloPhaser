@@ -134,6 +134,7 @@ def test_get_periods_forwards_the_key_to_the_stages(monkeypatch):
 
 # ── the 5 adjudicated TRAIN cases: params-track == the counterfactual ──────────
 
+@pytest.mark.source_tree   # item30_core.py asserts cyclophaser comes from the repo
 def test_params_track_reproduces_the_counterfactual_in_the_five():
     pytest.importorskip("yaml")
     sys.path.insert(0, str(REPO_ROOT / "research" / "labels" / "diagnostics" / "item30"))

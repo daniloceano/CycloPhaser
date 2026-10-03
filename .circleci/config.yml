@@ -41,8 +41,25 @@ jobs:
           command: pip install pytest pyyaml
 
       - run:
-          name: Run tests
-          command: python -m pytest --junitxml=test-reports/results.xml
+          name: Run tests against the installed wheel
+          # `python -m pytest` from the checkout would import cyclophaser/ from
+          # the source tree (CWD first on sys.path, and the default prepend
+          # import mode puts the repo root there too), so it would not test the
+          # wheel. Bare `pytest` with --import-mode=append keeps site-packages
+          # ahead of the root; CYCLOPHASER_REQUIRE_INSTALLED makes
+          # tests/conftest.py fail the session if cyclophaser still comes from
+          # anywhere but site-packages, printing the path it found.
+          environment:
+            CYCLOPHASER_REQUIRE_INSTALLED: "1"
+          command: pytest --import-mode=append -m "not source_tree" --junitxml=test-reports/results.xml
+
+      - run:
+          name: Run source-tree tests against the checkout
+          # Tests marked source_tree import research code that asserts it runs
+          # on the repository's own cyclophaser/ (item30_core.py), so they can
+          # never pass against the wheel. Run them here, on the source, without
+          # the lock.
+          command: python -m pytest -m source_tree --junitxml=test-reports/results-source-tree.xml
 
       - store_test_results:
           path: test-reports
