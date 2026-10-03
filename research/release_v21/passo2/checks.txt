@@ -1,0 +1,56 @@
+RELEASE v2.1 — PART A — PASSO 2 — checks on manual_labels.yaml
+labels_core: research/labels/labels_core.py
+HEAD 0c4dbe694563ac886fedf685b78063b1cbfd8cfe; base develop-v2.1 = 4660b9dec3b65f959ad9da0c56c7b8ed6e0cba58
+
+a. labels_core validators
+  [OK] 82 record versions (73 cases) validate unchanged
+  [OK] schema 4 (labels_core.LABELS_SCHEMA 4)
+  [OK] n_labels 73 == 73 records == 73 on develop-v2.1
+  [OK] document header (schema, updated, n_labels) unchanged
+
+b. parsed-label diff develop-v2.1 -> working tree
+  [OK] same set of ids
+  [OK] ids that differ: ['20150656', '20170154', '20170409']
+  20150656:
+    close_unsure: '<absent>' -> False
+    labeled_at: '2026-09-08T13:33:15+00:00' -> '2026-09-14T18:45:17+00:00'
+    open_unsure: '<absent>' -> False
+    overlays_shown: '<absent>' -> ['vorticity_smoothed2']
+    phases[3].start_idx: 91 -> 100
+    superseded: <absent> -> list of 1 (entry 0 == develop-v2.1 record, field for field: True)
+  [OK] 20150656: superseded[0] equals the develop-v2.1 record
+  20170154:
+    close_unsure: '<absent>' -> False
+    labeled_at: '2026-09-08T13:45:15+00:00' -> '2026-09-14T18:47:03+00:00'
+    open_unsure: '<absent>' -> False
+    overlays_shown: '<absent>' -> []
+    verdict.incipient_end_idx: 6 -> '<absent>'
+    verdict.kind: 'boundary' -> 'ambiguous'
+    superseded: <absent> -> list of 1 (entry 0 == develop-v2.1 record, field for field: True)
+  [OK] 20170154: superseded[0] equals the develop-v2.1 record
+  20170409:
+    close_unsure: '<absent>' -> False
+    labeled_at: '2026-09-08T13:34:38+00:00' -> '2026-09-14T18:45:42+00:00'
+    open_unsure: '<absent>' -> False
+    overlays_shown: '<absent>' -> []
+    phases[3].start_idx: 74 -> 71
+    superseded: <absent> -> list of 1 (entry 0 == develop-v2.1 record, field for field: True)
+  [OK] 20170409: superseded[0] equals the develop-v2.1 record
+
+c. first_blind_record vs vigente
+  20150656: first_blind_record residual start_idx = 91 (labeled_at 2026-09-08T13:33:15+00:00, overlays_shown '<absent>'); vigente residual start_idx = 100 (labeled_at 2026-09-14T18:45:17+00:00, overlays_shown ['vorticity_smoothed2'], is_blind False)
+  [OK] 20150656: first_blind_record returns the original 91
+  [OK] 20150656: vigente returns the corrected 100
+  20170409: first_blind_record decay start_idx = 74 (labeled_at 2026-09-08T13:34:38+00:00, overlays_shown '<absent>'); vigente decay start_idx = 71 (labeled_at 2026-09-14T18:45:42+00:00, overlays_shown [], is_blind True)
+  [OK] 20170409: first_blind_record returns the original 74
+  [OK] 20170409: vigente returns the corrected 71
+  20170154: first_blind_record verdict = {'kind': 'boundary', 'incipient_end_idx': 6} (labeled_at 2026-09-08T13:45:15+00:00, overlays_shown '<absent>'); vigente verdict = {'kind': 'ambiguous'} (labeled_at 2026-09-14T18:47:03+00:00, overlays_shown [], is_blind True)
+  [OK] 20170154: first_blind_record returns the original {'kind': 'boundary', 'incipient_end_idx': 6}
+  [OK] 20170154: vigente returns the corrected {'kind': 'ambiguous'}
+
+d. swell_item30
+  [OK] 10 ids in batches.swell_item30 of split.yaml
+  [OK] all present (10/10)
+  [OK] all unchanged, parsed (10/10)
+
+RESULT: PASS (0 failed checks)
