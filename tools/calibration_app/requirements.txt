@@ -18,4 +18,4 @@ numpy>=2.1
 scipy>=1.14
 cmocean>=4.0
 pyyaml>=6.0
-cyclophaser>=2.0.0
+cyclophaser>=2.1.0
