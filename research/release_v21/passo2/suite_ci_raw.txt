@@ -1,0 +1,83 @@
+worktree HEAD: 7e12a493cd246e3792e34539ee3e7a31df72d972 | changed files: 0 | date: 2026-10-03T00:55:01Z
+python: Python 3.12.9 | venv: new
+$ pip install --upgrade pip build
+exit 0
+$ python -m build
+exit 0
+Successfully built cyclophaser-2.0.0.tar.gz and cyclophaser-2.0.0-py3-none-any.whl
+$ pip install dist/*.whl
+exit 0
+$ pip install pytest pyyaml
+exit 0
+installed: build==1.6.1 cmocean==4.0.3 contourpy==1.4.0 cycler==0.12.1 cyclophaser==2.0.0 fonttools==4.66.1 iniconfig==2.3.0 kiwisolver==1.5.1 matplotlib==3.11.2 numpy==2.5.3 packaging==26.3 pandas==3.0.6 pillow==12.3.0 pip==26.2.1 pluggy==1.6.0 Pygments==2.21.0 pyparsing==3.3.3 pyproject_hooks==1.3.3 pytest==9.1.1 python-dateutil==2.9.0.post0 pytz==2026.4 PyYAML==6.0.3 scipy==1.18.1 setuptools==84.0.0 six==1.17.0 tzdata==2026.4 wheel==0.48.0 xarray==2026.9.0 
+playwright importable: no
+$ python -m pytest --junitxml=<scratch>/suite_ci.xml
+============================= test session starts ==============================
+platform darwin -- Python 3.12.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: <wt>
+configfile: pyproject.toml
+collected 1306 items / 8 skipped
+
+tests/synthetic/test_length_scale_regression.py ....                     [  0%]
+tests/synthetic/test_synthetic_lifecycles.py .....................s..    [  2%]
+tests/test_app_passo5_fixes.py ...............sssssss                    [  3%]
+tests/test_app_yaml_null_export.py ....                                  [  4%]
+tests/test_boundary_padding.py ......................................... [  7%]
+........................................................................ [ 12%]
+........................................................................ [ 18%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+........................................................................ [ 34%]
+...............................................                          [ 38%]
+tests/test_config_defaults.py ........                                   [ 39%]
+tests/test_decay_tail_amplitude_fraction.py ...........................  [ 41%]
+tests/test_determine_periods.py .                                        [ 41%]
+tests/test_evaluate_batch_train.py .........                             [ 41%]
+tests/test_incipient_plateau.py ........................................ [ 44%]
+...........................................                              [ 48%]
+tests/test_integration_prominence.py ................................... [ 50%]
+.......................................................................  [ 56%]
+tests/test_intensification_min_depth.py ........................         [ 58%]
+tests/test_item30_spare_intensification.py ....................          [ 59%]
+tests/test_layer_inspector.py .......................................... [ 62%]
+..............sss....s.................................................. [ 68%]
+........................................................................ [ 73%]
+........................................................................ [ 79%]
+......................                                                   [ 81%]
+tests/test_manual_labels.py ............................................ [ 84%]
+.....................sssssssssssssss..                                   [ 87%]
+tests/test_peaks_valleys_plateau.py .....                                [ 87%]
+tests/test_prominence.py .................                               [ 89%]
+tests/test_reclassify_index0.py ..............                           [ 90%]
+tests/test_regression_baseline.py ....                                   [ 90%]
+tests/test_swell_batch.py ...........                                    [ 91%]
+tests/test_track_io.py ................................................. [ 95%]
+............................................                             [ 98%]
+tests/test_use_filter_bool.py ..............                             [ 99%]
+tests/test_use_smoothing_false_derivatives.py ......                     [100%]
+
+=============================== warnings summary ===============================
+../suite_ci_venv/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  <ci-venv>/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+../suite_ci_venv/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  <ci-venv>/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+../suite_ci_venv/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  <ci-venv>/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+../suite_ci_venv/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  <ci-venv>/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  <wt>/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: <scratch>/suite_ci.xml -
+================ 1279 passed, 35 skipped, 89 warnings in 51.01s ================
+EXIT 0
