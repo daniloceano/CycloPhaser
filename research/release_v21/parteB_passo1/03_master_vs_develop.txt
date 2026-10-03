@@ -1,0 +1,57 @@
+origin/master      0df0ef538825b892557b62ea9aa74ce3ff30181c
+origin/develop-v2.1 76b79323df66907be26c3cc1e52c6e3952a18da8
+merge-base         0df0ef538825b892557b62ea9aa74ce3ff30181c  (2026-06-16 fix(deploy): pin Python via .python-version and relax app dependency pins)
+master is ancestor of develop-v2.1: yes
+
+commits in master not in develop-v2.1: 0
+
+commits in develop-v2.1 not in master: 256 (first-parent: 52, merges: 39)
+diff master..develop-v2.1:  603 files changed, 139295 insertions(+), 1283 deletions(-)
+
+by top-level path (files changed / +insertions / -deletions):
+  research/cleanup                          356  +77721   -0
+  tests/calibration_data                     66  +6588    -0
+  research/labels                            39  +9257    -0
+  tests/                                     32  +9807    -12
+  research/release_v21                       22  +9716    -0
+  tests/synthetic                            15  +1342    -30
+  tools/calibration_app                      13  +9311    -394
+  docs/                                      13  +5010    -597
+  docs/generated                             10  +84      -0
+  tests/baselines                             5  +728     -10
+  research/snapshots                          5  +4505    -0
+  docs/_images                                4  +0       -0
+  docs/figures                                3  +449     -0
+  cyclophaser                                 3  +2249    -169
+  research/incipient_plateau                  2  +772     -0
+  docs/data                                   2  +129     -0
+  runtime.txt                                 1  +0       -1
+  research/inert_params                       1  +434     -0
+  research/app_layer_inspector                1  +146     -0
+  environment.yml                             1  +69      -0
+  README.md                                   1  +37      -2
+  Pipfile                                     1  +0       -58
+  CLAUDE.md                                   1  +75      -0
+  CHANGELOG.md                                1  +812     -0
+  .readthedocs.yml                            1  +5       -1
+  .python-version                             1  +0       -1
+  .pypirc                                     1  +0       -7
+  .gitignore                                  1  +31      -0
+  .circleci                                   1  +18      -1
+
+package source cyclophaser/ only:  3 files changed, 2249 insertions(+), 169 deletions(-)
+ .circleci/config.yml             |   19 +-
+ cyclophaser/determine_periods.py | 1268 +++++++++++++++++++++++++++++++++++---
+ cyclophaser/find_stages.py       |  985 +++++++++++++++++++++++++++--
+ cyclophaser/lanczos_filter.py    |  165 ++++-
+ 4 files changed, 2267 insertions(+), 170 deletions(-)
+
+files deleted on develop-v2.1 relative to master:
+  D	.pypirc
+  D	.python-version
+  D	Pipfile
+  D	docs/_images/cyclophaser_methodology.jpg
+  D	docs/_images/density_map_Aggregate.png
+  D	docs/_images/test_default.png
+  D	docs/_images/test_steps_default.png
+  D	runtime.txt

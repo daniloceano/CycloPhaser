@@ -1,0 +1,63 @@
+{
+ "results.xml": {
+  "passed": 1278,
+  "failed": 0,
+  "skipped": 35,
+  "failed_ids": [],
+  "skipped_ids": [
+   "::tests.test_app_distance_removed",
+   "::tests.test_benchmark_apptest",
+   "::tests.test_inspector_apptest",
+   "::tests.test_label_apptest",
+   "::tests.test_label_browser",
+   "::tests.test_sidebar_coverage",
+   "::tests.test_sidebar_defaults",
+   "::tests.test_track_upload_apptest",
+   "tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]",
+   "tests.test_app_passo5_fixes::test_the_track_upload_and_its_caption_are_in_the_calibration_tab_only",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_train-bench_pick_test]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_test-bench_pick_train]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_real-bench_pick_synth]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_train-bench_pick_train]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_train-bench_pick_invert]",
+   "tests.test_app_passo5_fixes::test_clear_empties_both_the_selection_and_the_widget",
+   "tests.test_layer_inspector::test_plotly_inspector_starts_with_every_layer_on",
+   "tests.test_layer_inspector::test_plotly_inspector_rescales_in_the_package_s_own_groups",
+   "tests.test_layer_inspector::test_plotly_inspector_without_rescaling_plots_true_units",
+   "tests.test_layer_inspector::test_no_hardcoded_derivative_formula_under_vorticity_signal",
+   "tests.test_manual_labels::test_each_phase_is_drawn_in_its_own_standard_colour",
+   "tests.test_manual_labels::test_the_opening_scaffold_is_a_valid_partition",
+   "tests.test_manual_labels::test_the_chart_is_told_the_raw_series_and_the_labellers_marks_and_nothing_else",
+   "tests.test_manual_labels::test_the_chart_payload_is_json_serialisable",
+   "tests.test_manual_labels::test_a_drag_result_moves_the_boundary_it_names",
+   "tests.test_manual_labels::test_a_drag_result_is_re_clamped_on_arrival",
+   "tests.test_manual_labels::test_a_malformed_or_mismatched_drag_result_is_ignored",
+   "tests.test_manual_labels::test_an_unchanged_drag_result_reports_no_change",
+   "tests.test_manual_labels::test_the_same_drag_result_is_only_acted_on_once",
+   "tests.test_manual_labels::test_a_chart_that_cannot_mount_says_so_instead_of_drawing_something_else",
+   "tests.test_manual_labels::test_the_component_key_can_never_contain_the_reserved_delimiter",
+   "tests.test_manual_labels::test_the_shipped_chart_js_never_reads_a_vertical_coordinate",
+   "tests.test_manual_labels::test_the_shipped_chart_js_listens_on_window_not_on_the_svg",
+   "tests.test_manual_labels::test_the_shipped_chart_js_reports_a_failure_to_reach_python",
+   "tests.test_manual_labels::test_the_shipped_chart_js_supports_the_keyboard"
+  ]
+ },
+ "results-source-tree.xml": {
+  "passed": 1,
+  "failed": 0,
+  "skipped": 8,
+  "failed_ids": [],
+  "skipped_ids": [
+   "::tests.test_app_distance_removed",
+   "::tests.test_benchmark_apptest",
+   "::tests.test_inspector_apptest",
+   "::tests.test_label_apptest",
+   "::tests.test_label_browser",
+   "::tests.test_sidebar_coverage",
+   "::tests.test_sidebar_defaults",
+   "::tests.test_track_upload_apptest"
+  ]
+ },
+ "source_tree_skips_subset_of_main_skips": true,
+ "union_of_skips": 35
+}
