@@ -16,6 +16,7 @@ setup(
     author_email="danilo.oceano@gmail.com",
     license='GPL-3.0-or-later',
     packages=find_packages(exclude=['tests', 'tests.*']),
+    python_requires=">=3.12",
     license_files=[],
     install_requires=[
         "cmocean>=4.0",
@@ -51,6 +52,7 @@ setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.12",
     ],
     project_urls={
         'Documentation': 'https://cyclophaser.readthedocs.io/en/latest/',
