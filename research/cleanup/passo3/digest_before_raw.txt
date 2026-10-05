@@ -1,0 +1,16 @@
+mode: before
+HEAD: 654a3e553c4f2bbd0e4890885eab8ddc728b96b9
+files staged for deletion: 0
+assert OK: cyclophaser.__file__ = <repo>/cyclophaser/__init__.py | sys.prefix = <env>
+cyclophaser.__file__ = <repo>/cyclophaser/__init__.py
+series_sha256 verified for all 47 training series.
+n_series = 47
+SHA256   = 7552bc67ed87b0ea8ac4c46aec1013e5034422b4bbbca53743acd9df77aa500f
+provenance:
+  commit  : 654a3e553c4f2bbd0e4890885eab8ddc728b96b9
+  python  : 3.12.14
+  numpy   : 2.5.3
+  scipy   : 1.18.0
+  pandas  : 3.0.5
+
+appended a new record to <repo>/research/labels/diagnostics/front_b/default_behaviour_sha256.txt

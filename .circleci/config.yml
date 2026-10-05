@@ -1,5 +1,16 @@
 version: 2.1
 
+# This job installs from the built wheel plus bare pytest/pyyaml -- it does NOT
+# provision from environment.yml (conda), on purpose. environment.yml is for
+# local development (editable install, streamlit, plotly, the full app
+# toolchain); this job checks what a `pip install cyclophaser` user actually
+# gets. Keeping the two apart is a deliberate choice, not an oversight: this
+# minimal install is exactly what caught `plotly` being undeclared, and what
+# caught the series_sha256 hash instability documented in
+# docs/future_work.md items 10-12 -- a real, measured failure mode this same
+# thin environment surfaced that a conda-provisioned CI would not have.
+# See docs/future_work.md item 12 for the full record of that decision.
+
 jobs:
   build_test:
     docker:
@@ -21,11 +32,34 @@ jobs:
 
       - run:
           name: Install test dependencies
-          command: pip install pytest
+          # PyYAML is NOT a dependency of cyclophaser and must not become one --
+          # the package never reads or writes YAML. It is here because the
+          # manual-labelling front's artefact is a YAML file, and without it the
+          # 8 round-trip/atomicity tests that guard that artefact were being
+          # SKIPPED in CI: the artefact was unprotected in the one place that
+          # runs on every push.
+          command: pip install pytest pyyaml
 
       - run:
-          name: Run tests
-          command: python -m pytest --junitxml=test-reports/results.xml
+          name: Run tests against the installed wheel
+          # `python -m pytest` from the checkout would import cyclophaser/ from
+          # the source tree (CWD first on sys.path, and the default prepend
+          # import mode puts the repo root there too), so it would not test the
+          # wheel. Bare `pytest` with --import-mode=append keeps site-packages
+          # ahead of the root; CYCLOPHASER_REQUIRE_INSTALLED makes
+          # tests/conftest.py fail the session if cyclophaser still comes from
+          # anywhere but site-packages, printing the path it found.
+          environment:
+            CYCLOPHASER_REQUIRE_INSTALLED: "1"
+          command: pytest --import-mode=append -m "not source_tree" --junitxml=test-reports/results.xml
+
+      - run:
+          name: Run source-tree tests against the checkout
+          # Tests marked source_tree import research code that asserts it runs
+          # on the repository's own cyclophaser/ (item30_core.py), so they can
+          # never pass against the wheel. Run them here, on the source, without
+          # the lock.
+          command: python -m pytest -m source_tree --junitxml=test-reports/results-source-tree.xml
 
       - store_test_results:
           path: test-reports

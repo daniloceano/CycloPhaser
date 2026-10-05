@@ -1,0 +1,24 @@
+# item 3 — license_files=["LICENSE"]: build + twine check (working tree on top of 32d9fd4, 2026-10-03T13:50:56Z)
+python: Python 3.12.9
+setuptools (build isolation): 84.0.0 (from build.log)
+twine version 7.0.0 (readme-renderer: 46.0, requests: 2.34.2, requests-toolbelt: 1.0.0, urllib3: 2.8.0, keyring: 25.7.0, rfc3986: 2.0.0, rich: 15.0.0, packaging: 26.3, id: 1.6.1)
+Successfully built cyclophaser-2.1.0.tar.gz and cyclophaser-2.1.0-py3-none-any.whl
+
+$ twine check --strict <scratch>/dist/*
+Checking <scratch>/dist/cyclophaser-2.1.0-py3-none-any.whl: PASSED
+Checking <scratch>/dist/cyclophaser-2.1.0.tar.gz: PASSED
+twine check exit: 0
+
+## wheel: license files
+    35149  10-03-2026 13:50   cyclophaser-2.1.0.dist-info/licenses/LICENSE
+## wheel METADATA (license-related + python)
+Metadata-Version: 2.4
+License: GPL-3.0-or-later
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.12
+License-File: LICENSE
+## sdist: license files
+cyclophaser-2.1.0/LICENSE

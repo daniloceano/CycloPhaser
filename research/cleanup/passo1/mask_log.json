@@ -1,0 +1,17 @@
+{
+ "research/cleanup/passo1/digest_post_raw.txt": {
+  "<env>": 1,
+  "<repo>": 3
+ },
+ "research/cleanup/passo1/digest_pre_raw.txt": {
+  "<env>": 1,
+  "<worktree:pre>": 3
+ },
+ "research/cleanup/passo1/rebaseline_ci_raw.txt": {
+  "<tmp>": 2
+ },
+ "research/cleanup/passo1/suite_post_c1_raw.txt": {
+  "<env>": 9,
+  "<repo>": 2
+ }
+}

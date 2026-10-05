@@ -1,0 +1,160 @@
+{
+ "R0_ci_recipe": {
+  "passed": 1279,
+  "failed": 0,
+  "skipped": 35,
+  "failed_ids": [],
+  "failed_by_module": {},
+  "cyclophaser_file": "<wt>/cyclophaser/__init__.py",
+  "all_cyclophaser_modules_dirs": [
+   "<wt>/cyclophaser"
+  ],
+  "dist_version": "2.0.0",
+  "sys_path_head": [
+   "<wt>/tools/calibration_app",
+   "<wt>/research/labels",
+   "<wt>/research/labels",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>/research/labels/diagnostics/item30"
+  ]
+ },
+ "A1_bare_importlib": {
+  "passed": 1278,
+  "failed": 1,
+  "skipped": 35,
+  "failed_ids": [
+   "tests.test_item30_spare_intensification::test_params_track_reproduces_the_counterfactual_in_the_five"
+  ],
+  "failed_by_module": {
+   "tests.test_item30_spare_intensification": 1
+  },
+  "cyclophaser_file": "<venv>/lib/python3.12/site-packages/cyclophaser/__init__.py",
+  "all_cyclophaser_modules_dirs": [
+   "<venv>/lib/python3.12/site-packages/cyclophaser"
+  ],
+  "dist_version": "2.0.0",
+  "sys_path_head": [
+   "<wt>/tools/calibration_app",
+   "<wt>/research/labels",
+   "<wt>/research/labels",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>"
+  ]
+ },
+ "A2_bare_append": {
+  "passed": 1278,
+  "failed": 1,
+  "skipped": 35,
+  "failed_ids": [
+   "tests.test_item30_spare_intensification::test_params_track_reproduces_the_counterfactual_in_the_five"
+  ],
+  "failed_by_module": {
+   "tests.test_item30_spare_intensification": 1
+  },
+  "cyclophaser_file": "<venv>/lib/python3.12/site-packages/cyclophaser/__init__.py",
+  "all_cyclophaser_modules_dirs": [
+   "<venv>/lib/python3.12/site-packages/cyclophaser"
+  ],
+  "dist_version": "2.0.0",
+  "sys_path_head": [
+   "<wt>/tools/calibration_app",
+   "<wt>/research/labels",
+   "<wt>/research/labels",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>"
+  ]
+ },
+ "A3_outside_prepend": {
+  "passed": 1260,
+  "failed": 19,
+  "skipped": 35,
+  "failed_ids": [
+   "tests.test_determine_periods::test_determine_periods_with_options",
+   "tests.test_regression_baseline::test_baseline_default",
+   "tests.test_regression_baseline::test_baseline_smoothing",
+   "tests.test_regression_baseline::test_baseline_default_2_0_0_path",
+   "tests.test_regression_baseline::test_baseline_smoothing_2_0_0_path",
+   "tests.test_use_filter_bool::test_true_is_equivalent_to_auto",
+   "tests.test_use_filter_bool::test_true_matches_the_explicit_auto_window",
+   "tests.test_use_filter_bool::test_false_skips_filtering",
+   "tests.test_use_filter_bool::test_integer_is_an_explicit_window_length[5]",
+   "tests.test_use_filter_bool::test_integer_is_an_explicit_window_length[31]",
+   "tests.test_use_filter_bool::test_integer_is_an_explicit_window_length[64]",
+   "tests.test_use_filter_bool::test_integer_one_is_not_confused_with_true",
+   "tests.test_use_filter_bool::test_true_warns_and_names_the_window",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[auto]",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[False]",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[1]",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[31]",
+   "tests.test_use_filter_bool::test_warning_propagates_through_determine_periods",
+   "tests.test_use_filter_bool::test_end_to_end_true_equals_auto"
+  ],
+  "failed_by_module": {
+   "tests.test_determine_periods": 1,
+   "tests.test_regression_baseline": 4,
+   "tests.test_use_filter_bool": 14
+  },
+  "cyclophaser_file": "<wt>/cyclophaser/__init__.py",
+  "all_cyclophaser_modules_dirs": [
+   "<wt>/cyclophaser"
+  ],
+  "dist_version": "2.0.0",
+  "sys_path_head": [
+   "<wt>/tools/calibration_app",
+   "<wt>/research/labels",
+   "<wt>/research/labels",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>/research/labels/diagnostics/item30"
+  ]
+ },
+ "A4_outside_P_importlib": {
+  "passed": 1259,
+  "failed": 20,
+  "skipped": 35,
+  "failed_ids": [
+   "tests.test_determine_periods::test_determine_periods_with_options",
+   "tests.test_item30_spare_intensification::test_params_track_reproduces_the_counterfactual_in_the_five",
+   "tests.test_regression_baseline::test_baseline_default",
+   "tests.test_regression_baseline::test_baseline_smoothing",
+   "tests.test_regression_baseline::test_baseline_default_2_0_0_path",
+   "tests.test_regression_baseline::test_baseline_smoothing_2_0_0_path",
+   "tests.test_use_filter_bool::test_true_is_equivalent_to_auto",
+   "tests.test_use_filter_bool::test_true_matches_the_explicit_auto_window",
+   "tests.test_use_filter_bool::test_false_skips_filtering",
+   "tests.test_use_filter_bool::test_integer_is_an_explicit_window_length[5]",
+   "tests.test_use_filter_bool::test_integer_is_an_explicit_window_length[31]",
+   "tests.test_use_filter_bool::test_integer_is_an_explicit_window_length[64]",
+   "tests.test_use_filter_bool::test_integer_one_is_not_confused_with_true",
+   "tests.test_use_filter_bool::test_true_warns_and_names_the_window",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[auto]",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[False]",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[1]",
+   "tests.test_use_filter_bool::test_other_values_do_not_warn[31]",
+   "tests.test_use_filter_bool::test_warning_propagates_through_determine_periods",
+   "tests.test_use_filter_bool::test_end_to_end_true_equals_auto"
+  ],
+  "failed_by_module": {
+   "tests.test_determine_periods": 1,
+   "tests.test_item30_spare_intensification": 1,
+   "tests.test_regression_baseline": 4,
+   "tests.test_use_filter_bool": 14
+  },
+  "cyclophaser_file": "<venv>/lib/python3.12/site-packages/cyclophaser/__init__.py",
+  "all_cyclophaser_modules_dirs": [
+   "<venv>/lib/python3.12/site-packages/cyclophaser"
+  ],
+  "dist_version": "2.0.0",
+  "sys_path_head": [
+   "<wt>/tools/calibration_app",
+   "<wt>/research/labels",
+   "<wt>/research/labels",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>/research/labels/diagnostics/item30",
+   "<wt>"
+  ]
+ }
+}

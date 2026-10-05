@@ -1,0 +1,1 @@
+de Souza, D. C., da Silva Dias, P. L., Gramcianinov, C. B., & de Camargo, R. (2025). CycloPhaser: A Python Package for Detecting Extratropical Cyclone Life Cycles. Journal of Open Source Software, 10(108), 7363. https://doi.org/10.21105/joss.07363

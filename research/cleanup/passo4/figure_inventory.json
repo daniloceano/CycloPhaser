@@ -1,0 +1,121 @@
+{
+ "determine_periods_returns": {
+  "type": "DataFrame",
+  "index": "datetime64[us]",
+  "columns": {
+   "z": "float64",
+   "z_unfil": "float64",
+   "dz": "float64",
+   "dz2": "float64",
+   "z_peaks_valleys": "object",
+   "dz_peaks_valleys": "object",
+   "dz2_peaks_valleys": "object",
+   "periods": "object"
+  }
+ },
+ "get_periods_returns": {
+  "type": "DataFrame",
+  "columns": [
+   "z",
+   "z_unfil",
+   "dz",
+   "dz2",
+   "z_peaks_valleys",
+   "dz_peaks_valleys",
+   "dz2_peaks_valleys",
+   "periods"
+  ],
+  "same_frame_as_determine_periods": true
+ },
+ "process_vorticity_returns": {
+  "type": "Dataset",
+  "data_vars": [
+   "zeta",
+   "filtered_vorticity",
+   "vorticity_smoothed",
+   "vorticity_smoothed2",
+   "dz_dt_filt",
+   "dz_dt2_filt",
+   "dz_dt_smoothed2",
+   "dz_dt2_smoothed2"
+  ]
+ },
+ "labels": {
+  "z_peaks_valleys": [
+   "peak",
+   "valley"
+  ],
+  "dz_peaks_valleys": [
+   "peak",
+   "valley"
+  ],
+  "dz2_peaks_valleys": [
+   "peak",
+   "valley"
+  ],
+  "periods": [
+   "decay",
+   "incipient",
+   "intensification",
+   "mature"
+  ]
+ },
+ "column_sources": {
+  "z": true,
+  "z_unfil": true,
+  "dz": true,
+  "dz2": true,
+  "filtered_vorticity == vorticity_smoothed2 under the defaults": true
+ },
+ "replay_equals_get_periods": true,
+ "prominence": {
+  "considered": 7,
+  "kept": 5,
+  "kept_subset_of_considered": true,
+  "dropped": 2
+ },
+ "index0": {
+  "final": "peak",
+  "without_rule": "peak",
+  "with_rule_equals_returned": true
+ },
+ "depth_floors": {
+  "intensification_steps_floor_off": 60,
+  "intensification_steps_default": 60,
+  "mature_steps_floor_off": 11,
+  "mature_steps_default": 11
+ },
+ "decay_tail": {
+  "steps_differing_default_vs_None": 25,
+  "transitions": {
+   "residual -> decay": 25
+  }
+ },
+ "public_functions": {
+  "cyclophaser.determine_periods (module)": {
+   "determine_periods": "(series: Union[list, numpy.ndarray, pandas.Series, xarray.core.dataarray.DataArray], x: Union[list, pandas.DatetimeIndex] = None, plot: Union[str, bool] = False, plot_steps: Union[str, bool] = False, export_dict: Union[str, bool] = False, hemisphere: str = 'southern', use_filter: Union[str, bool, int] = 'auto', replace_endpoints_with_lowpass: int = 0, use_smoothing: Union[bool, str, int] = False, use_smoothing_twice: Union[bool, str, int] = False, savgol_polynomial: int = 3, cutoff_low: float = 168, cutoff_high: float = 18.0, boundary_padding: str = 'reflect', threshold_intensification_length: float = 0.075, threshold_intensification_gap: float = 0.075, threshold_mature_distance: float = 0.18, threshold_mature_length: float = 0.15, threshold_decay_length: float = 0.075, threshold_decay_gap: float = 0.075, threshold_incipient_length: float = 0.4, prominence: float = None, prominence_relative: float = 0.3, reclassify_index0: bool = True, length_scale: str = 'local', mature_method: str = 'amplitude', mature_amplitude_fraction: float = 0.9, mature_min_depth: float = 0.8, intensification_min_depth: float = 0.05, decay_tail_amplitude_fraction: float = 0.3, incipient_method: str = 'plateau', incipient_plateau_tau: float = 0.2, incipient_plateau_signal: str = 'vorticity', incipient_plateau_crossing: str = 'sustained', incipient_plateau_k: int = 5, incipient_smooth_window: int = 5, incipient_smooth_polyorder: int = 3, incipient_plateau_spare_intensification: bool = True) -> pandas.DataFrame",
+   "export_periods_to_csv": "(phases_dict, periods_outfile_path)",
+   "find_peaks_valleys": "(series, prominence=None, prominence_relative=None, reclassify_index0=False)",
+   "get_periods": "(vorticity, plot: Union[str, bool] = False, plot_steps: Union[str, bool] = False, export_dict: Union[str, bool] = False, threshold_intensification_length: float = 0.075, threshold_intensification_gap: float = 0.075, threshold_mature_distance: float = 0.18, threshold_mature_length: float = 0.15, threshold_decay_length: float = 0.075, threshold_decay_gap: float = 0.075, threshold_incipient_length: float = 0.4, prominence: float = None, prominence_relative: float = 0.3, reclassify_index0: bool = True, length_scale: str = 'local', mature_method: str = 'amplitude', mature_amplitude_fraction: float = 0.9, mature_min_depth: float = 0.8, intensification_min_depth: float = 0.05, decay_tail_amplitude_fraction: float = 0.3, incipient_method: str = 'plateau', incipient_plateau_tau: float = 0.2, incipient_plateau_signal: str = 'vorticity', incipient_plateau_crossing: str = 'sustained', incipient_plateau_k: int = 5, incipient_smooth_window: int = 5, incipient_smooth_polyorder: int = 3, incipient_plateau_spare_intensification: bool = True) -> pandas.DataFrame",
+   "main": "()",
+   "periods_to_dict": "(df)",
+   "post_process_periods": "(df)",
+   "process_vorticity": "(zeta_df, use_filter='auto', replace_endpoints_with_lowpass=0, use_smoothing=False, use_smoothing_twice=False, savgol_polynomial=3, cutoff_low=168, cutoff_high=18.0, boundary_padding='reflect')"
+  },
+  "cyclophaser.find_stages": {
+   "find_decay_period": "(df, **args_periods)",
+   "find_incipient_period": "(df, **args_periods)",
+   "find_intensification_period": "(df, **args_periods)",
+   "find_mature_stage": "(df, **args_periods)",
+   "find_residual_period": "(df, **args_periods)"
+  }
+ },
+ "private_functions_holding_intermediates": [
+  "_amplitude_mature_bounds",
+  "_incipient_plateau_boundary",
+  "_incipient_plateau_rel",
+  "_local_cycle_scale",
+  "_smooth_incipient_probe",
+  "_spare_enclosed_intensification"
+ ]
+}

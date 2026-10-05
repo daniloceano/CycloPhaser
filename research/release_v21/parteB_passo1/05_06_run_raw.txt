@@ -1,0 +1,82 @@
+worktree HEAD: 76b79323df66907be26c3cc1e52c6e3952a18da8 | changed files: 0 | date: 2026-10-03T12:45:20Z
+python: Python 3.12.9 | venv: new
+pip/build exit 0
+build exit 0
+Successfully built cyclophaser-2.0.0.tar.gz and cyclophaser-2.0.0-py3-none-any.whl
+worktree after build: 
+wheel install exit 0
+pytest/pyyaml exit 0
+installed: build==1.6.1 cmocean==4.0.3 contourpy==1.4.0 cycler==0.12.1 cyclophaser==2.0.0 fonttools==4.66.1 iniconfig==2.3.0 kiwisolver==1.5.1 matplotlib==3.11.2 numpy==2.5.3 packaging==26.3 pandas==3.0.6 pillow==12.3.0 pip==26.2.1 pluggy==1.6.0 Pygments==2.21.0 pyparsing==3.3.3 pyproject_hooks==1.3.3 pytest==9.1.1 python-dateutil==2.9.0.post0 pytz==2026.4 PyYAML==6.0.3 scipy==1.18.1 setuptools==84.0.0 six==1.17.0 tzdata==2026.5 wheel==0.48.0 xarray==2026.9.0 
+playwright importable: no
+wheel: cyclophaser-2.0.0-py3-none-any.whl sha256 75b4596fe2fc6ee7…
+
+=== R0_ci_recipe
+cwd: <wt>
+$ python -m pytest
+EXIT 0
+CP_PROBE cyclophaser.__file__ = <wt>/cyclophaser/__init__.py
+
+=== A1_bare_importlib
+cwd: <wt>
+$ pytest --import-mode=importlib
+EXIT 1
+CP_PROBE cyclophaser.__file__ = <venv>/lib/python3.12/site-packages/cyclophaser/__init__.py
+FAILED tests/test_item30_spare_intensification.py::test_params_track_reproduces_the_counterfactual_in_the_five
+
+=== A2_bare_append
+cwd: <wt>
+$ pytest --import-mode=append
+EXIT 1
+CP_PROBE cyclophaser.__file__ = <venv>/lib/python3.12/site-packages/cyclophaser/__init__.py
+FAILED tests/test_item30_spare_intensification.py::test_params_track_reproduces_the_counterfactual_in_the_five
+
+=== A3_outside_prepend
+cwd: <scratch>/pb1_outside
+$ python -m pytest <wt>
+EXIT 1
+CP_PROBE cyclophaser.__file__ = <wt>/cyclophaser/__init__.py
+FAILED ../pb1_wt/tests/test_determine_periods.py::test_determine_periods_with_options
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_default - F...
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_smoothing
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_default_2_0_0_path
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_smoothing_2_0_0_path
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_true_is_equivalent_to_auto
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_true_matches_the_explicit_auto_window
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_false_skips_filtering - F...
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_is_an_explicit_window_length[5]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_is_an_explicit_window_length[31]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_is_an_explicit_window_length[64]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_one_is_not_confused_with_true
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_true_warns_and_names_the_window
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[auto]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[False]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[1]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[31]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_warning_propagates_through_determine_periods
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_end_to_end_true_equals_auto
+
+=== A4_outside_P_importlib
+cwd: <scratch>/pb1_outside
+$ python -P -m pytest --import-mode=importlib <wt>
+EXIT 1
+CP_PROBE cyclophaser.__file__ = <venv>/lib/python3.12/site-packages/cyclophaser/__init__.py
+FAILED ../pb1_wt/tests/test_determine_periods.py::test_determine_periods_with_options
+FAILED ../pb1_wt/tests/test_item30_spare_intensification.py::test_params_track_reproduces_the_counterfactual_in_the_five
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_default - F...
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_smoothing
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_default_2_0_0_path
+FAILED ../pb1_wt/tests/test_regression_baseline.py::test_baseline_smoothing_2_0_0_path
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_true_is_equivalent_to_auto
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_true_matches_the_explicit_auto_window
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_false_skips_filtering - F...
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_is_an_explicit_window_length[5]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_is_an_explicit_window_length[31]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_is_an_explicit_window_length[64]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_integer_one_is_not_confused_with_true
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_true_warns_and_names_the_window
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[auto]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[False]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[1]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_other_values_do_not_warn[31]
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_warning_propagates_through_determine_periods
+ERROR ../pb1_wt/tests/test_use_filter_bool.py::test_end_to_end_true_equals_auto

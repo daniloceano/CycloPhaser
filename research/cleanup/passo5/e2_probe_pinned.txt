@@ -1,0 +1,7 @@
+streamlit 1.58.0
+render exceptions: 0
+read options/value in the harness: ok 63 options
+set raw ids -> app exceptions: 0
+set formatted labels (what the test does) -> raised KeyError in ['element_tree.py:1191', 'element_tree.py:1211', 'benchmark_tab.py:648']
+click Train -> app exceptions: 0 | n selected (session): 47
+then click Test -> app exceptions: 0 | n selected (session): 16

@@ -1,0 +1,16 @@
+{
+ "ci": {
+  "passed": 1279,
+  "failed": 0,
+  "skipped": 35,
+  "failed_ids": [],
+  "failed_by_module": {}
+ },
+ "conda": {
+  "passed": 1443,
+  "failed": 0,
+  "skipped": 1,
+  "failed_ids": [],
+  "failed_by_module": {}
+ }
+}

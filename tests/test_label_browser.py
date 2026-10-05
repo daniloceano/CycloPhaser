@@ -1,0 +1,537 @@
+"""The labelling chart, driven by a real browser against the real app.
+
+Read tests/browser_harness.py first: it explains why this exists rather than a
+DOM stub, and what "verified" is allowed to mean here.
+
+The short version. Three deliveries of the drag interaction passed their checks
+and worked in nobody's browser, because the checks ran the component's JS against
+a simulated DOM and the fault was in the Python that mounts the component. So
+every assertion below is made against a value that Streamlit rendered from
+`st.session_state` — the phase table — after a real pointer or a real keystroke.
+Reading the SVG would prove only that the browser drew something.
+
+The four gestures pinned here are the four that were broken or unprovable:
+
+  1. drag a boundary bar right, and back left again;
+  2. drag a tolerance handle to widen the bar, and again to narrow it;
+  3. release the pointer OUTSIDE the chart mid-drag — the case `pointerup` on
+     the `<svg>` could never see, which lost the edit with no error at all;
+  4. drag while Streamlit reruns underneath — a rerender used to destroy and
+     rebuild the SVG, taking the listeners and the gesture with it.
+
+Plus the two paths that make a chart failure survivable: the keyboard, and the
+table, which is the canonical way to write a label and must move the chart.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "tests"))
+
+# Playwright, its browser, and Streamlit are TEST-only and hand-installed:
+#     pip install playwright && python -m playwright install chromium
+# Absent, this module skips whole. It must never be able to fail the package's
+# CI, which installs the wheel plus pytest and nothing else.
+playwright_api = pytest.importorskip(
+    "playwright.sync_api", reason="playwright is not installed (browser tests)")
+pytest.importorskip("streamlit", reason="Streamlit not installed (app-only)")
+
+from browser_harness import AppServer, LabelPage  # noqa: E402
+
+
+def _chromium_present() -> bool:
+    try:
+        with playwright_api.sync_playwright() as pw:
+            return bool(pw.chromium.executable_path) and \
+                Path(pw.chromium.executable_path).exists()
+    except Exception:
+        return False
+
+
+requires_browser = pytest.mark.skipif(
+    not _chromium_present(),
+    reason="Chromium is not installed: python -m playwright install chromium")
+
+pytestmark = [requires_browser, pytest.mark.browser]
+
+
+# ── one server and one browser for the whole module ─────────────────────────
+# Booting Streamlit and loading 63 series takes seconds; doing it per test would
+# make the suite unrunnable and nobody would run it, which is how the previous
+# rounds went unverified.
+
+@pytest.fixture(scope="module")
+def server(tmp_path_factory):
+    srv = AppServer(tmp_path_factory.mktemp("app") / "streamlit.log").start()
+    yield srv
+    srv.stop()
+
+
+@pytest.fixture(scope="module")
+def pw():
+    """One Playwright instance for the module.
+
+    Module-scoped because the sync API refuses to be re-entered: opening a
+    second `sync_playwright()` while the first is live raises "you are using
+    Playwright Sync API inside the asyncio loop". Tests that need their own
+    window (the viewport-size ones) launch another BROWSER from this instance
+    rather than another instance.
+    """
+    with playwright_api.sync_playwright() as instance:
+        yield instance
+
+
+@pytest.fixture(scope="module")
+def lab(server, pw):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 1600, "height": 1100})
+    page.set_default_timeout(60_000)
+    lp = LabelPage(page).open(server.url)
+    yield lp
+    browser.close()
+
+
+@pytest.fixture
+def fresh(lab):
+    """Put the table into a known state before each test, through the TABLE.
+
+    Deliberately not through the chart: a test whose setup uses the thing under
+    test cannot fail honestly.
+
+    Row 3 is pinned too, not left at whatever the currently-loaded real case
+    happens to have on disk. It didn't used to matter when this suite was
+    authored against a partially-labelled queue, but the queue is now 63/63
+    complete, so the case this fixture opens is always the SAME one (last in
+    the fixed shuffle order) with whatever decay boundary is actually
+    recorded for it — which drifts as that label gets refined, and at one
+    point sat at 54, close enough to block `drag_boundary(2, 61)` and
+    `drag_tolerance(2, 62)` from ever reaching their targets (correctly
+    clamped against row 3, not a bug — just a fixture that didn't control
+    every row it depends on). Pinned to 100 here, far past every target any
+    test in this file drags row 1 or row 2 toward.
+    """
+    lab.set_start_idx(1, 20)
+    lab.set_tolerance_idx(1, 4)
+    lab.set_start_idx(2, 50)
+    lab.set_tolerance_idx(2, 5)
+    lab.set_start_idx(3, 100)
+    lab.set_tolerance_idx(3, 5)
+    lab.set_unsure(1, False)
+    lab.set_unsure(2, False)
+    assert lab.table_state()[1] == (20, 4, False), lab.table_state()
+    return lab
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 0. The component mounts at all
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_the_chart_component_actually_mounts(lab):
+    """The bug that cost three rounds, pinned directly.
+
+    `key=f"lab_chart__{sid}"` made every mount raise BidiComponentInvalidIdError
+    (`__` is reserved inside a bidirectional component's id) and the exception
+    was swallowed by a static Plotly fallback, so the app drew an undraggable
+    picture and reported nothing. This test is the one that would have caught it
+    on day one: is the hand-drawn SVG in the document, in a browser, or not.
+    """
+    assert lab.mount_error() is None, lab.mount_error()
+    assert lab.has_chart(), (
+        "no #cp-label-chart svg in the page — the component did not mount")
+    assert lab.chart_alert() == ""
+
+
+# Streamlit re-requests a cached figure from the mode you just left and gets a
+# 404 for it. Noisy, harmless, and nothing to do with this front — but a test
+# that fails on it gets muted, and a muted test is how a real page error would
+# get through.
+_APP_NOISE = ("Failed to load resource", "Image source error", "/media/")
+
+
+def test_no_javascript_errors_on_the_page(lab):
+    real = [e for e in lab.errors if not any(n in e for n in _APP_NOISE)]
+    assert not real, real
+
+
+def test_the_table_shows_a_row_per_phase(lab):
+    assert lab.n_rows() == 4
+    assert lab.phase_name(0) == "incipient"
+    assert lab.start_idx(0) == 0
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ACTION 1 — drag the body of a boundary bar, there and back
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_dragging_a_bar_right_moves_the_boundary_in_python(fresh):
+    fresh.drag_boundary(1, 34)
+    assert fresh.start_idx(1) == pytest.approx(34, abs=1), fresh.table_state()
+    assert fresh.tolerance_idx(1) == 4, "a body drag must not touch the margin"
+    assert fresh.start_idx(2) == 50, "it must not disturb its neighbour"
+
+
+def test_dragging_a_bar_back_left_moves_it_back(fresh):
+    fresh.drag_boundary(1, 34)
+    assert fresh.start_idx(1) == pytest.approx(34, abs=1)
+    fresh.drag_boundary(1, 12)
+    assert fresh.start_idx(1) == pytest.approx(12, abs=1), fresh.table_state()
+
+
+def test_the_same_drag_twice_is_delivered_twice(fresh):
+    """The replay guard used to key on the positions, so an identical second
+    gesture looked like a stale repeat of the first and was DISCARDED — the bar
+    sprang back on its own. The component now sends a monotonic counter."""
+    fresh.drag_boundary(1, 30)
+    assert fresh.start_idx(1) == pytest.approx(30, abs=1)
+    fresh.drag_boundary(1, 15)
+    assert fresh.start_idx(1) == pytest.approx(15, abs=1)
+    fresh.drag_boundary(1, 30)                      # byte-identical to the first
+    assert fresh.start_idx(1) == pytest.approx(30, abs=1), fresh.table_state()
+
+
+def test_a_bar_cannot_be_dragged_past_its_neighbour(fresh):
+    fresh.drag_boundary(1, 90)                      # the next boundary is at 50
+    assert fresh.start_idx(1) <= 49, fresh.table_state()
+    assert fresh.start_idx(2) == 50
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ACTION 2 — drag a tolerance handle, wider and narrower
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_dragging_the_edge_widens_the_margin_in_python(fresh):
+    fresh.drag_tolerance(2, 62)                     # boundary at 50 -> |62-50|
+    assert fresh.tolerance_idx(2) == pytest.approx(12, abs=1), fresh.table_state()
+    assert fresh.start_idx(2) == 50, "widening must not move the boundary"
+
+
+def test_dragging_the_edge_back_narrows_the_margin(fresh):
+    fresh.drag_tolerance(2, 62)
+    assert fresh.tolerance_idx(2) == pytest.approx(12, abs=1)
+    fresh.drag_tolerance(2, 52)
+    assert fresh.tolerance_idx(2) == pytest.approx(2, abs=1), fresh.table_state()
+    assert fresh.start_idx(2) == 50
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ACTION 3 — let go of the pointer outside the chart
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_releasing_the_pointer_outside_the_svg_still_commits(fresh):
+    """`pointerup` was bound to the `<svg>`, so a release anywhere else was never
+    delivered: `finish()` never ran, `setTriggerValue` was never called, and the
+    edit vanished WITHOUT ANY ERROR. The listeners are on `window` now.
+
+    This is the gesture a person makes constantly — overshoot the plot while
+    dragging a boundary toward the end of the series and let go — so it failing
+    silently is most of what "dragging doesn't work" meant.
+    """
+    fresh.drag_boundary(1, 40, release_outside=True)
+    assert fresh.start_idx(1) == pytest.approx(40, abs=2), (
+        f"the edit was lost when the pointer left the chart: {fresh.table_state()}")
+    assert fresh.chart_alert() == ""
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ACTION 4 — drag through a Streamlit rerun
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_a_drag_survives_a_rerender_underneath_it(fresh):
+    """Any sidebar widget reruns the script, and the component's JS runs again
+    with it. It used to `prev.remove()` and rebuild the SVG from scratch, which
+    destroyed the listeners and the in-flight gesture. The node is preserved now,
+    and a rerender never overwrites phases while a drag is live.
+    """
+    fresh.drag_boundary(1, 38, before_release=fresh.poke_sidebar)
+    assert fresh.has_chart(), "the chart disappeared during the rerender"
+    assert fresh.start_idx(1) == pytest.approx(38, abs=2), (
+        f"the rerender ate the drag: {fresh.table_state()}")
+
+
+def test_the_chart_survives_a_rerun_with_no_drag_in_flight(fresh):
+    fresh.drag_boundary(1, 25)
+    fresh.poke_sidebar()
+    fresh.settle()
+    assert fresh.has_chart()
+    assert fresh.start_idx(1) == pytest.approx(25, abs=1), (
+        "the value did not survive a server rerender, so it never reached Python")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# The keyboard — the path that works when the pointer does not
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_arrow_keys_move_the_selected_boundary_one_step(fresh):
+    fresh.click_boundary(1)
+    before = fresh.start_idx(1)
+    fresh.press("ArrowRight")
+    assert fresh.start_idx(1) == before + 1, fresh.table_state()
+    fresh.press("ArrowLeft")
+    assert fresh.start_idx(1) == before
+
+
+def test_shift_arrow_moves_five_steps(fresh):
+    fresh.click_boundary(1)
+    before = fresh.start_idx(1)
+    fresh.press("Shift+ArrowRight")
+    assert fresh.start_idx(1) == before + 5, fresh.table_state()
+    fresh.press("Shift+ArrowLeft")
+    assert fresh.start_idx(1) == before
+
+
+def test_up_and_down_adjust_the_margin(fresh):
+    fresh.click_boundary(1)
+    before = fresh.tolerance_idx(1)
+    fresh.press("ArrowUp")
+    assert fresh.tolerance_idx(1) == before + 1, fresh.table_state()
+    fresh.press("Shift+ArrowUp")
+    assert fresh.tolerance_idx(1) == before + 6
+    fresh.press("Shift+ArrowDown")
+    fresh.press("ArrowDown")
+    assert fresh.tolerance_idx(1) == before
+    assert fresh.start_idx(1) == 20, "a margin key must not move the boundary"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# The table and the chart are ONE state, in both directions
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_a_number_typed_in_the_table_moves_the_bar(fresh):
+    """The table is the canonical path, so this direction is the one that must
+    never break: it is what a labeller falls back to when the chart does."""
+    fresh.set_start_idx(1, 31)
+    assert fresh.start_idx(1) == 31
+    drawn = fresh.page.locator(fresh.CHART).evaluate(
+        "(svg) => svg.parentElement.__cp.PH[1].start_idx")
+    assert drawn == 31, f"the chart still shows {drawn}"
+
+
+def test_a_drag_updates_the_number(fresh):
+    fresh.drag_boundary(2, 61)
+    assert fresh.start_idx(2) == pytest.approx(61, abs=1), fresh.table_state()
+
+
+def test_dragging_never_changes_the_number_of_phases(fresh):
+    """A real bug, not a hypothetical: with overlapping grip/edge hit-areas
+    resolved by DOM z-order instead of geometry, a click meant for boundary 2
+    could silently move boundary 3 instead, and reading the table afterward
+    looked exactly like a phase had been added at the drag target while the
+    original boundary "stayed behind" — same length, but the WRONG entry
+    moved. Length alone would not have caught that regression; this checks it
+    on every kind of edit the chart can make, pinned against `n_rows()`
+    before and after each one.
+    """
+    n_before = fresh.n_rows()
+
+    fresh.drag_boundary(2, 61)
+    assert fresh.n_rows() == n_before
+    fresh.set_start_idx(2, 50)  # restore for the next assertion in this test
+
+    fresh.drag_tolerance(2, 58)
+    assert fresh.n_rows() == n_before
+    fresh.set_tolerance_idx(2, 5)
+
+    fresh.click_boundary(1)
+    fresh.press("ArrowRight")
+    assert fresh.n_rows() == n_before
+
+    fresh.drag_boundary(1, 40, release_outside=True)
+    assert fresh.n_rows() == n_before
+
+
+def test_a_margin_typed_in_the_table_resizes_the_bar(fresh):
+    fresh.set_tolerance_idx(2, 9)
+    assert fresh.tolerance_idx(2) == 9
+    drawn = fresh.page.locator(fresh.CHART).evaluate(
+        "(svg) => svg.parentElement.__cp.PH[2].tolerance_idx")
+    assert drawn == 9
+
+
+def test_the_first_row_start_is_not_editable(fresh):
+    """It is 0 by construction — a partition of [0, n) begins at 0."""
+    assert fresh.page.get_by_label("start_idx, row 0", exact=True).is_disabled()
+    assert fresh.start_idx(0) == 0
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# "Not sure", per boundary
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_not_sure_is_per_boundary_and_survives_a_drag(fresh):
+    """Ambiguity used to be a property of the whole series, so one unreadable
+    transition voided every boundary in the cyclone. Ticked here, it must stay
+    ticked when the bar it belongs to is dragged — the chart does not send the
+    flag and must not be able to clear it."""
+    fresh.set_unsure(2, True)
+    assert fresh.is_unsure(2) and not fresh.is_unsure(1)
+    fresh.drag_boundary(2, 55)
+    assert fresh.is_unsure(2), "the drag cleared the not-sure mark"
+    assert not fresh.is_unsure(1), "it leaked onto another boundary"
+    fresh.set_unsure(2, False)
+
+
+def test_row_zero_start_unsure_is_settable_it_is_the_series_opening_edge(fresh):
+    """Unlike schema 3's single per-phase flag (disabled on row 0, since a
+    partition of [0, n) begins at 0 by construction and there was nothing to
+    be unsure about there), row 0's START checkbox is now `open_unsure` — the
+    edge BEFORE the first phase, which the phase list has no boundary to
+    carry. It must be enabled and settable like any other checkbox."""
+    box = fresh.page.get_by_label("unsure, row 0", exact=True)
+    assert not box.is_disabled()
+    fresh.set_unsure(0, True)
+    assert fresh.is_unsure(0)
+    fresh.set_unsure(0, False)
+
+
+def test_end_unsure_of_one_row_mirrors_start_unsure_of_the_next(fresh):
+    """A phase sequence of N phases has N+1 edges; row k's 'end unsure' and
+    row k+1's 'start unsure' are two on-screen checkboxes for the SAME
+    stored edge. They are two different Streamlit widgets under two
+    different keys, so ticking one does not, by itself, change what the
+    other widget shows — this is exactly the class of bug the module's own
+    docstring warns about elsewhere (a keyed widget ignores a changed
+    `value=`). Both must settle on the identical state after one rerun."""
+    fresh.set_end_unsure(1, True)
+    assert fresh.is_end_unsure(1)
+    assert fresh.is_unsure(2), "row 2's start-unsure did not mirror row 1's end-unsure"
+    fresh.set_unsure(2, False)
+    assert not fresh.is_end_unsure(1), "row 1's end-unsure did not follow back down"
+    assert not fresh.is_unsure(2)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Overlays share the chart, never the boundaries
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_dragging_a_boundary_gives_the_same_start_idx_with_overlays_on(fresh):
+    """The three filtered/smoothed layers are drawn in the SAME chart as the
+    raw series, on the SAME x/y mapping — a boundary's screen position comes
+    only from `sx(step index)`, never from any curve's value (see
+    label_tab.py's _CHART_JS: `setStart`/`onMove` read `clientX` and the
+    step index alone). Dragging near a differently-scaled curve must
+    therefore land on the identical step as dragging with no overlay on.
+
+    Leaves overlays switched off again at the end: a later test in this
+    module (`test_nothing_the_detector_produced_is_on_the_page`) asserts
+    package vocabulary is absent from the WHOLE page, which an overlay
+    checkbox's own label would violate if left ticked on.
+    """
+    fresh.drag_boundary(1, 34)
+    target_start = fresh.start_idx(1)
+    fresh.set_start_idx(1, 20)   # back to `fresh`'s known starting position
+
+    fresh.enable_overlay("vorticity_smoothed2")
+    try:
+        fresh.drag_boundary(1, 34)
+        with_overlay_start = fresh.start_idx(1)
+    finally:
+        fresh.set_start_idx(1, 20)
+        # switch the layer and the master back off
+        layer = fresh.page.get_by_label("vorticity_smoothed2", exact=False)
+        if layer.is_checked():
+            layer.locator("xpath=ancestor::label[1]").click()
+            fresh.settle()
+        master = fresh.page.get_by_label("Show filtered/smoothed overlays",
+                                         exact=False)
+        if master.is_checked():
+            master.locator("xpath=ancestor::label[1]").click()
+            fresh.settle()
+
+    assert with_overlay_start == pytest.approx(target_start, abs=1), (
+        f"drag landed on {with_overlay_start} with an overlay on vs. "
+        f"{target_start} without — the boundary must not depend on which "
+        "curve is drawn near the pointer")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# It has to fit on the screen
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Not cosmetics. The chart was a fixed 520 viewBox units tall, which rendered at
+# ~540px and put the curve and the table on different screenfuls: you scrolled
+# up to see the shape, down to type the number, and up again to check. You
+# cannot judge a boundary you cannot see while setting it. The component now
+# sizes itself from window.innerHeight and the app scrolls the working area to
+# the top when a new series arrives.
+
+@pytest.mark.parametrize("width,height", [(1440, 800), (1680, 950), (1920, 1080)])
+def test_the_working_area_fits_in_the_viewport(server, pw, width, height):
+    """Chart top to button bottom, on the three sizes this is actually used at.
+
+    A separate page per size on purpose: the height is computed once per build
+    from window.innerHeight, so resizing an existing page would test the resize
+    path rather than the initial one (that is the next test).
+    """
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": width, "height": height})
+    page.set_default_timeout(60_000)
+    try:
+        lp = LabelPage(page).open(server.url)
+        top, bottom = lp.working_area()
+        assert bottom - top <= height, (
+            f"the working area is {bottom - top:.0f}px tall in a {height}px "
+            "window — the curve and the table cannot both be seen")
+        assert top >= 0 and bottom <= height, (
+            f"it fits ({bottom - top:.0f}px) but is not on screen: "
+            f"top={top:.0f} bottom={bottom:.0f}")
+        assert not lp.clipped_chart_labels()
+        assert lp.chart_box()["height"] <= 460, "the chart ignored its cap"
+        assert lp.chart_box()["height"] >= 220, "the chart is too short to read"
+    finally:
+        browser.close()
+
+
+def test_the_chart_resizes_with_the_window_without_losing_the_marks(server, pw):
+    """The axes and the series path are baked in at build time, so a size change
+    is a rebuild — and a rebuild must not be a way to lose work."""
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 1600, "height": 1000})
+    page.set_default_timeout(60_000)
+    try:
+        lp = LabelPage(page).open(server.url)
+        lp.set_start_idx(1, 27)
+        # Row 2's own position on disk isn't controlled by this test (it uses
+        # a fresh page, not the `fresh` fixture, which pins it for exactly
+        # this reason) — push it out of the way so the drag to 40 at the
+        # bottom of this test has room; otherwise it is legitimately clamped
+        # against whatever row 2 happens to be for the currently-loaded case.
+        lp.set_start_idx(2, 60)
+        tall = lp.chart_box()["height"]
+
+        page.set_viewport_size({"width": 1600, "height": 700})
+        page.wait_for_timeout(900)
+        short = lp.chart_box()["height"]
+        assert short < tall - 40, f"{short} vs {tall}: the chart did not shrink"
+        assert lp.start_idx(1) == 27, "the resize rebuild dropped the marks"
+
+        page.set_viewport_size({"width": 1600, "height": 1000})
+        page.wait_for_timeout(900)
+        assert lp.chart_box()["height"] > short + 40, "it did not grow back"
+        assert lp.start_idx(1) == 27
+        # and it is still a working chart, not just a picture
+        lp.drag_boundary(1, 40)
+        assert lp.start_idx(1) == pytest.approx(40, abs=2)
+    finally:
+        browser.close()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Blindness, reconfirmed in the browser
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_nothing_the_detector_produced_is_on_the_page(lab):
+    """The AST tests prove the tab cannot IMPORT a detector. This proves the
+    rendered page carries no detector vocabulary either — the payload crosses
+    into the browser as JSON, so anything leaking would be visible here."""
+    body = lab.page.locator("body").inner_text().lower()
+    for word in ("get_periods", "process_vorticity", "find_stages",
+                 "vorticity_smoothed", "filtered_vorticity", "z_peaks_valleys"):
+        assert word not in body, word
+    series = lab.page.locator(lab.CHART).evaluate(
+        "(svg) => svg.querySelectorAll('path[stroke=\\'#1f2d3d\\']').length")
+    assert series == 1, f"{series} series drawn; the label view shows exactly one"

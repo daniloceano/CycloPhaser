@@ -1,0 +1,6 @@
+snapshot: labels_v1_snapshot.yaml, 7 TRAIN blocks, sha256 each, round-trip OK
+adjudicated: 5 — 20120297, 19940445, 19810854, 19860380, 19870927
+other blocks byte-identical: 68/68
+header before: "schema: 4\nupdated: '2026-09-25T13:24:00+00:00'\nn_labels: 73"
+header after:  "schema: 4\nupdated: '2026-09-27T15:08:39+00:00'\nn_labels: 73"
+manual_labels.yaml sha256 before e857e53b8b968e0f after 6815d82d73d14bcf

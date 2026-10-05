@@ -1,0 +1,18 @@
+{
+ "image": "8dc2159:docs/_images/cyclophaser_methodology.jpg",
+ "size": [
+  1754,
+  1241
+ ],
+ "colors": {
+  "incipient": "#8aa5f6",
+  "intensification": "#eeeb78",
+  "mature": "#e67d77",
+  "decay": "#cee3a8",
+  "residual": "#c0c0c0",
+  "zeta_850": "#717171",
+  "zeta_f": "#ef706a",
+  "zeta_s": "#6889f4",
+  "zeta_s2": "#030408"
+ }
+}

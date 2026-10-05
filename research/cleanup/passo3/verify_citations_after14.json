@@ -1,0 +1,9 @@
+{
+ "doc": "docs/findings.md",
+ "lines_with_numbers": 129,
+ "numbers_checked": 422,
+ "citations_resolved": 542,
+ "citations_total": 542,
+ "failures": [],
+ "weak_citations": 45
+}

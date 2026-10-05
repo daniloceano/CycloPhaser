@@ -1,0 +1,2 @@
+selection check against part 2's table: 5 selected, equal to the brief's 5: True
+frozen: 5 files copied byte for byte, sha256 recorded; split.yaml previous text is an exact prefix: True

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = '2.0.0'
+VERSION = '2.1.0'
 DESCRIPTION = 'Determine phases from extratropical cyclone life cycle'
 
 setup(
@@ -16,7 +16,8 @@ setup(
     author_email="danilo.oceano@gmail.com",
     license='GPL-3.0-or-later',
     packages=find_packages(exclude=['tests', 'tests.*']),
-    license_files=[],
+    python_requires=">=3.12",
+    license_files=["LICENSE"],
     install_requires=[
         "cmocean>=4.0",
         "contourpy>=1.3",
@@ -51,6 +52,7 @@ setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.12",
     ],
     project_urls={
         'Documentation': 'https://cyclophaser.readthedocs.io/en/latest/',

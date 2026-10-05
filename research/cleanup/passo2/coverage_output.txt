@@ -1,0 +1,3 @@
+Q1: 37/37 consolidar files mapped; without destination: none
+Q2: CSV rows 18, table rows in S02 18, cites CSV True, cites generator True
+Q3: S10 rows 203; destinations {'findings.md section': 202, 'future_work.md line': 28}; rows pointing to a leaving file: 0

@@ -1,0 +1,45 @@
+RELEASE v2.1 — PART A — PASSO 1 — TRAIN baseline under CURRENT labels
+cyclophaser.__file__: /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+environment: {"cyclophaser.__file__": "cyclophaser/__init__.py", "sys.prefix": "cyclophaser", "python": "3.12.14", "numpy": "2.5.3", "scipy": "1.18.0", "pandas": "3.0.5"}
+branch fix/relabel-recovery HEAD 4660b9dec3b65f959ad9da0c56c7b8ed6e0cba58
+scorer: research/labels/diagnostics/item31/stage1_run.py@5075e49 (verbatim copy stage1_run_5075e49.py, definitions only)
+config: research/labels/configs/cyclophaser_params-track.yaml sha256 5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04
+manual_labels.yaml sha256 6815d82d73d14bcf8478359bc1f82e7cf790a971ff4fa4eaa4b79e271bc7d40d
+population: 54 TRAIN (original_real 35, synthetic 12, batch_train 7); no TEST id read
+series_sha256 mismatches: none
+legacy records: none; adjudicated records: ['19810854', '19860380', '19870927', '19940445', '20120297'] (kept, as stage1_smoke_train.py kept every TRAIN record)
+
+aggregate (params-track):  H/B  R/N0  C/(B+N0)  Q/n  MAT/M  false-refusals  ambiguous(refused)  boundaries hit/scored  unsure-excluded
+  original_real  8/17  14/16  22/33  19/35  27/33  6  2(1)  33/42  6
+  synthetic      9/10  2/2  11/12  12/12  11/11  0  0(0)  43/46  0
+  batch_train    2/3  4/4  6/7  6/7  6/6  1  0(0)  16/16  0
+  all_train      19/30  20/22  39/52  37/54  44/50  7  2(1)  92/104  6
+
+per-phase boundary numbers, original_real (sequence-matched series only):
+  mature           n 17 hit 12 MAE 1.941 worst 6
+  decay            n 17 hit 15 MAE 2.235 worst 7
+  intensification  n  7 hit  6 MAE 1.857 worst 6
+  residual         n  1 hit  0 MAE 3.0 worst 3
+
+the three relabel series (CURRENT labels):
+  20150656  [residual]
+    label: verdict none inc_end None ±0 | intensification > mature > decay > residual
+    det:   inc_end None | intensification@0 mature@34 decay@49 intensification@86 mature@140 decay@148
+    C True  Q False  MAT True  incipient |err| None  boundaries 0/0 [] MAE None
+      k1 mature           label  34 ±3  unsure False | det same-slot None  first-mature 34 | |err| None scored False hit None
+      k2 decay            label  53 ±3  unsure False | det same-slot None  first-decay 49 | |err| None scored False hit None
+      k3 residual         label  91 ±13 unsure False | det same-slot None  first-residual None | |err| None scored False hit None
+  20170409  [decay]
+    label: verdict boundary inc_end 6 ±2 | incipient > intensification > mature > decay
+    det:   inc_end 6 | incipient@0 intensification@6 mature@60 decay@67
+    C True  Q True  MAT False  incipient |err| 0.0  boundaries 1/3 [intensification:0;mature:5;decay:7] MAE 4.0
+      k1 intensification  label   6 ±2  unsure False | det same-slot 6  first-intensification 6 | |err| 0 scored True hit True
+      k2 mature           label  55 ±4  unsure False | det same-slot 60  first-mature 60 | |err| 5 scored True hit False
+      k3 decay            label  74 ±3  unsure False | det same-slot 67  first-decay 67 | |err| 7 scored True hit False
+  20170154  [incipient boundary (verdict)]
+    label: verdict boundary inc_end 6 ±2 | incipient > intensification > mature > decay
+    det:   inc_end 6 | incipient@0 intensification@6 mature@35 decay@44
+    C True  Q True  MAT False  incipient |err| 0.0  boundaries 1/1 [intensification:0] MAE 0.0
+      k1 intensification  label   6 ±2  unsure False | det same-slot 6  first-intensification 6 | |err| 0 scored True hit True
+      k2 mature           label  31 ±5  unsure True  | det same-slot 35  first-mature 35 | |err| 4 scored False hit None
+      k3 decay            label  77 ±21 unsure True  | det same-slot 44  first-decay 44 | |err| 33 scored False hit None

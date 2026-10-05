@@ -1,0 +1,25 @@
+parameter,default,default in determine_periods
+``threshold_intensification_length``,``0.075``,``0.075``
+``threshold_intensification_gap``,``0.075``,``0.075``
+``threshold_mature_distance``,``0.18``,``0.18``
+``threshold_mature_length``,``0.15``,``0.15``
+``threshold_decay_length``,``0.075``,``0.075``
+``threshold_decay_gap``,``0.075``,``0.075``
+``threshold_incipient_length``,``0.4``,``0.4``
+``prominence``,``None``,``None``
+``prominence_relative``,``0.3``,``0.3``
+``reclassify_index0``,``True``,``True``
+``length_scale``,``'local'``,``'local'``
+``mature_method``,``'amplitude'``,``'amplitude'``
+``mature_amplitude_fraction``,``0.9``,``0.9``
+``mature_min_depth``,``0.8``,``0.8``
+``intensification_min_depth``,``0.05``,``0.05``
+``decay_tail_amplitude_fraction``,``0.3``,``0.3``
+``incipient_method``,``'plateau'``,``'plateau'``
+``incipient_plateau_tau``,``0.2``,``0.2``
+``incipient_plateau_signal``,``'vorticity'``,``'vorticity'``
+``incipient_plateau_crossing``,``'sustained'``,``'sustained'``
+``incipient_plateau_k``,``5``,``5``
+``incipient_smooth_window``,``5``,``5``
+``incipient_smooth_polyorder``,``3``,``3``
+``incipient_plateau_spare_intensification``,``True``,``True``

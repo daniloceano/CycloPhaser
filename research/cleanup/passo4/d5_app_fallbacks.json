@@ -1,0 +1,89 @@
+{
+ "old_rev": "b9991c4",
+ "preset_to_widgets_literal_fallbacks_old": {
+  "use_filter": false,
+  "replace_endpoints_with_lowpass": 0,
+  "savgol_polynomial": 3,
+  "boundary_padding": "reflect",
+  "cutoff_low": 168,
+  "cutoff_high": 48,
+  "use_smoothing": "auto",
+  "use_smoothing_twice": "auto"
+ },
+ "preset_to_widgets_literal_fallbacks_head": {},
+ "mature_ledger_literal_fallbacks_old": {
+  "length_scale": "global",
+  "mature_method": "derivative",
+  "mature_amplitude_fraction": 0.9,
+  "mature_min_depth": 0.0
+ },
+ "mature_ledger_literal_fallbacks_head": {},
+ "presets": {
+  "SYNTHETIC_CLEAN_PRESET": {
+   "missing_keys": [],
+   "reaches_fallback": false,
+   "widgets_old": {
+    "use_filter": false,
+    "replace_endpoints": 0,
+    "savgol_poly": 3,
+    "boundary_padding": "reflect",
+    "cutoff_low": 168,
+    "cutoff_high": 48,
+    "sm_mode": "auto",
+    "sm2_mode": "off"
+   },
+   "widgets_new": {
+    "use_filter": false,
+    "replace_endpoints": 0,
+    "savgol_poly": 3,
+    "boundary_padding": "reflect",
+    "cutoff_low": 168,
+    "cutoff_high": 48,
+    "sm_mode": "auto",
+    "sm2_mode": "off"
+   },
+   "identical": true,
+   "defaults_read": []
+  },
+  "SYNTHETIC_NOISY_PRESET": {
+   "missing_keys": [],
+   "reaches_fallback": false,
+   "widgets_old": {
+    "use_filter": true,
+    "replace_endpoints": 0,
+    "savgol_poly": 3,
+    "boundary_padding": "reflect",
+    "cutoff_low": 168,
+    "cutoff_high": 18,
+    "sm_mode": "off",
+    "sm2_mode": "off"
+   },
+   "widgets_new": {
+    "use_filter": true,
+    "replace_endpoints": 0,
+    "savgol_poly": 3,
+    "boundary_padding": "reflect",
+    "cutoff_low": 168,
+    "cutoff_high": 18,
+    "sm_mode": "off",
+    "sm2_mode": "off"
+   },
+   "identical": true,
+   "defaults_read": []
+  }
+ },
+ "mature_ledger_keys_in_ARGS_PERIODS_DEFAULTS": {
+  "length_scale": true,
+  "mature_method": true,
+  "mature_amplitude_fraction": true,
+  "mature_min_depth": true
+ },
+ "mature_ledger_keys_in_build_args_periods": {
+  "length_scale": true,
+  "mature_method": true,
+  "mature_amplitude_fraction": true,
+  "mature_min_depth": true
+ },
+ "configurations_reaching_a_fallback": 0,
+ "results_changed": []
+}

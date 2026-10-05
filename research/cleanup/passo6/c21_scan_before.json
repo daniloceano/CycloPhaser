@@ -1,0 +1,225 @@
+{
+ "label": "c21_scan_before",
+ "rev": "94fe6b2",
+ "paths": [
+  "tools/calibration_app",
+  "docs"
+ ],
+ "text_files_scanned": 42,
+ "occurrences": 67,
+ "lines": 53,
+ "where": [
+  {
+   "where": "docs/findings.md:86",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/findings.md:89",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/findings.md:91",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:100",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:111",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:120",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:160",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:164",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:175",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:249",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:373",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:376",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:589",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:739",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:1661",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:1693",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:1694",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:1723",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:1724",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:2316",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2322",
+   "n_test_ids": 4
+  },
+  {
+   "where": "docs/future_work.md:2326",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2386",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2443",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2447",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2571",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2576",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2596",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2637",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2642",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2643",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2652",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2875",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:2962",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3043",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3128",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3188",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3394",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3401",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:3402",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3431",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3442",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3450",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3591",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:3592",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3691",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3692",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3697",
+   "n_test_ids": 2
+  },
+  {
+   "where": "docs/future_work.md:3706",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3710",
+   "n_test_ids": 1
+  },
+  {
+   "where": "docs/future_work.md:3796",
+   "n_test_ids": 3
+  },
+  {
+   "where": "docs/future_work.md:3889",
+   "n_test_ids": 1
+  },
+  {
+   "where": "tools/calibration_app/app.py:2260",
+   "n_test_ids": 1
+  }
+ ]
+}

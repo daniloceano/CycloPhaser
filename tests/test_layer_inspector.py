@@ -1,0 +1,1130 @@
+"""Tests for the calibration app's layer inspector (tools/calibration_app/).
+
+The inspector is PURE VISUALISATION — it must never change what the package
+detects, and it must never MISREPORT it either. A view that showed a plausible
+parallel calculation would be worse than no view, because it would teach the
+wrong thing about the very parameter being tuned. So the tests here are almost
+entirely fidelity tests against the package itself:
+
+1. **Ledger fidelity** (the risky piece). The union of the candidates the
+   ledger marks ACCEPTED — plus the gaps it marks FILLED — must equal, bit for
+   bit, the mask ``find_intensification_period`` / ``find_decay_period``
+   produce when run in isolation on a fresh frame. Over the whole 51-track
+   calibration set x several prominence and length_scale settings.
+   Plus the measured reference counts, which pin the arithmetic itself.
+
+2. **Ribbon fidelity.** Step 6 of the pipeline ribbon must equal the
+   ``periods`` column ``get_periods`` returns. If it does not, the working
+   frame was built wrong — the ribbon would be narrating a run that never
+   happened.
+
+3. **Mature fidelity.** The windows the mature ledger says survive the strict
+   neighbour confirmation must be exactly the ones ``find_mature_stage``
+   leaves behind, and the accepted extrema must be the ones the detector
+   consumes.
+
+4. **The diagnostics are actually correct** (the ``|d2z|`` knee, the normalised
+   ``rel`` profile), on series whose answer is known by construction.
+
+5. **"Grid" mode is untouched.** The phase figure and the ZIP's PNG must be
+   BYTE-IDENTICAL to the research/incipient-plateau baseline — the inspector is
+   an addition, not a change.
+"""
+
+import ast
+import hashlib
+import io
+import sys
+import warnings
+import zipfile
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import pytest  # noqa: E402
+import yaml  # noqa: E402
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
+
+from cyclophaser.determine_periods import (  # noqa: E402
+    get_periods, periods_to_dict, process_vorticity,
+)
+from cyclophaser.find_stages import (  # noqa: E402
+    find_decay_period, find_intensification_period, find_mature_stage,
+)
+from cyclophaser.plots import plot_all_periods  # noqa: E402
+
+import layer_inspector as li  # noqa: E402
+
+sys.path.insert(0, str(REPO_ROOT / "tests"))
+# Item 31: tests whose numbers were MEASURED under the 2.0.0 defaults pass them
+# explicitly; tests about the CURRENT defaults (the ribbon with config dict(),
+# the defaults-equality checks of section 7) do not.
+from legacy_defaults import ARGS_2_0_0, FILTER_2_0_0, FRAME_2_0_0, PHASE_2_0_0  # noqa: E402
+
+CALIB = REPO_ROOT / "tests" / "calibration_data"
+ALL_TRACKS = sorted(p.stem for p in CALIB.glob("*.csv"))
+
+# 2.0.0 package-default pre-processing with smoothing off — the configuration
+# the reference ledger counts below were measured under. Item 31 moved the
+# package defaults (cutoff_high 48 -> 18, boundary_padding reflect -> edge; C1
+# later moved boundary_padding back to reflect), so the 2.0.0 filter values are
+# now spelled out, from the frozen table.
+PV_DEFAULT = dict(FILTER_2_0_0, use_filter=True, use_smoothing=False,
+                  use_smoothing_twice=False)
+
+# The section-3c calibration, the regime in which the prominence filter
+# actually rejects candidates on real tracks.
+AUTHOR_PV = dict(use_filter=True, cutoff_low=168, cutoff_high=18,
+                 boundary_padding="reflect", replace_endpoints_with_lowpass=0,
+                 use_smoothing=False, use_smoothing_twice=False,
+                 savgol_polynomial=3)
+
+
+def _series(track_id):
+    return pd.read_csv(CALIB / f"{track_id}.csv", sep=";", index_col="time",
+                       parse_dates=True)["min_max_zeta_850"]
+
+
+def _vorticity(track_id, **pv):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return process_vorticity(pd.DataFrame({"zeta": _series(track_id)}),
+                                 **{**PV_DEFAULT, **pv})
+
+
+@pytest.fixture(scope="module")
+def vort_cache():
+    """process_vorticity is the expensive step; compute each track once."""
+    return {}
+
+
+def _vort(cache, track_id, key="default", **pv):
+    ck = (track_id, key)
+    if ck not in cache:
+        cache[ck] = _vorticity(track_id, **pv)
+    return cache[ck]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 1. Ledger fidelity — the union of accepted candidates IS the package's mask
+# ══════════════════════════════════════════════════════════════════════════════
+
+# 51 tracks x 6 configurations x both stage functions. The brief asked for
+# >= 20 tracks x >= 2 prominence values; length_scale and the gap threshold are
+# swept too because both change which arithmetic the ledger has to reproduce
+# (_local_cycle_scale instead of the global length; gap bridging on or off).
+LEDGER_CONFIGS = [
+    (None, "global", 0.0),
+    (None, "global", 0.075),
+    (0.10, "global", 0.075),
+    (0.10, "local",  0.075),
+    (0.30, "global", 0.0),
+    (0.30, "local",  0.075),
+]
+
+
+@pytest.mark.parametrize("prominence_relative,length_scale,gap", LEDGER_CONFIGS)
+@pytest.mark.parametrize("kind", ["intensification", "decay"])
+def test_ledger_union_equals_the_package_mask(vort_cache, kind,
+                                              prominence_relative, length_scale,
+                                              gap):
+    """Every accepted candidate, and nothing else, is what the package marks.
+
+    Run over ALL 51 calibration tracks per configuration. The oracle is the
+    package function itself, executed in isolation on a fresh copy of the same
+    working frame, so a divergence means the ledger is telling the user a
+    different story from the one the detector acted on.
+    """
+    ledger_fn = (li.intensification_ledger if kind == "intensification"
+                 else li.decay_ledger)
+    divergences = []
+    for track_id in ALL_TRACKS:
+        df = li.build_working_frame(_vort(vort_cache, track_id),
+                                    prominence_relative=prominence_relative)
+        args = li.build_args_periods(
+            threshold_intensification_length=0.075,
+            threshold_intensification_gap=gap,
+            threshold_decay_length=0.075,
+            threshold_decay_gap=gap,
+            length_scale=length_scale,
+        )
+        mine = ledger_fn(df, **args)["mask"]
+        theirs = li.ledger_reference_mask(df, kind, **args)
+        if not np.array_equal(mine, theirs):
+            divergences.append((track_id, int((mine != theirs).sum())))
+    assert divergences == [], f"{len(divergences)} tracks diverge: {divergences[:5]}"
+
+
+# Measured on the 51 calibration tracks, intensification, length_scale='global',
+# package-default pre-processing with smoothing off. These pin the ARITHMETIC
+# (duration > scale x threshold), not just the agreement with the package: a
+# ledger that agreed with a wrongly-parameterised run would still pass the test
+# above.
+INTENSIFICATION_REFERENCE = {0.075: (71, 2), 0.15: (61, 12),
+                             0.25: (48, 25), 0.40: (31, 42)}
+
+
+@pytest.mark.parametrize("threshold,expected", sorted(INTENSIFICATION_REFERENCE.items()))
+def test_intensification_ledger_reference_counts(vort_cache, threshold, expected):
+    accepted = rejected = 0
+    for track_id in ALL_TRACKS:
+        df = li.build_working_frame(_vort(vort_cache, track_id), **FRAME_2_0_0)
+        args = li.build_args_periods(**{**ARGS_2_0_0,
+                                        "threshold_intensification_length": threshold,
+                                        "length_scale": "global"})
+        ledger = li.intensification_ledger(df, **args)
+        accepted += sum(c["accepted"] for c in ledger["candidates"])
+        rejected += sum(not c["accepted"] for c in ledger["candidates"])
+    assert (accepted, rejected) == expected
+
+
+def test_decay_ledger_covers_the_last_valley_to_the_end_of_the_series(vort_cache):
+    """find_decay_period runs the last z_valley to the end of the record when no
+    z_peak follows it. That branch is a candidate like any other and must appear
+    in the ledger — otherwise the view would silently omit the decay segment
+    that most often ends a track."""
+    seen = 0
+    for track_id in ALL_TRACKS:
+        df = li.build_working_frame(_vort(vort_cache, track_id), **FRAME_2_0_0)
+        ledger = li.decay_ledger(df, **li.build_args_periods(**ARGS_2_0_0))
+        tails = [c for c in ledger["candidates"] if c["to_series_end"]]
+        assert len(tails) <= 1
+        if tails:
+            seen += 1
+            assert tails[0]["end"] == df.index[-1]
+    assert seen > 0, "no track exercised the last-valley branch"
+
+
+def test_gap_records_use_the_opposite_comparison(vort_cache):
+    """A candidate is accepted when it is LONGER than its minimum; a gap is
+    filled when it is SHORTER than its maximum. Getting that backwards would be
+    invisible in the union mask on most tracks, so it is pinned directly."""
+    for track_id in ALL_TRACKS[:10]:
+        df = li.build_working_frame(_vort(vort_cache, track_id))
+        args = li.build_args_periods(threshold_intensification_gap=0.075)
+        ledger = li.intensification_ledger(df, **args)
+        for c in ledger["candidates"]:
+            assert c["accepted"] == (c["duration"] > c["minimum"])
+        for g in ledger["gaps"]:
+            assert g["accepted"] == (g["duration"] < g["minimum"])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 2. Ribbon fidelity — step 6 IS get_periods' result
+# ══════════════════════════════════════════════════════════════════════════════
+
+RIBBON_TRACKS = ALL_TRACKS[:12]        # the brief asked for >= 10
+RIBBON_CONFIGS = [
+    dict(),
+    dict(prominence_relative=0.30, length_scale="local"),
+    dict(mature_method="amplitude", mature_amplitude_fraction=0.95,
+         decay_tail_amplitude_fraction=0.05),
+    dict(incipient_method="plateau", incipient_plateau_tau=0.20),
+]
+_EXTREMA_KEYS = ("prominence", "prominence_relative")
+
+
+@pytest.mark.parametrize("config", RIBBON_CONFIGS,
+                         ids=["defaults", "tight-local", "amplitude-tail", "plateau"])
+def test_ribbon_step_six_equals_get_periods(vort_cache, config):
+    """The last lane of the ribbon must be the run the app is showing.
+
+    This is the check that the working frame was transcribed correctly: every
+    other guarantee in this module rests on ``build_working_frame`` producing
+    the frame ``get_periods`` builds internally, and this is the only way to
+    verify that from outside the function.
+    """
+    for track_id in RIBBON_TRACKS:
+        vort = _vort(vort_cache, track_id)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            df_result = get_periods(vort, **config)
+        # Item 31: forward only what the config CARRIES. An explicit None here
+        # would switch the prominence filter off while get_periods(**config)
+        # runs its default (0.3 since item 31).
+        df = li.build_working_frame(
+            vort, **{k: config[k] for k in _EXTREMA_KEYS if k in config})
+        args = li.build_args_periods(
+            **{k: v for k, v in config.items() if k not in _EXTREMA_KEYS})
+        steps = li.pipeline_ribbon(df, **args)
+
+        assert len(steps) == 6
+        assert [n for n, _ in steps] == list(li.STEP_NAMES)
+        pd.testing.assert_series_equal(steps[-1][1], df_result["periods"],
+                                       check_names=False)
+
+
+def test_ribbon_does_not_mutate_the_frame_it_is_given(vort_cache):
+    df = li.build_working_frame(_vort(vort_cache, ALL_TRACKS[0]))
+    snapshot = df.copy(deep=True)
+    li.pipeline_ribbon(df, **li.build_args_periods())
+    pd.testing.assert_frame_equal(df, snapshot)
+
+
+def test_ribbon_shows_a_later_step_overwriting_an_earlier_one(vort_cache):
+    """The measured reference case for the ribbon (20150069, package defaults,
+    use_filter=True / use_smoothing=False): decay takes the end of the
+    intensification from 28/01 17h; mature then takes stretches from BOTH
+    between 28/01 13h and 20h; incipient takes the first 6 steps of the
+    intensification. If the ribbon stopped showing this, it would have stopped
+    doing the one thing it exists for."""
+    df = li.build_working_frame(_vort(vort_cache, "20150069"), **FRAME_2_0_0)
+    steps = li.pipeline_ribbon(df, **li.build_args_periods(**ARGS_2_0_0))
+    got = {(r["step"], r["from"], r["to"],
+            r["start"].strftime("%d/%m %H"), r["end"].strftime("%d/%m %H"), r["n"])
+           for r in li.ribbon_overwrites(steps)}
+    assert ("2 find_decay_period", "intensification", "decay",
+            "28/01 17", "28/01 17", 1) in got
+    assert ("3 find_mature_stage", "intensification", "mature",
+            "28/01 13", "28/01 16", 4) in got
+    assert ("3 find_mature_stage", "decay", "mature",
+            "28/01 17", "28/01 20", 4) in got
+    assert ("6 find_incipient_period", "intensification", "incipient",
+            "27/01 04", "27/01 09", 6) in got
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 3. Mature fidelity
+# ══════════════════════════════════════════════════════════════════════════════
+
+MATURE_TRACKS = ["20190325", "20203947"]
+MATURE_CONFIGS = [
+    dict(),
+    dict(prominence_relative=0.30),
+    dict(mature_method="amplitude", mature_amplitude_fraction=0.95),
+    dict(length_scale="local", threshold_mature_length=0.06),
+]
+
+
+def test_mature_tracks_are_not_in_the_test_split():
+    """The test split is spent: no test reads it (passo5). Guarded against split.yaml
+    itself, never against a copied id list."""
+    import yaml
+    split = yaml.safe_load((REPO_ROOT / "research" / "labels" / "split.yaml").read_text())
+    test = {str(i) for i in split["test"]}
+    for batch in (split.get("batches") or {}).values():
+        test |= {str(i) for i in (batch.get("test") or [])}
+    assert not set(MATURE_TRACKS) & test
+
+
+@pytest.mark.parametrize("track_id", MATURE_TRACKS)
+@pytest.mark.parametrize("config", MATURE_CONFIGS,
+                         ids=["defaults", "tight", "amplitude", "local-floor"])
+def test_mature_ledger_confirmed_windows_are_the_detector_s(vort_cache, track_id,
+                                                            config):
+    """The windows the ledger says survive == the 'mature' find_mature_stage writes.
+
+    ``mature_ledger`` is the one place in the module that reconstructs a
+    criterion the package does not expose as a callable (the window sizing is
+    inline in find_mature_stage), so it is pinned against find_mature_stage's
+    own output — including the strict neighbour confirmation, whose whole point
+    here is that a discarded window otherwise leaves no trace at all.
+    """
+    vort = _vort(vort_cache, track_id, key="author", **AUTHOR_PV)
+    df = li.build_working_frame(vort, **{k: config.get(k) for k in _EXTREMA_KEYS})
+    args = li.build_args_periods(
+        **{k: v for k, v in config.items() if k not in _EXTREMA_KEYS})
+
+    after_decay = find_decay_period(
+        find_intensification_period(df.copy(deep=True), **args), **args)
+    records = li.mature_ledger(after_decay, **args)
+    mine = li.mature_confirmed_mask(after_decay, records)
+    theirs = (find_mature_stage(after_decay.copy(deep=True), **args)["periods"]
+              == "mature").to_numpy()
+    np.testing.assert_array_equal(mine, theirs)
+
+
+@pytest.mark.parametrize("track_id", MATURE_TRACKS[:3])
+def test_discarded_mature_windows_carry_a_reason(vort_cache, track_id):
+    """Every window that was written and then erased says WHY, in the vocabulary
+    of the confirmation rule — that string is the entire point of the layer."""
+    vort = _vort(vort_cache, track_id, key="author", **AUTHOR_PV)
+    df = li.build_working_frame(vort)
+    args = li.build_args_periods()
+    after_decay = find_decay_period(
+        find_intensification_period(df.copy(deep=True), **args), **args)
+    allowed = {"no preceding intensification", "no following decay",
+               "block starts at the beginning of the series",
+               "block ends at the end of the series"}
+    for rec in records_written(li.mature_ledger(after_decay, **args)):
+        if rec["confirmed"]:
+            assert rec["reason"] == ""
+        else:
+            assert rec["reason"], "a discarded window must say why"
+            assert set(rec["reason"].split(" · ")) <= allowed
+
+
+def records_written(records):
+    return [r for r in records if r["written"]]
+
+
+@pytest.mark.parametrize("track_id", MATURE_TRACKS)
+@pytest.mark.parametrize("extrema", [dict(), dict(prominence_relative=0.30),
+                                     dict(prominence_relative=0.05)],
+                         ids=["no-filter", "tight-0.30-d3", "loose-0.05"])
+def test_mature_lens_accepted_extrema_are_the_detector_s(vort_cache, track_id,
+                                                         extrema):
+    """The lens's "accepted" set == the extrema mature detection actually uses.
+
+    Ground truth is ``df['z_peaks_valleys']`` from a real ``get_periods`` run —
+    the exact column ``find_mature_stage`` reads its z_valleys and z_peaks from.
+    (Carried over from the abandoned research/app-phase-focus branch, which is
+    where this lens and its test were first written.)
+    """
+    vort = _vort(vort_cache, track_id, key="author", **AUTHOR_PV)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, **{**PHASE_2_0_0, **extrema})   # 2.0.0 base
+    lens = li.mature_lens(df_result["z"], **extrema)
+    for kind in ("peak", "valley"):
+        np.testing.assert_array_equal(
+            lens[f"accepted_{kind}s"],
+            np.flatnonzero((df_result["z_peaks_valleys"] == kind).to_numpy()))
+
+
+def test_effective_threshold_explains_the_classification(vort_cache):
+    """The drawn threshold line separates accepted from rejected, exactly.
+
+    Prominence is the ONLY reason an interior candidate
+    can be dropped and the line must account for every rejection. Boundary
+    extrema are excluded: the package preserves them unconditionally.
+    """
+    for track_id in MATURE_TRACKS:
+        vort = _vort(vort_cache, track_id, key="author", **AUTHOR_PV)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            df_result = get_periods(vort, prominence_relative=0.30)
+        lens = li.mature_lens(df_result["z"], prominence_relative=0.30)
+        n = lens["n"]
+        for kind in ("peak", "valley"):
+            thr = lens[f"{kind}_threshold"]
+            assert thr is not None
+            proms = lens[f"{kind}_prominences"]
+            for idx in lens[f"accepted_{kind}s"]:
+                if idx in (0, n - 1):
+                    continue
+                assert proms[int(idx)] >= thr
+            for idx in lens[f"rejected_{kind}s"]:
+                assert int(idx) not in (0, n - 1)
+                assert proms[int(idx)] < thr
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 4. Diagnostics on series with a known answer
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_knee_index_on_a_known_series():
+    """|d2z| is largest at a designed spike inside the first half."""
+    dz2 = np.zeros(100)
+    dz2[20] = 3.0        # the knee: the largest |.| in the leading half
+    dz2[10] = -1.5
+    dz2[80] = -50.0      # a far larger turn later on, which must NOT win
+    assert li.knee_index(dz2) == 20
+    dz2[20] = -3.0       # sign is irrelevant — it is |d2z| that is maximised
+    assert li.knee_index(dz2) == 20
+
+
+def test_knee_index_window_follows_the_fraction():
+    dz2 = np.zeros(100)
+    dz2[15] = 1.0
+    dz2[40] = 5.0
+    assert li.knee_index(dz2, fraction=0.5) == 40    # window [0, 50)
+    assert li.knee_index(dz2, fraction=0.2) == 15    # window [0, 20)
+
+
+def test_knee_index_degenerate_inputs():
+    assert li.knee_index(np.array([])) == 0
+    assert li.knee_index(np.array([np.nan, np.nan])) == 0
+    assert li.knee_index(np.zeros(10)) == 0          # flat: argmax is index 0
+
+
+def test_rel_profile_is_abs_dz_over_its_max():
+    """rel(t) on the "derivative" signal is exactly |dz| / max|dz|."""
+    dz = np.array([0.0, -1.0, 2.0, -8.0, 4.0, 0.5])
+    lens = li.incipient_lens(z_unfil=np.zeros_like(dz), dz=dz,
+                             dz2=np.zeros_like(dz), signal="derivative", tau=0.20)
+    np.testing.assert_allclose(lens["rel_raw"], np.abs(dz) / 8.0)
+    # tau=0.20 -> first sample with |dz|/8 >= 0.2 is index 2 (2/8 = 0.25);
+    # index 1 is 1/8 = 0.125, below tau.
+    assert lens["boundary_raw"] == 2
+    # "derivative" reads a curve the pipeline already filtered, so the probe
+    # smoothing is inert there and both profiles must coincide.
+    assert lens["smoothing_applies"] is False
+    np.testing.assert_array_equal(lens["rel_raw"], lens["rel_smoothed"])
+
+
+def test_rel_profile_flat_signal_is_all_zero():
+    flat = np.zeros(20)
+    lens = li.incipient_lens(z_unfil=flat, dz=flat, dz2=flat,
+                             signal="derivative", tau=0.20)
+    np.testing.assert_array_equal(lens["rel_raw"], np.zeros(20))
+    assert lens["boundary_raw"] == 0        # no crossing -> no incipient phase
+
+
+def test_probe_smoothing_is_reported_only_where_it_applies():
+    """smoothing_applies mirrors the package's own "vorticity only" rule."""
+    x = np.linspace(0, 1, 60) ** 2
+    common = dict(z_unfil=x, dz=np.gradient(x), dz2=np.gradient(np.gradient(x)),
+                  tau=0.20, smooth_polyorder=3)
+    assert li.incipient_lens(signal="vorticity", smooth_window=9, **common)["smoothing_applies"]
+    assert not li.incipient_lens(signal="vorticity", smooth_window=0, **common)["smoothing_applies"]
+    assert not li.incipient_lens(signal="derivative", smooth_window=9, **common)["smoothing_applies"]
+
+
+@pytest.mark.parametrize("track_id", ["20190325", "20206498"])
+def test_incipient_boundary_is_read_back_not_recomputed(vort_cache, track_id):
+    """``incipient_lead`` reports the boundary the RUN produced.
+
+    Under the plateau rule with this calibration it coincides with the lens's
+    own tau crossing; the layer draws both precisely so a divergence (the
+    catch-all fillna extending the phase past the crossing) stays visible
+    rather than being silently reconciled.
+    """
+    vort = _vort(vort_cache, track_id, key="author", **AUTHOR_PV)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, **{**PHASE_2_0_0,            # 2.0.0 base
+                                         "incipient_method": "plateau",
+                                         "incipient_plateau_tau": 0.20})
+    lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
+                             df_result["dz2"], signal="derivative", tau=0.20)
+    assert li.incipient_lead(df_result) == lens["boundary_raw"]
+
+
+def test_helpers_do_not_mutate_their_input_arrays():
+    dz = np.array([0.0, -1.0, 2.0, -8.0, 4.0, 0.5])
+    dz2 = np.array([1.0, 2.0, -3.0, 0.5, 0.0, 0.0])
+    z = np.linspace(1.0, 2.0, 6)
+    dz_copy, dz2_copy, z_copy = dz.copy(), dz2.copy(), z.copy()
+
+    li.incipient_lens(z, dz, dz2, signal="vorticity", tau=0.2, smooth_window=5)
+    li.mature_lens(pd.Series(z), prominence_relative=0.1)
+
+    np.testing.assert_array_equal(dz, dz_copy)
+    np.testing.assert_array_equal(dz2, dz2_copy)
+    np.testing.assert_array_equal(z, z_copy)
+
+
+def test_build_args_periods_rejects_a_non_parameter():
+    """A typo'd threshold silently falling back to the default would make the
+    ribbon and the ledgers explain a different run from the one on screen."""
+    with pytest.raises(KeyError):
+        li.build_args_periods(threshold_intensification_lenght=0.075)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5. "Grid" mode is byte-identical to the research/incipient-plateau baseline
+# ══════════════════════════════════════════════════════════════════════════════
+
+GRID_TRACKS = ["20150069", "20190325", "20206498"]
+
+
+def _phase_png(track_id, figsize=(12, 5), show_title=True) -> bytes:
+    """The Grid mode's phase figure, produced exactly as _render_periods_png does.
+
+    Transcribed from the app rather than imported because importing app.py
+    executes a Streamlit script; the point here is the matplotlib call chain,
+    which is what a regression would break.
+    """
+    vort = _vorticity(track_id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, plot=False, plot_steps=False)
+    periods_dict = periods_to_dict(df_result)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    try:
+        plot_all_periods(periods_dict, df_result, ax=ax, vorticity=vort)
+        import matplotlib.dates as mdates
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d"))
+    except Exception:
+        pass
+    if show_title:
+        ax.set_title(track_id, fontweight="bold")
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    return buf.getvalue()
+
+
+@pytest.mark.parametrize("track_id", GRID_TRACKS)
+def test_grid_phase_figure_is_unchanged_by_the_inspector(track_id):
+    """Rendering the inspector's layers must leave the Grid figure identical.
+
+    The realistic regression is a helper mutating the shared frame (a column
+    overwritten, an index re-sorted), which would silently change the figure
+    the next time it is drawn. So: render, run EVERY inspector computation over
+    the same objects, render again, and require byte equality.
+    """
+    before = _phase_png(track_id)
+
+    vort = _vorticity(track_id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort)
+    snapshot = df_result.copy(deep=True)
+
+    args = li.build_args_periods()
+    work = li.build_working_frame(vort)
+    li.pipeline_ribbon(work, **args)
+    li.intensification_ledger(work, **args)
+    li.decay_ledger(work, **args)
+    after_decay = find_decay_period(
+        find_intensification_period(work.copy(deep=True), **args), **args)
+    li.mature_ledger(after_decay, **args)
+    li.mature_lens(df_result["z"])
+    li.incipient_lens(df_result["z_unfil"], df_result["dz"], df_result["dz2"])
+
+    after = _phase_png(track_id)
+    assert hashlib.md5(after).hexdigest() == hashlib.md5(before).hexdigest()
+    pd.testing.assert_frame_equal(df_result, snapshot)
+
+
+def test_grid_zip_png_is_the_same_figure_as_the_export():
+    """The ZIP entry is the phase PNG at the export size, unchanged.
+
+    Guards the export path specifically: the inspector added a second renderer,
+    and the exported PNG has to stay deterministic matplotlib output.
+    """
+    png = _phase_png("20190325", figsize=(12, 5), show_title=True)
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("20190325_periods.png", png)
+    buf.seek(0)
+    with zipfile.ZipFile(buf) as zf:
+        assert zf.read("20190325_periods.png") == png
+    assert png.startswith(b"\x89PNG")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 6. The renderers consume the helpers without touching detection
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_plotly_inspector_starts_with_every_layer_on(vort_cache):
+    """The inspector opens with everything visible, and nothing is missing.
+
+    Every pipeline series and every extrema column is a trace, all of them
+    visible; phase shading is present as shapes with a client-side on/off
+    button (a full-height band cannot be a legend item in Plotly). Switching a
+    layer off is a legend click, which leaves it in the figure as
+    'legendonly' — that is what makes the toggle free.
+    """
+    pytest.importorskip("plotly")
+    from inspector_plotly import build_inspector_figure
+
+    vort = _vorticity("20190325")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort)
+    fig = build_inspector_figure("20190325", vort, df_result,
+                                 periods_to_dict(df_result))
+
+    visible = {t.name for t in fig.data if t.visible is True}
+    for expected in ("zeta (raw input)", "filtered_vorticity (Lanczos)",
+                     "vorticity_smoothed (Savgol 1)",
+                     "vorticity_smoothed2 (what detection reads)",
+                     "dz_dt_filt", "dz_dt_smoothed2 (what detection reads)",
+                     "dz_dt2_filt", "dz_dt2_smoothed2 (what detection reads)",
+                     "z_peaks_valleys", "dz_peaks_valleys", "dz2_peaks_valleys"):
+        assert expected in visible, expected
+    assert not [t for t in fig.data if t.visible == "legendonly"]
+    # Phase shading is always present and has no toggle: it is the background
+    # every other layer is read against.
+    assert len(fig.layout.shapes) > 0
+    assert len(fig.layout.updatemenus) == 0
+
+
+def test_plotly_inspector_rescales_in_the_package_s_own_groups(vort_cache):
+    """Rescaling reproduces how ``plots.plot_all_periods`` splits its twinx axes.
+
+    That figure draws raw ``zeta`` on one axis and filtered/smoothed/smoothed2
+    together on a second. Both halves of that matter:
+
+      * the raw series gets its own band, so it OVERLAYS the filtered curve
+        instead of squashing it — the readable "same track, cleaned up" view;
+      * the three pipeline stages share ONE band, so the amplitude each
+        smoothing pass removes is still visible. Scaling them separately would
+        force each to span the full height and make every stage look the same,
+        which is exactly what the panel exists to show.
+
+    Run with smoothing ON (package defaults), since with it off the three
+    stages are identical and the grouping cannot be told apart.
+    """
+    pytest.importorskip("plotly")
+    from inspector_plotly import build_inspector_figure
+
+    vort = _vorticity("20190325", use_smoothing="auto", use_smoothing_twice="auto")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort)
+    fig = build_inspector_figure("20190325", vort, df_result,
+                                 periods_to_dict(df_result), normalize=True)
+
+    def plotted(name):
+        return np.asarray(next(t for t in fig.data if t.name == name).y, dtype=float)
+
+    raw = plotted("zeta (raw input)")
+    filt = plotted("filtered_vorticity (Lanczos)")
+    sm = plotted("vorticity_smoothed (Savgol 1)")
+    sm2 = plotted("vorticity_smoothed2 (what detection reads)")
+
+    # The raw series has a band of its own and uses all of it.
+    assert np.isclose(raw.min(), 0.0) and np.isclose(raw.max(), 1.0)
+    # The three pipeline stages pool into one band: together they fill it,
+    # individually they do not.
+    pooled = np.concatenate([filt, sm, sm2])
+    assert np.isclose(pooled.min(), 0.0) and np.isclose(pooled.max(), 1.0)
+    assert (sm2.max() - sm2.min()) < (filt.max() - filt.min())
+
+    # The ratio of amplitudes between stages is preserved exactly — that ratio
+    # IS the effect of the smoothing pass, and it is what per-series scaling
+    # destroyed (it forces every ratio to 1).
+    true = {n: np.asarray(vort[n].values, dtype=float)
+            for n in ("filtered_vorticity", "vorticity_smoothed2")}
+    true_ratio = (np.ptp(true["filtered_vorticity"])
+                  / np.ptp(true["vorticity_smoothed2"]))
+    assert true_ratio > 1.05, "this track must actually be smoothed for the test to bite"
+    np.testing.assert_allclose(np.ptp(filt) / np.ptp(sm2), true_ratio, rtol=1e-9)
+
+
+def test_plotly_inspector_without_rescaling_plots_true_units(vort_cache):
+    pytest.importorskip("plotly")
+    from inspector_plotly import build_inspector_figure
+
+    vort = _vorticity("20190325")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort)
+    plain = build_inspector_figure("20190325", vort, df_result,
+                                   periods_to_dict(df_result), normalize=False)
+    raw_trace = next(t for t in plain.data if t.name == "zeta (raw input)")
+    np.testing.assert_allclose(np.asarray(raw_trace.y, dtype=float),
+                               np.asarray(vort["zeta"].values, dtype=float))
+    # The raw value is in the hover either way, so rescaling never loses it.
+    normed = build_inspector_figure("20190325", vort, df_result,
+                                    periods_to_dict(df_result), normalize=True)
+    hov = next(t for t in normed.data if t.name == "zeta (raw input)")
+    np.testing.assert_allclose(
+        np.asarray([c[0] for c in hov.customdata], dtype=float),
+        np.asarray(vort["zeta"].values, dtype=float))
+
+
+def test_normalise_series_spreads_over_zero_to_one():
+    y = np.array([-4.0, -2.0, 0.0, 1.0, 2.0])
+    out, lo, hi = li.normalise_series(y)
+    assert (lo, hi) == (-4.0, 2.0)
+    np.testing.assert_allclose(out, (y + 4.0) / 6.0)
+    assert out[0] == 0.0 and out[-1] == 1.0
+    # A flat series has no range to spread over: centre it instead of dividing
+    # by zero.
+    flat, flo, fhi = li.normalise_series(np.zeros(5))
+    np.testing.assert_array_equal(flat, np.full(5, 0.5))
+    assert flo == fhi
+
+
+def test_rescaler_puts_an_overlay_on_the_curve_it_annotates():
+    """An overlay must use the SAME transform as the curve it is drawn over,
+    or a ledger segment would float above or below the z line it describes."""
+    z = np.array([-4.0, -2.0, 0.0, 2.0])
+    f = li.rescaler([z], normalize=True)
+    np.testing.assert_allclose(f(z), [0.0, 1 / 3, 0.5 + 1 / 6, 1.0])
+    # A subset of the same curve lands exactly on the full curve's rendering.
+    np.testing.assert_allclose(f(z[1:3]), f(z)[1:3])
+    # Off, the transform is the identity.
+    np.testing.assert_array_equal(li.rescaler([z], normalize=False)(z), z)
+    # A bare array is a group of one, not a band per element.
+    np.testing.assert_allclose(li.rescaler(z, normalize=True)(z), f(z))
+
+
+def test_rescaler_pools_a_group_into_one_band():
+    """Series handed in together share a band, so their relative amplitudes
+    survive — that is what keeps a smoothing pass visible in the z panel."""
+    wide = np.array([0.0, 10.0])
+    narrow = np.array([2.0, 4.0])
+    f = li.rescaler([wide, narrow], normalize=True)
+    np.testing.assert_allclose(f(wide), [0.0, 1.0])
+    np.testing.assert_allclose(f(narrow), [0.2, 0.4])   # keeps its 1/5 amplitude
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 6. Incipient inspector: rel label sourced from `signal`, and the crossing/k
+#    evidence the plateau rule's refusal is explained by (FRENTE F(i)(ii))
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_rel_signal_label_names_the_active_quantity():
+    """`rel_label`/`rel_label_short` must name the curve `rel` actually reads,
+    branch for branch with `_incipient_plateau_rel` (find_stages.py:799-837)."""
+    short, long = li.rel_signal_label("derivative")
+    assert "|dz|" in short and "|dz|" in long
+
+    short0, long0 = li.rel_signal_label("vorticity", smooth_window=0)
+    assert "|dz|" not in short0 and "|dz|" not in long0
+    assert "ζ_raw" in long0 and "dt" in long0
+
+    short_w, long_w = li.rel_signal_label("vorticity", smooth_window=5,
+                                          smooth_polyorder=3)
+    assert "|dz|" not in short_w and "|dz|" not in long_w
+    assert "5" in long_w and "Savgol" in long_w
+    # The window shows up in the label, so w=5 and w=9 must read differently.
+    _, long_w9 = li.rel_signal_label("vorticity", smooth_window=9,
+                                     smooth_polyorder=3)
+    assert long_w != long_w9
+
+    with pytest.raises(ValueError):
+        li.rel_signal_label("not-a-signal")
+
+
+def _incipient_dict(df_result, *, signal="derivative", tau=0.20,
+                    crossing="single", k=3, smooth_window=0,
+                    smooth_polyorder=3):
+    """Builds the same `incipient=` dict app.py hands the renderers."""
+    lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
+                             df_result["dz2"], signal=signal, tau=tau,
+                             crossing=crossing, k=k,
+                             smooth_window=smooth_window,
+                             smooth_polyorder=smooth_polyorder)
+    return {
+        "lens": lens,
+        "boundary": li.incipient_lead(df_result),
+        "tau": tau,
+        "plateau_active": True,
+    }
+
+
+def test_no_hardcoded_derivative_formula_under_vorticity_signal(vort_cache):
+    """With signal='vorticity', the string '|dz| / max|dz|' must not appear
+    anywhere in the plotly figure's trace names / subplot titles, nor in the
+    mpl figure's legend labels / ylabel — it would misname the curve drawn."""
+    pytest.importorskip("plotly")
+    from inspector_mpl import render_static_inspector
+    from inspector_plotly import build_inspector_figure
+
+    forbidden = "|dz| / max|dz|"
+    vort = _vort(vort_cache, "20190325", key="author", **AUTHOR_PV)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, incipient_method="plateau",
+                                incipient_plateau_tau=0.20)
+    incipient = _incipient_dict(df_result, signal="vorticity",
+                                smooth_window=5, smooth_polyorder=3)
+
+    fig = build_inspector_figure("20190325", vort, df_result,
+                                 periods_to_dict(df_result), incipient=incipient)
+    for trace in fig.data:
+        assert forbidden not in (trace.name or "")
+    for ann in fig.layout.annotations:
+        assert forbidden not in (ann.text or "")
+
+    mpl_fig = render_static_inspector("20190325", vort, df_result,
+                                      periods_to_dict(df_result),
+                                      incipient=incipient)
+    ax_rel = mpl_fig.axes[3]
+    assert forbidden not in ax_rel.get_ylabel()
+    legend = ax_rel.get_legend()
+    if legend is not None:
+        for text in legend.get_texts():
+            assert forbidden not in text.get_text()
+    plt.close(mpl_fig)
+
+
+@pytest.mark.parametrize("track_id", ALL_TRACKS)
+@pytest.mark.parametrize("crossing,k", [("single", 1), ("sustained", 3)])
+def test_crossing_index_matches_the_package_boundary_function(vort_cache,
+                                                              track_id,
+                                                              crossing, k):
+    """`crossing_index` is never a second, parallel implementation of the
+    plateau rule — it must equal `_incipient_plateau_boundary` on the rel
+    profile in force, and `refusal_reason` must exist iff there is no
+    crossing."""
+    vort = _vort(vort_cache, track_id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, **{**PHASE_2_0_0,            # 2.0.0 base
+                                         "incipient_method": "plateau",
+                                         "incipient_plateau_tau": 0.20,
+                                         "incipient_plateau_crossing": crossing,
+                                         "incipient_plateau_k": k})
+    lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
+                             df_result["dz2"], signal="derivative", tau=0.20,
+                             crossing=crossing, k=k)
+    expected = li._incipient_plateau_boundary(lens["rel_smoothed"], 0.20,
+                                              crossing, k)
+    assert lens["crossing_index"] == expected
+    assert (lens["refusal_reason"] is None) == (lens["crossing_index"] > 0)
+
+
+@pytest.mark.parametrize("track_id", ALL_TRACKS)
+@pytest.mark.parametrize("crossing,k", [("single", 1), ("sustained", 3)])
+def test_incipient_lead_never_precedes_the_crossing_index(vort_cache,
+                                                          track_id,
+                                                          crossing, k):
+    """The phase `find_incipient_period` produces may sit LATER than the
+    crossing (the leading-NaN fillna can extend it — see `incipient_lead`'s
+    docstring), but it must never start before the crossing the same
+    configuration produces."""
+    vort = _vort(vort_cache, track_id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        df_result = get_periods(vort, **{**PHASE_2_0_0,            # 2.0.0 base
+                                         "incipient_method": "plateau",
+                                         "incipient_plateau_tau": 0.20,
+                                         "incipient_plateau_crossing": crossing,
+                                         "incipient_plateau_k": k})
+    lens = li.incipient_lens(df_result["z_unfil"], df_result["dz"],
+                             df_result["dz2"], signal="derivative", tau=0.20,
+                             crossing=crossing, k=k)
+    lead = li.incipient_lead(df_result)
+    assert lead >= lens["crossing_index"], (
+        f"{track_id} ({crossing}, k={k}): lead={lead} < "
+        f"crossing_index={lens['crossing_index']}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 7. The app's full parameter set reaches the inspector (item 30a)
+# ══════════════════════════════════════════════════════════════════════════════
+
+APP_PY = REPO_ROOT / "tools" / "calibration_app" / "app.py"
+PARAMS_TRACK = REPO_ROOT / "research" / "labels" / "configs" / "cyclophaser_params-track.yaml"
+
+# What the app routes to build_working_frame instead of build_args_periods —
+# the exclusion in the inspector block of app.py.
+_APP_EXTRA_KEYS = ("prominence", "prominence_relative", "reclassify_index0")
+
+# The app's own YAML converters for the three integer-valued keys (params-track
+# stores incipient_smooth_window as 5.0).
+_INT_KEYS = ("incipient_plateau_k", "incipient_smooth_window",
+             "incipient_smooth_polyorder")
+
+
+def _app_phase_param_keys() -> set:
+    """Keyword names of the app's ``_PHASE_PARAMS = dict(...)``, read by parsing
+    app.py — importing it would execute a Streamlit script. Read rather than
+    copied, so a key the app starts sending shows up here on its own."""
+    tree = ast.parse(APP_PY.read_text())
+    found = [node.value for node in ast.walk(tree)
+             if isinstance(node, ast.Assign)
+             and any(isinstance(t, ast.Name) and t.id == "_PHASE_PARAMS"
+                     for t in node.targets)]
+    assert len(found) == 1, f"expected one _PHASE_PARAMS assignment, got {len(found)}"
+    call = found[0]
+    assert isinstance(call, ast.Call) and call.func.id == "dict"
+    return {kw.arg for kw in call.keywords}
+
+
+def _params_track():
+    """(filter_params, phase_params) of params-track, phase values typed as the app
+    types them on import."""
+    cfg = yaml.safe_load(PARAMS_TRACK.read_text())
+    phase = dict(cfg["phase_params"])
+    for k in _INT_KEYS:
+        phase[k] = int(float(phase[k]))
+    return dict(cfg["filter_params"]), phase
+
+
+def test_inspector_accepts_the_full_parameter_set_the_app_sends(vort_cache):
+    """The inspector path, called with every key the app hands build_args_periods.
+
+    Regression for item 30a: the app sends mature_min_depth and
+    intensification_min_depth on every run (default 0.0), and
+    build_args_periods rejected both, so the inspector failed for any track.
+    """
+    keys = _app_phase_param_keys() - set(_APP_EXTRA_KEYS)
+    pv, phase = _params_track()
+    args = li.build_args_periods(**{k: phase.get(k) for k in keys})
+    df = li.build_working_frame(
+        _vort(vort_cache, "20190325", key="p15", **pv),
+        prominence=phase.get("prominence"),
+        prominence_relative=phase.get("prominence_relative"),
+        reclassify_index0=phase["reclassify_index0"])
+    li.pipeline_ribbon(df, **args)
+    li.intensification_ledger(df, **args)
+    li.decay_ledger(df, **args)
+    after_decay = find_decay_period(
+        find_intensification_period(df.copy(deep=True), **args), **args)
+    li.mature_ledger(after_decay, **args)
+
+
+
+def _get_periods_args_block() -> dict:
+    """``{key: forwarded parameter name}`` of the ``args_periods = {...}`` block
+    inside ``get_periods``, read by parsing the package source — not a copied
+    list, so a key added to the package and not to the inspector fails here."""
+    import cyclophaser.find_stages as _fs  # a module, unlike cyclophaser.determine_periods
+    src = Path(_fs.__file__).with_name("determine_periods.py")
+    tree = ast.parse(src.read_text())
+    fns = [n for n in tree.body
+           if isinstance(n, ast.FunctionDef) and n.name == "get_periods"]
+    assert len(fns) == 1
+    blocks = [node.value for node in ast.walk(fns[0])
+              if isinstance(node, ast.Assign)
+              and any(isinstance(t, ast.Name) and t.id == "args_periods"
+                      for t in node.targets)
+              and isinstance(node.value, ast.Dict)]
+    assert len(blocks) == 1, f"expected one args_periods dict, got {len(blocks)}"
+    out = {}
+    for k, v in zip(blocks[0].keys, blocks[0].values):
+        assert isinstance(k, ast.Constant) and isinstance(v, ast.Name)
+        out[k.value] = v.id
+    return out
+
+
+def test_args_periods_defaults_have_exactly_get_periods_keys():
+    """Anti-recurrence for item 30a: the inspector's key set IS the package's."""
+    package = set(_get_periods_args_block())
+    mine = set(li._ARGS_PERIODS_DEFAULTS)
+    assert mine == package, (f"missing here: {sorted(package - mine)}; "
+                             f"unknown to the package: {sorted(mine - package)}")
+
+
+def test_args_periods_defaults_are_get_periods_defaults():
+    """...and each value is get_periods' own default for the parameter it forwards."""
+    import inspect
+    sig = inspect.signature(get_periods)
+    wrong = {k: (li._ARGS_PERIODS_DEFAULTS[k], sig.parameters[param].default)
+             for k, param in _get_periods_args_block().items()
+             if li._ARGS_PERIODS_DEFAULTS.get(k) != sig.parameters[param].default}
+    assert wrong == {}, f"(inspector, package) defaults differ: {wrong}"
+
+
+# ── Fidelity with the depth floors ACTIVE (params-track: intensification 0.05,
+#    mature 0.80 — the same floors as params-14, which left the repo in item 31;
+#    params-track adds only incipient_plateau_spare_intensification=True, so the
+#    ribbon sweep below now covers that rule too). Every earlier fidelity test
+#    runs with both floors at 0.0, so none of them could see a ledger that
+#    ignored the floors.
+
+def _p15_frame_and_args(cache, track_id):
+    pv, phase = _params_track()
+    df = li.build_working_frame(
+        _vort(cache, track_id, key="p15", **pv),
+        **{k: phase.get(k) for k in _APP_EXTRA_KEYS})
+    args = li.build_args_periods(
+        **{k: v for k, v in phase.items() if k not in _APP_EXTRA_KEYS})
+    return df, args, phase
+
+
+def test_params_track_has_both_depth_floors_active():
+    """Guard for the tests below: if params-track ever stopped setting the floors,
+    they would silently fall back to testing the 0.0 path again."""
+    _, phase = _params_track()
+    assert phase["intensification_min_depth"] > 0
+    assert phase["mature_min_depth"] > 0
+
+
+def test_ribbon_step_six_equals_get_periods_under_params_track(vort_cache):
+    pv, _ = _params_track()
+    divergences = []
+    for track_id in ALL_TRACKS:
+        df, args, phase = _p15_frame_and_args(vort_cache, track_id)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            df_result = get_periods(_vort(vort_cache, track_id, key="p15", **pv),
+                                    **phase)
+            steps = li.pipeline_ribbon(df, **args)
+        if not steps[-1][1].equals(df_result["periods"]):
+            divergences.append(track_id)
+    assert divergences == [], f"{len(divergences)} tracks diverge: {divergences[:5]}"
+
+
+@pytest.mark.parametrize("kind", ["intensification", "decay", "mature"])
+def test_ledger_accepted_set_is_the_package_mask_under_params_track(vort_cache, kind):
+    """Each ledger's accepted set == what the package writes, floors active."""
+    divergences = []
+    for track_id in ALL_TRACKS:
+        df, args, _ = _p15_frame_and_args(vort_cache, track_id)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            if kind == "mature":
+                after_decay = find_decay_period(
+                    find_intensification_period(df.copy(deep=True), **args), **args)
+                mine = li.mature_confirmed_mask(
+                    after_decay, li.mature_ledger(after_decay, **args))
+            else:
+                ledger_fn = (li.intensification_ledger if kind == "intensification"
+                             else li.decay_ledger)
+                mine = ledger_fn(df, **args)["mask"]
+            theirs = li.ledger_reference_mask(df, kind, **args)
+        if not np.array_equal(mine, theirs):
+            divergences.append((track_id, int((mine != theirs).sum())))
+    assert divergences == [], f"{len(divergences)} tracks diverge: {divergences[:5]}"
+
+
+# Measured 2026-09-25 under params-14; identical under params-track, whose one
+# extra key changes 0 of the 47 TRAIN series (item 31, stage 0): on these tracks the floor changes what
+# the package writes (mask with the floor != mask with it at 0.0), so the
+# fidelity above genuinely covers a block the floor REMOVED, not only the 0.0
+# path. intensification_min_depth removes a block on 20180654 (41 steps) and
+# 20180733 (68 steps); mature_min_depth removes a confirmed window on 20160735,
+# 20170794, 20190325, 20191014, 20203947 and 20206498.
+#
+# Only TRAIN tracks of research/labels/split.yaml are pinned: 20180654 and
+# 20206498 are test tracks, and a test set whose members are singled out in the
+# suite is no longer held out. (The fidelity sweeps above do run over all 51 —
+# they read no label and score nothing.) 20170794 over 20191014 for the second
+# mature track: same structure (one D1 = 1.000 valley kept, one valley the
+# confirmation kept with the floor off, removed by it), but the larger margin
+# below 0.80 (D1 0.606 vs 0.642) and the larger removed window (9 vs 7 steps).
+INTENSIFICATION_FLOOR_TRACKS = ["20180733"]
+MATURE_FLOOR_TRACKS = ["20190325", "20170794"]
+
+
+def test_floor_tracks_pinned_here_are_train_tracks():
+    """Guards the SPLIT, not a copied id list: read split.yaml itself."""
+    split = yaml.safe_load(
+        (REPO_ROOT / "research" / "labels" / "split.yaml").read_text())
+    test_ids = {str(x) for x in split["test"]}
+    train_ids = {str(x) for x in split["train"]}
+    pinned = set(INTENSIFICATION_FLOOR_TRACKS) | set(MATURE_FLOOR_TRACKS)
+    assert pinned & test_ids == set()
+    assert pinned <= train_ids
+
+
+@pytest.mark.parametrize("track_id", INTENSIFICATION_FLOOR_TRACKS)
+def test_intensification_floor_removes_a_block_and_the_ledger_says_so(vort_cache,
+                                                                     track_id):
+    df, args, _ = _p15_frame_and_args(vort_cache, track_id)
+    off = dict(args, intensification_min_depth=0.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        assert not np.array_equal(
+            li.ledger_reference_mask(df, "intensification", **args),
+            li.ledger_reference_mask(df, "intensification", **off)), \
+            "the floor no longer changes this track — the test would not test it"
+        on_led = li.intensification_ledger(df, **args)["candidates"]
+        off_led = li.intensification_ledger(df, **off)["candidates"]
+    removed = [i for i, c in enumerate(on_led)
+               if c["reason"] == "below intensification_min_depth"]
+    assert removed
+    for i in removed:
+        c = on_led[i]
+        assert not c["accepted"]
+        assert c["duration"] > c["minimum"]      # it failed on depth, not duration
+        assert c["depth"] < args["intensification_min_depth"]
+        assert off_led[i]["accepted"]            # and with the floor off it is accepted
+
+
+@pytest.mark.parametrize("track_id", MATURE_FLOOR_TRACKS)
+def test_mature_floor_removes_a_window_and_the_ledger_says_so(vort_cache, track_id):
+    df, args, _ = _p15_frame_and_args(vort_cache, track_id)
+    off = dict(args, mature_min_depth=0.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        assert not np.array_equal(li.ledger_reference_mask(df, "mature", **args),
+                                  li.ledger_reference_mask(df, "mature", **off)), \
+            "the floor no longer changes this track — the test would not test it"
+        after_decay = find_decay_period(
+            find_intensification_period(df.copy(deep=True), **args), **args)
+        on_recs = {r["z_valley"]: r for r in li.mature_ledger(after_decay, **args)}
+        off_recs = {r["z_valley"]: r for r in li.mature_ledger(after_decay, **off)}
+    below = [v for v, r in on_recs.items() if r["reason"] == "below mature_min_depth"]
+    assert below
+    for v in below:
+        assert not on_recs[v]["written"] and not on_recs[v]["confirmed"]
+        assert on_recs[v]["depth"] < args["mature_min_depth"]
+    # At least one of them was a window the confirmation kept with the floor off.
+    assert any(off_recs[v]["confirmed"] for v in below)

@@ -1,0 +1,26 @@
+{
+ "ci": {
+  "passed": 1279,
+  "failed": 7,
+  "skipped": 28,
+  "failed_ids": [
+   "tests.test_app_passo5_fixes::test_the_track_upload_and_its_caption_are_in_the_calibration_tab_only",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_train-bench_pick_test]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_test-bench_pick_train]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_real-bench_pick_synth]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_train-bench_pick_train]",
+   "tests.test_app_passo5_fixes::test_a_second_preset_click_gives_what_the_button_gives_on_its_own[bench_pick_train-bench_pick_invert]",
+   "tests.test_app_passo5_fixes::test_clear_empties_both_the_selection_and_the_widget"
+  ],
+  "failed_by_module": {
+   "tests.test_app_passo5_fixes": 7
+  }
+ },
+ "conda": {
+  "passed": 1443,
+  "failed": 0,
+  "skipped": 1,
+  "failed_ids": [],
+  "failed_by_module": {}
+ }
+}

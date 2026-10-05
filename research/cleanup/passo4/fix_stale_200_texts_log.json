@@ -1,0 +1,87 @@
+[
+ {
+  "file": "tools/calibration_app/benchmark_tab.py",
+  "old": "\"**4 · keys absent, filled with the frozen 2.0.0 default** \"",
+  "new": "\"**4 · keys absent, filled with the frozen pre-item-31 default** \""
+ },
+ {
+  "file": "tools/calibration_app/benchmark_tab.py",
+  "old": "\"**4 · keys absent, filled with the frozen 2.0.0 default** — none\"",
+  "new": "\"**4 · keys absent, filled with the frozen pre-item-31 default** — none\""
+ },
+ {
+  "file": "tools/calibration_app/app.py",
+  "old": "# does not carry is FILLED with the frozen cyclophaser 2.0.0 default",
+  "new": "# does not carry is FILLED with the frozen pre-item-31 default"
+ },
+ {
+  "file": "tools/calibration_app/app.py",
+  "old": "# 2.0.0 default is None (OFF) as well,",
+  "new": "# pre-item-31 default is None (OFF) as well,"
+ },
+ {
+  "file": "tools/calibration_app/app.py",
+  "old": "    frozen cyclophaser 2.0.0 default and listed",
+  "new": "    frozen pre-item-31 default and listed"
+ },
+ {
+  "file": "tools/calibration_app/app.py",
+  "old": "\"the cyclophaser 2.0.0 defaults (frozen table, item 31): \"",
+  "new": "\"the frozen pre-item-31 defaults (research/labels/defaults_2.0.0.json, item 31): \""
+ },
+ {
+  "file": "tools/calibration_app/app.py",
+  "old": "decay_tail_amplitude_fraction are None when their sidebar check is OFF; up to\n# 2.0.0 omitting them",
+  "new": "decay_tail_amplitude_fraction are None when their sidebar check is OFF; before\n# item 31 omitting them"
+ },
+ {
+  "file": "tools/calibration_app/layer_inspector.py",
+  "old": "The 2.0.0 values are the frozen",
+  "new": "The pre-item-31 values are the frozen"
+ },
+ {
+  "file": "tools/calibration_app/benchmark_core.py",
+  "old": "filled with the frozen 2.0.0 defaults (`config_defaults.fill_missing`",
+  "new": "filled with the frozen pre-item-31 defaults (`config_defaults.fill_missing`"
+ },
+ {
+  "file": "tools/calibration_app/benchmark_core.py",
+  "old": "be used: the FROZEN 2.0.0 default (`config_defaults`",
+  "new": "be used: the FROZEN pre-item-31 default (`config_defaults`"
+ },
+ {
+  "file": "research/labels/config_defaults.py",
+  "old": "\"\"\"Filling incomplete calibration configs with the FROZEN 2.0.0 defaults.",
+  "new": "\"\"\"Filling incomplete calibration configs with the FROZEN pre-item-31 defaults."
+ },
+ {
+  "file": "research/labels/config_defaults.py",
+  "old": "**cyclophaser 2.0.0 default**, and the keys filled are always listed.",
+  "new": "**pre-item-31 default** (the file name says 2.0.0; it is not the 2.0.0\nrelease, see research/labels/README.md), and the keys filled are always listed."
+ },
+ {
+  "file": "research/labels/config_defaults.py",
+  "old": "f\"cyclophaser 2.0.0 defaults (frozen table {DEFAULTS_PATH.name}): {items}\")",
+  "new": "f\"pre-item-31 defaults (frozen table {DEFAULTS_PATH.name}): {items}\")"
+ },
+ {
+  "file": "research/labels/evaluate_against_labels.py",
+  "old": "filled with the frozen cyclophaser 2.0.0",
+  "new": "filled with the frozen pre-item-31"
+ },
+ {
+  "file": "tests/test_decay_tail_amplitude_fraction.py",
+  "old": "moved (None up to 2.0.0).",
+  "new": "moved (None before item 31)."
+ },
+ {
+  "file": "tests/test_intensification_min_depth.py",
+  "old": "moved (0.0 up to 2.0.0).",
+  "new": "moved (0.0 before item 31)."
+ },
+ {
+  "file": "tests/test_item30_spare_intensification.py",
+  "old": "(item 31; False up to 2.0.0)",
+  "new": "(item 31; False before it)"
+ }
+]

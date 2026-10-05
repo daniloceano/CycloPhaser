@@ -1,0 +1,95 @@
+{
+ "develop": "06d8550",
+ "branch": "0c63145",
+ "n_train_ids": 54,
+ "n_train_labels_develop": 54,
+ "n_train_labels_branch": 47,
+ "only_in_develop": [
+  "19790612",
+  "19810854",
+  "19860380",
+  "19870927",
+  "19940445",
+  "20050893",
+  "20120297"
+ ],
+ "only_in_branch": [],
+ "changed": [
+  {
+   "id": "20150656",
+   "fields": [
+    "phases"
+   ],
+   "other_keys": [
+    "close_unsure",
+    "labeled_at",
+    "open_unsure",
+    "overlays_shown",
+    "superseded"
+   ],
+   "phases": [
+    {
+     "phase": "residual",
+     "field": "start_idx",
+     "develop": 91,
+     "branch": 100
+    }
+   ]
+  },
+  {
+   "id": "20170154",
+   "fields": [
+    "verdict"
+   ],
+   "other_keys": [
+    "close_unsure",
+    "labeled_at",
+    "open_unsure",
+    "overlays_shown",
+    "superseded"
+   ],
+   "verdict": {
+    "develop": {
+     "kind": "boundary",
+     "incipient_end_idx": 6
+    },
+    "branch": {
+     "kind": "ambiguous"
+    }
+   }
+  },
+  {
+   "id": "20170409",
+   "fields": [
+    "phases"
+   ],
+   "other_keys": [
+    "close_unsure",
+    "labeled_at",
+    "open_unsure",
+    "overlays_shown",
+    "superseded"
+   ],
+   "phases": [
+    {
+     "phase": "decay",
+     "field": "start_idx",
+     "develop": 74,
+     "branch": 71
+    }
+   ]
+  }
+ ],
+ "resave_only": [
+  {
+   "id": "20180170",
+   "keys": [
+    "close_unsure",
+    "labeled_at",
+    "open_unsure",
+    "overlays_shown",
+    "superseded"
+   ]
+  }
+ ]
+}

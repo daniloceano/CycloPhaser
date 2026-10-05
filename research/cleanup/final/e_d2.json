@@ -1,0 +1,330 @@
+{
+ "label": "e_d2",
+ "ref_for_carried_verdicts": "ff4eb3b",
+ "score_lines": 188,
+ "flagged": 53,
+ "carried": 53,
+ "reviewed_on_branch": 0,
+ "unreviewed": 0,
+ "attributing": 0,
+ "flagged_rows": [
+  {
+   "where": "docs/defaults.rst:41",
+   "text": "params-track: the measured preset",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from docs/defaults.rst:41@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "docs/defaults.rst:44",
+   "text": "params-track is the configuration whose results were measured against the",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from docs/defaults.rst:44@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "docs/defaults.rst:47",
+   "text": "package defaults, which have no measured scores of their own.",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from docs/defaults.rst:47@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "docs/generated/boundary_padding_effect.inc:1",
+   "text": "On the 54 training series, running the package defaults (``boundary_padding=\"reflect\"``) and the same defaults with ``boundary_padding=\"edge\"``, without scoring either against the manual labels:",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from docs/generated/boundary_padding_effect.inc:1@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "tools/calibration_app/README.md:137",
+   "text": "the whole height and all of them look identical — measured on 20190325 with",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from tools/calibration_app/README.md:137@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "research/labels/README.md:43",
+   "text": "| `evaluate_against_labels.py` | Runs the detector, scores it against the labels. |",
+   "verdict": "OK: not about the default's scores (describes the evaluation script)",
+   "source": "carried from research/labels/README.md:43@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "research/labels/README.md:63",
+   "text": "the **only configuration with measured scores**, and every score was measured",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from research/labels/README.md:63@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "research/labels/README.md:64",
+   "text": "under `edge`: those scores belong to params-track, not to the package defaults.",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from research/labels/README.md:64@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "research/labels/README.md:65",
+   "text": "Anyone working with TRACK series who wants the measured behaviour must pass",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from research/labels/README.md:65@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "tools/calibration_app/app.py:1638",
+   "text": "+ \" — pads with the edge value repeated; the padding of the measured \"",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from tools/calibration_app/app.py:1638@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "tools/calibration_app/app.py:1674",
+   "text": "\"Measured: **28 of 51** calibration tracks opened with a spurious `decay` phase \"",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from tools/calibration_app/app.py:1674@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "tools/calibration_app/label_tab.py:1518",
+   "text": "\"scoring — a phase sequence of N phases has N+1 edges (before \"",
+   "verdict": "OK: 'EDGE' is a phase boundary in the label tab, not boundary_padding",
+   "source": "carried from tools/calibration_app/label_tab.py:1518@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "tools/calibration_app/layer_inspector.py:478",
+   "text": "(measured on 20190325 under package defaults: filtered_vorticity spans",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from tools/calibration_app/layer_inspector.py:478@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:432",
+   "text": "``\"edge\"``. params-track is the only configuration with measured scores,",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1431@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:433",
+   "text": "and those scores were measured under ``\"edge\"``: they describe",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1432@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:435",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1434@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:565",
+   "text": "configuration with measured scores. To reproduce",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:565@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:595",
+   "text": "visible STEP. Measured over the 51 tracks with the package defaults of that",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from cyclophaser/determine_periods.py:595@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:891",
+   "text": "``\"edge\"``. params-track is the only configuration with measured scores,",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1431@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:892",
+   "text": "and those scores were measured under ``\"edge\"``: they describe",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1432@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:894",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1434@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1079",
+   "text": "incipient_plateau_signal (str, optional): Which signal the plateau is measured",
+   "verdict": "OK: 'measured' describes a signal or a rate, not a score",
+   "source": "carried from cyclophaser/determine_periods.py:1568@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1099",
+   "text": "make the measured rate reliable without re-enabling any pipeline smoothing.",
+   "verdict": "OK: 'measured' describes a signal or a rate, not a score",
+   "source": "carried from cyclophaser/determine_periods.py:1588@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1143",
+   "text": "is a measured no-op: identical output with and without it on all 64",
+   "verdict": "OK: a measured no-op, labelled with the defaults before item 31",
+   "source": "carried from cyclophaser/determine_periods.py:1629@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1157",
+   "text": "stage function reads index 0's type in ``dz``/``dz2``. Measured in",
+   "verdict": "OK: points to where something was measured; no score stated",
+   "source": "carried from cyclophaser/determine_periods.py:1157@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1431",
+   "text": "``\"edge\"``. params-track is the only configuration with measured scores,",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1431@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1432",
+   "text": "and those scores were measured under ``\"edge\"``: they describe",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1432@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1434",
+   "text": "the measured behaviour must pass params-track explicitly. The defaults fall",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from cyclophaser/determine_periods.py:1434@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1527",
+   "text": "the measured numbers, and the consequences for `replace_endpoints_with_lowpass`.",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from cyclophaser/determine_periods.py:1527@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1568",
+   "text": "incipient_plateau_signal (str, optional): Which signal the plateau is measured",
+   "verdict": "OK: 'measured' describes a signal or a rate, not a score",
+   "source": "carried from cyclophaser/determine_periods.py:1568@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1588",
+   "text": "make the measured rate reliable without re-enabling any pipeline smoothing.",
+   "verdict": "OK: 'measured' describes a signal or a rate, not a score",
+   "source": "carried from cyclophaser/determine_periods.py:1588@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1629",
+   "text": "is a measured no-op: identical output with and without it on all 64",
+   "verdict": "OK: a measured no-op, labelled with the defaults before item 31",
+   "source": "carried from cyclophaser/determine_periods.py:1629@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/determine_periods.py:1643",
+   "text": "stage function reads index 0's type in ``dz``/``dz2``. Measured in",
+   "verdict": "OK: points to where something was measured; no score stated",
+   "source": "carried from cyclophaser/determine_periods.py:1643@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/find_stages.py:874",
+   "text": "# IMPORTANT MEASURED CAVEAT: this criterion is only DEFINABLE when the boundary",
+   "verdict": "OK: 'measured' describes a signal or a rate, not a score",
+   "source": "carried from cyclophaser/find_stages.py:874@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/find_stages.py:903",
+   "text": "# measured on the 2 %-noise synthetic cases, the normalised raw gradient at t0",
+   "verdict": "OK: 'measured' describes a signal or a rate, not a score",
+   "source": "carried from cyclophaser/find_stages.py:903@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/lanczos_filter.py:34",
+   "text": "# accounts for >= 80 % of the slope measured at t0 in 51/51 tracks, and the",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from cyclophaser/lanczos_filter.py:34@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/lanczos_filter.py:42",
+   "text": "#                reflection of the series about its edge samples.  Measured",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from cyclophaser/lanczos_filter.py:42@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/lanczos_filter.py:172",
+   "text": "for the mechanism and the measured effect. The kernel itself is",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from cyclophaser/lanczos_filter.py:230@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "cyclophaser/lanczos_filter.py:230",
+   "text": "for the mechanism and the measured effect. The kernel itself is",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from cyclophaser/lanczos_filter.py:230@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:29",
+   "text": "**Measured scores belong to params-track, not to these defaults.**",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from CHANGELOG.md:29@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:30",
+   "text": "params-track is the only configuration with measured scores, on the training",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from CHANGELOG.md:30@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:31",
+   "text": "and on the test split. Those scores were measured with its own",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from CHANGELOG.md:31@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:33",
+   "text": "TRACK input and want the measured behaviour, pass params-track explicitly.",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from CHANGELOG.md:33@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:91",
+   "text": "PASS on the 16 held-out series, measured with params-15 = params-track, i.e.",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from CHANGELOG.md:91@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:93",
+   "text": "evidence because stage 1 was not a first scoring: those 16 series had been part",
+   "verdict": "OK: assigns the measured scores to params-track (edge) and says the default has none",
+   "source": "carried from CHANGELOG.md:93@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:330",
+   "text": "item 31 — the rule never fires: measured identical output with and",
+   "verdict": "OK: a measured no-op, labelled with the defaults before item 31",
+   "source": "carried from CHANGELOG.md:330@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:350",
+   "text": "Measured in full — 63-series table, figures, and the gate this change was",
+   "verdict": "OK: points to where something was measured; no score stated",
+   "source": "carried from CHANGELOG.md:350@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:662",
+   "text": "defaults of the time stayed at its measured 0.526.",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from CHANGELOG.md:662@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:664",
+   "text": "> **Scope of validation:** measured and validated on TRACK (Gramcianinov)",
+   "verdict": "OK: the validation scope (input type) of a past change, not a score of the current default",
+   "source": "carried from CHANGELOG.md:664@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:685",
+   "text": "visible **step**. Measured over the 51-track calibration set, the number of tracks",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from CHANGELOG.md:685@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:710",
+   "text": "(~24 % at each end) and accounting for **≥ 80 % of the slope measured at the first",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from CHANGELOG.md:710@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:714",
+   "text": "Measured effect of the new default (normalised `|dz|` at the first/last sample,",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from CHANGELOG.md:714@ff4eb3b (file, text and context identical)"
+  },
+  {
+   "where": "CHANGELOG.md:791",
+   "text": "byte-for-byte the pre-fix behaviour). Measured on the 51 tracks with",
+   "verdict": "OK: a measured effect of the filter or of the padding on the signal, not a detection score",
+   "source": "carried from CHANGELOG.md:791@ff4eb3b (file, text and context identical)"
+  }
+ ]
+}

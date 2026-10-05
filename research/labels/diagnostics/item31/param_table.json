@@ -1,0 +1,594 @@
+{
+  "environment": {
+    "cyclophaser.__file__": "cyclophaser/__init__.py",
+    "sys.prefix": "cyclophaser",
+    "python": "3.12.14",
+    "numpy": "2.5.3",
+    "scipy": "1.18.0",
+    "pandas": "3.0.5"
+  },
+  "counts": {
+    "params_15_keys": 31,
+    "params_15_keys_matched_to_a_signature": 31,
+    "yaml_keys_in_no_signature": [],
+    "differ_strict": 20,
+    "differ_value": 19,
+    "differ_behaviour": 17,
+    "by_group_differ_behaviour": {
+      "filtragem": "4/8",
+      "fase": "13/23"
+    },
+    "type_only_differences": [
+      "incipient_smooth_polyorder"
+    ],
+    "behaviour_only_equivalences": [
+      "use_filter",
+      "incipient_smooth_window"
+    ],
+    "signature_params_absent_from_params_15": [
+      "x",
+      "plot",
+      "plot_steps",
+      "export_dict",
+      "hemisphere",
+      "prominence"
+    ],
+    "defaults_inconsistent_across_signatures": []
+  },
+  "rows": [
+    {
+      "param": "x",
+      "functions": [
+        "determine_periods"
+      ],
+      "default": null,
+      "group": "outro",
+      "defaults_consistent": true
+    },
+    {
+      "param": "plot",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": false,
+      "group": "outro",
+      "defaults_consistent": true
+    },
+    {
+      "param": "plot_steps",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": false,
+      "group": "outro",
+      "defaults_consistent": true
+    },
+    {
+      "param": "export_dict",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": false,
+      "group": "outro",
+      "defaults_consistent": true
+    },
+    {
+      "param": "hemisphere",
+      "functions": [
+        "determine_periods"
+      ],
+      "default": "southern",
+      "group": "outro",
+      "defaults_consistent": true
+    },
+    {
+      "param": "use_filter",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": "auto",
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": true,
+      "section": "filter_params",
+      "strict": false,
+      "value": false,
+      "behaviour": true,
+      "why": "True \u2192 window len//2, same as 'auto'; only adds a UserWarning (cyclophaser/determine_periods.py:613, cyclophaser/determine_periods.py:630)"
+    },
+    {
+      "param": "replace_endpoints_with_lowpass",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": 0,
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": 0,
+      "section": "filter_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "use_smoothing",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": "auto",
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": false,
+      "section": "filter_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "use_smoothing_twice",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": "auto",
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": false,
+      "section": "filter_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "savgol_polynomial",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": 3,
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": 3,
+      "section": "filter_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "cutoff_low",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": 168,
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": 168,
+      "section": "filter_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "cutoff_high",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": 48.0,
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": 18,
+      "section": "filter_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "boundary_padding",
+      "functions": [
+        "process_vorticity",
+        "determine_periods"
+      ],
+      "default": "reflect",
+      "group": "filtragem",
+      "defaults_consistent": true,
+      "p15": "edge",
+      "section": "filter_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "threshold_intensification_length",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.075,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.075,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "threshold_intensification_gap",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.075,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.075,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "threshold_mature_distance",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.125,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.18,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "threshold_mature_length",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.03,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.15,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "threshold_decay_length",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.075,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.075,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "threshold_decay_gap",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.075,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.075,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "threshold_incipient_length",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.4,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.4,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "prominence",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": null,
+      "group": "fase",
+      "defaults_consistent": true
+    },
+    {
+      "param": "prominence_relative",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": null,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.3,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "reclassify_index0",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": true,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": true,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "length_scale",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": "global",
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": "local",
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "mature_method",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": "derivative",
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": "amplitude",
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "mature_amplitude_fraction",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.9,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.9,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "mature_min_depth",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.0,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.8,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "intensification_min_depth",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.0,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.05,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "decay_tail_amplitude_fraction",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": null,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.3,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "incipient_method",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": "geometric",
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": "plateau",
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "incipient_plateau_tau",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0.2,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 0.2,
+      "section": "phase_params",
+      "strict": true,
+      "value": true,
+      "behaviour": true,
+      "why": ""
+    },
+    {
+      "param": "incipient_plateau_signal",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": "derivative",
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": "vorticity",
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "incipient_plateau_crossing",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": "single",
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": "sustained",
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "incipient_plateau_k",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 3,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 5,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    },
+    {
+      "param": "incipient_smooth_window",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 0,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 5.0,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": true,
+      "why": "cast by int() before use (cyclophaser/find_stages.py:940)"
+    },
+    {
+      "param": "incipient_smooth_polyorder",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": 3,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": 3.0,
+      "section": "phase_params",
+      "strict": false,
+      "value": true,
+      "behaviour": true,
+      "why": "cast by int() before use (cyclophaser/find_stages.py:946)"
+    },
+    {
+      "param": "incipient_plateau_spare_intensification",
+      "functions": [
+        "get_periods",
+        "determine_periods"
+      ],
+      "default": false,
+      "group": "fase",
+      "defaults_consistent": true,
+      "p15": true,
+      "section": "phase_params",
+      "strict": false,
+      "value": false,
+      "behaviour": false,
+      "why": ""
+    }
+  ]
+}

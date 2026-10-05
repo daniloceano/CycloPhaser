@@ -1,0 +1,46 @@
+assert OK: cyclophaser from the worktree | sys.prefix = ~/miniconda3/envs/cyclophaser
+.........................s.............................................. [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 19%]
+........................................................................ [ 24%]
+........................................................................ [ 29%]
+........................................................................ [ 34%]
+........................................................................ [ 39%]
+........................................................................ [ 44%]
+........................................................................ [ 49%]
+........................................................................ [ 54%]
+........................................................................ [ 59%]
+........................................................................ [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 74%]
+........................................................................ [ 79%]
+........................................................................ [ 84%]
+........................................................................ [ 89%]
+........................................................................ [ 94%]
+........................................................................ [ 99%]
+....                                                                     [100%]
+=============================== warnings summary ===============================
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+../../../../../../..~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  ~/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  <wt>/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1443 passed, 1 skipped, 29 deselected, 89 warnings in 420.70s (0:07:00)
+EXIT 0

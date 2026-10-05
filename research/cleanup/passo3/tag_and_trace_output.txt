@@ -1,0 +1,5 @@
+R1: listed 309, deleted by 2912b79 309, same set True
+    per top-level dir: {'Pipfile': 1, 'docs': 6, 'research/incipient_plateau': 9, 'research/inert_params': 14, 'research/labels': 277, 'tests': 2}
+R2: 309/309 present at archive/research-diagnostics-pre-cleanup
+R3: 203 S10 rows; failures 0
+EXIT 0

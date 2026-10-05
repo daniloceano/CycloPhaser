@@ -1,0 +1,9 @@
+git log -- cyclophaser/ since develop-v2.1: 32651c8 00718d4 c5e298b 129b04d 742e685
+  32651c8: tree w/o docstrings parent==commit True; recorded tree True, digest 7552bc67→7552bc67
+  00718d4: tree w/o docstrings parent==commit True; recorded tree True, digest 7552bc67→7552bc67
+  c5e298b: tree w/o docstrings parent==commit True; recorded tree True, digest 7552bc67→7552bc67
+  129b04d: tree w/o docstrings parent==commit True; recorded tree True, digest 7552bc67→7552bc67
+  742e685: C1 — the behaviour change
+HEAD vs 742e685, tree w/o docstrings: identical True (5 files)
+gate (a): PASS
+EXIT 0

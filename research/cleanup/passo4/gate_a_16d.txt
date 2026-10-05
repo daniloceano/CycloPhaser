@@ -1,0 +1,4 @@
+git log --format='%h %s' develop-v2.1..HEAD -- cyclophaser/
+c5e298b docs(cyclophaser): 16d — docstrings/comments: stale default and opt-in claims; rst fixes
+129b04d docs(cyclophaser): 16b — docstring de decay_tail_amplitude_fraction com o default atual
+742e685 feat(C1): default boundary_padding "reflect"; params-15 renomeado params-track

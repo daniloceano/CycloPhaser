@@ -1,0 +1,44 @@
+{
+ "R1": {
+  "listed": 309,
+  "deleted_by_commit": 309,
+  "same_set": true,
+  "removal_commit": "2912b79",
+  "per_top_dir": {
+   "Pipfile": 1,
+   "docs": 6,
+   "research/incipient_plateau": 9,
+   "research/inert_params": 14,
+   "research/labels": 277,
+   "tests": 2
+  },
+  "per_dir": {
+   "Pipfile": 1,
+   "docs/_images": 6,
+   "research/incipient_plateau": 9,
+   "research/inert_params": 14,
+   "research/labels/diagnostics/frontA_idx0_c2": 38,
+   "research/labels/diagnostics/frontA_reverify": 30,
+   "research/labels/diagnostics/frontC": 11,
+   "research/labels/diagnostics/frontD": 21,
+   "research/labels/diagnostics/frontRefusal": 21,
+   "research/labels/diagnostics/front_b": 19,
+   "research/labels/diagnostics/item19": 17,
+   "research/labels/diagnostics/item20a": 7,
+   "research/labels/diagnostics/item20b": 18,
+   "research/labels/diagnostics/item30": 45,
+   "research/labels/diagnostics/item31": 50,
+   "tests/calibration_data": 1,
+   "tests/synthetic": 1
+  }
+ },
+ "R2": {
+  "checked": 309,
+  "present_at_tag": 309,
+  "missing": []
+ },
+ "R3": {
+  "rows": 203,
+  "failures": []
+ }
+}

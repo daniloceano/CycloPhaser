@@ -1,0 +1,74 @@
+{
+ "removed": 309,
+ "live_references": 0,
+ "own_outputs": 11,
+ "refs": [],
+ "own": [
+  {
+   "file": "research/incipient_plateau/measure_incipient_smoothing.py",
+   "line": 387,
+   "removed": "research/incipient_plateau/incipient_smoothing_sweep.csv",
+   "text": "d.to_csv(OUT / \"incipient_smoothing_sweep.csv\", index=False)"
+  },
+  {
+   "file": "research/incipient_plateau/measure_incipient_smoothing.py",
+   "line": 388,
+   "removed": "research/incipient_plateau/incipient_smoothing_sweep.csv",
+   "text": "print(f\"wrote {OUT / 'incipient_smoothing_sweep.csv'} ({len(d)} rows)\")"
+  },
+  {
+   "file": "research/incipient_plateau/measure_incipient_smoothing.py",
+   "line": 392,
+   "removed": "research/incipient_plateau/incipient_smoothing_real_rel0.csv",
+   "text": "rt_df.to_csv(OUT / \"incipient_smoothing_real_rel0.csv\", index=False)"
+  },
+  {
+   "file": "research/incipient_plateau/measure_incipient_smoothing.py",
+   "line": 395,
+   "removed": "research/incipient_plateau/incipient_smoothing_tables.txt",
+   "text": "(OUT / \"incipient_smoothing_tables.txt\").write_text(text)"
+  },
+  {
+   "file": "research/incipient_plateau/measure_incipient_smoothing.py",
+   "line": 396,
+   "removed": "research/incipient_plateau/incipient_smoothing_tables.txt",
+   "text": "print(f\"\\nwrote {OUT / 'incipient_smoothing_tables.txt'}\")"
+  },
+  {
+   "file": "research/labels/diagnostics/item30/figs_cf.py",
+   "line": 23,
+   "removed": "research/labels/diagnostics/item30/REPORT_figs_cf.md",
+   "text": "Outputs: figs_cf/<id>.png, figs_cf/board_8_cases.png, REPORT_figs_cf.md."
+  },
+  {
+   "file": "research/labels/diagnostics/item30/figs_cf.py",
+   "line": 274,
+   "removed": "research/labels/diagnostics/item30/REPORT_figs_cf.md",
+   "text": "(HERE / \"REPORT_figs_cf.md\").write_text(\"\\n\".join(lines) + \"\\n\")"
+  },
+  {
+   "file": "research/labels/diagnostics/item30/separability.py",
+   "line": 178,
+   "removed": "research/labels/diagnostics/item30/separability_train_params14.csv",
+   "text": "t.to_csv(HERE / \"separability_train_params14.csv\")"
+  },
+  {
+   "file": "research/labels/diagnostics/item30/separability.py",
+   "line": 194,
+   "removed": "research/labels/diagnostics/item30/separability_criterion.json",
+   "text": "(HERE / \"separability_criterion.json\").write_text(json.dumps(crit, indent=1, default=str))"
+  },
+  {
+   "file": "research/labels/diagnostics/item31/param_table.py",
+   "line": 26,
+   "removed": "research/labels/diagnostics/item31/param_table.md",
+   "text": "Outputs: param_table.md (table + counts), param_table.json."
+  },
+  {
+   "file": "research/labels/diagnostics/item31/param_table.py",
+   "line": 166,
+   "removed": "research/labels/diagnostics/item31/param_table.md",
+   "text": "(HERE / \"param_table.md\").write_text(\"\\n\".join(out))"
+  }
+ ]
+}

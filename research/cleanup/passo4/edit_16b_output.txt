@@ -1,0 +1,3 @@
+old: (opt-in; default None reproduces prior behaviour exactly),
+new: (default 0.3; ``None`` switches the check off and leaves the tail to the catch-all, the behaviour before this option existed),
+default read from the signature: 0.3 (get_periods == determine_periods)

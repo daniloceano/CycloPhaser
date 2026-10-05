@@ -1,0 +1,49 @@
+batch: swell_item30_val
+base: Gramcianinov et al. (2020), Atlantic extratropical cyclone tracks (TRACK on ERA5), Mendeley
+  Data 4, 108111 — the same base as the 51 labelled real series
+via: 'cyclone_monitor: per-cyclone Parquet files under data/processed/tracks_by_id on swell;
+  200 of 6789 drawn with random.Random(29).sample over the sorted list'
+id: the original TRACK id of the cyclone_monitor file, unchanged
+conversion: min_max_zeta_850 = -1e-5 * vor42 (vor42 in 1e-5 s^-1, positive)
+format: time;min_max_zeta_850, hourly, copied byte for byte
+files:
+  '19861089':
+    file: tests/calibration_data/swell_item30_val/19861089.csv
+    sha256: 8325df35326ee88194ca18ba89d111e2998f5fb19e03956b02cf8eef6d0b52db
+    original_id: '19861089'
+    n_steps: 87
+    first_time: '1986-12-28 00:00:00'
+    last_time: '1986-12-31 14:00:00'
+    role: validation
+  '19900808':
+    file: tests/calibration_data/swell_item30_val/19900808.csv
+    sha256: 26bb9aeebf04662b30609ca70861003f3115bbe79ae86c63048f3d37dc51861c
+    original_id: '19900808'
+    n_steps: 40
+    first_time: '1990-09-12 16:00:00'
+    last_time: '1990-09-14 07:00:00'
+    role: validation
+  '19940737':
+    file: tests/calibration_data/swell_item30_val/19940737.csv
+    sha256: 769e693176a437dd53ac0254c4bab49f48425c1790d15e344c53234a5c3addf7
+    original_id: '19940737'
+    n_steps: 34
+    first_time: '1994-08-19 10:00:00'
+    last_time: '1994-08-20 19:00:00'
+    role: validation
+  '19960808':
+    file: tests/calibration_data/swell_item30_val/19960808.csv
+    sha256: aac0799e0940dd1b5adf4db8958a0282816e94aeb619b973cb351266f004d2e7
+    original_id: '19960808'
+    n_steps: 30
+    first_time: '1996-09-11 12:00:00'
+    last_time: '1996-09-12 17:00:00'
+    role: validation
+  '20000821':
+    file: tests/calibration_data/swell_item30_val/20000821.csv
+    sha256: 63eaa4ab7a9e93eabc6917828fadb1d79a0585e2e3b8845650451a6b12b62545
+    original_id: '20000821'
+    n_steps: 68
+    first_time: '2000-09-07 13:00:00'
+    last_time: '2000-09-10 08:00:00'
+    role: validation

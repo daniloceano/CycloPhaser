@@ -1,0 +1,11 @@
+# cyclophaser-2.0.0-py3-none-any.whl
+     8990  cyclophaser-2.0.0.dist-info/METADATA
+      832  cyclophaser-2.0.0.dist-info/RECORD
+       91  cyclophaser-2.0.0.dist-info/WHEEL
+       12  cyclophaser-2.0.0.dist-info/top_level.txt
+      164  cyclophaser/__init__.py
+   111979  cyclophaser/determine_periods.py
+    13248  cyclophaser/example_data/example_file.csv
+    69428  cyclophaser/find_stages.py
+    10706  cyclophaser/lanczos_filter.py
+    18990  cyclophaser/plots.py

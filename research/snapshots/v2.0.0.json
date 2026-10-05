@@ -1,0 +1,2100 @@
+{
+  "snapshot": {
+    "label": "cyclophaser 2.0.0 (published, package defaults)",
+    "cyclophaser_version": "2.0.0",
+    "module_file": "/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/c1aa7c3d-39c1-406a-9a1c-6d2a992c5058/scratchpad/snapshots/venv_2_0_0/lib/python3.12/site-packages/cyclophaser/determine_periods.py",
+    "python": "3.12.14",
+    "platform": "macOS-14.1.2-x86_64-i386-64bit",
+    "generated": "2026-09-18T14:59:26.392175+00:00",
+    "generator": "research/snapshots/make_published_snapshot.py",
+    "parameters": "package defaults \u2014 no argument is passed to process_vorticity or get_periods",
+    "public_signature": {
+      "determine_periods": {
+        "series": null,
+        "x": "None",
+        "plot": "False",
+        "plot_steps": "False",
+        "export_dict": "False",
+        "hemisphere": "'southern'",
+        "use_filter": "'auto'",
+        "replace_endpoints_with_lowpass": "24",
+        "use_smoothing": "'auto'",
+        "use_smoothing_twice": "'auto'",
+        "savgol_polynomial": "3",
+        "cutoff_low": "168",
+        "cutoff_high": "48.0",
+        "threshold_intensification_length": "0.075",
+        "threshold_intensification_gap": "0.075",
+        "threshold_mature_distance": "0.125",
+        "threshold_mature_length": "0.03",
+        "threshold_decay_length": "0.075",
+        "threshold_decay_gap": "0.075",
+        "threshold_incipient_length": "0.4"
+      },
+      "process_vorticity": {
+        "zeta_df": null,
+        "use_filter": "'auto'",
+        "replace_endpoints_with_lowpass": "24",
+        "use_smoothing": "'auto'",
+        "use_smoothing_twice": "'auto'",
+        "savgol_polynomial": "3",
+        "cutoff_low": "168",
+        "cutoff_high": "48.0"
+      },
+      "get_periods": {
+        "vorticity": null,
+        "plot": "False",
+        "plot_steps": "False",
+        "export_dict": "False",
+        "threshold_intensification_length": "0.075",
+        "threshold_intensification_gap": "0.075",
+        "threshold_mature_distance": "0.125",
+        "threshold_mature_length": "0.03",
+        "threshold_decay_length": "0.075",
+        "threshold_decay_gap": "0.075",
+        "threshold_incipient_length": "0.4"
+      }
+    },
+    "has_collapse_plateaux": true
+  },
+  "counts": {
+    "real": 51,
+    "synthetic": 12,
+    "total": 63,
+    "failed": 0
+  },
+  "records": {
+    "20150069": {
+      "id": "20150069",
+      "source": "real",
+      "n_steps": 66,
+      "series_sha256": "7231f13dd90896378a554d49f78dea6c2476a6b864d0d2b7cfb91c6216679ed3",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          32
+        ],
+        [
+          "mature",
+          33,
+          40
+        ],
+        [
+          "decay",
+          41,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "20150377": {
+      "id": "20150377",
+      "source": "real",
+      "n_steps": 113,
+      "series_sha256": "50b48d08248d413ef2ad0f156c528f7498637072085837433d42864ea457b16a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          16
+        ],
+        [
+          "intensification",
+          17,
+          58
+        ],
+        [
+          "mature",
+          59,
+          72
+        ],
+        [
+          "decay",
+          73,
+          112
+        ]
+      ],
+      "error": null
+    },
+    "20150436": {
+      "id": "20150436",
+      "source": "real",
+      "n_steps": 112,
+      "series_sha256": "cd5783d0e292257cd6f314338c93189b88faf0a5e6479f4f460396429ce68ca0",
+      "phases": [
+        [
+          "incipient",
+          0,
+          17
+        ],
+        [
+          "intensification",
+          18,
+          61
+        ],
+        [
+          "mature",
+          62,
+          75
+        ],
+        [
+          "decay",
+          76,
+          111
+        ]
+      ],
+      "error": null
+    },
+    "20150528": {
+      "id": "20150528",
+      "source": "real",
+      "n_steps": 51,
+      "series_sha256": "3e77c71c694eb00bdb70edeac87246ffc02e57ade54797c8707c924739a976d5",
+      "phases": [
+        [
+          "incipient",
+          0,
+          9
+        ],
+        [
+          "intensification",
+          10,
+          27
+        ],
+        [
+          "mature",
+          28,
+          33
+        ],
+        [
+          "decay",
+          34,
+          48
+        ],
+        [
+          "residual",
+          49,
+          50
+        ]
+      ],
+      "error": null
+    },
+    "20150532": {
+      "id": "20150532",
+      "source": "real",
+      "n_steps": 107,
+      "series_sha256": "16ea01913e2f1028edf81eb80b076140dec7cc0e724323ce7758bf0ee1aa6506",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          37
+        ],
+        [
+          "mature",
+          38,
+          50
+        ],
+        [
+          "decay",
+          51,
+          106
+        ]
+      ],
+      "error": null
+    },
+    "20150561": {
+      "id": "20150561",
+      "source": "real",
+      "n_steps": 146,
+      "series_sha256": "19c749b21df94fb3f89695cfa54dfd5817121c85ae072296644e91824a7bd961",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          38
+        ],
+        [
+          "mature",
+          39,
+          56
+        ],
+        [
+          "decay",
+          57,
+          145
+        ]
+      ],
+      "error": null
+    },
+    "20150646": {
+      "id": "20150646",
+      "source": "real",
+      "n_steps": 130,
+      "series_sha256": "4bc733a2b043577bfa654346bd13cf9d8aab0958c2adc73b6948cf076a8b32ee",
+      "phases": [
+        [
+          "incipient",
+          0,
+          28
+        ],
+        [
+          "intensification",
+          29,
+          81
+        ],
+        [
+          "mature",
+          82,
+          97
+        ],
+        [
+          "decay",
+          98,
+          129
+        ]
+      ],
+      "error": null
+    },
+    "20150656": {
+      "id": "20150656",
+      "source": "real",
+      "n_steps": 160,
+      "series_sha256": "ef2fbd35f71ee080ffeccff5360379df84d7ad4175f9bd3a26de4a54ddc40b32",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          41
+        ],
+        [
+          "mature",
+          42,
+          54
+        ],
+        [
+          "decay",
+          55,
+          98
+        ],
+        [
+          "residual",
+          99,
+          159
+        ]
+      ],
+      "error": null
+    },
+    "20150746": {
+      "id": "20150746",
+      "source": "real",
+      "n_steps": 71,
+      "series_sha256": "bd773cf2f40ff8504eda336c8120079cf0d184866a50433d4e0e90d22d85b4fe",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          27
+        ],
+        [
+          "mature",
+          28,
+          36
+        ],
+        [
+          "decay",
+          37,
+          64
+        ],
+        [
+          "residual",
+          65,
+          70
+        ]
+      ],
+      "error": null
+    },
+    "20160030": {
+      "id": "20160030",
+      "source": "real",
+      "n_steps": 153,
+      "series_sha256": "f8e42d49faa799727f52515193df7f0e4038d9bf24f5a3c73214fc1d0bfddccf",
+      "phases": [
+        [
+          "incipient",
+          0,
+          10
+        ],
+        [
+          "intensification",
+          11,
+          50
+        ],
+        [
+          "mature",
+          51,
+          69
+        ],
+        [
+          "decay",
+          70,
+          152
+        ]
+      ],
+      "error": null
+    },
+    "20160587": {
+      "id": "20160587",
+      "source": "real",
+      "n_steps": 79,
+      "series_sha256": "474ceebdf61e5cc90d2c5028d9640d1bffd5034fab8217e8aa460076a26a9e7a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          15
+        ],
+        [
+          "intensification",
+          16,
+          50
+        ],
+        [
+          "mature",
+          51,
+          60
+        ],
+        [
+          "decay",
+          61,
+          78
+        ]
+      ],
+      "error": null
+    },
+    "20160735": {
+      "id": "20160735",
+      "source": "real",
+      "n_steps": 259,
+      "series_sha256": "9f1be0b84b1c6fc9f85aade6c7983c42ab41186c48b4784c87b1ccaf2d3b3bbe",
+      "phases": [
+        [
+          "incipient",
+          0,
+          32
+        ],
+        [
+          "decay",
+          33,
+          105
+        ],
+        [
+          "intensification",
+          106,
+          152
+        ],
+        [
+          "mature",
+          153,
+          166
+        ],
+        [
+          "decay",
+          167,
+          221
+        ],
+        [
+          "residual",
+          222,
+          258
+        ]
+      ],
+      "error": null
+    },
+    "20170154": {
+      "id": "20170154",
+      "source": "real",
+      "n_steps": 124,
+      "series_sha256": "73cc56cddca17020ea67550512b371425d4db36a2ed7a4c71552f49ad7fb6dad",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          50
+        ],
+        [
+          "mature",
+          51,
+          66
+        ],
+        [
+          "decay",
+          67,
+          123
+        ]
+      ],
+      "error": null
+    },
+    "20170225": {
+      "id": "20170225",
+      "source": "real",
+      "n_steps": 31,
+      "series_sha256": "70fc5fc2361328b03bd444b9cae9d60b6625cc2cfedc68f96912b7449ab8461f",
+      "phases": [
+        [
+          "decay",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          17
+        ],
+        [
+          "mature",
+          18,
+          19
+        ],
+        [
+          "decay",
+          20,
+          24
+        ],
+        [
+          "residual",
+          25,
+          30
+        ]
+      ],
+      "error": null
+    },
+    "20170342": {
+      "id": "20170342",
+      "source": "real",
+      "n_steps": 146,
+      "series_sha256": "4526fc062295fcbcaa99c3865f58cfd42ee83dbc6865c38665be1af2c54bb176",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          48
+        ],
+        [
+          "mature",
+          49,
+          63
+        ],
+        [
+          "decay",
+          64,
+          121
+        ],
+        [
+          "residual",
+          122,
+          145
+        ]
+      ],
+      "error": null
+    },
+    "20170409": {
+      "id": "20170409",
+      "source": "real",
+      "n_steps": 169,
+      "series_sha256": "cceb45f7f0210c9d7babae0d2e77a0de9d7f1982b85d40d8ff847868d280cfea",
+      "phases": [
+        [
+          "incipient",
+          0,
+          14
+        ],
+        [
+          "intensification",
+          15,
+          62
+        ],
+        [
+          "mature",
+          63,
+          84
+        ],
+        [
+          "decay",
+          85,
+          168
+        ]
+      ],
+      "error": null
+    },
+    "20170520": {
+      "id": "20170520",
+      "source": "real",
+      "n_steps": 58,
+      "series_sha256": "fa77671f026a1558b353dc3a08857bdc5015b4c8530a3d2e41f040f2f1e266b3",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          27
+        ],
+        [
+          "mature",
+          28,
+          34
+        ],
+        [
+          "decay",
+          35,
+          55
+        ],
+        [
+          "residual",
+          56,
+          57
+        ]
+      ],
+      "error": null
+    },
+    "20170587": {
+      "id": "20170587",
+      "source": "real",
+      "n_steps": 68,
+      "series_sha256": "596fec2d327a13123b69cd5336c5e402a59296b57f7ead35d967168f0109d52a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          10
+        ],
+        [
+          "intensification",
+          11,
+          38
+        ],
+        [
+          "mature",
+          39,
+          46
+        ],
+        [
+          "decay",
+          47,
+          67
+        ]
+      ],
+      "error": null
+    },
+    "20170756": {
+      "id": "20170756",
+      "source": "real",
+      "n_steps": 65,
+      "series_sha256": "e078b746d8d03d9bc99cf5c033430de6b1215305ac5e3368aa021a14b339d073",
+      "phases": [
+        [
+          "decay",
+          0,
+          10
+        ],
+        [
+          "intensification",
+          11,
+          19
+        ],
+        [
+          "mature",
+          20,
+          26
+        ],
+        [
+          "decay",
+          27,
+          64
+        ]
+      ],
+      "error": null
+    },
+    "20170760": {
+      "id": "20170760",
+      "source": "real",
+      "n_steps": 59,
+      "series_sha256": "039378c51cfcaa87b144326117a9370beead6a209571dd6b216bc69a596f5190",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          29
+        ],
+        [
+          "mature",
+          30,
+          35
+        ],
+        [
+          "decay",
+          36,
+          53
+        ],
+        [
+          "residual",
+          54,
+          58
+        ]
+      ],
+      "error": null
+    },
+    "20170794": {
+      "id": "20170794",
+      "source": "real",
+      "n_steps": 224,
+      "series_sha256": "23958fd4d07daa40b78410488c65e239a758310e345da069f97bd9f4d4c50d0b",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          41
+        ],
+        [
+          "mature",
+          42,
+          56
+        ],
+        [
+          "decay",
+          57,
+          116
+        ],
+        [
+          "intensification",
+          117,
+          156
+        ],
+        [
+          "mature",
+          157,
+          169
+        ],
+        [
+          "decay",
+          170,
+          221
+        ],
+        [
+          "residual",
+          222,
+          223
+        ]
+      ],
+      "error": null
+    },
+    "20170899": {
+      "id": "20170899",
+      "source": "real",
+      "n_steps": 52,
+      "series_sha256": "d05240d5559b65db6906335686787990defe780baaeaae72d71cef7c84f6a48e",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          27
+        ],
+        [
+          "mature",
+          28,
+          32
+        ],
+        [
+          "decay",
+          33,
+          44
+        ],
+        [
+          "residual",
+          45,
+          51
+        ]
+      ],
+      "error": null
+    },
+    "20171179": {
+      "id": "20171179",
+      "source": "real",
+      "n_steps": 62,
+      "series_sha256": "bc2fd3aa62d0e8b5528e672a4a6556791ccf4bf5d4110e5161c14d8ce03bddf2",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          37
+        ],
+        [
+          "mature",
+          38,
+          43
+        ],
+        [
+          "decay",
+          44,
+          48
+        ],
+        [
+          "residual",
+          49,
+          61
+        ]
+      ],
+      "error": null
+    },
+    "20180129": {
+      "id": "20180129",
+      "source": "real",
+      "n_steps": 60,
+      "series_sha256": "9b0d81186af87feb2f3ae1f7aa58c14e36f18ce7e0095b869368861bc3b3004a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          27
+        ],
+        [
+          "mature",
+          28,
+          34
+        ],
+        [
+          "decay",
+          35,
+          52
+        ],
+        [
+          "residual",
+          53,
+          59
+        ]
+      ],
+      "error": null
+    },
+    "20180170": {
+      "id": "20180170",
+      "source": "real",
+      "n_steps": 69,
+      "series_sha256": "973acda6e116b414aef211b4ad5a16c3824b0923c2f899c0e43c307f85508b03",
+      "phases": [
+        [
+          "decay",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          35
+        ],
+        [
+          "mature",
+          36,
+          42
+        ],
+        [
+          "decay",
+          43,
+          68
+        ]
+      ],
+      "error": null
+    },
+    "20180263": {
+      "id": "20180263",
+      "source": "real",
+      "n_steps": 57,
+      "series_sha256": "e13175eff293a3b4309c80155b4d17db8479b95651e40386132c6487dfc08c3a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          27
+        ],
+        [
+          "mature",
+          28,
+          32
+        ],
+        [
+          "decay",
+          33,
+          46
+        ],
+        [
+          "residual",
+          47,
+          56
+        ]
+      ],
+      "error": null
+    },
+    "20180300": {
+      "id": "20180300",
+      "source": "real",
+      "n_steps": 59,
+      "series_sha256": "500077620bfd65790076abddf7e99a1d130a92ed61efb0eebf2accf8f7f5890a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          4
+        ],
+        [
+          "intensification",
+          5,
+          20
+        ],
+        [
+          "mature",
+          21,
+          27
+        ],
+        [
+          "decay",
+          28,
+          56
+        ],
+        [
+          "residual",
+          57,
+          58
+        ]
+      ],
+      "error": null
+    },
+    "20180608": {
+      "id": "20180608",
+      "source": "real",
+      "n_steps": 117,
+      "series_sha256": "98dfcca3c33b414cf53207c9bfefdd946774edaee99f4ed1ca23be0db92e1e99",
+      "phases": [
+        [
+          "incipient",
+          0,
+          18
+        ],
+        [
+          "intensification",
+          19,
+          61
+        ],
+        [
+          "mature",
+          62,
+          75
+        ],
+        [
+          "decay",
+          76,
+          116
+        ]
+      ],
+      "error": null
+    },
+    "20180628": {
+      "id": "20180628",
+      "source": "real",
+      "n_steps": 94,
+      "series_sha256": "430d29e4f2c29e09eebc0dd39bc507e1e8e96953f6386446c0a64eaf1ccffd0a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          39
+        ],
+        [
+          "mature",
+          40,
+          51
+        ],
+        [
+          "decay",
+          52,
+          93
+        ]
+      ],
+      "error": null
+    },
+    "20180654": {
+      "id": "20180654",
+      "source": "real",
+      "n_steps": 149,
+      "series_sha256": "5c49beb6631237f9375e67508767f120c9df0a33a3450f45668b7f85e6a5a5c5",
+      "phases": [
+        [
+          "incipient",
+          0,
+          20
+        ],
+        [
+          "intensification",
+          21,
+          66
+        ],
+        [
+          "mature",
+          67,
+          83
+        ],
+        [
+          "decay",
+          84,
+          139
+        ],
+        [
+          "residual",
+          140,
+          148
+        ]
+      ],
+      "error": null
+    },
+    "20180733": {
+      "id": "20180733",
+      "source": "real",
+      "n_steps": 257,
+      "series_sha256": "e0cfafac0ac6a007ecb22446e1d66686e6569266e18d273f5ed80d3218718281",
+      "phases": [
+        [
+          "intensification",
+          0,
+          28
+        ],
+        [
+          "mature",
+          29,
+          39
+        ],
+        [
+          "decay",
+          40,
+          85
+        ],
+        [
+          "intensification",
+          86,
+          130
+        ],
+        [
+          "mature",
+          131,
+          144
+        ],
+        [
+          "decay",
+          145,
+          200
+        ],
+        [
+          "residual",
+          201,
+          256
+        ]
+      ],
+      "error": null
+    },
+    "20180759": {
+      "id": "20180759",
+      "source": "real",
+      "n_steps": 88,
+      "series_sha256": "1040eea4c4ea584a3614b31c36d5b239e073af0bd40ed60da4e9374e404d6904",
+      "phases": [
+        [
+          "incipient",
+          0,
+          7
+        ],
+        [
+          "intensification",
+          8,
+          35
+        ],
+        [
+          "mature",
+          36,
+          46
+        ],
+        [
+          "decay",
+          47,
+          87
+        ]
+      ],
+      "error": null
+    },
+    "20181046": {
+      "id": "20181046",
+      "source": "real",
+      "n_steps": 30,
+      "series_sha256": "1bb422386093f44f1c2fef996620accc48c0c32e10351f1a01e1fe28a89679b5",
+      "phases": [
+        [
+          "decay",
+          0,
+          3
+        ],
+        [
+          "intensification",
+          4,
+          16
+        ],
+        [
+          "mature",
+          17,
+          19
+        ],
+        [
+          "decay",
+          20,
+          22
+        ],
+        [
+          "residual",
+          23,
+          29
+        ]
+      ],
+      "error": null
+    },
+    "20190325": {
+      "id": "20190325",
+      "source": "real",
+      "n_steps": 167,
+      "series_sha256": "9d30120f4f65621a20493b8410eede8113007087890931841a6f62761d7f328b",
+      "phases": [
+        [
+          "incipient",
+          0,
+          10
+        ],
+        [
+          "intensification",
+          11,
+          83
+        ],
+        [
+          "mature",
+          84,
+          98
+        ],
+        [
+          "decay",
+          99,
+          120
+        ],
+        [
+          "residual",
+          121,
+          166
+        ]
+      ],
+      "error": null
+    },
+    "20190397": {
+      "id": "20190397",
+      "source": "real",
+      "n_steps": 56,
+      "series_sha256": "ea92fc7775a334f232bf3cee4b4a1d684e5249338f1eeef06bdbf5321131219e",
+      "phases": [
+        [
+          "incipient",
+          0,
+          7
+        ],
+        [
+          "intensification",
+          8,
+          30
+        ],
+        [
+          "mature",
+          31,
+          37
+        ],
+        [
+          "decay",
+          38,
+          52
+        ],
+        [
+          "residual",
+          53,
+          55
+        ]
+      ],
+      "error": null
+    },
+    "20190639": {
+      "id": "20190639",
+      "source": "real",
+      "n_steps": 180,
+      "series_sha256": "9f71c04387d09d90e6f74e39a33673b80767d7152f28852d57b490683ab2d7d3",
+      "phases": [
+        [
+          "incipient",
+          0,
+          26
+        ],
+        [
+          "intensification",
+          27,
+          83
+        ],
+        [
+          "mature",
+          84,
+          104
+        ],
+        [
+          "decay",
+          105,
+          179
+        ]
+      ],
+      "error": null
+    },
+    "20190691": {
+      "id": "20190691",
+      "source": "real",
+      "n_steps": 123,
+      "series_sha256": "8e105dd352f03d4a1e1fcaccee1d364502d4dc0db637ff0e00db35453b953550",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          35
+        ],
+        [
+          "mature",
+          36,
+          45
+        ],
+        [
+          "decay",
+          46,
+          122
+        ]
+      ],
+      "error": null
+    },
+    "20190870": {
+      "id": "20190870",
+      "source": "real",
+      "n_steps": 129,
+      "series_sha256": "d0923e385d0484c3a8202782db0fbb6468777515feff4ecf2ad2df7a0fe3502c",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          41
+        ],
+        [
+          "mature",
+          42,
+          58
+        ],
+        [
+          "decay",
+          59,
+          128
+        ]
+      ],
+      "error": null
+    },
+    "20190879": {
+      "id": "20190879",
+      "source": "real",
+      "n_steps": 79,
+      "series_sha256": "3ec9b0cb10d15207812f7ae156055176a2e9a676c4407b38cdc3ae37e19bb56d",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          28
+        ],
+        [
+          "mature",
+          29,
+          38
+        ],
+        [
+          "decay",
+          39,
+          78
+        ]
+      ],
+      "error": null
+    },
+    "20191014": {
+      "id": "20191014",
+      "source": "real",
+      "n_steps": 206,
+      "series_sha256": "9008e9adf81a9c5915cd996d86d021687e6905b50819cd1dd24588c957a0201a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          12
+        ],
+        [
+          "intensification",
+          13,
+          57
+        ],
+        [
+          "mature",
+          58,
+          83
+        ],
+        [
+          "decay",
+          84,
+          205
+        ]
+      ],
+      "error": null
+    },
+    "20191104": {
+      "id": "20191104",
+      "source": "real",
+      "n_steps": 118,
+      "series_sha256": "24b8c3613208bd18cd8412b402dfea03694a37a47d17a459f1f7400c8b94985e",
+      "phases": [
+        [
+          "incipient",
+          0,
+          4
+        ],
+        [
+          "intensification",
+          5,
+          32
+        ],
+        [
+          "mature",
+          33,
+          47
+        ],
+        [
+          "decay",
+          48,
+          117
+        ]
+      ],
+      "error": null
+    },
+    "20191155": {
+      "id": "20191155",
+      "source": "real",
+      "n_steps": 93,
+      "series_sha256": "e4f05296d0be8d53e7bc6674112676378614b52176f53070befd60e55ddb3cf9",
+      "phases": [
+        [
+          "incipient",
+          0,
+          7
+        ],
+        [
+          "intensification",
+          8,
+          38
+        ],
+        [
+          "mature",
+          39,
+          50
+        ],
+        [
+          "decay",
+          51,
+          92
+        ]
+      ],
+      "error": null
+    },
+    "20201245": {
+      "id": "20201245",
+      "source": "real",
+      "n_steps": 98,
+      "series_sha256": "44762e2bc4155e4e8979674b0a2db9e3f26a55c61c0a4d1ab83c9abd19c5a0d0",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          39
+        ],
+        [
+          "mature",
+          40,
+          51
+        ],
+        [
+          "decay",
+          52,
+          97
+        ]
+      ],
+      "error": null
+    },
+    "20202023": {
+      "id": "20202023",
+      "source": "real",
+      "n_steps": 78,
+      "series_sha256": "74b40c901398841529fc8e8058ece64a47c03c50b0f2e590dd52f5fbc11cdaf9",
+      "phases": [
+        [
+          "incipient",
+          0,
+          15
+        ],
+        [
+          "intensification",
+          16,
+          50
+        ],
+        [
+          "mature",
+          51,
+          60
+        ],
+        [
+          "decay",
+          61,
+          77
+        ]
+      ],
+      "error": null
+    },
+    "20203373": {
+      "id": "20203373",
+      "source": "real",
+      "n_steps": 79,
+      "series_sha256": "eddfe286fd0d0d4ec7310f32e6a19a9fc761aacc92b3a28f339435591c4caf8e",
+      "phases": [
+        [
+          "incipient",
+          0,
+          7
+        ],
+        [
+          "intensification",
+          8,
+          31
+        ],
+        [
+          "mature",
+          32,
+          41
+        ],
+        [
+          "decay",
+          42,
+          78
+        ]
+      ],
+      "error": null
+    },
+    "20203389": {
+      "id": "20203389",
+      "source": "real",
+      "n_steps": 95,
+      "series_sha256": "01df44255cb3ef0b15b8c9339e0840614161c2c915be376d310f6daedf67fc5c",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          62
+        ],
+        [
+          "mature",
+          63,
+          73
+        ],
+        [
+          "decay",
+          74,
+          94
+        ]
+      ],
+      "error": null
+    },
+    "20203947": {
+      "id": "20203947",
+      "source": "real",
+      "n_steps": 242,
+      "series_sha256": "8f0b177c58e8d6b5bbc5e4d8881bd679959bb6b5021fd5d98fb5a4e5d596c936",
+      "phases": [
+        [
+          "incipient",
+          0,
+          2
+        ],
+        [
+          "decay",
+          3,
+          63
+        ],
+        [
+          "intensification",
+          64,
+          136
+        ],
+        [
+          "mature",
+          137,
+          150
+        ],
+        [
+          "decay",
+          151,
+          174
+        ],
+        [
+          "residual",
+          175,
+          241
+        ]
+      ],
+      "error": null
+    },
+    "20204655": {
+      "id": "20204655",
+      "source": "real",
+      "n_steps": 57,
+      "series_sha256": "c8c5afe16e8e6a54c5cda865f546acb509797f550115099917199f3fe168d72d",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          32
+        ],
+        [
+          "mature",
+          33,
+          38
+        ],
+        [
+          "decay",
+          39,
+          52
+        ],
+        [
+          "residual",
+          53,
+          56
+        ]
+      ],
+      "error": null
+    },
+    "20205386": {
+      "id": "20205386",
+      "source": "real",
+      "n_steps": 100,
+      "series_sha256": "2416aa6fd73ca516f0ab3ee4abf85452abf7776afa8715adec00e0dc85d1fc65",
+      "phases": [
+        [
+          "incipient",
+          0,
+          8
+        ],
+        [
+          "intensification",
+          9,
+          61
+        ],
+        [
+          "mature",
+          62,
+          73
+        ],
+        [
+          "decay",
+          74,
+          99
+        ]
+      ],
+      "error": null
+    },
+    "20206498": {
+      "id": "20206498",
+      "source": "real",
+      "n_steps": 133,
+      "series_sha256": "ca36de3232f3e7cfce0b8ce0d7333948aa1badd17118c05cbc8dc4d75e9a8462",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          43
+        ],
+        [
+          "mature",
+          44,
+          51
+        ],
+        [
+          "decay",
+          52,
+          61
+        ],
+        [
+          "intensification",
+          62,
+          105
+        ],
+        [
+          "mature",
+          106,
+          114
+        ],
+        [
+          "decay",
+          115,
+          132
+        ]
+      ],
+      "error": null
+    },
+    "20207822": {
+      "id": "20207822",
+      "source": "real",
+      "n_steps": 162,
+      "series_sha256": "fa7a2f7c6fe64ec97ac31b563feaa32c8ecd55b462c81364559c752f24fac90b",
+      "phases": [
+        [
+          "incipient",
+          0,
+          12
+        ],
+        [
+          "intensification",
+          13,
+          54
+        ],
+        [
+          "mature",
+          55,
+          74
+        ],
+        [
+          "decay",
+          75,
+          161
+        ]
+      ],
+      "error": null
+    },
+    "s0596ea57": {
+      "id": "s0596ea57",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "78ae091842bc862a32bc314e12b839859b8dc9551dd3a6710de3ec778a225242",
+      "phases": [
+        [
+          "incipient",
+          0,
+          1
+        ],
+        [
+          "intensification",
+          2,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s46657891": {
+      "id": "s46657891",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "e0fe1e0a85981d761f110e04ae3f67acc78daab08998f11d95ac1f27a845c6bb",
+      "phases": [
+        [
+          "incipient",
+          0,
+          6
+        ],
+        [
+          "intensification",
+          7,
+          27
+        ],
+        [
+          "mature",
+          28,
+          36
+        ],
+        [
+          "decay",
+          37,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s4e7ff65c": {
+      "id": "s4e7ff65c",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "8ef970c54d89f95ea8e65e5e99a1f9a58cf966a5d3c8979e341e0a5757188c61",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          25
+        ],
+        [
+          "mature",
+          26,
+          33
+        ],
+        [
+          "decay",
+          34,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s5b8aa46f": {
+      "id": "s5b8aa46f",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "4dbf8e04ab28e8159d8fb49bb2267bb713d32f53a93ea49e401d67df996af255",
+      "phases": [
+        [
+          "decay",
+          0,
+          10
+        ],
+        [
+          "intensification",
+          11,
+          24
+        ],
+        [
+          "mature",
+          25,
+          29
+        ],
+        [
+          "decay",
+          30,
+          50
+        ],
+        [
+          "residual",
+          51,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s5dcc0f79": {
+      "id": "s5dcc0f79",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "9454fe8e2b34a814878f8744cad252aa159a09627f52f798f2f9803707aa399e",
+      "phases": [
+        [
+          "incipient",
+          0,
+          4
+        ],
+        [
+          "intensification",
+          5,
+          19
+        ],
+        [
+          "mature",
+          20,
+          25
+        ],
+        [
+          "decay",
+          26,
+          46
+        ],
+        [
+          "residual",
+          47,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s6b1e8245": {
+      "id": "s6b1e8245",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "c3f0600e92b645f829b052d80e602d353e83e68faacf75b972982ec0c4a2ac01",
+      "phases": [
+        [
+          "incipient",
+          0,
+          2
+        ],
+        [
+          "decay",
+          3,
+          17
+        ],
+        [
+          "intensification",
+          18,
+          37
+        ],
+        [
+          "mature",
+          38,
+          43
+        ],
+        [
+          "decay",
+          44,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s6b542eee": {
+      "id": "s6b542eee",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "6ad904a1a64da31fc653077fd15010ccfef64bc6412a74461072d9cbff83e16a",
+      "phases": [
+        [
+          "incipient",
+          0,
+          2
+        ],
+        [
+          "intensification",
+          3,
+          13
+        ],
+        [
+          "mature",
+          14,
+          18
+        ],
+        [
+          "decay",
+          19,
+          32
+        ],
+        [
+          "intensification",
+          33,
+          45
+        ],
+        [
+          "mature",
+          46,
+          50
+        ],
+        [
+          "decay",
+          51,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s8001f17b": {
+      "id": "s8001f17b",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "284cd8141059530aff503175bf9fd0b64122dd3f5d5bd767b9466c61fec60a10",
+      "phases": [
+        [
+          "decay",
+          0,
+          11
+        ],
+        [
+          "intensification",
+          12,
+          31
+        ],
+        [
+          "mature",
+          32,
+          37
+        ],
+        [
+          "decay",
+          38,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "s9ddbc53c": {
+      "id": "s9ddbc53c",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "af5e3fb08414abc37f5189c1dd1b4a8fd4912162c3f1d0dcc5a8adcb762d4173",
+      "phases": [
+        [
+          "incipient",
+          0,
+          4
+        ],
+        [
+          "intensification",
+          5,
+          19
+        ],
+        [
+          "mature",
+          20,
+          25
+        ],
+        [
+          "decay",
+          26,
+          46
+        ],
+        [
+          "residual",
+          47,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "sbceec644": {
+      "id": "sbceec644",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "0443afab2618323d9602006ee0a5c6bd4688ab49bcac960c45accc3fd311d976",
+      "phases": [
+        [
+          "incipient",
+          0,
+          5
+        ],
+        [
+          "intensification",
+          6,
+          24
+        ],
+        [
+          "mature",
+          25,
+          32
+        ],
+        [
+          "decay",
+          33,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "sbd6c6920": {
+      "id": "sbd6c6920",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "eb4f2989b87146a76443bd091ceb541bb06c92c613e70909103073a9d5f89c0b",
+      "phases": [
+        [
+          "incipient",
+          0,
+          3
+        ],
+        [
+          "intensification",
+          4,
+          15
+        ],
+        [
+          "mature",
+          16,
+          19
+        ],
+        [
+          "decay",
+          20,
+          32
+        ],
+        [
+          "intensification",
+          33,
+          45
+        ],
+        [
+          "mature",
+          46,
+          50
+        ],
+        [
+          "decay",
+          51,
+          65
+        ]
+      ],
+      "error": null
+    },
+    "scfcf1387": {
+      "id": "scfcf1387",
+      "source": "synthetic",
+      "n_steps": 66,
+      "series_sha256": "f315cb99c45350c498cdcd4b422f4b98241695945f41e3fc4c0faad8d25bd517",
+      "phases": [
+        [
+          "incipient",
+          0,
+          1
+        ],
+        [
+          "decay",
+          2,
+          15
+        ],
+        [
+          "intensification",
+          16,
+          31
+        ],
+        [
+          "mature",
+          32,
+          36
+        ],
+        [
+          "decay",
+          37,
+          55
+        ],
+        [
+          "residual",
+          56,
+          65
+        ]
+      ],
+      "error": null
+    }
+  }
+}

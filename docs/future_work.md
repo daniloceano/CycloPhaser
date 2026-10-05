@@ -37,21 +37,348 @@ corrected boundaries; avoids false-confidence in phase attribution near track st
 
 ---
 
-## 3. Locally-adaptive thresholds
+## 3. Locally-adaptive thresholds — **implemented (opt-in), 2026-07**
 
-All seven detection thresholds are currently expressed as fractions of total series
-length. This scales poorly for:
-- Long series with a brief intensification that exceeds the fractional threshold but
-  represents a physically real episode.
-- Multi-cycle series where the second cycle is detected out of phase because the
-  denominator (total series length) inflates all fractions.
+**Status: done as an opt-in on `research/adaptive-thresholds`.** Five of the seven
+detection thresholds (`threshold_intensification_length`,
+`threshold_intensification_gap`, `threshold_mature_length`,
+`threshold_decay_length`, `threshold_decay_gap`) were fractions of the *total series
+length*. `determine_periods(..., length_scale="local")` (default remains `"global"`,
+byte-identical to all prior versions) checks each candidate segment against
+`_local_cycle_scale` (`cyclophaser/find_stages.py`) — the span of the local
+oscillation it belongs to (nearest z-extremum before and after it, falling back to
+the series boundary) — instead of the whole track. `threshold_mature_distance` and
+`threshold_incipient_length` were already local and are unaffected.
 
-A locally-adaptive approach — e.g., fractions of the local cycle length, or absolute
-timestep counts derived from an estimated lifecycle duration — would generalise better
-across the climatological range of cyclone lifetimes.
+**Central finding — a real, load-bearing limit of this approach, not a bug:**
+local-scale normalization only resolves heterogeneity **between** life cycles in a
+multi-cycle track (a small second cycle no longer has its phases rejected by
+thresholds sized for a much larger first cycle). It does **not**, and *cannot by
+construction*, correct a disproportion **within** a single, isolated cycle (e.g. an
+unusually short decay right after an unusually long intensification): with only one
+cycle in the series there is no extremum beyond the ones already bounding it, so
+`_local_cycle_scale`'s neighbour-lookup falls back to the series boundary on both
+sides and numerically **equals** the global series length. Local and global are
+mathematically forced to agree whenever a series contains a single life cycle — the
+"local" mode only has something to correct once a series has more structure than the
+one segment being evaluated.
 
-**Expected benefit:** highest-impact change for cross-cyclone threshold generalization;
-likely to reduce the need for per-dataset manual calibration.
+This was checked against the real cyclone track database (TRACK/Gramcianinov): decays
+as abrupt as the synthetic stress case used to establish this limit (a intensification
+~20x longer than the following decay) do not occur in real tracks — real declines are
+always at least moderately gradual, and real asymmetric cyclones (decay shorter than
+intensification, or the reverse, within physically plausible ratios) are already
+detected correctly by the existing pipeline, in both modes. So this is a documented
+boundary of what threshold-rescaling alone can do, not an open problem to chase
+further — a genuinely disproportionate single-cycle decay would need a different kind
+of fix entirely (e.g. item 6 below, changepoint-based segmentation, which does not
+rely on a length threshold at all).
+
+Locked in as permanent regression tests in
+`tests/synthetic/test_length_scale_regression.py`: the multi-cycle case (local
+recovers the second cycle's phases; global still collapses them into `residual`) and
+the single-cycle sentinel case (global and local agree exactly; not a target for a
+future fix — see the test's docstring for the reasoning above in full, and the
+mature/decay neighbour-confirmation comment in `find_mature_stage`,
+`cyclophaser/find_stages.py`, for the related physical-confirmation invariant this
+interacts with).
+
+**Update 2026-09:** `length_scale` (and `mature_method`, see item 3b below) are now
+wired into `tools/calibration_app/app.py` (defaults dict, YAML import/export map, UI
+controls, `determine_periods` call).
+
+---
+
+## 3b. Amplitude-based mature-stage detection — **implemented (opt-in), 2026-09**
+
+**Status: done as an opt-in on `research/adaptive-thresholds`.** The mature stage was
+previously located only one way (now `mature_method="derivative"`, still the
+default): a fixed proportion (`threshold_mature_distance`) of the *time* distance
+from the vorticity minimum (z_valley) to each neighbouring z_peak. This locates the
+window using extrema of the smoothed *derivative*, which can lag the true z minimum
+by a few timesteps and displace the mature window forward of where the cyclone was
+actually most intense — observed concretely on case 20160030, where "derivative"
+placed the mature window's centre ~3h after the smoothed-z minimum.
+
+`mature_method="amplitude"` (new, opt-in; `find_stages._amplitude_mature_bounds`)
+instead defines the mature window as the contiguous stretch of z around the z_valley
+that stays within `mature_amplitude_fraction` (default 0.90) of the cycle's own
+peak-to-valley amplitude, evaluated independently on the intensification side and the
+decay side. Amplitude is always measured as a peak-to-valley *drop*
+(`z[side_peak] - z[z_valley]`), never the extremum's absolute value — vorticity has a
+non-zero floor, so an absolute fraction would not be physically meaningful (same
+reasoning as `prominence_relative` in `find_peaks_valleys`). Anchoring on z's own
+value rather than on the derivative removes the phase lag: on 20160030, with the
+author's calibrated thresholds, this took the mature window's centre offset from the
+smoothed z minimum from +3h ("derivative") down to +30min ("amplitude").
+
+`threshold_mature_length` and `threshold_mature_distance` are **mutually exclusive**
+with `mature_method="amplitude"` and have no effect in that mode. Both are
+minimum-duration/window-sizing rules calibrated for "derivative"'s
+fixed-time-proportion window; reusing `threshold_mature_length` as a floor on the
+amplitude window was tried first and found to discard well-centred amplitude windows
+for being narrow (20160030's ~19h window fell ~1h15 short of a `threshold_mature_length`
+value tuned for "derivative", and was discarded entirely rather than kept). Narrowness
+there is a physically meaningful outcome of `mature_amplitude_fraction`, not a defect.
+No replacement minimum-duration safeguard has been introduced for "amplitude" —
+deliberately, to evaluate the method unconstrained first (see below). The mature/decay
+neighbour-confirmation invariant (`find_mature_stage` / `find_residual_period`,
+see item 3 above) is unrelated to `threshold_mature_length` and still applies
+identically in both modes.
+
+### Empirical calibration on the 51-track set (`tests/calibration_data/`)
+
+Best configuration found by the author so far:
+
+```
+mature_method: amplitude
+mature_amplitude_fraction: 0.95
+prominence_relative: 0.3
+distance: 3
+length_scale: local
+use_smoothing: 31
+cutoff_high: 24
+replace_endpoints_with_lowpass: 0
+```
+
+Result: **7.8% bad cases (4/51)**, down from **17.6% (9/51)** with the previous
+`mature_method="derivative"` calibration (`length_scale=local`,
+`threshold_mature_distance=0.18`, `threshold_mature_length=0.15`, no prominence
+filtering — see the YAML exported 2026-07-16 for that baseline).
+
+**Finding — signal-significance criteria outperform duration thresholds here:**
+raising `prominence_relative` from 0.2 to 0.3 alone resolved 5 of the 9 bad cases.
+Separately adjusting `threshold_intensification_length` (a *duration* threshold) was
+tried and produced no improvement. This suggests that, at least for this track set,
+criteria based on how significant a feature is (prominence, amplitude) generalize
+better than criteria based on how long it lasts (duration fractions) — consistent
+with why `mature_method="amplitude"` itself outperforms `"derivative"` on the
+displacement problem it was built to fix.
+
+**Remaining bad cases (4/51) and diagnoses:**
+
+- **20206498** — a second mature phase (in a two-cycle track) is not detected.
+- **20170409**, **20191014** — small spurious "intensification" bumps during an
+  otherwise-continuous decay cause much of that decay to be reclassified as
+  `residual` instead.
+- **20150561** — a plateau during decay is misread as a renewed intensification
+  (same failure family as 20170409/20191014 above).
+
+**Note on ceiling, not failure:** part of these remaining cases appears to originate
+upstream, at the TRACK stage (spurious merging of two distinct cyclones into one
+track), not in CycloPhaser's phase detection itself. Those are a ceiling on what
+threshold/method tuning inside CycloPhaser can fix, not a defect of the method — worth
+keeping in mind before chasing further threshold changes on this specific subset.
+
+### Update 2026-09-02 — `decay_tail_amplitude_fraction` closes the gap to 0/51
+
+Root cause of the 20170409 / 20150561 failure family above: on a single-cycle
+series, `find_peaks_valleys`' prominence filter scores peaks and valleys as
+*separate* populations, so the largest interior z_peak always survives
+`prominence_relative` filtering by construction (it is the max of its own
+population), even when its prominence is negligible in absolute terms — while
+the valley of that same ripple is correctly rejected against the population
+containing the cycle's genuine main valley. The result is an "orphan" z_peak
+with no surviving valley after it, which makes `find_decay_period` truncate
+decay early; the remaining flat tail is then labelled `residual` by
+`find_residual_period`'s catch-all rule, even though nothing in the vorticity
+indicates a genuine re-intensification (20170409 was declared `residual` with
+89.5% of its peak intensity still present).
+
+`decay_tail_amplitude_fraction` (new, opt-in; `find_stages.find_residual_period`)
+fixes this **without touching `z_peaks_valleys` or any extrema detection** —
+unlike the discarded alternative of dropping the orphan peak from the extrema
+themselves, which was found to shift `_amplitude_mature_bounds`'s decay-side
+amplitude reference and inflate the mature window's duration in every case it
+fixed. Instead, immediately before the catch-all rule, and only when the NaN
+tail directly follows an existing `decay` block, it checks whether that tail
+contains a genuine re-deepening — a drop below the tail's running-maximum z
+larger than this fraction of the cycle's own peak-to-valley amplitude — and
+extends `decay` over the tail if not. See the function's docstring for the
+full mechanism and `tests/test_decay_tail_amplitude_fraction.py` for the
+locked-in regression cases.
+
+**Author's validated calibration on the 51-track set: 0% bad cases (0/51)**,
+down from 17.6% (9/51) at the start of this line of investigation:
+
+```
+mature_method: amplitude
+mature_amplitude_fraction: 0.95
+prominence_relative: 0.3
+distance: 3
+decay_tail_amplitude_fraction: 0.05
+length_scale: local
+use_smoothing: 31
+cutoff_high: 24
+cutoff_low: 168
+replace_endpoints_with_lowpass: 0
+savgol_polynomial: 3
+```
+
+Duration thresholds (`threshold_intensification_length`,
+`threshold_intensification_gap`, `threshold_decay_length`,
+`threshold_decay_gap`, `threshold_incipient_length`) are left at package
+defaults, except `threshold_mature_distance=0.18` and
+`threshold_mature_length=0.15` — the latter has no effect under
+`mature_method="amplitude"` (see above) and is carried over from the prior
+`"derivative"` calibration mainly for continuity/documentation, not because it
+does anything here.
+
+**NOTE — this calibration is specific to TRACK (Gramcianinov et al.)
+vorticity, not a general-purpose default.** TRACK output already carries
+built-in spatial smoothing; raw ERA5 vorticity series (no upstream smoothing)
+will very likely need a different calibration — most immediately different
+`cutoff_high`/`use_smoothing` values, and possibly different
+`prominence_relative`/`decay_tail_amplitude_fraction` since both are measured
+relative to the *smoothed* signal's own amplitude, which depends on how much
+noise reaches `find_peaks_valleys` in the first place.
+
+**Plan — named presets instead of changed defaults:** once the improvement
+fronts opened by this investigation (item 3 above, this item, and the two
+remaining known cases below) are closed, turn validated calibrations like this
+one into named presets (e.g. `"track_gramcianinov"`, `"era5_raw"`) exposed
+alongside the existing keyword arguments, rather than changing
+`determine_periods`'s own default values. This keeps a bare
+`determine_periods(series)` call byte-identical to v2.0.0 while giving users a
+one-line way to opt into a validated, dataset-appropriate parameter set. Not
+implemented yet — noted here for when this line of work is ready to close.
+
+**Known remaining cases (not counted as bad, but not fully understood
+either):**
+
+- **20206498** — a second mature phase, in a two-cycle track, is still not
+  detected. Unrelated to the orphan-peak mechanism above; not yet diagnosed.
+- **Incipient phase** — the current `find_incipient_period` heuristic (see
+  `cyclophaser/find_stages.py`) needs a redefinition pass; flagged here as a
+  future front, not addressed by this update.
+
+---
+
+## 3c. Lanczos boundary artifact + `use_filter=True` bug — **implemented, 2026-09-03**
+
+Two changes, on the `research/boundary-artifacts` branch, that together alter what
+the filtering stage actually does.
+
+### `boundary_padding` (opt-in, default `"zero"`)
+
+`lanczos_filter` / `lanczos_bandpass_filter` convolve via
+`scipy.signal.convolve(..., mode="same")`, which implicitly **zero-pads** the input
+beyond its own ends. Vorticity has a non-zero floor (order −5e-5), so those
+"missing" samples are a jump to zero, not a neutral continuation — and two
+properties of this configuration amplify the damage:
+
+- the kernel is about **half the series length** (`window_length_lanczo =
+  len(zeta)//2`; measured kernel/series ratio median **0.494** over the 51-track
+  set), so the contaminated zone is **~24 % of the series at each end (~48 % in
+  total)**;
+- the "bandpass" kernel **does not reject DC** at these window lengths
+  (`sum(weights)` median **0.629**, `|H(DC)|/|H|max` median **0.79**), so most of
+  the large mean vorticity passes through and is what gets removed at the edges.
+
+Result: a step between the boundary value and the interior worth a median **74 % of
+the cyclone's own peak-to-peak amplitude** (q25 0.40, q75 1.29), spread as a ramp
+carrying the sign of a spurious *deepening*. That ramp alone accounts for **≥ 80 %
+of the slope measured at t₀ in 51/51 tracks**.
+
+Measured with the filter active, normalised `|dz|` at the first/last sample (median
+over 51 tracks): `"zero"` **0.95/0.98** → `"reflect"` **0.42/0.35** → `"edge"`
+**0.50/0.38**. Raw-signal reference: **0.29**.
+
+The kernels are untouched — the fix is purely a boundary condition, and the pad
+widths (`M//2`, `M-1-M//2`) reproduce scipy's own `"same"` alignment exactly, so no
+time shift is introduced.
+
+### `use_filter=True` was silently disabling the filter (bug fix, behaviour change)
+
+`bool` is a subclass of `int` in Python, so the previous
+`window_length_lanczo = use_filter` read `True` as the integer **1**. A 1-tap
+Lanczos kernel is a scalar multiply (0.0714 for `cutoff_low=168`/`cutoff_high=24`),
+not a convolution.
+
+**Every parameter set previously calibrated with `use_filter=True` — including the
+0/51 calibration recorded in section 3b above — was calibrated on an effectively
+UNFILTERED signal.** That is what the calibration app's "Apply Lanczos filter"
+checkbox sent. `use_filter=True` now means `'auto'` and warns; `use_filter=1` still
+means a literal 1-tap window and reproduces the old behaviour byte-identically
+(pinned in `tests/test_decay_tail_amplitude_fraction.py` as a historical record).
+
+The section-3b calibration does **not** survive activating the filter: 5 of its 7
+`decay_tail_amplitude_fraction` CONVERT cases stop converting, and the set of
+changed tracks becomes a *different* set, not a smaller one.
+
+**Interaction between the two changes.** Activating the filter with
+`boundary_padding="reflect"` is *less* disruptive than with `"zero"` — measured
+against the section-3b calibration as baseline:
+
+| configuration | `r(t₀)` | `r(t_final)` | phase sequences changed |
+|---|---|---|---|
+| filter inert (window 1), `zero` — baseline | 0.581 | 0.428 | — |
+| filter active, `zero` | **0.949** | **0.981** | **15/51** |
+| filter active, `reflect` | **0.415** | **0.346** | **9/51** |
+
+With `"zero"`, switching the filter on makes the boundary *worse*; with `"reflect"`
+it improves on the baseline. The two corrections are complementary, not independent.
+
+### Author's validated calibration with the Lanczos filter ACTIVE — 0/51 bad cases
+
+```
+use_filter: true                      # == 'auto'; window = len(series)//2
+cutoff_low: 168
+cutoff_high: 18
+replace_endpoints_with_lowpass: 0
+use_smoothing: false
+use_smoothing_twice: false
+savgol_polynomial: 3
+boundary_padding: reflect
+prominence_relative: 0.3
+distance: 3
+mature_method: amplitude
+mature_amplitude_fraction: 0.95
+decay_tail_amplitude_fraction: 0.05
+length_scale: local
+threshold_mature_distance: 0.18
+threshold_mature_length: 0.15         # no effect under mature_method="amplitude"
+```
+
+All other thresholds at package defaults. **0 % bad cases (0/51)** by the author's
+visual evaluation in the calibration app.
+
+**Finding — with the Lanczos filter finally doing its job, the Savitzky-Golay
+smoothing of `z` could be switched off entirely** (`use_smoothing=false`,
+`use_smoothing_twice=false`) while keeping 0/51. This is consistent with the
+attribution measured under the old (unfiltered) configuration, where **100 % of the
+edge-artifact excess came from the Savgol passes on the derivative** — `r(t₀)` went
+0.465 (raw) → 0.372 (after Savgol on z) → 0.524 (+Savgol #1 on dz) → 0.581
+(+Savgol #2 on dz). Two smoothing stages were doing the same job, and the one that
+was actually hurting the boundary was the redundant one. `cutoff_high` moved
+18 h (from 24 h), which is the high-frequency rejection the Savgol was standing in
+for.
+
+**Caveat on "Savgol off" — it is off for `z`, not for the derivatives.**
+`use_smoothing=false` skips both Savgol passes on `z` (verified:
+`vorticity_smoothed2 == filtered_vorticity`), but `process_vorticity` then hits
+`if not window_length_savgol: window_length_savgol_derivatives = len//4|1` (or
+`len//2|1`), so the **derivatives are still smoothed twice, with an *auto* window**
+— 29–67 timesteps on this track set, i.e. *larger* than the explicit 31 used
+before. This is why `r(t₀)` under the new calibration measures **0.571**, close to
+the old 0.581, rather than dropping toward the 0.42 that `"reflect"` reaches with
+Savgol on `z` active. Worth knowing before concluding that derivative smoothing is
+out of the picture; it connects directly to item 4 below.
+
+**Structural notes on the new calibration (measured, for the record — not a
+contradiction of the 0/51 visual evaluation, which is the author's own criterion):**
+47/51 tracks get an `incipient` phase, 14/51 a `residual`, 0 unclassified
+timesteps, median mature duration 9 h, median `|mature centre − argmin(z)|` 1.0 h
+(unchanged). Three tracks resolve to fewer than three distinct phases —
+`20170760` (n=59) → `intensification → decay`, `20206498` (n=133) →
+`decay → intensification`, `20181046` (n=30) → `intensification` only. `20181046`
+is the shortest series in the set and the least resolvable by a
+`len(series)//2`-tap kernel; `20206498` is the two-cycle track already listed as a
+known open case in section 3b.
+
+**Presets.** This calibration and the section-3b one are the two concrete
+candidates for the named-preset plan described in section 3b — with the caveat
+that the section-3b set is only reproducible via `use_filter=1`.
 
 ---
 
@@ -67,6 +394,134 @@ when computing derivatives (`deriv=1`). Alternatives to evaluate:
 
 **Expected benefit:** cleaner derivative signal near series edges; less dependence on
 `replace_endpoints_with_lowpass` as a compensatory measure.
+
+### Measurement 2026-09-03 — derivative smoothing is the dominant remaining edge artifact, and removing it barely moves the phases
+
+**Commit measured: `50a624480b02817dac6f2987ff260616435312a8`** (`develop-v2.1`, i.e.
+with `boundary_padding="reflect"` as default and the `use_filter=True` bug fixed).
+Branch of the investigation: `research/smooth-derivatives`.
+Environment: scipy 1.17.1, numpy 2.1.2, pandas 2.3.3.
+Track set: the 51 tracks in `tests/calibration_data/`.
+
+**What was varied.** Only the four `savgol_filter` calls applied to the derivatives in
+`process_vorticity` (`cyclophaser/determine_periods.py`, the block after
+`dzfilt_dt = vorticity_smoothed2.differentiate(...)`). The two Savgol passes on `z`
+were left exactly as the configuration specifies. `current` is the unmodified code;
+`off` and `w5/w9/w15` required a temporary monkeypatch of `savgol_filter` in the module
+namespace **for measurement only** — no package code was changed on this branch.
+
+- `current` — untouched. With `use_smoothing=false` the code falls into
+  `if not window_length_savgol:` and picks the *auto* window
+  `len//4|1` or `len//2|1`; measured range over the set **15–91 timesteps**.
+- `off` — derivative Savgol calls replaced by identity (no smoothing of `dz`, `dz2`).
+- `w5` / `w9` / `w15` — window forced to 5 / 9 / 15, `savgol_polynomial=3` unchanged.
+
+**Metrics.** `r(t₀) = |dz_dt_smoothed2[0]| / max|dz_dt_smoothed2|`, `r(t_final)` the
+same at the last sample; median over the 51 tracks. `dz_dt_smoothed2` is the array
+`find_stages` actually consumes. "seq" counts tracks whose *phase sequence* changes;
+"labels" counts tracks where **any** timestep is relabelled; "relabelled" is the mean
+fraction of timesteps that change label. All comparisons are against `current` **of the
+same parameter set**.
+
+#### (a) Author's validated calibration (section 3c: `use_filter=true`, `cutoff_low=168`, `cutoff_high=18`, `use_smoothing=false`, `length_scale=local`, `mature_method=amplitude`, …)
+
+| derivative smoothing | `r(t₀)` (q25–q75) | `r(t_final)` | seq changed | labels changed | relabelled |
+|---|---|---|---|---|---|
+| `current` (auto, 15–91) | **0.545** (0.29–0.70) | 0.403 | — | — | — |
+| off | **0.068** (0.04–0.11) | 0.060 | 1/51 | 39/51 | 3.5 % |
+| window 5 | 0.082 (0.05–0.13) | 0.072 | 1/51 | 39/51 | 3.5 % |
+| window 9 | 0.122 (0.08–0.20) | 0.108 | 1/51 | 40/51 | 3.3 % |
+| window 15 | 0.192 (0.12–0.31) | 0.179 | 1/51 | 41/51 | 3.2 % |
+
+#### (b) Package defaults (bare `determine_periods(series)`: `use_filter='auto'`, `cutoff_high=48`, `use_smoothing='auto'`, `length_scale=global`, `mature_method=derivative`)
+
+| derivative smoothing | `r(t₀)` (q25–q75) | `r(t_final)` | seq changed | labels changed | relabelled |
+|---|---|---|---|---|---|
+| `current` (auto, 15–91) | **0.526** (0.26–0.68) | 0.319 | — | — | — |
+| off | **0.282** (0.16–0.37) | 0.182 | 1/51 | 27/51 | 0.7 % |
+| window 5 | 0.285 (0.16–0.37) | 0.186 | 1/51 | 27/51 | 0.7 % |
+| window 9 | 0.301 (0.18–0.38) | 0.196 | 1/51 | 27/51 | 0.7 % |
+| window 15 | 0.334 (0.21–0.40) | 0.208 | 1/51 | 27/51 | 0.7 % |
+
+The single track whose sequence changes is `20180170` under the author's calibration and
+`20180733` under the defaults — the same track in every mode, in both cases.
+
+**Findings.**
+
+1. **With the Lanczos boundary fixed, the derivative Savgol is now the dominant source
+   of the edge artifact.** Under the author's calibration it multiplies `r(t₀)` by ~8
+   (0.068 → 0.545) and `r(t_final)` by ~7. Under package defaults the factor is smaller
+   (~1.9) because the wider `cutoff_high=48` leaves more genuine high-frequency slope in
+   the signal for the Savgol to preserve.
+2. **The auto window is the problem, not smoothing per se.** `r(t₀)` scales smoothly
+   with window length — 0.068 (off) → 0.082 (5) → 0.122 (9) → 0.192 (15) → 0.545
+   (auto, 15–91). Any fixed short window recovers most of the benefit.
+3. **The phase output is nearly insensitive to this.** 1/51 sequences change in every
+   mode and both parameter sets; per-timestep relabelling is 3.5 % (author) / 0.7 %
+   (defaults); no fragmentation appears — total phase segments over the set go 248 → 249
+   (author) and 218 → 219 (defaults), tracks with fewer than three distinct phases stay
+   at 3 and 1, `residual` counts are unchanged, and `incipient` gains one track. The
+   label at `t₀` changes in 1/51 and at `t_final` in 0/51; the median shift of the first
+   phase boundary is −2 h (author) / 0 h (defaults), with a worst case of 31 h / 44 h on
+   a single track.
+4. **`use_smoothing=false` does not mean "no Savgol".** Confirmed again here: with
+   `use_smoothing=false` the derivatives are still smoothed twice with a window of
+   15–91 timesteps — *larger* than the explicit windows used by any calibration. This is
+   the caveat recorded in section 3c, now quantified.
+
+**Reconciliation with the earlier note.** Section 3c records `r(t₀) = 0.571` for this
+calibration; re-measured here at `50a6244` it is **0.545**. The earlier note did not pin
+the measurement script, so the small gap is a metric-definition difference, not a
+behaviour change — `cyclophaser/` is byte-identical between `b5441aa` and `50a6244`
+apart from the two default values. The definition used above (`dz_dt_smoothed2`,
+normalised by its own maximum, median over tracks) is the one to reuse from now on.
+For reference, the same quantity on `dz_dt_filt` (one Savgol pass instead of two) is
+0.353 (author) / 0.438 (defaults).
+
+**Implication for the item below.** The cheapest correction is not a new smoother: it is
+to stop deriving the derivative window from `window_length_savgol` and to cap it (a fixed
+5–15, or a physically-motivated fraction of the cycle length), plus a `use_smoothing=false`
+that actually disables the derivative passes too. Both are behaviour changes and need the
+author's visual re-validation on the 51 tracks before adoption — the numbers above say the
+re-validation should be nearly a no-op, but 0/51 is the author's criterion, not a metric.
+
+### Author's decision, 2026-09-04 — `use_smoothing=False` now disables the derivative smoothing
+
+**Decided and implemented** (branch `research/smooth-derivatives`): of the two
+corrections proposed just above, only the second was adopted. `use_smoothing=False`
+now skips the four derivative Savgol passes as well, so `find_stages` consumes the
+unfiltered `d(z)/dt` and `d²(z)/dt²`. This is exactly the `off` variant measured in
+the tables above, re-confirmed against the package code after the change:
+`r(t₀) = 0.068` (q25–q75 0.04–0.11), `r(t_final) = 0.060` under the author's
+calibration; 1/51 phase sequences change; no fragmentation.
+
+**Explicitly NOT adopted:** the fixed cap (a window of 5–15) and the
+cycle-length-fraction window. Both were measured (windows 5/9/15 in the tables
+above) and both remain unimplemented — the parameter-name honesty fix was judged to
+cover the case that mattered, without introducing a new tuning knob.
+
+**Scope of the decision — and what it does not cover.** The check is `use_smoothing
+is False` by identity, so `use_smoothing='auto'` and explicit integer windows are
+untouched, as are the two Savgol passes on `z`. Note that the `off` row under
+*package defaults* in table (b) above (`r(t₀) = 0.282`) is **not** reachable through
+this change: those defaults use `use_smoothing='auto'`, and that path is unchanged
+(`r(t₀) = 0.526`, as measured). That row remains a measurement-only variant.
+
+**This is validated on TRACK (Gramcianinov) vorticity only.** That data already
+carries built-in spatial smoothing from the upstream tracking, which is very
+plausibly why removing a second, redundant smoothing stage costs so little here.
+**It has NOT been validated on raw ERA5 vorticity**, which reaches
+`process_vorticity` with no upstream smoothing at all and therefore carries
+high-frequency content the TRACK series never had.
+
+**When raw ERA5 is taken up, the order of investigation is:** first establish
+whether the now-corrected Lanczos stage (`boundary_padding="reflect"` plus the
+`use_filter=True` fix, item 3c) handles that noise on its own — with an appropriate
+`cutoff_high`, which is the knob the derivative Savgol was standing in for on TRACK
+data. Only if it does not should re-enabling derivative smoothing be reconsidered,
+and in that case the capped-window variants above become live options again rather
+than the unbounded `auto` window this change removed.
+
 
 ---
 
@@ -114,6 +569,3556 @@ Possible approaches:
 
 **Expected benefit:** removes subjectivity from calibration; provides quantitative
 uncertainty bounds on detected phase boundaries.
+
+---
+
+## 8. Front A — index-0 boundary extremum type (investigation closed, unresolved)
+
+**Status: closed without a fix.** Related to item 1 above (`argrelextrema`'s
+`>=`/`<=` comparators). Full investigation, all measurements, and the refuted
+code change live on branch `fix/idx0-boundary-extremum-type` (pushed, **not
+merged** — the change is refuted and the branch exists only as a
+self-contained record) in `research/labels/diagnostics/` (`REPORT.md`,
+`FIX_REPORT.md`, `FIX_REPORT_v2.md`, `idx0_inventory.csv`,
+`synthetic_sign_table.csv`, and the scripts/figures alongside them). All
+numbers below are sourced from there; nothing here is a new measurement.
+
+### (a) Symptom, mechanical cause, four discarded routes
+
+**Symptom:** in 5 of the 51 real calibration tracks (`20180170`, `20180608`,
+`20190325`, `20191014` — training; `20206498` — held-out test split), the
+detected life cycle opens with a spurious `decay` phase instead of
+`intensification`.
+
+**Mechanical cause:** `find_peaks_valleys` (`cyclophaser/determine_periods.py:122-123`)
+calls `argrelextrema` with non-strict comparators (`np.greater_equal` /
+`np.less_equal`) and the default `mode='clip'`. Under `mode='clip'`, index 0
+is compared against itself as its own "missing" left neighbour, which always
+passes under a non-strict comparator — index 0 is marked as an extremum in
+51/51 real tracks, and its TYPE is decided only by the sign of
+`data[1]-data[0]` on the filtered series. This extremum has calculated
+prominence exactly `0.0` in the 5 affected cases and survives the
+prominence/distance filter only via an explicit boundary exemption
+(`cyclophaser/determine_periods.py:181-223`).
+
+**Four routes discarded, each with the number that killed it:**
+
+1. **Remove the index-0 extremum entirely** → 40/51 tracks then open with
+   decay instead (worse, not fixed).
+2. **Guard `find_decay_period` against a decay run starting at index 0** →
+   no part of the pipeline has any handling for an unassigned gap at the
+   START of the series (`cyclophaser/determine_periods.py:259`,
+   `cyclophaser/find_stages.py:621-628`); a guard here would leave up to 52%
+   of a series with no assigned phase at all.
+3. **Force index 0 to `'peak'` unconditionally** → mechanically clean on the
+   51 real tracks (46/46 no-op on the already-correct ones, incipient
+   boundary identical field-for-field, 3/3 correct on the affected training
+   tracks' first non-incipient phase), **but** 4 of the 12 synthetic cases
+   that open with genuine decay by construction (`DItMD_noisy`,
+   `DItMD_residual_noisy`, `IcDItMD_noisy`, `IcDItMD_residual_noisy`)
+   regressed from a perfect sequence match to a mismatch.
+4. **Condition route 3 on raw/filtered sign disagreement** (the raw and
+   filtered series disagree on `sign(z[1]-z[0])` in exactly the 5 affected
+   real tracks, 5/5) → refuted at a gate, before implementation, by the
+   counter-example `IcDItMD_residual_noisy`: it opens with genuine decay AND
+   has disagreeing raw/filtered signs — the same signature the rule would
+   use to (wrongly) call it a boundary artefact.
+
+**Front A does not block the v2.1 release.** The incipient-phase boundary —
+the metric v2.1 is actually closing on — is IDENTICAL, field for field, with
+and without route 3's fix applied (`TRAIN · real`: 17 boundary labels, 8
+within margin, MAE 4.82, worst 26; refusal 16/14 — all unchanged). This is
+not incidental: `boundary` is computed from `dz`/`z_unfil` and config alone
+(`cyclophaser/find_stages.py:969-978`), never from the phase map, so it is
+mathematically invariant to how index 0 is classified in `z_peaks_valleys`.
+The index-0 problem affects the opening decay/intensification phase in 5/51
+real tracks — not the incipient boundary v2.1 depends on.
+
+### (b) Not pursued: magnitude instead of sign
+
+The counter-example that refuted route 4, `IcDItMD_residual_noisy`, has
+`|z[1]-z[0]|` = 2.6×10⁻⁶ raw vs. 1.9×10⁻⁵ filtered — the filter AMPLIFIES the
+difference by ~7×. The three genuine-decay-opening synthetic cases that
+passed the gate have large raw magnitude, and the filter ATTENUATES it
+instead of amplifying it. A rule keyed on amplification-vs-attenuation of
+`|z[1]-z[0]|` was **not pursued**, because it would require a numeric
+amplification/attenuation threshold — i.e. a new parameter, which this
+investigation was explicitly constrained not to introduce. Left here as a
+lead for whoever reopens Front A.
+
+### (c) Defect H (open): unconditional incipient overwrite can mask a wrong phase map
+
+`find_incipient_period` overwrites `df.iloc[:boundary]` unconditionally,
+regardless of what was already assigned there:
+
+```
+cyclophaser/find_stages.py:982:        df.iloc[:boundary, df.columns.get_loc('periods')] = 'incipient'
+```
+
+> **Line-number correction, 2026-09-23 (item 27).** That citation is against
+> `887c628`. The same statement sits at **`find_stages.py:1134`** on the current
+> `develop-v2.1`. The line moved; the defect did not — it is still
+> unconditional, and item 27 re-observed it masking `20180608` (incipient
+> boundary 38 vs a leading decay block of 11). Prefer `:1134` when reading the
+> current tree; `:982` remains correct for anything quoting `887c628`.
+
+Observed case: `20180608` — the incipient boundary happens to consume the
+entire spurious decay block produced by the index-0 artefact, so the final
+output looks correct (opens with `intensification`) even though the
+underlying extremum classification at index 0 was wrong underneath it.
+Correct-looking final output here is not evidence that the phase map
+beneath it is correct.
+
+### (d) Defect I (open): Lanczos boundary padding flips the sign at t0 in 7/51 real tracks
+
+With `boundary_padding='edge'`, the raw and filtered series disagree on
+`sign(z[1]-z[0])` in **7 of the 51** real calibration tracks (5 of which are
+the `valley`-at-index-0 cases in (a); the other 2 keep the correct `'peak'`
+classification, since the classification depends only on the filtered
+series' sign and that one happens to still read the same way despite the
+disagreement). This is the underlying mechanism behind both routes 3 and 4
+above, and behind item 3c's `r(t₀)` measurements for `boundary_padding`.
+
+**Backlog addition, 2026-09-24 — `20180608` is handed to this item by item 28.**
+Stage 2 of front A shipped `reclassify_index0` (rule C2') and measured that it
+**cannot reach `20180608`**: in the filtered series the valley at index 0 is
+legitimate — `z` rises monotonically from `z[0] = -3.285e-5` to the peak at
+index 10 — so the rule correctly declines. Its spurious opening `decay[0,11)`
+comes from the filtered curve starting at a minimum and rising while the raw
+series deepens (`sign(z_raw[1]-z_raw[0]) = -1` vs
+`sign(z_filt[1]-z_filt[0]) = +1`), i.e. from **this** defect. No
+reclassification rule of any kind fixes it; a change to the filter's edge
+treatment would. Today H (`find_stages.py:1134`) masks it, with
+`boundary = 38` against an 11-step block, so it is invisible in the output and
+free — until a config shortens that boundary below 11. See item 28.
+
+### (e) ⚠️ The synthetic suite does not represent the real tracks at the t0 boundary
+
+**The 12 synthetic cases (`tests/synthetic/cases.py`) are not evidence about
+real-track behaviour at the t0 boundary, and real-track measurements are not
+evidence about the synthetic suite there — the two populations have a
+measurably different sign structure at index 0.** Measured 2×2 table,
+`idx0_tipo` (peak/valley) × whether the raw and filtered signs agree:
+
+| population | `valley` & signs disagree | `valley` & signs agree |
+|---|---|---|
+| 51 real tracks | 5 | 0 |
+| 12 synthetic cases | 3 | 3 |
+
+The real tracks separate cleanly (every `valley`-at-index-0 case is a sign
+disagreement, no exceptions); the synthetic suite does not (split evenly).
+**Any future front that touches the index-0 boundary and validates only
+against the synthetic suite, or only against the real tracks, is not
+validating against the other population** — they do not agree well enough
+here to stand in for each other.
+
+---
+
+## 9. Calibration app — layer inspector fidelity and inert-parameter UI signaling (F(i)(ii) and F(iii), implemented 2026-09-10)
+
+**Status: implemented, merged into `develop-v2.1`.** Two related fronts on
+`tools/calibration_app/`, both UI-only — no `cyclophaser/` file was touched
+by either, verified by a byte-identical sha256 of `determine_periods()`
+default output before/after each.
+
+### (a) F(i)(ii) — rel-panel fidelity and a boundary-selection bug (commit `7133570`, merge `1f38611`)
+
+The layer inspector's "rel" panel hardcoded `"rel = |dz| / max|dz|"` as its
+label everywhere, even under `incipient_plateau_signal="vorticity"` where
+the curve actually plotted is `|d(zeta_raw)/dt|` — misleading whenever the
+signal choice didn't match the label. It also never showed the crossing/k
+evidence that decides whether a plateau incipient phase exists, so a
+refused plateau just said "no crossing" with no reason.
+
+**Bug fixed:** the panel picked which crossing to draw with
+`boundary_smoothed or boundary_raw or 0`, which silently fell back to the
+unsmoothed probe's boundary whenever the active configuration *legitimately
+refused* a crossing — `0` is both a valid falsy Python value and this
+codebase's refusal sentinel, so the `or`-chain could not tell "there is no
+crossing" from "the crossing is at index 0." Affected **5 of the 51 real
+calibration tracks**: `20150561`, `20150656`, `20170225`, `20171179`,
+`20180263` (diagnostic before/after renders in
+`research/labels/diagnostics/04_item3_*`, reviewed visually before commit).
+
+`rel_signal_label()` now derives the label from the actual
+`signal`/`smooth_window` at the same site `rel` is computed, and the
+crossing/k evidence (rejected runs, accepted run, active requirement,
+refusal reason) is read back from the same package helpers the detector
+itself uses, not recomputed. Fidelity locked in by
+`tests/test_layer_inspector.py`: label/anti-hardcode tests, and
+crossing/k-evidence fidelity checked across all 51 tracks × 2 configs.
+
+Series colours were also made role-based (grey/thickest = raw, yellow =
+post-filter, red = post-smoothing) with per-panel legends, at Danilo's
+request — a separate, purely cosmetic follow-up commit from the bug fix
+above, per this project's "aesthetic changes go in their own commit" rule.
+
+### (b) F(iii) — inert calibration parameters were live controls that silently did nothing (commits `f188bae`, `25a113a`, `20e003d`; merges `f837052`, `402d3f7`)
+
+Several `app.py` widgets were clickable and had a real effect under *some*
+configurations but were completely inert (no effect on `determine_periods`'
+`periods` output) under others, with no indication to the user. Measured
+with an automated "inertia sweep" (`research/inert_params/sweep_inertia.py`,
+later replaced by a **derived** cartesian enumeration,
+`research/inert_params/sweep_derived.py` — see the methodology note below)
+across all 51 calibration tracks, and every inert case classified into
+**POR DESENHO** (a citable line skips the parameter) or **DEPENDENTE DOS
+DADOS** (the parameter is read unconditionally; the flat result is a
+property of this specific 51-track set, not of the code) — never left
+uncaptioned-but-unclassified, since captioning a data-dependent coincidence
+as "unused" would misrepresent it as documented behaviour.
+
+**3 POR DESENHO conditions, now signalled with `disabled=` + an inline
+"Inactive" note:**
+
+1. `use_filter=False` → `cutoff_low`, `cutoff_high`, `boundary_padding`
+   (`determine_periods.py:614`, the Lanczos convolution's sole consumer).
+2. `use_smoothing is False` → `savgol_polynomial`
+   (`determine_periods.py:648`/`:688`, both Savgol passes on `z` and the
+   derivative passes gated on this check).
+3. Found in a follow-up audit of the sweep's own enumeration (below):
+   `use_smoothing is False` → `use_smoothing_twice` (the second pass is
+   nested inside the first, `determine_periods.py:648,655`, never reached);
+   and `use_filter=False` → `replace_endpoints_with_lowpass`
+   (`determine_periods.py:625`).
+
+**Methodology finding, worth keeping in mind for any future sweep-style
+audit:** the original sweep's `(parameter, base_config)` pairs were a
+hand-written list — and a hand-written list has no way to make an *absent*
+pair visible, which is exactly how the `use_smoothing_twice` case above
+stayed hidden through the front's own gate (a) self-test. Replaced with a
+**derived** enumeration: the full cartesian product of every parameter ×
+every base config, with every pair explicitly marked `TESTED` /
+`SKIPPED_REDUNDANT` (provably identical to an already-tested pair) /
+`SKIPPED_DEFERRED` (not run, cost, but listed rather than silently absent)
+— see `research/inert_params/sweep_derived.py` and
+`inertia_matrix_full.csv`.
+
+**3 items registered here rather than left only in `research/inert_params/`
+(which a future front is not guaranteed to read):**
+
+1. **Real package defect, not fixed (out of scope for a UI-only front):**
+   `process_vorticity(use_smoothing=False, use_smoothing_twice="auto")`
+   raises `ValueError`. `bool` is a subclass of `int`, so
+   `use_smoothing=False` degrades `window_length_savgol` to `0` in the
+   `'auto'` derivation of the second pass's window
+   (`determine_periods.py:582-586`), which then fails the
+   `>= savgol_polynomial` guard at `:608` for any polynomial degree the UI
+   allows. **One click from the app's own defaults** (`use_smoothing` to
+   `"off"`, `use_smoothing_twice` left at its own default `"auto"`) —
+   reproduced live twice, independently. No existing test exercises this
+   combination (every test that sets `use_smoothing=False` also explicitly
+   sets `use_smoothing_twice=False` in the same call). Full brute-forced
+   blast-radius table (288 combinations) and blocked-vs-legitimate-error
+   split in `research/inert_params/INCIDENTAL_crash_bug.md`.
+2. `threshold_intensification_gap` is inert under the *default*
+   configuration across its whole UI range (0/51 tracks change) — read
+   unconditionally, but the gap-merge loop it feeds only runs when a track
+   has more than one intensification block, which none of the 51 tracks do
+   at default thresholds. **Untested:** whether a different
+   `threshold_intensification_length`, or `length_scale='local'`, exposes
+   tracks where this parameter bites.
+3. `incipient_plateau_crossing` (`"single"` vs `"sustained"`) only agrees
+   on all 51 tracks for `k ≤ 10`, across the whole τ range tested — not in
+   general, as first reported; it diverges (up to 15/51 tracks) at
+   `k ≥ 15`. Practical implication for whoever works on the `k`/sustained-
+   run mechanism or its F(i)(ii) visualization next: **that machinery is
+   barely exercised by this calibration set under
+   `signal="derivative"` at any `k` a user is likely to reach for** (UI
+   default 3) — validate against `signal="vorticity"` tracks instead,
+   where the two modes already diverge on 42/51. Full (τ, k) grid in
+   `research/inert_params/FINDING_signal_derivative_crossing_for_G_E.md`.
+
+**Also surfaced, unrelated to this front, not investigated:** the full
+pytest suite has 4 pre-existing failures in `tests/test_label_browser.py`
+(drag-to-resize margin assertions off by a few pixels, e.g. `36 == 40 ± 2`)
+— confirmed via `git stash` to fail identically with every file this front
+touched removed, so not a regression from F(iii). Likely
+viewport/DPI-sensitive in this sandbox; candidate for its own front.
+
+---
+
+## 10. Front G blocker — `series_sha256` void on all 12 synthetic train labels (investigation closed, unresolved)
+
+**Status: closed without a fix — FAIL against the declared gate (root cause
+identified).** Blocks Front G (`expected_starts_idx`) until resolved. Full
+investigation, all measurements, and the diagnostic script live on branch
+`diag/series-sha256-mismatch` (pushed, **not merged** — the branch exists
+only as a self-contained record) in `research/labels/diagnostics/`
+(`diag_series_sha256.py`, `series_sha256_report.md`, `.csv`; that directory
+is gitignored, the three files were force-added). All numbers below are
+sourced from there; nothing here is a new measurement.
+
+**Symptom:** 12 of 47 TRAIN labels in `research/labels/manual_labels.yaml`
+are marked void by the `series_sha256` guard — the totality of the 12
+synthetic cases, 0 of the 35 real tracks. Deterministic, reproduced outside
+CircleCI.
+
+**Declared gate:** identify the root cause. **Not identified — FAIL.**
+
+**What was measured:**
+- There is exactly one hash function, `labels_core.py:105`
+  (`series_sha256`) — `sha256(np.asarray(values, dtype="float64").tobytes())`,
+  values only, no index.
+- WRITE (`labels_core.py:376`, `label_tab.py:830/845/966`) and VERIFY
+  (`evaluate_against_labels.py:221-229`, `test_manual_labels.py:1129-1140`)
+  call that same function over the output of the same two loaders
+  (`load_real_series`/`load_synthetic_series`).
+- **WRITE and VERIFY agree with each other today: 12/12 synthetic ids have
+  `max|Δ| == 0` between the two routes.** The two-diverging-routes
+  hypothesis is refuted.
+- None of 11 alternative byte encodings tried (float32, big-endian,
+  index-inclusive, rounded, CSV round-trip, repr/str text, Fortran order)
+  reproduces the hash recorded on 2026-09-08, for any of the 12 synthetic
+  ids.
+- `tests/synthetic/cases.py` and `generators.py` are git-diff-identical
+  between the commit predating labelling (`f80c2f6`, 2026-09-04) and HEAD.
+- The recorded-vs-current mismatch is stable across four numpy versions
+  tested (1.26.4, 2.1.2, 2.4.0, 2.5.3 — spanning the pre-/post-2.0
+  BLAS-backend split), so it is not numpy/Accelerate/OpenBLAS drift.
+
+**Conclusion by elimination:** the hash function is correct (the 35 real
+labels pass through it and match) and the encoding is correct (11 tried,
+none explains it). So the values of the 12 synthetic series on 2026-09-08
+were not the values produced by the code today. A sha256 mismatch is not
+reversible, so this cannot be directly demonstrated — it is the only
+reading compatible with the measurements above.
+
+**Leading theory, not confirmed and not confirmable:** a long-lived
+`st.cache_data` Streamlit session serving a stale synthetic snapshot from
+before a local edit that was never committed. The original session no
+longer exists to inspect.
+
+**Structural cause, this one actionable:** synthetic series are generated
+in memory on every load; real series are read from a file on disk. The 12
+broken labels are exactly the ones with no file backing them. Addressed by
+freezing the synthetic suite to a versioned file, in a following front.
+
+**Not tested:** cross-checking the id → values pairing at write time
+itself. Superseded by immediate same-process verification right after
+re-labelling, rather than trusting a hash written and checked in separate
+sessions.
+
+**Addendum, 2026-09-10 (see item 11):** the structural fix below found, as a
+side effect of its own measurements, that a fresh process on this machine
+reproduces 12/12 MATCHING hashes against the unmodified in-memory generator
+— the opposite of what is recorded above. `manual_labels.yaml` was not
+touched between the two sessions (`git log` shows its last change at
+`7f1cd04`, 2026-09-08, before this investigation). This is left as-recorded
+above rather than revised, since it was not re-investigated; item 11 is the
+next measurement in the timeline, not a correction of this one.
+
+**Addendum, 2026-09-11 — main finding, from item 12's work, not a
+re-investigation of this one:** CircleCI build `#327` (Linux runner,
+`cimg/python:3.12.3`, fresh wheel install), run on `feat/dedicated-conda-env`
+before item 11 had merged into it, failed the same `series_sha256` guard on
+the same id (`s0596ea57`) with a **third** hash value — distinct from the
+value recorded on 2026-09-08, from the diagnostic session's value (commit
+`3ae6082`), and from this machine's value (the 2026-09-10 addendum above).
+Three separate environments (the original labelling session, the diagnostic
+session, and a Linux CI runner) produced three different values for the same
+nominal computation. **This is evidence for environment dependence (OS,
+numpy/BLAS build, float rounding), not for the "leading theory" above of one
+specific lost/stale Streamlit session** — a single stale session could
+account for two diverging values, not three independently-diverging ones
+across unrelated environments including a CI runner that never had a
+Streamlit process running at all. Left here as a correction of the *shape* of
+the evidence, not a resolution of the root cause: WHICH environment factor
+causes the divergence is still not identified, and is not being
+re-investigated. See item 12 for the build `#327` → `#329` (green, after item
+11 merged) comparison this is drawn from.
+
+---
+
+## 11. Front G blocker — synthetic series frozen to versioned file — **closed, PASS, 2026-09-10**
+
+**Status: closed with a fix.** Unblocks Front G (`expected_starts_idx`).
+Branch `feat/freeze-synthetic-series`, pushed, not merged. Implements the
+structural fix item 10 named as actionable: the 12 synthetic series no
+longer regenerate in memory on every load.
+
+**What changed:**
+- `research/labels/freeze_synthetic_series.py` (new): one-time script,
+  execs `tests/synthetic/cases.py` to get its CURRENT generator output and
+  writes each of the 12 series to `tests/synthetic/data/<opaque_id>.csv` —
+  no value was invented; this only relocates what the generator already
+  produced.
+- `labels_core.load_synthetic_series()`: reads those 12 CSVs instead of
+  exec'ing `cases.py`. Case names (needed to derive the opaque id) are
+  still read from `cases.py`, but via static AST parsing of the
+  `CASES["name"] = {...}` assignments, not import/exec — so the load path
+  performs no computation at all, matching `load_real_series()`.
+
+**Declared gate — PASS on all five parts:**
+- (a) the 12 series are read from a versioned file, and synthetic loading
+  recomputes nothing — verified structurally (AST-based name parsing, no
+  generator call, no RNG) and by the full test suite passing unchanged.
+- (b) `series_sha256` of the 12 identical across 3 separate Python
+  processes — measured, byte-identical (see below on the precision fix
+  this required).
+- (c) fresh-process verification, right after freezing, validates the 12
+  labels — measured PASS, with a scope change from what was planned:
+  Danilo decided (2026-09-10) to accept this as satisfying the gate rather
+  than running the blind relabelling protocol, because there turned out to
+  be no NEW rotulagem to verify — see next paragraph. (c) as originally
+  written assumed today's synthetic values differed from September's; that
+  premise was wrong, and the measured hash coincidence is stronger evidence
+  than the relabelling protocol it stood in for — without this correction
+  (c) would read as not measured, which it is not.
+- (d) the real labels' recorded `series_sha256` is unchanged and still
+  validates — measured across all 51 (the gate text said 35, the TRAIN
+  subset; all 51 real labels, train and test, were checked and PASS, 0
+  stale).
+- (e) the 12 ids and `split.yaml` are unchanged — measured, `git diff` on
+  `split.yaml` is empty; the 12 ids derived from the frozen files match
+  `split.yaml`'s synthetic id list exactly.
+
+**The scope change on (c), in full:** a fresh-process check (done to
+satisfy (c)) found that the UNMODIFIED in-memory generator's current output
+already matches all 12 recorded 2026-09-08 label hashes — 0 stale, direct
+contradiction of item 10's "12/12 mismatch, root cause not identified."
+`manual_labels.yaml` has not been touched since 2026-09-08 (`git log`).
+Once the CSV freeze round-trips losslessly (see below), the frozen files
+validate against the EXISTING 12 labels with no new labelling performed.
+Presented to Danilo as a three-way choice (accept as satisfying (c) /
+relabel anyway as independent confirmation / hold off pending a look at why
+item 10 said otherwise); he chose to accept it. This front does not
+re-investigate item 10's finding — it is left standing as its own
+measurement, unrevised, with this file cross-referencing both directions.
+
+**A fix required within this front, not carried over from item 10:** the
+freeze is not a no-op — pandas' default `to_csv`/`read_csv` float
+formatting does NOT guarantee recovering the exact float64 a value was
+written from (measured: ~16-significant-digit truncation on write by
+default, plus a separate low-precision fast parser on read). Either alone
+silently perturbs the last 1-2 bits of most values, which `series_sha256`
+hashes raw — this would have manufactured a NEW staleness bug distinct
+from, and unrelated to, item 10's. Fixed for the synthetic loader with
+`float_format="%.17g"` on write and `float_precision="round_trip"` on
+read; verified bit-exact (`.tobytes()` equality) for all 12 series.
+**Deliberately NOT applied to `load_real_series()`**: measured that
+switching its parser to `round_trip` makes all 51 real labels newly void,
+because their recorded hashes were written against the default parser's
+(imprecise) output — the fix belongs only on the newly-introduced
+synthetic round-trip, not on a real-track path that was already correct
+under its existing parser.
+
+**Verification method:** `git stash` used throughout to compare
+before/after on the same commit rather than trusting either state
+asserted; the pandas round-trip precision loss was caught this way, not
+assumed. Full `pytest tests/ -k "not label_browser"` — 1098 passed, 1
+skipped (`test_synthetic_lifecycles.py:128`, pre-existing, unrelated to
+this front — an observational-mode case with no timing assertion), before
+and after, no new failures. `test_label_browser.py` itself deselected, not
+run — pre-existing sandbox-only Playwright exception, per item 9.
+
+---
+
+## 12. Dedicated conda environment for development — **closed, PASS, 2026-09-11**
+
+**Status: closed with a fix.** Branch `feat/dedicated-conda-env`, merged
+into `develop-v2.1`. Fixes the shadowing bug behind `research/labels/
+evaluate_against_labels.py` resolving `cyclophaser.determine_periods` to
+whichever version happens to be installed in the active environment rather
+than to this repository, depending on the launch directory — confirmed
+concretely (repo root vs `/tmp`, under the non-editable 1.7.3 install in
+conda env "lorenz").
+
+**What changed:**
+- `environment.yml` (already existed, commit `e17fe12`, never actually
+  built as an env): `python=3.13` → `python=3.12`, to match "lorenz", the
+  environment development has actually happened in; added `plotly>=5.24`
+  (floor matches `tools/calibration_app/requirements.txt`), which
+  `tools/calibration_app/inspector_plotly.py` imports unconditionally and
+  which was undeclared in every root dependency file (`environment.yml`,
+  `requirements.txt`, `Pipfile`, `setup.py`) — it was already declared in
+  the app's own `requirements.txt`/`requirements-app.txt`, just not here.
+- `README.md`: new "Development Environment" section documenting the
+  shadowing failure mode and the verification command. No `CONTRIBUTING.md`
+  exists, so this went into `README.md` per the task's own fallback.
+- `cyclophaser.__version__` does not exist anywhere in the package (neither
+  the repo copy nor the installed 1.7.3 copy) — measured, `AttributeError`
+  in both. Documented verification uses
+  `importlib.metadata.version('cyclophaser')` instead.
+
+**Declared gate, three parts, decided explicitly (2026-09-11) because the
+two declared texts for it disagreed with each other on authorship — not
+resolved by picking whichever text is more literal, resolved by judgement,
+recorded here so it is not ambiguous again:**
+
+1. **Import resolves to the repo from any directory** — measured PASS.
+   Checked from `/tmp`, `$HOME`, the repo root, and `tests/`: all four
+   resolve to `.../CycloPhaser/cyclophaser/__init__.py`, version `2.0.0`
+   (via `importlib.metadata`, not `1.7.3`).
+2. **Full pytest suite, "mesmo resultado do ambiente atual"** — measured,
+   not literally identical: `cyclophaser` (new) = 1098 passed / 2 skipped /
+   0 failed (1100 collected); "lorenz" (the environment named as current in
+   this front's own problem statement) = 1079 passed / **21 skipped** / 0
+   failed (1100 collected) — `lorenz` lacks `streamlit` and `plotly`
+   entirely, so it cannot even collect-and-run 19 tests
+   (`test_layer_inspector.py` ×4, `test_manual_labels.py` ×15) that the new
+   environment runs and passes. **Decided: PASS.** No test passed in one
+   environment and failed in the other — the declared FAIL trigger did not
+   fire — and the difference is not noise: it is monotonic (strictly more
+   tests execute and pass, zero regress), and it is fully and only
+   explained by `environment.yml` declaring dependencies `lorenz` was
+   missing, which is this front's entire point. A "same result" reading
+   that penalizes fixing a coverage gap by calling it FAIL would reward the
+   deficient baseline.
+3. **CircleCI vs `environment.yml`** — decided: **deliberately kept
+   different, not unified**, and documented as a choice rather than left
+   implicit (comments added to both `.circleci/config.yml` and
+   `environment.yml`). CircleCI builds the sdist/wheel and installs it plus
+   bare `pytest`+`pyyaml` — no `streamlit`, no `plotly`, no conda — which is
+   *closer to a PyPI user's install than to `environment.yml`*, on purpose:
+   that minimal, from-a-wheel install is exactly what caught `plotly` being
+   undeclared, and it is what caught the hash instability below. Making CI
+   provision from `environment.yml` (conda) would have CI stop validating
+   what a `pip install cyclophaser` user actually gets, for a package that
+   is published to PyPI — the two environments testing different things is
+   the reason to keep them apart, not an oversight to fix.
+   **Directly relevant evidence, not a new investigation:** CircleCI build
+   `#327`, on this branch, **before** item 11 merged into it, failed the
+   same `series_sha256` guard as items 10/11, on the same id (`s0596ea57`)
+   — with a **third** hash value distinct from every one already on record
+   (the recorded label, the item-10 diagnostic session's, and this front's
+   local session's). Build `#329`, immediately after merging item 11 into
+   this branch and re-running, was green — 1100 collected, 0 failed,
+   matching `lorenz` exactly. The environment-set difference between CI and
+   local was a real, active contributor to the instability items 10/11
+   chased; item 11's fix (series read from a committed file, never
+   regenerated) closes that off regardless of what CI or any future
+   environment installs, which is what makes keeping CI thin safe rather
+   than reintroducing the original risk.
+
+---
+
+## 13. Open risk — earlier fronts may have run against the shadowed cyclophaser 1.7.3, not this repo — **CLOSED 2026-09-23** (Front A by item 27; "Front E" by provenance, below)
+
+> **2026-09-23 — Front A is cleared.** Front A′ (item 27) reproduced A's
+> measurements against `887c628`'s `cyclophaser/` in a worktree, with the
+> loaded package asserted in-process: **990 fields compared, 0 divergences**,
+> and `fix_state_before.json` byte-identical. The mechanical census is also
+> unchanged at the current tip under both params-9 and params-13 (0 per-track
+> differences). A's line numbers and its `argrelextrema`/`mode='clip'`
+> reasoning are this repository's code. Related: the env A's scripts name,
+> `south_atlantic_cyclone_extremes`, carries **no cyclophaser at all**, so it
+> had no wheel to shadow with; `lorenz`, the env this item names, does carry
+> 1.7.3. ~~**This item stays OPEN** solely for the unidentified "Front E".~~
+> **Superseded the same day — "Front E" is closed too, below.**
+
+### Closing of the "Front E" residue — 2026-09-23
+
+**Status: CLOSED.** Decided by Danilo, who approved this route explicitly
+("Aprovo a rota 3 e o merge"). No new measurement was taken to close it, and
+none is needed: the number at issue was already reproduced, under proof of
+provenance, by item 27.
+
+**Identification.** "Front E" is the **synthetic `mature` score of 58.3% under
+`mature_method=amplitude`** (`mature_amplitude_fraction: 0.95`), named in the
+CircleCI/dedicated-environment front (item 12) as supporting evidence for
+problem E, the meaning of "mature". It was named there alongside the refutation
+of `fix/idx0-boundary-extremum-type` — which is Front A, already cleared by
+item 27.
+
+**What an attempt to close it by the originally planned argument found.** The
+plan was to show that `mature_method` could not have reached a shadowed 1.7.3,
+by locating the script that produced the pair "baseline 8.3% → 58.3%" and
+inspecting how it passed the parameter. That attempt **failed at its first
+step, and is recorded here rather than discarded**:
+
+- **The pair does not exist in this repository.** Searched across tracked files,
+  ignored files, and every blob of every ref (`git rev-list --all`). There is no
+  8.3% paired with a 58.3% anywhere, and no package-defaults evaluation run is
+  recorded at all. Every synthetic `mature` rate on record is 53.8%, 58.3% or
+  84.6% (params-9, -10, -11, -13).
+- **The only 8.3% in the repository is a different quantity from a different
+  front**: `Reader T 1/12 ( 8.3%)` — the topology-proxy *reader* baseline of
+  Front B, at `research/labels/diagnostics/front_b/REPORT_front_b_part1.md:257`
+  and `topology_run_gate_excerpt.txt:21`. It is not a `mature_method` baseline.
+  Do not re-pair these two numbers; they never belonged together.
+- **The call path is therefore not determinable.** With no identified script,
+  there is no line to cite, and the planned argument could not be sustained.
+
+**The route that does close it: direct provenance of the number itself.** The
+only recorded synthetic `mature` 58.3% is
+`research/labels/diagnostics/fix_eval_before.txt:35` at commit `6060c6d`:
+
+```
+      mature            12   58.3%   2.00      3
+```
+
+produced by Front A, under `cyclophaser_params-9.yaml`
+(sha256 `0c3ec559…9f63`, `mature_method: amplitude`,
+`mature_amplitude_fraction: 0.95`). **Item 27's step 1a regenerated that file
+and it came back identical — 57 lines, 0 differing, sha256
+`064c2386…38de`** — in a process that asserted `cyclophaser.__file__` inside a
+worktree pinned to `887c628` before running anything. `compare_1a.py` compares
+that report **in full, line by line**, not merely the two counts it also
+asserts; line 35 is inside that comparison. Gate verdict: PASS.
+
+So the provenance of the 58.3% is proved directly. It was produced by this
+repository's code, not by the published 1.7.3 — which is exactly what item 13
+asked about, reached without needing the script, the call path, or the missing
+baseline.
+
+**Beware the near-miss.** `fix_eval_after.txt:31`, in the same commit, reads
+`sequence 7 of 12 match ( 58.3%)` — the synthetic *whole-sequence* match rate
+**after** the refuted idx0 edit. 7/12 is also 58.3%. That is **a different
+quantity**, and item 27 did **not** reproduce it: step 1a regenerated only the
+`before` state, the refuted edit never having been merged. The figure this item
+closes on is the `mature` phase hit rate in `fix_eval_before.txt`, not that one.
+
+**Weight of this number in the decision about problem E.** None. **The decision
+on the meaning of "mature" rests on Danilo's visual review of the 12 synthetic
+cases**, not on the 58.3%. That figure is historical supporting evidence and
+carries no weight in the decision — which is why proving its provenance settles
+the item rather than reopening a calibration question. See also the ruling
+recorded for the synthetic `incipient` ground truth: on the synthetics, the
+manual label wins.
+
+**Supporting record — the 1.7.3 API surface**, raised during the failed attempt
+and kept because it is independently useful. Wheel `cyclophaser-1.7.3-py3-none-any.whl`
+from PyPI, sha256 `73396776a00249f22e2a63e266e3b08b07d17ed1cd11f4ec4f83d26ae750038d`,
+unpacked outside the repository:
+
+- `get_periods(vorticity, plot=False, plot_steps=False, export_dict=False, periods_args=None)`
+  — five parameters, as the earlier forensics stated.
+- `determine_periods(series, x, plot, plot_steps, export_dict, process_vorticity_args, periods_args)`.
+- `default_args` holds only the seven threshold keys, and `periods_args` is
+  merged by `default_args.update(periods_args)` — **an unknown key is absorbed
+  silently, with no error**.
+- **`mature_method` does not appear in any file of the 1.7.3 package.**
+
+The consequence is worth stating because it generalises beyond this item: under
+1.7.3 `mature_method` is inert *either way* — as a named argument it raises
+`TypeError` and the run dies; through `periods_args` it is swallowed and never
+read. **No score difference can be attributed to `mature_method` under 1.7.3.**
+`research/snapshots/README.md` records the same absence for 1.9.4 and 2.0.0.
+
+**Status of the whole item: CLOSED.** Front A cleared by item 27; the "Front E"
+residue closed here. Nothing remains open under item 13.
+
+Merged into `develop-v2.1` as **`3465e81`** (`--no-ff`, no PR, authorised by
+Danilo). Suite after the merge, in the dedicated `cyclophaser` conda environment
+against the working tree: **1230 passed, 0 failed**, under `-m "not browser"`.
+`git diff 40649c7 HEAD -- cyclophaser/ tests/` is **empty** — the merge touches
+`docs/future_work.md` and nothing else.
+
+### Original text, kept as the historical record
+
+> Everything below is the item **as it was written on 2026-09-11**, preserved so
+> the reasoning that raised the risk is not lost. It is **superseded** by the two
+> closings above: where it says "Front E" is unidentified and nothing has been
+> checked, that was true when written and is no longer true. Read it as history,
+> not as status.
+
+**Status when opened: OPEN.** Flagged 2026-09-11, not yet checked. Item 12 established
+that, before its fix, `import cyclophaser` in conda env "lorenz" resolved to
+the non-editable, installed **1.7.3** package or to this repository depending
+on the launch directory (repo root → repo; elsewhere, e.g. `/tmp` → 1.7.3).
+Any analysis run from "lorenz" in a directory where that resolved to 1.7.3
+was measuring a **different version of the detector than this repository's**,
+silently, with no error.
+
+**At risk, named so far:** **Front A (item 8, "index-0 boundary extremum
+type") — CLEARED by item 27 on 2026-09-23.** As originally written:
+Front A — its investigation cites specific line numbers in
+`cyclophaser/determine_periods.py` (`find_peaks_valleys`, lines 122-123) and
+draws conclusions about `argrelextrema`'s `mode='clip'` behaviour; if it was
+launched from a directory where the import shadowed to 1.7.3, those line
+numbers and that behaviour may not be this repository's code at all.
+*That conditional is now settled: item 27 proved the import did resolve to
+this repository, and the line numbers and behaviour are this code's.* A
+second front, referred to as "Front E," was also named as at risk in the
+same message that opened this item, but is **not identified** in this file,
+in `docs/`, or in project memory as of this writing — which front "E" refers
+to needs to come from Danilo directly before it can be checked.
+
+**Not yet done (for "Front E"; done for Front A, item 27):** determining, for each at-risk front, which directory/
+environment it was actually launched from, and if it cannot be determined,
+whether the front's conclusions change under a re-run against this
+repository's code as of the commit that front used. This item exists so
+that risk is not lost, not as a verdict that either front's findings are
+wrong. For Front A that check has now been done and it came back clean
+(item 27); for "Front E" nothing has been checked, because the front has
+not been identified. *(Superseded 2026-09-23: "Front E" was identified and
+closed by provenance — see "Closing of the 'Front E' residue" above. The
+launch directory was never recovered for either front, and did not need to
+be: item 27 settled Front A by reproduction, and the 58.3% by the same
+reproduction.)*
+
+---
+
+## 14. Open items and debt carried forward from items 11 and 12
+
+**Status: not closed, not being closed by this entry.** Three items named
+alongside item 13, registered together here because they belong to items 11
+and 12 respectively, not because they are one investigation.
+
+**OPEN — root cause of the synthetic generator's non-determinism across
+environments.** Item 11 worked around this for the 12 labelled cases only:
+`load_synthetic_series()` no longer calls the generator at all, so the
+non-determinism items 10's addenda measured (three distinct hash values
+across three environments, for the same nominal computation) cannot reach a
+label anymore, regardless of what causes it. It is **not fixed at the
+source** — `tests/synthetic/generators.py`'s `make_lifecycle_series` is
+unchanged, and any use of the synthetic suite outside
+`load_synthetic_series()` (a script calling the generator directly, or a
+future case added to `cases.py`) is exposed to the same non-determinism
+item 10 measured and did not explain. Not being investigated here — see
+item 10 for what was already ruled out.
+
+**DEBT — the freeze uses CSV, a text format.** `tests/synthetic/data/*.csv`
+round-trips exactly today only because of the explicit
+`float_format="%.17g"` / `float_precision="round_trip"` pairing item 11 had
+to add (pandas' defaults were silently lossy on both the write and the read
+side — measured, see item 11). A binary format (`.npz`, NetCDF) would not
+depend on a text round-trip being configured correctly to stay exact, and
+would remove this as a maintenance hazard for whoever next touches either
+side without knowing the precision pairing is load-bearing. Not urgent —
+the current pairing is verified bit-exact for all 12 series — noted as the
+more robust long-term choice, not an active problem.
+
+**COVERAGE GAP — CI exercises none of the streamlit/plotly code paths.**
+Direct, accepted consequence of item 12's decision 3 (CI deliberately does
+not provision `streamlit`/`plotly`, to stay close to a PyPI install).
+`tools/calibration_app/` — `label_tab.py`, `inspector_plotly.py`, `app.py`
+— is untested on every push; the only checks on that code are local
+(`tests/test_label_browser.py`, sandbox-only per item 9) or manual. Accepted
+as a tradeoff, not accidental — but it means a regression in the
+calibration app can land on `develop-v2.1` with a green CI.
+
+---
+
+## 15. Synthetic incipient ground truth — manual label overrules `expected_starts_idx` (decision, 2026-09-14)
+
+**Status: decided, no code change required.** Danilo, after blind-labelling
+the 12 synthetic cases through the calibration app's Label tab (see item 9;
+the tab itself gained navigation, per-boundary edge uncertainty, selective
+phase removal and gated overlays on branch
+`feat/label-tab-navigation-overlays`, not merged as of this writing (merged
+since, 8102334)):
+
+> nos sintéticos quase sempre há uma fase incipiente que não foi pretendida
+> originalmente. Pelo menos para os sintéticos eu confirmo meu label manual
+> como fonte da verdade
+
+For the 12 synthetic cases, his blind manual label in
+`research/labels/manual_labels.yaml` is the source of truth for the
+incipient phase — not `tests/synthetic/cases.py`'s segment-derived
+`expected_starts_idx`.
+
+**Why:** this independently confirms, by blind human judgment, what
+`cases.py`'s own comments and `research/incipient_plateau/
+REPORT_incipient_characterisation.md` already measured algorithmically:
+`_ramp_sine` is a half-period cosine with zero derivative at both endpoints,
+so any `It`/`D` segment opening in `sine` starts flat and produces a genuine
+incipient plateau the segment list never designed for. Only the two
+`linear` openings (`DItMD_noisy`, `DItMD_residual_noisy` —
+`STEEP_START_CASE_IDS`) are true negatives.
+
+**Practical consequence:** `research/labels/evaluate_against_labels.py`
+already scores every case, synthetic included, against `manual_labels.yaml`
+— it never reads `expected_starts_idx` at all, so this decision needs **no
+code change** there. What it DOES affect: `research/incipient_plateau/
+REPORT_incipient_characterisation.md` and `measure_incipient.py`'s
+`synthetic_ground_truth()` (`designed_Ic` / `expected_Ic` / `no_Ic`,
+built entirely from `expected_starts_idx`) predate the blind-labelling front
+and are now **superseded**, for the synthetic set, by the manual labels.
+Neither has been updated to reflect this ruling — not done as part of this
+entry, pending a separate request.
+
+**Data change, same date:** one synthetic case was re-labelled under this
+front's schema 4 — `s5dcc0f79` (`IcItMD_residual_clean`) gained a `residual`
+phase. Its previous version is preserved under that record's `superseded`
+list (schema 4 never discards an overwritten label), and the new version is
+flagged `overlays_shown: [vorticity_smoothed2]` — not blind, since an
+overlay was on screen before this specific re-save.
+
+**Extended to every phase, 2026-09-15 (front E).** The ruling recorded above
+is scoped to the incipient phase. Front E extended it: for the synthetic set
+the manual label is the source of truth for **all** phases, `mature`
+included. See item 17, which is where the timing test was switched over to
+the labels and where the consequences for `mature` are recorded.
+
+---
+
+## 17. Front G — synthetic timing test reads the manual labels, not `expected_starts_idx` — **gate FAIL (finding); verified and decided, 2026-09-15**
+
+**What changed.** `tests/synthetic/test_synthetic_lifecycles.py::test_lifecycle_phase_timing`
+no longer reads `expected_starts_idx` from `tests/synthetic/cases.py`. It now
+compares each detected boundary with the boundary in Danilo's manual label
+(`research/labels/manual_labels.yaml`), paired by position, only when the
+detected phase sequence equals the labelled one. The detector, its parameters,
+`expected_phases`, the sequence test, the labels and `split.yaml` are untouched.
+`expected_starts_idx` is still in `cases.py`, now unread (own clean-up front).
+
+**Why the series source also changed (timing test only).** A label certifies
+one exact array (`series_sha256`). The test now runs on the frozen
+`tests/synthetic/data/<id>.csv` and checks that hash first. `case["series"]`
+(regenerated at import) did not match any of the 12 hashes in the development
+sandbox used for this front (max |Δ| ≤ 1.1e-19 vs the frozen files; item 14's
+generator non-determinism). Measured: no phase assignment changed between the
+two sources in any of the 12 cases.
+
+**Margin used.** The assertion margin is still the case `tolerance` (6). The
+labels' own `tolerance_idx` (1–4 on the synthetic boundaries, mostly 1–2: 40
+of 45 boundaries) is reported alongside, not asserted: with it as the margin,
+18 of 45 boundaries would fail. See the decision below.
+
+**Result.** Suite passes; no case changed pass/fail (`quase_ItD` went from a
+vacuous timing pass — it had no `expected_starts_idx` — to a real one;
+`IcIt_observational` is still skipped). Full table, 45 boundaries:
+`research/labels/front_g/front_g_synthetic_deviations.md`, regenerated by
+`front_g_deviation_table.py` next to it using the test's own comparison.
+
+**Gate: FAIL by its own declared rule (slack ≤ 1 is luck, not a hit).**
+- `ItMD_clean` / mature: label 20, detected 26, dev +6, slack **0**.
+- `DItMD_noisy` / mature: label 26, detected 31, dev +5, slack **1**.
+Both are mature starts detected late. All 13 labelled mature boundaries have a
+positive dev (+1..+6, 12 of 13 at +2 or more): the detector's mature starts
+later than the labelled one in every case, consistent with the label marking
+the start of the visually flat region. Not investigated further (out of scope:
+no detector change in this front; front E owns the definition of mature).
+
+**Not comparable.** `IcIt_observational`: label is
+incipient→intensification (boundary 14), detector returns only
+intensification — no boundary to subtract. Observational, so not asserted.
+
+**Premise corrections from the brief, measured.** Labelled mature length is
+7–16 steps (not 8–16: `ItMD_ItMD_noisy` first mature is 7), across 13 mature
+phases in 11 cases, not 12 of 12 (`IcIt_observational` has no mature;
+`quase_ItD` has one but no designed plateau at all).
+
+### (a) Independent verification in the conda `cyclophaser` environment (2026-09-15)
+
+The patch was authored and first measured in a pip venv (numpy 2.4.0, scipy
+1.17.1, pandas 2.3.3). Re-verified on branch `feat/front-g-manual-labels-source`
+(commit `727efd2`, branched from `develop-v2.1` at `ff53f1f`) in the dedicated
+conda environment of item 12 — python 3.12.14, numpy 2.5.3, scipy 1.18.0,
+pandas 3.0.5, `cyclophaser` resolving to this repository (not the shadowed
+1.7.3 of item 13):
+
+- **Deviation table identical across all 45 boundary rows.** Regenerating
+  `front_g_synthetic_deviations.md` changed only the embedded library-versions
+  line. Every `dev`, `slack` and `label_tol` is unchanged across those three
+  library upgrades.
+- **Suite: 1115 passed, 0 failures** (`pytest -m "not browser"`).
+- Both slack ≤ 1 boundaries reproduce exactly (`ItMD_clean` / mature dev +6
+  slack 0; `DItMD_noisy` / mature dev +5 slack 1), as does the 18/45 figure.
+
+### (b) The `case["series"]` hash mismatch is environment-specific
+
+Measured in the conda `cyclophaser` environment: `case["series"]` (regenerated
+at import) matches the recorded `series_sha256` for **12 of 12** synthetic
+cases, with `max |Δ|` against the frozen CSV of **exactly 0.0**. In the pip
+venv with numpy 2.4.0 it matched **0 of 12** (≤ 1.1e-19, the observation in
+item 14 that motivated the change of series source).
+
+The timing test reads the frozen `tests/synthetic/data/<id>.csv` precisely so
+that it does not depend on which of those two environments it runs in. The
+hash guard stays regardless. Do not cite the 1.1e-19 figure as a property of
+the generators — it is a property of that one sandbox. This is also a third
+dated data point in the unreconciled item 10 / item 11 contradiction, agreeing
+with item 11; not investigated here.
+
+### (c) Skip counts are environment-dependent — do not gate on them
+
+The front's declared gate predicted `1115 passed / 2 skipped` and got
+`1115 passed / 1 skipped / 29 deselected`. No test changed outcome. Cause:
+`tests/test_label_browser.py` does a module-level
+`pytest.importorskip("playwright.sync_api")`, so the same commit reports two
+shapes under `-m "not browser"`:
+
+| playwright | reported |
+|---|---|
+| absent | 1115 passed, **2 skipped**, 0 deselected — module skips whole at collection, its 29 tests never collected |
+| present | 1115 passed, **1 skipped**, 29 deselected — the 29 collect, then the marker filter drops them |
+
+The 29 was confirmed exactly by collection. The only real runtime skip is
+`test_synthetic_lifecycles.py:244` (observational case). **The correct
+prediction for a gate is "1115 passed, 0 failures"** — predict `passed` and
+`failed`, never the skipped/deselected split, which reports on the machine
+rather than on the code.
+
+### (d) DECISION (Danilo, 2026-09-15): the asserted margin stays a fixed 6
+
+`max(6, tolerance_idx)` was considered and **rejected**. On today's labels it
+would change nothing — the largest `tolerance_idx` on any synthetic boundary
+is 4, so the expression yields 6 at **45 of 45** boundaries — but it was
+rejected on principle, not on effect: it would mix the detector's error margin
+with the labeller's own uncertainty, which are two different quantities. The
+labels' `tolerance_idx` stays reported alongside and unasserted.
+
+This closes the open question left in *Margin used* above. `expected_starts_idx`
+remains in `cases.py`, unread, for its own clean-up front.
+
+### (e) OPEN backlog — the detector's mature starts late at every labelled boundary
+
+All **13** labelled mature boundaries have a positive deviation: the detector
+places the start of mature **after** the label, by **+1 to +6** steps (12 of
+13 at +2 or more; devs +1, +2, +2, +3, +3, +3, +4, +4, +4, +4, +4, +5, +6).
+This is systematic, not scatter — there is no mature boundary the detector
+finds early or on time. The labelled mature phases it is measured against run
+7–16 steps across 11 cases, so a +6 offset consumes a large fraction of the
+shorter ones.
+
+This is registered against the definition of mature decided in **front E**:
+the label marks the start of the visually flat region, and the detector does
+not. Not investigated and not to be fixed here — no detector change was in
+this front's scope. Whoever picks this up should start from the 13 mature rows
+of `research/labels/front_g/front_g_synthetic_deviations.md` and front E's
+definition, and decide whether the detector, the definition, or the labelling
+convention is the thing that moves.
+
+---
+
+## 16. Calibration app — Label tab navigation, per-boundary uncertainty, overlays, schema 4 — **closed, PASS, 2026-09-14**
+
+**Status: closed with a fix.** Branch `feat/label-tab-navigation-overlays`
+(6 commits: `ab17faa`, `d1e23a5`, `2b9d5a1`, `c8d3dbb`, `ddc4522`, `f300420`),
+merged into `develop-v2.1` as `8102334` (`--no-ff`). Follows on from item 9's
+Label tab.
+
+**What changed, in the Label tab (`tools/calibration_app/label_tab.py`)
+only, plus a schema bump in `research/labels/labels_core.py`:**
+- Case-navigation dropdown (status/split/frozen indicators) moved into the
+  main content area, above the heading — it originally shipped in the
+  sidebar, mixed with Grid/Inspector filters, and Danilo could not find it.
+- Uncertainty is now settable on both edges (`open`/`close`) of every phase,
+  including the two series edges, not one flag per row; reconciled per
+  boundary across the two rows that share it.
+- Selective multi-phase removal via a per-row checkbox + "Remove selected",
+  replacing the old "No incipient" / "Remove last" buttons. Navigation is a
+  pure "◂ Previous" / "Next ▸" pair that never saves.
+- An opt-in, Inspection-only overlay of the detector's own filtered/smoothed
+  series (`cyclophaser.determine_periods.process_vorticity`, computed in
+  `app.py`, never reimplemented in the tab), drawn in the SAME chart and
+  y-axis as the raw series and the boundary bars — forced off in Labelling
+  mode, so blind labelling never sees it.
+- `manual_labels.yaml` schema 3 → 4: `open_unsure`, `close_unsure`,
+  `overlays_shown` (blindness provenance), `superseded` (label history on
+  overwrite). Schema-3 records are read unchanged and do not migrate until a
+  deliberate resave; the addition never changes verdict derivation — checked
+  by round-tripping all 63 committed records with zero content change.
+- Hard blocks before save: TEST-split cases cannot be saved at all; the 12
+  frozen synthetic cases require two separate confirmations; overwriting any
+  existing label requires an explicit confirmation. An explicit "Cannot save
+  yet — <reasons>" caption makes a blocked save diagnosable from the screen.
+
+**Two bugs found and fixed against real usage, both root-caused before being
+patched:**
+1. A genuine Streamlit lesson, not specific to this tab: a widget rendered
+   after another widget that can call `st.rerun()` earlier in the same
+   script pass loses its ticked/typed state on the pass it gets skipped,
+   even though its key is unchanged — bare widget-key memory does not
+   survive being skipped. Hit this on the three save-confirmation checkboxes
+   and the Notes field, right after `_mode_switch`'s Confirm button reruns.
+   Fixed by backing each with an explicit `st.session_state` entry read as
+   `value=`. See [[streamlit_widget_state_after_early_rerun]].
+2. **Real, pre-existing bug, not introduced by this front**: dragging a
+   phase boundary in the chart could silently move the WRONG boundary
+   whenever two adjacent boundaries' tolerance hit-areas overlapped (an
+   ordinary condition, not an edge case). Root cause: one `pointerdown`
+   listener per boundary's hit-rect, so an overlap was resolved by DOM
+   z-order (whichever rect was painted last won), never by geometry.
+   Confirmed pre-existing via a throwaway `git worktree` of unmodified
+   `develop-v2.1` — reproduces there identically, so the front's own
+   initial hypothesis (the new three-curve overlay chart broke boundary
+   identification) was investigated and ruled out (reproduces with zero
+   overlays active) before any fix was applied. Fixed with one chart-level
+   listener that picks the target by distance to boundary geometry.
+   `setStart`/`setTol`/`onMove`/`onKey` — the pointer/keyboard code that
+   only ever reads `clientX`/step index, never a curve value — are
+   untouched by this fix, confirmed by diff. Verified with a new invariance
+   test: dragging never changes the number of phases, only `start_idx`.
+
+Also fixed, found only once real Chromium became available for this
+front's browser suite: two `tests/browser_harness.py` selectors broken by a
+Streamlit version's migration to react-aria components (slider `role`,
+combobox value storage in an `input` attribute rather than text) —
+confirmed pre-existing on `develop-v2.1` too, not caused by the navigation
+move; and a ~3px viewport overflow at 1440x800 fixed by a chart-height
+budget bump, re-measured at 1440x800 / 1680x950 / 1920x1080 to confirm no
+shrinkage on the two larger sizes.
+
+**Verification:** `tests/test_label_browser.py` (real Chromium, branch tip
+`f300420`, pre-merge): 29/29 passed. Full project suite, run on merged
+`develop-v2.1` (`8102334`) in the dedicated `cyclophaser` conda env (item
+12): **1144 passed, 1 skipped, 95 warnings in 546.53s** — a first attempt at
+this same run, from a shell where `python` resolved to the base conda env
+(3.13) rather than `cyclophaser` (3.12), produced 2 failures and 1 error, all
+three Playwright timeouts specific to that wrong environment (missing/
+different browser binaries) — exactly the shadowing failure mode item 13
+warned about, not a regression from this merge. Discarded once identified;
+not the number recorded above.
+
+**Data change carried in from this branch:** two manual labels Danilo saved
+while testing (`20170794`, `s5dcc0f79`), and item 15's
+[[synthetic-incipient-ground-truth-decision]] (registered separately, ahead
+of this front closing, at Danilo's explicit request).
+
+---
+
+## 19. Front B — `distance` removed; premise refuted — **closed, PREMISE REFUTED, 2026-09-16**
+
+> Item 18 is claimed by the v3.0 topology-proxy front, which lives on the
+> unmerged branch `research/v3-topology-proxy`. This item is numbered 19 to
+> avoid a collision when that branch merges.
+
+Front B was commissioned on the hypothesis that the fixed-in-timesteps
+`distance` extrema filter was producing mature phases that were too short on
+`20160735` and `20203947`, with a view to letting `length_scale` govern it. The
+read-only diagnosis refuted the premise: under the reference config
+(`research/labels/configs/cyclophaser_params-9.yaml`, `distance=5`) the filter
+removes **zero** extrema across all 47 training series — every one of the 63
+interior extrema removed in the split goes by relative prominence. Swept over
+the whole split, `distance` removes nothing up to and including 14, removes one
+inert extremum at 15–18, and first changes a phase at 20. `length_scale`, in
+turn, never reaches the mature window under `mature_method="amplitude"`
+(`find_stages.py:309` is in the `derivative` branch alone), so the proposed
+coupling would have joined two controls that are both inert on mature. Because
+the redundancy is with `prominence_relative` rather than a mode switch — a UI
+guard cannot express "already done by another parameter" — and because
+`distance` was added after v2.0.0 (`969904b`) and never published, Danilo's
+decision was to **remove it from the package and the app** with no compatibility
+shim. Diagnosis: `research/labels/diagnostics/front_b/`; removal rationale and
+the sweep table: `research/inert_params/REPORT_inertia_sweep.md`.
+
+### (a) OPEN backlog — the mature phase ends EARLY, not just starts late
+
+Item 17(e) registered that the detector's mature **starts** late at every
+labelled synthetic boundary. Measured here on the 47 training series (real and
+synthetic), over 45 overlap-paired labelled mature windows, the end is early by
+a comparable median and a far worse tail: start deviation median **+2**
+(−3…+9), end **−2** (−34…+3), duration **−5** (−40…+3). The mature window is
+squeezed from both sides, so 17(e) is half the picture. Not investigated.
+
+### (b) OPEN backlog — `derivative` + `length_scale="global"` yields no mature at all
+
+On both front-B target tracks, `mature_method="derivative"` with
+`length_scale="global"` returns **no mature phase whatsoever** (`local` returns
+3). Observed during the causal sweep and not pursued; it may be the same
+global-denominator inflation already described in `find_stages.py`'s comment on
+`threshold_decay_length`. Not investigated.
+
+### (c) OPEN backlog — the real cause of short matures was never addressed
+
+The measured drivers of short mature windows are `mature_amplitude_fraction`
+(width, symmetric: `20160735`'s labelled-overlapping window goes 13 → 32 → 45
+steps as the fraction goes 0.95 → 0.90 → 0.70) and `prominence_relative`
+(cycle inventory: it leaves enough z extrema to cut one labelled cycle into
+four detected ones). **20 of the 47 training series carry at least one detected
+mature shorter than 7 steps** (14 of 35 real, 6 of 12 synthetic). Front B
+changed neither parameter — removing `distance` does not touch this. Whoever
+picks it up should start from `research/labels/diagnostics/front_b/sensitivity.txt`.
+
+### (d) OPEN backlog — `distance=25` changed `20160735`'s phases, and nobody scored it
+
+The sweep recorded that at `distance=25` the phase output changes on five
+series including `20160735`, and at 30 on eleven. **Whether any of those changes
+is an improvement was never measured** — the front scored nothing above the
+calibrated value, and the removal did not test that range. This is the one
+substantive thing the removal forecloses: if a future front wants a separation
+constraint on z extrema, it starts from scratch, and the history is
+`research/labels/diagnostics/front_b/distance_sweep.txt` (regenerable only
+against `develop-v2.1` @ `ab7f244`).
+
+Observed in passing while guarding the app and recorded here without
+investigation: `length_scale` is likewise unscored on these tracks. Switching
+`local` → `global` under `params-9`/`amplitude` changes the phase output on
+**`20160735`, `20191014` and `20203947`** — not through the mature window
+(inert under `amplitude`) but through the intensification and decay duration
+thresholds, and from there through the intensification/mature/decay neighbour
+check that confirms a mature window. Which setting is *better* on those three
+was never measured.
+
+
+---
+
+## 20. Mature detection — the `prominence_relative` × `mature_amplitude_fraction` trade-off — **part 1 closed, gate FAIL, premise CONFIRMED, 2026-09-17**
+
+> Danilo's brief commissioned this front as "Item 19". Item 19 on this branch is
+> already Front B (`distance` removed), and item 18 is claimed by the unmerged
+> `research/v3-topology-proxy` branch, so the front is registered here as **item
+> 20**. It is the same front; the number is the only thing that changed.
+
+This front picks up item 19(c) — the real cause of short matures was never
+addressed. The symptom: the mature phase comes out short or fragmented. Under
+`params-10` (`prominence_relative=0.30`, `mature_amplitude_fraction=0.95`),
+`20160735` has short troughs detected as mature where the manual label carries a
+single mature of 33 steps, 145 → 178. Raising `prominence_relative` cleans that
+case up but, by construction, also makes it harder to accept true extrema in
+other series — so a single scalar adjustment may not be able to separate the two
+effects. Part 1 of the front measures, **on the train split only**, whether any
+combination of the two parameters fixes `20160735` without any training series
+losing its mature. The trade-off is to be confirmed or refuted with numbers
+before any new mechanism is proposed.
+
+Out of scope, already decided: `distance` is gone (item 19) and `length_scale` is
+not to be touched; mature follows the human label (item 15 / 17); the asserted
+boundary margin is a fixed 6 (item 17(d)). `20150377` and `20206498` are in the
+**test** split and stay out of this front.
+
+### (a) Gate — declared before any measurement, config `params-10`
+
+Stage 1 is descriptive, on the train split (35 real + 12 synthetic = 47 series).
+Stage 2 is a grid over `prominence_relative` {0.20, 0.25, …, 0.60} ×
+`mature_amplitude_fraction` {0.80, 0.85, …, 1.00} — 45 cells — with every other
+parameter held at `params-10`.
+
+**PASS** if at least one cell satisfies all of the following simultaneously:
+
+- **(a′)** no training series that has a mature under `params-10` ends up with
+  no mature;
+- **(b)** `20160735` has exactly one mature, with |Δstart| ≤ 6 (label 145) and
+  |Δend| ≤ 6 (label 178);
+- **(c)** no training series that gets the full phase sequence right under
+  `params-10` stops getting it right (checked series by series);
+- **(d)** `20191014` and `20203947`: the sequence does not get worse, and the sum
+  of |Δ| over the mature boundaries does not increase;
+- **(e)** the incipient boundary is identical to `params-10` in every series;
+- **(f)** the sequence score over the 12 synthetics does not drop.
+
+**FAIL** otherwise. **Declared prediction: FAIL.**
+
+**Next step if FAIL, declared now:** replace the height filter with a duration
+filter — a mature candidate is accepted only if it sustains the window for ≥ 7
+steps, the floor from the item-15 decision — *if* stage 1 shows that the lost
+matures disappear in the prominence filter. If they disappear in the amplitude
+window instead, a window rule will be declared before any test is run.
+
+**Exposure on the record:** the 16 test cases were inspected visually under
+`params-10` in the calibration app (bad cases `20150377` and `20206498`), and the
+label for `20150377` was read during the split check. `20150377` will be scored
+as a test result after the mechanism is chosen, with no adjustment afterwards.
+
+<details>
+<summary>Gate as Danilo wrote it (Portuguese, verbatim)</summary>
+
+```
+Portão Item 19 (declarado antes da medição, config params-10):
+Etapa 1 descritiva no treino (35 reais + 12 sintéticos).
+Etapa 2: grade prominence_relative {0.20,0.25,...,0.60} ×
+mature_amplitude_fraction {0.80,0.85,...,1.00} (45 células), demais
+parâmetros = params-10.
+PASS se existir ao menos uma célula com, simultaneamente:
+(a') nenhuma série de treino com mature sob params-10 fica sem mature;
+(b) 20160735 com exatamente uma mature, |Δinício| ≤ 6 (rótulo 145) e
+    |Δfim| ≤ 6 (rótulo 178);
+(c) nenhuma série de treino que acerta a sequência completa sob
+    params-10 deixa de acertar (série a série);
+(d) 20191014 e 20203947: sequência não piora e soma de |Δ| das
+    fronteiras da mature não aumenta;
+(e) fronteira do incipient idêntica a params-10 em todas as séries;
+(f) pontuação de sequência dos 12 sintéticos não cai.
+FAIL caso contrário. Previsão declarada: FAIL.
+Próximo passo se FAIL (declarado agora): substituir o filtro por altura
+por um filtro por duração (candidato a mature só aceito se sustentar a
+janela por ≥ 7 passos, piso da decisão E), SE a etapa 1 mostrar que as
+matures perdidas somem no filtro de proeminência; se somem na janela de
+amplitude, uma regra de janela será declarada antes de qualquer teste.
+Exposição registrada: os 16 casos de teste foram inspecionados
+visualmente com params-10 no app (bad cases 20150377 e 20206498), e o
+rótulo de 20150377 foi lido durante a checagem do split. 20150377 será
+avaliado como resultado de teste depois do mecanismo escolhido, sem
+ajuste posterior.
+```
+
+</details>
+
+### (b) Result — gate FAIL, 0 of 45 cells; the trade-off is real
+
+Branch `research/item19-mature-prominence`, from `develop-v2.1` @ `5120856`.
+`params-10` versioned and verified against the declared sha256
+`c14755e3…047902d7`. Measured in the conda `cyclophaser` environment against the
+working tree, not the published 1.7.3. No package code changed. The test split
+was never read. Full write-up and tables:
+`research/labels/diagnostics/item19/REPORT.md`.
+
+**Stage 1, `params-10`, train (47 series).** Sequence 30/47 (real 18/35,
+synthetic 12/12); mature within ±6 at both ends 32/47; 2 series with no mature; 9
+with more than one mature block. The constant modal-sequence baseline scores
+16/47, so the detector beats it by 14 series. `20160735` produces **four** mature
+blocks (3, 8, 13 and 8 steps) where the label has one of 33.
+
+The quantity `prominence_relative` compares is
+`scipy.signal.peak_prominences` (`determine_periods.py:188`) on the filtered
+vorticity, normalised at `:203-208` by the maximum over the surviving interior
+set **per series and per extremum type**. The two distributions the front asked
+about **overlap**: `20160735`'s three spurious candidates run 0.3037–0.5709,
+the 32 valleys that generate a label-matching mature across the split run
+0.3074–1.0000, and the shared band holds 2 of 3 spurious and 1 of 32 true values.
+
+**Stage 2, the 45-cell grid.** **No cell meets all six criteria.** Criterion (b) —
+`20160735` reduced to one mature within ±6 — is met in exactly **2 cells**,
+`prominence_relative=0.60` with `mature_amplitude_fraction` 0.85 or 0.90, and both
+fail (a′), (c), (d) and (f): `20191014` and `scfcf1387` lose their mature outright,
+`scfcf1387` stops matching its sequence, and the synthetic score drops 12 → 11.
+`params-10` itself scores 5/6, failing only (b). **The declared prediction was
+FAIL and the measurement is FAIL.**
+
+**Where the matures are lost.** In every informative cell (`maf < 1.00`) the
+answer is **A — the prominence filter**: 2 of 2 series (`20191014` at
+`prominence_relative ≥ 0.45`, `scfcf1387` at `≥ 0.55`) lose the flanking z peak
+their valley needed, so no candidate is formed (`find_stages.py:261-262`). **B 0,
+C 0, D 0.** C is 0 structurally, as item 20's pre-measurement provenance note
+already established. The `maf = 1.00` column is degenerate (window collapses to
+the valley) and is reported apart.
+
+**Consequence for the declared next step.** The declared condition is met — the
+lost matures disappear in the prominence filter — so the ≥ 7-step duration floor
+is the mechanism to try, with no new rule to declare. But the follow-up
+measurement asked for at closeout weakens it: `20160735`'s **spurious** blocks
+widen along with the correct ones as `mature_amplitude_fraction` falls (3/8/8 steps
+at 0.95, 5/12/12 at 0.90, 5/15/21 at 0.85, 7/19/24 at 0.80), so the floor must rise
+with the window, and a floor high enough to remove all three destroys **17 of 32,
+19 of 38, 31 of 36 and 30 of 32** correct matures at those four fractions. The best
+ratio anywhere is `maf = 0.90`, and it still costs half of them. A duration floor
+**alone** should not be expected to work. It is also a **new** mechanism in the
+`amplitude` arm — `threshold_mature_length` is unreachable there — so the
+deliberate decision against such a floor at `find_stages.py:288-302` has to be
+revisited explicitly. Candidates that have not been measured: item 20(e).
+
+**A blind spot in the gate, found at closeout.** `20205386` keeps a mature at
+`prominence_relative=0.60` but a *different* one: its valleys at 41 (0.3115) and 61
+(0.3074) are cut, the deepest valley at 82 survives, and the detected mature moves
+from (60,62) — within ±6 of the label — to (81,84), 25 steps late. No criterion
+catches it: (a′) exempts it because a mature still exists, (c) exempts it because
+`20205386` did not match its sequence under `params-10` either, and (d) watches
+only `20191014` and `20203947`. **The gate cannot see a mature that moves to the
+wrong place without disappearing, unless the series' sequence was already
+correct** — and 17 of the 47 training series are outside (c)'s protection on that
+ground. It strengthens the FAIL (a third series is damaged at `pr = 0.60`) and it
+is a lesson for the next gate's wording.
+
+**How much weight the two counted losses carry.** `20191014`'s mature under
+`params-10` is at 135–137 [**corrected: 135–139**, see 20(a)] against a label
+of 43–69 — wrong by 92 steps — so losing
+it is not clearly a regression. Stripped of that case, the FAIL rests on
+`scfcf1387` alone, which fails (a′), (c) and (f) on its own. One series is enough
+to fail the gate as declared, and `scfcf1387` is the cleanest possible case, but
+the honest accounting is one clearly-correct mature destroyed, one badly-placed one
+lost, and one displaced unseen.
+
+### (c) OPEN — `mature_amplitude_fraction=1.0` raises `IndexError`
+
+A documented-legal value (`0 < maf ≤ 1`, validated `find_stages.py:242-245`) that
+crashes: `find_stages.py:152` indexes one past the end of the segment when
+floating-point round-off puts `z[z_valley]` a part in 1e20 above
+`level_prev = z_peak − 1.0 × (z_peak − z_valley)`, so the valley counts as a
+violation. 2 of 47 training series hit it **on numpy 2.5.3 / scipy 1.18.0 /
+pandas 3.0.5, Python 3.12.14**; an independent run on **numpy 2.4.4 / scipy
+1.17.1 did not reproduce it**. The missing bounds check is unconditional in both
+— only whether it fires is environment-dependent, which makes it harder to own,
+not less real. The `maf = 1.00` column is degenerate either way, so the item-20
+verdict does not move. The forward side (`find_stages.py:160`) has the mirror defect and
+is worse because it is **silent**: it wraps to `index[-1]` and returns
+`next_z_peak`, a maximally wrong window, instead of raising. Not fixed — this
+front changes no package code.
+
+### (d) ~~OPEN~~ **CLOSED by 20(a) below, 2026-09-17** — `mature_amplitude_fraction=0.90` is free improvement, unclaimed
+
+Holding everything else at `params-10`, 0.95 → 0.90 raises matures within ±6 of
+their label from **32/47 to 38/47**, leaves the sequence at 30/47 and the
+synthetics at 12/12, and moves no incipient boundary. Not pursued here because it
+does not fix `20160735`. It bears directly on item 19(a) — the mature window is
+squeezed from both sides — and is the cheapest unclaimed gain the grid turned up.
+
+
+### 20(a) — `mature_amplitude_fraction` 0.95 → 0.90 — **closed, gate PASS, 2026-09-17**
+
+Closes 20(d) above, which registered this cell as the cheapest unclaimed gain the
+item-20 grid turned up. Confirmed in isolation, with its own gate declared before
+measurement.
+
+**What changed, and why.** `mature_amplitude_fraction` 0.95 → 0.90, in the
+calibration config only. The parameter sets the fraction of each side's
+peak-to-valley amplitude a timestep must still cover to count as mature, so 0.95
+admitted only the deepest 5% of the cycle and produced a window systematically
+too short against the manual label — train medians: start +2, end −2, duration
+−5. 0.90 doubles the accepted band and extends the window at both ends.
+`prominence_relative` stays at 0.30. No other parameter is touched, and no line
+of `cyclophaser/` changes.
+
+**Gate, declared before measurement, measured with the instruments the
+step-3 ruling assigns** — (a) and (e) with `pair_by_overlap`
+(`research/labels/diagnostics/item19/item19_core.py:130`, both ends, fixed margin
+6), (b) with `evaluate_against_labels.py` / `score_phase_sequences`:
+
+| | predicted | measured | |
+|---|---|---|---|
+| (a) matures within ±6 at both ends | 38/47, M95 ⊆ M90 | **38/47**, `M95 − M90` = **∅** | PASS |
+| (b) sequence | 30/47, S90 = S95 | **30/47**, both differences **∅** | PASS |
+| (c) synthetics | 12/12 unchanged | **12/12 → 12/12** | PASS |
+| (d) incipient boundaries | identical case by case | **0 of 47 differ** | PASS |
+| (e) `20205386` | boundary stays within ±6 | **YES both configs** (60–62 → 60–63) | PASS |
+| (f) suite, package diff | 1130 passed, 0 failed; empty diff | **1130 passed, 0 failed**; diff **empty** | PASS |
+| (g) clean run, no degenerate window | 47/47, no 1-step mature, none ending on the next z peak | **47/47**, **0 and 0** | PASS |
+
+**The six series that join**, nominally: `20150436`, `20160735`, `20170342`,
+`20180628`, `20180733`, `20207822`. None leaves — `M95 − M90` is empty, so the
+gain is strictly additive over the nominal set, not a net total hiding a swap.
+
+**Caveat, and it is the important line in this subsection: 38/47 is a
+best-block metric, not a cleanliness metric.** `pair_by_overlap` pairs the
+detected block with the largest overlap against the label, so a series can count
+as a hit while remaining fragmented. `20160735` is exactly that case: at 0.90 it
+emits four mature blocks — 5, 12, **32** and 12 steps — and enters the 38 because
+the 32-step block at 150–181 matches the 33-step label at 145–177 (Δ +5 / +4).
+The detector still produces four matures where the label has one. `20203947`
+is fragmented the same way, four blocks of 6, 7, 8 and 8 steps, and does *not*
+reach the 38. So **38/47 means "the best mature is in the right place", not "the
+detection is clean"** — and that is precisely why the sequence score is pinned at
+30/47 on both sides of the change. Any reading of 38/47 as a detection-quality
+number is wrong.
+
+**Accepted limitation of the instrument.** `pair_by_overlap` scores only
+`lab_mat[0]` (`item19_core.py:187`), so the second labelled mature of
+`20203947`, `s6b542eee` and `sbd6c6920` is never scored, in **either**
+configuration. Both totals — 32/47 and 38/47 — are over 47 **series**, not 47
+matures. This belongs to 20b/20c, not to this front.
+
+**Corroboration from outside the gate.** `evaluate_against_labels.py` on both
+configs, over the same 30 sequence-matching series on each side: mature start hit
+56.7% → **73.3%** (MAE 2.23 → 1.73), decay start 65.6% → **93.8%** (MAE 2.62 →
+1.41), all boundaries 61/89 → **75/89**. The decay gain follows mechanically from
+the mature window extending forward — the mature→decay boundary lands closer to
+the label. The two runs' output differs in the mature and decay lines and nowhere
+else; the incipient block is byte-identical, which is an independent confirmation
+of (d).
+
+**Side effect that moves the starting point for 20b and 20c.** In `20160735` the
+true block grows from 13 to 32 steps while the spurious ones grow too, so the
+largest-spurious / true ratio falls to 12/32 = **0.375** — below any genuine
+ratio in the labels. A depth rule (20b) or a duration floor (20c) calibrated
+against the `params-10` window is calibrated against the wrong window; both must
+be re-derived on the 0.90 window.
+
+**`20180733` changed category.** It now hits the mature boundary (two blocks,
+paired 135–146 against label 129–150) but its sequence is still wrong. It is one
+of the three problem-C cases (a `residual` where the label continues in `decay`).
+This does **not** resolve C; it moves C's starting point, and C should be
+re-diagnosed on 0.90 rather than on `params-10`.
+
+**`CHANGELOG.md` deliberately not touched.** A recorded decision, not an
+omission: the CHANGELOG describes the package, and no package line changed in
+this front.
+
+#### Two corrections to the earlier record
+
+1. **`20191014`'s mature under `params-10` is 135–139, not 135–137.** The
+   five-step window is what the detector produces; under `params-11` it is
+   134–140. The figure 135–137 appears in the item-20 documents and is wrong.
+   The case still misses by ~92 steps against a label starting at 43 in both
+   configurations — unchanged in kind, and not a regression of this front — but
+   the recorded number was incorrect.
+2. **The repository has two measuring instruments with different definitions of
+   "a correct mature", and until now no document said which governs what.**
+   `score_phase_sequences` scores only series whose whole phase sequence matches
+   exactly, compares phase **starts** only, and uses each label's own
+   `tolerance_idx`; `pair_by_overlap` scores **all** series, compares **both
+   ends**, and uses a fixed margin of 6. They are not interchangeable, and a gate
+   stated in one instrument's numbers cannot be checked with the other — front
+   20a was halted at its step 3 for exactly this reason before the ruling arrived
+   (`research/labels/diagnostics/item20a/BLOCKER_pairing_rule.md`). **Open debt:
+   pick the governing instrument per quantity and say so in one place.** To be
+   resolved in the repository clean-up front, alongside the `expected_starts_idx`
+   removal.
+
+**Reproduced in two environments**, which is worth stating because this code has
+shown version sensitivity elsewhere: python 3.12.14 / numpy 2.5.3 / scipy 1.18.0,
+and independently on numpy 2.4.4 / scipy 1.17.1 from a clean clone with a
+separate driver — 32/47, 38/47, `M95 − M90` empty, S90 = S95, 12/12, 0 of 47
+incipient boundaries moved, `20205386` 60–62 → 60–63, zero pairing ties, zero
+one-step matures, and the same six series joining. The numbers are robust to that
+version difference, unlike `mature_amplitude_fraction = 1.00`, whose `IndexError`
+reproduces on one and not the other (20(c) above).
+
+**Artifacts.** Config `research/labels/configs/cyclophaser_params-11.yaml`,
+sha256 `24dd7f22b76d98cf0cab0b18ff040e010209604a8485007551095e9622abe420`.
+Report, tables T1–T8, raw record and both evaluation outputs in
+`research/labels/diagnostics/item20a/`.
+
+### 20(e) — candidate mechanisms not yet measured
+
+Registered, not implemented, not scored. Each is a **separate** candidate, and
+none of them has been measured on any split. They exist because part 1 refuted
+the mechanism it tested: `prominence_relative` and `mature_amplitude_fraction`
+are one degree of freedom against a fragmented mature, and part 1's own follow-up
+measurement (`REPORT.md` §3) shows that a duration floor on its own is no more
+separable — a floor high enough to clear `20160735`'s spurious blocks destroys
+between half and all of the correct matures at every amplitude fraction tested.
+
+**(i) A duration floor on mature candidates, measured over the window actually
+chosen — not over `params-10`.** This is the next step the item-20 gate declared
+in advance, and the condition that triggers it was met (every informative loss is
+code A, the prominence filter). Part 1 measured only the un-measured version of
+it: "≥ 7 steps at `mature_amplitude_fraction=0.95`" removes one of `20160735`'s
+three spurious blocks and 11 of 32 correct matures. Whatever window a future front
+settles on, the floor has to be calibrated **on that window**, and the numbers in
+`REPORT.md` §3 say a floor alone is unlikely to be enough. It is also a **new**
+mechanism in the `amplitude` arm — `threshold_mature_length`
+(`find_stages.py:304-312`) is unreachable there — so the deliberate decision
+against such a floor at `find_stages.py:288-302` has to be revisited explicitly.
+
+**(ii) Absolute valley depth, as distinct from prominence.** `peak_prominences`
+returns the **smaller** of the two climbs from a valley to its bounding peaks, so
+a deep minimum sitting next to an even deeper neighbour scores low, and a shallow
+dip between two modest bumps can score high. The proposed alternative is the
+valley's depth measured against the **series minimum** (or against the series'
+own dynamic range) — a global quantity the current filter never computes. Part 1
+gives a reason to expect it to behave differently: 30 of the 32 correct matures
+are generated by their series' single deepest valley, which is precisely the
+population an absolute-depth criterion selects and a relative-prominence
+criterion only approximately recovers.
+
+**(iii) The asymmetry between the two flanks.** Prominence collapses the two
+climbs into their minimum and throws the rest away. The ratio (or difference) of
+the previous-peak climb to the next-peak climb is information the detector
+currently discards, and it is exactly the quantity that distinguishes a genuine
+mature — a deep minimum flanked by comparable intensification and decay — from a
+pause on one side of a larger cycle. Untested.
+
+**(iv) The leanest variant: one mature per cycle, anchored on the deepest
+valley.** Rather than filtering extrema and hoping the survivors produce one
+window, select the mature directly: the deepest valley of the series gets the
+mature, and a second is admitted only if its **absolute depth is comparable**
+(criterion (ii)). Two facts from part 1's train split motivate it: **41 of the 47
+labels carry exactly one mature** (3 carry none, 3 carry two), and **30 of the 32
+detected matures that match their label are generated by the series' deepest
+valley** (relative prominence exactly 1.0000). Under that rule, `20160735`'s three
+spurious blocks never form, because they are not anchored on the deepest valley —
+without touching any threshold.
+
+Candidates (ii), (iii) and (iv) come from **Danilo's intuition about what
+prominence throws away**, recorded here on 2026-09-17 before any measurement, so
+that whichever is taken up is scored against a gate declared in advance, as items
+19 and 20 were. **None of the four has been measured.** Any front that picks one
+up starts by declaring its gate and its prediction, and the frozen test split
+(`research/labels/split.yaml`) stays untouched until a mechanism is chosen.
+
+---
+
+## 21. Calibration app — Benchmark tab, published-version snapshots, sidebar in execution order — **closed, PASS, 2026-09-18**
+
+Branch `research/item5-benchmark-tab`. **No change to `cyclophaser/`** (verified:
+empty diff against `develop-v2.1`).
+
+### What the front delivered
+
+* **A Benchmark tab** holding N configurations side by side over the same
+  cyclones, aligned by cyclone, each column carrying its own provenance: the
+  sha256 of its source YAML, the commit of the code actually running, the keys
+  the current signature ignores, the keys it fills from defaults, and a warning
+  when the file predates the filter fix.
+* **Two modes.** `Validation` and `Exploration` filter what is selectable and
+  what is emphasised. They never decide whether a number exists: that is decided
+  per cyclone by whether it carries a manual label
+  (`benchmark_core.scoreable`), which every scoring path routes through. **A row
+  without a label produces no scoring number in either mode.**
+* **A reference column**, chosen explicitly, defaulting to the manual label.
+* **Metrics without ground truth** — in Exploration each column is measured
+  against the reference column and the block is labelled `relative to
+  reference`: sequences changed; boundary displacement (median, max) where the
+  sequence matches; phases appeared/disappeared per type; cyclones refusing an
+  incipient phase. Distances, never accuracies.
+* **Frozen snapshots of the published releases** (`research/snapshots/`) —
+  1.9.4 and 2.0.0, 63 series each, 0 failures, generated by running each
+  published wheel in its own isolated virtualenv with that release's package
+  defaults. Version 1 is not expressible as a YAML in the current detector: the
+  two releases have an identical 19-parameter public signature and the
+  difference is in the code, so the reference has to be a recording.
+* **The sidebar reorganised by execution order**, read off the source:
+  1 Lanczos → 2 Savgol → 3 `find_peaks_valleys` → 4 intensification → 5 decay →
+  6 mature → 7 residual → (8 `post_process_periods`, no parameter) →
+  9 incipient. Two parameters that cross groups carry a note in their own
+  widget: `length_scale` and `boundary_padding`.
+
+### Gate
+
+| item | verdict | measured |
+|---|---|---|
+| (a) app suite, no regression | **PASS** | 1204 passed / **0 failed** (base 1130) |
+| (b) `cyclophaser/` diff empty | **PASS** | empty |
+| (c) Benchmark tab under AppTest, public API only | **PASS** | 37 tests, three positive controls |
+| (d) sidebar verified by automatic test | **PASS** | 35 tests; 28/28 public parameters, plus step-numbering assertion |
+| (e) snapshot isolated + hashed + env confirmed | **PASS** | `c22eebe7…`, `944b51d8…`; app env editable-only |
+| (f) Danilo's visual checkpoint | **PASS** | approved |
+
+The three positive controls in (c): swapped columns; an unlabelled row producing
+a score; and the mode leak (an uploaded track surviving into a Validation run).
+Each was confirmed to fail when the behaviour it guards was removed, as were
+(d)'s coverage and step-numbering assertions.
+
+### Declared prediction, scored
+
+> `>= 40 %` of the 51 real series with a different phase sequence between v1 and
+> params-11, the divergence concentrated at the edges, because of the
+> zero-padded filter convolution.
+
+* **Count: CORRECT** — 41/51 (**80.4 %**) against v1.9.4, 40/51 (78.4 %) against
+  v2.0.0, against a declared threshold of 40 %.
+* **Localisation: PARTLY WRONG** — the divergence concentrates on the **leading**
+  edge alone: 60 % of timesteps disagree in the first decile against 20–36 %
+  elsewhere, and the **last** decile is the quietest region at 20 %. "Edges",
+  plural, is not what the data show.
+* **Mechanism: NOT ESTABLISHED** — the snapshot differs from params-11 in ~15
+  parameters at once, so the measurement sizes the gap and attributes nothing.
+  Zero padding remains a plausible, unmeasured explanation.
+
+### Findings
+
+**`decay_tail_amplitude_fraction` is read by `find_residual_period`
+(`find_stages.py:588`), not by `find_decay_period`.** The name says decay and
+the effect is in the residual step: the parameter decides whether a flat tail
+after the last decay block is labelled `decay` instead of `residual`. Grouping
+the sidebar by phase name would have put the control under Decay, where it does
+nothing; it sits under Residual because the execution order was read off the
+source rather than assumed. **This is a naming debt of the package, not of the
+app** — the app can only describe it accurately. Renaming it is a public-API
+change and belongs to a package front, not here.
+
+**An isolated virtualenv does not isolate if the CWD is the repository.** The
+current directory precedes site-packages on the search path, so `import
+cyclophaser` resolves to the **working tree** and the installed wheel is
+shadowed — silently, with no error, producing a snapshot of the wrong code.
+Measured here: two freshly built venvs with `cyclophaser==1.9.4` and `==2.0.0`
+both reported the working tree's `determine_periods.py` until the CWD was moved.
+This is the same class as item 13 and it survives the fix recorded in item 12 —
+that one was about the conda environment, this is about the CWD, and a correct
+environment does not protect you. `research/snapshots/make_published_snapshot.py`
+now **refuses to run** unless `cyclophaser` resolved inside the running
+interpreter's own environment, and is invoked with `-P` from outside the repo.
+
+**A file's sha256 is a poor instrument when the file carries a timestamp.**
+Re-running the snapshot generator produces a different file hash with identical
+content, because `generated` changes. Verifying that a recorded artefact is
+sound therefore means comparing **field by field, ignoring the timestamp** — done
+for both snapshots, which reproduce exactly in `records`, `counts`,
+`public_signature`, `module_file` and `has_collapse_plateaux`. Hash the payload,
+not the file, whenever reproducibility is the question being asked.
+
+### Open defect — handed to the clean-up front (item 6)
+
+The cyclone upload block and the three loading checkboxes are rendered **before**
+`st.tabs` (`app.py:2037-2205` against `:2305`), so they appear above **every**
+tab. On the Benchmark tab they govern nothing: it reads the 63 records from disk
+through `benchmark_core.load_all_series()` and never consults those checkboxes.
+The caption *"No file uploaded — using `example_file.csv` as default"* is
+therefore **false on the Benchmark tab**, where 63 records are in fact available
+and selectable. The natural fix is to move the block inside `with tab_cal:`.
+**Deliberately not fixed here:** it changes the Calibration tab, whose layout did
+not go through the visual checkpoint this front's gate required.
+
+### Debt that remains
+
+**Two instruments with different definitions of a correct mature.**
+`evaluate_against_labels.py / score_phase_sequences` refuses to pair boundaries
+when the sequence does not match; `item19_core.pair_by_overlap` pairs the
+largest-overlap block against a fixed margin of 6. The tab **declares which
+number came from which instrument and never sums them**; the general resolution
+stays open, as it was before this front.
+
+**Portuguese sections in the app README** (`Instalação`, `Como rodar`, `Formato
+do CSV`, `Modos de exibição`), which predate this front. Everything this front
+wrote — interface, sidebar, tab, and its own README sections — is in English.
+**Permanent rule: the app interface is in English.**
+
+### Also done
+
+`research/labels/configs/` now holds all **eleven** configurations
+(`cyclophaser_params-1` … `-11`), each exactly as the app exports it, with
+`metadata.cyclones_used`. Only 9, 10 and 11 were there before, which would have
+left the tab unable to span the history it exists to show. `params-10` is
+`item19_core`'s frozen instrument and was not touched. See
+`research/labels/README.md` for the eleven hashes.
+
+---
+
+## 22. Front 20(b) — `mature_min_depth`, a depth floor on mature detection — **stage 1 gate FAIL (premise), stage 2 closed, PASS, merged 2026-09-21**
+
+Branch `research/item20b-depth-rule`. Two stages with opposite results, and both
+matter: the separability premise the front was built on is **false**, and the
+rule built on it nonetheless passes its gate. Authorised by Danilo at 0.80.
+
+### Stage 1 — does valley depth separate true matures from spurious ones? **FAIL**
+
+Measured over the 46 valleys that generate a mature block across the 35 real
+train series under `params-11` (32 true, 14 spurious), with two depth
+definitions: `D1 = (z_max - z_valley) / (z_max - z_min)` and
+`D2 = |z_valley| / |z_min|`.
+
+| | min(TRUE) | max(SPURIOUS) | separates? |
+|---|---|---|---|
+| D1 | 0.8805 | **1.0000** | **NO** |
+| D2 | 0.9272 | **1.0000** | **NO** |
+
+**It is the premise that fails, not the threshold.** Three spurious valleys are
+their own series' deepest point (`20171179` v45, `20181046` v26, `20205386` v82,
+all at exactly 1.0000), so the spurious population reaches the ceiling and no
+threshold can sit above it. The decisive case is **`20205386`, where depth orders
+the valleys backwards inside one series**: the true valley 61 (0.8805) sits
+between a spurious 41 (0.8687) and a spurious 82 (1.0000). The FAIL survives
+excluding the two series with no labelled mature, and survives recomputing D2
+against physical zero on the raw series. **Do not re-run this as a sweep** — a
+sweep cannot change it.
+
+Restricted to `20160735` alone, both D1 and D2 **do** separate, cleanly
+(+0.2923 / +0.3192). The motivating case is as favourable as hoped; the other 34
+refuse.
+
+Three corrections to the record came out of stage 1:
+
+* **The series feeding mature detection is the FILTERED `z`
+  (`vorticity_smoothed2`), and its mean is NOT ≈ 0.** It keeps a median **65 %**
+  of the raw mean, because the Lanczos band-pass does not reject DC at
+  `window = len//2` (`sum(weights)` median 0.629 — documented in
+  `lanczos_filter.py`). The offset is a median 0.93× the series' own range. The
+  baseline still is not physical zero: the DC gain varies **0.2408–0.8343**
+  across series, so `|z|` ratios are not on a common baseline between series.
+* **`s6b542eee` and `sbd6c6920` are SYNTHETIC**, not real train series. Among the
+  35 real, exactly **one** (`20203947`) has more than one labelled mature, and
+  both of its labelled matures are already detected under `params-11`.
+* **The "deepest valley" recount is 36 of 38 under `params-11`, not 30 of 32.**
+  The old figure was `params-10` **and** used `prominence_relative == 1.0` as a
+  *stand-in* for depth — prominence is the smaller of a valley's two climbs, not
+  its depth. They agree here (36 either way) but are not the same quantity.
+  Exceptions: `20205386` and synthetic `s6b542eee`. All six entries new since
+  front 20(a) sit on their series' deepest valley.
+
+### Stage 2 — the rule, implemented anyway at the fixed floor 0.80. **Gate PASS**
+
+`mature_min_depth`, a float in `[0, 1]`: a z-valley may generate a mature block
+only if its `D1` reaches the floor. The rule lives entirely in
+`find_stages.find_mature_stage`, as a filter on the valley list; it touches
+neither the extrema filter nor `prominence_relative`, so no other phase can move.
+It applies to both `mature_method` values, and it is **not a cap on the number of
+matures** — every valley clearing the floor still emits its own block.
+
+`research/labels/configs/cyclophaser_params-12.yaml` = `params-11` + `0.80`,
+sha256 `39262f45785eea00d19e4165d6f52b6a77cabfcf56e14514a0cea2e3c67ebec3`.
+
+**Default 0.0 is a proven no-op**: the whole `periods` column of all 47 train
+series, hashed against a clean `develop-v2.1` worktree — package defaults
+`b01b16b6…` and `params-11` `b65551009b…` byte-identical across both trees, and
+an explicit `0.0` equal to an absent key.
+
+| criterion | 0.80 (merged) | 0.85 (diagnostic) |
+|---|---|---|
+| (a) `20160735` | 4 blocks → **1**, `(150,181)` | same |
+| (b) `20203947` | both labelled matures kept | same |
+| (c) sequence | **31**/47 (base 30) | 32/47 |
+| (d) synthetic sequence | 12/12, min D1 0.9922 | same |
+| (e) mature boundary | 38/47, incipient unchanged, no displacement | same |
+| (f) suite / latent defects | 1205 passed, 0 failed; `:152`/`:160` 0 | same |
+
+Both floors pass; **0.80 is the merged value, by Danilo's decision.**
+
+### What the rule does NOT fix — read before building on it
+
+* **`20205386` is completely unchanged.** All three of its valleys clear 0.80, so
+  both spurious blocks survive. The series stage 1 identified as the one that
+  refuses depth still refuses it.
+* **`20160735` still fails its sequence.** Its four blocks correctly became one,
+  and the sequence still does not match the label. Removing the spurious matures
+  was necessary but not sufficient for the case that motivated the front.
+* **The margin rests on one sample.** 30 of 32 true valleys are at `D1 = 1.0000`
+  *exactly* — they ARE the series minimum, so a spiky `z_max` cannot flip them.
+  But `20205386` v61 (0.8805), the only true valley that is not its series'
+  minimum, lives in a series whose `z_max` sits **0.4874** of the range above the
+  next peak; under an adverse denominator its D1 falls to 0.7669 and it would be
+  **cut**, losing a true mature. The 0.08 margin is propped up by a single point.
+
+### Collateral, deliberate
+
+* **`determine_periods.py` carries plumbing only** — signature default,
+  `args_periods` entry, docstrings, in `get_periods` and the `determine_periods`
+  wrapper. No logic. It was unavoidable: `get_periods` takes no `**kwargs` and
+  builds `args_periods` from an explicit literal, and every calibration driver
+  filters `phase_params` against its signature, so without a signature entry the
+  parameter is dropped before reaching `find_stages` and `params-12` would
+  silently behave as `params-11`.
+* **`tools/calibration_app/app.py` declares the parameter**, because
+  `tests/test_sidebar_coverage.py::test_every_public_parameter_is_declared`
+  enforces exact signature coverage in both directions and failed until it did.
+  On import the key is applied when present but not reported missing when absent,
+  which needed an explicit subtraction from `_REQUIRED_PHASE_YAML_KEYS`:
+  membership of `_OPTIONAL_PHASE_YAML_KEYS` only suppresses the "unknown key"
+  warning, it does **not** make a key optional — a key must be in
+  `_YAML_PHASE_MAP` to be applied at all, and `_REQUIRED` is derived from that
+  map. `params-1` … `params-11` all import clean.
+
+### Fill-in and defect H
+
+Seven blocks removed across five series. **No series lost a label match or a
+sequence match**; one gained a sequence (`20170794`). Five vacated ranges are
+closed over by the neighbouring intensification/decay; two become **residual**
+(`20160735` 211–258 and `20170794` 119–223) — a real change in how those tails
+are described, even at no cost on either metric.
+
+Defect H (`find_stages.py:982`, unconditional incipient overwrite) was checked
+**actively**: the overwrite reaches index 9 and 12 in the two series that have
+one, and the earliest removed block starts at 7 in a series whose overwrite is
+`None`. **No removed block is touched**, so every fill-in reading is the
+detector's own output, not the overwrite masking it.
+
+### Still open
+
+* The two latent defects of `_amplitude_mature_bounds` — `find_stages.py:152`
+  (loud `IndexError`) and `:159`/`:160` (**silent** wrong window) — remain
+  unfixed. Both fired **0** times here, checked by recomputing `amp_prev < 0` /
+  `amp_next < 0` for every valley rather than by absence of an exception.
+* Whether `20205386` and `20160735`'s sequence want a different instrument
+  altogether. Stage 1 says it will not be depth.
+
+Artefacts: `research/labels/diagnostics/item20b/` — `REPORT.md` (stage 1),
+`REPORT_stage2.md`, `depth_table.csv`, the drivers, and before/after figures for
+`20160735` and `20205386`. `item19_core.py` and `params-11.yaml` untouched
+throughout.
+
+### Recorded while working front C — findings, not open fronts
+
+Measured on `research/frontC-intensification-depth`; recorded here because they
+bear on 20(b) and on the residual/decay machinery generally. **None of these
+opens a front.**
+
+* **The 0.80 floor destroyed `20191014`'s only mature phase, and 20(b)'s gate
+  could not see it.** Under `params-11` the series has exactly one mature block,
+  `(134, 140)`; under `params-12` it has none — the sequence goes
+  `incipient / decay / intensification / decay`, with `intensification` widening
+  from `(124,133)` to `(124,136)` to fill the space. The 20(b) gate scored the
+  *boundary* of the 38 matures that already paired with a label, so a phase
+  ceasing to exist scored as nothing at all rather than as a loss. **Any future
+  gate over phase detection needs an explicit existence criterion alongside the
+  boundary one**; front C's own measurement carries one for this reason.
+
+* **The project's definition of `residual` is topological, not amplitude-based.**
+  Residual means *deepening with no subsequent mature stage*, which places it
+  outside the cyclone's life cycle — a transient interaction, or TRACK
+  contamination. Writing `residual` from that point to the end of the series is
+  therefore the **desired** behaviour of `find_residual_period`, not a defect to
+  be tuned away. Front C works by removing the spurious *intensification* that
+  triggers the rule, and deliberately leaves the rule untouched.
+
+* **`20160735` and `20170342` are genuinely ambiguous between decay and
+  residual.** Both readings are defensible under the definition above. The
+  current manual labels stay as they are; this is recorded so a future front
+  does not "discover" the ambiguity and relabel on one reading.
+
+* **`decay_tail_amplitude_fraction`'s documented calibration is not reproducible
+  under `params-12`.** The "safe window" `(0.0356, 0.0651]`, the 7 convert cases
+  and the 3 preserve cases written into
+  `tests/test_decay_tail_amplitude_fraction.py`'s docstrings were calibrated on
+  a **pre-correction** config (`use_filter=1`, `use_smoothing=31`, no
+  `boundary_padding`). Under `params-12` the parameter is **inert** on both
+  `20180733` and `20180654`: every value from 0.05 to 1.0 reproduces the config's
+  own output byte for byte (verified at 0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0).
+  Recalibrating it and rewriting those docstrings is **a front of its own, still
+  open** — front C did not touch that file or that parameter.
+
+* **4 of the 7 documented convert cases are in the frozen test split**:
+  `20150561`, `20160030`, `20180654`, `20203373`. (`20170409`, `20180759` and
+  `20207822` are train.) Anyone recalibrating the parameter above must reckon
+  with that before reading those four.
+
+* **`20180654` was measured and reported with Danilo's explicit authorisation** —
+  a declared spend of the test split, made because it is the second series the
+  intensification depth floor was designed for and the front could not be judged
+  without it. The threshold itself was chosen from the train split alone. This
+  authorisation is per-series and per-front; it sets no precedent.
+
+---
+
+## 24. Front C — `intensification_min_depth`, a depth floor on intensification detection — **closed, PASS, merged 2026-09-22**
+
+Numbered 24, not 23: front 20(c) claimed 23 on `research/item20c-duration-ratio`,
+which was still unmerged when this front closed.
+
+### The defect
+
+`find_intensification_period` accepted a candidate segment on **duration alone**
+(`threshold_intensification_length`). No criterion asked whether the segment
+deepened, so a long, essentially flat stretch was labelled intensification.
+`find_residual_period` then converted that phantom intensification — having no
+mature after it — into `residual` to the end of the series, over a stretch the
+manual label calls decay.
+
+`find_residual_period` is **correct and was not touched**. See the residual
+definition recorded under item 22: residual is decided topologically, so writing
+it from a deepening-without-mature to the end of the series is the intended
+behaviour. The fix removes the phantom *segment* that triggers the rule.
+
+### The rule
+
+A raw segment is accepted only when
+
+```
+D2 = (z[peak] - z[valley]) / (z_max - z_min)  >=  intensification_min_depth
+```
+
+applied **per raw segment**, after the duration test and **before** the gap
+stitching of `threshold_intensification_gap` — a stitched block's D2 is a
+property of the merged span, not of the segments the parameter is defined on.
+Default `0.0` switches it off. `params-13` = `params-12` + `0.05`.
+
+### Separation measured on TRAIN
+
+Of the **75 raw segments** that clear the duration test across the 47 train
+series, exactly one falls below 0.15 — 20180733's, at `D2 = 0.0068` — and the
+smallest legitimate one sits at `0.1714`. Nothing lies between, so **every floor
+in `(0.0068, 0.1714]` is equivalent on this split**; 0.05 was chosen from train
+alone.
+
+### Gate — PASS
+
+| metric | params-12 | params-13 |
+|---|---|---|
+| sequence | 31/47 | 31/47 |
+| mature within ±6 | 38/44 | 38/44 |
+| synthetic sequence | 12/12 | 12/12 |
+| incipient boundary identical | — | 47/47 |
+| series changed | — | 1 (train) |
+| phase existence lost | — | none |
+
+`20180733` (train): `residual 190-256` gone, `decay 147-189` → `147-256`.
+`20180654` (test, authorised): `residual 109-148` gone, `decay 83-108` → `83-148`.
+Only those two series change in the whole calibration set. Suite 1230 passed, 0 failed.
+
+Unlike 20(b)'s gate, this one carried an explicit **phase-existence** criterion —
+added precisely because 20(b)'s could not see `20191014` lose its only mature
+(item 22).
+
+### Three divergences from the commissioning brief — reported, not adjusted
+
+1. ~~**The default-behaviour sha256 is `b01b16b6…752f`, not the CHANGELOG's
+   `b500d2e0…c4a5`** — the recorded constant is environment-dependent.~~
+   **RETRACTED 2026-09-22. This was wrong, and it was my error.**
+
+   The digest I computed was not the digest the CHANGELOG records. I wrote a
+   second generator (`frontC/default_equivalence.py`) with a different blob
+   layout — `sid` concatenated with `"|".join(periods)` and no separator between
+   series — where the canonical generator
+   (`front_b/default_behaviour_hash.py`) builds `"<id>:<periods>"` lines joined
+   by `\n`. Two different blobs over identical behaviour give two different
+   numbers. I then attributed the disagreement to the library versions.
+
+   Run with the **canonical** generator in this environment (numpy 2.5.3 /
+   scipy 1.18.0 / pandas 3.0.5, python 3.12.14), the digest is
+   `b500d2e0…c4a5` — exactly the recorded value — at `17dc21f` (before this
+   front) **and** at `7a87a10` (after it). So the constant is *not*
+   environment-dependent across the two environments now on record, and front
+   C's default-neutrality is confirmed by the canonical instrument rather than
+   merely by a private one.
+
+   This is the [gate-instrument attribution trap] in its purest form: a second
+   instrument was built, disagreed with the first, and the environment was
+   blamed instead of the instrument. The corrective work
+   (`docs/frontC-hash-provenance`) adds per-run environment records to the
+   canonical `.txt` and states in the generator's own docstring that digests
+   from other layouts are not comparable.
+
+   **The failure was not only in building the second instrument.** In the
+   verification pass I ran the **canonical** generator in a second environment,
+   obtained the recorded constant `b500d2e0…c4a5` — and read that as
+   *confirming* the environment-dependence hypothesis. It was the opposite:
+   reproducing the recorded constant with the recorded instrument makes
+   environment-dependence the *least* likely explanation and points squarely at
+   a different instrument. Both halves of the disproof were in hand and the
+   wrong hypothesis survived because it had been supplied first. I went on to
+   recommend a two-row table carrying two different digests — which would have
+   written the falsehood into the very file created to prevent it.
+
+   The practice rule below exists because of that, not merely because of the
+   duplicate generator: **an anchoring hypothesis arriving with the task is
+   still a hypothesis, and evidence consistent with its negation must be scored
+   against it rather than folded into it.**
+
+2. **75 raw segments, not 68.** Both are real and count different things: 68 is
+   the number of *stitched* blocks left after the gap merge. The D2 figures are
+   per-segment, so 75 is their denominator. The D2 values themselves reproduce
+   exactly.
+
+3. **`20180654`'s block has `D2 = +0.0025`, not −0.02%, and is not stitched.**
+   Under `params-12` neither series stitches at all — raw segments and the
+   blocks `find_intensification_period` leaves are identical on both — so the
+   brief's empirical case for judging before the stitch ("the merged block of
+   20180654 has a negative D2") **does not reproduce**. The pre-stitch ordering
+   was implemented as specified regardless, on principle, and is demonstrated by
+   a purpose-built synthetic series with a positive control
+   (`test_floor_is_per_segment_not_per_stitched_block`). **No real series
+   currently exercises the distinction.**
+
+### Practice rule for any future gate that uses the default-behaviour hash
+
+Added 2026-09-22, out of the retraction above.
+
+A gate may **never** discharge "default behaviour unchanged" by comparing
+against a constant copied from a document. The baseline digest and the changed
+digest must be computed **on the same machine, in the same session, with the
+same generator**, and compared to each other. A written-down value is a record,
+not a control.
+
+Front C's own gate had exactly this defect: it compared a freshly computed
+number against a constant in the CHANGELOG, got a mismatch, and reached for the
+environment as the explanation. The right move — running the baseline commit
+through the same generator — is what eventually falsified it.
+
+Corollary: **one generator per quantity.** If a digest is needed, call
+`research/labels/diagnostics/front_b/default_behaviour_hash.py`. Writing a
+second one guarantees a mismatch that means nothing and costs a session to
+diagnose.
+
+### Epistemic standing of this front's gate — read before citing it
+
+Added 2026-09-22. The gate table above is **not** of the same kind as the gates
+in items 19–23, and citing it as though it were would credit it with predictive
+force it does not have.
+
+1. **Only the D2 distribution test was predictive.** The prediction — *at most 3
+   segments fall in `(0.02, 0.15]`* — was declared before the measurement
+   existed. The result was **0 of 75**. That is the one part of this front that
+   risked being wrong and was not.
+
+2. **The gate metrics were not predictive.** Sequence, mature, incipient,
+   synthetics and the set of changed series were re-read from a floor sweep
+   already measured **before the topological criterion for residual existed**.
+   Their agreement is retrospective validation, not a passed prediction.
+
+3. **Two earlier interventions were declared and failed first, and the second
+   failed on a mis-specified criterion.** It required "fixing" two residuals
+   held to be spurious — `20160735` and `20170342` — which under the topological
+   definition are **correct**. A gate that fails on the wrong criterion is not
+   evidence against the intervention it rejected.
+
+4. **The earlier diagnosis of a "destructive overwrite at `find_stages.py:726`,
+   sibling of defect H" is WITHDRAWN.** Line 726 sits in
+   `find_residual_period`, and that rule implements the physical definition
+   correctly. It is not a defect and must not be carried forward as one. (Defect
+   H itself, at `find_stages.py:982`, is a separate and still-open matter — see
+   item 22.)
+
+5. **`0.05` was chosen after the result was known.** Nothing predictive supports
+   that particular value inside `(0.0068, 0.1714]`. What is predictive is the
+   *existence and width of the window*; the point estimate inside it is not.
+
+### Still open
+
+* The `decay_tail_amplitude_fraction` recalibration (item 22) — untouched here.
+* Whether 0.05 stays, given the whole `(0.0068, 0.1714]` window is equivalent.
+
+Artefacts: `research/labels/diagnostics/frontC/` — `REPORT.md`, the four drivers
+(`measure_frontC.py`, `d2_separation.py`, `default_equivalence.py`,
+`report_test_series.py`), `make_figures.py`, `d2_segments.csv` and before/after
+figures for both series. `params-12` and
+`tests/test_decay_tail_amplitude_fraction.py` untouched throughout.
+
+---
+
+## 25. Front D — stage 0 census, then closed with no mechanism — **closed, 2026-09-23**
+
+Branch `research/frontD-stage0-census`, from `develop-v2.1` @ `f901b76`. Nothing
+in `cyclophaser/` changed and no parameter moved; this stage only asks whether
+the short-incipient symptom that motivated front D exists in the **training**
+set. Full write-up, tables and figures:
+`research/labels/diagnostics/frontD/REPORT.md`.
+
+`params-13` verified against the declared sha256 `c1ab8ce0…6e483973`, and all 63
+frozen series (51 real + 12 synthetic) verified against the `series_sha256`
+recorded in `manual_labels.yaml` — 63/63 match. Measured in the dedicated
+`cyclophaser` conda environment against the working tree, not the installed
+2.0.0 wheel.
+
+**Census (train, params-13).** "Short" was defined before the cases were listed
+as `0 < N_det < min(N_lab)` over the real train series with a labelled incipient
+phase; that floor is **4**. Counts — real: **C1 = 2** (`20190397`, `20191155`),
+**C2 = 6** (`20160587`, `20160735`, `20171179`, `20180628`, `20181046`,
+`20202023`), **C3 = 14**; synthetic: **C1 = 5**, **C2 = 0**, **C3 = 2**. The
+symptom does exist in TRAIN, but among the reals the *refusal* (C2, 6/35) is
+three times as common as the short detection (C1, 2/35). Declared predictions
+**P1 (C1 ≥ 2) and P2 (C2 ≥ 2) both CORRECT**; P1 landed exactly on its boundary.
+
+**Step 2 verdicts: ARTEFACT 0, REAL SHORT PHASE 1, INCONCLUSIVE 6.** Two
+findings about the *instrument*, not the data, that any continuation must handle
+first:
+
+1. **The anchoring test cannot discriminate at `L = 2`**, and 5 of the 7 C1
+   series have `L = 2`. With only `k = 1` valid, `N_det_cut = 1` satisfies
+   "time-anchored" (`abs_end = 2 = L`, within ±1) and "edge-anchored"
+   (`|N_det_cut − L| = 1 ≤ 1`) *simultaneously, by arithmetic*. The only series
+   that discriminated, `s46657891`, did so because `L = 3` admits a second cut.
+2. **`ARTEFACT` was unreachable on TRAIN**: it requires criterion (a) to fail,
+   and all 7 C1 series passed (a). Zero artefacts means "no short detection is
+   also far from its label", not "the anchoring test cleared them".
+
+Also recorded: on `20191155` the label says there is **no** incipient phase
+(`N_lab = 0`) and the detector produced one of length 1, which the frozen rule
+scores as a 1-step timing error rather than as the refusal-type disagreement it
+is. Not adjusted — the rule was frozen before measurement.
+
+**Divergence from the commissioning brief.** The brief asked for
+`evaluate_against_labels.py`'s output "including the constant baseline line".
+**That script computes no baseline of any kind** (verified by reading it and by
+`grep -i baseline` at `f901b76`); the "constant modal-sequence baseline" of item
+19 is a different quantity, about the phase *sequence*, from that front's own
+diagnostics. The evaluator was run unmodified and its output attached verbatim;
+the constant baseline was computed separately in
+`research/labels/diagnostics/frontD/constant_baseline.py` and is attributed to
+that file. On train it gives best-constant 10 → 6/17 (real) and 4 → 12/27 (all),
+against the detector's 8/17 and 17/27 — the detector beats it on every split.
+
+**Exposure on the record:** `20160030` — exposição visual da saída do detector
+sob `params-13` (ausência de incipient), por Danilo, set/2026, durante a abertura
+da frente D. Nenhuma medição.
+
+Stage 0 proposes no mechanism and no parameter change, by instruction. Open
+items handed forward are listed in §9 of the front's REPORT.md. `20150646`, the
+case that motivated front D, is in the TEST split and was not read.
+
+### Closing — later reading and corrections (2026-09-23)
+
+Stage 0's execution was verified independently by the technical lead: evaluator
+and constant-baseline outputs reproduced identically; `census.json` differed only
+by floating-point noise in the 15th–16th digit of `d_filt_t0`, with no change of
+sign or of any count. **The execution is correct; the defect is in the DESIGN of
+the step-2 criterion, which came from the brief.** Nothing measured was revised —
+the corrections below sit *alongside* the original numbers and verdicts. Full
+text: §10 of `research/labels/diagnostics/frontD/REPORT.md`.
+
+**1. ARTEFACT was unreachable BY CONSTRUCTION, not merely "on TRAIN".** By
+arithmetic, with no reference to the data: "short" means `N_det ∈ {1,2,3}`, the
+hypothesis is `N_lab = 0`, so `|N_det − N_lab| ≤ 3 < 6` and criterion (a) *always
+passes*. ARTEFACT required (a) to **fail**, i.e. `N_lab ≥ N_det + 7` — a label
+whose incipient phase is at least 7 steps **longer** than the detection, the
+opposite of the hypothesis. The fixed margin (6) exceeds the "short" floor (4),
+making the two criteria mutually exclusive on the population the test selects.
+**Had `20150646` been spent directly on this test, the verdict would have been
+INCONCLUSIVE or REAL SHORT PHASE regardless of the truth.** It was not spent.
+
+**2. The anchoring test (b) discriminates only at `L = 3`.** With `k < L` and ±1
+tolerances: `L = 1` has no valid `k`; `L = 2` collapses both hypotheses onto the
+single `k = 1` observation; only `L = 3`, via `k = 2`, discriminates — and since
+"short" caps `L` at 3, that is the only discriminating case in the whole
+population. The sole REAL SHORT PHASE verdict (`s46657891`) is **weak**: its
+filtered series' global maximum sits at index 0, so *both* cuts removed it,
+changing the normalisation every relative threshold is measured against.
+
+**3. Attribution.** The step-2 defect — margin 6 above the "short" floor 4, and
+`k < L` with ±1 — is in the **brief's design, written by the technical lead**;
+the execution followed the frozen rule correctly. The premise that
+`evaluate_against_labels.py` already carried a constant baseline was likewise an
+error of the brief.
+
+**4. `20191155` reclassified on later reading.** The original row stands
+(`N_det=1`, `N_lab=0`, `|Δ|=1`, C1, INCONCLUSIVE). It is a **categorical**
+disagreement — detector has an incipient, label says the series has none — not a
+1-step timing error. The evaluator already counts it that way; only the brief's
+criterion (a) subtracted the two as if phase existence and phase end were one
+quantity.
+
+**5. The 2×2 of the real TRAIN series** (2 ambiguous labels excluded; 33 remain;
+counts verified against `census.json`):
+
+| | label HAS incipient | label has NO incipient |
+|---|---:|---:|
+| detector HAS incipient | 11 | **2** — `20191155` (L=1), `20191014` (L=9) |
+| detector has NO incipient | **6** (refusal) | 14 |
+
+Symptom D proper — a *short* incipient where the label has none — is **1 real
+series** (`20191155`). `20191014` is an incipient where the label has none but is
+**not short** (L=9), already a front-A bad case. `20190397`, the other C1, is a
+**different** symptom: the label's incipient runs to 8 and the detector closes it
+at 2 — ending too early, not existing spuriously. **The dominant incipient
+failure in TRAIN is refusal: 6 of the 17** real series whose label has one.
+
+**6. Predictions, unadjusted.** P1 stays **correct** (`C1 = 2` under the frozen
+definition), with the note that C1 mixed two symptoms and symptom D proper has 1
+real series. P2 stays **correct** (`C2 = 6`). The prediction "`20150646` will
+give ARTEFACT" is recorded as **DECLARED, NO VALID TEST** — the criterion could
+not produce ARTEFACT for any input — and counts as neither hit nor miss.
+
+**7. Closing state.** Front D is **closed with no mechanism and no parameter
+change**. `20150646` was **not measured and not spent**: the test split still
+holds 16 series, of which only `20180654` has been spent (front C). The
+artefact-vs-real-phase criterion was **not redesigned** — the training population
+does not justify it, symptom D proper being one real series at `L = 1`, where the
+anchoring test has no valid cut at all.
+
+**8. Proposed to orchestration — proposals only, no work opened.**
+
+* **(a) A new front on incipient refusal**: 6 of 17 real train series
+  (`20160587`, `20160735`, `20171179`, `20180628`, `20181046`, `20202023`). The
+  training population suffices without touching the test split; `20160030`
+  (test) stays out.
+* **(b) Make the constant baseline a standing output of
+  `evaluate_against_labels.py`** — it exists today only in
+  `research/labels/diagnostics/frontD/constant_baseline.py`.
+* **(c) Repository hygiene**: the committed `.txt` outputs embed absolute local
+  paths (`/Users/…`) in a public repository.
+
+---
+
+## 26. Front "incipient refusal" — stage 1 diagnosis: one path, no separable threshold — **closed, diagnostic only, no parameter change, 2026-09-23** (merge `1287aa2`)
+
+Branch `research/incipient-refusal-stage1`, from `develop-v2.1` @ `559dd64`.
+Nothing in `cyclophaser/` or `tests/` was touched and no parameter moved. The
+TEST split was never loaded (enforced in code, not asserted). Full write-up,
+tables and six figures: `research/labels/diagnostics/frontRefusal/REPORT.md`.
+
+Commissioned from item 25's proposal 8(a): under `incipient_method="plateau"`
+and `params-13` (sha256 `c1ab8ce0…6e483973`), the detector produces no
+`incipient` phase on 6 of the 17 real TRAIN series whose label says there is one
+— `20160587`, `20160735`, `20171179`, `20180628`, `20181046`, `20202023`. The
+2×2 (11 / 2 / 6 / 14) and the 8/17 boundary rate were reproduced before anything
+else was measured. The tolerance `evaluate_against_labels.py` applies is the
+**per-label `tolerance_idx`** (`research/labels/labels_core.py:692`), not the
+fixed 6 of the synthetic pytest timing test — two different instruments.
+
+**One refusal path.** Four exist in the code (R1 run-starts-at-0
+`find_stages.py:1035`; R2 no-run-anywhere `:1030–1035`; R3 `k > n` `:1025–1028`;
+R4 flat probe `:986–988`). **All 6 refusals and all 14 agreed-nones are R1**;
+R2–R4 fire on nothing in the real TRAIN split. A fifth site, the unconditional
+`fillna('incipient')` at `find_stages.py:1102`, is **inert here** — the leading
+NaN run is 0 on all 35 real TRAIN series — so the plateau boundary *is* the
+detector's leading-incipient count. Both facts are asserted per series by a
+replay checked against `get_periods`, and re-derived independently in
+`separability.py` (35/35).
+
+**Cause: COMUM, M3 = 4/6** (genuine disagreement), M2 = 2 (near miss, `20160587`
+at 3.8% and `20171179` at 8.9% relative margin), **M1 = 0**, M4 = 0.
+
+**Defect I (item 8(d)) is not the mechanism.** Re-measured over the 35 real
+TRAIN series: 6 members (`20180170`, `20180608`, `20180759`, `20190325`,
+`20190397`, `20191014`) — the 7th of the published 7/51 is in TEST and was not
+read, which does not weaken the result because every refusal is a TRAIN series.
+**Intersection with the 6 refusals: empty.** Every defect-I member on TRAIN is a
+series the detector *did* label. The edge-artefact hypothesis for refusal should
+be retired unless re-opened with new evidence.
+
+**Separability: none.** With R1 the only path, the decision reduces to
+`head_min = min(rel[0:k]) >= tau`, in which `tau` is the only knob. Recovering
+≥3 of the 6 needs `tau > 0.287663`; sparing all 14 agreed-nones needs
+`tau <= 0.231229`. Four TN series lie between them (`20180263`, `20170794`,
+`20150656`, `20150528`) — the two populations **interleave** on the decisive
+statistic. At most 2 of 6 recover before the first TN flips.
+
+**Stage 2's own gate G1 is unreachable by a `tau` move, and this is known before
+stage 2 runs.** Ignoring the sparing conditions entirely and recovering all six
+at each one's minimum `tau`, only **2 of 6** would land inside its label's
+tolerance (`20171179`, `20181046`); the others overshoot badly (`20202023`
+N_det 42 against a label of 11; `20160735` and `20180628` collapse to 1).
+
+**Predictions scored: P1 WRONG** (verdict COMUM, not PARCIAL/HETEROGÊNEO),
+**P2 WRONG** (defect-I intersection empty), **P3 CORRECT** (no separable
+threshold). Two of three were wrong in the same direction — the refusals were
+expected to be edge artefacts or near misses and are mostly neither.
+
+**Unmeasured, and the obvious next question:** `incipient_plateau_k`, the probe
+smoothing (`incipient_smooth_window`/`_polyorder`) and
+`incipient_plateau_signal` were all held at their `params-13` values. The
+arithmetic above holds only at k = 5, window 5, signal `vorticity`, crossing
+`sustained`. Whether any of those separates the populations is not known.
+
+Also noted: item 25's proposal 8(c) (committed `.txt` outputs embedding absolute
+`/Users/…` paths) was honoured for this front's own outputs — its three scripts
+print repo-relative paths — but the pre-existing files under
+`research/labels/diagnostics/` were left alone; that clean-up is still open.
+
+### Closing (2026-09-23)
+
+**Independent verification.** Branch pulled; `diagnose.py`, `classify.py`,
+`separability.py` and `evaluate_against_labels.py` (params-13) re-run. The
+evaluator's output is identical; the JSONs differ only in the 15th–16th decimal
+place, i.e. floating-point noise, with no change of sign, count or verdict. The
+sign at t0 was checked separately: all six **deepen** — the raw and the filtered
+derivative are both negative — so M3 here means *intensification already under
+way*, not weakening.
+
+**Claim strengthened, and one detail of it corrected.** The tolerance table in
+step 4 evaluated each series only at ITS OWN minimum recovering τ, which is the
+weakest form of the claim. A full sweep — τ ∈ [0.20, 0.80], step 0.0005, 1201
+values, conditions (ii) and (iii) abandoned entirely — now settles the strong
+form (`tau_sweep.py`, `tau_sweep.txt`, `tau_sweep.json`):
+
+> **Maximum 2 of 6 within tolerance at ANY τ; no τ reaches 3. G1 is unreachable
+> by τ, independently of G3** — no trade-off against the negatives can rescue it.
+
+Per series, the *complete* set of τ that lands inside the label's tolerance:
+
+| id | τ interval(s) that hit |
+|---|---|
+| `20171179` | [0.2180, 0.2660] |
+| `20181046` | [0.4500, 0.7585] |
+| `20180628` | **[0.4510, 0.4775]** |
+| `20160587`, `20160735`, `20202023` | never, anywhere in the range |
+
+**Correction to the closing brief as issued.** It recorded "the other four
+never". It is **three**, not four: `20180628` does hit, on τ ∈ [0.4510, 0.4775]
+(N_det = 8 against a label of 9, tolerance ±1). Verified directly — at τ =
+0.4500 it gives N_det = 1, at 0.4510 `rel[5] = 0.4507` drops below τ and breaks
+the leading run so the first sustained run starts at index 8, and by τ = 0.4780
+it jumps to N_det = 21. The maximum of 2/6 is attained exactly on
+τ ∈ [0.4510, 0.4775], where `20180628` and `20181046` coincide. **The conclusion
+is unchanged and is now stronger, not weaker**: the second hit is a 0.027-wide
+knife edge between N_det = 1 and N_det = 21, which is not a tuning target.
+
+**Closing decision (Danilo, 2026-09-23): no stage 2.** The front closes with no
+parameter change. The unmeasured parameters — `incipient_plateau_k`, the probe
+smoothing (`incipient_smooth_window` / `_polyorder`) and
+`incipient_plateau_signal` — go to the backlog. **Re-opening requires a NEW
+front with a declared premise** for *why* that parameter would separate the four
+M3 series from the 14 agreed-nones, which on the decisive statistic are
+indistinguishable. Never a search over values, and never a loosened gate. The
+two M2 series recoverable at no cost (τ ∈ (0.2178, 0.2312], which spares all 14)
+yield at most **+1** within tolerance — below G1 — and are not pursued.
+
+Merged into `develop-v2.1` as `1287aa2` (`--no-ff`, no PR, authorised by Danilo)
+on 2026-09-23. Suite after the merge, in the dedicated `cyclophaser` conda
+environment against the working tree (`sys.prefix` = the env,
+`cyclophaser.__file__` = this repo): **1230 passed, 0 failed**, under
+`-m "not browser"` — the browser module is not run, per `CLAUDE.md`.
+
+---
+
+## 27. Front A′ — re-verification of Front A under the correct detector — **closed, gate PASS, merged 2026-09-23** (merge `f1c88ab`)
+
+**Measurement only.** No line of `cyclophaser/` or `tests/` was changed.
+Branch `research/frontA-reverify` from `develop-v2.1` tip `558eb5d`.
+Full record: `research/labels/diagnostics/frontA_reverify/REPORT.md`.
+
+### The question
+
+Item 13 flagged that Front A's measurements (2026-09-09, base `887c628`, config
+`params-9`) might have run against the **published cyclophaser 1.7.3 wheel**
+rather than this checkout — which would void A's documented mechanical cause
+(index 0 typed `valley` on 5 tracks, prominence 0.0) and its "A does not block
+v2.1" conclusion. The front separates **environment**, **code drift** and
+**config drift**.
+
+### Step 1a — gate — **PASS**
+
+A `git worktree` outside the repo at `6060c6d`, with `cyclophaser/` restored to
+`887c628` (`git diff 887c628 -- cyclophaser/` empty). Every original A script run
+through a wrapper that, in the same process and before the script body, imports
+`cyclophaser`, prints the resolved paths and module digests, and **hard-asserts**
+they live inside the worktree. CWD = the worktree throughout.
+
+Comparison was field-by-field and typed, never whole-file sha256. Against the
+criterion declared before measuring — categoricals and integers identical,
+index-0 prominence exactly `0.0`, other floats within 1e-9 relative,
+`fix_eval` 8/17 and 14/16 exact — **990 fields compared, 0 divergences.**
+`fix_state_before.json` additionally came back byte-identical
+(`a31391ce…c87e`).
+
+**A's numbers were produced by this repository's code. Its mechanical cause
+stands as recorded.**
+
+### Steps 1b and 2 — diagnostics
+
+At the tip, with `params-9` (where `distance` is dropped **in memory** by
+`load_config`'s existing `inspect.signature` filter — the YAML is untouched) and
+then with `params-13`:
+
+- **(M) identical in every case.** Per-track diff against A's `6060c6d`
+  artifacts: **0 differences** across `idx0_inventory` (51×8),
+  `idx0b_prominence` (5×5) and `idx0_final_stage` (51×3) — under *both* configs.
+  46 peak / 5 valley; prominence exactly `0.0` on all five.
+- Incipient boundary on TRAIN under params-9 at the tip: **8 of 17 (47.1%)**,
+  refusal agreement **14 of 16** — identical to A.
+- **(V) 4 of 5 under params-13, identical to A.** `20180608` remains the sole
+  exception by A's own mechanism: incipient boundary 38 vs leading decay block
+  11, so the unconditional overwrite at `find_stages.py:1134` (tip; `:982` at
+  `887c628`) consumes the whole block. Unchanged, not repaired.
+- The replay used to snapshot `periods` after `find_decay_period` was verified
+  against the real `get_periods` on **all 51 tracks, both configs** — per the
+  practice rule recorded under item 24.
+
+### The one behavioural difference found anywhere
+
+`20191014`'s sequence loses its `mature` between params-9 and params-13
+(`incipient>decay>intensification>mature>decay` → `incipient>decay>intensification>decay`).
+Flipping one key at a time from params-9 — only three keys can differ at the tip,
+`distance` being inert there — attributes it to **`mature_min_depth=0.80` alone**,
+the known deliberate collateral of front 20(b) (item 22). The all-three variant
+reproduces the params-13 census on all 5 tracks, which is what licenses reading
+the single-key rows as attribution. **Its V does not flip**: the phase lost is
+mid-sequence, while V reads the first non-incipient phase, still `decay`.
+Attribution only; no correction proposed.
+
+### Findings worth keeping
+
+- **The env A's scripts name, `south_atlantic_cyclone_extremes`, has no
+  cyclophaser installed at all** — no package, no `dist-info`, absent from
+  `pip list`. There is no wheel there to shadow with. The env item 13 actually
+  names, `lorenz`, *does* carry **1.7.3** non-editably: the vector is real, but
+  it is not the env A used. This is the env's state today, not on 2026-09-09 —
+  evidence, not proof. The 1a gate is what settles it.
+- **The dedicated `cyclophaser` env is itself a shadowing vector for worktree
+  work.** It carries an editable install whose `MAPPING` points at the *main*
+  checkout. Its `install()` appends to `sys.meta_path`, landing after
+  `PathFinder`, so a `sys.path` entry still wins — but that is setuptools'
+  current codegen, not a guarantee. **Any future worktree measurement must assert
+  `cyclophaser.__file__`, never assume it.**
+- `import cyclophaser.determine_periods` binds the *function* of that name, which
+  the package `__init__` rebinds over the submodule; it has no `__file__`. The
+  module object is reachable only via `sys.modules['cyclophaser.determine_periods']`.
+  (Already recorded under item 26; it bit again here.)
+- Step 1a ran the original code under a **different** interpreter stack from the
+  original (python 3.12.14 / numpy 2.5.3 / scipy 1.18.0 vs 3.11.15 / 2.4.6 /
+  1.17.1). Had it failed, env drift and shadowing would not have been separable.
+  It passed — which also shows A's numbers are stable across that step.
+
+### Scope
+
+Frozen test split respected: the 16 test reals enter only the mechanical census;
+`20206498` also enters (V), exactly as in A. No test label was read or scored —
+every `evaluate_against_labels.py` run omitted `--test`. No correction to A, no
+repository clean-up, no reopening of B, C, D, E, G or the refusal front.
+
+### Closing (2026-09-23)
+
+Merged into `develop-v2.1` as **`f1c88ab`** (`--no-ff`, no PR, authorised by
+Danilo). Suite after the merge, in the dedicated `cyclophaser` conda environment
+against the working tree (`sys.prefix` = the env, `cyclophaser.__file__` = this
+repo): **1230 passed, 0 failed**, under `-m "not browser"` — the browser module
+is not run, per `CLAUDE.md`. `git diff 558eb5d HEAD -- cyclophaser/ tests/` is
+**empty**: the merge carries 32 files, all of them documentation and
+diagnostics.
+
+**The defect A described remains. This front confirmed the diagnosis; it did
+not correct it.** Nothing in item 27 changed detector behaviour, and nothing in
+it was meant to. Index 0 is still typed `valley` on those 5 tracks with
+prominence 0.0, the spurious leading decay block is still produced, and
+`20180608`'s is still masked rather than repaired. What is now settled is only
+that those observations describe *this repository's code* — not that any of them
+has been fixed. Item 8 stays open on its own terms.
+
+**Independent verification.** A second, independent pass reproduced this front's
+result on a different interpreter stack (**numpy 2.4.4 / scipy 1.17.1**, against
+this front's 2.5.3 / 1.18.0): step 1a byte-identical; steps 1b and 2 reproduced
+through its own driver rather than this front's scripts; and `20191014`'s lost
+`mature` independently attributed to `mature_min_depth`. Two conclusions follow
+that a single pass could not license: the A numbers are **stable across that
+numpy/scipy step**, so the gate result is not an artefact of one environment; and
+the 1b/2 findings do not depend on `census_tip.py` being correct, since a
+separate implementation reaches them.
+
+Item 13 remains **OPEN** for the front named "E", which is still unidentified.
+Front A is struck from it.
+
+### Backlog raised by this front
+
+**The dedicated `cyclophaser` conda environment is itself a shadowing vector for
+worktree work.** It carries an editable install
+(`__editable___cyclophaser_2_0_0_finder`) whose `MAPPING` points at the **main**
+checkout, so a measurement run inside a worktree can silently resolve
+`cyclophaser` to the main tree instead. Today its `install()` *appends* to
+`sys.meta_path`, landing after `PathFinder`, so a `sys.path` entry still wins —
+but that is setuptools' current codegen, not a guarantee, and it is not
+something a future run should rely on without checking.
+
+**Rule: every measurement run inside a worktree must assert
+`cyclophaser.__file__` in-process, before the script body, and fail loudly if it
+resolves outside the worktree.** Asserting the environment is not enough, and
+neither is setting `sys.path` — both were correct here while the resolution still
+had to be proved. `research/labels/diagnostics/frontA_reverify/run_in_worktree.py`
+is the working template. This extends, and does not replace, the CWD lesson of
+items 5 and 12.
+
+---
+
+## 28. Front A — conditional reclassification of index 0 — stage 1 measurement (C2, **FAIL**) and stage 2 (C2', **shipped as default behaviour**, gate PASS) — **closed and merged 2026-09-24** (merge `e1dc17f`)
+
+Stage 1 measured rule C2 and failed it. Stage 2 implemented the rule **without**
+C2's same-type restriction (C2') as the package's default, on Danilo's
+instruction. The two verdicts stand side by side on purpose: stage 1's FAIL is
+not retracted by stage 2's PASS, and the section "What stage 2 corrects in the
+stage 1 record" below says exactly which stage 1 statements do not survive.
+
+### Stage 1 — rule C2 (E1 must share index 0's type) — **FAIL**
+
+Branch `frontA-idx0-c2`, from `develop-v2.1` @ `c714451`. **Measurement only** —
+nothing under `cyclophaser/` or `tests/` was touched, and no parameter moved.
+Config params-13 (sha256 `c1ab8ce0…6e483973`), dedicated `cyclophaser` env,
+`cyclophaser.__file__` asserted in-process before every script body. Full
+write-up, tables and figures:
+`research/labels/diagnostics/frontA_idx0_c2/REPORT.md`.
+
+Every number below comes from a replay of `get_periods`' body whose output was
+compared field by field with the real `get_periods` on **63/63** series before
+any attribution was made.
+
+### The rule measured
+
+C2, bidirectional, on the FINAL z extremum list (after the prominence filter and
+the boundary exception), with E1 the extremum immediately after index 0:
+index 0 `valley` + E1 `valley` strictly deeper → valley→peak; index 0 `peak` +
+E1 `peak` strictly higher → peak→valley; anything else → no trigger.
+
+### Result — C2 as specified does not work, and not for want of a threshold
+
+- Fires on **4 of 63** series: `valley->peak` on `20190325`, `20191014`,
+  `20206498` (test), and `peak->valley` on `20190639`.
+- Of the 5 tracks whose index 0 is typed `valley`, C2 reaches 3. It misses
+  `20180170` and `20180608` because their E1 is a `peak` — by the rule's own
+  definition, not by a margin.
+- On the 2 scoreable firings it changes the sequence and **neither becomes a
+  match** against the label.
+- The only track where forcing index 0 to `peak` buys a sequence match
+  (`20180170`, and with all three boundaries flagged `unsure`) is one C2 does
+  **not** fire on.
+- The `peak->valley` branch fires on `20190639`: the sequence gains a `decay`
+  block over `[13, 26)` and stops matching the label. **Danilo inspected it and
+  ruled the change acceptable (2026-09-23)** — a reclassification, not a
+  regression; see below.
+
+Net at params-13 on TRAIN, after that ruling: **0 gained by the sequence metric,
+0 lost.** C2 is harmless and still does not reach the case that motivated the
+front. The discriminant — the *type* of E1 — does not separate spurious openings
+from genuine ones; on the 5 targets it splits 3/2 with the wrong member on each
+side.
+
+### Maintainer ruling — `20190639` (2026-09-23)
+
+| | blocks |
+|---|---|
+| label | `incipient[0,25)` `intensification[25,81)` `mature[81,106)` `decay[106,180)` |
+| base | `incipient[0,13)` `intensification[13,88)` `mature[88,105)` `decay[105,180)` |
+| C2 | `incipient[0,13)` **`decay[13,26)`** `intensification[26,88)` `mature[88,105)` `decay[105,180)` |
+
+`mature` and the final `decay` do not move; the `intensification` start goes
+from 13 (error 12, outside the label's ±5) to 26 (error 1, inside it). The cost
+is a 13-step `decay` over `[13, 26)` — a stretch where the vorticity does weaken
+before the real deepening, and which the label calls `incipient`. Danilo:
+"com esse decay após Ic, era ambíguo" — accepted.
+
+**This firing is not about index 0.** The z candidates before the prominence
+filter are `peak@0`, `valley@9`, `peak@25`; `prominence_relative = 0.3` removes
+the `valley@9`, leaving two consecutive peaks. C2's second branch keys on a
+valley the prominence filter deleted.
+
+**Consequence for any future gate.** `manual_labels.yaml` still says
+`incipient[0,25)`, and `score_phase_sequences` refuses to pair boundaries once
+an extra phase appears — so a gate scoring C2 or C1 reads `20190639` as a loss,
+against the maintainer's own judgement. Either the label is revisited or the
+gate states that this track is scored against a superseded label.
+`manual_labels.yaml` was **not** touched; relabelling is the maintainer's call.
+
+### Predictions declared before measuring
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| P1 | prominence of index 0 = 0.0 by construction, 63/63 | 63/63, both sign conventions | CONFIRMED |
+| P2 | the 4 genuine-decay synthetics do not fire | 0/4 fire (E1 = `peak` on all four) | CONFIRMED |
+| P3 | the 5 targets fire, 5/5 | **3/5** | REFUTED |
+| P4 | 5/63 fire; `peak->valley` 0/63 | **4/63**; `peak->valley` **1/63** | REFUTED |
+| P5 | `boundary` does not depend on the phase map | static reading + 63/63 measured | CONFIRMED |
+
+### The correction P1 forces onto the record
+
+**A prominence of 0.0 at index 0 is not evidence of an artefact.** The package
+computes no prominence for index 0 at all: `_refine_extrema` puts 0 and N−1 in
+`boundary` and passes only `interior` to `peak_prominences`
+(`determine_periods.py:180-181`, `:188`), re-adding them unconditionally at
+`:212`. The 0.0 that Front A reported is what `peak_prominences` returns when
+asked anyway, and it is 0.0 for **any** data because scipy's base search cannot
+cross the array edge. Confirmed on 63/63 series and as a property of the
+algorithm. Any argument of the form "index 0's prominence is 0.0, therefore the
+extremum is spurious" is void, including Front A's own.
+
+### Two facts that change how this front must be gated
+
+**The incipient overwrite H masks the artefact on `20180608`.**
+`find_stages.py:1134` overwrites `[0, boundary)` with `incipient` after all
+other phases are assigned. On `20180608`, `boundary = 38` and the spurious
+`decay` block is 11 steps: fully present inside the pipeline, fully invisible in
+the output. The Front A variant is a measured **no-op** on that track at
+params-13. So "5 tracks open with spurious decay" is a params-9 statement; at
+params-13 it is 4, and the fifth is masked, not fixed. **Any future gate on this
+front must read the phase map BEFORE H, not the final output** — a real fix will
+otherwise score as no change there, and a config that shortens `boundary` will
+re-expose the defect.
+
+**A leading `decay` does not require a `valley` at index 0.** `20170756` (test
+split) opens with decay while its index 0 is typed `peak`. Index-0 typing is one
+route to the symptom, not the only one — so the symptom count is not an upper
+bound on what this front can fix, nor a lower bound on what remains after it.
+
+### M5 — the incipient boundary is upstream of all of this
+
+`_incipient_plateau_rel` (`find_stages.py:951-989`) reads only `'dz'` and
+`'z_unfil'`; `_incipient_plateau_boundary` (`:992-1035`) is pure in
+`(rel, tau, crossing, k)`; `'periods'` first appears in that branch at `:1134`,
+as a write. Measured: `boundary` is identical with and without index 0 forced on
+**63/63** series. No reclassification of index 0 can move the incipient
+boundary.
+
+### Which pre-declared retreat applies — neither, cleanly
+
+- **(a)** (a synthetic fires → go to C1) does **not** apply: 0/4 fire.
+- **(e)** (FAIL only in `peak->valley` → try unidirectional C2) does **not**
+  apply: it presupposes the second branch is where the harm is, and that
+  branch's one firing was inspected and accepted. Dropping it would remove the
+  only change C2 makes that the maintainer endorses, while the surviving
+  `valley->peak` branch converts 0 of its 2 scoreable firings into a match —
+  a strictly worse version of a rule that already has no measured benefit.
+
+The measurement points at **C1** (relative depth
+`D1 = (z_max − z[0]) / (z_max − z_min)`), whose discriminant is the magnitude of
+the opening excursion rather than the type of E1 — the "magnitude lead" Front A
+recorded and did not pursue. Reached here by measurement, not by rule (a).
+**C3** stays recorded only.
+
+### Stage 1's verdict, as it stood
+
+FAIL. (e) failed on its own terms *before* the ruling on `20190639`, because it
+presupposes the second branch is where the harm is; the ruling then removed the
+harm and left the rule with no measured benefit either way. The acceptance of
+`20190639` is dated 2026-09-23 and counts from stage 2 onward — it is not
+retroactive evidence for stage 1.
+
+---
+
+### Stage 2 — rule C2' as default behaviour (`reclassify_index0`) — **gate PASS**
+
+Same branch. **This stage changes `cyclophaser/`.** Full write-up:
+`research/labels/diagnostics/frontA_idx0_c2/REPORT.md`.
+
+C2' drops C2's same-type restriction: E1 is the next extremum in the final list
+**of either type**. That is the whole difference, and it is what reaches
+`20180170` — the one track worth a sequence match, which C2 missed because its
+E1 is a peak.
+
+`reclassify_index0` is a bool on `get_periods` and `determine_periods`,
+**default True**; `find_peaks_valleys` accepts it too but defaults to False, so
+a direct caller of that function is not silently changed. Applied to `z` alone.
+`params-14` = params-13 + the key. The calibration app carries a sidebar
+control, and the Benchmark tab can therefore compare with and without it.
+
+#### Gate
+
+Fingerprints are the sha256 of the `periods` column per series, taken for a
+NAMED cyclophaser tree (`stage2_reference.py` asserts in-process which package
+it imported): `develop-v2.1 @ c714451` in a pinned worktree, and the working
+tree with the flag forced each way.
+
+| | prediction | measured | verdict |
+|---|---|---|---|
+| Q1 | `False` == c714451, 63/63 | 63/63 | CONFIRMED |
+| Q2 | fires on exactly 5/63, other 58 byte-identical | exactly those 5; 58 identical; 0 of 12 synthetics | CONFIRMED |
+| Q3 | `20180170` → `Ic>It>M>D`, matches label | yes | CONFIRMED |
+| Q4 | `20190325` → `Ic>It>D>It>M>D` | yes | CONFIRMED |
+| Q5 | `20191014` → `Ic>It>M>D>R` | yes | CONFIRMED |
+| Q6 | `20190639` blocks as ruled | `incipient[0,13) decay[13,26) intensification[26,88) mature[88,105) decay[105,180)` | CONFIRMED |
+| Q7 | `20180608` unchanged before and after H | identical both ways; before H `decay[0,11) …`; boundary 38 | CONFIRMED |
+| Q8 | boundary identical, 63/63 | 63/63 | CONFIRMED |
+| Q9 | suite green | green | CONFIRMED |
+
+Sequence match, **TRAIN only (47 series): 31/47 → 31/47** by the raw counter;
+**32/47** once `20190639` is read by its blocks (Q6), per the declared
+exception — +1 match and one accepted reclassification. `manual_labels.yaml`
+untouched.
+
+> **Correction, 2026-09-24.** This was first recorded as "62 label-carrying
+> series: 42 → 42", which had read the labels of 15 held-out TEST tracks into an
+> aggregate. Fixed at the source: `stage2_gate.py` reads labels for TRAIN only,
+> the table's test rows carry no label and no match column, and no test
+> aggregate remains in the repo. The TEST split is still run — Q1, Q2, Q7 and Q8
+> are mechanical and need all 63 series — and `20206498`'s sequence is still
+> reported; what is gone is every comparison against a test label.
+
+#### The finding that matters most
+
+**C2' can only fire where something has already removed the extremum between
+index 0 and E1.** Raw `argrelextrema` output alternates, so the extremum right
+after a valley at index 0 is a peak the series rose to, which cannot lie below
+index 0 — symmetrically for a peak. What breaks the alternation is the
+prominence filter: on `20190639` it deletes `valley@9`, on `20180170` the early
+bumps.
+
+Consequence, measured: under the **package's own defaults** (no prominence
+filter) the output is identical with and without the rule on **64 of 64** series
+— the 51 tracks, the 12 synthetics and the packaged example. So **the CI
+reference baselines needed no update at all** (the brief's separate commit for
+that was not needed), and a user on package defaults sees no change. This is a
+change to the *calibrated* configuration, not to the out-of-the-box one.
+
+#### What stage 2 corrects in the stage 1 record
+
+1. **"0 gained / the measurement points at C1" is superseded, and the reasoning
+   that produced it was too narrow.** On `20190325` and `20191014` the rule does
+   remove the spurious opening `decay`; their sequences stay wrong because of
+   defects elsewhere in those series, which is a different failure from "the
+   rule does not work". Counting only whole-sequence matches hid that.
+2. **A ceiling, now stated: any comparator that retypes index 0 produces
+   exactly the M3 result wherever it fires, so the maximum sequence-match gain
+   on TRAIN is +1 (`20180170`) — C1 included.** C1 is therefore **dropped**: it
+   cannot beat a ceiling it shares. C3 stays recorded only.
+3. **`20190639`'s firing is not the index-0 artefact.** It comes from
+   `prominence_relative = 0.3` deleting `valley@9`. The improvement is accepted;
+   the mechanism is distinct and is sensitive to the filter's threshold, so it
+   should not be cited as evidence about index-0 typing.
+
+4. **Stage 1's scripts are frozen.** Their replay builds extrema with the rule
+   off and asserts equality with `get_periods`; that assertion is now False on
+   the 5 firing series. Do not re-run them as a check on current behaviour.
+5. **`20180608` is not reachable by C2', and the reason reassigns it to another
+   defect.** Measured at params-14: in the FILTERED series the valley at index 0
+   is **legitimate** — `z` rises monotonically from `z[0] = -3.285e-5` to the
+   peak at index 10 (`-3.005e-5`), so E1 is higher than index 0 and C2' declines
+   on both branches, correctly. The opening `decay[0,11)` is therefore not an
+   index-0 typing artefact at all: it is the filtered curve genuinely starting at
+   a minimum and rising, while the RAW series is deepening
+   (`sign(z_raw[1]-z_raw[0]) = -1` against `sign(z_filt[1]-z_filt[0]) = +1`).
+   That disagreement is **defect I, item 8(d)** — Lanczos boundary padding under
+   `boundary_padding='edge'` flipping the sign at t0, 7 of 51 real tracks — and
+   `20180608` is a listed member of it (`research/labels/diagnostics/frontRefusal/REPORT.md`,
+   "Defect I"). **`20180608` is hereby moved off this front's ledger and onto
+   item 8(d)'s backlog.** No reclassification rule of any kind can reach it;
+   what would is a change to the filter's edge treatment. H continues to mask it
+   in the final output, so it costs nothing today and will reappear on any
+   config that shortens the incipient `boundary` below 11.
+
+#### Provenance of the decision
+
+The default was set on Danilo's instruction, taken in full knowledge that C2'
+was chosen **after** seeing stage 1's table, and that `20190639` was accepted
+**after** seeing what the rule did to it. No part of this was validated on the
+held-out TEST split; `20206498` was run and reported mechanically, and its label
+was never read.
+
+#### Closing (2026-09-24)
+
+Merged into `develop-v2.1` as **`e1dc17f`**, on Danilo's authorisation, from
+`frontA-idx0-c2` @ `e97eb17`. `develop-v2.1` was verified to be still at
+`c714451` immediately before the merge, local and origin agreeing, so the merge
+is a straight fast-forwardable `--no-ff` of the branch the gate ran on. No PR
+was opened.
+
+Suite on the merged `develop-v2.1`, dedicated `cyclophaser` env
+(`cyclophaser.__file__` confirmed to be this checkout, `reclassify_index0`
+default confirmed True in the merged tree), `-m "not browser"`:
+**1245 passed, 0 failed**. Pushed.
+
+Nothing on this front is left open. `20180608`, its last unresolved target, was
+moved to item 8(d) — see correction 5 above and the backlog note in that item.
+C1 is dropped on the ceiling argument; C3 remains recorded only.
+
+---
+
+## 29. Calibration app — flexible track reading + `use_filter` translation — **closed, gate PASS, merged 2026-09-24** (merge `84b63ec`)
+
+Branch `feat/app-flexible-track-reader`, from `develop-v2.1` @ `d45ae49`. App
+only: `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser`
+env throughout, `sys.prefix` and `cyclophaser.__file__` checked; the baseline
+suite ran in a separate detached worktree of `develop-v2.1` that resolved its
+own `cyclophaser`.
+
+### The two problems
+
+1. Both cyclone upload fields declared `type=["csv"]`, so Streamlit's browser
+   filter turned away `.txt` files with identical content, and the app read a
+   track in three duplicated bare `read_csv` calls with no validation.
+2. The "Apply Lanczos filter" checkbox gives a bool; `process_vorticity` warns on
+   `use_filter=True`, so the grid showed that warning once per cyclone, asking
+   the user to change a value they never typed.
+
+### What was done
+
+* `tools/calibration_app/track_io.py` — `read_track(data, fmt=None)`, the single
+  reader. The standard layout is recognised from the first line (`;`, `time`,
+  `min_max_zeta_850`) and read by the unchanged `read_csv` call; a non-standard
+  file is refused unless a `CustomFormat` is given, in which case it is
+  normalised to standard bytes (vorticity tokens verbatim) and read by the same
+  call. Every path ends in one validation (DatetimeIndex, strictly increasing,
+  no duplicates, float64, no NaN, ≥ 2 points).
+* `track_format_ui.py` — the custom-format controls (off by default), the
+  mandatory preview and a per-file confirmation checkbox whose key hashes the
+  file bytes and the format (changing either clears it). Shared by the
+  Calibration and Benchmark → Exploration uploaders; the Benchmark reads the
+  same session-state keys, so the configuration was simple to share.
+* `package_args.package_use_filter` — `True → 'auto'`, everything else
+  unchanged, applied at the three calls into the package: `app.py`
+  `_run_process_vorticity`, `app.py` `_label_overlays`, `benchmark_core.run_series`.
+  The YAML export/import and the grid display code are untouched.
+
+### Added beyond the brief — decided by Danilo, 2026-09-24
+
+* **Year-first date rule.** Measured during the work: pandas 3's
+  `parse_dates=True` does NOT leave day-first dates as text — it infers the
+  layout from the first value, and reads `05/01/2015` as **1 May, with no
+  warning** (only `13/01/…` triggers the `dayfirst` warning). Validation alone
+  does not catch it (the misread dates still increase). So both paths now
+  require year-first dates (`YYYY-MM-DD…`) unless an explicit strftime format is
+  given. All 64 bundled series are year-first; bit-identity is unaffected. A
+  standard-layout file with day-first dates, previously accepted (possibly
+  misread), is now refused with a pointer to the custom format.
+  **Decision: ACCEPTED** — both paths keep the year-first requirement, for the
+  measured reason above (`05/01/2015` → 1 May, no warning).
+* **Magnitude warning** in the preview: |ζ| > 1e-2 s⁻¹ flags a probable wrong
+  column (a latitude read as vorticity gives ≈ 50). **Decision: ACCEPTED.**
+* **Per-file confirmation** of a custom-format file after its preview.
+  **Decision: ACCEPTED.**
+
+### Gate — predictions declared before measurement
+
+| | prediction | result |
+|---|---|---|
+| (a) real `.txt` read by the new reader ≡ `.csv` copy by the old path | identical | **premise refuted** — see below |
+| (b) custom synthetic ≡ original; negatives raise | — | PASS |
+| (c) `help=` on upload + custom widgets | — | PASS |
+| (d-2)(i) filtered_vorticity, vorticity_smoothed2, phase map | 128/128 | **128/128** (and 128/128 on the Benchmark path) |
+| (d-2)(ii) grid messages "use_filter=True is interpreted" | 0 | **0** (59 on `develop-v2.1`, same state) |
+| (d-2)(iii) YAML export | identical | byte-identical in 3 states (timestamp line masked) |
+| (d-2)(iv) package test for the True warning | passes | passes (`tests/test_use_filter_bool.py`) |
+| (d-2)(v) grid display region | empty diff | empty diff (44 lines) |
+| (e) suite | 1348 passed, 0 failed | **1348 passed, 0 failed** (before: 1245 passed, 0 failed; +103 new tests) |
+
+**(a) — premise refuted; the recorded prediction ("identical") was WRONG.** The
+real tracks used for (a) (444 files from another local project; their path is
+deliberately not recorded here) all have the header `time;Lat;Lon`:
+**position-only, no vorticity column**. They are not in the standard layout, and
+no layout can make them a vorticity track. (a) was therefore decided by the
+fallen-premise branch that the brief declared BEFORE the measurement, not by the
+bit-identity oracle: the standard path refuses them with the message "not the standard
+track layout … enable 'Custom track format'"; the custom path parses their
+`1979-02-19-2100` dates correctly (year-first, inferred) and refuses them for the
+missing vorticity column. The old path, on a `.csv` copy, failed with a bare
+`KeyError: 'min_max_zeta_850'`. The bit-identity oracle could not be run on them;
+the standard-path identity is instead pinned on all 64 bundled series
+(`tests/test_track_io.py`), and the custom-path identity on a synthetic
+rewrite of `20150069` in (b).
+
+**(a) — second real dataset, with vorticity (measured before the merge).** 200
+per-cyclone tracks from a different real dataset (drawn with
+`random.Random(29).sample` over the sorted file list; data, source and location
+kept outside the repository). **None is in the standard layout**: the per-cyclone
+files are Parquet, and the text form is a `,`-separated table with `date` and
+`vor42` (relative vorticity, positive, in 1e-5 s⁻¹ — the TRACK convention).
+
+* Standard path: **200/200 refused with the cause** ("not the standard track
+  layout …"); the `develop-v2.1` reader failed on all 200 with a bare
+  `ValueError: 'time' is not in list`.
+* Custom format (`,`, `date`, `vor42`): **200/200 read, identical to an
+  independent oracle** (dates via `datetime.strptime`, values via `float()`,
+  compared bit for bit; no pandas, no `track_io`).
+* Plausibility warnings fired on all 200 — positive sign 200/200, |ζ| > 1e-2
+  200/200 — i.e. the reader reports, but does not convert, that convention. No
+  file was accepted with wrong data and no warning.
+* The Parquet files themselves are refused by both paths.
+
+The bit-for-bit identity of the STANDARD path is demonstrated on the 64
+versioned series (`tests/test_track_io.py`); neither real dataset contains a
+standard-layout file, so neither could test it.
+
+**The (d-2)(i) population** is 51 real tracks in `tests/calibration_data` (not
+52), 12 frozen synthetics and `example_file.csv` = 64 series; × params-14 and the
+app defaults (with the filter on in both) = 128.
+
+**(f) qualitative.** 51 real + 12 synthetic + 2 accepted uploads (standard `.txt`,
+custom `.txt`) + 2 refused real `.txt`, AppTest, same machine: first load of the
+63 bundled series ≈ 29.7 s (≈ 28.8 s on `develop-v2.1`), rerun after a slider
+change ≈ 29.6 s (≈ 29.0 s before), cache-hit rerun ≈ 0.8 s. No freeze, no
+exception. The cost is detection, not reading.
+
+**(f) with 200 real cyclones** (the second dataset converted to the standard
+layout as −1e-5 × `vor42`, a conversion Danilo confirmed; 200/200 accepted by the
+standard path with 0 plausibility warnings), filter on, app defaults, AppTest:
+first load **85.5 s**, rerun after a slider change **86.5 s**, cache-hit rerun
+**3.5 s**; no exception, no error, 0 "use_filter=True is interpreted" messages.
+The expectation of < 2 s for the cache hit was WRONG (3.5 s: 200 figures are
+still re-sent on every rerun). Time scales linearly with the detection cost
+(≈ 29 s for 63 series, ≈ 86 s for 200) — not a regression.
+
+**Independent verification (Claude, separate run).** New vs old reader 64/64
+bit-identical; `use_filter` True vs `'auto'` 64/64 identical (filtered_vorticity,
+vorticity_smoothed2, phase map), warning 64 vs 0; `cyclophaser/` diff empty. Under
+the versions pinned in `tools/calibration_app/requirements-app.txt` (streamlit
+1.58.0, pandas 2.3.3) the suite went 1222 → 1325 passed with the SAME set of
+failures before and after: 23 in `tests/test_benchmark_apptest.py`, which predate
+this front. In the dedicated `cyclophaser` env (streamlit 1.63, pandas 3.0.5)
+there are no failures (1245 → 1348 passed, 0 failed).
+
+### Backlog opened by this front
+
+1. **23 failures of `tests/test_benchmark_apptest.py` under the
+   `requirements-app.txt` versions** (streamlit 1.58.0, pandas 2.3.3); they pass
+   in the dedicated env. Check the real Benchmark tab in the deployed app.
+2. **Local paths containing a user name** in
+   `research/labels/diagnostics/frontA_idx0_c2/` — for the clean-up front.
+3. **Proposed new front: factor/sign in the custom format + reading Parquet.**
+   Motivated by real data with positive vorticity in 1e-5 s⁻¹ (the TRACK
+   convention), which the app today reads correctly but cannot convert. Proposed
+   oracle: a cyclone present in both datasets — compare `min_max_zeta_850` with
+   −1e-5 × `vor42`.
+4. **The refusal of a binary (Parquet) file is cryptic** ("'utf-8' codec can't
+   decode …"); detect the `PAR1` magic and say so.
+5. **With ~200 cyclones, every slider change costs ~1.5 min in the grid.**
+
+Also still true: a user CAN pick a wrong column in the custom format (e.g. `Lat`
+as vorticity) — the preview shows the magnitude warning and nothing is used
+without the explicit confirmation; and the new UI has no browser test (browser
+tests are run by hand, fixed rule).
+
+#### Closing (2026-09-24)
+
+Merged into `develop-v2.1` as **`84b63ec`**, on Danilo's authorisation, from
+`feat/app-flexible-track-reader` @ `ba9af46`. `develop-v2.1` was verified to be at
+`d45ae49` immediately before the merge, local and origin agreeing. No PR was
+opened. `git diff d45ae49 -- cyclophaser/` is empty.
+
+Suite on the merged `develop-v2.1`, dedicated `cyclophaser` env
+(`cyclophaser.__file__` confirmed to be this checkout), `-m "not browser"`:
+**1348 passed, 0 failed**. Pushed.
+
+The disposable branch `exp/pre-peak-normalization` (local only, not pushed)
+belongs to the maturation diagnostic that followed, not to this front.
+
+---
+
+## 30. Plateau overwriting intensification — selection, parts 1–3, opt-in rule and params-15 — **closed, merged 2026-09-27** (merge `5434d87`)
+
+The labelled set has no case where the incipient plateau ends after the intensity
+peak and overwrites the intensification. Without such cases, a fix could only be
+calibrated against visual marks. Ten tracks from the 200-track swell sample were
+therefore drawn into the labelled set by a seeded rule and split before
+labelling. No detector was run on the 10 and no figure was drawn. The full record
+is in `research/labels/swell_item30/README.md`.
+
+- **Groups.** They come from the maturation diagnostic of 2026-09-24
+  (`m1_baseline.csv`, repo `params-11`, package code of `d45ae49`). The signal is
+  `plateau_boundary > peak_idx`: R = bad with the signal (9), S = good with the
+  signal (10), C = the other good tracks (175). The lists were reconstructed
+  exactly from the saved CSV and match the lists printed in that session.
+- **Overlap exclusions.** 20180733 (train) and 20203389 (test) are already among
+  the 51, with byte-identical files. They were removed before the draw, leaving
+  group sizes of R 9, S 10 and C 173.
+- **Conversion** (`-1e-5 * vor42`). Measured on 20180733: max|Δ| 1.36e-20 (1 ulp),
+  ratio 1.000, same sign, lag 0.
+- **Draw.** Seed `20260925` with `numpy.random.default_rng`, pre-registered in
+  `659eb5e` before it was run. **Train:** 19860380, 19870927, 19940445, 20120297
+  (R); 19790612, 19810854 (S); 20050893 (C). **Test:** 19930748 (R), 20111118 (S),
+  19990549 (C). The batch is recorded as `batches: swell_item30` at the end of
+  `split.yaml`. The original 146 lines are byte-identical.
+- **Integration.** The series are in `tests/calibration_data/swell_item30/`, one
+  level down, so every non-recursive `*.csv` reader still sees 51 real series.
+  The label tab appends the 10 after the 63 without changing their order; the 3
+  test cases can be saved once while unlabelled and are locked after that.
+  The benchmark population is unchanged (35/12/16 by split × source, same
+  population hash).
+
+**Provenance finding: the 15 bad marks were not made under `params-11`.** The
+app export that holds them (named `cyclophaser_params-11.yaml`, sha256 `6df2cc07…`)
+has filter and phase parameters identical to `params-14`: floors 0.05 and 0.80.
+The diagnostic ran the repo's `params-11`, where the floors are 0.0. The groups
+are unaffected, because the signal reads only `z`, `z_unfil` and the plateau
+parameters, and neither floor touches them. This was established by reading the
+code, not by running it. Only the batch's labelling note is affected: R, and in
+fact all 10, were seen with the `params-14` detection before labelling.
+
+**Labels recorded (2026-09-25).** `manual_labels.yaml` gained exactly the 10
+batch records (63 → 73). The 63 earlier records are byte-identical, block by
+block, to `develop-v2.1`. For all 10, `series_sha256` equals the hash of the batch
+file, whose sha256 matches `split.yaml`. The 7 train records pass schema-4
+validation, with the stored verdict equal to the one derived from their phases.
+For the 3 test records only presence, hash and lock were checked; AppTest shows
+all three `[TEST split — locked]`, with both save buttons disabled.
+
+- **(a) Decision (Danilo):** the save-once exception for the batch's 3 test cases
+  is accepted. They were labellable once while unlabelled, and are locked from
+  then on.
+- **(b) Exposure:** the original TEST series **20203389** was among the 200 swell
+  tracks Danilo evaluated with detection in the Grid on 2026-09-24. Its label
+  predates that (all 63 were on file by 2026-09-14) and was not read. Any later
+  test result citing it should carry the caveat.
+- **(c) Name trap:** the app export `cyclophaser_params-11.yaml` (`6df2cc07…`)
+  holds **`params-14`'s values** (0.05 / 0.80 / `reclassify_index0` true). A
+  config is identified by its parameter blocks, compared with
+  `research/labels/configs/`, never by its file name.
+
+**Declared exposure (1 bit), as observed.** A verdict-consistency check was run
+over the 3 test records before the "presence, hash and lock only" rule was
+applied. It observed that **20111118's stored verdict ≠ the verdict derived from
+its phases**. Reading this as "saved as ambiguous" is an inference, not an
+observation. No other test-label content was read.
+
+**Measurement part — gate and baseline under params-14 (2026-09-25).**
+Measurement only; `cyclophaser/` is untouched. Predictions were committed in
+`f01ca88` before anything ran. The full record is in
+`research/labels/diagnostics/item30/REPORT.md`. TEST series (16 + 3, plus
+20203389 in the swell) were excluded everywhere.
+
+- **Config comparison.** `params-11` and `params-14` are identical in filter and
+  `incipient_*` parameters.
+- **P1 CONFIRMED.** The boundary is identical in 196/196 tracks.
+- **P2 CONFIRMED.** The signal fires in 8/14 bad and 9/182 good tracks.
+- **P3 CONFIRMED (8/8).** H (`find_stages.py:1134`) erases the step-5
+  intensification before the boundary, exactly and nowhere else.
+- **P4 REFUTED (5/8).** In 3 tracks the whole mature is erased too, so the final
+  map reads `incipient > decay`.
+- **P5 REFUTED (2/9).** The intensification does not end at the global minimum.
+  In 7/9 good tracks the peak is at index 0–1 and only decay is erased.
+- **P6 REFUTED (2/4).** 19860380 and 19870927 are labelled `incipient > decay`,
+  so the erased "intensification" is not in the label.
+- **Census.** The signal fires in 0/35 of the split's real train series, which
+  confirms the batch premise. Away from the signal, H erases the leading part of
+  the intensification, mostly where the labels agree (incipient end within ±2
+  steps of the boundary in 7/10).
+- **Evaluator.** It gains `--batch-train`. Its default path is unchanged:
+  population hash and output are identical.
+- **Baseline under params-14.** Across the 47: sequence 31/47, incipient
+  boundary 17/27. Across the batch's 7: sequence 1/7, incipient boundary 3/7.
+
+**H redescribed (2026-09-26): a property of the unconditional overwrite, not an
+isolated defect.** Line 1134 writes `incipient` over `[0, boundary)` whatever the
+pre-incipient map holds, with three outcomes:
+
+- **Boundary right:** it hides a wrong intermediate map (20180608, 19860380,
+  19870927).
+- **Boundary late:** it destroys a correct map (20120297, 19940445, 19810854).
+- **Outside the signal:** it erases only the beginning of the intensification,
+  and the labels agree.
+
+The question is therefore the boundary, not the overwrite.
+
+**Part 2 — separability (2026-09-26).** Measurement only; predictions were
+committed in `2ded3af`, and the full record is in
+`research/labels/diagnostics/item30/REPORT_part2.md`. The measure is E, the
+first step-5 intensification block that starts before the boundary. Three
+candidates were tested: c1 = the D2 depth of E, c2 = c1 / duration, and
+c3 = the fraction of E before the boundary. The groups were L (late: 20120297,
+19940445, 19810854), K (right: 19790612, which has no E, plus 19860380 and
+19870927) and P (21 = 13 real + 8 synthetic, all partial erasures).
+
+- **No candidate passes** the pre-declared criterion.
+  - c1 and c2 put L on both sides of K.
+  - c3 ties L and K at 1 (Q1 CONFIRMED). It clears P by a margin of 0.471,
+    but that only restates the signal.
+- **Q2** does not apply, since nothing separates. **Q3** had no prediction.
+- **Swell check.** E is defined in 10 of the 17 signal tracks, and c3 = 1 in
+  all 10. With no valid threshold there is no side to report.
+
+**Figures for label review (2026-09-27).** Diagnostic only, with no rule
+proposed; the record is in `research/labels/diagnostics/item30/REPORT_figs_cf.md`
+and `figs_cf/`. Each of 8 TRAIN cases shows the label, params-13, params-14 and
+one counterfactual. The cases are L, K, and the 2 P cases with the largest c3:
+20180608 and 20150436. The counterfactual, under params-14, is s5 with
+[0, E.start) written as incipient when E exists and c3 = 1, and s6 otherwise.
+
+- params-13 and params-14 give the same final map in all 8 cases.
+- The counterfactual equals s6 in both P controls and in 19790612.
+- **L: closer to the label** in incipient end and sequence (edit distance),
+  but E starts at step 0 in all three, so the counterfactual has no incipient,
+  while the labels open with 2, 8 and 3 steps of it.
+- **K 19860380 and 19870927: further.** Those labels are `incipient > decay`,
+  and the counterfactual restores an intensification and a mature that the
+  labels do not contain. Moving toward the L labels moves away from these K
+  labels, which is part 2's non-separability case by case.
+
+**Part 3 — opt-in rule, params-15 CANDIDATE, adjudicated labels (2026-09-27,
+CHECKPOINT, not merged).** The record is
+`research/labels/diagnostics/item30/REPORT_part3.md`; predictions are in
+`84f7c89`.
+
+- **The rule.** `incipient_plateau_spare_intensification` (bool, default False)
+  in `get_periods` and `determine_periods`, applied in `find_incipient_period`
+  just before the plateau overwrite. If the first intensification that starts
+  before the boundary also ends before it, the boundary moves back to that
+  intensification's start.
+- **Configs.** `params-15` is `params-14` plus the key; `params-14` is
+  untouched.
+- **Labels.** By Danilo's decision, the 5 TRAIN labels where the
+  counterfactual differs from params-14 are now the counterfactual. They are
+  marked in `notes`, the originals are in `swell_item30/labels_v1_snapshot.yaml`,
+  and they are scored in their own ADJUDICATED block.
+- **Validation batch.** 5 tracks frozen as `batches.swell_item30_val` (role
+  validation), unlabelled and outside every aggregate.
+
+Results:
+
+- **R1 CONFIRMED.** The rule changes exactly the 5 of 54 TRAIN series, each
+  into the counterfactual.
+- **R2 CONFIRMED.** Hash `b500d2e0…` before and after. It exercises only the
+  geometric path; the plateau path is proven by the evaluator under params-14.
+- **R3 REFUTED.** 15 swell tracks change, not 10. All 10 predicted change, and
+  5 more change that do NOT carry the signal (3 of them marked bad). The rule
+  is broader than the pattern it was designed for.
+- **R4 CONFIRMED.** Scores 47: 31/47 sequence and 17/27 incipient under both
+  configs. The 2 non-adjudicated batch series: 1/2 under both.
+- **Adjudicated block: 0/5 → 5/5, circular by construction.**
+- **V:** open until Danilo labels the 5 validation tracks, which he saw with
+  detection on 2026-09-24. Without V, adoption must be recorded as "adotado
+  sem validação independente".
+- Suite 1419 passed, 0 failed; `cyclophaser/` diff vs develop-v2.1 = the rule only.
+
+**Part 3 checkpoint addendum (2026-09-27).** The record is the addendum of
+`REPORT_part3.md`.
+
+- **R3.** The 5 unpredicted tracks are 19850338, 19890443, 20011085,
+  20040726 and 20110785 (3 marked bad). None is TEST or VALIDATION. In each, E
+  is a first, shallower deepening that ends at a secondary valley inside the
+  plateau, and the global minimum comes at or after the boundary. In 19890443
+  the two are equal, a tie. Claude's hypothesis was wrong: "E wholly before
+  the boundary" does not imply "boundary > global minimum".
+- **Narrow variant** (signal required too; a replica outside the package,
+  measured, not adopted). It changes the same 5 in TRAIN, and exactly the 10
+  predicted in the swell, with none of the 5 above.
+- **R2 lesson.** The canonical hash runs the geometric defaults and never
+  enters the plateau branch. The effective proof there is the evaluator's
+  output under params-14, identical to `1a3ad76`. A "default unchanged" guard
+  must exercise the changed branch.
+- **Deviation.** The rule was committed (`f85e1b8`) before the checkpoint was
+  approved; it is recorded, and the history is not rewritten.
+- **Benchmark.** Adjudicated labels get their own block and are never pooled
+  with train. There is an AppTest with a positive control.
+- **Cleanup debts.** The configs table in `research/labels/README.md` stops
+  at params-11. Importing configs older than params-14 warns "missing key".
+
+**Closing record (2026-09-27).**
+
+- **Rule kept in its BROAD form**, by the declared decision rule. In Danilo's
+  evaluation under params-15 (27 Sept 2026, 20:43Z, 249 tracks), none of the 5
+  tracks outside the signal (19850338, 19890443, 20011085, 20040726, 20110785)
+  was marked bad. 19890443, 20011085 and 20040726 had been marked bad under
+  params-14. Visual marks are judgement, not a score.
+- **V: spent.** The 5 validation tracks were seen under params-15 before they
+  were labelled. `batches.swell_item30_val` stays frozen as a record, role
+  "spent before labelling", with no labels. The block in `split.yaml` was not
+  edited and still reads `role: validation`; updating it is a separate
+  decision.
+- **Test exposure.** 19 test series were evaluated in the Grid under params-15:
+  the 16 of the split, the 3 of the batch and 20203389. Danilo marked 20150377
+  and 20206498 bad. The marks were used in no decision.
+- **Danilo's note.** Other cases may be bad because their series are genuinely
+  ambiguous. They are outside the scope of this front.
+- **Adoption NOT recorded.** The ADOÇÃO line of the closing brief came back
+  unfilled, so params-15 remains a CANDIDATE and is not the reference
+  configuration. The package default stays False.
+- **Merge NOT done.** The AUTORIZAÇÃO DE MERGE line came back unfilled.
+
+**Closing decisions (2026-09-27; they supersede the two lines above).**
+
+- **Adoption (Danilo): "adotado sem validação independente".** params-15 is
+  now the calibration reference, and params-11 becomes historical. The package
+  default of `incipient_plateau_spare_intensification` stays False. The configs
+  table in `research/labels/README.md` now runs to params-15, which also clears
+  that cleanup debt.
+- **Validation batch (Danilo's authorisation).** In `batches.swell_item30_val`,
+  only `role` and `labelling_note` were edited: the role is now "spent before
+  labelling", and the note carries the edit record. The series hashes are
+  unchanged. The label tab locks the 5 outright, which an AppTest proves.
+  Commit `916ecfc`.
+- **Merge authorised by Danilo.** The merge result is recorded on
+  develop-v2.1.
+
+**Merge (2026-09-27).** `research/item30-plateau-overwrite` was merged into
+`develop-v2.1` with `--no-ff` and no PR, as merge **`5434d87`**. Its parents
+are `f92569a` (the develop tip, confirmed before merging) and `2319609` (the
+branch tip). Post-merge checks
+(`research/labels/diagnostics/item30/post_merge_checks.py`):
+
+- The `cyclophaser/` diff between `f92569a` and `5434d87` is the rule only (2
+  files, +62/−2), identical to the branch's.
+- The default evaluator matches `f92569a` in population hash and full output,
+  under params-14 and under package defaults.
+- `load_real_series` returns 51 series.
+- R1, rerun: params-15 changes exactly the 5 adjudicated TRAIN series of 54,
+  each into the counterfactual.
+- Suite (`-m "not browser"`): **1422 passed, 0 failed**.
+
+The result is no separation found on 3 L cases against 2 K cases with a value.
+It is not proof that none exists.
+
+**Still open:** the evaluator reads the batch's TRAIN part only under
+`--batch-train`, in a block of its own. The benchmark reads it only behind
+30c's opt-in "Include swell_item30 batch", with the 3 test cases as `test` (see
+30c). Whatever reads the batch next must keep its 3 test cases out of any
+training aggregate.
+
+## 30a. Inspector — the two depth-floor parameters — **closed, merged 2026-09-25** (merge `ad8daca`)
+
+Branch `fix/inspector-depth-params`, from `develop-v2.1` @ `0f5bef5`. App only:
+`git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated `cyclophaser` env,
+`cyclophaser.__file__` confirmed to be this checkout.
+
+### The defect
+
+`layer_inspector._ARGS_PERIODS_DEFAULTS` lacked `mature_min_depth` (front 20b)
+and `intensification_min_depth` (front C). The app sends both on every run
+(default 0.0), and `build_args_periods` rejects unknown keys, so the Inspector
+view showed `Inspector error: "not stage-detection parameters:
+['intensification_min_depth', 'mature_min_depth']"` for **every** track — since
+2026-09-21. Beneath that, `intensification_ledger` and `mature_ledger`
+reconstruct their criteria outside the package and ignored both floors, so
+adding the keys alone would have made the ledgers show as accepted blocks the
+package had removed. No existing fidelity test could see it: all of them ran
+with both floors at 0.0.
+
+**Positive control.** Before the fix, a new test that drives the inspector path
+with exactly the keys the app sends (read by parsing `app.py`'s
+`_PHASE_PARAMS`, minus the three extrema keys) failed with that `KeyError`; an
+AppTest of the real Inspector view, with the two keys removed, shows the same
+`Inspector error` (kept as a permanent test).
+
+### What was done
+
+* The two keys added, with defaults read from `get_periods`' signature (both
+  `0.0`, `determine_periods.py:822-823`).
+* Anti-recurrence: the key set of `_ARGS_PERIODS_DEFAULTS` is asserted EQUAL to
+  the keys of the `args_periods = {` block inside `get_periods`, parsed with
+  `ast` — and every value equal to `get_periods`' default for the parameter it
+  forwards (`inspect.signature`). Mutation-checked: removing a key fails it.
+* Ledgers. The package exposes **no callable** for either floor — both are
+  applied inline in `find_stages.py` — so only the depth arithmetic is
+  transcribed, in the package's order: D2 on an intensification candidate only
+  after it passed the duration test and before gap stitching; D1 on a valley
+  before its neighbouring peaks are looked up, for both mature methods; both
+  skipped where the z range is zero/non-finite. Removed candidates carry
+  `reason` "below intensification_min_depth" / "below mature_min_depth" and a
+  `depth` field. `ledger_reference_mask` gained `kind="mature"` (steps 1-3 by
+  the package) so all three ledgers share one oracle.
+* App: `Depth (D2)` / `Depth (D1)` columns, verdict "rejected: below
+  intensification_min_depth", captions updated; the Plotly hover no longer
+  claims a depth-rejected candidate was shorter than its minimum.
+
+### Fidelity with the floors active (params-14: 0.05 / 0.80), all 51 tracks
+
+Step 6 of the ribbon == `get_periods`; accepted set of each ledger
+(intensification, decay, mature) == the package's mask. These sweeps run over
+all 51 real tracks, test split included: they read no label and score nothing.
+The floor genuinely removes what the package writes on: **intensification**
+20180654 (41 steps), 20180733 (68 steps); **mature** (a window confirmed with
+the floor off) 20160735, 20170794, 20190325, 20191014, 20203947, 20206498.
+
+Pinned by tests that first assert the floor still changes the package's mask —
+**train tracks only**, guarded by a test that reads `split.yaml` itself:
+**20180733** (intensification), **20190325** and **20170794** (mature). The
+first pass pinned 20180654 and 20206498, both TEST tracks; replaced on
+2026-09-25 before the independent verification. 20170794 was chosen over
+20191014 (same structure: one D1 = 1.000 valley kept, one valley that the
+confirmation kept with the floor off, removed by it) for the larger margin below
+0.80 (D1 0.606 vs 0.642) and the larger removed window (9 vs 7 steps).
+Mutation check after the swap — ledgers that ignore the floors: **6 tests
+fail** — the two params-14 fidelity sweeps (intensification, mature), the three
+pinned-track tests, and the Inspector AppTest (5 of the 301 in
+`test_layer_inspector.py`, 1 of the 2 in `test_inspector_apptest.py`). Before
+the swap the same mutant failed 6 in `test_layer_inspector.py` alone (20180654
+was the sixth); the AppTest had not been mutation-run then.
+
+Pre-existing and out of scope: `MATURE_TRACKS` (front 20b-era fidelity tests,
+floors at 0.0) still lists 20206498, a test track.
+
+### History — an earlier, unmerged fix of the same defect
+
+The same defect was reported and fixed on 2026-09-23 on branch
+`fix/inspector-min-depth-params` (**`a2b639e`**, pushed, never merged). That fix
+added only the two keys to `_ARGS_PERIODS_DEFAULTS` and did not touch the
+ledgers — i.e. exactly the "keys alone" state in which the ledgers would show
+as accepted blocks the package removed. Its register entry is numbered **28**,
+a number since assigned to rule C2′ (item 28 above). **This branch (30a)
+supersedes it**; the old branch is kept, for a decision in the clean-up front.
+
+### Clean-up debt opened by this front
+
+* **"Depth (D2)" collides with a refuted D2.** The ledger column is named after
+  front C's intensification depth `D2 = (z[peak] − z[valley]) / (z_max − z_min)`
+  (item 24), and sits beside "Depth (D1)" — the mature depth of front 20b
+  (item 22). But item 22 also defines a `D2 = |z_valley| / |z_min|`, the
+  alternative valley depth that failed stage 1 and was not adopted. The same
+  label therefore names two different quantities in the register, one of them
+  refuted. Rename in the clean-up front (e.g. by what each measures, not by
+  index).
+
+Limit: the app's default track (`example_file`) has intensification D2 of
+1.000 and 0.565, above the slider's 0.50 maximum, so the AppTest can exercise
+only the mature floor through the UI.
+
+Suite, dedicated env, `-m "not browser"`: **1348 passed, 0 failed** before →
+**1362 passed, 0 failed** after (+14 = the new tests: 12 in
+`test_layer_inspector.py`, 2 in the new `test_inspector_apptest.py`). After the
+train-only swap, still **1362 passed, 0 failed** (one pinned parametrisation
+removed, the split guard added).
+
+**Stop before merge:** Danilo checks visually, opening in the Inspector one
+track from the repo and one from the swell set under params-14.
+
+#### Closing (2026-09-25)
+
+Merged into `develop-v2.1` as **`ad8daca`** (`--no-ff`, parents `0f5bef5` and
+`52ecb04`), on Danilo's authorisation, from `fix/inspector-depth-params` @
+`52ecb04`. Immediately before the merge, `origin/fix/inspector-depth-params` was
+verified to be `52ecb04` and `develop-v2.1` to be `0f5bef5`, local and origin
+agreeing. No PR was opened. `git diff 0f5bef5 ad8daca -- cyclophaser/` is empty.
+
+The merge was made in a separate worktree of `develop-v2.1`, because the main
+checkout was on another front's branch (`research/item30-plateau-overwrite`) and
+was left untouched. Suite on `ad8daca` in that worktree, dedicated `cyclophaser`
+env, with `cyclophaser.__file__` and `layer_inspector.__file__` confirmed —
+inside pytest — to be that worktree's files, `-m "not browser"`:
+**1362 passed, 1 skipped, 0 failed**. Pushed.
+
+The superseded branch `fix/inspector-min-depth-params` (`a2b639e`) is still
+unmerged and kept; its fate belongs to the clean-up front.
+
+---
+
+## 30c. Visualisation — shared 0-1 scale in the Label tab, smoothed series and the swell batch in the Benchmark — **done on branch `research/item30-plateau-overwrite`, NOT merged; awaiting Danilo's visual check**
+
+App only: `git diff develop-v2.1 -- cyclophaser/` is empty. Dedicated
+`cyclophaser` env, `cyclophaser.__file__` confirmed to be this checkout.
+
+### What was done
+
+* **Label tab, Inspection only: "Shared 0-1 scale"**, on by default, next to
+  the overlay switch. It uses the inspector's grouping: the raw series gets a
+  0-1 band of its own, and `filtered_vorticity`, `vorticity_smoothed` and
+  `vorticity_smoothed2` share ONE band (`layer_inspector.rescaler` over all
+  three, whichever are switched on, so toggling a layer never rescales the
+  others). The group band is computed in `app.py`'s `_label_overlays` (the
+  provider), so `label_tab.py`'s AST stays free of the package's names. The
+  raw band is `label_tab.unit_band`, which re-writes `rescaler([zeta], True)`'s
+  arithmetic, and a test pins the two to agree (flat, NaN and all-NaN
+  included). The hover shows the step and every curve's PHYSICAL value. The
+  band travels in a separate `display` key, and `chart_payload`'s pinned keys
+  are unchanged. `overlays_shown` still records the names seen. Labelling stays
+  raw-only, and the blindness tests pass unloosened.
+* **Benchmark cells and stacked figure** draw each column's own
+  `vorticity_smoothed2` (`run_series`' `z`, from that column's filter_params)
+  with the Grid's compact convention (`_plot_compact`): raw and smoothed on
+  twin y axes, raw in front. In the stacked figure every panel uses its own
+  column's curve, and all panels share one twin range. A snapshot column has
+  no `z` and draws raw only. A PNG has no hover, so the left axis carries the
+  raw values.
+* **Benchmark: "Include swell_item30 batch"**, off by default
+  (`benchmark_core.load_batch`, sha256-checked via `load_batch_series`). The
+  batch's 7 train cases take membership `train`, and its 3 test cases
+  (19930748, 20111118, 19990549) take `test`, which gives them exactly the 16's
+  treatment: the Test button, the frozen test block, never a train number.
+  Nothing downstream special-cases them.
+
+### Default paths unchanged (`research/labels/diagnostics/item30/prove_defaults_30c.py`, against `99f5a9a`)
+
+* The benchmark's `load_all_series` population hash is `d275380b…` both before
+  and after. Sources (51 real / 12 synthetic) and `split_membership` (47/16)
+  are identical.
+* `labels_core.py` (`load_real_series`) and `evaluate_against_labels.py` are
+  byte-identical to `99f5a9a`.
+* The evaluator's default path, run old vs new, gives an identical population
+  hash and identical output, both under `params-14` and under package defaults.
+
+Suite (`-m "not browser"`, dedicated env): **1386 passed, 0 failed**.
+
+### Open
+
+* **Pre-existing, not 30c:** in the Benchmark, pressing **Train** and then
+  **Test** in one session empties the selection (a second press selects the
+  16). Reproduced on `99f5a9a`.
+* Danilo's visual check (Label tab in Inspection with the shared scale;
+  Benchmark with the batch and the smoothed series) comes before any merge.
+
+---
+
+
+## 31. params-15 as the package default — stages 0, 1, 2a, 2b, 2c — **closed, merged 2026-09-28** (merge `0a469eb`)
+
+**Merge (2026-09-28).** `research/item31-params15-default` @ `e31b727` merged into `develop-v2.1` with `--no-ff`, no PR, as **`0a469eb`** (parents `6f956fc`, `e31b727`; tree identical to `e31b727`). Post-merge: suite `-m "not browser"` 1438 passed, 0 failed; front_b default digest `3a6de265…` (record appended at `0a469eb`).
+
+**Every number below is regenerated by
+`research/labels/diagnostics/item31/future_work_numbers.py`**, from this
+front's committed outputs, and is not copied from any brief. The full record is
+`research/labels/diagnostics/item31/DESIGN.md` (§1–§12).
+
+### Stage 0 — design (`e42da8b`, `a21bca2`)
+
+* **params-15 against the 2.0.0 defaults.** Of 31 keys,
+  20 differ strictly,
+  19 by value and
+  17 in behaviour. The brief's "21/31"
+  did not reproduce.
+* **Reachability on TRAIN** (sequence changes from params-14 to params-15):
+  0 in the 35 original real series, 0 in
+  the 12 synthetic and 5 in the 7 of the batch. **The original
+  split does not test `incipient_plateau_spare_intensification`.**
+* **Exposure of the TEST series.** 23 events, each tied to
+  a `file:line` source (`exposure_table.md`).
+* **Label-only census of the 16 TEST series**, aggregates only, declared as
+  exposure: n 16; boundary 9, none 6,
+  ambiguous 1; 15 with a mature;
+  5 equal to the constant's sequence. first-blind equals
+  current in 16/16.
+* **The constant comparator**, derived from TRAIN only: S\* =
+  `intensification > mature > decay` (14/35), and "no
+  incipient".
+
+### Stage 1 — the single scoring run (criterion frozen at `5075e49`, run at `5075e49`, outputs `33ea489`)
+
+**Verdict: PASS.** V1–V5 hold under both label versions. The
+aggregates, on current labels (first-blind is identical):
+
+| | incipient hits H/B | refusals agreed R/N₀ | C | Q | MAT | false refusals |
+|---|---|---|---|---|---|---|
+| params-15 | 3/9 | 6/6 | 9/15 | 10/16 | 11/15 | 4 |
+| defaults 2.0.0 | 4/9 | 0/6 | 4/15 | 8/16 | 10/15 | 0 |
+| constant | 0/9 | 6/6 | 6/15 | 5/16 | — | 9 |
+
+Discordant pairs, params-15 against the 2.0.0 defaults:
+* C: 7 where params-15 is right and
+  the defaults wrong, 2 the other
+  way round;
+* Q: 6 against
+  4.
+
+**Findings, as they are to be read:**
+
+* **The PASS is weak evidence.** The stage was not out-of-sample (DESIGN §5.2):
+  * the 16 series were part of the visual calibration set (E01);
+  * they were seen under params-15 when it was adopted (E22);
+  * their TEST blocks had been displayed in the Benchmark (E23, confirmed by
+    Danilo);
+  * the labels are the same assessor's judgement.
+
+  A FAIL would have been strong evidence; a PASS is not.
+* **The incipient boundary is worse on TEST than on TRAIN.**
+  * Hits for params-15: 3/9 (33 %) on TEST against
+    8/17 (47 %) on the 35 real TRAIN series.
+  * False refusals: 4/9 on TEST against 6/17.
+  * On H alone, params-15 is below the 2.0.0 defaults (3 vs 4).
+    It wins C only through refusal agreement (6 vs 0).
+* **`spare_intensification` acted on 1/16 TEST
+  series (`20170756`).** That is the params-14 vs
+  params-15 final-map count, outside the verdict. **Its effect on the score was
+  not measured.**
+* **The TEST split is SPENT.** `stage1_run.py` is single-shot (its output files
+  act as a lock), and no later choice may be scored on these 16 as if they were
+  held out.
+
+### Danilo's decisions (2026-09-28)
+
+* **Scope and comparators.**
+  * Option A only: the 3 batch TEST series are not scored. The rule therefore
+    stays **"adotada sem validação independente"** for good; validating it needs
+    new swell series labelled.
+  * Comparators: params-15, the 2.0.0 defaults and the constant. params-14 is
+    only a mechanical count.
+* **E23 confirmed:** TEST blocks were displayed in the Benchmark; the configs
+  were not recorded.
+* **Filtering.** The default filtering is params-15's, with `use_filter='auto'`
+  and no presets. The hybrid (params-15 phases on 2.0.0 filtering) is parked.
+* **Incomplete configs, decision (a):** absent keys are filled from the frozen
+  2.0.0 table (`research/labels/defaults_2.0.0.json`) and listed.
+* **params-1 to params-14 are removed in this front**, ahead of the clean-up
+  front.
+* **Approvals:** 2b (defaults = params-15), the `use_filter=False` fix
+  (`a1784b5`), and the sidebar opening with the package defaults (2c).
+
+### Stage 2a — removal, no package behaviour change (`b484738` → `eed8e77`)
+
+* **Removal.** 14 configs were removed **here, not in the clean-up
+  front**. Each is recoverable byte for byte with
+  `git show 33ea489358d9:<path>`, as listed in
+  `research/labels/diagnostics/item31/recovery_table.md` (each row verified
+  against the working tree and the README's hash at generation).
+* **40 closed-front scripts stop running.** They are listed,
+  not migrated, in `stale_scripts.md`, and reproduce from
+  `33ea489358d9`.
+* **Decision (a) is wired into three places:** `evaluate_against_labels.py`,
+  `benchmark_core` and the app's YAML import. `item19_core` keeps
+  `pair_by_overlap` / `MARGIN` and loses its default config.
+* **Gate PASS.** `cyclophaser/` diff empty; digest `b500d2e0…`; the evaluator's
+  output is byte-identical to `33ea489`'s. Suite: 1431
+  passed, 0 failed, as predicted.
+
+### Stage 2b — the defaults become params-15 (`c5217b5` → `45f0600`)
+
+**Equivalence gate: PASS**, on predictions declared at stage 0:
+
+| check | result |
+|---|---|
+| EQ1 (47 TRAIN, no arguments) | `3a6de265…` |
+| EQ2 (54) | `923e1a03…` |
+| EQ2 control (params-15, spare=False) | `3756392e…` |
+| EQ4 (2.0.0 table, explicit) | `b500d2e0…` |
+| EQ3 (`determine_periods` == G() == G(params-15)) | train 54/54, example 1/1, test 16/16, batch test 3/3, validation 5/5 |
+| EQ5 | no `use_filter` warning |
+
+**What moves, relative to 2.0.0:**
+
+| population | final map | sequence | incipient presence flips |
+|---|---|---|---|
+| TRAIN | 54/54 | 32 (25 real / 1 synthetic / 6 batch) | 24 |
+| 16 TEST | 16/16 | 12 | 10 |
+| 5 validation | 5/5 | 5 | 4 |
+| example file | 1/1 | 1 | 1 |
+
+**The suite:**
+* **Measured under the new defaults, tests untouched:**
+  171 failed, 1260 passed.
+* **Classified before any change:**
+  * A: the test asserts a default value;
+  * C: the test was measured under 2.0.0; it now passes 2.0.0 explicitly
+    (`tests/legacy_defaults.py`);
+  * a harness case;
+  * B: regenerated baselines. The 2.0.0 baselines are kept as cross-version
+    tests.
+* **After migration and regeneration: 1432 passed,
+  1 failed — the declared prediction MISSED by
+  one.**
+
+**The finding behind the miss.**
+* **What.** `process_vorticity(use_filter=False)` on an unnamed index crashed
+  (`'time'` coordinate absent).
+* **How it became reachable.** The defect was pre-existing: in 2.0.0 it needed
+  `use_smoothing=False` passed explicitly. The new default made
+  `use_filter=False` alone hit it: 55 crashes out
+  of 110 runs under the new defaults, 55
+  under 2.0.0 with smoothing off, and 0 under
+  2.0.0 as shipped.
+* **The fix.** It went in its own commit, `a1784b5`, approved. No output
+  changed, and every crash was removed.
+* **Final suite: 1433 passed,
+  0 failed.** front_b's default-digest record was
+  appended (`3a6de265…`).
+
+### Stage 2c — the sidebar opens with the package defaults
+
+* **The sidebar.** `app._DEFAULTS` now derives every package parameter from the
+  signature. The prominence filter and the decay tail start ON when their
+  default is not None. Reset returns there. 20 of the
+  37 sidebar keys changed start-up value; the obtained values
+  match the declared table on 37/37
+  (`sidebar_table_2c.md`).
+* **New tests** (`tests/test_sidebar_defaults.py`):
+  * anti-recurrence: start-up values and the live config equal the signature,
+    key by key;
+  * app ↔ package: an untouched sidebar column equals `determine_periods(series)`
+    on 3 TRAIN series, one of them from the swell batch, with a positive control.
+* **The Benchmark AppTest's positive control** now sets one declared non-default
+  sidebar value (`cutoff_high=48`). The swap mutation fails the pin
+  (`benchmark_swap_mutation_2c.txt`).
+
+**Suite at `cc5519e`: 1438 passed, 0 failed**, as declared before the run
+(1433 + the 5 new tests). **Gates:** front_b's default digest is `3a6de265…`,
+with its record appended, and `git diff 45f0600 -- cyclophaser/` is empty.
+
+### Still open
+
+* **`incipient_plateau_spare_intensification=True` is "adotada sem validação
+  independente".** It is now a package default. The original split cannot test
+  it, the validation batch is spent, and the TEST split is spent.
+* **Only the TRACK filtering was calibrated** (hourly 850 hPa vorticity along
+  tracks). Other inputs may need another filtering, not calibrated here. The
+  docstrings, `docs/usage.rst` and the CHANGELOG say so.
+* **Defect I (item 8(d)) now sits on the default path**, because
+  `boundary_padding='edge'` is the default. Re-measured under the current
+  defaults: the sign at t0 flips between raw and filtered in
+  **7/51** real tracks,
+  6 of them TRAIN (`20180170, 20180608, 20180759, 20190325, 20190397, 20191014`).
+  Still open; the known masking by the incipient overwrite is unchanged.
+* **Clean-up debt this front leaves.**
+  * The 40 stale scripts listed above.
+  * Two recording errors, corrected in place and noted:
+    * three `suite_*.txt` files held only the `EXIT` line;
+    * §12.1 said "22" keys where its own table has 20.
+
+> **Nota de correspondência (2026-09-28).** params-15 foi renomeado para
+> params-track (conteúdo idêntico, sha256 `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04`); registros anteriores citam o
+> nome antigo.
+
+---
+
+## 32. Repository clean-up + `boundary_padding` default `"reflect"` (C1) — branch `chore/repo-cleanup`, **merged into `develop-v2.1` at `0d75db3` (2026-10-02)**
+
+**Every number below is regenerated by `research/cleanup/passo6/future_work_item32.py`** from the front's committed outputs under `research/cleanup/`. Per-step reports: `passo1/RELATORIO.md`, `passo3/RELATORIO.md`, `passo4/RELATORIO_faseC.md`, `passo5/RELATORIO.md`, `passo6/`; the final gate is `research/cleanup/RELATORIO_FINAL.md`, measured once after this item was committed. The inventory and the per-file decisions are in `research/cleanup/MANIFEST.md`.
+
+### Scope
+
+* **Passo 0–1.** Read-only inventory (files, branches, traceability), then C1 — the only behaviour change in `cyclophaser/` — and the params-15 → params-track rename.
+* **Passo 2.** `docs/findings.md`, one register of what the closed fronts established, refuted, decided and left open (§S01–§S12, every source `path:line@commit`).
+* **Passo 3.** Removal of the closed fronts' diagnostics, kept readable through an archive tag.
+* **Passo 4.** Documented defaults checked against the signatures; docstring/comment-only commits in `cyclophaser/`; the Read the Docs site rewritten; app texts.
+* **Passo 5.** Minor debts: app fixes, the evaluator's constant baselines, the digest generator opening training files only, absolute paths.
+* **Passo 6.** The branch table, archive tags for the branches that hold cited commits, and the deletion of the branches Danilo authorised by name.
+
+### C1 — `boundary_padding` default `"reflect"` (`742e685`)
+
+* **The default is the maintainer's choice (2026-09-28), made without a detection-quality measurement** (`CHANGELOG.md`, `[Unreleased]`). No score against labels was taken under it; the scores recorded for params-track were measured under `"edge"`.
+* **The two consequences expected when C1 was decided did not hold** on the 54 training series (`passo1/hygiene_train.json`):
+  * no incipient refusals under `"reflect"` — predicted 0 (P4); measured **28/54** under `"reflect"` and 28/54 under `"edge"`, the same series;
+  * defect I leaving the default path — it is present on **11/54** under `"reflect"` against 10/54 under `"edge"`.
+* Mechanism (post-hoc, `passo1/refusal_mechanism.json`): the default `incipient_plateau_signal="vorticity"` reads the plateau on the raw input, which the padding never touches. Under `"derivative"` the padding decides: 2/54 refusals under `"reflect"` against 32/54 under `"edge"`.
+* What C1 moves: the final phase map on 19/54 training series, the phase sequence on 3/54; the default-behaviour digest `3a6de265…` → `7552bc67…`.
+
+### params-15 → params-track
+
+Renamed with `git mv`, byte-identical: sha256 `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` before and after (`passo1/params_track_vs_defaults.json`). It differs from the package defaults in 2 keys of 31, `boundary_padding` among them. Historical records keep the old name; dated correspondence notes were added.
+
+### Removals and the archive tag
+
+* `2912b79` removed **309** files listed by `passo3/removal_list.py` from the MANIFEST; 309/309 resolve through the annotated tag **`archive/research-diagnostics-pre-cleanup`** (at `654a3e5`), as `git show archive/research-diagnostics-pre-cleanup:<path>`.
+* One CSV was restored from the tag by `51596c0`, so 308 of those paths are absent from the tree.
+
+### `docs/findings.md`
+
+Built by `research/cleanup/passo2/make_findings.py` (`b60d57b`), maintained by hand since. §S10 maps every removed file to where its finding is recorded (203 rows at passo 3, 0 failures); §S11 lists every open item once; §S12 holds record corrections, C1's premise among them.
+
+### Site rewrite and the new figure
+
+* `c1305af`: the Read the Docs pages rewritten for package users (approved by Danilo). `438eadf`: the generators in `docs/figures/` and their outputs in `docs/generated/` — the methodology figure (`make_methodology_figure.py`, panels A–K from the package's own output on a synthetic series, with an assertion that the replay of the public stage functions reproduces `get_periods`), the usage-guide figures on an hourly example track, and the default tables read from the signatures.
+* Documentation build, errors/warnings: 0/1 before → 0/0 after (`passo4/RELATORIO_faseC.md`). `.readthedocs.yml` installs the package itself, so autodoc reads the docstrings.
+* Documented defaults (`passo4/check_documented_defaults.py`): 0 divergences in 131 claims after the edits. Scores attributed to the current default (`passo4/faseC_d2.json`): 0 of 53 reviewed lines.
+
+### App fixes
+
+* `bffa6fe`: every default the app writes, falls back to or states is read from the package signature; literal fallbacks removed; stale "(default)"/"opt-in" texts fixed.
+* `f00a7a0`: the Documentation tab replaced by a link to the site; switched-off checks exported as `null` in the YAML (before, the missing key took the package default, which is not off).
+* `bea55a6`: upload and dataset choice drawn inside the Calibration tab; Benchmark preset selection; ledger column renamed away from the refuted D2 metric; binary uploads refused; test-split ids removed from `tests/test_layer_inspector.py`; the Benchmark tests pass raw TRAIN ids.
+* `dbaacd6` (commit 21): a help text cited a test-split track; it now cites a training track (`passo6/rel_t0_window.py`, training files only).
+* App tests in the environment with the pinned versions of `requirements-app.txt`: 658 passed / 0 failed (`passo5/RELATORIO.md`); after commit 21, 658 passed (`passo6/c21_app_tests.txt`).
+
+### Branch tags and branch deletion (passo 6)
+
+* 9 annotated tags `archive/<branch>` at the tips of the branches that hold commits cited outside `develop-v2.1` (`passo6/tags.json`), pushed. `archive/exp/pre-peak-normalization` stays public (Danilo, 2026-10-02).
+* Danilo authorised by name (2026-10-02) the branches of `passo6/removal_list.md` @ `fbeff00`. Each tip and each group-B tag was checked before deletion (`passo6/delete_6b.py`); deleted **38 remote** (A 30, B 8) and **4 local** (A 3, B 1); not deleted: 0.
+* Remote branches now (`passo6/post_6b.json`): `chore/repo-cleanup`, `develop-v2.1`, `master`. Deleted on origin = the authorised list: True. Of 214 distinct commits cited in tracked files, **0** are unreachable from the refs on origin.
+
+### Predictions that failed, and what was learned
+
+* **R4 (passo 3) — live references to removed paths.** Predicted 0; the first measurement gave 0 with a scanner that only recognised the full path; with the scanner implementing the declared definition (any suffix of 2+ components): **7** in 5 files. Corrected by `51596c0`; R4 recorded as FAIL. *Learned:* a scanner whose result is a predicted zero must first be shown to find a known positive.
+* **D1 "before" inside `cyclophaser/` (passo 4).** Predicted 0; measured **1** (`passo4/before.json`): a docstring stated a stale default for `decay_tail_amplitude_fraction`. The gate was widened by Danilo to admit docstring/comment-only commits, each checked by a docstring-free syntax tree and the digest. *Learned:* item 31 changed defaults without sweeping the texts that state them.
+* **P4 (passo 1).** Above: predicted 0 refusals under `"reflect"`, measured 28/54. *Learned:* the refusal depends on the incipient signal, which the premise did not name.
+* **E1 (passo 5).** Predicted 0 failures; 6 failed in `tests/test_evaluate_batch_train.py` (a stub of `score_labels` without the field the evaluator's new section reads). After `9bc670b`: 1443 passed / 0 failed. *Learned:* a test stub of a function's output must be updated with the consumer.
+* **E2 (passo 5).** Predicted 0 environment / 23 code for the Benchmark failures under the pinned versions; obtained **24 environment / 0 code** — the AppTest harness of the pinned streamlit re-applies `format_func`; the app itself was right. *Learned:* the cause was inferred from reading code without running it.
+* **E4 (passo 5).** Predicted 0 absolute paths outside the exception; 3 before → 2 after, all in `docs/future_work.md`, mentions of the pattern in a historical record. *Learned:* the exception did not cover historical records.
+* **The test-id scanner (passo 5 → commit 21).** The passo-5 scanner counted only quoted 8-digit literals in `.py` files (10 after, none in `tools/calibration_app/`); widened to any word-bounded occurrence, it found 1 in `tools/calibration_app/` text (→ 0 after `dbaacd6`). *Learned:* same as R4 — the scanner was narrower than the question.
+* **0 test ids in `docs/` (commit 21).** Predicted 0 without excluding the records; measured 52 lines before and 52 after — 49 in `docs/future_work.md`, 3 in a table of `docs/findings.md`. Left for Danilo's decision. *Learned:* a prediction over a folder must say whether historical records are in scope.
+
+* **The final gate's (b) — suite with 0 failures.** Measured once at `f7d8fd9`: the suite stopped at collection on `research/cleanup/passo6/test_ids_in_text.py` (commit 21), a research script named `test_*.py` that pytest collects from the root and that runs with pytest's argv; 0 tests ran. The passo-5 scanner `passo5/test_ids_in_code.py` had been collected the same way, silently, in passo 5's suite runs, and wrote `passo5/-m.json`. *Learned:* without a pytest `testpaths`, a research script must never be named `test_*.py`; the suites of passo 5 ran an extra module nobody declared.
+* **The final gate's (b), in the CI environment.** (b) had been measured only in the conda environment, which has streamlit. The CircleCI job installs the wheel with only pytest and pyyaml; reproduced in a new venv at `40f71b4`: 1279 passed / **7 failed**, all in `tests/test_app_passo5_fixes.py` (added by `bea55a6`, passo 5), `ModuleNotFoundError: streamlit` — the CI has failed since passo 5. *Learned:* the criterion "suite with 0 failures" includes the CI sequence, not only the development environment.
+
+### Final gate (`research/cleanup/RELATORIO_FINAL.md`)
+
+Measured once, in a clean worktree at `f7d8fd9`, except (b): redefined by Danilo on 2026-10-02 to include the CI sequence and measured before and after a correction. Verdicts: (a) PASS, (b) PASS, (c) PASS, (d) PASS, (e) PASS, (f) PASS.
+
+* (a) `cyclophaser/` touched by `32651c8`, `00718d4`, `c5e298b`, `129b04d`, `742e685`: C1 and 4 docstring/comment commits, each with an identical docstring-free tree and equal digests; HEAD's docstring-free tree is identical to `742e685`'s: True.
+* (b) First measurement FAIL, as above. App tests in a fresh venv with `requirements-app.txt`: 658 passed / 0 failed; digest `7552bc67…`. The two scanners were renamed to `scan_*` and `passo5/-m.json` removed (`d44802e`); a **second measurement** at `d44802e`, recorded beside the first, which stands: suite 1443 passed / 0 failed, app tests in the same run 658 passed / 0 failed, digest `7552bc67…`.
+* (b) with the CI sequence (`research/cleanup/final/run_b_ci.sh`; predictions `final/PREVISOES_ci.md`, committed before measuring). Correction `0b21e51`: the `_app()` helper of `tests/test_app_passo5_fixes.py` calls `pytest.importorskip("streamlit")`, so only the tests that drive the app skip without streamlit (unguarded streamlit imports in the test files: 1 before, 0 after, `final/scan_streamlit_guards.py`). CI sequence before → after: 1279 / 7 / 28 → **1279 / 0 / 35** (passed / failed / skipped); conda `-m "not browser"` after: 1443 passed / 0 failed; digest `7552bc67…` → `7552bc67…`. The same commit removes `runtime.txt` and `.python-version`, which no tracked file reads.
+* (c) §S10 202 rows, 0 failures; `verify_citations` 557/557, 0 failures.
+* (d) 0 divergences in 133 default claims.
+* (e) 53 flagged lines, 53 with file, text and context identical to the Fase C review; 0 attribute an `edge` score to the current default.
+* (f) remote branches deleted = the authorised list: True.
+
+### Pending — for the release front
+
+* **Order — SUPERSEDED by the order of (i) below (2026-10-02); kept as it was written:** publish 2.1 on PyPI → raise the app's requirement to `cyclophaser>=2.1` → merge into `master` → restart the published app. Today the app requires `cyclophaser>=2.0.0` (`tools/calibration_app/requirements.txt`), and the latest PyPI release predates the parameters the app reads (§S11). *Why superseded:* the CI's `pypi_publish` job is what publishes to PyPI, on the push to `master`, so 2.1 cannot reach PyPI before the merge into `master`. The order is now that of (i): change the version in `setup.py` before the merge into `master` → the `pypi_publish` job publishes to PyPI on the push to `master` → restart the app after the publication.
+* **(i) `pypi_publish` publishes to PyPI on every push to `master`** (`.circleci/config.yml`), so the version in `setup.py` must change BEFORE the merge into `master`, and the app, which deploys from `master`, must be restarted after the CI has published 2.1.
+* **(ii) Check that the app runs Python 3.12** in its settings on Streamlit Community Cloud (`runtime.txt` and `.python-version` were removed; that platform does not read them).
+* **(iii) `test_pypi_publish` runs only on the branch `develop`**, which is still to be created.
+* **Version strings:** `setup.py` and `docs/conf.py` still say `2.0.0` / `2.0.0`.
+* **Create the permanent `develop` branch**: the contributing page sends pull requests to `develop`, which does not exist.
+* **Read the Docs keeps building `master`** (the default branch), so the rewritten site is published only after the merge into `master`.
+* **CI** tests only Python 3.12.3 (`passo4/ci_python.md`), and may be importing the checked-out tree rather than the installed wheel (`python -m pytest` from the checkout root; read from the configuration, not measured).
+* The other open items stay in §S11 of `docs/findings.md`.
 
 ---
 
