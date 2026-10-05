@@ -4110,6 +4110,8 @@ Measured once, in a clean worktree at `f7d8fd9`, except (b): redefined by Danilo
 
 ### Pending — for the release front
 
+Resolved by item 33 (2026-10-05).
+
 * **Order — SUPERSEDED by the order of (i) below (2026-10-02); kept as it was written:** publish 2.1 on PyPI → raise the app's requirement to `cyclophaser>=2.1` → merge into `master` → restart the published app. Today the app requires `cyclophaser>=2.0.0` (`tools/calibration_app/requirements.txt`), and the latest PyPI release predates the parameters the app reads (§S11). *Why superseded:* the CI's `pypi_publish` job is what publishes to PyPI, on the push to `master`, so 2.1 cannot reach PyPI before the merge into `master`. The order is now that of (i): change the version in `setup.py` before the merge into `master` → the `pypi_publish` job publishes to PyPI on the push to `master` → restart the app after the publication.
 * **(i) `pypi_publish` publishes to PyPI on every push to `master`** (`.circleci/config.yml`), so the version in `setup.py` must change BEFORE the merge into `master`, and the app, which deploys from `master`, must be restarted after the CI has published 2.1.
 * **(ii) Check that the app runs Python 3.12** in its settings on Streamlit Community Cloud (`runtime.txt` and `.python-version` were removed; that platform does not read them).
@@ -4119,6 +4121,63 @@ Measured once, in a clean worktree at `f7d8fd9`, except (b): redefined by Danilo
 * **Read the Docs keeps building `master`** (the default branch), so the rewritten site is published only after the merge into `master`.
 * **CI** tests only Python 3.12.3 (`passo4/ci_python.md`), and may be importing the checked-out tree rather than the installed wheel (`python -m pytest` from the checkout root; read from the configuration, not measured).
 * The other open items stay in §S11 of `docs/findings.md`.
+
+## 33. Re-label recovery + release 2.1.0 — closed, released 2026-10-05
+
+Reports: `research/release_v21/passo1/`, `passo2/` (part A); `research/release_v21/parteB_passo1/`, `parteB_passo2/` (part B). Merges into `master` and the publication were authorised in writing by Danilo, per step; deleting `release/v2.1` and `develop-v2.1` was authorised on 2026-10-05.
+
+### Part A — the three training re-labels (branch `fix/relabel-recovery`)
+
+* **What was missing.** Three re-labels Danilo made in the app on `feat/label-tab-toplevel` (tag `0c63145`) never reached develop (§S11 of `docs/findings.md`). All three are TRAIN series:
+  * `20150656`: residual start 91 → **100**;
+  * `20170409`: decay start 74 → **71**;
+  * `20170154`: verdict `boundary` (incipient end 6) → **`ambiguous`**.
+* **Commits.** `0c4dbe6` read-only baseline (passo 1); `4b3b86e` the labels; `7e12a49` TRAIN re-measured; `a41095d` suite by the CI recipe (1279 passed / 0 failed) and report. Merged into `develop-v2.1` as **`76b7932`** (2026-10-03).
+* **History preserved.** Each of the three records carries `superseded`, equal field by field to the record it replaces; `first_blind_record` still returns the originals (residual 91, decay 74, `boundary` with incipient end 6), the current record returns the corrections. The other 70 cases and the 10 `swell_item30` records are byte-identical (`passo2/checks.txt`).
+* **Prediction declared before measuring, not adjusted: 20/20 items matched** (`passo2/comparison.txt`). Detection is identical on all 54 TRAIN series (same params-track config, same scorer); only the rows of the three re-labelled series change. `20150656` changes no score: its sequence does not match, so its residual is not scored.
+
+| population | metric | before (`0c4dbe6`) | after (`7e12a49`) |
+|---|---|---|---|
+| 35 real | H/B | 8/17 | 7/16 |
+| | C | 22/33 | 21/32 |
+| | Q | 19/35 | 19/35 |
+| | MAT | 27/33 | 28/33 |
+| | boundaries | 33/42 | 33/42 |
+| 54 TRAIN | H/B | 19/30 | 18/29 |
+| | C | 39/52 | 38/51 |
+| | Q | 37/54 | 37/54 |
+| | MAT | 44/50 | 45/50 |
+| | boundaries | 92/104 | 92/104 |
+
+* **Earlier scores stay valid as measured** under the labels of their time. They are not re-stated; any comparison with them must say which labels it used.
+
+### Part B — release 2.1.0
+
+* **Commits** (branch `release/v2.1`, one per item): `bc26902` version 2.1.0 (`setup.py:6`, `docs/conf.py:12`); `32d9fd4` `python_requires=">=3.12"` and the 3.12 classifier; `7b820df` LICENSE in the distributions; `32cbcf1` CI against the wheel; `0faf708` app requires `cyclophaser>=2.1.0`; `6df1661` CHANGELOG entry for 2.1.0 (reviewed by Danilo); `6323ec9` release date 2026-10-05.
+* **LICENSE back in the wheel and sdist.** `f423476` (2026-06-15) had set `license_files=[]` because `twine<6`, through `pkginfo<1.10`, did not recognise the `License-File` field that setuptools≥69 writes, and `twine check` failed. The same commit pinned `twine>=6.0` in CI, which removed the cause, so the suppression was no longer needed. With `license_files=["LICENSE"]`, `twine check --strict` (twine 7.0.0) passes on wheel and sdist (`parteB_passo2/03_license_twine_check.txt`).
+* **CI tests the installed wheel.** Before, `python -m pytest` from the checkout imported `cyclophaser/` from the source tree (CWD first on `sys.path`, plus pytest's default prepend mode with `tests/__init__.py`), so CI never tested the wheel (`parteB_passo1/05_import_mode.md`). Now the main step runs bare `pytest --import-mode=append -m "not source_tree"` with `CYCLOPHASER_REQUIRE_INSTALLED=1`: `tests/conftest.py` stops the session if `cyclophaser` is not imported from site-packages, and fails it at the end if any `cyclophaser*` module came from elsewhere, printing the path. One test needs the source by design — `test_params_track_reproduces_the_counterfactual_in_the_five`, which imports `item30_core.py`, whose anti-shadowing guard refuses any installed copy — and is marked `source_tree` and run in a separate step against the checkout, without the lock. Controls: the lock refuses the source (exit 4) and catches a late swap to the source (exit 1).
+* **Credentials.** The PyPI and TestPyPI credentials in CircleCI were replaced by project-scoped API tokens on 2026-10-03 (Danilo; no values recorded).
+* **TestPyPI rehearsal.** `release/v2.1` merged into `develop-v2.1` as **`499c3af`**, pushed to the new branch `develop`; `test_pypi_publish` **#469** published 2.1.0 to TestPyPI. The installed files matched the source; the suite gave 1278 passed through site-packages and 1 passed on the source.
+* **Release.** `develop` merged into `master` with `--no-ff` as **`7260b04`** ("Release 2.1.0"; tree identical to `develop`), annotated tag **`v2.1.0`** (object `a7367a6` → `7260b04`). CircleCI on `7260b04`: `build_test` **#473** success (1278 passed / 0 failed with `cyclophaser.__file__` in site-packages; 1 passed / 0 failed on the source), `pypi_publish` **#474** success.
+* **PyPI 2.1.0**: wheel `cyclophaser-2.1.0-py3-none-any.whl`, sha256 `93951b79c6281ad357f913e54ed9a2fdf030d1dc38dea53a98c295f54042488b`; sdist `cyclophaser-2.1.0.tar.gz`, sha256 `5760167e9007d6f0fa77b23b448f0ecfce93ed9107ba3416614316a2a67f08ef`; `requires_python >=3.12`. Installed from PyPI in a new venv outside the repository: the 6 package files and `LICENSE` are byte-identical to `master` at `7260b04`; the two CI steps against that install gave 1278 passed / 0 failed and 1 passed / 0 failed. The TestPyPI wheel has a different sha256 because it is a separate build.
+* **Read the Docs**: `latest` and `stable` built from `7260b04`, both showing 2.1.0.
+* **App**: confirmed by Danilo on 2026-10-05.
+* **Branches**: `release/v2.1` (`6df1661`) and `develop-v2.1` (`6323ec9`) checked as ancestors of `develop` with `git merge-base --is-ancestor`, then deleted on origin and locally (2026-10-05). Remote heads now: `develop`, `master`, and `fix/relabel-recovery`, which is merged (`76b7932`) but was not in the authorisation and stays.
+
+### Record correction
+
+* `parteB_passo1/04_ci.md` described `.pypirc` as a `[pypi]` username/password block with both fields non-empty. The file only ever had one version (`e412b72`, 2023-08-29, removed by `c080f4d`), and it held a username and an environment-variable placeholder, not a password. The report is not rewritten; this is the correction.
+
+### Open (recorded, not acted on by this front)
+
+* The browser test of the Label tab (`tests/test_label_browser.py`) has never been run for this release.
+* The sdist ships `tests/` without its data and without `tests/__init__.py`.
+* `install_requires` includes development tools (`pluggy`, `iniconfig`, `wheel`, `setuptools`).
+* The app shows the version parsed from `setup.py`, not the installed version.
+* `store_test_results` has no `when: always`, so a failing main step uploads no junit.
+* Only Python 3.12 is tested.
+* The merge commit `7260b04` has no `Co-Authored-By` line (its message was fixed by the instruction).
+* `paper.md` on the branch `joss-submission` states no version.
 
 ---
 
