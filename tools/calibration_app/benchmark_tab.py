@@ -95,6 +95,14 @@ K_BATCH = "bench_include_swell_batch"
 REFERENCE_MANUAL = "Manual label"
 BATCH_TAG = "swell_item30"
 
+# The widget keys app.py shields from Streamlit's clean-up while another page is
+# open (see app.py, `_PAGE_WIDGET_STATE`). Buttons and file uploaders are left
+# out: their values cannot be written back through session_state.
+WIDGET_STATE_KEYS = frozenset({
+    K_MODE, K_IDS_WIDGET, K_LABELS, K_REFERENCE, K_FIGLAYOUT, K_SCORE_LABELLED,
+    K_BATCH, "bench_pick_config", "bench_pick_snapshot"})
+WIDGET_STATE_PREFIXES = ("bench_edit_", "bench_custom_ok_")
+
 
 # ── state ─────────────────────────────────────────────────────────────────────
 def _init_state() -> None:
@@ -415,7 +423,6 @@ def _summary_frame(metrics_per_column, names, split) -> pd.DataFrame:
 
 def _render_scoring(metrics, names, n_unscored: int) -> None:
     train_n = len(metrics[0]["train"]["ids"]) if metrics else 0
-    test_n = len(metrics[0]["test"]["ids"]) if metrics else 0
 
     st.markdown("**Scored against the manual labels**")
     if n_unscored:
@@ -448,21 +455,6 @@ def _render_scoring(metrics, names, n_unscored: int) -> None:
                      "construction. They are shown apart and never pooled.")
             st.dataframe(_summary_frame(metrics, names, "adjudicated"),
                          use_container_width=True)
-
-    with st.expander(f"Test split (frozen) — {test_n} series", expanded=False):
-        if test_n:
-            st.caption(
-                "Frozen test split — shown on request, never combined with the "
-                "train numbers.",
-                help="Leakage rule: every aggregate is computed over the train "
-                     "split. Aggregates involving the 16 real cyclones of the "
-                     "frozen test split — and the swell_item30 batch's 3 test "
-                     "cases, when the batch is included — live in this block "
-                     "alone and are never added into the train one.")
-            st.dataframe(_summary_frame(metrics, names, "test"),
-                         use_container_width=True)
-        else:
-            st.caption("No test-split cyclone in the current selection.")
 
 
 def _render_reference_metrics(results, names, ref_results, ids,
@@ -522,7 +514,15 @@ def render() -> None:
                   **{k: pd.Series(v) for k, v in extra.items()}}
     for k in extra:
         source_of[k] = "uploaded"
-    labels = bc.labels_for_display()
+    # The test split is spent: no score or metric against the label of a
+    # test-split series may appear anywhere on this page (I1 of the app
+    # redesign). Its labels are therefore withheld right here, before anything
+    # reads them, so a test series is an UNLABELLED series to every line below
+    # — never scored, never a manual-label reference, never a label column —
+    # whichever way it got into a selection. Validation, which offers labelled
+    # sources only, consequently no longer offers the test series at all.
+    labels = {sid: rec for sid, rec in bc.labels_for_display().items()
+              if membership.get(sid) != "test"}
 
     mode = st.session_state[K_MODE]
     cols = st.session_state[K_COLUMNS]
@@ -544,9 +544,10 @@ def render() -> None:
         st.radio(
             "Mode", options=MODES, key=K_MODE, horizontal=True,
             label_visibility="collapsed",
-            help="**Validation** — only labelled sources are selectable (the 51 "
-                 "real tracks and the 12 frozen synthetic cases), and the "
-                 "scoring panel is shown.\n\n**Exploration** — every source is "
+            help="**Validation** — only labelled sources are selectable (the "
+                 "train split: 35 real tracks and the 12 frozen synthetic cases; "
+                 "the 16 test-split tracks are not offered, their labels are "
+                 "withheld on this page), and the scoring panel is shown.\n\n**Exploration** — every source is "
                  "selectable, uploads included; the scoring panel is collapsed "
                  "and columns are measured against the reference column "
                  "instead.\n\nMode does not decide whether a number is "
@@ -560,8 +561,8 @@ def render() -> None:
                        "collapsed; unlabelled rows are never scored.")
 
     # ── 2 · Data ──────────────────────────────────────────────────────────────
-    selectable = ([s for s in series_bundled] if mode == "Validation"
-                  else list(series_all))
+    selectable = ([s for s in series_bundled if membership.get(s) != "test"]
+                  if mode == "Validation" else list(series_all))
     selectable = sorted(selectable, key=lambda s: (source_of[s], s))
     # Validation offers labelled sources only, so an uploaded track selected in
     # Exploration is dropped from the selection when the mode changes rather
@@ -585,8 +586,8 @@ def render() -> None:
                  "(split.yaml `batches: swell_item30`) to the selectable "
                  "records: its 7 train cases join the train split, and its 3 "
                  "test cases get exactly the treatment of the 16 frozen test "
-                 "cases — scored only in the test block, never in a train "
-                 "number. Off, the population is the usual 63.")
+                 "cases — their labels are withheld and they are never "
+                 "scored. Off, the population is the usual 63.")
         if batch_error:
             st.error(f"The swell_item30 batch could not be loaded "
                      f"({batch_error}) — continuing without it.")
@@ -609,7 +610,7 @@ def render() -> None:
             st.session_state[K_IDS] = ids
             st.session_state[K_IDS_WIDGET] = list(ids)
 
-        s1, s2, s3, s4, s5, s6 = st.columns(6)
+        s1, s2, s3, s5, s6 = st.columns(5)
         with s1:
             if st.button("All real", key="bench_pick_real", use_container_width=True):
                 _set([s for s in selectable if source_of[s] == "real"])
@@ -620,9 +621,6 @@ def render() -> None:
         with s3:
             if st.button("Train", key="bench_pick_train", use_container_width=True):
                 _set([s for s in selectable if membership.get(s) == "train"])
-        with s4:
-            if st.button("Test", key="bench_pick_test", use_container_width=True):
-                _set([s for s in selectable if membership.get(s) == "test"])
         with s5:
             if st.button("Invert", key="bench_pick_invert", use_container_width=True):
                 _set([s for s in selectable if s not in selected])
@@ -698,8 +696,17 @@ def render() -> None:
         a1, a2 = st.columns(2)
         with a1:
             st.markdown("**From the sidebar**")
+            # The Calibrate page publishes its sidebar here on every run. Before
+            # it has run once in this session there is nothing to copy, and an
+            # empty document would be filled with the frozen pre-item-31
+            # defaults rather than the sidebar's, so the button says so instead.
+            no_sidebar = "_bench_live_config" not in st.session_state
             if st.button("Add column from current sidebar state",
-                         key="bench_add_sidebar", use_container_width=True):
+                         key="bench_add_sidebar", use_container_width=True,
+                         disabled=no_sidebar,
+                         help=("Open the Calibrate page once first: its sidebar "
+                               "has not been built in this session yet."
+                               if no_sidebar else None)):
                 doc = _sidebar_doc()
                 st.session_state[K_COLUMNS].append(_new_column(
                     f"sidebar #{st.session_state[K_NEXT_ID]}", doc, "sidebar",
