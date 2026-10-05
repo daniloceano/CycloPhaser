@@ -1,5 +1,5 @@
-base HEAD: dd8e1633bceb343011b158ef8cb4220be2958396 | working-tree patch: 156 lines, sha256 f04a9ef88a08cd95… | untracked files copied: 3 | date: 2026-10-05T19:23:48Z
-worktree: tracked files differing from HEAD: 3
+base HEAD: 8197a46545edc72fedee7229fd1525e677aa8ccf | working-tree patch: 252 lines, sha256 648a2a4a3cbed181… | untracked files copied: 13 | date: 2026-10-05T21:33:57Z
+worktree: tracked files differing from HEAD: 7
 python: Python 3.12.9 | venv: new
 
 === install_build_tools
@@ -30,11 +30,11 @@ exit 0
 CYCLOPHASER_REQUIRE_INSTALLED: cyclophaser.__file__ = <venv>/lib/python3.12/site-packages/cyclophaser/__init__.py
 collected 1305 items / 1 deselected / 10 skipped / 1304 selected
 cyclophaser.__file__ (in session) = <venv>/lib/python3.12/site-packages/cyclophaser/__init__.py
-========== 1278 passed, 36 skipped, 1 deselected, 1 warning in 31.44s ==========
+========== 1278 passed, 36 skipped, 1 deselected, 1 warning in 33.88s ==========
 
 === source_tree
 $ python -m pytest -m source_tree --junitxml=test-reports/results-source-tree.xml
 exit 0
 collected 1305 items / 1304 deselected / 10 skipped / 1 selected
 cyclophaser.__file__ (in session) = <wt>/cyclophaser/__init__.py
-========= 1 passed, 10 skipped, 1304 deselected, 88 warnings in 1.67s ==========
+========= 1 passed, 10 skipped, 1304 deselected, 88 warnings in 1.82s ==========

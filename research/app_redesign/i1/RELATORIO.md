@@ -288,3 +288,40 @@ UM skip, por isso o número de skips subestima o que fica de fora. (Contagem vá
 para esta receita e este commit: com playwright instalado, os dois módulos de
 navegador mudariam de forma, como explica o CLAUDE.md.)
 
+## Segunda correção — testes de Chromium em streamlit 1.56.0 (portão c: FAIL)
+
+**Defeito, nos testes e não no app:** na ponta 8197a46, 3 dos 34 testes de Chromium
+davam timeout com streamlit 1.56.0 e passavam com 1.63.0. A rodada anterior em duas
+versões cobriu só o AppTest; o Chromium tinha rodado só em 1.63.0.
+
+**Diagnóstico antes da correção** (`diag_chromium/diagnose.py`, capturas e dump dos
+controles em `diag_chromium/st1.56.0/` e `diag_chromium/conda_st1.63.0/`, tabela em
+`diag_chromium/DIAGNOSTICO.md`). **Os três são TESTE:** em 1.56.0 o controle está na
+tela e mostra o valor certo, mas com outra estrutura de DOM.
+
+| Teste | Esperava | Em 1.56.0 | Classe |
+|---|---|---|---|
+| `test_label_browser::test_the_table_shows_a_row_per_phase` | combobox de nome `phase, row 0` | combobox de nome `Selected incipient. phase, row 0`, `<input>` vazio | TESTE |
+| `test_app_pages_browser::test_an_uploaded_track_and_an_imported_yaml_…` | combobox de nome `Boundary padding` | `Selected reflect. Boundary padding`, `<input>` vazio | TESTE |
+| `test_app_pages_browser::test_sidebar_values_set_in_the_ui_…` | `<input type="range">` | `<div role="slider">` com `aria-valuenow` (17 sliders, valores certos) | TESTE |
+
+**Correção (só testes; piso inalterado em 1.56.0):** `tests/browser_harness.py`
+ganhou `selectbox`, `selectbox_value` e `SLIDER_HANDLE`, que acham e leem os dois
+formatos. `LabelPage.phase_name` e `tests/test_app_pages_browser.py` passaram a
+usá-los, e o retrato da barra lateral lê os dois tipos de slider. Como não houve caso
+APP, o piso não precisou subir e a busca por versões intermediárias não se aplicou.
+
+**No piso final (1.56.0) e no env conda (1.63.0):**
+
+| | streamlit 1.56.0 (venv novo, playwright 1.62.0) | streamlit 1.63.0 (env conda) |
+|---|---|---|
+| testes de app (`run_app_tests.sh`, 10 arquivos: os 5 `test_*apptest*.py`, `test_sidebar_defaults`, `test_sidebar_coverage`, `test_app_passo5_fixes`, `test_app_distance_removed`, `test_app_yaml_null_export`) | **177 passed, 0 failed** — `app_tests_st1.56.0.txt` | **177 passed, 0 failed** — `app_tests_conda_st1.63.0.txt` |
+| 34 de Chromium (`run_browser_tests.sh`) | **34 passed, 0 failed** — `browser_tests_st1.56.0.txt` | **34 passed, 0 failed** — `browser_tests_conda_st1.63.0.txt` |
+
+`research/labels/manual_labels.yaml` continuou intocado nas duas rodadas de navegador.
+Depois da correção:
+- suíte conda completa, `-m "not browser"`: **1456 passed, 0 failed** (`suite_conda_raw.txt`);
+- receita do CI: **1278 passed, 0 failed** (wheel, 36 pulados, a mesma divisão por
+  motivo da seção anterior) e **1 passed, 0 failed** (`source_tree`)
+  (`ci_recipe_summary.json`, `ci_recipe_raw.txt`).
+
