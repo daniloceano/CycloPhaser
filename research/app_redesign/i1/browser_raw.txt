@@ -76,3 +76,6 @@ ERROR tests/test_label_browser.py::test_dragging_a_boundary_gives_the_same_start
 
 ## after the pause-(d) adjustments (streamlit floor 1.56.0, rst restored): tests/test_label_browser.py + tests/test_app_pages_browser.py
 34 passed in 515.55s (0:08:35)
+
+## after the independent-verification correction (navigation tests by effect): tests/test_label_browser.py + tests/test_app_pages_browser.py
+34 passed in 556.28s (0:09:16)

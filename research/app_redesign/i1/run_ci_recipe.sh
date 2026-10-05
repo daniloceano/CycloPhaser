@@ -11,7 +11,8 @@
 #   pip install pytest pyyaml;
 #   CYCLOPHASER_REQUIRE_INSTALLED=1 pytest --import-mode=append -m "not source_tree"
 #   python -m pytest -m source_tree
-# Counts come from the junit files. Output: ci_recipe_raw.txt, ci_recipe_summary.json
+# Counts come from the junit files; skips are counted there too, grouped by reason
+# and by module (a module skipped at collection counts as ONE skip). Output: ci_recipe_raw.txt, ci_recipe_summary.json
 # next to this script. Adapted from research/release_v21/parteB_passo2/run_ci_steps.sh.
 set -u
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
@@ -55,12 +56,19 @@ import json, sys, os, xml.etree.ElementTree as ET
 rep, out = sys.argv[1:]
 res = {}
 for f in ("results.xml", "results-source-tree.xml"):
-    c = dict(passed=0, failed=0, failed_ids=[])
+    c = dict(passed=0, failed=0, failed_ids=[], skipped=0, skipped_by_reason={},
+             skipped_by_file={})
     for tc in ET.parse(os.path.join(rep, f)).getroot().iter("testcase"):
         k = {x.tag for x in tc}
         if k & {"failure", "error"}:
             c["failed"] += 1; c["failed_ids"].append(f"{tc.get('classname')}::{tc.get('name')}")
-        elif "skipped" not in k:
+        elif "skipped" in k:
+            c["skipped"] += 1
+            msg = tc.find("skipped").get("message", "")
+            c["skipped_by_reason"][msg] = c["skipped_by_reason"].get(msg, 0) + 1
+            mod = (tc.get("classname") or "").split(".")[-1] or "(collection)"
+            c["skipped_by_file"][mod] = c["skipped_by_file"].get(mod, 0) + 1
+        else:
             c["passed"] += 1
     res[f] = c
 s = json.dumps(res, indent=1)

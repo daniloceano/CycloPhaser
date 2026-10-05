@@ -233,3 +233,58 @@ Capturas aprovadas pelo Danilo. Ajustes pedidos antes do commit, aplicados:
 Suítes rodadas de novo depois dos ajustes: ver `suite_conda_raw.txt`,
 `ci_recipe_raw.txt` / `ci_recipe_summary.json` e `browser_raw.txt` (seção final).
 
+## Correção após verificação independente (portão c: FAIL)
+
+**Defeito, nos testes e não no app:** três testes de
+`tests/test_app_navigation_apptest.py` falhavam com streamlit 1.56.0 (o piso) e
+1.58.0, e passavam só em versões mais novas. Os resultados de (c) acima foram
+medidos só com 1.63.0, por isso não pegaram o problema.
+
+1. `…absent_without_the_key` e `…absent_when_the_secret_is_false`: o helper
+   `_registered` usava `AppTest.switch_page`, que até pelo menos 1.58 só confere se o
+   ARQUIVO existe. Os testes falhavam com o app correto, e o de "presente com a chave"
+   ficava vazio nessas versões. Agora `_rendered` troca de página, roda e diz qual
+   página DE FATO apareceu, pelo widget que só ela desenha (`view_mode`, `bench_run`,
+   `label_default_tolerance`). Sem a chave, ou com o segredo falso, pedir a página
+   Label a partir de Calibrate renderiza Calibrate, nas duas versões (a 1.63 recusa a
+   troca e fica na página atual; a 1.56 deixa trocar e o `st.navigation` cai na página
+   padrão). Com a chave renderiza a Label.
+2. `…exploration_runs_a_test_series_but_never_scores_it`: passava ao multiselect os
+   rótulos formatados ("20150069 (real/train)"); agora passa os ids, que é o que
+   `set_value` recebe em todas as versões (os testes do Benchmark já faziam assim).
+
+**Testes de app em duas versões** (`run_app_tests.sh`; os `test_*apptest*.py` e
+`test_sidebar_defaults.py` pedidos, mais os outros três arquivos que usam AppTest:
+`test_app_passo5_fixes.py`, `test_app_distance_removed.py`, `test_sidebar_coverage.py`):
+- streamlit **1.56.0** (venv novo, Python 3.12.9, `pip check` limpo):
+  **173 passed, 0 failed** — `app_tests_st1.56.0.txt`;
+- streamlit **1.63.0** (env conda `cyclophaser`): **173 passed, 0 failed** —
+  `app_tests_conda_st1.63.0.txt`.
+
+**Suítes de novo, depois da correção:**
+- env conda, `-m "not browser"`: **1456 passed, 0 failed** (`suite_conda_raw.txt`);
+- receita do CI: **1278 passed, 0 failed** (wheel) e **1 passed, 0 failed**
+  (`source_tree`) (`ci_recipe_raw.txt`, `ci_recipe_summary.json`);
+- Chromium: **34 passed, 0 failed** (`browser_raw.txt`).
+
+### O que a receita do CI não testa
+
+Na receita do CI não há streamlit, plotly nem playwright (só a wheel, pytest e
+pyyaml, de propósito). **Só o env conda testa o app.** A receita tem 36 skips no
+passo da wheel (`ci_recipe_summary.json`, por motivo e por arquivo):
+
+| Pulado na receita do CI | Contado como | Testes que contém |
+|---|---|---|
+| 8 módulos inteiros por `importorskip("streamlit")`: `test_app_distance_removed`, `test_app_navigation_apptest`, `test_benchmark_apptest`, `test_inspector_apptest`, `test_label_apptest`, `test_sidebar_coverage`, `test_sidebar_defaults`, `test_track_upload_apptest` | 8 skips (um por módulo, na coleta) | 152 |
+| 2 módulos de navegador, pulados antes por falta de playwright (também exigem streamlit): `test_label_browser`, `test_app_pages_browser` | 2 skips | 34 |
+| testes de AppTest em `test_app_passo5_fixes` (sem streamlit) | 6 | 6 |
+| testes de `test_manual_labels` que exigem o código do app ("the labelling tab is calibration-app code") | 15 | 15 |
+| testes de `test_layer_inspector` que exigem plotly (dependência do app) | 4 | 4 |
+| `test_synthetic_lifecycles`, caso observacional (não é do app) | 1 | 1 |
+
+São 35 dos 36 skips ligados ao app, que escondem **211 testes**: 177 que o env conda
+roda e os 34 de navegador, que só rodam à mão. Um módulo pulado na coleta conta como
+UM skip, por isso o número de skips subestima o que fica de fora. (Contagem válida
+para esta receita e este commit: com playwright instalado, os dois módulos de
+navegador mudariam de forma, como explica o CLAUDE.md.)
+
