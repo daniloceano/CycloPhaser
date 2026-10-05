@@ -6,6 +6,7 @@ parameters interactively, and inspect results across all cyclones at once.
 
 import hashlib
 import io
+import os
 import sys
 import warnings
 import zipfile
@@ -33,7 +34,6 @@ from cyclophaser.plots import plot_all_periods, plot_didactic
 if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
 import benchmark_tab  # noqa: E402
-import label_tab  # noqa: E402
 import layer_inspector as li  # noqa: E402
 import track_format_ui  # noqa: E402
 import track_io  # noqa: E402
@@ -293,7 +293,7 @@ def _with_default_mark(name: str, value, label: str) -> str:
     return f"{label} (default)" if value == _pkg_default(name) else label
 
 _SM_OPTS = ["auto", "off", "manual"]
-_VIEW_MODES = ["Grid", "Inspector", "Label"]
+_VIEW_MODES = ["Grid", "Inspector"]
 _BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
@@ -1344,69 +1344,10 @@ def _run_process_vorticity(
     return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
 
 
-# Colors/labels are supplied HERE, not invented in label_tab.py: that module
-# stays generic about what an "overlay" is (a name, a label, a color, values),
-# so it never needs to know cyclophaser's own vocabulary to draw one.
-# Progressively thinner in the app's stroke-width scheme (see _CHART_JS),
-# matching pipeline order: each is one more processing step than the last.
-_LABEL_OVERLAY_STYLE = {
-    "filtered_vorticity": {"label": "filtered_vorticity — Lanczos band-pass",
-                          "color": "#1f9e89"},
-    "vorticity_smoothed": {"label": "vorticity_smoothed — 1st Savitzky-Golay pass",
-                          "color": "#e8702a"},
-    "vorticity_smoothed2": {"label": "vorticity_smoothed2 — 2nd pass (what phase "
-                                    "detection is actually run against)",
-                           "color": "#8856a7"},
-}
-
-
-def _label_overlays(values: pd.Series) -> dict[str, dict]:
-    """Filtered/smoothed overlays for the Label tab's Inspection mode.
-
-    Called ONLY from label_tab.py's overlay controls, and only after the
-    labeller has explicitly opted into seeing it. This is where the actual
-    call into `cyclophaser.determine_periods.process_vorticity` happens:
-    label_tab.py itself imports nothing from the package (see its module
-    docstring), so the curves the labeller can choose to reveal are
-    guaranteed to be the SAME function the detector runs, computed here, in
-    the one module that is already allowed to import cyclophaser, and handed
-    down as plain numbers plus a label/color pair.
-
-    Uses the CURRENT sidebar filter widgets, deliberately: Inspection mode is
-    already non-blind by construction, and it exists to show what the
-    detector currently sees under whatever calibration is being tried, not a
-    second, independent snapshot.
-
-    Returns {name: {"label": str, "color": str, "values": [float, ...],
-    "shared_values": [float, ...]}}.
-
-    * `values` are in physical units. label_tab.py draws them on the identical
-      y-axis as the raw series when its "Shared 0-1 scale" option is off.
-    * `shared_values` are the same curves on the inspector's grouped 0-1 band
-      (item 30c): `layer_inspector.rescaler` over the THREE layers together,
-      so the amplitude each smoothing pass removes stays visible. The raw
-      series gets a band of its own, rescaled in label_tab.py itself.
-
-    The grouping is computed here, where the package's names may appear, rather
-    than in label_tab.py, whose AST must stay free of them. The group is always
-    all three layers, whichever are switched on, so toggling one never
-    rescales the others.
-    """
-    zeta_df = pd.DataFrame({"zeta": values})
-    vort = process_vorticity(
-        zeta_df, use_filter=package_use_filter(use_filter),
-        cutoff_low=cutoff_low, cutoff_high=cutoff_high,
-        use_smoothing=use_smoothing, use_smoothing_twice=use_smoothing_twice,
-        replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
-        boundary_padding=boundary_padding,
-    )
-    group = li.rescaler([vort[name].values for name in _LABEL_OVERLAY_STYLE], normalize=True)
-    return {
-        name: {**style,
-               "values": [float(v) for v in vort[name].values],
-               "shared_values": [float(v) for v in group(vort[name].values)]}
-        for name, style in _LABEL_OVERLAY_STYLE.items()
-    }
+# The Manual labelling page's overlay provider (`_LABEL_OVERLAY_STYLE`,
+# `_label_overlays`) moved to label_overlays.py in I1 of the app redesign:
+# that page no longer runs this file's sidebar, so it cannot read the filter
+# widgets as globals any more. See that module's docstring.
 
 
 @st.cache_data(
@@ -1436,6 +1377,149 @@ def _run_get_periods(
     phase_warns = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
     periods_dict = periods_to_dict(df_result)
     return df_result, periods_dict, phase_warns
+
+
+# ── Pages ────────────────────────────────────────────────────────────────────────
+# st.navigation + st.Page (I1 of the app redesign). Only the page that is open
+# executes: the tabs this replaces ran the code of every tab on every
+# interaction, and the detection loop below ran before the display mode was even
+# read, so a click in the labelling view re-ran detection for every loaded track.
+#
+# This file stays the entrypoint (Streamlit Community Cloud points at it) and
+# keeps the Calibrate page's code inline, below this block: for any other page
+# the block runs that page's file and stops the script, so nothing below it
+# executes. The Calibrate page file itself is only the page's registration (see
+# app_pages/calibrate.py). Everything ABOVE this block is declarations, which
+# tests read straight out of this file's source, so they stay where they are.
+_APP_PAGES_DIR = Path(__file__).parent / "app_pages"
+_PAGE_CALIBRATE = st.Page(_APP_PAGES_DIR / "calibrate.py", title="Calibrate",
+                          icon=":material/tune:", default=True)
+_PAGE_BENCHMARK = st.Page(_APP_PAGES_DIR / "benchmark.py", title="Benchmark",
+                          icon=":material/table_chart:")
+_PAGE_LABEL = st.Page(_APP_PAGES_DIR / "label.py", title="Manual labelling",
+                      icon=":material/edit_note:")
+
+
+def _developer_mode() -> bool:
+    """The developer key: env CYCLOPHASER_APP_DEV=1, or `developer_mode = true`
+    in st.secrets.
+
+    Without it the Developer section does not exist in the menu, so the page
+    that writes research/labels/manual_labels.yaml is not reachable from the
+    public app. `load_if_toml_exists` is asked first because reading a key from
+    st.secrets with no secrets file raises (and older Streamlit releases also
+    draw an error box on the page while doing so); any failure means "off".
+    """
+    if os.environ.get("CYCLOPHASER_APP_DEV") == "1":
+        return True
+    try:
+        return bool(st.secrets.load_if_toml_exists()
+                    and st.secrets.get("developer_mode") is True)
+    except Exception:
+        return False
+
+
+# Streamlit deletes the state of every widget that was not drawn in the current
+# run. With one page per run, leaving Calibrate would therefore wipe its whole
+# sidebar, the dataset checkboxes and the bad-case marks. Each page's widget
+# keys are listed here and written back into session_state as plain values
+# (`st.session_state[k] = st.session_state[k]`), the documented Streamlit
+# pattern for keeping widget state across pages, at two moments:
+#
+# * on every run, for the pages that are NOT open — this takes their keys out
+#   of the clean-up;
+# * on the first run of a page the user has just ARRIVED at, for that page's
+#   own keys. The server would hold the right values without this, but the
+#   browser would not show them: it forgets a page's widgets when it leaves
+#   the page, and on return draws each widget from its `value=`/`index=`
+#   default unless the server marks the value as set in this run. Without the
+#   second write the sidebar came back showing defaults and the next click sent
+#   those defaults back (measured in Chromium; AppTest has no browser side and
+#   cannot see it). A value set via Session State in the same run as a widget
+#   with a default is what Streamlit warns about: a server log line since
+#   streamlit 1.56, a one-time warning box on the page before that.
+#
+# Explicit lists, not "every key in session_state": a button's or an uploader's
+# value cannot be written this way, and a key drawn on the open page must not
+# be. File uploads cannot be restored by any key at all; see _carry_uploads.
+_PAGE_WIDGET_STATE: dict[str, tuple[frozenset, tuple[str, ...]]] = {
+    _PAGE_CALIBRATE.url_path: (
+        frozenset(_DEFAULTS) | frozenset({
+            "show_incipient_probe", "load_all_test_cyclones",
+            "load_synthetic_clean", "load_synthetic_noisy"}),
+        (_BAD_CASE_KEY_PREFIX, "track_custom_")),
+    _PAGE_BENCHMARK.url_path: (benchmark_tab.WIDGET_STATE_KEYS,
+                               benchmark_tab.WIDGET_STATE_PREFIXES),
+    _PAGE_LABEL.url_path: (frozenset({"label_default_tolerance",
+                                      "lab_nav_only_unlabeled"}), ()),
+}
+
+
+def _keep_page_state(current: str, arrived: bool) -> None:
+    """Shield the widget state of every page except `current` from clean-up and,
+    when the user has just `arrived` at `current`, hand its own values back to
+    the browser. See the comment above `_PAGE_WIDGET_STATE`."""
+    for page, (keys, prefixes) in _PAGE_WIDGET_STATE.items():
+        if page == current and not arrived:
+            continue
+        for k in list(st.session_state.keys()):
+            if k in keys or (prefixes and k.startswith(prefixes)):
+                try:
+                    st.session_state[k] = st.session_state[k]
+                except Exception:
+                    pass
+
+
+_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_BENCHMARK]}
+if _developer_mode():
+    _pages["Developer"] = [_PAGE_LABEL]
+_page = st.navigation(_pages)
+_PREVIOUS_PAGE = st.session_state.get("_app_page")
+st.session_state["_app_page"] = _page.url_path
+_keep_page_state(_page.url_path,
+                 arrived=_PREVIOUS_PAGE is not None and _PREVIOUS_PAGE != _page.url_path)
+if _page.url_path != _PAGE_CALIBRATE.url_path:
+    _page.run()
+    st.stop()
+
+
+_K_KEPT_UPLOADS = "_kept_track_uploads"
+_K_KEPT_RESTORED = "_kept_track_uploads_restored"
+
+
+def _forget_kept_uploads() -> None:
+    st.session_state.pop(_K_KEPT_UPLOADS, None)
+    st.session_state[_K_KEPT_RESTORED] = False
+
+
+def _carry_uploads(uploaded, accepted: dict, came_back: bool) -> dict:
+    """Keep the uploaded tracks across a trip to another page.
+
+    A file uploader's content cannot be put back through session_state, so the
+    widget comes back EMPTY after another page was open. The accepted tracks
+    (standard-layout bytes, after any custom-format confirmation) are kept here
+    instead, and restored when the uploader is empty because the user came back
+    from another page — not when they emptied it themselves on this page. They
+    stay restored until the user uploads again or forgets them.
+    """
+    if uploaded:
+        st.session_state[_K_KEPT_UPLOADS] = dict(accepted)
+        st.session_state[_K_KEPT_RESTORED] = False
+        return accepted
+    kept = st.session_state.get(_K_KEPT_UPLOADS) or {}
+    if came_back and kept:
+        st.session_state[_K_KEPT_RESTORED] = True
+    if kept and st.session_state.get(_K_KEPT_RESTORED):
+        _kc1, _kc2 = st.columns([4, 1])
+        _kc1.caption(
+            f"Still using the {len(kept)} track(s) uploaded before you switched "
+            f"pages ({', '.join(sorted(kept))}); the uploader above cannot show "
+            "them again. Uploading new files replaces them.")
+        _kc2.button("Forget them", key="forget_kept_uploads",
+                    on_click=_forget_kept_uploads, use_container_width=True)
+        return dict(kept)
+    _forget_kept_uploads()
+    return accepted
 
 
 # ── Synthetic-preset application ─────────────────────────────────────────────────
@@ -2323,10 +2407,12 @@ _PHASE_PARAMS = dict(
 _phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 
 # The sidebar's live state, in the same shape a calibration YAML uses, so the
-# Benchmark tab can spawn a column from "the current sidebar" without
+# Benchmark page can spawn a column from "the current sidebar" without
 # re-deriving any of it. Written here, next to the values actually passed to the
 # detector, rather than rebuilt inside the tab: a second derivation would be one
-# more place for the column and the Calibration view to drift apart.
+# more place for the column and the Calibration view to drift apart. The Manual
+# labelling page reads its filter_params too, for its optional overlays
+# (label_overlays.live_filter_params): that page no longer runs this sidebar.
 st.session_state["_bench_live_config"] = {
     "filter_params": {
         "use_filter": use_filter,
@@ -2342,15 +2428,11 @@ st.session_state["_bench_live_config"] = {
     "phase_params": dict(_PHASE_PARAMS),
 }
 
-# ── Tabs ─────────────────────────────────────────────────────────────────────────
-# Created BEFORE the track upload and the dataset choice, so those widgets live in
-# the Calibration tab only: drawn above the tabs, they also showed in the
-# Benchmark tab, with captions that are false there (Benchmark has its own
-# sources). Everything below stays module-level code; only where Streamlit
-# draws the widgets changes.
-tab_cal, tab_bench = st.tabs(["Calibration", "Benchmark"])
-
-with tab_cal:
+# ── Calibrate page body ──────────────────────────────────────────────────────────
+# The two `st.container()` blocks below used to be the Calibration tab of an
+# `st.tabs` pair; Benchmark is a page of its own now (see "Pages" above). They
+# are kept as containers only so this code keeps its indentation.
+with st.container():
     # ── File upload ──────────────────────────────────────────────────────────────────
     uploaded = st.file_uploader(
         "Upload cyclone track(s) — .csv or .txt, ';'-delimited with columns 'time' "
@@ -2364,6 +2446,9 @@ with tab_cal:
     _custom_fmt = track_format_ui.format_controls()
     _uploaded_tracks = track_format_ui.accept_uploads(uploaded, _custom_fmt,
                                                       confirm_prefix="track_custom_ok_")
+    _uploaded_tracks = _carry_uploads(
+        uploaded, _uploaded_tracks,
+        came_back=_PREVIOUS_PAGE not in (None, _PAGE_CALIBRATE.url_path))
 
     _calib_data_files = sorted(_CALIBRATION_DATA_DIR.glob("*.csv")) if _CALIBRATION_DATA_DIR.is_dir() else []
     load_all_test_cyclones = st.checkbox(
@@ -2490,26 +2575,6 @@ with tab_cal:
                "against." if _flat else "")
         )
 
-    with st.sidebar:
-        st.divider()
-        st.subheader("Manual labelling")
-        label_default_tolerance = st.number_input(
-            "Default ± steps for a new boundary", min_value=0, max_value=50, value=5,
-            step=1, key="label_default_tolerance",
-            help=(
-                "Starting value for each boundary's margin in the **Label** display "
-                "mode. It is only a starting value: the margin is stored per "
-                "BOUNDARY, because the subjectivity is not uniform even within one "
-                "cyclone — an incipient knee can be unmistakable on a track whose "
-                "mature→decay transition is a long gentle roll. A single global "
-                "margin would force the worst case onto every boundary and hide "
-                "exactly that difference.\n\nThe margin is drawn on the chart as a "
-                "shaded band and a double-headed arrow, because a number in a table "
-                "gives no sense of how much of the curve it actually forgives.\n\n"
-                "Does not affect detection and is not exported to YAML."
-            ),
-        )
-
     _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
 
     # Precedence when both an upload and "load all test cyclones" are active: the
@@ -2627,9 +2692,9 @@ with tab_cal:
 
 
 # ══════════════════════════════════════════════════════════════════════════════════
-# TAB 1 — Calibration
+# Calibrate — display
 # ══════════════════════════════════════════════════════════════════════════════════
-with tab_cal:
+with st.container():
     # Top row: display mode + ZIP export.
     #
     # "Grid" is the historical view and renders exactly what it rendered
@@ -2653,17 +2718,6 @@ with tab_cal:
                 "decision the algorithm made, each on its own switchable "
                 "layer. Use it when a track in the grid looks wrong and you "
                 "need to know *why*.\n\n"
-                "**Label** — blind manual labelling. One cyclone at a time, "
-                "marking its WHOLE phase sequence before moving on, so each "
-                "track is judged as a complete life cycle rather than one "
-                "boundary in isolation. Drag a bar to move a phase boundary; "
-                "the bar's thickness is the margin you accept on it, and the "
-                "shading follows. Shows the raw input series and NOTHING "
-                "else: no filtered series, no derivatives, no detector output "
-                "of any kind. The phase colours are the project's standard "
-                "ones, but they are painting *your* marks — a label written "
-                "while looking at the algorithm's answer is an echo of it, "
-                "not evidence about it.\n\n"
                 "No mode changes detection, and no view setting reaches the "
                 "exported YAML."
             ),
@@ -3076,54 +3130,24 @@ with tab_cal:
                 st.dataframe(_mature_table(_mature_records),
                              use_container_width=True, hide_index=True)
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # MODE "Label" — BLIND manual labelling of the whole phase sequence
-    # ══════════════════════════════════════════════════════════════════════════
-    # This mode is deliberately CUT OFF from everything above it. It does not
-    # read `all_results`, `files`, `cyclone_names`, or any filter/phase widget;
-    # it loads its own 63 series (51 calibration tracks + 12 synthetic cases)
-    # straight from disk and draws the raw input and nothing else.
-    #
-    # That isolation is the requirement, not an implementation detail. There is
-    # no ground truth for the incipient boundary — the synthetic suite derives
-    # one from the segment list and gets it wrong, because a sine-shaped It or D
-    # opening has zero derivative at t₀ and so starts flat exactly as a designed
-    # `Ic` segment would. The labels therefore have to come from a human, and a
-    # human who can see the detector's answer is no longer independent evidence
-    # about it. The phase palette is the project's standard one, so a labelled
-    # series reads like every other phase figure in the repo -- but every band
-    # and arrow is drawn from the LABELLER'S marks, never the algorithm's.
-    # See the module docstring of label_tab.py.
-    elif view_mode == "Label":
-        label_tab.render(default_tolerance=int(label_default_tolerance),
-                         overlay_provider=_label_overlays)
-
-    # Bad-case evaluation summary — shown for both detector-facing modes,
-    # regardless of n_cols. NOT shown in "Label": that mode is blind by
-    # construction and must not put any detector-derived number on screen.
-    if view_mode != "Label":
-        st.divider()
-        st.subheader("Bad-case evaluation")
-        _eval = _compute_evaluation(cyclone_names)
-        st.metric(
-            "Bad cases",
-            f"{_eval['bad_cases_count']} / {_eval['total_cyclones']}",
-            f"{_eval['bad_cases_percent']}%",
-            delta_color="off",
-        )
-        if _eval["bad_cases"]:
-            st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
-        else:
-            st.caption("No cyclones marked as bad in this session.")
-        st.caption(
-            "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
-            "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
-            "is also written to the exported YAML's 'evaluation' section, so different "
-            "parameter sets can be compared by their bad-case rate."
-        )
-
-# ══════════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Benchmark
-# ══════════════════════════════════════════════════════════════════════════════════
-with tab_bench:
-    benchmark_tab.render()
+    # Bad-case evaluation summary — shown for both display modes, regardless of
+    # n_cols. (The blind labelling view that must not show it is its own page.)
+    st.divider()
+    st.subheader("Bad-case evaluation")
+    _eval = _compute_evaluation(cyclone_names)
+    st.metric(
+        "Bad cases",
+        f"{_eval['bad_cases_count']} / {_eval['total_cyclones']}",
+        f"{_eval['bad_cases_percent']}%",
+        delta_color="off",
+    )
+    if _eval["bad_cases"]:
+        st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
+    else:
+        st.caption("No cyclones marked as bad in this session.")
+    st.caption(
+        "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
+        "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
+        "is also written to the exported YAML's 'evaluation' section, so different "
+        "parameter sets can be compared by their bad-case rate."
+    )
