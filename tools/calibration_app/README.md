@@ -18,11 +18,34 @@ mode from the repository root.
 
 ## Running
 
+From the **repository root**:
+
 ```bash
-streamlit run app.py
+streamlit run tools/calibration_app/app.py
 ```
 
-Open http://localhost:8501 in a browser.
+Open http://localhost:8501 in a browser. Run from the root so the theme in
+`.streamlit/config.toml` applies: Streamlit Community Cloud runs the app from
+the repository root and reads that file there, so local runs from the root look
+the same.
+
+## Pages
+
+The app has one page per task, in the sidebar menu (`st.navigation`; only the
+open page runs):
+
+- **Calibrate** (default) — the sidebar of filter/phase parameters, the track
+  upload and the dataset choice, and the Grid / Inspector display.
+- **Benchmark** — configurations side by side (below).
+- **Developer → Manual labelling** — only with the developer key: environment
+  variable `CYCLOPHASER_APP_DEV=1`, or `developer_mode = true` in
+  `.streamlit/secrets.toml` (or the app's secrets on Streamlit Cloud). Without
+  the key the page is not in the menu. It writes
+  `research/labels/manual_labels.yaml`; see `research/labels/README.md`.
+
+Going to another page and back keeps the Calibrate sidebar, the imported YAML's
+values, the dataset choice, the bad-case marks and the uploaded tracks (the
+uploader itself shows empty again; a caption names the tracks still in use).
 
 ## Track format
 
@@ -57,10 +80,10 @@ that fails is refused with the cause, never accepted silently.
 
 ## Display modes
 
-The top of the **Calibration** tab has a mode selector: Grid, Inspector and
-Label. Grid and Inspector are **pure visualisation**: none of their controls
-changes the detection, and none of their state enters the exported YAML. Label
-is the manual-labelling tool; see `research/labels/README.md`.
+The top of the **Calibrate** page has a mode selector: Grid and Inspector. Both
+are **pure visualisation**: none of their controls changes the detection, and
+none of their state enters the exported YAML. Manual labelling is a page of its
+own (developer key, above).
 
 ### Grid (default)
 
@@ -156,7 +179,7 @@ produces on its own (`tests/test_layer_inspector.py`). The same helpers feed the
 app's Plotly renderer and the static matplotlib check render in
 `research/app_layer_inspector/gen_inspector_figures.py`.
 
-## Benchmark tab
+## Benchmark page
 
 Compares N configurations side by side, over the cyclones you choose, aligned by
 cyclone. A column is created from the current sidebar state, an uploaded YAML, a
@@ -192,9 +215,13 @@ historical annotation under `Provenance`: these were visual marks made at
 different times with different knowledge of the problem (v5 and v6 record 0; v9
 records 6).
 
-**Leakage.** Every aggregate is computed over the train split. Aggregates
-involving the 16 real cyclones of the frozen test split appear in a separate,
-labelled block and are never added into the train one. Manual labels are opt-in.
+**Leakage.** The test split is spent: no score or metric against the label of a
+test-split series appears anywhere on the page. Their labels are withheld from
+the page altogether, so Validation (labelled sources only) does not offer the 16
+test tracks — nor the swell_item30 batch's 3 test cases — and in Exploration a
+test series is an unlabelled one: compared against the reference column, never
+scored. Every aggregate is computed over the train split. Manual labels are
+opt-in.
 
 Frozen reference columns come from `research/snapshots/` (see that directory's
 README): the tab **reads files** and never runs a published version live.
@@ -290,5 +317,6 @@ requires every parameter to have a control and no widget key to repeat.
 
 The app covers the whole detection pipeline: track upload (standard or custom
 format), every filter, smoothing and phase-detection parameter of the package in
-the sidebar, the Grid, Inspector and Label display modes, the Benchmark tab, and
+the sidebar, the Grid and Inspector display modes, the Benchmark page, the
+Manual labelling page (developer key), and
 export of the parameters (YAML) with the figures and phase tables.
