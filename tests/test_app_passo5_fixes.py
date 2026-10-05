@@ -2,10 +2,12 @@
 
 * The track upload and the dataset choice live in the Calibration tab only: drawn
   above the tabs, they also showed in the Benchmark tab with a caption that is
-  false there ("No file uploaded — using … as default").
-* The Benchmark preset buttons (All real, All synthetic, Train, Test, Invert,
-  Clear) keep the "Choose individually" multiselect in step with the selection:
-  before, any second preset click emptied the selection (e.g. Train, then Test).
+  false there ("No file uploaded — using … as default"). Since the app redesign
+  (I1) Calibrate and Benchmark are separate pages, and this is checked per page.
+* The Benchmark preset buttons (All real, All synthetic, Train, Invert, Clear;
+  "Test" was retired in I1) keep the "Choose individually" multiselect in step
+  with the selection: before, any second preset click emptied the selection
+  (e.g. Train, then Test).
 * A binary upload (Parquet, zip, netCDF/HDF5, GRIB, gzip, or anything with a NUL
   byte) is refused with a message that says so, instead of a decoder error.
 
@@ -66,17 +68,20 @@ def _app():
     return at
 
 
-def _tab(at, label):
-    return next(t for t in at.tabs if t.label == label)
+def _bench_app():
+    at = _app()
+    at.switch_page("app_pages/benchmark.py").run()
+    assert not at.exception, [str(e) for e in at.exception]
+    return at
 
 
 def test_the_track_upload_and_its_caption_are_in_the_calibration_tab_only():
-    at = _app()
-    cal, bench = _tab(at, "Calibration"), _tab(at, "Benchmark")
-    assert [w.key for w in cal.get("file_uploader")] == ["track_upload"]
-    assert "track_upload" not in [w.key for w in bench.get("file_uploader")]
-    assert any("No file uploaded" in c.value for c in cal.caption)
-    assert not any("No file uploaded" in c.value for c in bench.caption)
+    cal = _app()
+    assert [w.key for w in cal.main.get("file_uploader")] == ["track_upload"]
+    assert any("No file uploaded" in c.value for c in cal.main.caption)
+    bench = _bench_app()
+    assert "track_upload" not in [w.key for w in bench.main.get("file_uploader")]
+    assert not any("No file uploaded" in c.value for c in bench.main.caption)
 
 
 def _click(at, key):
@@ -91,15 +96,20 @@ def _click(at, key):
 
 
 @pytest.mark.parametrize("first, second", [
-    ("bench_pick_train", "bench_pick_test"),
-    ("bench_pick_test", "bench_pick_train"),
+    # ("bench_pick_train", "bench_pick_test") and its reverse were the two
+    # cases here before the "Test" button was retired (app redesign I1); the
+    # same defect is covered by the two-different-presets pairs that remain.
     ("bench_pick_real", "bench_pick_synth"),
+    ("bench_pick_synth", "bench_pick_train"),
     ("bench_pick_train", "bench_pick_train"),
-    ("bench_pick_train", "bench_pick_invert"),
+    # Validation offers the train split only since I1, so Train selects every
+    # selectable record and Invert after it is legitimately empty; All real
+    # (the 35 real train tracks) leaves the 12 synthetic ones to invert onto.
+    ("bench_pick_real", "bench_pick_invert"),
 ])
 def test_a_second_preset_click_gives_what_the_button_gives_on_its_own(first, second):
-    fresh = _click(_app(), second)
-    at = _app()
+    fresh = _click(_bench_app(), second)
+    at = _bench_app()
     after_first = _click(at, first)
     assert after_first, "the first preset selected nothing"
     after_second = _click(at, second)
@@ -113,6 +123,6 @@ def test_a_second_preset_click_gives_what_the_button_gives_on_its_own(first, sec
 
 
 def test_clear_empties_both_the_selection_and_the_widget():
-    at = _app()
+    at = _bench_app()
     assert _click(at, "bench_pick_train")
     assert _click(at, "bench_pick_none") == []

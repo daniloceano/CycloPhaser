@@ -37,7 +37,7 @@ def _inspector(int_floor: float, mat_floor: float) -> AppTest:
     at = AppTest.from_file(str(APP), default_timeout=180)
     at.run()
     for r in at.radio:
-        if set(r.options) >= {"Grid", "Inspector", "Label"}:
+        if set(r.options) >= {"Grid", "Inspector"}:
             r.set_value("Inspector")
             break
     at.run()

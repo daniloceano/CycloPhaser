@@ -1,4 +1,6 @@
-"""Streamlit-widget-level tests for the Label tab, via AppTest — no browser.
+"""Streamlit-widget-level tests for the Manual labelling page, via AppTest — no
+browser. (It was the "Label" display mode of the Calibration tab until the app
+redesign's I1 made it a page of its own, behind the developer key.)
 
 `streamlit.testing.v1.AppTest` runs the real app script through Streamlit's
 actual session_state/widget-key/rerun machinery, without a browser. It cannot
@@ -37,14 +39,16 @@ pytest.importorskip("streamlit")
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
 
+LABEL_PAGE = "app_pages/label.py"
+
+
 def _label_app() -> AppTest:
-    at = AppTest.from_file(str(APP), default_timeout=60)
+    """The app on its Manual labelling page, with the developer key on (the
+    page is not in the menu without it)."""
+    at = AppTest.from_file(str(APP), default_timeout=120)
+    at.secrets["developer_mode"] = True
     at.run()
-    for r in at.radio:
-        if set(r.options) >= {"Grid", "Inspector", "Label"}:
-            r.set_value("Label")
-            break
-    at.run()
+    at.switch_page(LABEL_PAGE).run()
     assert not at.exception, [str(e) for e in at.exception]
     return at
 
@@ -148,16 +152,18 @@ def test_toggling_overlay_layers_does_not_move_any_phase():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Confirmation checkboxes must survive the mode-switch confirm dialog
+# Confirmation checkboxes must survive a rerun issued earlier in the script
 # ══════════════════════════════════════════════════════════════════════════
 #
 # A real bug, not a hypothetical: the overwrite/frozen-synthetic confirmation
 # checkboxes read `value=False` on every render and relied on Streamlit's own
 # widget-key memory to keep them ticked afterward. That memory does not
-# survive being skipped for one script pass, and `_mode_switch`'s pending ->
-# Confirm flow calls `st.rerun()` from EARLIER in `render` than these
-# checkboxes, which skips them for exactly one pass — enough to reset them to
-# unticked. Reported as "I tick everything and Save stays disabled".
+# survive being skipped for one script pass, and anything that calls
+# `st.rerun()` from EARLIER in `render` than these checkboxes skips them for
+# exactly one pass — enough to reset them to unticked. Reported as "I tick
+# everything and Save stays disabled". The trigger then was the
+# Inspection/Labelling switch, retired in I1; the phase table issues the same
+# kind of early rerun on every edit, so that is the trigger used now.
 
 def _synthetic_case_index(at) -> int:
     for sb in at.main.selectbox:
@@ -168,18 +174,16 @@ def _synthetic_case_index(at) -> int:
                if "frozen synthetic" in o and "TEST split" not in o)
 
 
-def _switch_to_labelling(at) -> None:
-    for r in at.sidebar.radio:
-        if set(r.options) >= {"Inspection", "Labelling"}:
-            r.set_value("Labelling")
+def _rerun_from_the_phase_table(at) -> None:
+    """Two phase-table edits that cancel out; each issues an st.rerun() from
+    above the confirmation checkboxes."""
+    _end_unsure(at)[0].set_value(True)
     at.run()
-    for b in at.sidebar.button:
-        if b.label == "Confirm":
-            b.click()
+    _end_unsure(at)[0].set_value(False)
     at.run()
 
 
-def test_overwrite_confirmation_survives_switching_to_labelling_mode():
+def test_overwrite_confirmation_survives_an_earlier_rerun():
     at = _label_app()
     for sb in at.main.selectbox:
         if sb.label == "Jump to case":
@@ -192,19 +196,20 @@ def test_overwrite_confirmation_survives_switching_to_labelling_mode():
     at.run()
     assert ow.value is True
 
-    _switch_to_labelling(at)
+    _rerun_from_the_phase_table(at)
 
     ow_after = next(cb for cb in at.checkbox
                    if "Overwrite the existing label" in cb.label)
     assert ow_after.value is True, (
-        "the overwrite confirmation reset to unticked after switching to "
-        "Labelling mode — it must survive the mode-switch confirm dialog")
+        "the overwrite confirmation reset to unticked after a rerun issued "
+        "earlier in the script")
 
 
-def test_all_three_confirmations_together_enable_save_after_mode_switch():
+def test_all_three_confirmations_together_enable_save():
     """The exact scenario reported: tick overwrite + both synthetic
-    confirmations, switch to Labelling, and Save must become available with
-    no further explanation needed than what's already on screen."""
+    confirmations, with an early rerun in between, and Save must become
+    available with no further explanation needed than what's already on
+    screen — and with no mode to switch to first (retired in I1)."""
     at = _label_app()
     for sb in at.main.selectbox:
         if sb.label == "Jump to case":
@@ -214,7 +219,7 @@ def test_all_three_confirmations_together_enable_save_after_mode_switch():
     next(cb for cb in at.checkbox
         if "Overwrite the existing label" in cb.label).set_value(True)
     at.run()
-    _switch_to_labelling(at)
+    _rerun_from_the_phase_table(at)
     next(cb for cb in at.checkbox
         if "I understand this is a frozen synthetic case" in cb.label).set_value(True)
     at.run()
@@ -271,34 +276,47 @@ def test_previous_and_next_move_through_the_queue_without_saving():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# item 30c — the "Shared 0-1 scale" option for the overlays
+# Overlay scale — "Raw range" by default (2c9ab1d), item 30c's 0-1 kept
 # ══════════════════════════════════════════════════════════════════════════
 
-def _shared_cbs(at):
-    return [cb for cb in at.checkbox
-            if cb.key and cb.key.startswith("lab_overlay_shared__")]
+def _scale_radios(at):
+    return [r for r in at.radio if r.key and r.key.startswith("lab_overlay_scale__")]
 
 
-def test_shared_scale_is_offered_and_on_by_default_in_inspection():
+def test_overlay_scale_is_offered_and_defaults_to_the_raw_range():
     at = _label_app()
-    assert at.session_state["_lab_mode"] == "inspect"
-    cbs = _shared_cbs(at)
-    assert len(cbs) == 1 and cbs[0].label == "Shared 0-1 scale"
-    assert cbs[0].value is True
+    radios = _scale_radios(at)
+    assert len(radios) == 1 and radios[0].label == "Overlay scale"
+    assert list(radios[0].options) == ["Raw range", "Shared 0-1", "Physical"]
+    assert radios[0].value == "Raw range"
 
 
-def test_shared_scale_is_absent_in_labelling():
-    """With the positive control first: the same run DID show it in Inspection,
-    so its absence below is the mode's doing, not a missing widget."""
+def test_overlays_are_offered_with_no_mode_to_switch_to():
+    """The Inspection/Labelling switch is retired: the overlay controls are on
+    the page from the start, and so are the save buttons."""
     at = _label_app()
-    assert _shared_cbs(at)
-    _switch_to_labelling(at)
-    assert at.session_state["_lab_mode"] == "label"
-    assert not _shared_cbs(at)
-    assert not any("Show filtered/smoothed overlays" in cb.label for cb in at.checkbox)
+    assert not any(set(r.options) >= {"Inspection", "Labelling"} for r in at.radio)
+    assert any("Show filtered/smoothed overlays" in cb.label for cb in at.checkbox)
+    assert {"💾 Save & next", "Save ambiguous"} <= {b.label for b in at.button}
 
 
-def test_toggling_the_shared_scale_does_not_move_any_phase():
+def test_revealing_an_overlay_records_it_and_unblinds_the_case():
+    at = _label_app()
+    assert any(c.value.startswith("🙈 blind") for c in at.caption)
+    next(cb for cb in at.checkbox
+         if "Show filtered/smoothed overlays" in cb.label).set_value(True)
+    at.run()
+    layer = next(cb for cb in at.checkbox
+                 if cb.key and cb.key.endswith("__vorticity_smoothed2"))
+    sid = layer.key[len("lab_overlay__"):-len("__vorticity_smoothed2")]
+    layer.set_value(True)
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    assert at.session_state[f"_lab_overlays_seen__{sid}"] == {"vorticity_smoothed2"}
+    assert any(c.value.startswith("👁 overlays revealed") for c in at.caption)
+
+
+def test_switching_the_overlay_scale_does_not_move_any_phase():
     at = _label_app()
     before = [int(nb.value) for nb in _start_idx(at)]
     next(cb for cb in at.checkbox
@@ -307,11 +325,39 @@ def test_toggling_the_shared_scale_does_not_move_any_phase():
     for cb in (cb for cb in at.checkbox if cb.key and cb.key.startswith("lab_overlay__")):
         cb.set_value(True)
         at.run()
-    for value in (False, True):
-        _shared_cbs(at)[0].set_value(value)
+    for value in ("Shared 0-1", "Physical", "Raw range"):
+        _scale_radios(at)[0].set_value(value)
         at.run()
         assert not at.exception, [str(e) for e in at.exception]
         assert [int(nb.value) for nb in _start_idx(at)] == before
+
+
+def test_onto_raw_range_maps_the_band_onto_the_raw_min_and_max():
+    """Decision (iii) of 2c9ab1d: overlays drawn on the raw series' own range.
+    Band 0 lands on the raw minimum, band 1 on the raw maximum, NaN ignored
+    for the range exactly as `unit_band` ignores it."""
+    import sys
+
+    import numpy as np
+    sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
+    import label_tab
+
+    raw = np.array([-3.0, np.nan, 1.0, -1.0])
+    got = label_tab.onto_raw_range([0.0, 0.5, 1.0], raw)
+    assert got == [-3.0, -1.0, 1.0]
+    # the round trip: the raw series' own band maps back onto itself
+    fin = raw[np.isfinite(raw)]
+    back = label_tab.onto_raw_range(label_tab.unit_band(fin), fin)
+    assert np.allclose(back, fin)
+
+
+def test_the_default_tolerance_input_is_on_the_page_not_in_a_sidebar():
+    at = _label_app()
+    assert [nb.key for nb in at.main.number_input
+            if nb.key == "label_default_tolerance"] == ["label_default_tolerance"]
+    assert not any(nb.key == "label_default_tolerance" for nb in at.sidebar.number_input)
+    # and none of the Calibrate sidebar is drawn on this page
+    assert not at.sidebar.slider and not at.sidebar.number_input
 
 
 def test_unit_band_matches_the_inspectors_raw_band():
@@ -360,8 +406,8 @@ def test_the_validation_cases_are_in_the_queue_unlabelled_and_marked():
 
 def test_a_spent_validation_case_cannot_be_saved_even_once():
     """Item 30 closing: `batches.swell_item30_val` is "spent before labelling".
-    In Labelling mode — where saving is otherwise allowed — an UNLABELLED
-    validation case has both save buttons disabled, and the lock is the ONLY
+    Where saving is otherwise allowed, an UNLABELLED validation case has both
+    save buttons disabled, and the lock is the ONLY
     blocker named (no overwrite, no synthetic confirmation, no sequence
     problem), so it is the lock that disables them. Nothing is written."""
     import sys
@@ -374,8 +420,6 @@ def test_a_spent_validation_case_cannot_be_saved_even_once():
     idx = next(i for i, o in enumerate(nav.options) if any(v in o for v in val))
     nav.set_value(idx)
     at.run()
-    _switch_to_labelling(at)
-    assert at.session_state["_lab_mode"] == "label"
     saves = [b for b in at.button if b.label in ("💾 Save & next", "Save ambiguous")]
     assert len(saves) == 2 and all(b.disabled for b in saves)
     blocked = [c.value for c in at.caption if c.value.startswith("Cannot save yet")]

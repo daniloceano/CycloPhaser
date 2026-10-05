@@ -118,8 +118,15 @@ def test_every_custom_format_control_has_help():
         assert _widget(at, kind, key).help == text, key
 
 
+def _to_benchmark(at) -> AppTest:
+    """Benchmark is a page of its own since the app redesign (I1); the custom
+    format set on Calibrate reaches it through app.py's cross-page state."""
+    at.switch_page("app_pages/benchmark.py")
+    return _run(at)
+
+
 def test_benchmark_upload_accepts_txt_and_has_help():
-    at = _app()
+    at = _to_benchmark(_app())
     _widget(at, "radio", "bench_mode").set_value("Exploration")
     _run(at)
     up = _widget(at, "file_uploader", "bench_data_upload")
@@ -176,7 +183,7 @@ def test_positive_vorticity_warns_in_the_preview():
 
 # ── the Benchmark Exploration uploader, same settings ─────────────────────────
 def test_benchmark_exploration_uses_the_same_custom_format():
-    at = _enable_custom(_app())
+    at = _to_benchmark(_enable_custom(_app()))
     _widget(at, "radio", "bench_mode").set_value("Exploration")
     _run(at)
     _widget(at, "file_uploader", "bench_data_upload").set_value(

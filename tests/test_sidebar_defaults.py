@@ -170,14 +170,15 @@ def _three_train_ids() -> list[str]:
 
 def _sidebar_column_runs(set_cutoff_high=None) -> dict:
     at = _app()
+    if set_cutoff_high is not None:     # the sidebar is the Calibrate page's
+        _widget(at, "slider", "cutoff_high").set_value(set_cutoff_high)
+        at.run()
+    at.switch_page("app_pages/benchmark.py").run()   # a page of its own since I1
     _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
     at.run()
     ids = _three_train_ids()
     _widget(at, "multiselect", "bench_ids_widget").set_value(ids)
     at.run()
-    if set_cutoff_high is not None:
-        _widget(at, "slider", "cutoff_high").set_value(set_cutoff_high)
-        at.run()
     _widget(at, "button", "bench_add_sidebar").click()
     at.run()
     _widget(at, "button", "bench_run").click()
