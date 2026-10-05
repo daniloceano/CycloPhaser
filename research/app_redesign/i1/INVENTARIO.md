@@ -19,15 +19,15 @@ o bloqueio de salvar "switch to Labelling mode" saiu de `render`; o nome do caso
 sintético, antes mostrado no seletor de casos só em Inspection, agora aparece
 quando aquele caso já teve overlay revelado (decisão de 2c9ab1d).
 
-## Substituída (aprovação explícita pendente)
+## Substituída, aprovada pelo Danilo
 
 | O quê | Antes | Agora |
 |---|---|---|
 | Escala dos overlays da página Label | checkbox "Shared 0-1 scale" (`lab_overlay_shared__…`, item 30c) | rádio "Overlay scale" (`lab_overlay_scale__…`): "Raw range" (padrão, decisão iii de 2c9ab1d), "Shared 0-1" (o 30c, mantido), "Physical" (o antigo desligado) |
 
-O retorno da pausa (d) aprovou as capturas, onde o rádio aparece, mas não disse que
-aprova esta troca. Fica listada como substituída, **ainda não** como "aprovada pelo
-Danilo".
+Aprovação explícita do Danilo registrada na abertura do I2 (2026-10-05). Até ali a
+troca estava listada como "aprovação explícita pendente": o retorno da pausa (d) do
+I1 aprovou as capturas, onde o rádio aparece, sem dizer que aprovava a troca.
 
 ## Movidas
 
