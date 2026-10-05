@@ -29,7 +29,8 @@ playwright_api = pytest.importorskip(
 pytest.importorskip("streamlit", reason="Streamlit not installed (app-only)")
 pytest.importorskip("yaml")
 
-from browser_harness import RENDER_TIMEOUT, AppServer, LabelPage  # noqa: E402
+from browser_harness import (RENDER_TIMEOUT, SLIDER_HANDLE, AppServer,  # noqa: E402
+                             LabelPage, selectbox, selectbox_value)
 
 sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
 import labels_core as lc  # noqa: E402
@@ -205,8 +206,7 @@ def test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip(dev_server, 
         page.goto(dev_server.url)
         page.wait_for_selector("text=Display mode", timeout=RENDER_TIMEOUT)
         lp.settle()
-        padding = page.get_by_label("Boundary padding", exact=True)
-        assert padding.input_value() != "edge"     # params-track sets edge
+        assert selectbox_value(page, "Boundary padding") != "edge"   # params-track sets edge
 
         page.locator('[data-testid="stSidebar"] input[type="file"]').set_input_files(
             str(CONFIG))
@@ -216,7 +216,7 @@ def test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip(dev_server, 
             str(TRACK))
         page.wait_for_selector(f"text={TRACK.stem}", timeout=RENDER_TIMEOUT)
         lp.settle()
-        assert padding.input_value() == "edge"
+        assert selectbox_value(page, "Boundary padding") == "edge"
 
         _go(page, "Benchmark", "1 · Mode")
         _go(page, "Calibrate", "Display mode")
@@ -227,7 +227,7 @@ def test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip(dev_server, 
         assert "No file uploaded" not in main
         assert "parameters from YAML" in page.locator(
             '[data-testid="stSidebar"]').inner_text()
-        assert page.get_by_label("Boundary padding", exact=True).input_value() == "edge"
+        assert selectbox_value(page, "Boundary padding") == "edge"
         assert not lp.errors, lp.errors
     finally:
         browser.close()
@@ -235,12 +235,19 @@ def test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip(dev_server, 
 
 # ── the sidebar as the browser shows it, after trips ───────────────────────────
 
-_SIDEBAR_SNAPSHOT_JS = """(root) => [...root.querySelectorAll('input')]
+# Every control's name=value, in either supported Streamlit rendering (see
+# browser_harness: a selectbox named "Selected <value>. <label>" with an empty
+# input on 1.56, a <div role="slider"> with aria-valuenow).
+_SIDEBAR_SNAPSHOT_JS = """(root) => [...root.querySelectorAll('input, [role=slider]')]
     .filter((e) => e.type !== 'file')
-    .map((e) => (e.getAttribute('aria-label') ||
-                 (e.closest('label') && e.closest('label').innerText.trim()) ||
-                 e.type) + '=' +
-                (e.type === 'checkbox' || e.type === 'radio' ? e.checked : e.value))"""
+    .map((e) => {
+      let name = e.getAttribute('aria-label') ||
+                 (e.closest('label') && e.closest('label').innerText.trim()) || e.type;
+      let value = (e.type === 'checkbox' || e.type === 'radio') ? e.checked
+                : (e.tagName !== 'INPUT') ? e.getAttribute('aria-valuenow') : e.value;
+      const m = /^Selected (.*)\\. (.*)$/s.exec(name);
+      if (m) { name = m[2]; if (!value) value = m[1]; }
+      return name + '=' + value; })"""
 
 
 def _sidebar_snapshot(page) -> list[str]:
@@ -260,13 +267,11 @@ def test_sidebar_values_set_in_the_ui_are_shown_after_page_trips(dev_server, pw)
         page.wait_for_selector("text=Display mode", timeout=RENDER_TIMEOUT)
         lp.settle()
         default = _sidebar_snapshot(page)
-        sliders = page.locator('[data-testid="stSidebar"] [data-testid="stSlider"] '
-                               'input[type="range"]')
+        sliders = page.locator('[data-testid="stSidebar"]').locator(SLIDER_HANDLE)
         for i in range(3):
             sliders.nth(i).press("ArrowLeft")
             lp.settle(600)
-        padding = page.get_by_label("Boundary padding", exact=True)
-        padding.click()
+        selectbox(page, "Boundary padding").first.click()
         page.get_by_role("option", name="zero", exact=True).click()
         lp.settle()
         edited = _sidebar_snapshot(page)

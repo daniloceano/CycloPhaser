@@ -44,6 +44,7 @@ the app goes to the copy.
 from __future__ import annotations
 
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -72,6 +73,35 @@ from streamlit.web import cli
 sys.argv = ["streamlit", "run", *sys.argv[3:]]
 sys.exit(cli.main())
 """
+
+
+# ── controls whose DOM differs between supported Streamlit versions ──────────
+# Measured in Chromium (research/app_redesign/i1/diag_chromium/): on streamlit
+# 1.56.0 a selectbox is a combobox whose accessible name is "Selected <value>.
+# <label>" and whose <input> value is empty, and a slider is a
+# <div role="slider"> carrying aria-valuenow; on 1.63.0 the combobox is named by
+# its label alone and holds the value, and the slider is an <input
+# type="range">. These helpers find and read both.
+
+def selectbox(page, label: str):
+    """The selectbox labelled `label`, in either naming."""
+    return page.locator(f'[role="combobox"][aria-label="{label}"], '
+                        f'[role="combobox"][aria-label$=". {label}"]')
+
+
+def selectbox_value(page, label: str) -> str:
+    """The value a selectbox shows, from its input or from its accessible name."""
+    box = selectbox(page, label).first
+    value = box.input_value()
+    if value:
+        return value
+    m = re.match(r"^Selected (.*)\. " + re.escape(label) + r"$",
+                 box.get_attribute("aria-label") or "", re.S)
+    return m.group(1) if m else ""
+
+
+SLIDER_HANDLE = ('[data-testid="stSlider"] input[type="range"], '
+                 '[data-testid="stSlider"] [role="slider"]')
 
 
 def free_port() -> int:
@@ -347,9 +377,10 @@ class LabelPage:
         return int(self._num("tolerance_idx", k).input_value())
 
     def phase_name(self, k: int) -> str:
-        """A Streamlit selectbox is a react-aria combobox: the chosen value
-        lives in its `<input value="...">` attribute, not as visible text
-        content. `.inner_text()` reads rendered text nodes and returns '' for
+        """Read through `selectbox_value`, which handles both supported
+        Streamlit renderings (see the comment above it). On the react-aria one
+        the chosen value lives in its `<input value="...">` attribute, not as
+        visible text content. `.inner_text()` reads rendered text nodes and returns '' for
         this widget regardless of which one — confirmed against unmodified
         develop-v2.1 too, so this is a Streamlit-version rendering change,
         predating and unrelated to anything on this front. Read via the
@@ -358,7 +389,7 @@ class LabelPage:
         and does not care how many OTHER selectboxes (the case-navigation
         dropdown included) sit before it on the page.
         """
-        return self.page.get_by_label(f"phase, row {k}", exact=True).input_value()
+        return selectbox_value(self.page, f"phase, row {k}")
 
     def is_unsure(self, k: int) -> bool:
         return self.page.get_by_label(f"unsure, row {k}", exact=True).is_checked()
