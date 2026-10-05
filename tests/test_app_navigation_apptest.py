@@ -1,8 +1,13 @@
 """The calibration app's pages (app redesign I1) — Streamlit AppTest, public API only.
 
-`st.navigation` registers the pages; `AppTest.switch_page` reaches a page only
-when it is registered, and raises ValueError otherwise, so "is X in the menu"
-is asked through that public call rather than through any element internals.
+"Is X in the menu" is asked by its EFFECT, not through AppTest's own page
+bookkeeping: switch to the page's file, run, and look at which page actually
+rendered. `AppTest.switch_page` itself cannot be trusted for this across the
+supported range: up to at least streamlit 1.58 it only checks that the FILE
+exists, so it "reaches" an unregistered page too, and st.navigation then
+renders the default page (Calibrate) instead. Each page is recognised by a
+widget only it draws: Calibrate `view_mode`, Benchmark `bench_run`, Manual
+labelling `label_default_tolerance`.
 
 Covered here:
 
@@ -57,12 +62,27 @@ def _go(at: AppTest, page: str) -> AppTest:
     return at
 
 
-def _registered(at: AppTest, page: str) -> bool:
+def _rendered(at: AppTest, page: str) -> str:
+    """Switch to `page`, run, and name the page that actually rendered.
+
+    Newer AppTest raises ValueError for a file that is not a registered page
+    and stays on the current page; older AppTest lets the switch through and
+    st.navigation renders the default page. Asked from Calibrate (the default
+    page), both come out as "calibrate" for an unregistered page — never as
+    the page asked for."""
     try:
         at.switch_page(page)
     except ValueError:
-        return False
-    return True
+        pass
+    at.run()
+    assert not at.exception, [str(e) for e in at.exception]
+    found = {
+        "calibrate": any(r.key == "view_mode" for r in at.radio),
+        "benchmark": any(b.key == "bench_run" for b in at.button),
+        "label": any(n.key == "label_default_tolerance" for n in at.number_input),
+    }
+    assert sum(found.values()) == 1, found
+    return next(k for k, v in found.items() if v)
 
 
 def _w(at, kind, key):
@@ -78,37 +98,34 @@ def test_the_menu_has_calibrate_and_benchmark_and_calibrate_is_the_default():
     at = _app()
     # the default page is Calibrate: its display-mode radio is on screen
     assert any(r.key == "view_mode" for r in at.radio)
-    assert _registered(at, CALIBRATE) and _registered(at, BENCHMARK)
-    _go(at, BENCHMARK)
-    assert any(b.key == "bench_run" for b in at.button)
-    assert not any(r.key == "view_mode" for r in at.radio)
+    assert _rendered(at, BENCHMARK) == "benchmark"
+    assert _rendered(at, CALIBRATE) == "calibrate"
 
 
 def test_the_developer_page_is_absent_without_the_key(monkeypatch):
     monkeypatch.delenv("CYCLOPHASER_APP_DEV", raising=False)
     at = _app()                       # no secrets file at all: not an error
-    assert _registered(at, BENCHMARK)  # positive control for the call itself
-    assert not _registered(at, LABEL)
+    assert _rendered(at, LABEL) == "calibrate"       # Calibrate, not Label
+    assert _rendered(at, BENCHMARK) == "benchmark"   # positive control: switching works
 
 
 def test_the_developer_page_is_absent_when_the_secret_is_false(monkeypatch):
     monkeypatch.delenv("CYCLOPHASER_APP_DEV", raising=False)
     at = _app({"developer_mode": False})
-    assert not _registered(at, LABEL)
+    assert _rendered(at, LABEL) == "calibrate"
 
 
 def test_the_developer_page_is_present_with_the_secret(monkeypatch):
     monkeypatch.delenv("CYCLOPHASER_APP_DEV", raising=False)
     at = _app({"developer_mode": True})
-    assert _registered(at, LABEL)
-    _go(at, LABEL)
+    assert _rendered(at, LABEL) == "label"
     assert any(sb.label == "Jump to case" for sb in at.main.selectbox)
 
 
 def test_the_developer_page_is_present_with_the_environment_variable(monkeypatch):
     monkeypatch.setenv("CYCLOPHASER_APP_DEV", "1")
     at = _app()
-    assert _registered(at, LABEL)
+    assert _rendered(at, LABEL) == "label"
 
 
 # ── state across pages ────────────────────────────────────────────────────────
@@ -233,8 +250,10 @@ def test_exploration_runs_a_test_series_but_never_scores_it():
     at = _go(_app(), BENCHMARK)
     _w(at, "radio", "bench_mode").set_value("Exploration")
     at.run()
-    ms = _w(at, "multiselect", "bench_ids_widget")
-    ms.set_value([o for o in ms.options if o.split(" ")[0] in (t, r)])
+    # By id: `set_value` takes the multiselect's VALUES. (Its `options` are the
+    # formatted labels, "<id> (<source>/<split>)"; newer AppTest maps a label
+    # back to its value, older ones pass it to format_func and fail.)
+    _w(at, "multiselect", "bench_ids_widget").set_value([r, t])
     at.run()
     _w(at, "selectbox", "bench_pick_config").set_value("cyclophaser_params-track.yaml")
     at.run()
