@@ -35,8 +35,10 @@ The app has one page per task, in the sidebar menu (`st.navigation`; only the
 open page runs):
 
 - **Calibrate** (default) — a guided sidebar (below) and the Grid / Inspector
-  display. Nothing is loaded and no detection runs until data is chosen in
-  step 1.
+  display. Nothing is loaded and no detection runs until data is chosen: until
+  then the main area is a start screen (what the page does, the four steps,
+  **Try example data** and **Sample data (51 TRACK cyclones)** — the same
+  actions as the step 1 buttons — and a link to the documentation).
 - **Benchmark** — configurations side by side (below).
 - **Developer → Manual labelling** — only with the developer key: environment
   variable `CYCLOPHASER_APP_DEV=1`, or `developer_mode = true` in
@@ -46,12 +48,15 @@ open page runs):
 
 Going to another page and back keeps the Calibrate sidebar, the imported YAML's
 values, the dataset choice, the bad-case marks and the uploaded tracks (the
-uploader itself shows empty again; a caption names the tracks still in use).
+uploader itself shows empty again; a caption names the tracks still in use),
+and the Grid's columns, page and page size (also across Grid → Inspector → Grid).
 
 **Developer functions** (developer key only): the Manual labelling page, the
 synthetic cases in step 1, the "⚠️ Mark as bad" box under each Grid figure, the
 bad-case summary with "Clear bad-case marks", and the `evaluation` section of
-the saved YAML. Without the key none of these is shown or written.
+the saved YAML. Without the key none of these is shown or written, and a
+loaded YAML's `evaluation` section is not restored: it is listed under
+"Ignored keys" as "evaluation (developer only)".
 
 ## Calibrate sidebar
 
@@ -119,7 +124,30 @@ own (developer key, above).
 
 The multi-cyclone grid: matplotlib figures rendered to PNG and cached, 1–6
 columns. The 1-column figure is the one Save results packs (rendered only when
-a package with figures is prepared). Rendering 51 Plotly figures on
+a package with figures is prepared).
+
+The grid is **paged**: 12, 24 or 48 tracks per page (12 by default), with
+◀ Previous / Next ▶ above the grid and again below it. Only the figures of the
+page on screen are drawn; detection still runs on every loaded track, so the
+consolidated table and the statistics below cover all of them. Loading a
+different set of tracks goes back to page 1; changing the page size keeps the
+page's first track on screen.
+
+At the end of the Grid, **Set statistics** — "Descriptive statistics of the
+detected phases — not a quality score": tracks analysed and failed, and the
+median of the whole cycle (start of the first phase to end of the last, in
+hours). Phases are counted by the package's own names: a phase that occurs again
+in a track is "intensification 2", "decay 3", …, as in the figures and the CSV
+files, and is counted on its own. For each name: how many tracks have it (n and
+%), the median of its duration in hours with its n, and a box showing every
+track. Tracks whose time axis has no dates are left out of the durations, and
+the count says how many. Then the 5 most common phase sequences, each drawn as
+one square per phase in the figures' colours (a repeat shows its number in the
+square), the names in text, and the number of tracks. All of it comes from the
+detection results already on the page — no extra detection run — and none of it
+compares with a label. The phase colours have one source in the app,
+`layer_inspector.PHASE_COLORS`; `tests/test_phase_colors.py` checks it against
+`cyclophaser/plots.py`. Rendering 51 Plotly figures on
 one page freezes the browser, and the exported PNG must stay deterministic —
 which is why this mode stays in matplotlib.
 
