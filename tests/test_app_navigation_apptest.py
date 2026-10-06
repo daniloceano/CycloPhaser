@@ -6,8 +6,8 @@ rendered. `AppTest.switch_page` itself cannot be trusted for this across the
 supported range: up to at least streamlit 1.58 it only checks that the FILE
 exists, so it "reaches" an unregistered page too, and st.navigation then
 renders the default page (Calibrate) instead. Each page is recognised by a
-widget only it draws: Calibrate `view_mode`, Benchmark `bench_run`, Manual
-labelling `label_default_tolerance`.
+widget only it draws: Calibrate `btn_defaults` (its sidebar's "Defaults"),
+Benchmark `bench_run`, Manual labelling `label_default_tolerance`.
 
 Covered here:
 
@@ -47,11 +47,17 @@ BENCHMARK = "app_pages/benchmark.py"
 LABEL = "app_pages/label.py"
 
 
-def _app(secrets: dict | None = None) -> AppTest:
+def _app(secrets: dict | None = None, data: bool = False) -> AppTest:
+    """The app on Calibrate. `data` loads the example track ("Try example
+    data"): since I2 nothing is loaded until the user asks, and the main area
+    (display mode, grid) is drawn only with data."""
     at = AppTest.from_file(str(APP), default_timeout=300)
     for k, v in (secrets or {}).items():
         at.secrets[k] = v
     at.run()
+    if data:
+        at.button(key="btn_example").click()
+        at.run()
     assert not at.exception, [str(e) for e in at.exception]
     return at
 
@@ -77,7 +83,7 @@ def _rendered(at: AppTest, page: str) -> str:
     at.run()
     assert not at.exception, [str(e) for e in at.exception]
     found = {
-        "calibrate": any(r.key == "view_mode" for r in at.radio),
+        "calibrate": any(b.key == "btn_defaults" for b in at.button),
         "benchmark": any(b.key == "bench_run" for b in at.button),
         "label": any(n.key == "label_default_tolerance" for n in at.number_input),
     }
@@ -96,8 +102,8 @@ def _w(at, kind, key):
 
 def test_the_menu_has_calibrate_and_benchmark_and_calibrate_is_the_default():
     at = _app()
-    # the default page is Calibrate: its display-mode radio is on screen
-    assert any(r.key == "view_mode" for r in at.radio)
+    # the default page is Calibrate: its "Defaults" button is on screen
+    assert any(b.key == "btn_defaults" for b in at.button)
     assert _rendered(at, BENCHMARK) == "benchmark"
     assert _rendered(at, CALIBRATE) == "calibrate"
 
@@ -132,13 +138,15 @@ def test_the_developer_page_is_present_with_the_environment_variable(monkeypatch
 
 # Non-default values, one per kind of Calibrate control: a sidebar slider, a
 # sidebar selectbox, a sidebar checkbox, a sidebar radio, the display-mode
-# radio, and a dataset checkbox in the main area. boundary_padding comes before
-# use_filter: switching the filter off disables it.
+# radio, and an Inspector checkbox in the main area (drawn once view_mode is
+# Inspector). boundary_padding comes before use_filter: switching the filter off
+# disables it. (The dataset choice was a checkbox here until I2; it is now set by
+# buttons into plain session state, which page clean-up never touches.)
 _EDITS = [("slider", "thr_int_len", None), ("selectbox", "boundary_padding", None),
           ("checkbox", "use_filter", False),
           ("radio", "incipient_plateau_crossing", None),
           ("radio", "view_mode", "Inspector"),
-          ("checkbox", "load_synthetic_clean", True)]
+          ("checkbox", "inspector_ribbon", False)]
 
 
 def _edit_calibrate(at: AppTest) -> dict:
@@ -156,23 +164,34 @@ def _edit_calibrate(at: AppTest) -> dict:
 
 
 def _snapshot(at: AppTest) -> dict:
-    return {key: _w(at, kind, key).value for kind, key, _v in _EDITS}
+    # a widget that is not drawn (e.g. an Inspector box after view_mode fell
+    # back to Grid) is recorded as absent, so a lost state compares unequal
+    # instead of raising
+    out = {}
+    for kind, key, _v in _EDITS:
+        try:
+            out[key] = _w(at, kind, key).value
+        except AssertionError:
+            out[key] = "<absent>"
+    return out
 
 
 def test_calibrate_state_survives_a_trip_to_benchmark_and_back():
-    at = _app()
+    at = _app(data=True)
     before = _edit_calibrate(at)
     _go(at, BENCHMARK)
     _go(at, CALIBRATE)
     assert _snapshot(at) == before
-    assert not at.warning, [w.value for w in at.warning]
+    # no warning beyond the Advanced notice, which these edits trigger on purpose
+    others = [w.value for w in at.warning if "differ from defaults" not in w.value]
+    assert not others, others
 
 
 def test_a_bad_case_mark_survives_a_trip_to_benchmark_and_back():
     """In Grid, where the marks are drawn. (Switching Grid → Inspector → Grid
-    loses them on develop too — the checkboxes are only drawn in Grid; that is
-    pre-existing and outside I1, where the marking moves anyway.)"""
-    at = _app()
+    is covered by tests/test_calibrate_i2_apptest.py since I2.) Marking is a
+    developer function, so the key is on."""
+    at = _app({"developer_mode": True}, data=True)
     mark = next(cb.key for cb in at.checkbox if cb.key and cb.key.startswith("badcase__"))
     at.checkbox(key=mark).check()
     at.run()
@@ -196,6 +215,8 @@ def test_the_trip_loses_the_state_without_the_shield(tmp_path):
     shadow.write_text(src.replace(call, ""))
     try:
         at = AppTest.from_file(str(shadow), default_timeout=300)
+        at.run()
+        at.button(key="btn_example").click()
         at.run()
         before = _edit_calibrate(at)
         _go(at, BENCHMARK)

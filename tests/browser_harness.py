@@ -208,7 +208,8 @@ class LabelPage:
         # logs two 404s to the console before finding the server at the root,
         # which `test_no_javascript_errors_on_the_page` would rightly report.
         self.page.goto(url, wait_until="load")
-        self.page.wait_for_selector("text=Display mode", timeout=RENDER_TIMEOUT)
+        # Calibrate's sidebar (since I2 its main area is empty until data is loaded)
+        self.page.wait_for_selector("text=1 · Data", timeout=RENDER_TIMEOUT)
         self.page.locator('[data-testid="stSidebarNav"]').get_by_text(
             "Manual labelling", exact=True).click()
         self.page.wait_for_selector("text=Manual labelling — the",
@@ -445,7 +446,7 @@ class LabelPage:
     def enable_overlay(self, layer_label_substring: str) -> None:
         """Turn the master overlay switch on, then one layer by its visible
         (partial) label text, e.g. 'vorticity_smoothed2'."""
-        master = self.page.get_by_label("Show filtered/smoothed overlays",
+        master = self.page.get_by_role("checkbox", name="Show filtered/smoothed overlays",
                                         exact=False)
         if not master.is_checked():
             master.locator("xpath=ancestor::label[1]").click()

@@ -150,7 +150,8 @@ def test_reset_returns_to_the_signature_defaults():
     _widget(at, "checkbox", "decay_tail_enabled").set_value(False)
     at.run()
     assert at.session_state["cutoff_high"] == 48          # the edits took
-    reset = next(b for b in at.button if "Reset to defaults" in (b.label or ""))
+    # "Reset to defaults" became the "Defaults" button of step 2 (I2)
+    reset = next(b for b in at.button if b.key == "btn_defaults")
     reset.click()
     at.run()
     assert not at.exception, [str(e) for e in at.exception]

@@ -436,7 +436,7 @@ def test_dragging_a_boundary_gives_the_same_start_idx_with_overlays_on(fresh):
         if layer.is_checked():
             layer.locator("xpath=ancestor::label[1]").click()
             fresh.settle()
-        master = fresh.page.get_by_label("Show filtered/smoothed overlays",
+        master = fresh.page.get_by_role("checkbox", name="Show filtered/smoothed overlays",
                                          exact=False)
         if master.is_checked():
             master.locator("xpath=ancestor::label[1]").click()
