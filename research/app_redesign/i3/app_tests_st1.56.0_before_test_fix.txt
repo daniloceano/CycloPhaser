@@ -1,0 +1,7 @@
+python: <scratch>/venv_st156/bin/python (Python 3.12.9) | HEAD 3428512 | tracked changes: 5 | 2026-10-06T16:42:45Z
+streamlit 1.56.0 | cyclophaser ~/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+E   AssertionError: assert 14 > 50
+E    +  where 14 = len(['20150069', '20150436', '20150532', '20150646', '20150746', '20160587', ...])
+E    +    where ['20150069', '20150436', '20150532', '20150646', '20150746', '20160587', ...] = _grid_names(AppTest(\n    _script_path='~/Documents/Programs_and_scripts/CycloPhaser/tools/calibration_app/...ded cyclone, in one ZIP.')\n            }\n        ),\n        2: SpecialBlock(\n            type='event'\n        )\n    }\n))
+FAILED tests/test_track_upload_apptest.py::test_grid_with_filter_on_and_many_cyclones_shows_no_use_filter_warning
+1 failed, 200 passed in 158.66s (0:02:38)
