@@ -425,6 +425,28 @@ def _page_line(page) -> str:
         has_text=" · tracks ").first.inner_text().strip()
 
 
+# Every image of the main area has finished loading (a broken one never does,
+# so a figure that stays broken fails here by timeout).
+_JS_FIGURES_LOADED = """() => [...document.querySelectorAll(
+    '[data-testid="stMain"] [data-testid="stImage"] img')].every(
+        i => i.complete && i.naturalWidth > 0)"""
+
+
+def _settled(lp: LabelPage) -> None:
+    """The app has finished its run AND the figures on screen have loaded.
+
+    Waited for before every click that reruns the app. Streamlit serves each
+    figure from /media/<hash>.png only while the run that drew it is the
+    current one; a click that starts a new run while the browser is still
+    fetching the previous page's figures leaves those requests to fail with
+    404 ("Image source error") — transient, the figures of the new run all
+    load (diagnosed in research/app_redesign/i3/RELATORIO.md, "Falha
+    intermitente"). The console stays checked: nothing is ignored.
+    """
+    lp.settle()
+    lp.page.wait_for_function(_JS_FIGURES_LOADED, timeout=RENDER_TIMEOUT)
+
+
 def test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser(dev_server, pw):
     """What AppTest cannot see, for the I3 grid: after a trip through the
     Inspector and the Benchmark page, the browser shows the kept page size, the
@@ -436,39 +458,39 @@ def test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser(dev_server
         assert START_SCREEN in _main(page).inner_text()
         _main(page).get_by_role("button", name="Sample data (51 TRACK cyclones)").click()
         page.wait_for_selector("text=Set statistics", timeout=RENDER_TIMEOUT)
-        lp.settle()
+        _settled(lp)
         assert _page_line(page) == "Page 1 of 5 · tracks 1–12 of 51"
         assert _grid_figures(page) == 12
 
         mark = _main(page).get_by_role("checkbox", name="⚠️ Mark as bad").first
         mark.locator("xpath=ancestor::label[1]").click()
-        lp.settle()
+        _settled(lp)
         assert mark.is_checked()
 
         selectbox(page, "Tracks per page").first.click()
         page.get_by_role("option", name="24", exact=True).click()
-        lp.settle()
+        _settled(lp)
         assert _page_line(page) == "Page 1 of 3 · tracks 1–24 of 51"
         _main(page).get_by_role("button", name="Next ▶").first.click()
-        lp.settle()
+        _settled(lp)
         assert _page_line(page) == "Page 2 of 3 · tracks 25–48 of 51"
         assert _grid_figures(page) == 24
 
         _main(page).get_by_text("Inspector", exact=True).first.click()
-        lp.settle()
+        _settled(lp)
         _main(page).get_by_text("Grid", exact=True).first.click()
-        lp.settle()
+        _settled(lp)
         _go(page, "Benchmark", "1 · Mode")
         _go(page, "Calibrate", "1 · Data")
         page.wait_for_selector("text=Set statistics", timeout=RENDER_TIMEOUT)
-        lp.settle()
+        _settled(lp)
         assert selectbox_value(page, "Tracks per page") == "24"
         assert _page_line(page) == "Page 2 of 3 · tracks 25–48 of 51"
         assert _grid_figures(page) == 24
 
         # an interaction after the return must not send defaults back
         _main(page).get_by_role("button", name="◀ Previous").first.click()
-        lp.settle()
+        _settled(lp)
         assert _page_line(page) == "Page 1 of 3 · tracks 1–24 of 51"
         assert selectbox_value(page, "Tracks per page") == "24"
         assert _main(page).get_by_role("checkbox", name="⚠️ Mark as bad").first.is_checked()
