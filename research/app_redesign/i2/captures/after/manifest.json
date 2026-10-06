@@ -1,0 +1,26 @@
+{
+ "variant": "after",
+ "root_head": "83a51146ac0223fb42bce0b5f781bfb293e13b9d",
+ "root_has_uncommitted_changes": true,
+ "viewport": {
+  "width": 1600,
+  "height": 1000
+ },
+ "streamlit": "1.63.0",
+ "shots": {
+  "sidebar_public": [
+   "sidebar_public_01.png",
+   "sidebar_public_02.png",
+   "sidebar_public_03.png"
+  ],
+  "main_no_data": "main_no_data.png",
+  "sidebar_dev": [
+   "sidebar_dev_01.png",
+   "sidebar_dev_02.png",
+   "sidebar_dev_03.png"
+  ],
+  "advanced_notice": "advanced_notice.png",
+  "save": "save.png",
+  "label_overlays": "label_overlays.png"
+ }
+}

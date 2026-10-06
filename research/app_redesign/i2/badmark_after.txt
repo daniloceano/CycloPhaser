@@ -1,0 +1,4 @@
+# research/app_redesign/i2/check_badmark.py, streamlit 1.63.0, 2026-10-05T23:26:51Z
+develop @ d339c7d: marked in Grid=True | still marked in Inspector=False | still marked back in Grid=False
+I1 tip @ 63f074f: marked in Grid=True | still marked in Inspector=False | still marked back in Grid=False | still marked after Benchmark -> Calibrate=False
+I2 @ 83a5114 (working tree): marked in Grid=True | still marked in Inspector=True | still marked back in Grid=True | still marked after Benchmark -> Calibrate=True

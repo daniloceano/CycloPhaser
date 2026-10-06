@@ -1,0 +1,34 @@
+{
+ "results.xml": {
+  "passed": 1278,
+  "failed": 0,
+  "failed_ids": [],
+  "skipped": 37,
+  "skipped_by_reason": {
+   "collection skipped": 11,
+   "Timing not checked for observational cases": 1,
+   "AppTest drives the calibration app; the CI installs only the wheel, pytest and pyyaml": 6,
+   "could not import 'plotly': No module named 'plotly'": 4,
+   "the labelling tab is calibration-app code": 15
+  },
+  "skipped_by_file": {
+   "(collection)": 11,
+   "test_synthetic_lifecycles": 1,
+   "test_app_passo5_fixes": 6,
+   "test_layer_inspector": 4,
+   "test_manual_labels": 15
+  }
+ },
+ "results-source-tree.xml": {
+  "passed": 1,
+  "failed": 0,
+  "failed_ids": [],
+  "skipped": 11,
+  "skipped_by_reason": {
+   "collection skipped": 11
+  },
+  "skipped_by_file": {
+   "(collection)": 11
+  }
+ }
+}

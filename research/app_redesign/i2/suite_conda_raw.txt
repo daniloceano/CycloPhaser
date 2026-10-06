@@ -1,0 +1,4 @@
+python: ~/miniconda3/envs/cyclophaser/bin/python
+cyclophaser ~/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py | streamlit 1.63.0
+cyclophaser.__file__ (in session) = ~/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+1468 passed, 1 skipped, 36 deselected in 374.70s (0:06:14)

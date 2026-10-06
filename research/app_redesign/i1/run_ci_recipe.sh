@@ -16,7 +16,7 @@
 # next to this script. Adapted from research/release_v21/parteB_passo2/run_ci_steps.sh.
 set -u
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
-OUT="$ROOT/research/app_redesign/i1"
+OUT="$ROOT/${OUT_DIR:-research/app_redesign/i1}"   # OUT_DIR=research/app_redesign/i2 for I2
 WT="$SCRATCH/i1_ci_wt"; VENV="$SCRATCH/i1_ci_venv"; RAW="$SCRATCH/i1_ci_raw"
 rm -rf "$WT" "$VENV" "$RAW"; mkdir -p "$RAW"
 git worktree add -q --detach "$WT" HEAD
