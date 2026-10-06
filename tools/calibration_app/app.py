@@ -35,6 +35,7 @@ if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
 import benchmark_tab  # noqa: E402
 import layer_inspector as li  # noqa: E402
+import set_stats  # noqa: E402
 import track_format_ui  # noqa: E402
 import track_io  # noqa: E402
 from inspector_plotly import build_inspector_figure  # noqa: E402
@@ -692,8 +693,12 @@ def _compute_evaluation(cyclone_names) -> dict:
     }
 
 
-def _load_yaml_config(yaml_bytes: bytes) -> dict:
+def _load_yaml_config(yaml_bytes: bytes, developer: bool = True) -> dict:
     """Parse an exported YAML and write values into session_state.
+
+    Without the developer key (`developer` false) the bad-case marks are a
+    function the user does not have: the file's "evaluation" section is not
+    restored and is listed as ignored ("evaluation (developer only)").
 
     Returns {"error": str|None, "ignored": list, "missing": list,
              "filled": list[(key, value)], "count": int}.
@@ -836,7 +841,9 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
     # every other imported value in this function *replaces* the current one,
     # rather than merging with it) -- useful for resuming a saved evaluation
     # instead of leaving stale marks from whatever was in the current session.
-    if "evaluation" in doc:
+    if "evaluation" in doc and not developer:
+        ignored.append("evaluation (developer only)")
+    elif "evaluation" in doc:
         ev = doc["evaluation"]
         bad_list = ev.get("bad_cases") if isinstance(ev, dict) else None
         if isinstance(bad_list, list):
@@ -1180,13 +1187,11 @@ _COMPACT_LW = {
     6: {"raw": 1.7, "smoothed2": 2.0},
 }
 
-PHASE_COLORS = {
-    "incipient":       "#65a1e6",
-    "intensification": "#f7b538",
-    "mature":          "#d62828",
-    "decay":           "#9aa981",
-    "residual":        "gray",
-}
+# The phase palette has one source in the app: layer_inspector.PHASE_COLORS
+# (Streamlit-free, also read by the Inspector renderers and set_stats). It must
+# equal the palette of cyclophaser/plots.py, which draws the phase figures;
+# tests/test_phase_colors.py compares the two.
+PHASE_COLORS = li.PHASE_COLORS
 
 
 def _render_global_legend() -> None:
@@ -1441,7 +1446,7 @@ _PAGE_WIDGET_STATE: dict[str, tuple[frozenset, tuple[str, ...]]] = {
     _PAGE_CALIBRATE.url_path: (
         frozenset(_DEFAULTS) | frozenset({
             "show_incipient_probe", "load_all_test_cyclones", "show_advanced_diffs",
-            "load_synthetic_clean", "load_synthetic_noisy"}),
+            "load_synthetic_clean", "load_synthetic_noisy", "grid_page_size"}),
         (_BAD_CASE_KEY_PREFIX, "track_custom_", "save_include_")),
     _PAGE_BENCHMARK.url_path: (benchmark_tab.WIDGET_STATE_KEYS,
                                benchmark_tab.WIDGET_STATE_PREFIXES),
@@ -1523,16 +1528,64 @@ def _carry_uploads(uploaded, accepted: dict, came_back: bool) -> dict:
 # dialog). Streamlit would clean their state up on the first run that does not
 # draw them, so they are written back on every Calibrate run, like the keys of
 # the pages that are not open (see `_keep_page_state`).
+# The Grid's "Grid columns" and "Tracks per page" are in the same situation:
+# they are not drawn in the Inspector.
 _CALIBRATE_KEEP_PREFIXES = (_BAD_CASE_KEY_PREFIX, "track_custom_", "save_include_")
+_K_GRID_PAGE_SIZE = "grid_page_size"
+_CALIBRATE_KEEP_KEYS = frozenset({"n_cols", _K_GRID_PAGE_SIZE})
 
 
 def _keep_calibrate_state() -> None:
     for k in list(st.session_state.keys()):
-        if k.startswith(_CALIBRATE_KEEP_PREFIXES):
+        if k.startswith(_CALIBRATE_KEEP_PREFIXES) or k in _CALIBRATE_KEEP_KEYS:
             try:
                 st.session_state[k] = st.session_state[k]
             except Exception:
                 pass
+
+
+# ── Grid pages ──────────────────────────────────────────────────────────────────
+# The Grid draws one page of tracks. The position is kept as the index of the
+# page's first track (a plain session key, so Streamlit never cleans it up):
+# changing the page size then keeps that track on screen. A different set of
+# loaded tracks starts again at page 1.
+_GRID_PAGE_SIZES = [12, 24, 48]
+_K_GRID_FIRST = "_grid_first"
+_K_GRID_NAMES = "_grid_names"
+
+
+def _grid_page(names: list, size: int) -> tuple[list, int, int, int]:
+    """The tracks of the current page: (names, page number, pages, first index)."""
+    if st.session_state.get(_K_GRID_NAMES) != names:
+        st.session_state[_K_GRID_NAMES] = list(names)
+        st.session_state[_K_GRID_FIRST] = 0
+    n_pages = max(1, -(-len(names) // size))
+    page = min(max(int(st.session_state.get(_K_GRID_FIRST, 0)) // size + 1, 1), n_pages)
+    first = (page - 1) * size
+    st.session_state[_K_GRID_FIRST] = first
+    return names[first:first + size], page, n_pages, first
+
+
+def _step_grid_page(delta: int) -> None:
+    size = st.session_state.get(_K_GRID_PAGE_SIZE, _GRID_PAGE_SIZES[0])
+    st.session_state[_K_GRID_FIRST] = max(
+        0, int(st.session_state.get(_K_GRID_FIRST, 0)) + delta * size)
+
+
+def _grid_nav(where: str, page: int, n_pages: int, first: int, shown: int,
+              total: int) -> None:
+    """Previous / "Page N of M" / Next. Drawn above the grid and, when there is
+    more than one page, again below it (keys differ by `where`)."""
+    _p, _t, _n = st.columns([1, 3, 1], vertical_alignment="center")
+    _p.button("◀ Previous", key=f"grid_prev_{where}", on_click=_step_grid_page,
+              args=(-1,), disabled=page <= 1, use_container_width=True)
+    _t.markdown(
+        f"<div style='text-align:center'>Page <b>{page}</b> of {n_pages} · "
+        f"tracks {first + 1}–{first + shown} of {total}</div>"
+        if total else "<div style='text-align:center'>No tracks</div>",
+        unsafe_allow_html=True)
+    _n.button("Next ▶", key=f"grid_next_{where}", on_click=_step_grid_page,
+              args=(1,), disabled=page >= n_pages, use_container_width=True)
 
 
 # ── Starting configuration: which one is active, and whether it was edited ────
@@ -1848,7 +1901,7 @@ with st.sidebar:
     if _yaml_file is not None:
         _fhash = hashlib.md5(_yaml_file.getvalue()).hexdigest()
         if st.session_state.get("_yaml_import_hash") != _fhash:
-            _result = _load_yaml_config(_yaml_file.getvalue())
+            _result = _load_yaml_config(_yaml_file.getvalue(), developer=_DEV)
             st.session_state["_yaml_import_hash"] = _fhash
             st.session_state["_yaml_import_result"] = _result
             if _result["error"] is None:
@@ -1865,7 +1918,7 @@ with st.sidebar:
         else:
             st.success(f"Loaded {_r['count']} parameters from YAML.")
             if _r["ignored"]:
-                st.warning(f"Ignored unknown keys: {', '.join(_r['ignored'])}")
+                st.warning(f"Ignored keys: {', '.join(_r['ignored'])}")
             if _r.get("filled"):
                 st.warning(
                     f"{len(_r['filled'])} key(s) absent from this file were filled "
@@ -2686,9 +2739,42 @@ with st.sidebar:
 # Calibrate — main area
 # ══════════════════════════════════════════════════════════════════════════════════
 # With nothing loaded, nothing runs: no example is loaded in silence and no
-# detection happens. The full start screen is I3's.
+# detection happens. The start screen explains the page; its two buttons have
+# keys of their own and call the same actions as the ones in step 1 of the
+# sidebar.
+_DOCS_URL = "https://cyclophaser.readthedocs.io/en/latest/"
+
+
+def _start_screen() -> None:
+    st.subheader("Check CycloPhaser's phases on your cyclone tracks")
+    st.markdown(
+        "CycloPhaser splits a cyclone's vorticity track into life-cycle phases: "
+        "incipient, intensification, mature, decay and residual. This page "
+        "shows the phases it finds on your tracks, so you can check them and "
+        "adjust the settings before you use them.")
+    st.markdown(
+        "1. **Load tracks** — upload your own in the sidebar, or start with the "
+        "data below.\n"
+        "2. **Check the figures** — each track is drawn with its phases.\n"
+        "3. **Adjust the filtering** if your tracks are not TRACK-filtered "
+        "850 hPa vorticity, the data the defaults were tuned on.\n"
+        "4. **Save** the configuration, phase tables and figures with "
+        "**Save results**.")
+    _s1, _s2, _s3 = st.columns([1, 1, 2])
+    _s1.button("Try example data", key="start_example", on_click=_load_example,
+               type="primary", use_container_width=True,
+               help="Loads the single example track shipped with the package.")
+    _s2.button(f"Sample data ({len(_calib_data_files)} TRACK cyclones)"
+               if _calib_data_files else "Sample data (unavailable here)",
+               key="start_sample", on_click=_load_sample, use_container_width=True,
+               disabled=not _calib_data_files,
+               help="Loads the real cyclone tracks bundled with the repository.")
+    st.markdown(f"How the method works and what each setting does: "
+                f"[CycloPhaser documentation]({_DOCS_URL}).")
+
+
 if not files:
-    st.write("No tracks loaded — use step 1 in the sidebar.")
+    _start_screen()
     st.stop()
 
 if load_synthetic_cases:
@@ -2805,17 +2891,36 @@ with st.container():
     # MODE "Grid" — unchanged multi-cyclone grid (matplotlib, cached PNGs)
     # ══════════════════════════════════════════════════════════════════════════
     if view_mode == "Grid":
-        n_cols: int = st.select_slider(
-            "Grid columns", options=[1, 2, 3, 4, 5, 6],
-            value=_DEFAULTS["n_cols"], key="n_cols",
-        )
+        _gc1, _gc2 = st.columns([4, 1])
+        with _gc1:
+            n_cols: int = st.select_slider(
+                "Grid columns", options=[1, 2, 3, 4, 5, 6],
+                value=_DEFAULTS["n_cols"], key="n_cols",
+            )
+        with _gc2:
+            # Seeded instead of `index=`, like the Inspector's track: the key
+            # is written back on every run (_keep_calibrate_state), and a
+            # default plus a value set through Session State is what
+            # Streamlit warns about.
+            if st.session_state.get(_K_GRID_PAGE_SIZE) not in _GRID_PAGE_SIZES:
+                st.session_state[_K_GRID_PAGE_SIZE] = _GRID_PAGE_SIZES[0]
+            _page_size: int = st.selectbox(
+                "Tracks per page", options=_GRID_PAGE_SIZES, key=_K_GRID_PAGE_SIZE,
+                help="Only the figures of the page on screen are drawn. Detection "
+                     "still runs on every loaded track: the table and the "
+                     "statistics below cover all of them.")
+
+        _page_names, _page_no, _n_pages, _first = _grid_page(list(all_results), _page_size)
+        _grid_nav("top", _page_no, _n_pages, _first, len(_page_names), len(all_results))
 
         if n_cols >= 4:
             _render_global_legend()
 
-        # Display grid
+        # Display grid: the current page only. Every figure is drawn by a
+        # cached function, so tracks on other pages cost nothing here.
         grid = st.columns(n_cols)
-        for idx, (cyclone_name, res) in enumerate(all_results.items()):
+        for idx, cyclone_name in enumerate(_page_names):
+            res = all_results[cyclone_name]
             with grid[idx % n_cols]:
                 _bad_key = f"{_BAD_CASE_KEY_PREFIX}{cyclone_name}"
                 _is_bad = _DEV and st.session_state.get(_bad_key, False)
@@ -2930,6 +3035,10 @@ with st.container():
                                 disabled=not bool(_png_display),
                             )
 
+        if _n_pages > 1:
+            _grid_nav("bottom", _page_no, _n_pages, _first, len(_page_names),
+                      len(all_results))
+
         # Consolidated diagnostics — 2+ col mode
         if n_cols > 1 and _ok_results:
             st.divider()
@@ -2946,6 +3055,11 @@ with st.container():
                     "Warnings":     f"{len(d['warns'])} ⚠️" if d["warns"] else "0",
                 })
             st.dataframe(pd.DataFrame(rows).set_index("Cyclone"), use_container_width=True)
+
+        # Set statistics — every loaded track, from the results computed above;
+        # no detection call of its own. Grid view only: the Inspector is one
+        # track and stays as it was.
+        set_stats.render_set_stats(all_results, PHASE_COLORS)
 
     # ══════════════════════════════════════════════════════════════════════════
     # MODE "Inspector" — one track, every layer switchable (Plotly)
