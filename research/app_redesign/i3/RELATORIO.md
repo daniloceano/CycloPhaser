@@ -311,3 +311,82 @@ Testes de app e Chromium passam inteiros no piso.
 - As suítes finais acima valem para o código commitado. Depois delas só mudaram
   `RELATORIO.md` e `INVENTARIO.md`.
 - Commit e push em `feat/app-redesign`, separados por assunto. Sem merge, sem PR.
+
+## Falha intermitente no Chromium (verificação independente, ponta 8e2b052)
+
+A verificação independente rodou o Chromium completo em streamlit 1.56.0 e teve
+36 passed e 1 failed:
+`test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser`. O console
+registrou "Failed to load resource … 404" e "Client Error: Image source error
+…/media/<hash>.png". Isolado, o teste passou 3 vezes.
+
+### Diagnóstico (antes de qualquer correção)
+
+**Ferramenta.** O plugin de pytest `diag_paged_grid_plugin.py` e o executor
+`run_diag_paged_grid.sh`, ambos em `research/`. O teste e o harness não mudaram.
+- O plugin roda o teste real N vezes numa sessão, com o servidor do módulo
+  compartilhado.
+- Antes do `browser.close()` do teste, ele registra o **estado final** da página:
+  espera até 20 s que toda imagem da área central termine (carregada ou falha).
+  Para cada imagem que não carregou, pergunta ao servidor o status da URL.
+  - 404: figura quebrada de vez, **APP**;
+  - 200: só estava atrasada.
+- Também registra os erros do console e uma captura de tela.
+- Saídas em `diag/` (um `.jsonl` por execução e um resumo).
+
+| execução | rodadas | falhas | estado final das falhas |
+|---|---|---|---|
+| 1.56.0, normal | 20 | **0** | — |
+| 1.63.0 (conda), normal | 20 | **0** | — |
+| 1.56.0, imagens com +1500 ms por pedido HTTP | 20 | **20** | 24/24 figuras carregadas, 0 URLs quebradas, nas 20 |
+| 1.63.0, imagens com +1500 ms por pedido HTTP | 20 | **20** | 24/24 figuras carregadas, 0 URLs quebradas, nas 20 |
+
+**Por que o atraso.** Nas condições normais a falha não apareceu em 40 rodadas.
+A verificação a viu na execução completa, com a máquina mais carregada.
+- A variante com atraso usa a emulação de rede do Chromium
+  (`Network.emulateNetworkConditions`): cada pedido HTTP, inclusive
+  `/media/*.png`, chega 1,5 s depois. O websocket que comanda o app não muda.
+- Isso reproduz a condição da hipótese: o teste clica enquanto as figuras da
+  página anterior ainda carregam.
+- O resultado é a mesma mensagem da verificação ("404" e "Image source error"),
+  em 40 de 40.
+
+**Classificação: TESTE.**
+- Em todas as 40 falhas, o estado final é íntegro: as 24 figuras da página
+  carregam, e nenhuma URL da página final responde 404.
+- O erro é transitório. O Streamlit só serve `/media/<hash>.png` enquanto a
+  execução que desenhou a figura é a atual. Um clique que começa outra execução
+  descarta as figuras da página anterior, e os pedidos ainda em curso dão 404.
+  As figuras da nova execução carregam todas.
+- Capturas no momento da falha: `diag/before_stress1500_st1.56.0_1.png` e
+  `diag/before_stress1500_conda_st1.63.0_1.png`. Guardei uma por versão, porque
+  as 40 mostram o mesmo estado final íntegro e somavam 6,8 MB; o registro de
+  cada rodada está nos `.jsonl`.
+
+### Correção (só no teste)
+
+O teste agora chama `_settled(lp)` antes de cada clique que reroda o app. Ela
+espera a execução terminar (`lp.settle()`) **e** toda imagem da área central
+carregar (`complete` e `naturalWidth > 0`).
+- Uma figura quebrada de vez nunca satisfaz a espera, então um defeito APP
+  futuro falharia por timeout.
+- `assert not lp.errors` continua estrito, e nenhum erro foi posto em lista de
+  ignorados.
+- O app não mudou, e nada do que se vê na tela mudou.
+
+### Depois da correção
+
+| execução | rodadas | falhas |
+|---|---|---|
+| 1.56.0, normal | 20 | **0** |
+| 1.63.0 (conda), normal | 20 | **0** |
+| 1.56.0, +1500 ms (a condição que falhava 20/20) | 20 | **0** |
+| 1.63.0, +1500 ms (a condição que falhava 20/20) | 20 | **0** |
+
+| | streamlit 1.56.0 | streamlit 1.63.0 (conda) |
+|---|---|---|
+| Chromium completo | **37 passed, 0 failed** (`browser_tests_st1.56.0.txt`) | **37 passed, 0 failed** (`browser_tests_conda_st1.63.0.txt`) |
+| testes de app | **203 passed, 0 failed** (`app_tests_st1.56.0.txt`) | **203 passed, 0 failed** (`app_tests_conda_st1.63.0.txt`) |
+
+`manual_labels.yaml` não foi tocado: 0 linhas de `git status` nos executores do
+Chromium.

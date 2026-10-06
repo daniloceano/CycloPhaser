@@ -1,0 +1,125 @@
+python: <scratch>/venv_st156/bin/python | HEAD 8e2b052 | tracked changes: 0 | 2026-10-06T21:34:18Z
+added latency per HTTP request: 1500 ms
+streamlit 1.56.0 | playwright 1.62.0
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[1]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[2]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[3]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[4]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[5]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[6]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[7]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[8]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[9]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[10]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[11]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[12]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[13]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[14]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[15]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[16]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[17]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[18]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[19]
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[20]
+20 failed in 638.71s (0:10:38)
+runs 20 | failed 20 | runs with console errors 20
+  run 1: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 2: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 3: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 4: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 5: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/9042a46c08f4e125106855faeab6b72a0bef67fae5fd66f764e3d3a7.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 6: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 7: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 8: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/bd379d9a9f130bcda1e25453fc44b4d718dd34e40227fa829b08f2b5.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 9: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/831a0c2e325cdbe48fdc37fac7fcf958dec004f8f45dc44f0e713dc6.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 10: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/bd379d9a9f130bcda1e25453fc44b4d718dd34e40227fa829b08f2b5.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 11: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 12: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/831a0c2e325cdbe48fdc37fac7fcf958dec004f8f45dc44f0e713dc6.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 13: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Client Error: Image source error - http://127.0.0.1:58509/media/9042a46c08f4e125106855faeab6b72a0bef67fae5fd66f764e3d3a7.png
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 14: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/831a0c2e325cdbe48fdc37fac7fcf958dec004f8f45dc44f0e713dc6.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 15: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/831a0c2e325cdbe48fdc37fac7fcf958dec004f8f45dc44f0e713dc6.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 16: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/157c6c7fb522bfe2aa7ef047f28579449aeed970e4373118446fccf5.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 17: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...404 (Not Found)', 'console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 18: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/157c6c7fb522bfe2aa7ef047f28579449aeed970e4373118446fccf5.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 19: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/c54ffaa7b1af3f5dbc034422ee96bc5f9685c8f0d89102f78a812a87.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+  run 20: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['console.error: Failed to load resource: the server responded with a status of 404 (Not Found)', 'console.error: Fail...: Image source error - http://127.0.0.1:58509/media/bd379d9a9f130bcda1e25453fc44b4d718dd34e40227fa829b08f2b5.png', ...]
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
+    console.error: Failed to load resource: the server responded with a status of 404 (Not Found)
