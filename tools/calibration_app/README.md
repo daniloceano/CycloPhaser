@@ -34,8 +34,9 @@ the same.
 The app has one page per task, in the sidebar menu (`st.navigation`; only the
 open page runs):
 
-- **Calibrate** (default) — the sidebar of filter/phase parameters, the track
-  upload and the dataset choice, and the Grid / Inspector display.
+- **Calibrate** (default) — a guided sidebar (below) and the Grid / Inspector
+  display. Nothing is loaded and no detection runs until data is chosen in
+  step 1.
 - **Benchmark** — configurations side by side (below).
 - **Developer → Manual labelling** — only with the developer key: environment
   variable `CYCLOPHASER_APP_DEV=1`, or `developer_mode = true` in
@@ -47,9 +48,37 @@ Going to another page and back keeps the Calibrate sidebar, the imported YAML's
 values, the dataset choice, the bad-case marks and the uploaded tracks (the
 uploader itself shows empty again; a caption names the tracks still in use).
 
+**Developer functions** (developer key only): the Manual labelling page, the
+synthetic cases in step 1, the "⚠️ Mark as bad" box under each Grid figure, the
+bad-case summary with "Clear bad-case marks", and the `evaluation` section of
+the saved YAML. Without the key none of these is shown or written.
+
+## Calibrate sidebar
+
+Top to bottom, under the page menu:
+
+1. **Data** — upload tracks; **Custom format…** (a dialog with the custom-format
+   fields and the preview/confirmation of each non-standard file); **Try
+   example data**; **Sample data (51 TRACK cyclones)**; the synthetic cases
+   (developer key). Once data is loaded: "N tracks loaded" and **Clear data**.
+2. **Starting configuration** — **Defaults** (the package's own signature
+   defaults; filtering was tuned on TRACK-filtered 850 hPa vorticity), loading a
+   saved YAML, and a line "Active: Defaults" or "Active: <file>.yaml", marked
+   *edited* with the number of changes made since.
+3. **Filtering** — Apply Lanczos filter, low cutoff, high cutoff: the only part
+   that was calibrated, and only for TRACK-filtered 850 hPa vorticity.
+- **Advanced** — "N advanced parameters differ from defaults" (with **Show which**),
+  then one flat expander per group, in the detector's execution order (see
+  "Advanced groups" below).
+4. **Save results** — one dialog: the configuration (YAML) always, the phase
+  tables (CSV per cyclone, on by default) and the figures (PNG, off by
+  default), in one ZIP built only when asked. The YAML is the content the old
+  "Export parameters (YAML)" wrote (`parameters.yaml` inside the ZIP); the
+  1-column Grid still has its per-cyclone CSV/PNG downloads.
+
 ## Track format
 
-Both upload fields (Calibration and Benchmark → Exploration) accept `.csv` and
+Both upload fields (Calibrate and Benchmark → Exploration) accept `.csv` and
 `.txt`. The format is recognised by **content**, never by extension
 (`track_io.py`, the app's only reader).
 
@@ -64,7 +93,8 @@ including:
 Other columns are ignored. Compatible with `example_file.csv` in
 `cyclophaser/example_data/`.
 
-**Custom format** (opt-in, *Custom track format* expander, off by default) —
+**Custom format** (opt-in, the **Custom format…** dialog on Calibrate, off by
+default; Benchmark's upload reuses its settings) —
 separator (`auto`, `;`, `,`, tab, whitespace), header line yes/no, date and
 vorticity columns (by name, or by 1-based number without a header) and an
 optional strftime date format. Dates that do not start with the year need the
@@ -88,7 +118,8 @@ own (developer key, above).
 ### Grid (default)
 
 The multi-cyclone grid: matplotlib figures rendered to PNG and cached, 1–6
-columns, and the same PNG inside the export ZIP. Rendering 51 Plotly figures on
+columns. The 1-column figure is the one Save results packs (rendered only when
+a package with figures is prepared). Rendering 51 Plotly figures on
 one page freezes the browser, and the exported PNG must stay deterministic —
 which is why this mode stays in matplotlib.
 
@@ -275,48 +306,42 @@ silently replaced.
 scale so a boundary that moved is read straight down the figure. The choice is
 kept in session state.
 
-## Sidebar order
+## Advanced groups
 
-The controls are grouped by the order in which the detector actually **executes**,
-not by phase name:
+The Advanced expanders keep the order in which the detector actually
+**executes**, not the order the phases are named in (the visible text no longer
+names the functions; they are here):
 
-| group | step | function |
-|---|---|---|
-| 1 Lanczos Filter | 1 | `process_vorticity` |
-| 2 Savitzky-Golay Smoothing | 2 | `process_vorticity` |
-| 3 Extrema Filtering | 3 | `find_peaks_valleys(z)` |
-| 4 Intensification | 4 | `find_intensification_period` |
-| 5 Decay | 5 | `find_decay_period` |
-| 6 Mature | 6 | `find_mature_stage` |
-| 7 Residual | 7 | `find_residual_period` |
-| 8 Incipient | 9 | `find_incipient_period` |
+| Advanced group | function |
+|---|---|
+| Filtering options (padding, endpoints, Savitzky-Golay) | `process_vorticity` |
+| Extrema | `find_peaks_valleys(z)`, before every stage |
+| Threshold scale | spans the three below |
+| Intensification | `find_intensification_period` |
+| Decay | `find_decay_period` |
+| Mature | `find_mature_stage` |
+| Residual | `find_residual_period` |
+| Incipient (with the probe) | `find_incipient_period`, last |
 
-Step 8, `post_process_periods`, takes no parameter.
-
-Two consequences of reading the real order instead of assuming it: **extrema
-filtering is step 3** — it runs before every stage, and the extrema that survive
-there are the ones all of them see — and `decay_tail_amplitude_fraction` is read
-by `find_residual_period` (`find_stages.py:588`), not by `find_decay_period`,
-which is why it sits under Residual.
-
-Two parameters span groups and carry a note in their own widget: `length_scale`
-(scales the intensification and decay duration thresholds,
-`find_stages.py:387`, and changes detected phases on 20160735, 20191014 and
-20203947 under params-9) and `boundary_padding` (a filter parameter that can
-govern the incipient phase: with `incipient_plateau_signal="derivative"` no
-series refuses an incipient phase under `reflect`, 0/51, against 33/51 under
-`edge`; with the default `incipient_plateau_signal="vorticity"` the probe reads
-the raw series and refusals do not change, 28/54 training series under both —
+`post_process_periods` takes no parameter and has no group.
+`decay_tail_amplitude_fraction` is read by `find_residual_period`
+(`find_stages.py:588`), not by `find_decay_period`, which is why it sits under
+Residual. `length_scale` scales the intensification and decay duration
+thresholds (`find_stages.py:387`), and `boundary_padding` can govern the
+incipient phase (with `incipient_plateau_signal="derivative"` no series refuses
+an incipient phase under `reflect`, 0/51, against 33/51 under `edge` —
 `research/cleanup/passo1/RELATORIO.md`).
 
 This layout's coverage is verified by an automatic test, not by eye:
 `tests/test_sidebar_coverage.py` enumerates the package's public signature and
-requires every parameter to have a control and no widget key to repeat.
+requires every parameter to have a control and no widget key to repeat;
+`tests/test_calibrate_i2_apptest.py` checks the step order and that no expander
+holds another.
 
 ## Scope
 
 The app covers the whole detection pipeline: track upload (standard or custom
 format), every filter, smoothing and phase-detection parameter of the package in
 the sidebar, the Grid and Inspector display modes, the Benchmark page, the
-Manual labelling page (developer key), and
-export of the parameters (YAML) with the figures and phase tables.
+Manual labelling page (developer key), and Save results (parameters as YAML,
+phase tables, figures).
