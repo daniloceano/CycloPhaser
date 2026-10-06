@@ -207,9 +207,11 @@ def test_without_data_no_detection_runs(monkeypatch):
     monkeypatch.setattr(dp, "get_periods", counting)
     st.cache_data.clear()
     at = _app()
-    assert [m.value for m in at.main.markdown][-1] == \
-        "No tracks loaded — use step 1 in the sidebar."
-    assert not at.main.subheader and calls == []
+    # I3 replaced the one-line no-data text with the start screen: its heading
+    # is the only subheader, and no track was drawn.
+    assert [h.value for h in at.main.subheader] == [
+        "Check CycloPhaser's phases on your cyclone tracks"]
+    assert calls == []
     # positive control: loading data does run it
     at.button(key="btn_example").click()
     _run(at)

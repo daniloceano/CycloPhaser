@@ -77,13 +77,16 @@ def _bench_app():
 
 def test_the_track_upload_and_its_caption_are_in_the_calibration_tab_only():
     """Since I2 the track upload is step 1 of the Calibrate sidebar, and the
-    no-data line is in Calibrate's main area; neither may show on Benchmark."""
+    no-data screen is in Calibrate's main area; neither may show on Benchmark.
+    (I3 replaced I2's one-line no-data text with the start screen, so the start
+    screen's heading is what is looked for.)"""
+    start = "Check CycloPhaser's phases on your cyclone tracks"
     cal = _app()
     assert "track_upload" in [w.key for w in cal.sidebar.get("file_uploader")]
-    assert any("No tracks loaded" in m.value for m in cal.main.markdown)
+    assert any(h.value == start for h in cal.main.subheader)
     bench = _bench_app()
     assert "track_upload" not in [w.key for w in bench.get("file_uploader")]
-    assert not any("No tracks loaded" in m.value for m in bench.main.markdown)
+    assert not any(h.value == start for h in bench.main.subheader)
 
 
 def _click(at, key):

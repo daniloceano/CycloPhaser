@@ -229,6 +229,16 @@ def test_grid_with_filter_on_and_many_cyclones_shows_no_use_filter_warning():
     _widget(at, "button", "btn_sample").click()   # was the "Load all test cyclones" box
     _run(at)
     assert at.session_state["use_filter"] is True
-    assert len(_grid_names(at)) > 50
-    hits = [w.value for w in at.warning if USE_FILTER_WARNING in w.value]
+    # Since I3 the grid is paged (12 tracks per page by default): walk every
+    # page, so the warning is looked for under every loaded track, as before.
+    names, hits = [], []
+    while True:
+        names += [n for n in _grid_names(at) if n.isdigit()]
+        hits += [w.value for w in at.warning if USE_FILTER_WARNING in w.value]
+        nxt = _widget(at, "button", "grid_next_top")
+        if nxt.disabled:
+            break
+        nxt.click()
+        _run(at)
+    assert len(set(names)) > 50
     assert hits == []

@@ -39,6 +39,8 @@ import labels_core as lc  # noqa: E402
 REAL_LABELS = REPO_ROOT / "research" / "labels" / "manual_labels.yaml"
 TRACK = REPO_ROOT / "docs" / "data" / "example_track_hourly.csv"
 CONFIG = REPO_ROOT / "research" / "labels" / "configs" / "cyclophaser_params-track.yaml"
+# The heading of the Calibrate start screen (I3), shown only while no track is loaded.
+START_SCREEN = "Check CycloPhaser's phases on your cyclone tracks"
 
 
 def _chromium_present() -> bool:
@@ -213,6 +215,13 @@ def _uploader(page, label_part: str):
         has_text=label_part).locator('input[type="file"]')
 
 
+def _sidebar_button(page, name: str):
+    """The sidebar's button. Since I3 the start screen repeats "Try example data"
+    and "Sample data …" in the main area while nothing is loaded, so a bare
+    role/name lookup would match two buttons."""
+    return page.locator('[data-testid="stSidebar"]').get_by_role("button", name=name)
+
+
 def _open_group(page, title: str) -> None:
     """Open one of the sidebar's Advanced expanders (they start closed)."""
     summary = page.locator('[data-testid="stSidebar"] [data-testid="stExpander"] summary').filter(
@@ -245,7 +254,7 @@ def test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip(dev_server, 
         body = page.locator("body").inner_text()
         assert "Still using the 1 track(s) uploaded before you switched pages" in body
         assert TRACK.stem in page.locator('[data-testid="stMain"]').inner_text()
-        assert "No tracks loaded" not in body
+        assert START_SCREEN not in body           # I3: the start screen replaced the no-data line
         sidebar = page.locator('[data-testid="stSidebar"]').inner_text()
         assert "parameters from YAML" in sidebar and f"Active: {CONFIG.name}" in sidebar
         assert selectbox_value(page, "Boundary padding") == "edge"
@@ -284,7 +293,7 @@ def test_sidebar_values_set_in_the_ui_are_shown_after_page_trips(dev_server, pw)
     browser, page = _page(pw, 1600, 1000)
     try:
         lp = _calibrate(page, dev_server.url)
-        page.get_by_role("button", name="Try example data").click()
+        _sidebar_button(page, "Try example data").click()
         lp.settle()
         default = _sidebar_snapshot(page)
         sliders = page.locator('[data-testid="stSidebar"]').locator(SLIDER_HANDLE)
@@ -337,7 +346,7 @@ def test_save_results_downloads_what_the_options_say(dev_server, pw):
     browser, page = _page(pw, 1600, 1000)
     try:
         lp = _calibrate(page, dev_server.url)
-        page.get_by_role("button", name="Try example data").click()
+        _sidebar_button(page, "Try example data").click()
         page.wait_for_selector("text=example_file", timeout=RENDER_TIMEOUT)
         lp.settle()
         # defaults: the configuration always, the phase tables on, no figures
@@ -371,7 +380,7 @@ def test_the_custom_format_dialog_reads_a_non_standard_file(dev_server, pw, tmp_
         _uploader(page, "Upload tracks").set_input_files(str(odd))
         lp.settle()
         assert "refused" in page.locator('[data-testid="stSidebar"]').inner_text()
-        assert "No tracks loaded" in page.locator('[data-testid="stMain"]').inner_text()
+        assert START_SCREEN in page.locator('[data-testid="stMain"]').inner_text()
 
         page.get_by_role("button", name="Custom format…").click()
         dialog = page.get_by_role("dialog")
@@ -396,6 +405,74 @@ def test_the_custom_format_dialog_reads_a_non_standard_file(dev_server, pw, tmp_
         page.wait_for_selector('[data-testid="stMain"] >> text=odd', timeout=RENDER_TIMEOUT)
         lp.settle()
         assert "1 track loaded" in page.locator('[data-testid="stSidebar"]').inner_text()
+        assert not lp.errors, lp.errors
+    finally:
+        browser.close()
+
+
+# ── I3: the paged grid, from the start screen, in the browser ─────────────────
+
+def _main(page):
+    return page.locator('[data-testid="stMain"]')
+
+
+def _grid_figures(page) -> int:
+    return _main(page).locator('[data-testid="stImage"]').count()
+
+
+def _page_line(page) -> str:
+    return _main(page).get_by_text("Page ", exact=False).filter(
+        has_text=" · tracks ").first.inner_text().strip()
+
+
+def test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser(dev_server, pw):
+    """What AppTest cannot see, for the I3 grid: after a trip through the
+    Inspector and the Benchmark page, the browser shows the kept page size, the
+    kept page and a mark set on a page that was not on screen — and only the
+    current page's figures are in the DOM."""
+    browser, page = _page(pw, 1600, 1000)
+    try:
+        lp = _calibrate(page, dev_server.url)
+        assert START_SCREEN in _main(page).inner_text()
+        _main(page).get_by_role("button", name="Sample data (51 TRACK cyclones)").click()
+        page.wait_for_selector("text=Set statistics", timeout=RENDER_TIMEOUT)
+        lp.settle()
+        assert _page_line(page) == "Page 1 of 5 · tracks 1–12 of 51"
+        assert _grid_figures(page) == 12
+
+        mark = _main(page).get_by_role("checkbox", name="⚠️ Mark as bad").first
+        mark.locator("xpath=ancestor::label[1]").click()
+        lp.settle()
+        assert mark.is_checked()
+
+        selectbox(page, "Tracks per page").first.click()
+        page.get_by_role("option", name="24", exact=True).click()
+        lp.settle()
+        assert _page_line(page) == "Page 1 of 3 · tracks 1–24 of 51"
+        _main(page).get_by_role("button", name="Next ▶").first.click()
+        lp.settle()
+        assert _page_line(page) == "Page 2 of 3 · tracks 25–48 of 51"
+        assert _grid_figures(page) == 24
+
+        _main(page).get_by_text("Inspector", exact=True).first.click()
+        lp.settle()
+        _main(page).get_by_text("Grid", exact=True).first.click()
+        lp.settle()
+        _go(page, "Benchmark", "1 · Mode")
+        _go(page, "Calibrate", "1 · Data")
+        page.wait_for_selector("text=Set statistics", timeout=RENDER_TIMEOUT)
+        lp.settle()
+        assert selectbox_value(page, "Tracks per page") == "24"
+        assert _page_line(page) == "Page 2 of 3 · tracks 25–48 of 51"
+        assert _grid_figures(page) == 24
+
+        # an interaction after the return must not send defaults back
+        _main(page).get_by_role("button", name="◀ Previous").first.click()
+        lp.settle()
+        assert _page_line(page) == "Page 1 of 3 · tracks 1–24 of 51"
+        assert selectbox_value(page, "Tracks per page") == "24"
+        assert _main(page).get_by_role("checkbox", name="⚠️ Mark as bad").first.is_checked()
+        assert "1 / 51" in _main(page).inner_text()
         assert not lp.errors, lp.errors
     finally:
         browser.close()
