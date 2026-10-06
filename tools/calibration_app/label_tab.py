@@ -1293,11 +1293,16 @@ def _overlay_controls(sid: str, values: pd.Series, overlay_provider) -> list[dic
         return [], None
     seen = st.session_state.setdefault(f"_lab_overlays_seen__{sid}", set())
     c_show, c_scale = st.columns([3, 2])
+    # Short enough for its column: the long version was cut off with "(…".
+    # The consequence for blindness is spelled out in the tooltip and in the
+    # status line above the chart, which turns to "👁 overlays revealed".
     show = c_show.checkbox(
-        "Show filtered/smoothed overlays, in the SAME chart — revealing one "
-        "makes THIS case's label no longer blind (recorded in the saved "
-        "record's 'overlays_shown')",
-        value=False, key=f"lab_overlay_master__{sid}")
+        "Show filtered/smoothed overlays (unblinds this case)",
+        value=False, key=f"lab_overlay_master__{sid}",
+        help="Draws the package's own filtered and smoothed series in the SAME "
+             "chart. Revealing any of them makes THIS case's label no longer "
+             "blind from then on in the session, and the saved record lists them "
+             "in 'overlays_shown'.")
     scale = c_scale.radio(
         "Overlay scale", OVERLAY_SCALES, index=0, horizontal=True,
         key=f"lab_overlay_scale__{sid}",
