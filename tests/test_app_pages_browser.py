@@ -425,15 +425,17 @@ def _page_line(page) -> str:
         has_text=" · tracks ").first.inner_text().strip()
 
 
-# Every image of the main area has finished loading (a broken one never does,
-# so a figure that stays broken fails here by timeout).
-_JS_FIGURES_LOADED = """() => [...document.querySelectorAll(
-    '[data-testid="stMain"] [data-testid="stImage"] img')].every(
-        i => i.complete && i.naturalWidth > 0)"""
+# The main area holds exactly `n` images and every one has finished loading (a
+# broken one never does, so a figure that stays broken fails here by timeout).
+# The count matters: "every image loaded" is also true of an empty page, which
+# a slow browser shows for a moment after the run has ended (CPU 4×, I3).
+_JS_FIGURES_LOADED = """(n) => { const imgs = [...document.querySelectorAll(
+    '[data-testid="stMain"] [data-testid="stImage"] img')];
+    return imgs.length === n && imgs.every(i => i.complete && i.naturalWidth > 0); }"""
 
 
-def _settled(lp: LabelPage) -> None:
-    """The app has finished its run AND the figures on screen have loaded.
+def _settled(lp: LabelPage, figures: int) -> None:
+    """The app has finished its run AND the page's `figures` figures have loaded.
 
     Waited for before every click that reruns the app. Streamlit serves each
     figure from /media/<hash>.png only while the run that drew it is the
@@ -444,57 +446,109 @@ def _settled(lp: LabelPage) -> None:
     intermitente"). The console stays checked: nothing is ignored.
     """
     lp.settle()
-    lp.page.wait_for_function(_JS_FIGURES_LOADED, timeout=RENDER_TIMEOUT)
+    lp.page.wait_for_function(_JS_FIGURES_LOADED, arg=figures, timeout=RENDER_TIMEOUT)
+
+
+_JS_FIGURE_REQUESTS_ENDED = """() => [...document.querySelectorAll(
+    '[data-testid="stMain"] [data-testid="stImage"] img')].every(i => i.complete)"""
+
+# The final state's figures, URL by URL: every main-area image loaded, and the
+# server still answers 200 for each of their URLs now.
+_JS_FINAL_FIGURES = """async () => Promise.all([...document.querySelectorAll(
+    '[data-testid="stMain"] [data-testid="stImage"] img')].map(async i => ({
+        src: i.currentSrc || i.src, loaded: i.complete && i.naturalWidth > 0,
+        status: (await fetch(i.currentSrc || i.src, {cache: 'no-store'})).status})))"""
+
+
+def _is_media_404(text: str, url: str) -> bool:
+    """A console error about one figure's /media/ URL answering 404 — and
+    nothing else: the browser's "Failed to load resource … 404" whose source
+    is a /media/ URL, or Streamlit's "Image source error - …/media/…"."""
+    return (("Image source error" in text and "/media/" in text)
+            or (text.startswith("Failed to load resource") and "404" in text
+                and "/media/" in url))
 
 
 def test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser(dev_server, pw):
     """What AppTest cannot see, for the I3 grid: after a trip through the
     Inspector and the Benchmark page, the browser shows the kept page size, the
     kept page and a mark set on a page that was not on screen — and only the
-    current page's figures are in the DOM."""
+    current page's figures are in the DOM.
+
+    Console errors — the one tolerance, and its condition. Streamlit serves a
+    figure from /media/<hash>.png only while the run that drew it is the
+    current one; when a click starts the next run while a slow browser is still
+    fetching figures, those requests answer 404 and the console logs it. Each
+    click here starts exactly ONE script run (measured; see
+    research/app_redesign/i3/RELATORIO.md, "Segunda correção"), so this is a
+    race inside Streamlit, not an extra run of the app. Hence:
+      * a console error is tolerated ONLY if it is such a /media/ 404
+        (`_is_media_404`), AND only because the final state is checked URL by
+        URL: after the app has finished, every figure on the page loaded and
+        every one of their URLs answers 200 (checked always, tolerated errors
+        or not);
+      * any other console error, and any page error, fails the test.
+    """
     browser, page = _page(pw, 1600, 1000)
     try:
+        console = []         # (text, source url) of every console error
+        page.on("console", lambda m: console.append(
+            (m.text, (m.location or {}).get("url", ""))) if m.type == "error" else None)
         lp = _calibrate(page, dev_server.url)
         assert START_SCREEN in _main(page).inner_text()
         _main(page).get_by_role("button", name="Sample data (51 TRACK cyclones)").click()
         page.wait_for_selector("text=Set statistics", timeout=RENDER_TIMEOUT)
-        _settled(lp)
+        _settled(lp, 12)
         assert _page_line(page) == "Page 1 of 5 · tracks 1–12 of 51"
         assert _grid_figures(page) == 12
 
         mark = _main(page).get_by_role("checkbox", name="⚠️ Mark as bad").first
         mark.locator("xpath=ancestor::label[1]").click()
-        _settled(lp)
+        _settled(lp, 12)
         assert mark.is_checked()
 
         selectbox(page, "Tracks per page").first.click()
         page.get_by_role("option", name="24", exact=True).click()
-        _settled(lp)
+        _settled(lp, 24)
         assert _page_line(page) == "Page 1 of 3 · tracks 1–24 of 51"
         _main(page).get_by_role("button", name="Next ▶").first.click()
-        _settled(lp)
+        _settled(lp, 24)
         assert _page_line(page) == "Page 2 of 3 · tracks 25–48 of 51"
         assert _grid_figures(page) == 24
 
         _main(page).get_by_text("Inspector", exact=True).first.click()
-        _settled(lp)
+        _settled(lp, 0)
         _main(page).get_by_text("Grid", exact=True).first.click()
-        _settled(lp)
+        _settled(lp, 24)
         _go(page, "Benchmark", "1 · Mode")
         _go(page, "Calibrate", "1 · Data")
         page.wait_for_selector("text=Set statistics", timeout=RENDER_TIMEOUT)
-        _settled(lp)
+        _settled(lp, 24)
         assert selectbox_value(page, "Tracks per page") == "24"
         assert _page_line(page) == "Page 2 of 3 · tracks 25–48 of 51"
         assert _grid_figures(page) == 24
 
         # an interaction after the return must not send defaults back
         _main(page).get_by_role("button", name="◀ Previous").first.click()
-        _settled(lp)
+        _settled(lp, 24)
         assert _page_line(page) == "Page 1 of 3 · tracks 1–24 of 51"
         assert selectbox_value(page, "Tracks per page") == "24"
         assert _main(page).get_by_role("checkbox", name="⚠️ Mark as bad").first.is_checked()
         assert "1 / 51" in _main(page).inner_text()
-        assert not lp.errors, lp.errors
+
+        # the final state, URL by URL — always. Its own wait: the app has
+        # finished, and every image request has ended (an image that failed
+        # for good also ends: complete, with no width — and is reported below)
+        lp.settle()
+        page.wait_for_function(_JS_FIGURE_REQUESTS_ENDED, timeout=RENDER_TIMEOUT)
+        final = page.evaluate(_JS_FINAL_FIGURES)
+        assert len(final) == 24, len(final)
+        bad = [f for f in final if not f["loaded"] or f["status"] != 200]
+        assert not bad, bad
+        # only /media/ 404s may be in the console, and only with that final state
+        assert not [e for e in lp.errors if e.startswith("pageerror")], lp.errors
+        assert len(console) == len(lp.errors), (console, lp.errors)
+        other = [t for t, u in console if not _is_media_404(t, u)]
+        assert not other, other
     finally:
         browser.close()
