@@ -390,3 +390,139 @@ carregar (`complete` e `naturalWidth > 0`).
 
 `manual_labels.yaml` não foi tocado: 0 linhas de `git status` nos executores do
 Chromium.
+
+## Segunda correção da falha intermitente (verificação na ponta 0a2ed3a)
+
+A verificação independente rodou o teste do Chromium isolado em streamlit
+1.63.0: 2 falhas em 6 rodadas, com o mesmo "404" e "Client Error: Image source
+error". A espera pelas figuras antes de cada clique fechava o caminho reproduzido
+com atraso de rede, mas não o de uma máquina com CPU mais lenta.
+
+**Diagnóstico encurtado por decisão do Danilo:** sem o nível de CPU 6×, e 10
+rodadas por versão em vez de 20. A execução de 20+20 com 4× e 6× já tinha 35
+rodadas com 4× concluídas (20 em 1.56.0 e 15 na conda) quando foi parada, e
+todas contam.
+
+### Diagnóstico
+
+O instrumento continua só no diagnóstico; o app commitado não foi tocado.
+- `diag_paged_grid_plugin.py` desacelera a CPU do navegador
+  (`Emulation.setCPUThrottlingRate`), marca o instante de cada clique do teste
+  (`Locator.click`) e de cada resposta 404 de `/media/`.
+- `diag_server/sitecustomize.py` entra só no servidor do diagnóstico (via
+  `PYTHONPATH` e `DIAG_RUNLOG`) e registra cada execução do script.
+- Cada execução é atribuída ao último clique antes dela.
+
+**Ponto cego da primeira versão do contador, corrigido.**
+- A primeira versão registrava só o início e o fim de
+  `ScriptRunner._run_script`.
+- Nas duas versões do Streamlit, um pedido que chega enquanto o script roda
+  interrompe a execução, e a seguinte roda **dentro da mesma chamada** (um
+  `while True`). Uma execução interrompida mais a seguinte contavam como 1, e
+  isso é justamente o caso A.
+- O contador corrigido registra também `_on_script_finished`, chamado uma vez por
+  execução com o tipo de término (`SCRIPT_STOPPED_FOR_RERUN` se interrompida), e
+  a thread de cada evento.
+- As contagens das rodadas `before2_*`, `after2_*` e `after3_*` foram feitas com
+  a versão cega. Os resultados de passou/falhou delas valem; as contagens de
+  execução não. A contagem que decide é a das rodadas `exec_cpu4_*`, abaixo.
+
+**Execuções do script por clique**, contador corrigido, CPU 4×, 10 rodadas por
+versão (`diag/exec_cpu4_*`). As 200 execuções registradas terminaram todas em
+`SCRIPT_STOPPED_WITH_SUCCESS`: nenhuma interrompida. Nas duas versões:
+
+| controle | execuções por clique |
+|---|---|
+| Sample data | 1 em todas |
+| ⚠️ Mark as bad | 1 em todas |
+| Tracks per page → 24 | 1 em todas (abrir a lista: 0) |
+| Next ▶ | 1 em todas |
+| ◀ Previous | 1 em todas |
+| modo → Inspector | 1 em todas |
+| modo → Grid | 1 em todas |
+| menu → Benchmark | 1 em todas |
+| menu → Calibrate | 1 em todas |
+
+Nenhum clique disparou mais de uma execução. No app há três `st.rerun`: no
+diálogo de formato customizado, na importação de YAML e no diálogo Save results.
+Nenhum fica nos caminhos de grade ou de modo.
+
+**404 antes da correção, com CPU 4×:**
+- 1.56.0: 20 rodadas, 0 falhas, 0 respostas 404 de mídia;
+- conda: 15 rodadas, 0 falhas, 0 respostas 404 de mídia.
+
+Aqui a falha não se reproduziu antes da correção. A máquina da verificação é
+mais lenta em CPU.
+
+**Decisão: caso B.** Todo clique dispara uma execução, e nenhuma é interrompida,
+então a corrida é do Streamlit. A melhor evidência do mecanismo veio depois da correção, numa rodada
+com CPU 4× na conda em que o 404 aconteceu sem provocação:
+- o clique em "Inspector" disparou 1 execução, de +2,94 s a +4,32 s depois do
+  clique;
+- o 404 de uma figura da grade veio a +4,44 s;
+- ou seja, o navegador pediu uma figura da execução anterior logo depois que a
+  nova execução terminou e o Streamlit a descartou;
+- o estado final tinha 24/24 figuras, todas com status 200.
+
+**Observação sem explicação completa.** Nessa mesma rodada, ainda com o contador
+antigo:
+- o clique em "Next" ficou com 0 execuções atribuídas;
+- o log do servidor tem duas execuções sobrepostas (`START`, `START`, `END`,
+  `END`), ou seja, duas threads de script ao mesmo tempo, não uma reexecução
+  dentro da mesma chamada;
+- o log antigo não registrava a thread, então não dá para dizer mais.
+
+Nas 20 rodadas com o contador novo, que registra a thread, não houve
+sobreposição: 100 inícios e 100 términos por versão, alternados. O teste
+corrigido não depende disso. Ele só aceita 404 de mídia quando o estado final
+está íntegro, e essa rodada passou nessas condições.
+
+### Correção (caso B, só no teste)
+
+`test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser`, com o
+critério escrito no docstring:
+- **Estado final, sempre, URL a URL.** Depois que o app termina e todo pedido de
+  imagem acaba, as 24 figuras da página final estão carregadas
+  (`complete && naturalWidth > 0`). O servidor responde 200 a cada uma das URLs
+  delas, perguntado com `fetch`. Uma figura quebrada de vez termina com largura 0
+  e reprova o teste.
+- **Tolerância única.** Só um erro de console que seja um 404 de uma URL
+  `/media/` (`_is_media_404`): o "Failed to load resource … 404" do navegador cuja
+  origem é `/media/`, ou o "Image source error - …/media/…" do Streamlit. Ele só
+  é tolerado porque o estado final acima é verificado.
+- **Todo o resto derruba o teste:** qualquer outro erro de console, qualquer erro
+  de página, e qualquer erro que o harness viu e o ouvinte do teste não.
+- Não há lista genérica de erros ignorados; o harness não mudou.
+- **A espera antes de cada clique** também passou a exigir o número esperado de
+  figuras da página atual (12, 24, ou 0 no Inspector), além de todas carregadas.
+  Com a CPU 4×, a primeira versão aceitou uma página momentaneamente vazia
+  ("toda imagem carregada" é verdade para zero imagens) e falhou com
+  `assert 0 == 12` (`diag/after2_cpu4_conda_st1.63.0_8.png`, em que a página
+  final mostra as 12 figuras). Foi uma falha de sincronia do teste, e esta mudança
+  a corrige.
+
+**Controles do critério**, pelo plugin, sem mudar o teste:
+- **tolerância:** sem a espera pelas figuras e com +1500 ms por pedido, os 404 de
+  mídia acontecem. Resultado: 3 passed, com 0, 25 e 39 respostas 404 e o estado
+  final íntegro (`diag/control_tolerated_media404_conda.jsonl`);
+- **erro qualquer:** um `console.error` injetado. Resultado: o teste falha e
+  aponta o erro (`diag/control_injected_error_conda.jsonl`).
+
+### Depois da correção
+
+| condição | 1.56.0 | 1.63.0 (conda) |
+|---|---|---|
+| normal, 10 rodadas | **0 falhas** | **0 falhas** |
+| CPU 4×, 10 rodadas | **0 falhas** | **0 falhas** (1 rodada com 404 de mídia tolerado, estado final 24/24 e 200) |
+| CPU 4×, 10 rodadas com o contador corrigido (`exec_cpu4_*`) | **0 falhas** | **0 falhas** |
+
+Saídas: `diag/after3_*`. A rodada `after2_*` é a da versão intermediária, que
+falhou pela contagem de figuras e foi corrigida acima.
+
+| | streamlit 1.56.0 | streamlit 1.63.0 (conda) |
+|---|---|---|
+| Chromium completo | **37 passed, 0 failed** | **37 passed, 0 failed** |
+| testes de app | **203 passed, 0 failed** | **203 passed, 0 failed** |
+
+O app não mudou, então não há tempo por clique a comparar (isso só valeria no
+caso A) nem captura nova. `manual_labels.yaml` não foi tocado.

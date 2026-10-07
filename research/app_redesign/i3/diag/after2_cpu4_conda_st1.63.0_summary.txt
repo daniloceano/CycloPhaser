@@ -1,0 +1,17 @@
+python: ~/miniconda3/envs/cyclophaser/bin/python | HEAD 0a2ed3a | tracked changes: 3 | 2026-10-07T12:57:54Z
+added latency per HTTP request: 0 ms | browser CPU throttling rate: 4
+streamlit 1.63.0 | playwright 1.62.0
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[8]
+1 failed, 9 passed in 315.88s (0:05:15)
+runs 10 | failed 1 | runs with console errors 0 | runs with a /media 404 0
+  script runs per click — sample data: 1×10
+  script runs per click — mark as bad: 1×9
+  script runs per click — page size (open): 0×9
+  script runs per click — page size → 24: 1×9
+  script runs per click — next: 1×9
+  script runs per click — mode → Inspector: 1×9
+  script runs per click — mode → Grid: 1×9
+  script runs per click — menu → Benchmark: 1×9
+  script runs per click — menu → Calibrate: 1×9
+  script runs per click — previous: 1×9
+  run 8: final images 12, not loaded 0, broken (URL not served now) 0 -> TESTE | assert 0 == 12

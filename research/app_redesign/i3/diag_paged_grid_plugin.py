@@ -21,6 +21,19 @@ A pytest plugin; the test and the harness are not changed.
   with that added latency per HTTP request — the images (/media/…) arrive late,
   as on a loaded machine, so the test's clicks land while the previous page's
   figures are still loading. The websocket that drives the app is not delayed.
+* DIAG_CPU_RATE (optional): CPU throttling of the page (CDP
+  Emulation.setCPUThrottlingRate), e.g. 4 or 6 — a slow machine's browser.
+* Script runs: the app server of the session gets diag_server/ on PYTHONPATH and
+  DIAG_RUNLOG, so its sitecustomize.py logs the wall-clock START/END of every
+  script run (the app's code is not touched). Each click the test makes
+  (Locator.click) and each 404 on /media/ are timestamped in the browser
+  process; every script run is attributed to the last click before it.
+* Controls of the test's console criterion (case B of the second correction):
+  DIAG_NO_SETTLE=1 replaces the test module's `_settled` by a bare
+  `lp.settle()` (no wait for the figures), so with DIAG_LATENCY_MS the /media/
+  404s do happen — the test must still pass, the final state being intact;
+  DIAG_INJECT_ERROR=1 logs one unrelated console.error on the page — the test
+  must fail.
 * One JSON line per run in <DIAG_OUT>/<label>.jsonl: outcome, the assertion
   message, console errors, image counts and the broken sources. Screenshots of
   passing runs are deleted; failing runs keep theirs.
@@ -30,13 +43,17 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
+import time
 from pathlib import Path
 
 TARGET = "test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser"
 OUT = Path(os.environ.get("DIAG_OUT", "."))
 LABEL = os.environ.get("DIAG_LABEL", "run")
-_state: dict = {"pages": [], "final": [], "nodeid": None}
+_state: dict = {"pages": [], "final": [], "nodeid": None, "events": [], "t0": 0.0}
+HERE = Path(__file__).resolve().parent
+RUNLOG = OUT / f"{LABEL}_server_runs.log"
 
 _JS_WAIT_SETTLED = """() => [...document.querySelectorAll(
     '[data-testid="stMain"] [data-testid="stImage"] img')].every(i => i.complete)"""
@@ -58,8 +75,33 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("diag_rep", range(1, n + 1))
 
 
+def _control(selector: str) -> str:
+    for pat, name in (("Next ▶", "next"), ("◀ Previous", "previous"),
+                      ('option[name="24"', "page size → 24"), ("Tracks per page", "page size (open)"),
+                      ('"Inspector"', "mode → Inspector"), ('"Grid"', "mode → Grid"),
+                      ('"Benchmark"', "menu → Benchmark"), ('"Calibrate"', "menu → Calibrate"),
+                      ("ancestor::label", "mark as bad"), ("Sample data", "sample data")):
+        if pat in selector:
+            return name
+    return selector[-80:]
+
+
 def pytest_configure(config):
     OUT.mkdir(parents=True, exist_ok=True)
+    RUNLOG.unlink(missing_ok=True)
+    os.environ["DIAG_RUNLOG"] = str(RUNLOG)
+    os.environ["PYTHONPATH"] = os.pathsep.join(
+        [str(HERE / "diag_server"), os.environ.get("PYTHONPATH", "")])
+    from playwright.sync_api import Locator
+
+    real_click = Locator.click
+
+    def click(self, *a, **k):
+        m = re.search(r"selector='(.*)'", str(self))
+        _state["events"].append(("click", time.time(), _control(m.group(1) if m else str(self))))
+        return real_click(self, *a, **k)
+
+    Locator.click = click
     tests_dir = Path(config.rootpath) / "tests"
     sys.path.insert(0, str(tests_dir))
     import browser_harness
@@ -68,10 +110,18 @@ def pytest_configure(config):
     real_init = browser_harness.LabelPage.__init__
 
     latency = int(os.environ.get("DIAG_LATENCY_MS", "0"))
+    cpu = float(os.environ.get("DIAG_CPU_RATE", "0"))
 
     def init(self, page):
         real_init(self, page)
         _state["pages"].append(self)
+        page.on("response", lambda r: _state["events"].append(("404", time.time(), r.url))
+                if r.status == 404 and "/media/" in r.url else None)
+        if os.environ.get("DIAG_INJECT_ERROR") == "1":
+            page.evaluate("() => console.error('diag: injected unrelated error')")
+        if cpu > 1:
+            page.context.new_cdp_session(page).send(
+                "Emulation.setCPUThrottlingRate", {"rate": cpu})
         if latency:
             cdp = page.context.new_cdp_session(page)
             cdp.send("Network.enable")
@@ -109,7 +159,9 @@ def pytest_configure(config):
 
 
 def pytest_runtest_setup(item):
-    _state.update(pages=[], final=[], nodeid=item.nodeid,
+    if os.environ.get("DIAG_NO_SETTLE") == "1" and hasattr(item.module, "_settled"):
+        item.module._settled = lambda lp, *a, **k: lp.settle()
+    _state.update(pages=[], final=[], nodeid=item.nodeid, events=[], t0=time.time(),
                   nodeid_tag=item.nodeid.split("[")[-1].rstrip("]"))
 
 
@@ -129,6 +181,38 @@ def pytest_runtest_makereport(item, call):
         "broken_srcs": broken,
         "screenshot": [f.get("screenshot") for f in _state["final"]],
     }
+    # timeline: every script EXECUTION from the server log (see
+    # diag_server/sitecustomize.py: an interrupted execution and the one that
+    # follows it inside the same _run_script call are two), attributed to the
+    # last click before the execution began
+    runs = []                       # (start, end, how it ended)
+    if RUNLOG.exists():
+        begin: dict = {}
+        for line in RUNLOG.read_text().splitlines():
+            f = line.split()
+            if f[0] == "START":
+                begin[f[2]] = float(f[1])
+            elif f[0] == "FIN" and f[2] in begin:
+                t = float(f[1])
+                if begin[f[2]] >= _state["t0"]:
+                    runs.append((begin[f[2]], t, f[3]))
+                begin[f[2]] = t     # a rerun inside the same call starts now
+            elif f[0] == "END":
+                begin.pop(f[2], None)
+    clicks = [e for e in _state["events"] if e[0] == "click"]
+    per_click = []
+    for i, (_k, t, name) in enumerate(clicks):
+        t_next = clicks[i + 1][1] if i + 1 < len(clicks) else float("inf")
+        rs = [r for r in runs if t <= r[0] < t_next]
+        e404 = [e for e in _state["events"] if e[0] == "404" and t <= e[1] < t_next]
+        per_click.append({"control": name, "t": round(t - _state["t0"], 3),
+                          "script_runs": len(rs),
+                          "interrupted": sum(1 for r in rs if r[2] == "SCRIPT_STOPPED_FOR_RERUN"),
+                          "runs_rel_s": [[round(a - t, 3), round(b - t, 3), how[7:]]
+                                         for a, b, how in rs],
+                          "media_404_rel_s": [round(e[1] - t, 3) for e in e404]})
+    rec["per_click"] = per_click
+    rec["media_404"] = len([e for e in _state["events"] if e[0] == "404"])
     if not failed:
         for f in _state["final"]:
             if f.get("screenshot"):
