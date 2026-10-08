@@ -4179,6 +4179,47 @@ Reports: `research/release_v21/passo1/`, `passo2/` (part A); `research/release_v
 * The merge commit `7260b04` has no `Co-Authored-By` line (its message was fixed by the instruction).
 * `paper.md` on the branch `joss-submission` states no version.
 
+
+## 34. Calibration app redesign — closed without the usability round (2026-10-08), NOT merged
+
+Branch `feat/app-redesign` (from `develop` @ `d339c7d`). Reports: `research/app_redesign/i1/`, `i2/`, `i3/` (each with `PREVISOES.md`, `INVENTARIO.md`, `RELATORIO.md`) and `research/app_redesign/close/`. No PR; merging needs Danilo's authorisation. The package (`cyclophaser/`), its defaults and its version are untouched by the whole front (`git diff d339c7d -- cyclophaser/` empty); the app's floor is `streamlit==1.56.0`.
+
+### What each increment delivered
+
+* **I1 — PASS** (tip `63f074f`, approval recorded in `83a5114`). One page per task (`st.navigation`): Calibrate and Benchmark; Manual labelling only with the developer key (`CYCLOPHASER_APP_DEV=1` or `developer_mode = true` in the secrets), so the page that writes `research/labels/manual_labels.yaml` is not reachable from the public app. Only the open page runs. Dark-sidebar theme in `.streamlit/config.toml` at the root. Widget state kept across pages (two writes: the closed pages' keys on every run, and the arrived page's keys on its first run). Benchmark lost the frozen test-split panel. Label page: overlays always available (revealing them is recorded), "Overlay scale" (raw range by default).
+* **I2 — PASS** (`91087b2`..`6016486`). Guided Calibrate sidebar: 1 · Data (upload, "Custom format…" dialog, example, 51 sample tracks), 2 · Starting configuration (defaults or a saved YAML; "Active: …", marked *edited*), 3 · Filtering (the only calibrated part), Advanced (eight flat groups in the detector's order, with a count of the values that differ from the defaults), 4 · Save results (one ZIP: `parameters.yaml` always, phase CSVs by default, PNGs on request, built only when asked). Developer-only functions (bad-case marks, their summary, the YAML `evaluation` section, the synthetic cases). With nothing loaded, nothing runs. The bad-case mark is kept across display modes and pages (it was lost on Grid → Inspector → Grid since before the front). The version shown is the installed package's.
+* **I3 — PASS** (`3428512`..`4f83334`). Start screen (what the page does, four steps, example and sample buttons, documentation link). Paged Grid (12/24/48 tracks per page; only the page's figures are drawn, detection still runs on every track; grid columns and page size kept across modes and pages). Set statistics, descriptive and labelled as not a quality score: tracks analysed and failed, per package phase key (a repeated phase counts under its own key, "intensification 2", as in the figures and CSVs — Danilo's decision) the n and % of tracks and the median duration with its n, the whole-cycle median, and the five most common sequences drawn with squares in the figures' colours. A YAML's `evaluation` section is ignored without the developer key ("evaluation (developer only)"). The app has one phase palette, `layer_inspector.PHASE_COLORS`, checked against `cyclophaser/plots.py` by `tests/test_phase_colors.py`.
+* **I3, after the independent verification**: two intermittent failures of the paged-grid Chromium test were diagnosed and fixed in the test (the app did not change). `6427043`/`0a2ed3a`: the test clicked while figures were still loading (reproduced with +1500 ms network latency: 40/40 failures, final state intact in all). `6951a89`/`4f83334`: on a slow CPU, each click still starts exactly ONE script execution, none interrupted (counted through `ScriptRunner._on_script_finished`, 10 runs per version at CPU 4×), so the remaining `/media/` 404 is a race inside Streamlit; the test tolerates only a `/media/` 404, and only with the final state checked URL by URL (24/24 figures loaded, every URL answering 200).
+
+### Gate criterion (e) NOT met
+
+**Usability was checked by the developer only.** The round with three outside users (I4) did not come back in time, and Danilo closed the front without it (decision of 2026-10-08). If their feedback arrives later, it opens a **new front** for it alone, with the same seven tasks and the same criterion; this front is not reopened.
+
+### Measurements (observations, predictions committed before measuring)
+
+One slider change ("High cutoff", 5 steps to unseen values), 51 sample tracks, Grid of 2 columns, streamlit 1.63.0, median server time per change:
+
+| tip | figures drawn per change | median per change |
+|---|---|---|
+| I1 (`63f074f`) | 102 (51 for the old ZIP export + 51 on screen) | 39.1 s |
+| I2 | 51 | 13.2 s |
+| I3 (page of 12) | 12 (detection still on all 51) | 5.0 s |
+
+The set statistics cost about 0.016 s per change (measured by replacing them with nothing: 4.96 s against 5.03 s).
+
+### Known pending items
+
+* **Overlapping script executions, unexplained.** In one CPU-4× Chromium run of I3 (old counter, which did not record the thread), the server log showed two script executions overlapping, i.e. two script threads at once, not a rerun inside one call. Not seen again in 20 runs with the corrected counter, which records the thread. The test does not depend on it.
+* **CI does not test the app.** The CI recipe installs only the wheel, pytest and PyYAML, so every app test is skipped there. At I1 (`63f074f`) the skips hid 211 tests (177 the conda env runs + 34 Chromium); at the end of the front (`4f83334`), 241: the conda suite passes 1485 and the CI recipe 1281 (1280 against the wheel + 1 on the source), so 204 run only in the conda env, plus the 37 Chromium tests, which neither runs (`research/app_redesign/close/`). Only the dedicated conda env and the manual Chromium runs test the app, on the floor (1.56.0) and on the newest version.
+* `docs/calibration_tool.rst` documents the new interface, with screenshots made by `docs/figures/make_app_screenshots.py`; Read the Docs publishes it only after the merge into `master`.
+
+### Lessons
+
+1. **Test on the floor and on the newest version — Chromium included.** I1 failed the independent verification twice for this: AppTest passed on 1.63 and failed on the declared floor 1.56.0, and then the Chromium tests did the same.
+2. **A new browser test is run many times before it is accepted.** The paged-grid test passed when written and failed later, intermittently, on another machine.
+3. **An intermittent failure is diagnosed by varying the conditions — network and CPU — not under one condition.** Network latency reproduced the first cause; the second appeared only with the CPU throttled; and the first counter of script executions had a blind spot (a rerun inside one `_run_script` call counted as one) that only a second instrument exposed.
+4. **The prediction is committed before measuring** (from I3 on; in I2 it was committed with the rest, so git did not prove its order).
+
 ---
 
 ## Note
