@@ -1,0 +1,22 @@
+python: ~/miniconda3/envs/cyclophaser/bin/python | HEAD 0a2ed3a | tracked changes: 7 | 2026-10-07T13:35:25Z
+added latency per HTTP request: 0 ms | browser CPU throttling rate: 0
+streamlit 1.63.0 | playwright 1.62.0
+            # finished, and every image request has ended (an image that failed
+FAILED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser[1]
+1 failed in 51.63s
+runs 1 | failed 1 | runs with console errors 1 | runs with a /media 404 0
+  script runs per click — sample data: 1×1
+  script runs per click — mark as bad: 1×1
+  script runs per click — page size (open): 0×1
+  script runs per click — page size → 24: 1×1
+  script runs per click — next: 1×1
+  script runs per click — mode → Inspector: 1×1
+  script runs per click — mode → Grid: 1×1
+  script runs per click — menu → Benchmark: 1×1
+  script runs per click — menu → Calibrate: 1×1
+  script runs per click — previous: 1×1
+  run 1: final images 24, not loaded 0, broken (URL not served now) 0 -> TESTE | ['diag: injected unrelated error', 'diag: injected unrelated error', 'diag: injected unrelated error']
+    console.error: diag: injected unrelated error
+    console.error: diag: injected unrelated error
+    console.error: diag: injected unrelated error
+    console.error: diag: injected unrelated error

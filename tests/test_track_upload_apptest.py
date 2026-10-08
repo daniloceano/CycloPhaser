@@ -75,9 +75,19 @@ def _custom_file(sign: int = 1) -> bytes:
     return ("\n".join(rows) + "\n").encode()
 
 
+def _custom_dialog(at) -> AppTest:
+    """Open "Custom format…" (I2: the fields, previews and confirmations live in
+    a dialog). AppTest reruns the whole script, which closes the dialog, so it
+    is reopened before every look at its contents; the values persist."""
+    _widget(at, "button", "open_custom_format").click()
+    return _run(at)
+
+
 def _enable_custom(at) -> AppTest:
+    _custom_dialog(at)
     _widget(at, "checkbox", tfu.K_ON).check()
     _run(at)
+    _custom_dialog(at)
     _widget(at, "selectbox", tfu.K_SEP).set_value(",")
     _widget(at, "text_input", tfu.K_DATE).set_value("date")
     _widget(at, "text_input", tfu.K_VORT).set_value("vor")
@@ -90,7 +100,7 @@ def _errors(at) -> list[str]:
 
 
 def _grid_names(at) -> list[str]:
-    return [h.value for h in at.subheader]
+    return [h.value for h in at.main.subheader]
 
 
 # ── help (?) texts and accepted extensions ────────────────────────────────────
@@ -103,10 +113,11 @@ def test_upload_field_accepts_txt_and_has_help():
 
 
 def test_every_custom_format_control_has_help():
-    at = _app()
+    at = _custom_dialog(_app())
     assert _widget(at, "checkbox", tfu.K_ON).help == tfu.HELP_ON
     _widget(at, "checkbox", tfu.K_ON).check()
     _run(at)
+    _custom_dialog(at)
     expected = {
         ("selectbox", tfu.K_SEP): tfu.HELP_SEP,
         ("checkbox", tfu.K_HEADER): tfu.HELP_HEADER,
@@ -118,8 +129,15 @@ def test_every_custom_format_control_has_help():
         assert _widget(at, kind, key).help == text, key
 
 
+def _to_benchmark(at) -> AppTest:
+    """Benchmark is a page of its own since the app redesign (I1); the custom
+    format set on Calibrate reaches it through app.py's cross-page state."""
+    at.switch_page("app_pages/benchmark.py")
+    return _run(at)
+
+
 def test_benchmark_upload_accepts_txt_and_has_help():
-    at = _app()
+    at = _to_benchmark(_app())
     _widget(at, "radio", "bench_mode").set_value("Exploration")
     _run(at)
     up = _widget(at, "file_uploader", "bench_data_upload")
@@ -153,6 +171,8 @@ def test_custom_file_is_previewed_and_used_only_after_confirmation():
     _widget(at, "file_uploader", "track_upload").set_value(
         ("odd.txt", _custom_file(), "text/plain"))
     _run(at)
+    assert "odd" not in _grid_names(at), "used before confirmation"
+    _custom_dialog(at)
     assert _errors(at) == []
     captions = " ".join(c.value for c in at.caption)
     n = len(SOURCE.read_text().splitlines()) - 1
@@ -171,12 +191,13 @@ def test_positive_vorticity_warns_in_the_preview():
     _widget(at, "file_uploader", "track_upload").set_value(
         ("north.txt", _custom_file(sign=-1), "text/plain"))
     _run(at)
+    _custom_dialog(at)
     assert any("SOUTHERN hemisphere" in w.value for w in at.warning)
 
 
 # ── the Benchmark Exploration uploader, same settings ─────────────────────────
 def test_benchmark_exploration_uses_the_same_custom_format():
-    at = _enable_custom(_app())
+    at = _to_benchmark(_enable_custom(_app()))
     _widget(at, "radio", "bench_mode").set_value("Exploration")
     _run(at)
     _widget(at, "file_uploader", "bench_data_upload").set_value(
@@ -205,9 +226,19 @@ def test_searched_text_is_what_the_package_emits_for_true():
 
 def test_grid_with_filter_on_and_many_cyclones_shows_no_use_filter_warning():
     at = _app()
-    _widget(at, "checkbox", "load_all_test_cyclones").check()
+    _widget(at, "button", "btn_sample").click()   # was the "Load all test cyclones" box
     _run(at)
     assert at.session_state["use_filter"] is True
-    assert len(_grid_names(at)) > 50
-    hits = [w.value for w in at.warning if USE_FILTER_WARNING in w.value]
+    # Since I3 the grid is paged (12 tracks per page by default): walk every
+    # page, so the warning is looked for under every loaded track, as before.
+    names, hits = [], []
+    while True:
+        names += [n for n in _grid_names(at) if n.isdigit()]
+        hits += [w.value for w in at.warning if USE_FILTER_WARNING in w.value]
+        nxt = _widget(at, "button", "grid_next_top")
+        if nxt.disabled:
+            break
+        nxt.click()
+        _run(at)
+    assert len(set(names)) > 50
     assert hits == []

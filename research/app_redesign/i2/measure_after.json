@@ -1,0 +1,57 @@
+{
+ "variant": "after",
+ "root_head": "83a51146ac0223fb42bce0b5f781bfb293e13b9d",
+ "root_tracked_changes": true,
+ "streamlit": "1.63.0",
+ "reps": 5,
+ "steps": [
+  {
+   "png_total": 51,
+   "png_by_caller": {
+    "_render_periods_png": 51
+   },
+   "script_runs": 1,
+   "server_seconds": 13.1496
+  },
+  {
+   "png_total": 51,
+   "png_by_caller": {
+    "_render_periods_png": 51
+   },
+   "script_runs": 1,
+   "server_seconds": 13.2951
+  },
+  {
+   "png_total": 51,
+   "png_by_caller": {
+    "_render_periods_png": 51
+   },
+   "script_runs": 1,
+   "server_seconds": 13.2362
+  },
+  {
+   "png_total": 51,
+   "png_by_caller": {
+    "_render_periods_png": 51
+   },
+   "script_runs": 1,
+   "server_seconds": 13.1582
+  },
+  {
+   "png_total": 51,
+   "png_by_caller": {
+    "_render_periods_png": 51
+   },
+   "script_runs": 1,
+   "server_seconds": 13.0776
+  }
+ ],
+ "median_server_seconds": 13.1582,
+ "png_total_per_step": [
+  51,
+  51,
+  51,
+  51,
+  51
+ ]
+}

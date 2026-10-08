@@ -65,9 +65,18 @@ CFG_B = "cyclophaser_params-track.yaml"
 DECLARED_DIFF = ("filter_params", "cutoff_high", 48, 18)
 
 
+CALIBRATE_PAGE = "app_pages/calibrate.py"
+BENCHMARK_PAGE = "app_pages/benchmark.py"
+
+
 def _app() -> AppTest:
+    """The app on its Benchmark page — opened the way a user opens it: Calibrate
+    (the default page) first, whose sidebar publishes `_bench_live_config`, then
+    Benchmark from the menu (app redesign I1; Benchmark used to be a tab that
+    rendered alongside Calibration on every run)."""
     at = AppTest.from_file(str(APP), default_timeout=300)
     at.run()
+    at.switch_page(BENCHMARK_PAGE).run()
     assert not at.exception, [str(e) for e in at.exception]
     return at
 
@@ -93,10 +102,14 @@ def _add_config_column(at, filename):
 
 
 def _set_declared_sidebar_value(at):
-    """Set the ONE declared non-default sidebar value (DECLARED_DIFF)."""
+    """Set the ONE declared non-default sidebar value (DECLARED_DIFF).
+
+    The sidebar is the Calibrate page's: go there, set it, come back."""
     _sec, key, value, _p15 = DECLARED_DIFF
+    at.switch_page(CALIBRATE_PAGE).run()
     _widget(at, "slider", key).set_value(value)
     at.run()
+    at.switch_page(BENCHMARK_PAGE).run()
     assert not at.exception, [str(e) for e in at.exception]
 
 
@@ -860,7 +873,9 @@ def test_the_batch_is_off_by_default_and_not_selectable():
     at = _app()
     assert at.session_state["bench_include_swell_batch"] is False
     opts = set(_widget(at, "multiselect", "bench_ids_widget").options)
-    assert len(opts) == 63
+    # 47, not 63: Validation offers labelled sources only, and the page
+    # withholds the 16 test-split labels (app redesign I1)
+    assert len(opts) == 47
     assert not {o.split(" ")[0] for o in opts} & set(_batch())
 
 
@@ -870,24 +885,27 @@ def test_the_batch_appears_with_the_control_on_and_goes_with_it_off():
     at.run()
     assert not at.exception, [str(e) for e in at.exception]
     opts = {o.split(" ")[0] for o in _widget(at, "multiselect", "bench_ids_widget").options}
-    assert set(_batch()) <= opts and len(opts) == 73
+    # the batch's 7 train cases join; its 3 test cases are withheld like the 16
+    assert set(_batch()) - BATCH_TEST <= opts and len(opts) == 54
+    assert not BATCH_TEST & opts
 
     _select(at, sorted(_batch()))
     _widget(at, "checkbox", "bench_include_swell_batch").set_value(False)
     at.run()
     assert not at.exception, [str(e) for e in at.exception]
     opts = {o.split(" ")[0] for o in _widget(at, "multiselect", "bench_ids_widget").options}
-    assert len(opts) == 63 and not set(_batch()) & opts
+    assert len(opts) == 47 and not set(_batch()) & opts
     assert not set(_batch()) & set(at.session_state["bench_selected_ids"]), (
         "batch ids stayed selected after the batch was switched off")
 
 
-def test_the_split_buttons_treat_the_batch_like_the_split():
-    """Train and Test pick the batch's 7 and 3 alongside the 47 and 16 — and,
-    as the positive control, not while the batch is off.
+def test_the_train_button_treats_the_batch_like_the_split():
+    """Train picks the batch's 7 alongside the 47 — and, as the positive
+    control, not while the batch is off. The "Test" button is retired (app
+    redesign I1): the test split is spent and the page offers none of it.
 
-    One fresh app per click: pressing Train and then Test in the same session
-    empties the selection, a defect that predates item 30c (reproduced on
+    One fresh app per click: pressing two presets in the same session used to
+    empty the selection, a defect that predates item 30c (reproduced on
     99f5a9a) and is not what this test is about."""
     def picked(key, batch):
         at = _app()
@@ -900,27 +918,28 @@ def test_the_split_buttons_treat_the_batch_like_the_split():
         return set(at.session_state["bench_selected_ids"])
 
     assert len(picked("bench_pick_train", False)) == 47
-    assert len(picked("bench_pick_test", False)) == 16
     train = picked("bench_pick_train", True)
     assert len(train) == 54 and not train & BATCH_TEST
-    test = picked("bench_pick_test", True)
-    assert len(test) == 19 and BATCH_TEST <= test
+    assert not _has(_app(), "button", "bench_pick_test")
 
 
-def test_the_batch_test_cases_score_only_in_the_test_block():
-    """The 3 are scored where the 16 are — the frozen test block — and never
-    in the train one. Only the blocks' series counts are read here."""
+def test_the_batch_test_cases_are_never_scored():
+    """The 3 are treated like the 16: not offered, never scored. With every
+    selectable batch case run, the scoring panel has train and adjudicated
+    blocks and no test block at all."""
     at = _app()
     _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
     at.run()
-    _select(at, sorted(_batch()))
+    opts = {o.split(" ")[0] for o in _widget(at, "multiselect", "bench_ids_widget").options}
+    assert not BATCH_TEST & opts
+    _select(at, sorted(set(_batch()) & opts))
     _add_config_column(at, CFG_B)
     _run(at)
     labels = [e.label for e in at.expander]
     # 7 batch TRAIN = 2 plain + 5 adjudicated (item 30 part 3), each in its block
     assert "Train split — 2 series" in labels, labels
-    assert "Test split (frozen) — 3 series" in labels, labels
     assert "Adjudicated (item 30) — 5 series" in labels, labels
+    assert not any(lb.startswith("Test split") for lb in labels), labels
 
 
 # ══════════════════════════════════════════════════════════════════════════

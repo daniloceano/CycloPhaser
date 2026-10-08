@@ -1,0 +1,15 @@
+python: <scratch>/venv_st156/bin/python | HEAD 0a2ed3a | tracked changes: 8 | 2026-10-07T14:32:51Z
+added latency per HTTP request: 0 ms | browser CPU throttling rate: 4
+streamlit 1.56.0 | playwright 1.62.0
+10 passed in 413.53s (0:06:53)
+runs 10 | failed 0 | runs with console errors 0 | runs with a /media 404 0
+  script executions per click — sample data: 1×10 | interrupted for a rerun: 0
+  script executions per click — mark as bad: 1×10 | interrupted for a rerun: 0
+  script executions per click — page size (open): 0×10 | interrupted for a rerun: 0
+  script executions per click — page size → 24: 1×10 | interrupted for a rerun: 0
+  script executions per click — next: 1×10 | interrupted for a rerun: 0
+  script executions per click — mode → Inspector: 1×10 | interrupted for a rerun: 0
+  script executions per click — mode → Grid: 1×10 | interrupted for a rerun: 0
+  script executions per click — menu → Benchmark: 1×10 | interrupted for a rerun: 0
+  script executions per click — menu → Calibrate: 1×10 | interrupted for a rerun: 0
+  script executions per click — previous: 1×10 | interrupted for a rerun: 0

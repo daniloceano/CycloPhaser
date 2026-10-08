@@ -1,0 +1,4 @@
+label: release_2.1.1 | mode: head | HEAD 6102b03 | patch: none | 2026-10-08T16:32:47Z
+sphinx: 7.2.6 | exit 0
+warnings: 0
+html: $SCRATCH/docs_release_2.1.1/docs/_build/html/index.html

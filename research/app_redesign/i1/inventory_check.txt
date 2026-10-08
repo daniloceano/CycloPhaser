@@ -1,0 +1,88 @@
+base origin/develop = d339c7d1f0fc17a5e2efa218f0825d2c8a379a86; now = working tree
+files only now: ['tools/calibration_app/app_pages/benchmark.py', 'tools/calibration_app/app_pages/calibrate.py', 'tools/calibration_app/app_pages/label.py', 'tools/calibration_app/label_overlays.py']
+files only at base: []
+
+== tools/calibration_app/app.py
+  top-level names gone: [('_LABEL_OVERLAY_STYLE', 'moved'), ('_label_overlays', 'moved')]
+  top-level names new:  ['_APP_PAGES_DIR', '_K_KEPT_RESTORED', '_K_KEPT_UPLOADS', '_PAGE_BENCHMARK', '_PAGE_CALIBRATE', '_PAGE_LABEL', '_PAGE_WIDGET_STATE', '_PREVIOUS_PAGE', '_carry_uploads', '_developer_mode', '_forget_kept_uploads', '_keep_page_state', '_page', '_pages']
+  widget keys gone: [('label_default_tolerance', 'moved')]
+  widget keys new:  ['forget_kept_uploads']
+  _VIEW_MODES: ['Grid', 'Inspector', 'Label'] -> ['Grid', 'Inspector']
+
+== tools/calibration_app/app_pages/benchmark.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/app_pages/calibrate.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/app_pages/label.py
+  top-level names gone: []
+  top-level names new:  ['_overlay_provider']
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/benchmark_core.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/benchmark_tab.py
+  top-level names gone: []
+  top-level names new:  ['WIDGET_STATE_KEYS', 'WIDGET_STATE_PREFIXES']
+  widget keys gone: [('bench_pick_test', 'GONE')]
+  widget keys new:  []
+
+== tools/calibration_app/inspector_mpl.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/inspector_plotly.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/label_overlays.py
+  top-level names gone: []
+  top-level names new:  ['FILTER_KEYS', 'LABEL_OVERLAY_STYLE', 'label_overlays', 'live_filter_params']
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/label_tab.py
+  top-level names gone: [('_mode_switch', 'GONE')]
+  top-level names new:  ['OVERLAY_SCALES', '_default_tolerance_input', '_display_path', '_finite_range', '_overlays_revealed', 'onto_raw_range']
+  widget keys gone: [('lab_mode_cancel', 'GONE'), ('lab_mode_confirm', 'GONE'), ('lab_mode_radio__…', 'GONE'), ('lab_overlay_shared__…', 'GONE')]
+  widget keys new:  ['lab_overlay_scale__…', 'label_default_tolerance']
+
+== tools/calibration_app/layer_inspector.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/package_args.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/track_format_ui.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []
+
+== tools/calibration_app/track_io.py
+  top-level names gone: []
+  top-level names new:  []
+  widget keys gone: []
+  widget keys new:  []

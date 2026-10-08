@@ -200,59 +200,29 @@ def test_only_the_declared_selector_keys_are_shared_between_parameters():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# the group numbering promises the execution order — it must not lie
+# the Advanced groups keep the detector's execution order
 # ══════════════════════════════════════════════════════════════════════════
+#
+# Until the app redesign's I2 the sidebar promised the execution order with
+# numbered headers ("4 · Intensification") and "Step N — <function>" captions,
+# checked by two tests here. I2 retired that layout on purpose: the visible text
+# no longer names internal functions or step numbers, and the parameters live in
+# flat "Advanced" expanders. The promise itself is kept, by the ORDER of those
+# expanders, and this test replaces the two (it checks the same thing on the new
+# layout; the post-processing step still has no group, having no parameter).
 
-def _numbered_groups(at):
-    """[(header_number, header_title, step_number_cited_in_its_caption), ...].
-
-    The sidebar is read top to bottom, so a group's caption is the first
-    "Step N" caption that follows its header.
-    """
-    import re
-    items = []
-    for el in at.sidebar:
-        t = getattr(el, "value", None)
-        if not isinstance(t, str):
-            continue
-        h = re.match(r"^(\d+) · (.+)$", t.strip())
-        if h:
-            items.append(["header", int(h.group(1)), h.group(2)])
-            continue
-        c = re.match(r"^Step (\d+) — ", t.strip())
-        if c:
-            items.append(["caption", int(c.group(1)), t.strip()])
-
-    out, pending = [], None
-    for kind, num, text in items:
-        if kind == "header":
-            pending = (num, text)
-        elif pending is not None:
-            out.append((pending[0], pending[1], num))
-            pending = None
-    return out
+ADVANCED_GROUPS_IN_EXECUTION_ORDER = [
+    "Filtering options",   # the rest of process_vorticity
+    "Extrema",             # find_peaks_valleys(z), before every stage
+    "Threshold scale",     # spans intensification, decay and mature
+    "Intensification",     # find_intensification_period
+    "Decay",               # find_decay_period
+    "Mature",              # find_mature_stage
+    "Residual",            # find_residual_period (decay_tail_amplitude_fraction)
+    "Incipient",           # find_incipient_period, last (after post-processing)
+]
 
 
-def test_every_group_header_number_matches_the_step_its_caption_cites():
-    """A header that says 8 above a caption that says "Step 9" makes the
-    numbering worthless — it is supposed to BE the execution order.
-
-    Step 8 (`post_process_periods`) takes no parameter and so has no group; the
-    numbering skips 8 rather than closing the gap, which is why this asserts
-    agreement rather than a contiguous 1..N sequence.
-    """
+def test_the_advanced_groups_follow_the_detectors_execution_order():
     at = _base_app()
-    groups = _numbered_groups(at)
-    assert groups, "no numbered sidebar groups were found"
-    wrong = [(h, title, step) for h, title, step in groups if h != step]
-    assert not wrong, (
-        "group header number disagrees with the step cited in its caption: "
-        + "; ".join(f"'{h} · {title}' cites Step {step}" for h, title, step in wrong))
-
-
-def test_the_numbering_covers_every_parameterised_step_and_skips_only_step_8():
-    at = _base_app()
-    numbers = sorted(h for h, _, _ in _numbered_groups(at))
-    assert numbers == [1, 2, 3, 4, 5, 6, 7, 9], (
-        f"unexpected group numbering {numbers}; step 8 (post_process_periods) "
-        "takes no parameter and is the only one that may be absent")
+    assert [e.label for e in at.sidebar.expander] == ADVANCED_GROUPS_IN_EXECUTION_ORDER

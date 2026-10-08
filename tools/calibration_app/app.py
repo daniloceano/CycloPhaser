@@ -6,6 +6,7 @@ parameters interactively, and inspect results across all cyclones at once.
 
 import hashlib
 import io
+import os
 import sys
 import warnings
 import zipfile
@@ -33,18 +34,19 @@ from cyclophaser.plots import plot_all_periods, plot_didactic
 if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
 import benchmark_tab  # noqa: E402
-import label_tab  # noqa: E402
 import layer_inspector as li  # noqa: E402
+import set_stats  # noqa: E402
 import track_format_ui  # noqa: E402
 import track_io  # noqa: E402
 from inspector_plotly import build_inspector_figure  # noqa: E402
 from package_args import package_use_filter  # noqa: E402
 
-# CycloPhaser version (read from setup.py at import time)
+# CycloPhaser version: the INSTALLED package's (importlib.metadata), not a
+# VERSION string parsed out of the checkout's setup.py. The app on Streamlit
+# Cloud runs the release from PyPI, and the checkout can say something else.
 try:
-    import re as _re
-    _setup = (Path(__file__).parent.parent.parent / "setup.py").read_text()
-    _CP_VERSION = _re.search(r"VERSION\s*=\s*['\"]([^'\"]+)['\"]", _setup).group(1)
+    from importlib import metadata as _metadata
+    _CP_VERSION = _metadata.version("cyclophaser")
 except Exception:
     _CP_VERSION = "unknown"
 
@@ -293,7 +295,7 @@ def _with_default_mark(name: str, value, label: str) -> str:
     return f"{label} (default)" if value == _pkg_default(name) else label
 
 _SM_OPTS = ["auto", "off", "manual"]
-_VIEW_MODES = ["Grid", "Inspector", "Label"]
+_VIEW_MODES = ["Grid", "Inspector"]
 _BOUNDARY_PADDING_OPTS = ["zero", "reflect", "edge"]
 
 # YAML key → (session_state key, converter)
@@ -691,8 +693,12 @@ def _compute_evaluation(cyclone_names) -> dict:
     }
 
 
-def _load_yaml_config(yaml_bytes: bytes) -> dict:
+def _load_yaml_config(yaml_bytes: bytes, developer: bool = True) -> dict:
     """Parse an exported YAML and write values into session_state.
+
+    Without the developer key (`developer` false) the bad-case marks are a
+    function the user does not have: the file's "evaluation" section is not
+    restored and is listed as ignored ("evaluation (developer only)").
 
     Returns {"error": str|None, "ignored": list, "missing": list,
              "filled": list[(key, value)], "count": int}.
@@ -835,7 +841,9 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
     # every other imported value in this function *replaces* the current one,
     # rather than merging with it) -- useful for resuming a saved evaluation
     # instead of leaving stale marks from whatever was in the current session.
-    if "evaluation" in doc:
+    if "evaluation" in doc and not developer:
+        ignored.append("evaluation (developer only)")
+    elif "evaluation" in doc:
         ev = doc["evaluation"]
         bad_list = ev.get("bad_cases") if isinstance(ev, dict) else None
         if isinstance(bad_list, list):
@@ -855,7 +863,11 @@ def _load_yaml_config(yaml_bytes: bytes) -> dict:
             "count": count}
 
 
-def _build_yaml(cyclone_names) -> str:
+def _build_yaml(cyclone_names, include_evaluation: bool = False) -> str:
+    """The configuration as YAML: what Save results writes as parameters.yaml.
+
+    `include_evaluation` adds the bad-case "evaluation" section — a developer
+    function, so only with the developer key."""
     doc = {
         "metadata": {
             "timestamp":           datetime.now(timezone.utc).isoformat(),
@@ -887,8 +899,9 @@ def _build_yaml(cyclone_names) -> str:
             **{k: _PHASE_PARAMS[k] for k in _PHASE_ENUM_KEYS},
             **{k: bool(_PHASE_PARAMS[k]) for k in _PHASE_BOOL_KEYS},
         },
-        "evaluation": _compute_evaluation(cyclone_names),
     }
+    if include_evaluation:
+        doc["evaluation"] = _compute_evaluation(cyclone_names)
     return yaml.dump(doc, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
 
@@ -1155,17 +1168,6 @@ def _mature_table(records: list) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _build_zip(ok_results: dict, yaml_str: str) -> bytes:
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("parameters.yaml", yaml_str)
-        for name, res in ok_results.items():
-            zf.writestr(f"{name}_periods.csv", res["csv_bytes"].decode("utf-8"))
-            zf.writestr(f"{name}_periods.png", res["png_bytes"])
-    buf.seek(0)
-    return buf.getvalue()
-
-
 # Figure sizes per column count (matplotlib inches)
 _FIGSIZES = {1: (12, 5), 2: (9, 4.5), 3: (7, 4), 4: (5, 3), 5: (4, 2.8), 6: (3.5, 2.5)}
 
@@ -1185,13 +1187,11 @@ _COMPACT_LW = {
     6: {"raw": 1.7, "smoothed2": 2.0},
 }
 
-PHASE_COLORS = {
-    "incipient":       "#65a1e6",
-    "intensification": "#f7b538",
-    "mature":          "#d62828",
-    "decay":           "#9aa981",
-    "residual":        "gray",
-}
+# The phase palette has one source in the app: layer_inspector.PHASE_COLORS
+# (Streamlit-free, also read by the Inspector renderers and set_stats). It must
+# equal the palette of cyclophaser/plots.py, which draws the phase figures;
+# tests/test_phase_colors.py compares the two.
+PHASE_COLORS = li.PHASE_COLORS
 
 
 def _render_global_legend() -> None:
@@ -1344,69 +1344,10 @@ def _run_process_vorticity(
     return vort, [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
 
 
-# Colors/labels are supplied HERE, not invented in label_tab.py: that module
-# stays generic about what an "overlay" is (a name, a label, a color, values),
-# so it never needs to know cyclophaser's own vocabulary to draw one.
-# Progressively thinner in the app's stroke-width scheme (see _CHART_JS),
-# matching pipeline order: each is one more processing step than the last.
-_LABEL_OVERLAY_STYLE = {
-    "filtered_vorticity": {"label": "filtered_vorticity — Lanczos band-pass",
-                          "color": "#1f9e89"},
-    "vorticity_smoothed": {"label": "vorticity_smoothed — 1st Savitzky-Golay pass",
-                          "color": "#e8702a"},
-    "vorticity_smoothed2": {"label": "vorticity_smoothed2 — 2nd pass (what phase "
-                                    "detection is actually run against)",
-                           "color": "#8856a7"},
-}
-
-
-def _label_overlays(values: pd.Series) -> dict[str, dict]:
-    """Filtered/smoothed overlays for the Label tab's Inspection mode.
-
-    Called ONLY from label_tab.py's overlay controls, and only after the
-    labeller has explicitly opted into seeing it. This is where the actual
-    call into `cyclophaser.determine_periods.process_vorticity` happens:
-    label_tab.py itself imports nothing from the package (see its module
-    docstring), so the curves the labeller can choose to reveal are
-    guaranteed to be the SAME function the detector runs, computed here, in
-    the one module that is already allowed to import cyclophaser, and handed
-    down as plain numbers plus a label/color pair.
-
-    Uses the CURRENT sidebar filter widgets, deliberately: Inspection mode is
-    already non-blind by construction, and it exists to show what the
-    detector currently sees under whatever calibration is being tried, not a
-    second, independent snapshot.
-
-    Returns {name: {"label": str, "color": str, "values": [float, ...],
-    "shared_values": [float, ...]}}.
-
-    * `values` are in physical units. label_tab.py draws them on the identical
-      y-axis as the raw series when its "Shared 0-1 scale" option is off.
-    * `shared_values` are the same curves on the inspector's grouped 0-1 band
-      (item 30c): `layer_inspector.rescaler` over the THREE layers together,
-      so the amplitude each smoothing pass removes stays visible. The raw
-      series gets a band of its own, rescaled in label_tab.py itself.
-
-    The grouping is computed here, where the package's names may appear, rather
-    than in label_tab.py, whose AST must stay free of them. The group is always
-    all three layers, whichever are switched on, so toggling one never
-    rescales the others.
-    """
-    zeta_df = pd.DataFrame({"zeta": values})
-    vort = process_vorticity(
-        zeta_df, use_filter=package_use_filter(use_filter),
-        cutoff_low=cutoff_low, cutoff_high=cutoff_high,
-        use_smoothing=use_smoothing, use_smoothing_twice=use_smoothing_twice,
-        replace_endpoints_with_lowpass=replace_endpoints, savgol_polynomial=savgol_poly,
-        boundary_padding=boundary_padding,
-    )
-    group = li.rescaler([vort[name].values for name in _LABEL_OVERLAY_STYLE], normalize=True)
-    return {
-        name: {**style,
-               "values": [float(v) for v in vort[name].values],
-               "shared_values": [float(v) for v in group(vort[name].values)]}
-        for name, style in _LABEL_OVERLAY_STYLE.items()
-    }
+# The Manual labelling page's overlay provider (`_LABEL_OVERLAY_STYLE`,
+# `_label_overlays`) moved to label_overlays.py in I1 of the app redesign:
+# that page no longer runs this file's sidebar, so it cannot read the filter
+# widgets as globals any more. See that module's docstring.
 
 
 @st.cache_data(
@@ -1438,6 +1379,278 @@ def _run_get_periods(
     return df_result, periods_dict, phase_warns
 
 
+# ── Pages ────────────────────────────────────────────────────────────────────────
+# st.navigation + st.Page (I1 of the app redesign). Only the page that is open
+# executes: the tabs this replaces ran the code of every tab on every
+# interaction, and the detection loop below ran before the display mode was even
+# read, so a click in the labelling view re-ran detection for every loaded track.
+#
+# This file stays the entrypoint (Streamlit Community Cloud points at it) and
+# keeps the Calibrate page's code inline, below this block: for any other page
+# the block runs that page's file and stops the script, so nothing below it
+# executes. The Calibrate page file itself is only the page's registration (see
+# app_pages/calibrate.py). Everything ABOVE this block is declarations, which
+# tests read straight out of this file's source, so they stay where they are.
+_APP_PAGES_DIR = Path(__file__).parent / "app_pages"
+_PAGE_CALIBRATE = st.Page(_APP_PAGES_DIR / "calibrate.py", title="Calibrate",
+                          icon=":material/tune:", default=True)
+_PAGE_BENCHMARK = st.Page(_APP_PAGES_DIR / "benchmark.py", title="Benchmark",
+                          icon=":material/table_chart:")
+_PAGE_LABEL = st.Page(_APP_PAGES_DIR / "label.py", title="Manual labelling",
+                      icon=":material/edit_note:")
+
+
+def _developer_mode() -> bool:
+    """The developer key: env CYCLOPHASER_APP_DEV=1, or `developer_mode = true`
+    in st.secrets.
+
+    Without it the Developer section does not exist in the menu, so the page
+    that writes research/labels/manual_labels.yaml is not reachable from the
+    public app. `load_if_toml_exists` is asked first because reading a key from
+    st.secrets with no secrets file raises (and older Streamlit releases also
+    draw an error box on the page while doing so); any failure means "off".
+    """
+    if os.environ.get("CYCLOPHASER_APP_DEV") == "1":
+        return True
+    try:
+        return bool(st.secrets.load_if_toml_exists()
+                    and st.secrets.get("developer_mode") is True)
+    except Exception:
+        return False
+
+
+# Streamlit deletes the state of every widget that was not drawn in the current
+# run. With one page per run, leaving Calibrate would therefore wipe its whole
+# sidebar, the dataset checkboxes and the bad-case marks. Each page's widget
+# keys are listed here and written back into session_state as plain values
+# (`st.session_state[k] = st.session_state[k]`), the documented Streamlit
+# pattern for keeping widget state across pages, at two moments:
+#
+# * on every run, for the pages that are NOT open — this takes their keys out
+#   of the clean-up;
+# * on the first run of a page the user has just ARRIVED at, for that page's
+#   own keys. The server would hold the right values without this, but the
+#   browser would not show them: it forgets a page's widgets when it leaves
+#   the page, and on return draws each widget from its `value=`/`index=`
+#   default unless the server marks the value as set in this run. Without the
+#   second write the sidebar came back showing defaults and the next click sent
+#   those defaults back (measured in Chromium; AppTest has no browser side and
+#   cannot see it). A value set via Session State in the same run as a widget
+#   with a default is what Streamlit warns about: a server log line since
+#   streamlit 1.56, a one-time warning box on the page before that.
+#
+# Explicit lists, not "every key in session_state": a button's or an uploader's
+# value cannot be written this way, and a key drawn on the open page must not
+# be. File uploads cannot be restored by any key at all; see _carry_uploads.
+_PAGE_WIDGET_STATE: dict[str, tuple[frozenset, tuple[str, ...]]] = {
+    _PAGE_CALIBRATE.url_path: (
+        frozenset(_DEFAULTS) | frozenset({
+            "show_incipient_probe", "load_all_test_cyclones", "show_advanced_diffs",
+            "load_synthetic_clean", "load_synthetic_noisy", "grid_page_size"}),
+        (_BAD_CASE_KEY_PREFIX, "track_custom_", "save_include_")),
+    _PAGE_BENCHMARK.url_path: (benchmark_tab.WIDGET_STATE_KEYS,
+                               benchmark_tab.WIDGET_STATE_PREFIXES),
+    _PAGE_LABEL.url_path: (frozenset({"label_default_tolerance",
+                                      "lab_nav_only_unlabeled"}), ()),
+}
+
+
+def _keep_page_state(current: str, arrived: bool) -> None:
+    """Shield the widget state of every page except `current` from clean-up and,
+    when the user has just `arrived` at `current`, hand its own values back to
+    the browser. See the comment above `_PAGE_WIDGET_STATE`."""
+    for page, (keys, prefixes) in _PAGE_WIDGET_STATE.items():
+        if page == current and not arrived:
+            continue
+        for k in list(st.session_state.keys()):
+            if k in keys or (prefixes and k.startswith(prefixes)):
+                try:
+                    st.session_state[k] = st.session_state[k]
+                except Exception:
+                    pass
+
+
+_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_BENCHMARK]}
+if _developer_mode():
+    _pages["Developer"] = [_PAGE_LABEL]
+_page = st.navigation(_pages)
+_PREVIOUS_PAGE = st.session_state.get("_app_page")
+st.session_state["_app_page"] = _page.url_path
+_keep_page_state(_page.url_path,
+                 arrived=_PREVIOUS_PAGE is not None and _PREVIOUS_PAGE != _page.url_path)
+if _page.url_path != _PAGE_CALIBRATE.url_path:
+    _page.run()
+    st.stop()
+
+
+_K_KEPT_UPLOADS = "_kept_track_uploads"
+_K_KEPT_RESTORED = "_kept_track_uploads_restored"
+
+
+def _forget_kept_uploads() -> None:
+    st.session_state.pop(_K_KEPT_UPLOADS, None)
+    st.session_state[_K_KEPT_RESTORED] = False
+
+
+def _carry_uploads(uploaded, accepted: dict, came_back: bool) -> dict:
+    """Keep the uploaded tracks across a trip to another page.
+
+    A file uploader's content cannot be put back through session_state, so the
+    widget comes back EMPTY after another page was open. The accepted tracks
+    (standard-layout bytes, after any custom-format confirmation) are kept here
+    instead, and restored when the uploader is empty because the user came back
+    from another page — not when they emptied it themselves on this page. They
+    stay restored until the user uploads again or forgets them.
+    """
+    if uploaded:
+        st.session_state[_K_KEPT_UPLOADS] = dict(accepted)
+        st.session_state[_K_KEPT_RESTORED] = False
+        return accepted
+    kept = st.session_state.get(_K_KEPT_UPLOADS) or {}
+    if came_back and kept:
+        st.session_state[_K_KEPT_RESTORED] = True
+    if kept and st.session_state.get(_K_KEPT_RESTORED):
+        _kc1, _kc2 = st.columns([4, 1])
+        _kc1.caption(
+            f"Still using the {len(kept)} track(s) uploaded before you switched "
+            f"pages ({', '.join(sorted(kept))}); the uploader above cannot show "
+            "them again. Uploading new files replaces them.")
+        _kc2.button("Forget them", key="forget_kept_uploads",
+                    on_click=_forget_kept_uploads, use_container_width=True)
+        return dict(kept)
+    _forget_kept_uploads()
+    return accepted
+
+
+# Calibrate keys whose widgets are NOT drawn on every Calibrate run: the
+# bad-case marks (Grid view only), the custom-format fields and confirmations
+# (inside the "Custom format…" dialog) and the Save results options (inside its
+# dialog). Streamlit would clean their state up on the first run that does not
+# draw them, so they are written back on every Calibrate run, like the keys of
+# the pages that are not open (see `_keep_page_state`).
+# The Grid's "Grid columns" and "Tracks per page" are in the same situation:
+# they are not drawn in the Inspector.
+_CALIBRATE_KEEP_PREFIXES = (_BAD_CASE_KEY_PREFIX, "track_custom_", "save_include_")
+_K_GRID_PAGE_SIZE = "grid_page_size"
+_CALIBRATE_KEEP_KEYS = frozenset({"n_cols", _K_GRID_PAGE_SIZE})
+
+
+def _keep_calibrate_state() -> None:
+    for k in list(st.session_state.keys()):
+        if k.startswith(_CALIBRATE_KEEP_PREFIXES) or k in _CALIBRATE_KEEP_KEYS:
+            try:
+                st.session_state[k] = st.session_state[k]
+            except Exception:
+                pass
+
+
+# ── Grid pages ──────────────────────────────────────────────────────────────────
+# The Grid draws one page of tracks. The position is kept as the index of the
+# page's first track (a plain session key, so Streamlit never cleans it up):
+# changing the page size then keeps that track on screen. A different set of
+# loaded tracks starts again at page 1.
+_GRID_PAGE_SIZES = [12, 24, 48]
+_K_GRID_FIRST = "_grid_first"
+_K_GRID_NAMES = "_grid_names"
+
+
+def _grid_page(names: list, size: int) -> tuple[list, int, int, int]:
+    """The tracks of the current page: (names, page number, pages, first index)."""
+    if st.session_state.get(_K_GRID_NAMES) != names:
+        st.session_state[_K_GRID_NAMES] = list(names)
+        st.session_state[_K_GRID_FIRST] = 0
+    n_pages = max(1, -(-len(names) // size))
+    page = min(max(int(st.session_state.get(_K_GRID_FIRST, 0)) // size + 1, 1), n_pages)
+    first = (page - 1) * size
+    st.session_state[_K_GRID_FIRST] = first
+    return names[first:first + size], page, n_pages, first
+
+
+def _step_grid_page(delta: int) -> None:
+    size = st.session_state.get(_K_GRID_PAGE_SIZE, _GRID_PAGE_SIZES[0])
+    st.session_state[_K_GRID_FIRST] = max(
+        0, int(st.session_state.get(_K_GRID_FIRST, 0)) + delta * size)
+
+
+def _grid_nav(where: str, page: int, n_pages: int, first: int, shown: int,
+              total: int) -> None:
+    """Previous / "Page N of M" / Next. Drawn above the grid and, when there is
+    more than one page, again below it (keys differ by `where`)."""
+    _p, _t, _n = st.columns([1, 3, 1], vertical_alignment="center")
+    _p.button("◀ Previous", key=f"grid_prev_{where}", on_click=_step_grid_page,
+              args=(-1,), disabled=page <= 1, use_container_width=True)
+    _t.markdown(
+        f"<div style='text-align:center'>Page <b>{page}</b> of {n_pages} · "
+        f"tracks {first + 1}–{first + shown} of {total}</div>"
+        if total else "<div style='text-align:center'>No tracks</div>",
+        unsafe_allow_html=True)
+    _n.button("Next ▶", key=f"grid_next_{where}", on_click=_step_grid_page,
+              args=(1,), disabled=page >= n_pages, use_container_width=True)
+
+
+# ── Starting configuration: which one is active, and whether it was edited ────
+_K_CONFIG_SOURCE = "_config_source"
+_K_CONFIG_SNAPSHOT = "_config_snapshot"
+
+
+def _set_config_source(name: str) -> None:
+    """Record where the configuration came from. The snapshot it is compared
+    with is taken at the end of the next run, once the widgets show it."""
+    st.session_state[_K_CONFIG_SOURCE] = name
+    st.session_state.pop(_K_CONFIG_SNAPSHOT, None)
+
+
+def _apply_defaults() -> None:
+    """The "Defaults" button: the package's own defaults (what "Reset to
+    defaults" did). A YAML file still sitting in the uploader is NOT re-applied
+    afterwards: its hash is kept, so only removing and re-adding it imports it
+    again."""
+    keep = st.session_state.get("_yaml_import_hash")
+    _reset()
+    if keep:
+        st.session_state["_yaml_import_hash"] = keep
+    _set_config_source("Defaults")
+
+
+def _changed_keys(a: dict, b: dict) -> list[str]:
+    out = []
+    for sec in ("filter_params", "phase_params"):
+        for k in sorted(set(a.get(sec, {})) | set(b.get(sec, {}))):
+            va, vb = a.get(sec, {}).get(k), b.get(sec, {}).get(k)
+            if isinstance(va, float) and isinstance(vb, float):
+                if abs(va - vb) > 1e-12 * max(1.0, abs(va), abs(vb)):
+                    out.append(k)
+            elif va != vb:
+                out.append(k)
+    return out
+
+
+# Everything below "3 · Filtering" in the sidebar. The three basic filtering
+# controls (use_filter, cutoff_low, cutoff_high) are not "advanced".
+_ADVANCED_FILTER_KEYS = ("boundary_padding", "replace_endpoints_with_lowpass",
+                         "use_smoothing", "use_smoothing_twice", "savgol_polynomial")
+
+
+def _advanced_differences(live: dict) -> list[tuple[str, object, object]]:
+    """(parameter, current value, package default) for every advanced parameter
+    whose effective value differs from the package's default."""
+    out = []
+    items = [(k, live["filter_params"][k]) for k in _ADVANCED_FILTER_KEYS]
+    items += sorted(live["phase_params"].items())
+    for k, v in items:
+        d = _pkg_default(k)
+        if isinstance(v, float) and isinstance(d, (int, float)) and not isinstance(d, bool):
+            same = abs(v - d) <= 1e-12 * max(1.0, abs(v), abs(d))
+        else:
+            same = v == d
+        if not same:
+            out.append((k, v, d))
+    return out
+
+
+_keep_calibrate_state()
+
+
 # ── Synthetic-preset application ─────────────────────────────────────────────────
 # Must run BEFORE the sidebar widgets are constructed: Streamlit reads a widget's
 # session_state value at construction time, so writing a preset after the sidebar
@@ -1454,8 +1667,10 @@ def _run_get_periods(
 # A preset is applied ONLY when the selection actually CHANGES, so the
 # pre-processing controls stay fully editable afterwards -- it is a starting
 # point, not a lock.
-_synth_clean_on = bool(st.session_state.get("load_synthetic_clean", False))
-_synth_noisy_on = bool(st.session_state.get("load_synthetic_noisy", False))
+# The synthetic cases are a developer function: without the key their presets
+# are never applied, whatever session_state holds.
+_synth_clean_on = _developer_mode() and bool(st.session_state.get("load_synthetic_clean", False))
+_synth_noisy_on = _developer_mode() and bool(st.session_state.get("load_synthetic_noisy", False))
 _synth_sel = ("noisy" if _synth_noisy_on else "clean") if (_synth_clean_on or _synth_noisy_on) else None
 
 
@@ -1501,25 +1716,196 @@ elif _synth_sel is None:
 
 # ── Page header ──────────────────────────────────────────────────────────────────
 st.title("CycloPhaser — Parameter Calibration")
-st.caption("Filtering · Smoothing · Phase Detection · Multi-cyclone")
+st.caption(f"CycloPhaser {_CP_VERSION} · Filtering · Smoothing · Phase detection")
 st.markdown("How the method works, the defaults and what was calibrated: "
             "[CycloPhaser documentation](https://cyclophaser.readthedocs.io/en/latest/).")
 
-# ── Sidebar ──────────────────────────────────────────────────────────────────────
+_DEV = _developer_mode()
+
+# ── Data sources ─────────────────────────────────────────────────────────────────
+_calib_data_files = sorted(_CALIBRATION_DATA_DIR.glob("*.csv")) if _CALIBRATION_DATA_DIR.is_dir() else []
+_synth_files, _synth_gt, _synth_groups, _synth_err = _load_synthetic_cases()
+_clean_ids = _synth_groups.get("clean", {}).get("ids", ())
+_noisy_ids = _synth_groups.get("noisy", {}).get("ids", ())
+_plateau_start_ids = set(_synth_groups.get("plateau_start", ()))
+_steep_start_ids = set(_synth_groups.get("steep_start", ()))
+_EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
+
+
+def _load_example() -> None:
+    st.session_state["load_example"] = True
+
+
+def _load_sample() -> None:
+    st.session_state["load_all_test_cyclones"] = True
+
+
+def _clear_data() -> None:
+    """Unload the example, the sample set and the synthetic cases, and forget
+    tracks kept from before a page switch. Files still in the uploader stay:
+    the uploader's own × removes them."""
+    st.session_state["load_example"] = False
+    st.session_state["load_all_test_cyclones"] = False
+    st.session_state["load_synthetic_clean"] = False
+    st.session_state["load_synthetic_noisy"] = False
+    _forget_kept_uploads()
+
+
+# Both dialogs stay open until closed (a session flag, cleared by their "Done"
+# button or by dismissing them), so a rerun from elsewhere does not close one
+# behind the user's back. Only one dialog may open per run.
+_K_DIALOG = "_calibrate_open_dialog"
+
+
+def _close_dialogs() -> None:
+    st.session_state[_K_DIALOG] = None
+
+
+def _open_dialog(name: str) -> None:
+    st.session_state[_K_DIALOG] = name
+
+
+if _PREVIOUS_PAGE not in (None, _PAGE_CALIBRATE.url_path):
+    _close_dialogs()          # arriving from another page: nothing pops up
+
+
+@st.dialog("Custom track format", width="large", on_dismiss=_close_dialogs)
+def _custom_format_dialog(uploads) -> None:
+    """The custom-format fields, and the preview/confirmation of every uploaded
+    file that needs them. Same controls and keys as before, now in a dialog."""
+    fmt = track_format_ui.format_controls(in_expander=False)
+    custom = [f for f in (uploads or []) if not track_io.is_standard(f.getvalue())]
+    if custom:
+        st.divider()
+        track_format_ui.accept_uploads(custom, fmt, confirm_prefix="track_custom_ok_")
+    elif uploads:
+        st.caption("Every uploaded file is in the standard layout.")
+    if st.button("Done", type="primary", key="custom_format_done"):
+        _close_dialogs()
+        st.rerun()
+
+
+# ── Sidebar: 1 · Data, 2 · Starting configuration, 3 · Filtering, Advanced ──────
 with st.sidebar:
-    # --- YAML import ---
-    st.subheader("Import configuration")
+    st.subheader("1 · Data")
+    uploaded = st.file_uploader(
+        "Upload tracks (.csv, .txt)",
+        type=["csv", "txt"], accept_multiple_files=True, key="track_upload",
+        help=track_format_ui.UPLOAD_HELP,
+    )
+    # Every upload is validated here; a non-standard one waits for the custom
+    # format and a confirmation, given in the "Custom format…" dialog. What comes
+    # out is standard-layout bytes, so nothing downstream knows which layout the
+    # file arrived in. See track_io.
+    _uploaded_tracks, _pending_uploads, _refused_uploads = track_format_ui.classify_uploads(
+        uploaded, track_format_ui.current_format(st.session_state),
+        confirm_prefix="track_custom_ok_", state=st.session_state)
+    for _name, _why in _refused_uploads:
+        st.error(f"`{_name}` refused: {_why}")
+    if _pending_uploads:
+        st.warning(f"{len(_pending_uploads)} file(s) wait for confirmation in "
+                   "**Custom format…**: " + ", ".join(_pending_uploads))
+    _uploaded_tracks = _carry_uploads(
+        uploaded, _uploaded_tracks,
+        came_back=_PREVIOUS_PAGE not in (None, _PAGE_CALIBRATE.url_path))
+    st.button("Custom format…", key="open_custom_format", use_container_width=True,
+              help=track_format_ui.HELP_ON, on_click=_open_dialog, args=("custom",))
+    if st.session_state.get(_K_DIALOG) == "custom":
+        _custom_format_dialog(uploaded)
+    st.button("Try example data", key="btn_example", on_click=_load_example,
+              use_container_width=True,
+              help="Loads the single example track shipped with the package.")
+    st.button(f"Sample data ({len(_calib_data_files)} TRACK cyclones)"
+              if _calib_data_files else "Sample data (unavailable here)",
+              key="btn_sample", on_click=_load_sample, use_container_width=True,
+              disabled=not _calib_data_files,
+              help=("Loads the real cyclone tracks bundled with the repository: "
+                    "TRACK-filtered 850 hPa relative vorticity, the data the "
+                    "filtering defaults were tuned on. Combined with any uploaded "
+                    "files; an uploaded file wins over a bundled one with the "
+                    "same name."
+                    if _calib_data_files else
+                    "The bundled tracks are not part of this installation."))
+    if _DEV:
+        st.caption("Developer — synthetic cases")
+        load_synthetic_clean = st.checkbox(
+            f"Synthetic — clean ({len(_clean_ids)})" if _clean_ids
+            else "Synthetic — clean (unavailable)",
+            value=False, key="load_synthetic_clean", disabled=not bool(_clean_ids),
+            help=("The noise-free synthetic cases. Loading them sets the "
+                  "pre-processing to a preset for clean series: Lanczos off, one "
+                  "Savitzky-Golay pass — there is nothing to denoise, and one pass "
+                  "is the minimum that survives the kink at each segment join."
+                  if _clean_ids else f"Synthetic cases unavailable ({_synth_err})."),
+        )
+        load_synthetic_noisy = st.checkbox(
+            f"Synthetic — noisy ({len(_noisy_ids)}, 2 % noise)" if _noisy_ids
+            else "Synthetic — noisy (unavailable)",
+            value=False, key="load_synthetic_noisy", disabled=not bool(_noisy_ids),
+            help=("The synthetic cases with 2 % Gaussian noise. Loading them sets "
+                  "the pre-processing to a preset for noisy series: Lanczos on "
+                  "(high cutoff 18 h), Savitzky-Golay off — the author's validated "
+                  "calibration for these cases. With both groups loaded, this "
+                  "preset wins: it is also correct on the clean cases."
+                  if _noisy_ids else f"Synthetic cases unavailable ({_synth_err})."),
+        )
+    else:
+        load_synthetic_clean = load_synthetic_noisy = False
+    load_synthetic_cases = bool(load_synthetic_clean or load_synthetic_noisy)
+    load_all_test_cyclones = bool(st.session_state.get("load_all_test_cyclones", False))
+    _load_example_on = bool(st.session_state.get("load_example", False))
+
+    # Precedence when several sources are on: the sets are combined (union), and
+    # an uploaded file wins on a cyclone-ID collision with a bundled one — a user
+    # re-uploading a track under its bundled ID is more likely re-testing a
+    # variant of it than asking for it to be silently dropped. Nothing is loaded
+    # unless the user asked for it: there is no silent fallback to the example.
+    files: dict[str, bytes] = {}
+    if _load_example_on:
+        files["example_file"] = _EXAMPLE.read_bytes()
+    if load_all_test_cyclones and _calib_data_files:
+        files.update({p.stem: p.read_bytes() for p in _calib_data_files})
+    if _synth_files and load_synthetic_cases:
+        _wanted = ((set(_clean_ids) if load_synthetic_clean else set())
+                   | (set(_noisy_ids) if load_synthetic_noisy else set()))
+        files.update({k: v for k, v in _synth_files.items() if k in _wanted})
+    if _uploaded_tracks:
+        files.update(_uploaded_tracks)
+    cyclone_names = list(files.keys())
+
+    if files:
+        _parts = ([f"{len(_uploaded_tracks)} uploaded"] if _uploaded_tracks else []) + (
+            ["example"] if _load_example_on else []) + (
+            ["sample"] if load_all_test_cyclones and _calib_data_files else []) + (
+            ["synthetic"] if load_synthetic_cases else [])
+        _dc1, _dc2 = st.columns([3, 2])
+        _dc1.markdown(f"**{len(files)} track{'s' if len(files) != 1 else ''} loaded** "
+                      f"· {', '.join(_parts)}")
+        _dc2.button("Clear data", key="btn_clear_data", on_click=_clear_data,
+                    use_container_width=True,
+                    help="Unloads the example, the sample set and the synthetic "
+                         "cases. Uploaded files are removed with the × in the "
+                         "uploader.")
+
+    st.divider()
+    st.subheader("2 · Starting configuration")
+    st.button("Defaults", key="btn_defaults", on_click=_apply_defaults,
+              use_container_width=True,
+              help="Sets every parameter below to the package's own defaults.")
+    st.caption("Package defaults. Filtering was tuned on TRACK-filtered 850 hPa vorticity.")
     _yaml_file = st.file_uploader(
-        "Load previously exported YAML", type=["yaml", "yml"], key="yaml_import",
-        help="Upload a YAML file exported by this app to restore its filter and phase parameters.",
+        "Load a saved configuration (YAML)", type=["yaml", "yml"], key="yaml_import",
+        help="A configuration saved with **Save results**. Restores its filtering "
+             "and phase-detection parameters.",
     )
     if _yaml_file is not None:
         _fhash = hashlib.md5(_yaml_file.getvalue()).hexdigest()
         if st.session_state.get("_yaml_import_hash") != _fhash:
-            _result = _load_yaml_config(_yaml_file.getvalue())
+            _result = _load_yaml_config(_yaml_file.getvalue(), developer=_DEV)
             st.session_state["_yaml_import_hash"] = _fhash
             st.session_state["_yaml_import_result"] = _result
             if _result["error"] is None:
+                _set_config_source(Path(_yaml_file.name).name)
                 st.rerun()  # reflect new widget values immediately
     else:
         # File removed — clear hash so the same file can be re-imported if needed
@@ -1532,53 +1918,20 @@ with st.sidebar:
         else:
             st.success(f"Loaded {_r['count']} parameters from YAML.")
             if _r["ignored"]:
-                st.warning(f"Ignored unknown keys: {', '.join(_r['ignored'])}")
+                st.warning(f"Ignored keys: {', '.join(_r['ignored'])}")
             if _r.get("filled"):
                 st.warning(
-                    f"{len(_r['filled'])} key(s) absent from this file were filled with "
-                    "the frozen pre-item-31 defaults (research/labels/defaults_2.0.0.json, item 31): "
+                    f"{len(_r['filled'])} key(s) absent from this file were filled "
+                    "with the earlier defaults older configuration files were "
+                    "written against: "
                     + ", ".join(f"{k}={v!r}" for k, v in _r["filled"]))
+    _active_config_line = st.empty()
 
     st.divider()
-    st.button("↺ Reset to defaults", on_click=_reset, use_container_width=True)
-    st.button(
-        "🗑 Clear bad-case marks", on_click=_clear_bad_marks, use_container_width=True,
-        help=(
-            "Unmarks every cyclone currently flagged as a bad detection result. "
-            "Kept separate from 'Reset to defaults' on purpose: trying different "
-            "filter/threshold values shouldn't wipe an evaluation in progress."
-        ),
-    )
-    st.divider()
-
-
-    # ══════════════════════════════════════════════════════════════════════
-    # The groups below follow the order in which the detector actually runs,
-    # not the order the phases are named in.  Read off the source, not assumed:
-    #
-    #   process_vorticity (determine_periods.py)
-    #     1. Lanczos band-pass          use_filter, cutoff_low, cutoff_high,
-    #                                   boundary_padding, replace_endpoints_with_lowpass
-    #     2. Savitzky-Golay             use_smoothing, use_smoothing_twice,
-    #                                   savgol_polynomial
-    #   get_periods (determine_periods.py:1026-1066)
-    #     3. find_peaks_valleys(z)      prominence, prominence_relative
-    #     4. find_intensification_period
-    #     5. find_decay_period
-    #     6. find_mature_stage
-    #     7. find_residual_period       decay_tail_amplitude_fraction
-    #     8. post_process_periods       (no parameter)
-    #     9. find_incipient_period      incipient_*, threshold_incipient_length
-    #
-    # Two consequences of reading the real order rather than the phase names:
-    # the extrema filter is step 3 — it runs BEFORE every stage and its output
-    # is what all of them see — and decay_tail_amplitude_fraction is read by
-    # find_residual_period (find_stages.py:588), not by find_decay_period, so
-    # it sits under Residual and not under Decay.
-    # ══════════════════════════════════════════════════════════════════════
-
-    st.header("1 · Lanczos Filter")
-    st.caption("Step 1 — `process_vorticity`. Runs before everything; every group below sees the filtered series.")
+    st.subheader("3 · Filtering")
+    st.caption(
+        "Only the filtering was calibrated, and only for TRACK-filtered 850 hPa "
+        "vorticity. For other sources, adjust the cutoffs and check the figures.")
     use_filter = st.checkbox(
         "Apply Lanczos filter", value=_DEFAULTS["use_filter"], key="use_filter",
         help=(
@@ -1598,8 +1951,7 @@ with st.sidebar:
             "Higher values remove more large-scale trend; lower values preserve slower "
             f"cyclone variations. Default: {_pkg_default('cutoff_low'):g} h."
             + ("" if use_filter else
-               " **Inactive**: only the Lanczos convolution reads it, and it does not "
-               "run when 'Apply Lanczos filter' is off.")
+               " **Inactive** while 'Apply Lanczos filter' is off.")
         ),
     )
     cutoff_high = st.slider(
@@ -1612,188 +1964,177 @@ with st.sidebar:
             "Lower values allow more high-frequency variability; higher values produce "
             f"a smoother curve. Default: {_pkg_default('cutoff_high'):g} h."
             + ("" if use_filter else
-               " **Inactive**: only the Lanczos convolution reads it, and it does not "
-               "run when 'Apply Lanczos filter' is off.")
-        ),
-    )
-    boundary_padding = st.selectbox(
-        "Boundary padding",
-        options=_BOUNDARY_PADDING_OPTS,
-        index=_BOUNDARY_PADDING_OPTS.index(_DEFAULTS["boundary_padding"]),
-        key="boundary_padding",
-        disabled=not use_filter,
-        help=(
-            "How the series is extended beyond its own ends before the Lanczos "
-            "convolution.\n\n"
-            "**reflect**" + (" (default)" if _pkg_default("boundary_padding") == "reflect" else "")
-            + " — pads with the reflection of the series. "
-            "Takes the normalised |dz| at the first sample from a median 0.95 down "
-            "to 0.42 on the 51-track set.\n\n"
-            "**zero** — the pre-fix behaviour: the kernel sees zeros "
-            "outside the series. Vorticity has a non-zero floor, so this injects a "
-            "spurious deepening ramp worth a median 74% of the cyclone's amplitude "
-            "over roughly 48% of every series (the kernel is ~half the series long). "
-            "Pass it to reproduce results from before this default changed.\n\n"
-            "**edge**" + (" (default)" if _pkg_default("boundary_padding") == "edge" else "")
-            + " — pads with the edge value repeated; the padding of the measured "
-            "preset params-track. Between the two "
-            "(median 0.50), changes marginally fewer phase sequences.\n\n"
-            "**Spans groups.** This is a FILTER parameter (step 1), but it "
-            "governs the INCIPIENT phase (step 9): the incipient phase is read "
-            "at the leading edge, which is exactly what this control rewrites. "
-            "It matters for refusals only through the filtered curve: with "
-            "`incipient_plateau_signal=\"derivative\"` the probe reads the filtered "
-            "derivative and, on the 51-track set, no series refuses an incipient "
-            "phase under `reflect` (0/51) while 33/51 refuse under `edge`. With the "
-            "default `incipient_plateau_signal=\"vorticity\"` the probe reads the raw "
-            "series, and the padding does not change refusals (28/54 training series "
-            "under both; research/cleanup/passo1/RELATORIO.md). Changing it "
-            "here can change step 9 without touching any of step 9's own "
-            "controls.\n\n"
-            "Changing this alters the smoothed signal near the boundaries, so a "
-            "calibrated parameter set must be re-validated before it is trusted "
-            "in a new mode."
-            + ("" if use_filter else
-               " **Inactive**: only the Lanczos convolution reads it, and it does not "
-               "run when 'Apply Lanczos filter' is off.")
+               " **Inactive** while 'Apply Lanczos filter' is off.")
         ),
     )
 
-    with st.expander("Advanced — Lanczos", expanded=False):
+    # ══════════════════════════════════════════════════════════════════════
+    # Advanced: one flat expander per group, none nested. The groups keep the
+    # order in which the detector runs, read off the source:
+    #   process_vorticity            boundary_padding, replace_endpoints_with_lowpass,
+    #                                use_smoothing, use_smoothing_twice, savgol_polynomial
+    #   get_periods
+    #     find_peaks_valleys(z)      prominence, prominence_relative, reclassify_index0
+    #     find_intensification_period / find_decay_period / find_mature_stage
+    #                                (length_scale spans all three)
+    #     find_residual_period       decay_tail_amplitude_fraction
+    #     post_process_periods       (no parameter)
+    #     find_incipient_period      incipient_*, threshold_incipient_length
+    # The extrema filter runs BEFORE every stage, and decay_tail_amplitude_fraction
+    # is read by find_residual_period, not by find_decay_period, so it sits under
+    # Residual. These names stay in comments only: the visible text avoids them.
+    # ══════════════════════════════════════════════════════════════════════
+    st.divider()
+    st.subheader("Advanced")
+    _advanced_notice = st.container()
+
+    with st.expander("Filtering options", expanded=False):
+        boundary_padding = st.selectbox(
+            "Boundary padding",
+            options=_BOUNDARY_PADDING_OPTS,
+            index=_BOUNDARY_PADDING_OPTS.index(_DEFAULTS["boundary_padding"]),
+            key="boundary_padding",
+            disabled=not use_filter,
+            help=(
+                "How the series is extended beyond its own ends before the Lanczos "
+                "convolution.\n\n"
+                "**reflect**" + (" (default)" if _pkg_default("boundary_padding") == "reflect" else "")
+                + " — pads with the reflection of the series. "
+                "Takes the normalised |dz| at the first sample from a median 0.95 down "
+                "to 0.42 on the 51-track set.\n\n"
+                "**zero** — the original behaviour: the filter sees zeros "
+                "outside the series. Vorticity has a non-zero floor, so this injects a "
+                "spurious deepening ramp worth a median 74% of the cyclone's amplitude "
+                "over roughly 48% of every series (the filter kernel is about half the "
+                "series long). Use it to reproduce results from before this default "
+                "changed.\n\n"
+                "**edge**" + (" (default)" if _pkg_default("boundary_padding") == "edge" else "")
+                + " — pads with the edge value repeated. Between the two "
+                "(median 0.50), changes marginally fewer phase sequences.\n\n"
+                "**Reaches the incipient phase.** The incipient phase is read at the "
+                "leading edge, which is exactly what this control rewrites. With the "
+                "incipient plateau read on the filtered derivative, no track of the "
+                "51-track set refuses an incipient phase under `reflect` (0/51), "
+                "while 33/51 do under `edge`. With the plateau read on the raw "
+                "vorticity (the default), the padding does not change refusals.\n\n"
+                "Changing this alters the series near its ends, so a calibrated "
+                "parameter set must be re-checked after changing it."
+                + ("" if use_filter else
+                   " **Inactive** while 'Apply Lanczos filter' is off.")
+            ),
+        )
         replace_endpoints = st.slider(
-            "Replace endpoints with lowpass (timesteps) — DEPRECATED", 0, 48, step=1,
+            "Replace endpoints with lowpass (timesteps) — deprecated", 0, 48, step=1,
             value=_DEFAULTS["replace_endpoints"], key="replace_endpoints",
             disabled=not use_filter,
             help=(
-                "**Deprecated — leave at 0.** Replaces the first and last 5% of the filtered "
-                "series with a simple low-pass estimate. It was a palliative for the Lanczos "
-                "zero-padding boundary artifact, which `boundary_padding` now fixes at its "
-                "source — and it applies the same zero-padded convolution internally.\n\n"
-                "Combined with `boundary_padding=reflect` it is actively harmful: both filters "
-                "carry full amplitude at the edge, so the 5% splice becomes a visible step. "
-                "Measured: **28 of 51** calibration tracks opened with a spurious `decay` phase "
-                "with this at 24, against **0/51** with it at 0.\n\n"
+                "**Deprecated — leave at 0.** Replaces the first and last 5% of the "
+                "filtered series with a simple low-pass estimate. It was a palliative "
+                "for the edge artifact that 'Boundary padding' now fixes at its "
+                "source.\n\n"
+                "Combined with `reflect` padding it is harmful: both carry full "
+                "amplitude at the edge, so the 5% splice becomes a visible step. "
+                "Measured: **28 of 51** calibration tracks opened with a spurious "
+                "`decay` phase with this at 24, against **0/51** with it at 0.\n\n"
                 f"Default: {_pkg_default('replace_endpoints_with_lowpass')} (it was 24 up to v2.0.0)."
                 + ("" if use_filter else
-                   " **Inactive**: only applied when `use_filter` is on "
-                   "(`if use_filter and replace_endpoints_with_lowpass:`).")
+                   " **Inactive** while 'Apply Lanczos filter' is off.")
             ),
         )
-
-    st.divider()
-
-    st.header("2 · Savitzky-Golay Smoothing")
-    st.caption("Step 2 — `process_vorticity`, over the Lanczos output.")
-    _sm_mode = st.selectbox(
-        "use_smoothing", _SM_OPTS,
-        index=_SM_OPTS.index(_DEFAULTS["sm_mode"]), key="sm_mode",
-        help=(
-            "Controls whether and how the Savitzky-Golay filter is applied after Lanczos. "
-            "'auto': window computed automatically from series length. "
-            "'off': no additional smoothing (uses Lanczos output directly). "
-            "'manual': set the window size with the slider below."
-        ),
-    )
-    if _sm_mode == "manual":
-        use_smoothing = st.slider(
-            "Savgol window 1× (steps, odd)", 3, 61, step=2,
-            value=_DEFAULTS["sm_val"], key="sm_val",
+        _sm_mode = st.selectbox(
+            "Savitzky-Golay pass 1", _SM_OPTS,
+            index=_SM_OPTS.index(_DEFAULTS["sm_mode"]), key="sm_mode",
             help=(
-                "Window size of the Savitzky-Golay filter (number of timesteps, must be odd). "
-                "Larger windows produce smoother, more stable curves for peak detection, "
-                "but may erase details in short life-cycle events. "
-                "Small windows preserve local variations but can create spurious extrema."
+                "Whether and how a Savitzky-Golay filter smooths the series after "
+                "Lanczos. 'auto': window computed from the series length. 'off': no "
+                "additional smoothing. 'manual': set the window below."
             ),
         )
-    elif _sm_mode == "off":
-        use_smoothing = False
-    else:
-        use_smoothing = "auto"
+        if _sm_mode == "manual":
+            use_smoothing = st.slider(
+                "Pass 1 window (steps, odd)", 3, 61, step=2,
+                value=_DEFAULTS["sm_val"], key="sm_val",
+                help=(
+                    "Window of the Savitzky-Golay filter (timesteps, odd). Larger "
+                    "windows give smoother curves for peak detection but may erase "
+                    "details of short events; small windows keep local variations "
+                    "but can create spurious extrema."
+                ),
+            )
+        elif _sm_mode == "off":
+            use_smoothing = False
+        else:
+            use_smoothing = "auto"
 
-    _sm2_mode = st.selectbox(
-        "use_smoothing_twice", _SM_OPTS,
-        index=_SM_OPTS.index(_DEFAULTS["sm2_mode"]), key="sm2_mode",
-        disabled=use_smoothing is False,
-        help=(
-            "Applies the Savitzky-Golay filter a second time on the already-smoothed curve. "
-            "Useful for noisy or high-temporal-resolution series where a single pass is "
-            "insufficient to remove spurious oscillations. "
-            "May distort or shorten phases in short-lived cyclones."
-            + ("" if use_smoothing is not False else
-               " **Inactive**: the second Savgol pass is nested inside the first "
-               "(`if use_smoothing: ... if use_smoothing_twice: ...`) — with "
-               "`use_smoothing='off'` the first pass never runs, so this mode/window "
-               "is never reached regardless of its own value.")
-        ),
-    )
-    if _sm2_mode == "manual":
-        use_smoothing_twice = st.slider(
-            "Savgol window 2× (steps, odd)", 3, 61, step=2,
-            value=_DEFAULTS["sm2_val"], key="sm2_val",
+        _sm2_mode = st.selectbox(
+            "Savitzky-Golay pass 2", _SM_OPTS,
+            index=_SM_OPTS.index(_DEFAULTS["sm2_mode"]), key="sm2_mode",
             disabled=use_smoothing is False,
             help=(
-                "Window size for the second Savitzky-Golay smoothing pass. "
-                "Works the same as the 1× window, but is applied to the already-smoothed "
-                "series. Generally can be equal to or slightly larger than the 1× window "
-                "to ensure incremental smoothing."
+                "A second Savitzky-Golay pass over the already-smoothed curve, for "
+                "noisy or high-resolution series. May distort or shorten phases in "
+                "short-lived cyclones."
                 + ("" if use_smoothing is not False else
-                   " **Inactive**: `use_smoothing='off'` skips the pass this window feeds.")
+                   " **Inactive**: the second pass only runs after the first, and "
+                   "pass 1 is off.")
             ),
         )
-    elif _sm2_mode == "off":
-        use_smoothing_twice = False
-    else:
-        use_smoothing_twice = "auto"
+        if _sm2_mode == "manual":
+            use_smoothing_twice = st.slider(
+                "Pass 2 window (steps, odd)", 3, 61, step=2,
+                value=_DEFAULTS["sm2_val"], key="sm2_val",
+                disabled=use_smoothing is False,
+                help=(
+                    "Window of the second pass, applied to the already-smoothed "
+                    "series. Usually equal to or slightly larger than the pass 1 "
+                    "window."
+                    + ("" if use_smoothing is not False else
+                       " **Inactive** while pass 1 is off.")
+                ),
+            )
+        elif _sm2_mode == "off":
+            use_smoothing_twice = False
+        else:
+            use_smoothing_twice = "auto"
 
-    with st.expander("Advanced — Savgol", expanded=False):
         savgol_poly = st.slider(
-            "Savgol polynomial degree", 2, 5, step=1,
+            "Savitzky-Golay polynomial degree", 2, 5, step=1,
             value=_DEFAULTS["savgol_poly"], key="savgol_poly",
             disabled=use_smoothing is False,
             help=(
                 "Degree of the polynomial fitted in each Savitzky-Golay window. "
-                "Lower degrees (2–3) yield more aggressive smoothing. "
-                "Higher degrees (4–5) better preserve local extrema and inflection points, "
-                f"but may be unstable with small window sizes. Default: {_pkg_default('savgol_polynomial')}."
+                "Lower degrees (2–3) smooth more; higher degrees (4–5) better keep "
+                "local extrema and inflection points but may be unstable with small "
+                f"windows. Default: {_pkg_default('savgol_polynomial')}."
                 + ("" if use_smoothing is not False else
-                   " **Inactive**: `use_smoothing='off'` skips every Savgol pass this "
-                   "reads — including the ones over `dz`/`dz2` — regardless of "
-                   "`use_smoothing_twice`.")
+                   " **Inactive** while pass 1 is off (that includes the passes over "
+                   "the derivatives).")
             ),
         )
 
-
-    st.divider()
-
-    st.header("3 · Extrema Filtering")
-    st.caption("Step 3 — `find_peaks_valleys(z)`. Runs BEFORE every stage: the extrema that survive here are the ones all the steps below see.")
-    reclassify_index0 = st.checkbox(
-        "Reclassify the extremum at index 0",
-        value=_DEFAULTS["reclassify_index0"],
-        key="reclassify_index0",
-        help=(
-            "Decide the type of the first point by comparing it with the next "
-            "extremum that survives filtering, instead of with the single "
-            "difference z[1] - z[0]. Index 0 is always marked as an extremum "
-            "(argrelextrema compares it against itself), so that one difference "
-            "used to decide whether a life cycle opens with intensification or "
-            "with decay. Uncheck to reproduce params-13 and every earlier "
-            "config, which predate this rule."
-        ),
-    )
-
-    with st.expander("Prominence filtering (advanced)", expanded=False):
-        st.caption(
-            "Optional post-processing for the detected peaks/valleys. "
-            "Boundary extrema (first and last points) are always preserved. "
-            + _off_or_default_text("prominence_relative")
+    with st.expander("Extrema", expanded=False):
+        st.caption("Runs before every phase rule: the peaks and valleys kept here "
+                   "are the ones all the phases below are built from. "
+                   + _off_or_default_text("prominence_relative"))
+        reclassify_index0 = st.checkbox(
+            "Reclassify the extremum at index 0",
+            value=_DEFAULTS["reclassify_index0"],
+            key="reclassify_index0",
+            help=(
+                "Decide the type of the first point by comparing it with the next "
+                "extremum that survives filtering, instead of with the single "
+                "difference z[1] - z[0]. Index 0 is always marked as an extremum, so "
+                "that one difference used to decide whether a life cycle opens with "
+                "intensification or with decay. Untick to reproduce configurations "
+                "made before this rule."
+            ),
         )
         _prom_enabled = st.checkbox(
-            "Enable prominence filter", value=_DEFAULTS["extrema_prominence_enabled"],
+            "Prominence filter", value=_DEFAULTS["extrema_prominence_enabled"],
             key="extrema_prominence_enabled",
             help=(
-                "Remove interior extrema that are not sufficiently prominent. "
-                "Boundary extrema are always preserved regardless of this setting."
+                "Removes interior extrema that are not prominent enough. The first "
+                "and last points are always kept."
             ),
         )
         if _prom_enabled:
@@ -1819,10 +2160,9 @@ with st.sidebar:
                     value=_DEFAULTS["extrema_prominence_rel_val"],
                     key="extrema_prominence_rel_val",
                     help=(
-                        "Fraction of the cyclone's strongest extremum's prominence; "
-                        "adapts to each cyclone's intensity (recommended mode). "
-                        "E.g.: 0.10 keeps only extrema with prominence ≥ 10% "
-                        "of the dominant extremum."
+                        "Fraction of the prominence of the cyclone's strongest "
+                        "extremum. E.g. 0.10 keeps only extrema with a prominence of "
+                        "at least 10% of the dominant one."
                     ),
                 )
                 extrema_prominence          = None
@@ -1833,8 +2173,8 @@ with st.sidebar:
                     value=_DEFAULTS["extrema_prominence_val"],
                     format="%.2e", key="extrema_prominence_val",
                     help=(
-                        "Minimum prominence in the same units as the smoothed vorticity "
-                        "series. Requires re-tuning for datasets of different magnitudes."
+                        "Minimum prominence in the units of the smoothed vorticity. "
+                        "Needs re-tuning for data of a different magnitude."
                     ),
                 )
                 extrema_prominence          = float(_abs_val)
@@ -1843,85 +2183,63 @@ with st.sidebar:
             extrema_prominence          = None
             extrema_prominence_relative = None
 
+    with st.expander("Threshold scale", expanded=False):
+        # `mature_method`'s own radio renders further down, so its current value is
+        # read from session_state here. Under "amplitude" length_scale stops scaling
+        # the MATURE window but keeps scaling the intensification and decay
+        # duration thresholds — so unlike 'Min. mature length'/'Mature distance'
+        # this control is NOT disabled, only annotated (measured: local vs global
+        # changes the phase output on 3 of the 47 training series under amplitude).
+        _length_scale_mature_active = (
+            st.session_state.get("mature_method", _DEFAULTS["mature_method"]) == "derivative")
+        length_scale = st.radio(
+            "Threshold scale",
+            options=["global", "local"],
+            index=["global", "local"].index(_DEFAULTS["length_scale"]),
+            format_func=lambda x: _with_default_mark(
+                "length_scale", x, "Global (whole series)"
+                if x == "global" else "Local (per cycle)"),
+            key="length_scale",
+            horizontal=True,
+            help=(
+                "What the duration thresholds of intensification, decay and mature "
+                "are fractions *of*. It spans those three groups, which is why it "
+                "has a group of its own; through the neighbour check between them "
+                "it can change the detected phases outright.\n\n"
+                "**global**" + _default_mark("length_scale", "global") + ": the whole "
+                "series length — the behaviour up to v2.0.0. "
+                "**local**" + _default_mark("length_scale", "local") + ": each life "
+                "cycle's own span, which resolves tracks with several asymmetric "
+                "cycles — a short second cycle would otherwise have all its phases "
+                "rejected by thresholds sized for a much larger first cycle, "
+                "collapsing it into one 'residual' block. Does not affect 'Mature "
+                "distance' or 'Min. incipient length', which were already local. "
+                "Changing it re-runs phase detection only, not the filtering."
+                + ("" if _length_scale_mature_active else
+                   " **Partially inactive**: with mature method 'amplitude' it no "
+                   "longer scales the mature window. It REMAINS ACTIVE for the "
+                   "intensification and decay thresholds, and through them can "
+                   "change which mature windows survive — measured on 3 of the 47 "
+                   "training series — so it stays enabled on purpose.")
+            ),
+        )
 
-
-    st.divider()
-    st.header("Threshold scale (spans steps 4-6)")
-    st.caption("Cross-cutting parameter: it does not belong to a single step.")
-    # `mature_method`'s own radio renders further down, so its current value is
-    # read from session_state here. Under "amplitude" length_scale stops scaling
-    # the MATURE window (find_stages.find_mature_stage reads it but only uses it
-    # in the "derivative" branch), but it keeps scaling the intensification and
-    # decay duration thresholds — so unlike 'Min. mature length'/'Mature
-    # distance' this control is NOT disabled, only annotated. Disabling it would
-    # present a live, outcome-changing control as inert: measured on the 47
-    # training series under params-9 (amplitude), local vs global changes the
-    # phase output on 20160735, 20191014 and 20203947.
-    _length_scale_mature_active = (
-        st.session_state.get("mature_method", _DEFAULTS["mature_method"]) == "derivative")
-    length_scale = st.radio(
-        "Threshold scale",
-        options=["global", "local"],
-        index=["global", "local"].index(_DEFAULTS["length_scale"]),
-        format_func=lambda x: _with_default_mark(
-            "length_scale", x, "Global (whole series; the behaviour before this option)"
-            if x == "global" else "Local (per-cycle)"),
-        key="length_scale",
-        horizontal=True,
-        help=(
-            "**Spans groups.** It scales the DURATION thresholds of "
-            "intensification (step 4) and decay (step 5) — `find_stages.py:387` "
-            "— and, through the intensification/mature/decay neighbour check, it "
-            "can change the detected phases outright: 20160735, 20191014 and "
-            "20203947 under params-9. That is why it sits above steps 4-6 rather "
-            "than inside one of them.\n\n"
-            "Controls what length the duration thresholds of the "
-            "intensification, decay and mature groups below are fractions *of*. "
-            "**global**" + _default_mark("length_scale", "global") + ": thresholds are measured against the whole "
-            "series length — unchanged from v2.0.0. "
-            "**local**" + _default_mark("length_scale", "local") + ": thresholds are measured against each individual life "
-            "cycle's own span instead, which resolves tracks containing "
-            "multiple asymmetric cycles — a short second cycle would "
-            "otherwise have every one of its phases rejected by thresholds "
-            "sized for a much larger first cycle, collapsing it into a "
-            "single 'residual' block. Does not affect 'Mature distance' or "
-            "'Min. incipient length' below, which were already local. "
-            "Switching this does not re-run the Lanczos/Savgol filtering — "
-            "only phase detection is re-computed."
-            + ("" if _length_scale_mature_active else
-               " **Partially inactive**: with Mature stage method = 'amplitude' "
-               "this setting no longer scales the mature window ('Min. mature "
-               "length' is itself inactive there). It REMAINS ACTIVE for the "
-               "intensification and decay thresholds, and through them can still "
-               "change which mature windows survive the "
-               "intensification/mature/decay neighbour check — measured to change "
-               "the phase output on 3 of the 47 training series under "
-               "'amplitude'. It is therefore left enabled on purpose.")
-        ),
-    )
-
-    st.divider()
-
-    st.header("4 · Intensification")
-    st.caption("Step 4 — `find_intensification_period`, the first phase written.")
-    thr_int_len = st.slider(
-        "Min. intensification length", 0.01, 0.30, step=0.005,
-        value=_DEFAULTS["thr_int_len"], key="thr_int_len",
-        help=(
-            "Minimum length of an intensification segment, expressed as a fraction of "
-            "the total series length. Segments shorter than this are discarded or absorbed "
-            "by adjacent phases. Higher values require longer, more sustained intensification; "
-            "lower values allow brief intensification episodes."
-        ),
-    )
-    with st.expander("Advanced — intensification", expanded=False):
+    with st.expander("Intensification", expanded=False):
+        thr_int_len = st.slider(
+            "Min. intensification length", 0.01, 0.30, step=0.005,
+            value=_DEFAULTS["thr_int_len"], key="thr_int_len",
+            help=(
+                "Minimum length of an intensification segment, as a fraction of the "
+                "series (or cycle) length. Shorter segments are discarded or absorbed "
+                "by neighbouring phases."
+            ),
+        )
         thr_int_gap = st.slider(
             "Max. intensification gap", 0.01, 0.30, step=0.005,
             value=_DEFAULTS["thr_int_gap"], key="thr_int_gap",
             help=(
-                "Maximum gap between two consecutive intensification segments that allows "
-                "them to be merged into a single continuous segment. Expressed as a fraction "
-                "of total series length. Gaps larger than this keep the segments separate."
+                "Largest gap between two intensification segments that still merges "
+                "them into one, as a fraction of the series length."
             ),
         )
         intensification_min_depth = st.slider(
@@ -1929,160 +2247,125 @@ with st.sidebar:
             value=_DEFAULTS["intensification_min_depth"],
             key="intensification_min_depth",
             help=(
-                "Depth floor on how much a candidate intensification segment must actually "
-                "deepen to be accepted at all. A segment qualifies when its normalised depth "
-                "`D2 = (z_peak - z_valley) / (z_max - z_min)` reaches this value — the drop "
-                "the segment itself achieves, as a fraction of the whole series' vorticity "
-                "range. Without it, a segment is accepted on duration alone, so a long flat "
-                "stretch is labelled intensification; step 7 then turns that phantom "
-                "intensification (having no mature after it) into residual to the end of the "
-                "series. Raise it to reject flat candidates. The floor is applied to each raw "
-                "segment before the gap merge above, not to the merged block. "
+                "How much a candidate segment must deepen to count as "
+                "intensification: its normalised depth "
+                "`D2 = (z_peak - z_valley) / (z_max - z_min)` must reach this value. "
+                "Without it a segment is accepted on duration alone, so a long flat "
+                "stretch is labelled intensification and later turned into residual "
+                "to the end of the series. Applied to each raw segment before the "
+                "gap merge. "
                 f"Default {_pkg_default('intensification_min_depth'):.2f}; 0.00 switches it off."
             ),
         )
 
-    st.divider()
-
-    st.header("5 · Decay")
-    st.caption("Step 5 — `find_decay_period`. May overwrite timesteps step 4 already labelled intensification.")
-    thr_dec_len = st.slider(
-        "Min. decay length", 0.01, 0.30, step=0.005,
-        value=_DEFAULTS["thr_dec_len"], key="thr_dec_len",
-        help=(
-            "Minimum length of a decay segment as a fraction of total series length. "
-            "Analogous to the intensification threshold, applied to the weakening phase. "
-            "Higher values eliminate short decay episodes."
-        ),
-    )
-    with st.expander("Advanced — decay", expanded=False):
+    with st.expander("Decay", expanded=False):
+        st.caption("May overwrite timesteps already labelled intensification.")
+        thr_dec_len = st.slider(
+            "Min. decay length", 0.01, 0.30, step=0.005,
+            value=_DEFAULTS["thr_dec_len"], key="thr_dec_len",
+            help=(
+                "Minimum length of a decay segment, as a fraction of the series (or "
+                "cycle) length. Higher values drop short decay episodes."
+            ),
+        )
         thr_dec_gap = st.slider(
             "Max. decay gap", 0.01, 0.30, step=0.005,
             value=_DEFAULTS["thr_dec_gap"], key="thr_dec_gap",
             help=(
-                "Maximum gap between consecutive decay segments for merging. "
-                "Analogous to the intensification gap. Useful when the cyclone shows brief "
-                "recoveries during decay that should not fragment the phase."
+                "Largest gap between decay segments that still merges them. Useful "
+                "when a cyclone briefly recovers during decay."
             ),
         )
 
-    st.divider()
-
-    st.header("6 · Mature")
-    st.caption("Step 6 — `find_mature_stage`.")
-    mature_method = st.radio(
-        "Mature stage method",
-        options=["derivative", "amplitude"],
-        index=["derivative", "amplitude"].index(_DEFAULTS["mature_method"]),
-        format_func=lambda x: _with_default_mark(
-            "mature_method", x, "Derivative (the behaviour before this option)"
-            if x == "derivative" else "Amplitude"),
-        key="mature_method",
-        horizontal=True,
-        help=(
-            "Controls how the mature-stage window around each vorticity minimum is sized. "
-            "**derivative**" + _default_mark("mature_method", "derivative") + ": a fixed proportion ('Mature distance' below) of the "
-            "time distance to the neighbouring vorticity peaks — unchanged from v2.0.0. "
-            "**amplitude**" + _default_mark("mature_method", "amplitude") + ": the contiguous stretch of vorticity around the minimum "
-            "that stays within a fraction of the cycle's own peak-to-valley amplitude on each "
-            "side ('Mature amplitude fraction' below). Anchors directly on the vorticity value "
-            "rather than on smoothed-derivative extrema, which can lag the true minimum and "
-            "displace the 'derivative' window forward on some real cyclones. "
-            "'Min. mature length' and 'Mature distance' below have NO EFFECT when 'amplitude' "
-            "is selected — that minimum-duration floor was calibrated for 'derivative' and was "
-            "observed to discard well-centred amplitude windows for being narrow, which is a "
-            "physically meaningful outcome there, not a defect to filter out."
-        ),
-    )
-    _mature_is_derivative = mature_method == "derivative"
-
-    thr_mat_len = st.slider(
-        "Min. mature length", 0.005, 0.15, step=0.005,
-        value=_DEFAULTS["thr_mat_len"], key="thr_mat_len",
-        disabled=not _mature_is_derivative,
-        help=(
-            "Minimum length of the mature phase (peak intensity period) as a fraction "
-            "of total series length. The mature stage spans the period around the vorticity "
-            "minimum. Very high values may eliminate the mature stage of rapidly evolving "
-            "cyclones; very low values can generate spurious peaks."
-            + ("" if _mature_is_derivative else
-               " **Inactive**: has no effect when Mature stage method = 'amplitude'.")
-        ),
-    )
-    thr_mat_dist = st.slider(
-        "Mature distance", 0.05, 0.30, step=0.005,
-        value=_DEFAULTS["thr_mat_dist"], key="thr_mat_dist",
-        disabled=not _mature_is_derivative,
-        help=(
-            "Maximum allowed distance between the intensity peak (vorticity minimum) and "
-            "the centre of the mature segment, as a fraction of total length. "
-            "Controls how close to the true intensity maximum the mature phase must be located. "
-            "Higher values allow offset peaks; lower values are more strict."
-            + ("" if _mature_is_derivative else
-               " **Inactive**: only used when Mature stage method = 'derivative'.")
-        ),
-    )
-    if not _mature_is_derivative:
-        mature_amplitude_fraction = st.slider(
-            "Mature amplitude fraction", 0.05, 1.00, step=0.01,
-            value=_DEFAULTS["mature_amplitude_fraction"], key="mature_amplitude_fraction",
+    with st.expander("Mature", expanded=False):
+        mature_method = st.radio(
+            "Mature stage method",
+            options=["derivative", "amplitude"],
+            index=["derivative", "amplitude"].index(_DEFAULTS["mature_method"]),
+            format_func=lambda x: _with_default_mark(
+                "mature_method", x, "Derivative" if x == "derivative" else "Amplitude"),
+            key="mature_method",
+            horizontal=True,
             help=(
-                "Fraction of each side's peak-to-valley vorticity amplitude a timestep must "
-                "still reach to count as mature. Higher values (closer to 1) yield a narrower "
-                "window tightly centred on the vorticity minimum; lower values widen it toward "
-                "the neighbouring peaks. No minimum-duration floor applies in this mode — a "
-                "narrow window is accepted on its own terms rather than discarded."
+                "How the mature window around each vorticity minimum is sized. "
+                "**derivative**" + _default_mark("mature_method", "derivative") + ": a "
+                "fixed proportion ('Mature distance') of the time to the neighbouring "
+                "vorticity peaks — the behaviour up to v2.0.0. "
+                "**amplitude**" + _default_mark("mature_method", "amplitude") + ": the "
+                "stretch around the minimum that stays within a fraction of the "
+                "cycle's own peak-to-valley amplitude on each side ('Mature amplitude "
+                "fraction'). It anchors on the vorticity itself rather than on "
+                "derivative extrema, which can lag the true minimum. 'Min. mature "
+                "length' and 'Mature distance' have NO EFFECT under 'amplitude'."
             ),
         )
-    else:
-        mature_amplitude_fraction = _DEFAULTS["mature_amplitude_fraction"]
+        _mature_is_derivative = mature_method == "derivative"
+        thr_mat_len = st.slider(
+            "Min. mature length", 0.005, 0.15, step=0.005,
+            value=_DEFAULTS["thr_mat_len"], key="thr_mat_len",
+            disabled=not _mature_is_derivative,
+            help=(
+                "Minimum length of the mature phase, as a fraction of the series "
+                "length. Very high values may remove the mature stage of fast "
+                "cyclones; very low ones can produce spurious peaks."
+                + ("" if _mature_is_derivative else
+                   " **Inactive** under mature method 'amplitude'.")
+            ),
+        )
+        thr_mat_dist = st.slider(
+            "Mature distance", 0.05, 0.30, step=0.005,
+            value=_DEFAULTS["thr_mat_dist"], key="thr_mat_dist",
+            disabled=not _mature_is_derivative,
+            help=(
+                "Largest distance between the vorticity minimum and the centre of "
+                "the mature segment, as a fraction of the length. Higher values "
+                "allow offset peaks."
+                + ("" if _mature_is_derivative else
+                   " **Inactive** under mature method 'amplitude'.")
+            ),
+        )
+        if not _mature_is_derivative:
+            mature_amplitude_fraction = st.slider(
+                "Mature amplitude fraction", 0.05, 1.00, step=0.01,
+                value=_DEFAULTS["mature_amplitude_fraction"], key="mature_amplitude_fraction",
+                help=(
+                    "Fraction of each side's peak-to-valley amplitude a timestep must "
+                    "still reach to count as mature. Closer to 1: a narrow window on "
+                    "the minimum; lower: wider, toward the neighbouring peaks. No "
+                    "minimum duration applies in this mode."
+                ),
+            )
+        else:
+            mature_amplitude_fraction = _DEFAULTS["mature_amplitude_fraction"]
+        mature_min_depth = st.slider(
+            "Mature minimum depth", 0.00, 1.00, step=0.01,
+            value=_DEFAULTS["mature_min_depth"], key="mature_min_depth",
+            help=(
+                "Which vorticity valleys may produce a mature phase: a valley "
+                "qualifies when `D1 = (z_max - z_valley) / (z_max - z_min)` reaches "
+                "this value (1.0 at the series minimum). Not a cap on how many mature "
+                "phases there are — every valley above the floor produces its own. "
+                "Acts inside mature detection only; it cannot move an incipient, "
+                "decay or residual boundary. Applies to both methods. "
+                f"Default {_pkg_default('mature_min_depth'):.2f}; 0.00 admits every valley."
+            ),
+        )
 
-    mature_min_depth = st.slider(
-        "Mature minimum depth", 0.00, 1.00, step=0.01,
-        value=_DEFAULTS["mature_min_depth"], key="mature_min_depth",
-        help=(
-            "Depth floor deciding which vorticity valleys may generate a mature "
-            "phase at all. A valley qualifies when its normalised depth "
-            "`D1 = (z_max - z_valley) / (z_max - z_min)` reaches this value — 1.0 "
-            "at the series minimum, 0.0 at its maximum. Raise it to stop shallow "
-            "dips from emitting spurious mature blocks. This is NOT a cap on how "
-            "many mature phases may be detected: every valley clearing the floor "
-            "still produces its own block, since a cyclone can genuinely have more "
-            "than one mature stage. Unlike the prominence filter above (which is "
-            "the *smaller of a valley's two climbs* and feeds every phase), this "
-            "acts inside mature detection only and cannot move an incipient, decay "
-            "or residual boundary. Applies to both mature stage methods. "
-            f"Default {_pkg_default('mature_min_depth'):.2f}; 0.00 admits every valley and changes nothing."
-        ),
-    )
-
-
-    st.divider()
-
-    st.header("7 · Residual")
-    st.caption("Step 7 — `find_residual_period`. This is the function that reads `decay_tail_amplitude_fraction` (find_stages.py:588), not `find_decay_period`.")
-    with st.expander("Extend decay over a flat tail (advanced)", expanded=False):
+    with st.expander("Residual", expanded=False):
         st.caption(
-            "Compensates for an artifact of the prominence filter above: on a "
-            "single-cycle series, peaks and valleys are scored against SEPARATE "
-            "populations, so the largest interior peak always survives "
-            "prominence_relative filtering by construction — even when its "
-            "prominence is negligible — while the valley of the same ripple is "
-            "correctly rejected. This 'orphan' peak (no surviving valley after it) "
-            "truncates decay early; the flat tail left behind is then labelled "
-            "'residual' even though nothing in the vorticity indicates a genuine "
-            "re-intensification. "
+            "Extends decay over a flat tail. The prominence filter can leave a lone "
+            "peak with no valley after it, which ends decay early; the flat tail is "
+            "then labelled residual although nothing in the vorticity re-intensifies. "
             + _off_or_default_text("decay_tail_amplitude_fraction")
         )
         _decay_tail_enabled = st.checkbox(
-            "Extend decay over a flat/plateau tail", value=_DEFAULTS["decay_tail_enabled"],
+            "Extend decay over a flat tail", value=_DEFAULTS["decay_tail_enabled"],
             key="decay_tail_enabled",
             help=(
-                "If the tail right after the last decay block contains no "
-                "re-deepening larger than the fraction below (relative to the "
-                "cycle's own peak-to-valley amplitude), it is labelled 'decay' "
-                "instead of 'residual'. Never touches z_peaks_valleys or any "
-                "detected extrema, so the mature window is unaffected."
+                "If the tail after the last decay block holds no re-deepening larger "
+                "than the fraction below (of the cycle's own peak-to-valley "
+                "amplitude), it is labelled 'decay' instead of 'residual'. Never "
+                "changes the detected extrema, so the mature window is unaffected."
             ),
         )
         if _decay_tail_enabled:
@@ -2092,33 +2375,20 @@ with st.sidebar:
                 value=_DEFAULTS["decay_tail_fraction_val"],
                 key="decay_tail_fraction_val",
                 help=(
-                    "Author's validated reference value is 0.05, confirmed safe "
-                    "over (0.0356, 0.0651] on the 51-track calibration set: below "
-                    "that, some spurious tails aren't absorbed; above it, genuine "
-                    "re-intensifications start being swallowed. A re-deepening at "
-                    "or above this fraction is left for the catch-all rule to mark "
-                    "'residual', as before."
+                    "Below about 0.036 some spurious tails are not absorbed; above "
+                    "about 0.065 genuine re-intensifications start being swallowed "
+                    "(51-track calibration set). A re-deepening at or above this "
+                    "fraction stays 'residual'."
                 ),
             )
             decay_tail_amplitude_fraction = float(_decay_tail_val)
         else:
             decay_tail_amplitude_fraction = None
 
-
-    st.divider()
-
-    # Numbered 9, not 8: these groups promise the detector's execution order, so
-    # the header has to carry the step number it actually is. Step 8 is
-    # `post_process_periods`, which takes no parameter and therefore has no
-    # group — the gap is the honest rendering of that, and renumbering to close
-    # the sequence would make the header disagree with its own caption.
-    st.caption("Step 8 — `post_process_periods`: gap-filling and singleton "
-               "removal. No parameter, so no controls.")
-    st.header("9 · Incipient")
-    st.caption("Step 9 — `find_incipient_period`, the LAST to run, after `post_process_periods`.")
-    with st.expander("Incipient — method and thresholds", expanded=False):
+    with st.expander("Incipient", expanded=False):
+        st.caption("The last rule to run, after gap-filling.")
         incipient_method = st.radio(
-            "incipient_method",
+            "Incipient method",
             options=["geometric", "plateau"],
             index=["geometric", "plateau"].index(_DEFAULTS["incipient_method"]),
             key="incipient_method",
@@ -2127,14 +2397,14 @@ with st.sidebar:
                 "incipient_method", x, "Geometric" if x == "geometric" else "Plateau"),
             help=(
                 "'geometric' is the historical rule: the incipient phase ends "
-                "`Min. incipient length` of the way to the next dz extremum. "
-                "'plateau' instead ends it where the normalised slope first "
-                "reaches tau — the end of the initial low-slope plateau.\n\n"
-                "**Caveat (measured on the 51-track set):** the plateau rule is only "
-                "meaningful once the t0 boundary artifact is controlled. With the "
-                "Lanczos filter off, or with derivative smoothing active, the first "
-                "sample already exceeds any usable tau on most tracks and the rule "
-                "degenerates to 'no incipient phase'."
+                "'Min. incipient length' of the way to the next dz extremum. "
+                "'plateau' ends it where the normalised slope first reaches tau — "
+                "the end of the initial low-slope plateau.\n\n"
+                "**Caveat (51-track set):** the plateau rule needs the edge artifact "
+                "at the first sample under control. With the Lanczos filter off, or "
+                "with derivative smoothing on, the first sample already exceeds any "
+                "usable tau on most tracks and the rule degenerates to 'no incipient "
+                "phase'."
             ),
         )
         if incipient_method == "geometric":
@@ -2142,22 +2412,16 @@ with st.sidebar:
                 "Min. incipient length", 0.1, 0.6, step=0.01,
                 value=_DEFAULTS["thr_inc_len"], key="thr_inc_len",
                 help=(
-                    "Minimum length of the incipient phase (pre-intensification period) as a "
-                    "fraction of total series length. The incipient stage covers genesis and "
-                    "early development before any identifiable intensification. "
-                    "Lower values allow shorter incipient phases."
+                    "Minimum length of the incipient phase (before any identifiable "
+                    "intensification), as a fraction of the series length."
                 ),
             )
         else:
-            # Kept out of the widget tree (not just disabled) under 'plateau' for
-            # the same reason threshold_mature_length is hidden under
-            # mature_method='amplitude': the parameter is genuinely ignored, and
-            # a live slider that does nothing reads as a bug during calibration.
+            # Kept out of the widget tree (not just disabled) under 'plateau': the
+            # parameter is genuinely ignored there, and a live slider that does
+            # nothing reads as a bug during calibration.
             thr_inc_len = st.session_state.get("thr_inc_len", _DEFAULTS["thr_inc_len"])
-            st.caption(
-                "`Min. incipient length` is ignored under `incipient_method='plateau'` "
-                "(as `Min. mature length` is under `mature_method='amplitude'`)."
-            )
+            st.caption("'Min. incipient length' is ignored by the plateau method.")
 
         incipient_plateau_tau = st.slider(
             "Plateau tau (normalised slope)", 0.01, 0.60, step=0.01,
@@ -2165,10 +2429,9 @@ with st.sidebar:
             disabled=incipient_method != "plateau",
             help=(
                 "The incipient phase is the leading stretch where the normalised "
-                "slope stays below this value. Measured reference points on the "
-                "51-track set under the author's calibration: tau=0.15 is the "
-                "smallest value that yields a non-empty plateau on all 51 tracks; "
-                "the resulting plateau is short (median 1-3 timesteps)."
+                "slope stays below this value. On the 51-track set, 0.15 is the "
+                "smallest value that gives a non-empty plateau on every track (median "
+                "1-3 timesteps)."
             ),
         )
         incipient_plateau_signal = st.radio(
@@ -2178,11 +2441,9 @@ with st.sidebar:
             key="incipient_plateau_signal", horizontal=True,
             disabled=incipient_method != "plateau",
             help=(
-                "'derivative': |dz/dt| of the smoothed series — the exact array the "
-                "stage detection consumes, so the criterion sees what the detector "
-                "sees, but it inherits the filter's edge artifact. "
-                "'vorticity': |d(zeta)/dt| computed on the UNFILTERED input, immune "
-                "to filter edge artifacts but noisier."
+                "'derivative': |dz/dt| of the smoothed series — what the phase rules "
+                "see, but with the filter's edge artifact. 'vorticity': |dζ/dt| of "
+                "the unfiltered input — immune to that artifact, but noisier."
             ),
         )
         incipient_plateau_crossing = st.radio(
@@ -2193,10 +2454,9 @@ with st.sidebar:
             disabled=incipient_method != "plateau",
             help=(
                 "'single': the plateau ends at the first sample reaching tau. "
-                "'sustained': it ends at the start of the first run of k consecutive "
-                "samples at or above tau, so an isolated noise spike inside the "
-                "plateau does not cut it short. If no such run exists anywhere in the "
-                "series, no incipient phase is created."
+                "'sustained': at the start of the first run of k samples at or above "
+                "tau, so an isolated noise spike does not cut it short. Without such "
+                "a run, no incipient phase is created."
             ),
         )
         if incipient_plateau_crossing == "sustained":
@@ -2204,37 +2464,35 @@ with st.sidebar:
                 "Plateau k (consecutive steps)", min_value=1, max_value=25, step=1,
                 value=_DEFAULTS["incipient_plateau_k"], key="incipient_plateau_k",
                 disabled=incipient_method != "plateau",
-                help="Number of consecutive samples at or above tau required by "
-                     "'sustained'. Ignored for 'single'.",
+                help="Consecutive samples at or above tau required by 'sustained'.",
             )
         else:
             incipient_plateau_k = st.session_state.get(
                 "incipient_plateau_k", _DEFAULTS["incipient_plateau_k"])
 
         incipient_plateau_spare_intensification = st.checkbox(
-            "Spare an intensification enclosed by the plateau (item 30)",
+            "Spare an intensification inside the plateau",
             value=_DEFAULTS["incipient_plateau_spare_intensification"],
             key="incipient_plateau_spare_intensification",
             disabled=incipient_method != "plateau",
-            help=(("ON" if _pkg_default("incipient_plateau_spare_intensification") else "OFF")
-                  + " by default. The plateau method writes incipient over "
-                  "the whole [0, boundary), which can erase an entire "
-                  "intensification and the mature after it. ON: if the first "
-                  "intensification that starts before the boundary also ends "
-                  "before it, the incipient stops at that intensification's start "
+            help=(("On" if _pkg_default("incipient_plateau_spare_intensification") else "Off")
+                  + " by default. The plateau method writes incipient over the whole "
+                  "stretch before its boundary, which can erase a whole "
+                  "intensification and the mature after it. On: if the first "
+                  "intensification that starts before the boundary also ends before "
+                  "it, the incipient phase stops where that intensification starts "
                   "(no incipient at all if it starts at step 0)."),
         )
 
         show_incipient_probe = st.checkbox(
-            "Show incipient probe overlay",
+            "Show incipient probe",
             value=False, key="show_incipient_probe",
             disabled=incipient_method != "plateau",
-            help=("Adds a per-cyclone panel showing the raw vs smoothed probe "
-                  "curve and the rate rel(t) with tau, so the effect of the "
-                  "smoothing window is visible directly."),
+            help=("Adds a panel per cyclone with the raw and smoothed probe curve "
+                  "and the rate rel(t) against tau, so the effect of the smoothing "
+                  "window is visible."),
         )
 
-        # --- dedicated smoothing for the incipient probe -------------------
         # Only meaningful for signal="vorticity": the "derivative" path already
         # reads a curve the pipeline filtered, so smoothing it here would be a
         # second, hidden pass over the same signal.
@@ -2245,20 +2503,16 @@ with st.sidebar:
                 key="incipient_smooth_window",
                 disabled=incipient_method != "plateau",
                 help=(
-                    "Savitzky-Golay window applied to the RAW vorticity before the "
-                    "incipient probe differentiates it. Affects the incipient "
-                    "probe only — `z` and `dz` used by every other phase are "
-                    "untouched, and the pipeline stays Savgol-off.\n\n"
-                    f"Default {_pkg_default('incipient_smooth_window')}; 0 disables it "
-                    "(the behaviour before this option). Even values are "
-                    "rounded up to odd.\n\n"
-                    "Measured on the synthetic suite: w≥5 removes the spurious "
-                    "noise trip that leaves the noisy designed-Ic cases with no "
-                    "incipient phase at all, and makes `sustained k` unnecessary. "
-                    "**Goldilocks:** too wide flattens the rise and displaces the "
-                    "knee — and on real tracks rel(t₀) is NOT monotone in the "
-                    "window (training track 20207822: 0.53 without smoothing → 0.60 at w=5 → 0.51 at w=7), so a "
-                    "bigger window is not reliably safer."
+                    "Savitzky-Golay window applied to the raw vorticity before the "
+                    "incipient probe differentiates it. Affects the incipient probe "
+                    "only.\n\n"
+                    f"Default {_pkg_default('incipient_smooth_window')}; 0 disables it. "
+                    "Even values are rounded up to odd.\n\n"
+                    "On the synthetic cases, a window of 5 or more removes the noise "
+                    "trip that left the noisy cases with no incipient phase. Too wide "
+                    "flattens the rise and displaces the knee, and on real tracks the "
+                    "effect is not monotone in the window, so wider is not reliably "
+                    "safer."
                 ),
             )
             incipient_smooth_polyorder = st.number_input(
@@ -2266,10 +2520,9 @@ with st.sidebar:
                 value=_DEFAULTS["incipient_smooth_polyorder"],
                 key="incipient_smooth_polyorder",
                 disabled=incipient_method != "plateau",
-                help=("Polynomial order of that Savitzky-Golay pass. Savgol rather "
-                      "than a moving average because it preserves the position and "
-                      "shape of the turn being measured. A window at or below this "
-                      "order cannot define the fit and is skipped."),
+                help=("Polynomial order of that Savitzky-Golay pass; it keeps the "
+                      "position and shape of the turn being measured. A window at or "
+                      "below this order cannot define the fit and is skipped."),
             )
         else:
             incipient_smooth_window = st.session_state.get(
@@ -2277,11 +2530,8 @@ with st.sidebar:
             incipient_smooth_polyorder = st.session_state.get(
                 "incipient_smooth_polyorder", _DEFAULTS["incipient_smooth_polyorder"])
             if incipient_method == "plateau":
-                st.caption(
-                    "Probe smoothing applies only to "
-                    "`incipient_plateau_signal='vorticity'` — the 'derivative' "
-                    "path already reads a pipeline-filtered curve."
-                )
+                st.caption("Probe smoothing applies only when the plateau signal is "
+                           "'vorticity'.")
 
     _rel_label_short, _rel_label = li.rel_signal_label(
         incipient_plateau_signal, incipient_smooth_window,
@@ -2323,10 +2573,12 @@ _PHASE_PARAMS = dict(
 _phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 
 # The sidebar's live state, in the same shape a calibration YAML uses, so the
-# Benchmark tab can spawn a column from "the current sidebar" without
+# Benchmark page can spawn a column from "the current sidebar" without
 # re-deriving any of it. Written here, next to the values actually passed to the
 # detector, rather than rebuilt inside the tab: a second derivation would be one
-# more place for the column and the Calibration view to drift apart.
+# more place for the column and the Calibration view to drift apart. The Manual
+# labelling page reads its filter_params too, for its optional overlays
+# (label_overlays.live_filter_params): that page no longer runs this sidebar.
 st.session_state["_bench_live_config"] = {
     "filter_params": {
         "use_filter": use_filter,
@@ -2342,299 +2594,277 @@ st.session_state["_bench_live_config"] = {
     "phase_params": dict(_PHASE_PARAMS),
 }
 
-# ── Tabs ─────────────────────────────────────────────────────────────────────────
-# Created BEFORE the track upload and the dataset choice, so those widgets live in
-# the Calibration tab only: drawn above the tabs, they also showed in the
-# Benchmark tab, with captions that are false there (Benchmark has its own
-# sources). Everything below stays module-level code; only where Streamlit
-# draws the widgets changes.
-tab_cal, tab_bench = st.tabs(["Calibration", "Benchmark"])
+# ── Sidebar: the Advanced notice and the active configuration ───────────────────
+# Both are drawn ABOVE the widgets they describe but filled here, once every
+# widget has produced its value for this run.
+_live = st.session_state["_bench_live_config"]
+_adv = _advanced_differences(_live)
+with _advanced_notice:
+    _n_adv = len(_adv)
+    _adv_text = (f"{_n_adv} advanced parameter{'s' if _n_adv != 1 else ''} "
+                 "differ from defaults" if _n_adv != 1 else
+                 "1 advanced parameter differs from defaults")
+    if _adv:
+        st.warning(_adv_text)
+        # A toggle and a plain list drawn in the sidebar itself: a popover opened
+        # in the main theme's text colour over the dark sidebar (unreadable), and
+        # a table in the narrow sidebar cut the parameter names off.
+        if st.toggle("Show which", key="show_advanced_diffs"):
+            st.markdown("\n".join(f"- `{k}`: **{v!r}** (default {d!r})"
+                                   for k, v, d in _adv))
+    else:
+        st.caption(_adv_text)
 
-with tab_cal:
-    # ── File upload ──────────────────────────────────────────────────────────────────
-    uploaded = st.file_uploader(
-        "Upload cyclone track(s) — .csv or .txt, ';'-delimited with columns 'time' "
-        "and 'min_max_zeta_850' (or a custom format, below)",
-        type=["csv", "txt"], accept_multiple_files=True, key="track_upload",
-        help=track_format_ui.UPLOAD_HELP,
-    )
-    # Every upload is validated here, and a non-standard one is previewed and must
-    # be confirmed; what comes out is standard-layout bytes, so nothing downstream
-    # knows or cares which layout the file arrived in. See track_io.
-    _custom_fmt = track_format_ui.format_controls()
-    _uploaded_tracks = track_format_ui.accept_uploads(uploaded, _custom_fmt,
-                                                      confirm_prefix="track_custom_ok_")
+if _K_CONFIG_SNAPSHOT not in st.session_state:
+    st.session_state[_K_CONFIG_SNAPSHOT] = {
+        "filter_params": dict(_live["filter_params"]),
+        "phase_params": dict(_live["phase_params"])}
+_edited = _changed_keys(_live, st.session_state[_K_CONFIG_SNAPSHOT])
+_active_config_line.markdown(
+    f"Active: **{st.session_state.get(_K_CONFIG_SOURCE, 'Defaults')}**"
+    + (f" · edited ({len(_edited)} change{'s' if len(_edited) != 1 else ''})"
+       if _edited else ""),
+    help=("Changed since it was loaded: " + ", ".join(_edited)) if _edited else None)
 
-    _calib_data_files = sorted(_CALIBRATION_DATA_DIR.glob("*.csv")) if _CALIBRATION_DATA_DIR.is_dir() else []
-    load_all_test_cyclones = st.checkbox(
-        f"Load all test cyclones (tests/calibration_data — {len(_calib_data_files)} tracks)"
-        if _calib_data_files else
-        "Load all test cyclones (tests/calibration_data — unavailable in this environment)",
-        value=False,
-        key="load_all_test_cyclones",
-        disabled=not bool(_calib_data_files),
+
+def _gt_boundary_iso(name: str, file_bytes: bytes) -> str | None:
+    """ISO timestamp of the designed incipient boundary, for synthetic cases.
+
+    Returns None for real tracks and for synthetic cases with no designed Ic
+    segment (those have no checkable boundary).
+    """
+    if not (load_synthetic_cases and _synth_files):
+        return None
+    idx = _synth_gt.get(name)
+    if idx is None:
+        return None
+    try:
+        return track_io.read_track(file_bytes).index[int(idx)].isoformat()
+    except Exception:
+        return None
+
+
+# ── 4 · Save results ─────────────────────────────────────────────────────────────
+# One button, at the end of the sidebar, replacing the sidebar's "Export
+# parameters (YAML)" and the main area's "Export all (ZIP)". The package is
+# built only when the user asks for it in the dialog — never on an ordinary
+# rerun, which used to render one export PNG per loaded track every time.
+def _save_signature(inc_csv: bool, inc_png: bool) -> str:
+    return hashlib.md5(yaml.safe_dump(
+        {"live": _live, "names": cyclone_names, "csv": inc_csv, "png": inc_png,
+         "dev": _DEV}, sort_keys=True).encode()).hexdigest()
+
+
+def _build_package(inc_csv: bool, inc_png: bool) -> dict:
+    """The ZIP: parameters.yaml always (the content the old YAML export wrote);
+    <name>_periods.csv and <name>_periods.png per cyclone, as asked. A cyclone
+    whose detection fails is left out and named, as the old ZIP left it out."""
+    buf = io.BytesIO()
+    failed = []
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("parameters.yaml", _build_yaml(cyclone_names, include_evaluation=_DEV))
+        for name, fb in files.items():
+            if not (inc_csv or inc_png):
+                break
+            try:
+                _d, pdict, _w = _run_get_periods(
+                    fb, use_filter, cutoff_low, cutoff_high,
+                    use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                    boundary_padding, _phase_params_tuple)
+            except Exception:
+                failed.append(name)
+                continue
+            if inc_csv:
+                zf.writestr(f"{name}_periods.csv", _render_csv(pdict).decode("utf-8"))
+            if inc_png:
+                try:
+                    zf.writestr(f"{name}_periods.png", _render_periods_png(
+                        fb, use_filter, cutoff_low, cutoff_high,
+                        use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+                        boundary_padding, _phase_params_tuple, name,
+                        figsize=(12, 5), show_title=True,
+                        gt_boundary_iso=_gt_boundary_iso(name, fb)))
+                except Exception:
+                    failed.append(name)
+    return {"bytes": buf.getvalue(), "failed": failed,
+            "signature": _save_signature(inc_csv, inc_png)}
+
+
+@st.dialog("Save results", on_dismiss=_close_dialogs)
+def _save_results_dialog() -> None:
+    st.checkbox("Configuration (YAML)", value=True, disabled=True,
+                key="save_include_yaml",
+                help="Always included: every filtering and phase-detection "
+                     "parameter, so the configuration can be loaded back here or "
+                     "used in a script.")
+    inc_csv = st.checkbox("Phase tables (CSV per cyclone)", value=True,
+                          key="save_include_csv",
+                          help="Start and end of every phase, one file per cyclone.")
+    inc_png = st.checkbox("Figures (PNG)", value=False, key="save_include_png",
+                          help="One phase figure per cyclone. Rendering them takes "
+                               "a while with many tracks.")
+    if not files:
+        st.caption("No tracks loaded: the package will hold the configuration only.")
+    if st.button("Prepare package", type="primary", key="save_prepare",
+                 use_container_width=True):
+        with st.spinner("Preparing…"):
+            st.session_state["_save_package"] = _build_package(inc_csv, inc_png)
+    pkg = st.session_state.get("_save_package")
+    if pkg and pkg["signature"] == _save_signature(inc_csv, inc_png):
+        st.download_button(
+            "Download cyclophaser_results.zip", data=pkg["bytes"],
+            file_name="cyclophaser_results.zip", mime="application/zip",
+            key="save_download", use_container_width=True, on_click="ignore")
+        if pkg["failed"]:
+            st.warning("Left out (detection failed): " + ", ".join(pkg["failed"]))
+    elif pkg:
+        st.caption("The options or the parameters changed — prepare the package again.")
+    if st.button("Done", key="save_close"):
+        _close_dialogs()
+        st.rerun()
+
+
+with st.sidebar:
+    st.divider()
+    st.subheader("4 · Save results")
+    st.button("Save results", type="primary", key="btn_save_results",
+              use_container_width=True, on_click=_open_dialog, args=("save",),
+              help="Configuration (YAML), and optionally the phase tables (CSV) "
+                   "and figures (PNG) of every loaded cyclone, in one ZIP.")
+    if st.session_state.get(_K_DIALOG) == "save":
+        _save_results_dialog()
+
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# Calibrate — main area
+# ══════════════════════════════════════════════════════════════════════════════════
+# With nothing loaded, nothing runs: no example is loaded in silence and no
+# detection happens. The start screen explains the page; its two buttons have
+# keys of their own and call the same actions as the ones in step 1 of the
+# sidebar.
+_DOCS_URL = "https://cyclophaser.readthedocs.io/en/latest/"
+
+
+def _start_screen() -> None:
+    st.subheader("Check CycloPhaser's phases on your cyclone tracks")
+    st.markdown(
+        "CycloPhaser splits a cyclone's vorticity track into life-cycle phases: "
+        "incipient, intensification, mature, decay and residual. This page "
+        "shows the phases it finds on your tracks, so you can check them and "
+        "adjust the settings before you use them.")
+    st.markdown(
+        "1. **Load tracks** — upload your own in the sidebar, or start with the "
+        "data below.\n"
+        "2. **Check the figures** — each track is drawn with its phases.\n"
+        "3. **Adjust the filtering** if your tracks are not TRACK-filtered "
+        "850 hPa vorticity, the data the defaults were tuned on.\n"
+        "4. **Save** the configuration, phase tables and figures with "
+        "**Save results**.")
+    _s1, _s2, _s3 = st.columns([1, 1, 2])
+    _s1.button("Try example data", key="start_example", on_click=_load_example,
+               type="primary", use_container_width=True,
+               help="Loads the single example track shipped with the package.")
+    _s2.button(f"Sample data ({len(_calib_data_files)} TRACK cyclones)"
+               if _calib_data_files else "Sample data (unavailable here)",
+               key="start_sample", on_click=_load_sample, use_container_width=True,
+               disabled=not _calib_data_files,
+               help="Loads the real cyclone tracks bundled with the repository.")
+    st.markdown(f"How the method works and what each setting does: "
+                f"[CycloPhaser documentation]({_DOCS_URL}).")
+
+
+if not files:
+    _start_screen()
+    st.stop()
+
+if load_synthetic_cases:
+    _active = "noisy" if load_synthetic_noisy else "clean"
+    _sel_ids = ((set(_clean_ids) if load_synthetic_clean else set())
+                | (set(_noisy_ids) if load_synthetic_noisy else set()))
+    _loaded_syn = [k for k in _synth_files if k in _sel_ids]
+    _flat = [k for k in _loaded_syn if k in _plateau_start_ids]
+    _steep = [k for k in _loaded_syn if k in _steep_start_ids]
+    st.caption(
+        f"**Synthetic cases — {_active} pre-processing applied.** "
+        "Pre-processing conclusions do not transfer from synthetic to real tracks; "
+        "phase-detection conclusions do.",
         help=(
-            f"Loads all {len(_calib_data_files)} real cyclone tracks bundled in "
-            "tests/calibration_data for bulk calibration/validation. If you also "
-            "upload files above, both sets are combined; an uploaded file takes "
-            "precedence over a bundled one with the same cyclone ID."
-            if _calib_data_files else
-            "tests/calibration_data was not found next to this app (this checkout "
-            "may not include the full repository) — this option is unavailable."
+            "These series are analytic, so the real-track Lanczos band-pass would "
+            "round off the very segment boundaries under test. The preset only "
+            "seeds the pre-processing; every control stays editable."
+            + (" With both groups loaded the noisy preset is used: it is also "
+               "correct on the clean cases, the clean one is not usable on the "
+               "noisy cases." if (load_synthetic_clean and load_synthetic_noisy) else "")
+            + ("\n\nKnown limitation of the noisy preset: it keeps the incipient "
+               "plateau measurable at the cost of 2 of 8 sequences "
+               "(DItMD_noisy and DItMD_residual_noisy), which also pick up a 1-step "
+               "spurious incipient phase." if load_synthetic_noisy else "")
+            + (f"\n\n{len(_flat)} of {len(_loaded_syn)} loaded cases start flat: a "
+               "sine-shaped opening segment has zero slope at its ends, so an "
+               "incipient phase on these is correct, not over-detection."
+               + (f" True negatives (non-zero slope from the first sample): "
+                  f"{', '.join(_steep)}." if _steep else "")
+               + " Green dotted line = designed incipient boundary, drawn where the "
+                 "case has one." if _loaded_syn else "")
         ),
     )
 
-    _synth_files, _synth_gt, _synth_groups, _synth_err = _load_synthetic_cases()
-    _clean_ids = _synth_groups.get("clean", {}).get("ids", ())
-    _noisy_ids = _synth_groups.get("noisy", {}).get("ids", ())
-    _plateau_start_ids = set(_synth_groups.get("plateau_start", ()))
-    _steep_start_ids = set(_synth_groups.get("steep_start", ()))
+# ── Pre-process all cyclones ─────────────────────────────────────────────────────
+all_results: dict[str, dict] = {}
 
-    # Two separate options rather than one: the clean and noisy populations need
-    # DIFFERENT pre-processing, so loading them together would force a single preset
-    # onto both. See the presets' block comment in tests/synthetic/cases.py.
-    _sc1, _sc2 = st.columns(2)
-    with _sc1:
-        load_synthetic_clean = st.checkbox(
-            f"Load synthetic — clean ({len(_clean_ids)} cases, no noise)"
-            if _clean_ids else "Load synthetic — clean (unavailable)",
-            value=False, key="load_synthetic_clean", disabled=not bool(_clean_ids),
-            help=(
-                "The noise-free synthetic cases: "
-                + ", ".join(_clean_ids) + ".\n\n"
-                "Pre-processing is set to SYNTHETIC_CLEAN_PRESET — Lanczos off, one "
-                "Savgol pass. These series have nothing to denoise, so the band-pass "
-                "is dropped; the single smoothing pass is the minimum that survives "
-                "the kink at each segment join. Measured: sequence 3/3, no timing "
-                "failures."
-                if _clean_ids else
-                f"tests/synthetic could not be imported ({_synth_err})."
-            ),
+for _cname, _fbytes in files.items():
+    _res: dict = {"ok": False, "name": _cname}
+
+    try:
+        _vort, _fwarns = _run_process_vorticity(
+            _fbytes, use_filter, cutoff_low, cutoff_high,
+            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+            boundary_padding,
         )
-    with _sc2:
-        load_synthetic_noisy = st.checkbox(
-            f"Load synthetic — noisy ({len(_noisy_ids)} cases, 2 % noise)"
-            if _noisy_ids else "Load synthetic — noisy (unavailable)",
-            value=False, key="load_synthetic_noisy", disabled=not bool(_noisy_ids),
-            help=(
-                "The synthetic cases carrying 2 % Gaussian noise.\n\n"
-                "Pre-processing is set to SYNTHETIC_NOISY_PRESET — Lanczos ACTIVE "
-                "(cutoff_high=18), Savgol off, mirroring the author's validated "
-                "section-3c calibration. These series genuinely need the noise "
-                "suppressed, and it is the band-pass that does it here. Measured: "
-                "sequence 6/8, no timing failures; DItMD_noisy and "
-                "DItMD_residual_noisy are the two that miss."
-                if _noisy_ids else
-                f"tests/synthetic could not be imported ({_synth_err})."
-            ),
-        )
-
-    load_synthetic_cases = bool(load_synthetic_clean or load_synthetic_noisy)
-
-    if _synth_err and not _synth_files:
-        st.caption(f"⚠ tests/synthetic unavailable: {_synth_err}")
-
-    if load_synthetic_cases:
-        _active = "noisy" if load_synthetic_noisy else "clean"
-        _both = load_synthetic_clean and load_synthetic_noisy
-        st.caption(
-            f"**Synthetic mode — {_active} preset applied.** "
-            "These series are analytic, so the real-track Lanczos band-pass would "
-            "round off the very segment boundaries under test. "
-            "**Pre-processing conclusions do not transfer from synthetic to real "
-            "tracks; phase-detection conclusions do.** The phase controls are "
-            "unaffected and remain fully editable; so is the pre-processing, which "
-            "the preset only seeds."
-            + (" Both groups are loaded, so the *noisy* preset is applied — it is "
-               "also correct on all four clean cases, whereas the clean preset is "
-               "not usable on the noisy ones." if _both else "")
-            + ("\n\n**Combined with the real tracks above.** This is a coherent "
-               "pairing, not an accident: SYNTHETIC_NOISY_PRESET *is* the author's "
-               "section-3c calibration (Lanczos on, cutoff_high=18, Savgol off), so "
-               "both sets are being processed identically and can be judged side by "
-               "side." if (load_synthetic_noisy and load_all_test_cyclones) else "")
-            + ("\n\nKnown limitation of the noisy preset: it keeps the incipient "
-               "plateau measurable (Savgol off keeps r(t₀) low) at the cost of 2/8 "
-               "sequences — `DItMD_noisy` and `DItMD_residual_noisy`, which also "
-               "pick up a 1-step spurious incipient. The alternative (two Savgol "
-               "passes) gets 8/8 sequences but puts the edge artifact back at t₀, "
-               "collapsing the plateau rule to 'no incipient phase' on 4 of the 5 "
-               "designed-Ic cases." if load_synthetic_noisy else "")
-        )
-        # Derived from the checkbox state, not from `files` — that dict is built
-        # further down the page, after this caption renders.
-        _sel_ids = ((set(_clean_ids) if load_synthetic_clean else set())
-                    | (set(_noisy_ids) if load_synthetic_noisy else set()))
-        _loaded_syn = [k for k in _synth_files if k in _sel_ids]
-        _flat = [k for k in _loaded_syn if k in _plateau_start_ids]
-        _steep = [k for k in _loaded_syn if k in _steep_start_ids]
-        st.caption(
-            f"**Initial plateau: {len(_flat)} of {len(_loaded_syn)} loaded cases "
-            "start flat.** An initial plateau is a property of the generator, not "
-            "of the designed life cycle: `_ramp_sine` is a half-period cosine with "
-            "zero derivative at its endpoints, so a series opening with a sine "
-            "It/D segment starts flat just as an `Ic` segment would. An incipient "
-            "phase on these is CORRECT, not over-detection — the suite's own "
-            "`expected_phases` already contains `incipient` in 9 of the 12 cases, "
-            "five of them with no designed `Ic` segment."
-            + (f"\n\nTrue negatives (built with a `linear` opening ramp, non-zero "
-               f"slope from the first sample): **{', '.join(_steep)}**. Note these "
-               "still pick up a 1-step incipient under `signal='derivative'`, "
-               "because the Lanczos smooths their abrupt onset (normalised |dz| at "
-               "t₀ goes 0.94/0.66 raw → 0.147/0.150 filtered); "
-               "`signal='vorticity'` reads the unfiltered series and rejects them "
-               "correctly." if _steep else "")
-            + ("\n\nGreen dotted line = designed `Ic` boundary, drawn only for the "
-               "cases that have an explicit `Ic` segment; the other flat-opening "
-               "cases have a real plateau but no designed boundary index to check "
-               "against." if _flat else "")
-        )
-
-    with st.sidebar:
-        st.divider()
-        st.subheader("Manual labelling")
-        label_default_tolerance = st.number_input(
-            "Default ± steps for a new boundary", min_value=0, max_value=50, value=5,
-            step=1, key="label_default_tolerance",
-            help=(
-                "Starting value for each boundary's margin in the **Label** display "
-                "mode. It is only a starting value: the margin is stored per "
-                "BOUNDARY, because the subjectivity is not uniform even within one "
-                "cyclone — an incipient knee can be unmistakable on a track whose "
-                "mature→decay transition is a long gentle roll. A single global "
-                "margin would force the worst case onto every boundary and hide "
-                "exactly that difference.\n\nThe margin is drawn on the chart as a "
-                "shaded band and a double-headed arrow, because a number in a table "
-                "gives no sense of how much of the curve it actually forgives.\n\n"
-                "Does not affect detection and is not exported to YAML."
-            ),
-        )
-
-    _EXAMPLE = Path(__file__).parent.parent.parent / "cyclophaser" / "example_data" / "example_file.csv"
-
-    # Precedence when both an upload and "load all test cyclones" are active: the
-    # two sets are combined (union), and an uploaded file wins on a cyclone-ID
-    # collision with a bundled one -- chosen because a user re-uploading a track
-    # under its bundled ID is more likely re-testing a specific variant of it than
-    # asking for it to be silently dropped.
-    files: dict[str, bytes] = {}
-    if load_all_test_cyclones and _calib_data_files:
-        files.update({p.stem: p.read_bytes() for p in _calib_data_files})
-    if _synth_files:
-        _wanted = ((set(_clean_ids) if load_synthetic_clean else set())
-                   | (set(_noisy_ids) if load_synthetic_noisy else set()))
-        files.update({k: v for k, v in _synth_files.items() if k in _wanted})
-    if _uploaded_tracks:
-        files.update(_uploaded_tracks)
-    if not files:
-        files = {"example_file": _EXAMPLE.read_bytes()}
-        st.caption(f"No file uploaded — using `{_EXAMPLE.name}` as default.")
-    elif load_all_test_cyclones and _uploaded_tracks:
-        st.caption(
-            f"Combined {len(_calib_data_files)} bundled test cyclone(s) with "
-            f"{len(_uploaded_tracks)} uploaded file(s) — {len(files)} total (uploads take "
-            "precedence on ID collision)."
-        )
-
-    cyclone_names = list(files.keys())
-
-    # ── Sidebar: YAML export ─────────────────────────────────────────────────────────
-    with st.sidebar:
-        st.divider()
-        st.download_button(
-            "📥 Export parameters (YAML)",
-            data=_build_yaml(cyclone_names).encode("utf-8"),
-            file_name="cyclophaser_params.yaml",
-            mime="text/yaml",
-            use_container_width=True,
-        )
-
-    def _gt_boundary_iso(name: str, file_bytes: bytes) -> str | None:
-        """ISO timestamp of the designed incipient boundary, for synthetic cases.
-
-        Returns None for real tracks and for synthetic cases with no designed Ic
-        segment (those have no checkable boundary — see section 5 of
-        research/incipient_plateau/REPORT_incipient_characterisation.md).
-        """
-        if not (load_synthetic_cases and _synth_files):
-            return None
-        idx = _synth_gt.get(name)
-        if idx is None:
-            return None
-        try:
-            return track_io.read_track(file_bytes).index[int(idx)].isoformat()
-        except Exception:
-            return None
-
-
-    # ── Pre-process all cyclones ─────────────────────────────────────────────────────
-    # Done before rendering tabs so export data (CSV + PNG) is ready for the ZIP button.
-    all_results: dict[str, dict] = {}
-
-    for _cname, _fbytes in files.items():
-        _res: dict = {"ok": False, "name": _cname}
-
-        try:
-            _vort, _fwarns = _run_process_vorticity(
-                _fbytes, use_filter, cutoff_low, cutoff_high,
-                use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-                boundary_padding,
-            )
-        except Exception as _exc:
-            _res["error"] = f"Vorticity processing failed: {_exc}"
-            all_results[_cname] = _res
-            continue
-
-        try:
-            _df, _pdict, _pwarns = _run_get_periods(
-                _fbytes, use_filter, cutoff_low, cutoff_high,
-                use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-                boundary_padding,
-                _phase_params_tuple,
-            )
-        except Exception as _exc:
-            _res["error"] = f"Phase detection failed: {_exc}"
-            _res["filter_warns"] = _fwarns
-            all_results[_cname] = _res
-            continue
-
-        try:
-            _png = _render_periods_png(
-                _fbytes, use_filter, cutoff_low, cutoff_high,
-                use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
-                boundary_padding,
-                _phase_params_tuple, _cname, figsize=(12, 5), show_title=True,
-                gt_boundary_iso=_gt_boundary_iso(_cname, _fbytes),
-            )
-        except Exception:
-            _png = b""
-
-        _res.update({
-            "ok":           True,
-            "vort":         _vort,
-            "df_result":    _df,
-            "periods_dict": _pdict,
-            "filter_warns": _fwarns,
-            "phase_warns":  _pwarns,
-            "diag":         _compute_diagnostics(_cname, _pdict, _df, _fwarns + _pwarns),
-            "csv_bytes":    _render_csv(_pdict),
-            "png_bytes":    _png,
-        })
+    except Exception as _exc:
+        _res["error"] = f"Vorticity processing failed: {_exc}"
         all_results[_cname] = _res
+        continue
 
-    _ok_results = {n: r for n, r in all_results.items() if r["ok"]}
-    _zip_bytes  = _build_zip(_ok_results, _build_yaml(cyclone_names))
+    try:
+        _df, _pdict, _pwarns = _run_get_periods(
+            _fbytes, use_filter, cutoff_low, cutoff_high,
+            use_smoothing, use_smoothing_twice, replace_endpoints, savgol_poly,
+            boundary_padding,
+            _phase_params_tuple,
+        )
+    except Exception as _exc:
+        _res["error"] = f"Phase detection failed: {_exc}"
+        _res["filter_warns"] = _fwarns
+        all_results[_cname] = _res
+        continue
+
+    _res.update({
+        "ok":           True,
+        "vort":         _vort,
+        "df_result":    _df,
+        "periods_dict": _pdict,
+        "filter_warns": _fwarns,
+        "phase_warns":  _pwarns,
+        "diag":         _compute_diagnostics(_cname, _pdict, _df, _fwarns + _pwarns),
+        "csv_bytes":    _render_csv(_pdict),
+    })
+    all_results[_cname] = _res
+
+_ok_results = {n: r for n, r in all_results.items() if r["ok"]}
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════════
-# TAB 1 — Calibration
+# Calibrate — display
 # ══════════════════════════════════════════════════════════════════════════════════
-with tab_cal:
-    # Top row: display mode + ZIP export.
+with st.container():
+    # Top row: display mode. (The ZIP export that shared this row is now
+    # "Save results", at the end of the sidebar.)
     #
     # "Grid" is the historical view and renders exactly what it rendered
     # before the inspector existed -- same matplotlib functions, same figures,
-    # same ZIP bytes; only the widget it shares this row with changed.
+    # same figures; only the widget around it changed.
     # "Inspector" answers a different question -- one track, with every pipeline
     # series and every decision overlay switchable one by one -- so it gets its
     # own renderer (Plotly, for client-side legend toggling) instead of being
@@ -2653,53 +2883,47 @@ with tab_cal:
                 "decision the algorithm made, each on its own switchable "
                 "layer. Use it when a track in the grid looks wrong and you "
                 "need to know *why*.\n\n"
-                "**Label** — blind manual labelling. One cyclone at a time, "
-                "marking its WHOLE phase sequence before moving on, so each "
-                "track is judged as a complete life cycle rather than one "
-                "boundary in isolation. Drag a bar to move a phase boundary; "
-                "the bar's thickness is the margin you accept on it, and the "
-                "shading follows. Shows the raw input series and NOTHING "
-                "else: no filtered series, no derivatives, no detector output "
-                "of any kind. The phase colours are the project's standard "
-                "ones, but they are painting *your* marks — a label written "
-                "while looking at the algorithm's answer is an echo of it, "
-                "not evidence about it.\n\n"
                 "No mode changes detection, and no view setting reaches the "
                 "exported YAML."
             ),
         )
-    with _c2:
-        st.download_button(
-            "📦 Export all (ZIP)",
-            data=_zip_bytes,
-            file_name="cyclophaser_results.zip",
-            mime="application/zip",
-            use_container_width=True,
-            disabled=not bool(_ok_results),
-            help=(
-                "Downloads a ZIP containing, for each cyclone: "
-                "<name>_periods.csv, <name>_periods.png, and parameters.yaml."
-            ),
-        )
-
     # ══════════════════════════════════════════════════════════════════════════
     # MODE "Grid" — unchanged multi-cyclone grid (matplotlib, cached PNGs)
     # ══════════════════════════════════════════════════════════════════════════
     if view_mode == "Grid":
-        n_cols: int = st.select_slider(
-            "Grid columns", options=[1, 2, 3, 4, 5, 6],
-            value=_DEFAULTS["n_cols"], key="n_cols",
-        )
+        _gc1, _gc2 = st.columns([4, 1])
+        with _gc1:
+            n_cols: int = st.select_slider(
+                "Grid columns", options=[1, 2, 3, 4, 5, 6],
+                value=_DEFAULTS["n_cols"], key="n_cols",
+            )
+        with _gc2:
+            # Seeded instead of `index=`, like the Inspector's track: the key
+            # is written back on every run (_keep_calibrate_state), and a
+            # default plus a value set through Session State is what
+            # Streamlit warns about.
+            if st.session_state.get(_K_GRID_PAGE_SIZE) not in _GRID_PAGE_SIZES:
+                st.session_state[_K_GRID_PAGE_SIZE] = _GRID_PAGE_SIZES[0]
+            _page_size: int = st.selectbox(
+                "Tracks per page", options=_GRID_PAGE_SIZES, key=_K_GRID_PAGE_SIZE,
+                help="Only the figures of the page on screen are drawn. Detection "
+                     "still runs on every loaded track: the table and the "
+                     "statistics below cover all of them.")
+
+        _page_names, _page_no, _n_pages, _first = _grid_page(list(all_results), _page_size)
+        _grid_nav("top", _page_no, _n_pages, _first, len(_page_names), len(all_results))
 
         if n_cols >= 4:
             _render_global_legend()
 
-        # Display grid
+        # Display grid: the current page only. Every figure is drawn by a
+        # cached function, so tracks on other pages cost nothing here.
         grid = st.columns(n_cols)
-        for idx, (cyclone_name, res) in enumerate(all_results.items()):
+        for idx, cyclone_name in enumerate(_page_names):
+            res = all_results[cyclone_name]
             with grid[idx % n_cols]:
                 _bad_key = f"{_BAD_CASE_KEY_PREFIX}{cyclone_name}"
-                _is_bad = st.session_state.get(_bad_key, False)
+                _is_bad = _DEV and st.session_state.get(_bad_key, False)
                 st.subheader(f"⚠️ {cyclone_name}" if _is_bad else cyclone_name)
 
                 if not res["ok"]:
@@ -2755,16 +2979,17 @@ with tab_cal:
                         except Exception as exc:
                             st.warning(f"Probe overlay unavailable: {exc}")
 
-                st.checkbox(
-                    "⚠️ Mark as bad",
-                    value=False, key=_bad_key,
-                    help=(
-                        "Flags this cyclone's detection result as bad for the current "
-                        "parameter set. Persists across parameter changes within this "
-                        "session (use '🗑 Clear bad-case marks' in the sidebar to reset) "
-                        "and is included in the exported YAML's 'evaluation' section."
-                    ),
-                )
+                if _DEV:   # developer function
+                    st.checkbox(
+                        "⚠️ Mark as bad",
+                        value=False, key=_bad_key,
+                        help=(
+                            "Flags this cyclone's detection result as bad for the "
+                            "current parameter set. Kept across parameter changes, "
+                            "display modes and pages, and written to the saved "
+                            "configuration's 'evaluation' section."
+                        ),
+                    )
 
                 # 1-col extras
                 if n_cols == 1:
@@ -2799,14 +3024,20 @@ with tab_cal:
                                 use_container_width=True,
                             )
                         with _dl2:
+                            # The 1-column figure IS the export figure (same
+                            # arguments), so this is a cache hit, not a render.
                             st.download_button(
                                 "⬇ Download PNG",
-                                data=res["png_bytes"],
+                                data=_png_display,
                                 file_name=f"{cyclone_name}_periods.png",
                                 mime="image/png",
                                 use_container_width=True,
-                                disabled=not bool(res["png_bytes"]),
+                                disabled=not bool(_png_display),
                             )
+
+        if _n_pages > 1:
+            _grid_nav("bottom", _page_no, _n_pages, _first, len(_page_names),
+                      len(all_results))
 
         # Consolidated diagnostics — 2+ col mode
         if n_cols > 1 and _ok_results:
@@ -2824,6 +3055,11 @@ with tab_cal:
                     "Warnings":     f"{len(d['warns'])} ⚠️" if d["warns"] else "0",
                 })
             st.dataframe(pd.DataFrame(rows).set_index("Cyclone"), use_container_width=True)
+
+        # Set statistics — every loaded track, from the results computed above;
+        # no detection call of its own. Grid view only: the Inspector is one
+        # track and stays as it was.
+        set_stats.render_set_stats(all_results, PHASE_COLORS)
 
     # ══════════════════════════════════════════════════════════════════════════
     # MODE "Inspector" — one track, every layer switchable (Plotly)
@@ -2935,7 +3171,7 @@ with tab_cal:
                         "(hollow), plus every mature window that was built "
                         "around a surviving valley.\n\n"
                         "A window drawn dotted was built and then **erased**: "
-                        "`find_mature_stage` only keeps a window whose "
+                        "the mature rule only keeps a window whose "
                         "previous timestep is `intensification` and whose next "
                         "one is `decay`.\n\n"
                         "Which means a missing mature phase gets an answer "
@@ -2968,7 +3204,7 @@ with tab_cal:
             _plateau_active = incipient_method == "plateau"
             if _show_incipient and not _plateau_active:
                 st.caption(
-                    "⚠ `incipient_method` is **geometric**: the rel/τ/probe "
+                    "⚠ The incipient method is **geometric**: the rel/τ/probe "
                     "layers only exist in `plateau` mode and were omitted. The "
                     "|dz2| knee and the incipient boundary the run produced are "
                     "still drawn, and so are the raw dz / dz2 panels."
@@ -3043,7 +3279,7 @@ with tab_cal:
                     "is `scale × threshold`. An intensification candidate "
                     "that is long enough is still rejected when its depth "
                     "`D2 = (z_peak − z_valley) / (z_max − z_min)` is below "
-                    "`intensification_min_depth` (only when that floor is "
+                    "'Min. intensification depth' (only when that floor is "
                     "above 0). Gaps run the other way: a gap "
                     "**shorter** than its maximum gets filled in. "
                     "'Final label' says what that stretch ended up labelled "
@@ -3070,38 +3306,15 @@ with tab_cal:
                     "built, 'Confirmed' says it survived, and 'Discard reason' "
                     "says which half of the rule it failed. A valley whose "
                     "depth `D1 = (z_max − z_valley) / (z_max − z_min)` is below "
-                    "`mature_min_depth` never gets a window; it is listed, "
+                    "'Mature minimum depth' never gets a window; it is listed, "
                     "unwritten, with that reason."
                 )
                 st.dataframe(_mature_table(_mature_records),
                              use_container_width=True, hide_index=True)
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # MODE "Label" — BLIND manual labelling of the whole phase sequence
-    # ══════════════════════════════════════════════════════════════════════════
-    # This mode is deliberately CUT OFF from everything above it. It does not
-    # read `all_results`, `files`, `cyclone_names`, or any filter/phase widget;
-    # it loads its own 63 series (51 calibration tracks + 12 synthetic cases)
-    # straight from disk and draws the raw input and nothing else.
-    #
-    # That isolation is the requirement, not an implementation detail. There is
-    # no ground truth for the incipient boundary — the synthetic suite derives
-    # one from the segment list and gets it wrong, because a sine-shaped It or D
-    # opening has zero derivative at t₀ and so starts flat exactly as a designed
-    # `Ic` segment would. The labels therefore have to come from a human, and a
-    # human who can see the detector's answer is no longer independent evidence
-    # about it. The phase palette is the project's standard one, so a labelled
-    # series reads like every other phase figure in the repo -- but every band
-    # and arrow is drawn from the LABELLER'S marks, never the algorithm's.
-    # See the module docstring of label_tab.py.
-    elif view_mode == "Label":
-        label_tab.render(default_tolerance=int(label_default_tolerance),
-                         overlay_provider=_label_overlays)
-
-    # Bad-case evaluation summary — shown for both detector-facing modes,
-    # regardless of n_cols. NOT shown in "Label": that mode is blind by
-    # construction and must not put any detector-derived number on screen.
-    if view_mode != "Label":
+    # Bad-case evaluation summary — a developer function, shown in both display
+    # modes, regardless of n_cols.
+    if _DEV:
         st.divider()
         st.subheader("Bad-case evaluation")
         _eval = _compute_evaluation(cyclone_names)
@@ -3115,15 +3328,16 @@ with tab_cal:
             st.caption("Marked: " + ", ".join(_eval["bad_cases"]))
         else:
             st.caption("No cyclones marked as bad in this session.")
-        st.caption(
-            "Mark cyclones using the '⚠️ Mark as bad' checkbox below each figure above. "
-            "Clear all marks with '🗑 Clear bad-case marks' in the sidebar. This summary "
-            "is also written to the exported YAML's 'evaluation' section, so different "
-            "parameter sets can be compared by their bad-case rate."
+        st.button(
+            "🗑 Clear bad-case marks", on_click=_clear_bad_marks,
+            help=(
+                "Unmarks every cyclone currently flagged as bad. Kept apart from "
+                "'Defaults' on purpose: trying other parameter values should not "
+                "wipe an evaluation in progress."
+            ),
         )
-
-# ══════════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Benchmark
-# ══════════════════════════════════════════════════════════════════════════════════
-with tab_bench:
-    benchmark_tab.render()
+        st.caption(
+            "Mark cyclones with '⚠️ Mark as bad' under each figure (Grid view). "
+            "The summary goes into the saved configuration's 'evaluation' "
+            "section, so parameter sets can be compared by their bad-case rate."
+        )

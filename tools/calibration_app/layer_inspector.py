@@ -74,9 +74,10 @@ from cyclophaser.find_stages import (
     find_residual_period,
 )
 
-# Phase palette — the app's PHASE_COLORS, duplicated here (not imported) so this
-# module stays importable without Streamlit; app.py and the offline figure
-# script both read it from here.
+# Phase palette — the app's single source (app.py, the Inspector renderers,
+# set_stats and the offline figure script read it from here; this module stays
+# importable without Streamlit). It must equal cyclophaser/plots.py's palette:
+# tests/test_phase_colors.py compares them.
 PHASE_COLORS = {
     "incipient":       "#65a1e6",
     "intensification": "#f7b538",

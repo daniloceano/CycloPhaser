@@ -44,7 +44,8 @@ the manual label is the source of truth for every phase, `mature` included.
 | `config_defaults.py`, `defaults_2.0.0.json` | Fills keys a config does not carry with the frozen pre-item-31 defaults (the file name says 2.0.0; see below), and lists them (item 31, decision (a)). |
 
 The labelling UI itself is `tools/calibration_app/label_tab.py`, reached through
-the **Label** display mode of the calibration app. Tests are in
+the **Developer → Manual labelling** page of the calibration app (only with the
+developer key, `CYCLOPHASER_APP_DEV=1`; see `tools/calibration_app/README.md`). Tests are in
 `tests/test_manual_labels.py`.
 
 ## Calibration configurations
@@ -150,7 +151,7 @@ test set. Result — **train 47** (35 real + 12 synthetic), **test 16**.
 **2 — labelling (done: all 63 series are labelled).**
 
 ```bash
-streamlit run tools/calibration_app/app.py    # then: Display mode → "Label"
+CYCLOPHASER_APP_DEV=1 streamlit run tools/calibration_app/app.py    # then: Developer → Manual labelling
 ```
 
 63 series in a queue whose order is shuffled with a fixed seed, because the real

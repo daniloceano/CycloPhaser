@@ -36,8 +36,10 @@ _INSPECTOR_ERROR = "Inspector error"
 def _inspector(int_floor: float, mat_floor: float) -> AppTest:
     at = AppTest.from_file(str(APP), default_timeout=180)
     at.run()
+    at.button(key="btn_example").click()   # nothing is loaded until asked (I2)
+    at.run()
     for r in at.radio:
-        if set(r.options) >= {"Grid", "Inspector", "Label"}:
+        if set(r.options) >= {"Grid", "Inspector"}:
             r.set_value("Inspector")
             break
     at.run()
@@ -67,7 +69,9 @@ def test_inspector_renders_with_the_depth_floors_set():
     at = _inspector(0.50, 1.00)
     assert _inspector_errors(at) == []
 
-    tables = {("Verdict" in d.value.columns): d.value for d in at.dataframe}
+    # main area only: since I2 the sidebar may hold the "Show which" list of the
+    # Advanced notice (these depth floors differ from the defaults)
+    tables = {("Verdict" in d.value.columns): d.value for d in at.main.dataframe}
     ledger, mature = tables[True], tables[False]
     assert "Segment depth (intensification_min_depth)" in ledger.columns
     assert not any("D2" in c for c in ledger.columns)  # no clash with the refuted D2 metric (item 20b)

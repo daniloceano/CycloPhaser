@@ -12,8 +12,10 @@ exception was swallowed by a static fallback). No amount of simulated DOM could
 have found that, because the simulated DOM never ran the mount.
 
 So this harness does the only thing that would have: it starts
-`streamlit run tools/calibration_app/app.py` on a free port, opens Chromium at
-it, clicks into the Label mode, and operates the page with real pointer events
+`streamlit run tools/calibration_app/app.py` on a free port with the developer
+key on, opens Chromium at its Manual labelling page (a page of its own since the
+app redesign's I1; it was the "Label" display mode before), and operates the
+page with real pointer events
 (`mouse.move` / `mouse.down` / `mouse.up` — not `dispatchEvent`). Every assertion
 is read back from the values Streamlit rendered from PYTHON state, never from a
 pixel: "the bar moved on screen" is not a pass, because the bar moving on screen
@@ -28,16 +30,21 @@ Chromium are TEST-only dependencies: they are installed by hand
 test that needs them skips when they are absent. Nothing here is added to the
 package's requirements, to requirements-app.txt, or to CI.
 
-This harness never presses Save. `research/labels/manual_labels.yaml` is the
+`LabelPage` never presses Save. `research/labels/manual_labels.yaml` is the
 artefact the whole front exists to produce, and a test suite that can write to it
-is a test suite that can corrupt it. Everything asserted here is read from the
-phase table, which is Streamlit rendering the same `st.session_state` list that
-a save would serialise.
+is a test suite that can corrupt it. Everything asserted through `LabelPage` is
+read from the phase table, which is Streamlit rendering the same
+`st.session_state` list that a save would serialise. The one test that does
+save (tests/test_app_pages_browser.py) starts its server with `labels_path=` a
+temporary COPY of the file: `AppServer` then patches `labels_core.LABELS_PATH`
+inside the server process before Streamlit starts, so every read and write of
+the app goes to the copy.
 """
 
 from __future__ import annotations
 
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -51,6 +58,51 @@ APP = REPO_ROOT / "tools" / "calibration_app" / "app.py"
 BOOT_TIMEOUT = 120        # seconds to wait for the HTTP server to answer
 RENDER_TIMEOUT = 180_000  # ms; the first render loads 51 CSVs and 12 synthetics
 
+# Run instead of `python -m streamlit` when a labels path is given: it points
+# labels_core at that file inside the server process, then hands over to
+# Streamlit's own CLI. label_tab imports the SAME module object from
+# sys.modules, and labels_core reads LABELS_PATH at call time.
+_LAUNCH_WITH_LABELS_PATH = """
+import sys
+from pathlib import Path
+labels_path, labels_pkg = Path(sys.argv[1]), sys.argv[2]
+sys.path.insert(0, labels_pkg)
+import labels_core
+labels_core.LABELS_PATH = labels_path
+from streamlit.web import cli
+sys.argv = ["streamlit", "run", *sys.argv[3:]]
+sys.exit(cli.main())
+"""
+
+
+# ── controls whose DOM differs between supported Streamlit versions ──────────
+# Measured in Chromium (research/app_redesign/i1/diag_chromium/): on streamlit
+# 1.56.0 a selectbox is a combobox whose accessible name is "Selected <value>.
+# <label>" and whose <input> value is empty, and a slider is a
+# <div role="slider"> carrying aria-valuenow; on 1.63.0 the combobox is named by
+# its label alone and holds the value, and the slider is an <input
+# type="range">. These helpers find and read both.
+
+def selectbox(page, label: str):
+    """The selectbox labelled `label`, in either naming."""
+    return page.locator(f'[role="combobox"][aria-label="{label}"], '
+                        f'[role="combobox"][aria-label$=". {label}"]')
+
+
+def selectbox_value(page, label: str) -> str:
+    """The value a selectbox shows, from its input or from its accessible name."""
+    box = selectbox(page, label).first
+    value = box.input_value()
+    if value:
+        return value
+    m = re.match(r"^Selected (.*)\. " + re.escape(label) + r"$",
+                 box.get_attribute("aria-label") or "", re.S)
+    return m.group(1) if m else ""
+
+
+SLIDER_HANDLE = ('[data-testid="stSlider"] input[type="range"], '
+                 '[data-testid="stSlider"] [role="slider"]')
+
 
 def free_port() -> int:
     s = socket.socket()
@@ -63,9 +115,12 @@ def free_port() -> int:
 class AppServer:
     """`streamlit run` on a free port, torn down on exit."""
 
-    def __init__(self, log_path: Path):
+    def __init__(self, log_path: Path, developer: bool = True,
+                 labels_path: Path | None = None):
         self.port = free_port()
         self.log_path = Path(log_path)
+        self.developer = developer
+        self.labels_path = labels_path
         self._log = None
         self._proc = None
 
@@ -75,15 +130,24 @@ class AppServer:
 
     def start(self) -> "AppServer":
         self._log = open(self.log_path, "w")
+        args = [str(APP),
+                "--server.port", str(self.port),
+                "--server.headless", "true",
+                "--server.fileWatcherType", "none",
+                "--browser.gatherUsageStats", "false"]
+        if self.labels_path is None:
+            cmd = [sys.executable, "-m", "streamlit", "run", *args]
+        else:
+            cmd = [sys.executable, "-c", _LAUNCH_WITH_LABELS_PATH,
+                   str(self.labels_path), str(REPO_ROOT / "research" / "labels"),
+                   *args]
+        env = dict(os.environ, STREAMLIT_BROWSER_GATHER_USAGE_STATS="false")
+        env.pop("CYCLOPHASER_APP_DEV", None)
+        if self.developer:
+            env["CYCLOPHASER_APP_DEV"] = "1"
         self._proc = subprocess.Popen(
-            [sys.executable, "-m", "streamlit", "run", str(APP),
-             "--server.port", str(self.port),
-             "--server.headless", "true",
-             "--server.fileWatcherType", "none",
-             "--browser.gatherUsageStats", "false"],
-            stdout=self._log, stderr=subprocess.STDOUT, text=True,
-            cwd=str(REPO_ROOT),
-            env=dict(os.environ, STREAMLIT_BROWSER_GATHER_USAGE_STATS="false"),
+            cmd, stdout=self._log, stderr=subprocess.STDOUT, text=True,
+            cwd=str(REPO_ROOT), env=env,
         )
         deadline = time.time() + BOOT_TIMEOUT
         while time.time() < deadline:
@@ -115,7 +179,7 @@ class AppServer:
 
 
 class LabelPage:
-    """The Label mode of the running app, driven through a real browser.
+    """The Manual labelling page of the running app, driven through a real browser.
 
     Index arithmetic is done in the page via the SVG's own screen CTM rather than
     recomputed here from the viewBox: the chart scales with
@@ -136,14 +200,47 @@ class LabelPage:
             if m.type == "error" else None))
 
     # ── getting there ────────────────────────────────────────────────────────
-    def open(self, url: str) -> "LabelPage":
+    def open(self, url: str, min_steps: int | None = 110) -> "LabelPage":
+        # The way a user gets there: the app's root (Calibrate), then the menu
+        # entry, which exists only with the developer key (AppServer sets it by
+        # default). Loading `url + "label"` directly also works, but Streamlit's
+        # frontend first probes `/label/_stcore/health` and `/host-config` and
+        # logs two 404s to the console before finding the server at the root,
+        # which `test_no_javascript_errors_on_the_page` would rightly report.
         self.page.goto(url, wait_until="load")
-        self.page.wait_for_selector("text=Display mode", timeout=RENDER_TIMEOUT)
-        self.page.get_by_text("Label", exact=True).first.click()
-        self.page.wait_for_selector("text=Manual labelling",
+        # Calibrate's sidebar (since I2 its main area is empty until data is loaded)
+        self.page.wait_for_selector("text=1 · Data", timeout=RENDER_TIMEOUT)
+        self.page.locator('[data-testid="stSidebarNav"]').get_by_text(
+            "Manual labelling", exact=True).click()
+        self.page.wait_for_selector("text=Manual labelling — the",
                                     timeout=RENDER_TIMEOUT)
         self.settle()
+        if min_steps:
+            self.step_to_long_unlocked_case(min_steps)
         return self
+
+    def step_to_long_unlocked_case(self, min_steps: int, max_steps: int = 90) -> None:
+        """Next ▸ until the case is at least `min_steps` long, not locked and
+        not a frozen synthetic.
+
+        The page opens on the first UNLABELLED case of the queue. Since item 30
+        the queue ends with the swell batches, so that case is now a 30-step
+        validation case — and the fixtures here type positions up to 100. Every
+        fixture move then left a number input pending ("Press Enter to apply")
+        and the suite failed wholesale, on develop too (d339c7d: 16 failed, 8
+        errors). The suite is about the chart and the table, not about which
+        case comes first, so it steps to one that can hold its positions.
+        Next ▸ never saves.
+        """
+        for _ in range(max_steps):
+            status = self.page.locator('[data-testid="stCaptionContainer"]').filter(
+                has_text="blind").first.inner_text()
+            if (self._n_steps() >= min_steps and "🔒" not in status
+                    and "❄️" not in status):
+                return
+            self.page.get_by_role("button", name="Next ▸").click()
+            self.settle()
+        raise AssertionError(f"no unlocked case of >= {min_steps} steps in {max_steps}")
 
     def settle(self, ms: int = 1200) -> None:
         """Wait for Streamlit to stop rerunning.
@@ -281,9 +378,10 @@ class LabelPage:
         return int(self._num("tolerance_idx", k).input_value())
 
     def phase_name(self, k: int) -> str:
-        """A Streamlit selectbox is a react-aria combobox: the chosen value
-        lives in its `<input value="...">` attribute, not as visible text
-        content. `.inner_text()` reads rendered text nodes and returns '' for
+        """Read through `selectbox_value`, which handles both supported
+        Streamlit renderings (see the comment above it). On the react-aria one
+        the chosen value lives in its `<input value="...">` attribute, not as
+        visible text content. `.inner_text()` reads rendered text nodes and returns '' for
         this widget regardless of which one — confirmed against unmodified
         develop-v2.1 too, so this is a Streamlit-version rendering change,
         predating and unrelated to anything on this front. Read via the
@@ -292,7 +390,7 @@ class LabelPage:
         and does not care how many OTHER selectboxes (the case-navigation
         dropdown included) sit before it on the page.
         """
-        return self.page.get_by_label(f"phase, row {k}", exact=True).input_value()
+        return selectbox_value(self.page, f"phase, row {k}")
 
     def is_unsure(self, k: int) -> bool:
         return self.page.get_by_label(f"unsure, row {k}", exact=True).is_checked()
@@ -344,11 +442,11 @@ class LabelPage:
             lbl.click()
             self.settle()
 
-    # ── overlays (Inspection mode only) ──────────────────────────────────────
+    # ── overlays (available at any time; revealing one unblinds the case) ────
     def enable_overlay(self, layer_label_substring: str) -> None:
         """Turn the master overlay switch on, then one layer by its visible
         (partial) label text, e.g. 'vorticity_smoothed2'."""
-        master = self.page.get_by_label("Show filtered/smoothed overlays",
+        master = self.page.get_by_role("checkbox", name="Show filtered/smoothed overlays",
                                         exact=False)
         if not master.is_checked():
             master.locator("xpath=ancestor::label[1]").click()
@@ -382,21 +480,26 @@ class LabelPage:
                  .map((t) => t.textContent)""")
 
     # ── forcing a rerun from outside the chart ───────────────────────────────
+    _poke_up = True
+
     def poke_sidebar(self) -> None:
-        """Change a sidebar widget, which reruns the whole script.
+        """Change a widget outside the chart, which reruns the whole script.
 
         Used two ways: to fire a rerender in the middle of a drag, and to prove
         afterwards that a value survived one — a value that is still on screen
         after the server has re-rendered the page came from the server.
 
-        Targets the slider's native `<input type="range">`, not `[role=
-        "slider"]`: Streamlit's slider moved to a react-aria implementation
-        that exposes the handle as a visually-hidden range input under
-        `role="group"`, not a `role="slider"` element — the old selector
-        matched nothing and this timed out. Pre-existing drift, unrelated to
-        anything this front changed (nothing here touches the filter
-        sidebar); confirmed by inspecting the live DOM, not guessed.
+        Name kept from when this poked a Calibrate sidebar slider: the Manual
+        labelling page has no parameter sidebar since I1 of the app redesign.
+        It now steps the page's own "Default ± steps for a new boundary" input,
+        up and down alternately, so repeated pokes never drift; that value is
+        only the starting margin of a boundary ADDED later, so no existing
+        phase depends on it. By KEYBOARD only (focus, then the arrow key): one
+        caller pokes in the middle of a drag, with the mouse button held down,
+        and a click would release that drag.
         """
-        slider = self.page.locator(
-            '[data-testid="stSidebar"] [data-testid="stSlider"]').first
-        slider.locator('input[type="range"]').first.press("ArrowRight")
+        box = self.page.get_by_label("Default ± steps for a new boundary",
+                                     exact=True)
+        key = "ArrowUp" if self._poke_up else "ArrowDown"
+        self._poke_up = not self._poke_up
+        box.press(key)

@@ -1,6 +1,6 @@
 # Requirements for Streamlit Community Cloud deployment.
 #
-# cyclophaser is installed from PyPI (>=2.0.0).
+# cyclophaser is installed from PyPI (>=2.1.0, the floor below).
 # For local development with an editable install, use requirements-app.txt instead.
 #
 # Lower-bound (>=) pins are intentional: Streamlit Cloud uses `uv`, which
@@ -9,7 +9,15 @@
 # floors below match cyclophaser's own dependency floors (see setup.py).
 # The Python version is not read from any file in this repository: it is set
 # in the app's settings on Streamlit Community Cloud.
-streamlit>=1.40
+# streamlit's floor is the app's, not cyclophaser's: 1.56.0. The app keeps widget
+# state across pages by writing it back through session_state (app.py,
+# `_keep_page_state`), which before 1.56.0 drew a duplicated-widget-state warning
+# box on the page; from 1.56.0 it is only logged (release notes 1.56.0: "Widget
+# state duplication warnings are now logged to the console instead of displayed
+# in the app UI", streamlit#14141). The other features used are older:
+# [theme.sidebar] of .streamlit/config.toml from 1.44.0 (streamlit#10772),
+# st.navigation with sections and Material page icons from 1.36.0.
+streamlit>=1.56.0
 pandas>=2.2
 matplotlib>=3.9
 plotly>=5.24

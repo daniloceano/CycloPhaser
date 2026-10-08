@@ -1,0 +1,40 @@
+base HEAD: 83a51146ac0223fb42bce0b5f781bfb293e13b9d | working-tree patch: 3087 lines, sha256 103e5ca021c1431c… | untracked files copied: 48 | date: 2026-10-06T01:23:40Z
+worktree: tracked files differing from HEAD: 16
+python: Python 3.12.9 | venv: new
+
+=== install_build_tools
+$ pip install --upgrade pip build
+exit 0
+Successfully installed build-1.6.1 packaging-26.3 pip-26.2.1 pyproject_hooks-1.3.3
+
+=== build
+$ python -m build
+exit 0
+Successfully built cyclophaser-2.1.0.tar.gz and cyclophaser-2.1.0-py3-none-any.whl
+
+=== install_wheel
+$ bash -c pip install dist/*.whl
+exit 0
+Successfully installed cmocean-4.0.3 contourpy-1.4.0 cycler-0.12.1 cyclophaser-2.1.0 fonttools-4.66.1 iniconfig-2.3.0 kiwisolver-1.5.1 matplotlib-3.11.2 numpy-2.5.3 pandas-3.0.6 pillow-12.3.0 pluggy-1.6.0 pyparsing-3.3.3 python-dateutil-2.9.0.post0 pytz-2026.5 scipy-1.18.1 setuptools-84.0.0 six-1.17.0 tzdata-2026.5 wheel-0.48.0 xarray-2026.9.0
+
+=== install_test_deps
+$ pip install pytest pyyaml
+exit 0
+Successfully installed pygments-2.21.0 pytest-9.1.1 pyyaml-6.0.3
+streamlit importable: no
+playwright importable: no
+
+=== main_wheel
+$ env CYCLOPHASER_REQUIRE_INSTALLED=1 pytest --import-mode=append -m not source_tree --junitxml=test-reports/results.xml
+exit 0
+CYCLOPHASER_REQUIRE_INSTALLED: cyclophaser.__file__ = <venv>/lib/python3.12/site-packages/cyclophaser/__init__.py
+collected 1305 items / 1 deselected / 11 skipped / 1304 selected
+cyclophaser.__file__ (in session) = <venv>/lib/python3.12/site-packages/cyclophaser/__init__.py
+========== 1278 passed, 37 skipped, 1 deselected, 1 warning in 29.04s ==========
+
+=== source_tree
+$ python -m pytest -m source_tree --junitxml=test-reports/results-source-tree.xml
+exit 0
+collected 1305 items / 1304 deselected / 11 skipped / 1 selected
+cyclophaser.__file__ (in session) = <wt>/cyclophaser/__init__.py
+========= 1 passed, 11 skipped, 1304 deselected, 88 warnings in 1.74s ==========

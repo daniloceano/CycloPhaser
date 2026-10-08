@@ -1,0 +1,3 @@
+# check_badmark_loss.py (research/app_redesign/i1/), before any I2 change, 2026-10-05, streamlit 1.63.0
+develop @ d339c7d: marked in Grid=True | still marked in Inspector=False | still marked back in Grid=False
+feat/app-redesign tip @ 83a5114: marked in Grid=True | still marked in Inspector=False | still marked back in Grid=False

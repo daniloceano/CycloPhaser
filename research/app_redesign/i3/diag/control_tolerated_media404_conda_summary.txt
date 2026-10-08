@@ -1,0 +1,15 @@
+python: ~/miniconda3/envs/cyclophaser/bin/python | HEAD 0a2ed3a | tracked changes: 7 | 2026-10-07T13:33:01Z
+added latency per HTTP request: 1500 ms | browser CPU throttling rate: 0
+streamlit 1.63.0 | playwright 1.62.0
+3 passed in 141.06s (0:02:21)
+runs 3 | failed 0 | runs with console errors 2 | runs with a /media 404 2
+  script runs per click — sample data: 1×3
+  script runs per click — mark as bad: 1×3
+  script runs per click — page size (open): 0×3
+  script runs per click — page size → 24: 1×3
+  script runs per click — next: 1×3
+  script runs per click — mode → Inspector: 1×3
+  script runs per click — mode → Grid: 1×3
+  script runs per click — menu → Benchmark: 1×3
+  script runs per click — menu → Calibrate: 1×3
+  script runs per click — previous: 1×3

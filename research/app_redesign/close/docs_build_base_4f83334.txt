@@ -1,0 +1,4 @@
+label: base_4f83334 | mode: head | HEAD 4f83334 | patch: none | 2026-10-08T14:14:17Z
+sphinx: 7.2.6 | exit 0
+warnings: 0
+html: $SCRATCH/docs_base_4f83334/docs/_build/html/index.html

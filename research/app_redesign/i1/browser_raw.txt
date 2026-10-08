@@ -1,0 +1,81 @@
+# Chromium runs, conda env cyclophaser (streamlit 1.63.0), 2026-10-05
+
+## develop d339c7d (worktree), tests/test_label_browser.py — pre-existing state
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E             comparison failed
+FAILED tests/test_label_browser.py::test_dragging_a_bar_right_moves_the_boundary_in_python
+FAILED tests/test_label_browser.py::test_dragging_a_bar_back_left_moves_it_back
+FAILED tests/test_label_browser.py::test_the_same_drag_twice_is_delivered_twice
+FAILED tests/test_label_browser.py::test_a_bar_cannot_be_dragged_past_its_neighbour
+FAILED tests/test_label_browser.py::test_dragging_the_edge_widens_the_margin_in_python
+FAILED tests/test_label_browser.py::test_dragging_the_edge_back_narrows_the_margin
+FAILED tests/test_label_browser.py::test_releasing_the_pointer_outside_the_svg_still_commits
+FAILED tests/test_label_browser.py::test_a_drag_survives_a_rerender_underneath_it
+FAILED tests/test_label_browser.py::test_the_chart_survives_a_rerun_with_no_drag_in_flight
+FAILED tests/test_label_browser.py::test_arrow_keys_move_the_selected_boundary_one_step
+FAILED tests/test_label_browser.py::test_shift_arrow_moves_five_steps - Asser...
+FAILED tests/test_label_browser.py::test_up_and_down_adjust_the_margin - Asse...
+FAILED tests/test_label_browser.py::test_a_number_typed_in_the_table_moves_the_bar
+FAILED tests/test_label_browser.py::test_the_working_area_fits_in_the_viewport[1440-800]
+FAILED tests/test_label_browser.py::test_the_chart_resizes_with_the_window_without_losing_the_marks
+FAILED tests/test_label_browser.py::test_nothing_the_detector_produced_is_on_the_page
+ERROR tests/test_label_browser.py::test_a_drag_updates_the_number - playwrigh...
+ERROR tests/test_label_browser.py::test_dragging_never_changes_the_number_of_phases
+ERROR tests/test_label_browser.py::test_a_margin_typed_in_the_table_resizes_the_bar
+ERROR tests/test_label_browser.py::test_the_first_row_start_is_not_editable
+ERROR tests/test_label_browser.py::test_not_sure_is_per_boundary_and_survives_a_drag
+ERROR tests/test_label_browser.py::test_row_zero_start_unsure_is_settable_it_is_the_series_opening_edge
+ERROR tests/test_label_browser.py::test_end_unsure_of_one_row_mirrors_start_unsure_of_the_next
+ERROR tests/test_label_browser.py::test_dragging_a_boundary_gives_the_same_start_idx_with_overlays_on
+16 failed, 5 passed, 8 errors in 716.73s (0:11:56)
+
+## feat/app-redesign working tree, before the LabelPage.open fix
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E         comparison failed
+E             comparison failed
+FAILED tests/test_label_browser.py::test_dragging_a_bar_right_moves_the_boundary_in_python
+FAILED tests/test_label_browser.py::test_dragging_a_bar_back_left_moves_it_back
+FAILED tests/test_label_browser.py::test_the_same_drag_twice_is_delivered_twice
+FAILED tests/test_label_browser.py::test_a_bar_cannot_be_dragged_past_its_neighbour
+FAILED tests/test_label_browser.py::test_dragging_the_edge_widens_the_margin_in_python
+FAILED tests/test_label_browser.py::test_dragging_the_edge_back_narrows_the_margin
+FAILED tests/test_label_browser.py::test_releasing_the_pointer_outside_the_svg_still_commits
+FAILED tests/test_label_browser.py::test_a_drag_survives_a_rerender_underneath_it
+FAILED tests/test_label_browser.py::test_the_chart_survives_a_rerun_with_no_drag_in_flight
+FAILED tests/test_label_browser.py::test_arrow_keys_move_the_selected_boundary_one_step
+FAILED tests/test_label_browser.py::test_shift_arrow_moves_five_steps - Asser...
+FAILED tests/test_label_browser.py::test_up_and_down_adjust_the_margin - Asse...
+FAILED tests/test_label_browser.py::test_a_number_typed_in_the_table_moves_the_bar
+FAILED tests/test_label_browser.py::test_the_working_area_fits_in_the_viewport[1440-800]
+FAILED tests/test_label_browser.py::test_the_chart_resizes_with_the_window_without_losing_the_marks
+ERROR tests/test_label_browser.py::test_a_drag_updates_the_number - playwrigh...
+ERROR tests/test_label_browser.py::test_dragging_never_changes_the_number_of_phases
+ERROR tests/test_label_browser.py::test_a_margin_typed_in_the_table_resizes_the_bar
+ERROR tests/test_label_browser.py::test_the_first_row_start_is_not_editable
+ERROR tests/test_label_browser.py::test_not_sure_is_per_boundary_and_survives_a_drag
+ERROR tests/test_label_browser.py::test_row_zero_start_unsure_is_settable_it_is_the_series_opening_edge
+ERROR tests/test_label_browser.py::test_end_unsure_of_one_row_mirrors_start_unsure_of_the_next
+ERROR tests/test_label_browser.py::test_dragging_a_boundary_gives_the_same_start_idx_with_overlays_on
+15 failed, 6 passed, 8 errors in 686.18s (0:11:26)
+
+## feat/app-redesign working tree, after it: tests/test_label_browser.py + tests/test_app_pages_browser.py
+34 passed in 509.38s (0:08:29)
+
+## after the pause-(d) adjustments (streamlit floor 1.56.0, rst restored): tests/test_label_browser.py + tests/test_app_pages_browser.py
+34 passed in 515.55s (0:08:35)
+
+## after the independent-verification correction (navigation tests by effect): tests/test_label_browser.py + tests/test_app_pages_browser.py
+34 passed in 556.28s (0:09:16)
