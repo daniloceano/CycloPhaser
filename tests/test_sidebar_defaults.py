@@ -150,7 +150,8 @@ def test_reset_returns_to_the_signature_defaults():
     _widget(at, "checkbox", "decay_tail_enabled").set_value(False)
     at.run()
     assert at.session_state["cutoff_high"] == 48          # the edits took
-    reset = next(b for b in at.button if "Reset to defaults" in (b.label or ""))
+    # "Reset to defaults" became the "Defaults" button of step 2 (I2)
+    reset = next(b for b in at.button if b.key == "btn_defaults")
     reset.click()
     at.run()
     assert not at.exception, [str(e) for e in at.exception]
@@ -170,14 +171,15 @@ def _three_train_ids() -> list[str]:
 
 def _sidebar_column_runs(set_cutoff_high=None) -> dict:
     at = _app()
+    if set_cutoff_high is not None:     # the sidebar is the Calibrate page's
+        _widget(at, "slider", "cutoff_high").set_value(set_cutoff_high)
+        at.run()
+    at.switch_page("app_pages/benchmark.py").run()   # a page of its own since I1
     _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
     at.run()
     ids = _three_train_ids()
     _widget(at, "multiselect", "bench_ids_widget").set_value(ids)
     at.run()
-    if set_cutoff_high is not None:
-        _widget(at, "slider", "cutoff_high").set_value(set_cutoff_high)
-        at.run()
     _widget(at, "button", "bench_add_sidebar").click()
     at.run()
     _widget(at, "button", "bench_run").click()

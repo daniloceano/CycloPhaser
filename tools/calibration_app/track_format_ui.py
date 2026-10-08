@@ -1,6 +1,6 @@
 """Streamlit controls for uploading tracks: the custom format and its preview.
 
-Shared by the Calibration page's uploader and the Benchmark tab's Exploration
+Shared by the Calibrate page's uploader and the Benchmark page's Exploration
 uploader, so both accept exactly the same files and show the same messages. The
 reading itself lives in ``track_io`` (no Streamlit there); this module only
 draws the controls, the preview and the errors.
@@ -48,8 +48,8 @@ UPLOAD_HELP = (
     "values; at least 2 points. A file that fails is refused with the "
     "reason.\n\n"
     "**Any other layout** (another separator, other column names, no header "
-    "line, another date format) is refused unless **Custom track format** "
-    "below is enabled and describes it."
+    "line, another date format) is refused unless the **Custom track format** "
+    "is enabled and describes it."
 )
 
 HELP_ON = (
@@ -59,7 +59,7 @@ HELP_ON = (
     "is shown in a preview (parsed rows, first and last date, number of points, "
     "vorticity range) and is used only after you confirm it.\n\n"
     "Files in the standard layout are always read as standard, even with this "
-    "on. The Benchmark tab's Exploration upload uses these same settings."
+    "on. The Benchmark page's Exploration upload uses these same settings."
 )
 HELP_SEP = (
     "`auto` looks at the first line: the most frequent of `;`, `,` and tab; if "
@@ -91,27 +91,36 @@ HELP_CONFIRM = (
 )
 
 
-def format_controls() -> tio.CustomFormat | None:
-    """Draw the custom-format controls; the active format, or None when off."""
+def format_controls(in_expander: bool = True) -> tio.CustomFormat | None:
+    """Draw the custom-format controls; the active format, or None when off.
+
+    `in_expander=False` draws them bare, for a container that already frames
+    them (the Calibrate page's "Custom format…" dialog)."""
+    if not in_expander:
+        return _format_fields()
     with st.expander("Custom track format (for files not in the standard layout)",
                      expanded=bool(st.session_state.get(K_ON, False))):
-        on = st.checkbox("Enable custom track format", value=False, key=K_ON,
-                         help=HELP_ON)
-        if not on:
-            return None
-        c1, c2 = st.columns(2)
-        with c1:
-            st.selectbox("Separator", options=list(tio.SEPARATORS), key=K_SEP,
-                         help=HELP_SEP)
-            st.text_input("Date column", value=tio.TIME_COL, key=K_DATE,
-                          help=HELP_DATE)
-            st.text_input("Date format (optional)", value="", key=K_DFMT,
-                          help=HELP_DFMT)
-        with c2:
-            st.checkbox("First line is a header", value=True, key=K_HEADER,
-                        help=HELP_HEADER)
-            st.text_input("Vorticity column", value=tio.VORT_COL, key=K_VORT,
-                          help=HELP_VORT)
+        return _format_fields()
+
+
+def _format_fields() -> tio.CustomFormat | None:
+    on = st.checkbox("Enable custom track format", value=False, key=K_ON,
+                     help=HELP_ON)
+    if not on:
+        return None
+    c1, c2 = st.columns(2)
+    with c1:
+        st.selectbox("Separator", options=list(tio.SEPARATORS), key=K_SEP,
+                     help=HELP_SEP)
+        st.text_input("Date column", value=tio.TIME_COL, key=K_DATE,
+                      help=HELP_DATE)
+        st.text_input("Date format (optional)", value="", key=K_DFMT,
+                      help=HELP_DFMT)
+    with c2:
+        st.checkbox("First line is a header", value=True, key=K_HEADER,
+                    help=HELP_HEADER)
+        st.text_input("Vorticity column", value=tio.VORT_COL, key=K_VORT,
+                      help=HELP_VORT)
     return current_format(st.session_state)
 
 
@@ -137,6 +146,42 @@ def _preview(name: str, s: pd.Series) -> None:
         f"max **{s.max():.4g}**")
     for msg in tio.plausibility_warnings(s):
         st.warning(f"{name}: {msg}")
+
+
+def _confirm_key(confirm_prefix: str, data: bytes, fmt) -> str:
+    """The confirmation key of one file read with one format: changing either
+    gives a new key, which is what clears the confirmation."""
+    return f"{confirm_prefix}{hashlib.sha256(data + repr(fmt).encode()).hexdigest()[:16]}"
+
+
+def classify_uploads(uploads, fmt: tio.CustomFormat | None, confirm_prefix: str,
+                     state) -> tuple[dict[str, bytes], list[str], list[tuple[str, str]]]:
+    """Like `accept_uploads`, but draws nothing: (accepted, pending, refused).
+
+    `accepted` is {name: standard-layout bytes} — standard files, and custom-format
+    files already confirmed in `state` (under the key `accept_uploads` would give
+    their confirmation checkbox). `pending` names custom-format files that parse
+    but are not confirmed yet; `refused` is [(file name, reason)]. For a page that
+    shows the previews and confirmations somewhere else (the Calibrate dialog).
+    """
+    accepted: dict[str, bytes] = {}
+    pending: list[str] = []
+    refused: list[tuple[str, str]] = []
+    for f in uploads or []:
+        name = Path(f.name).stem
+        data = f.getvalue()
+        standard = tio.is_standard(data)
+        try:
+            std_bytes = tio.normalize_track(data, None if standard else fmt)
+            tio.read_track(std_bytes)
+        except tio.TrackFormatError as exc:
+            refused.append((f.name, str(exc)))
+            continue
+        if standard or state.get(_confirm_key(confirm_prefix, data, fmt)):
+            accepted[name] = std_bytes
+        else:
+            pending.append(f.name)
+    return accepted, pending, refused
 
 
 def accept_uploads(uploads, fmt: tio.CustomFormat | None,
@@ -167,8 +212,7 @@ def accept_uploads(uploads, fmt: tio.CustomFormat | None,
             out[name] = std_bytes
             continue
         _preview(f.name, s)
-        digest = hashlib.sha256(data + repr(fmt).encode()).hexdigest()[:16]
         if st.checkbox(f"Use `{f.name}` as previewed", value=False,
-                       key=f"{confirm_prefix}{digest}", help=HELP_CONFIRM):
+                       key=_confirm_key(confirm_prefix, data, fmt), help=HELP_CONFIRM):
             out[name] = std_bytes
     return out

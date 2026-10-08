@@ -54,7 +54,7 @@ dependencies:
   - pytest>=6.2
 
   # ── calibration app (tools/calibration_app) ───────────────────────────────
-  - streamlit>=1.30
+  - streamlit>=1.56.0   # floor of tools/calibration_app/requirements.txt (see its comment)
   - pyyaml>=6.0
   # tools/calibration_app/inspector_plotly.py (imported unconditionally by
   # app.py) -- floor matches tools/calibration_app/requirements.txt. Was

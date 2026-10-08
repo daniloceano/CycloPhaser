@@ -11,6 +11,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.1] - 2026-10-08
+
+**The package code did not change**: `cyclophaser/` is identical to 2.1.0, so
+no default, no parameter and no result moves. This release carries the new
+calibration app (`tools/calibration_app/`), which now needs `streamlit>=1.56.0`,
+and the documentation of it.
+
+### Changed — calibration app: pages
+
+* One page per task, in the sidebar menu: **Calibrate** and **Benchmark**. Only
+  the open page runs.
+* The developer pages and functions (manual labelling, the synthetic cases,
+  marking a detection as bad, the `evaluation` section of the saved YAML) exist
+  only with the developer key (`CYCLOPHASER_APP_DEV=1`, or
+  `developer_mode = true` in the app's secrets); the public app does not show
+  them.
+* The Benchmark page no longer has the frozen test-split panel.
+* The Calibrate sidebar, the dataset choice, the imported configuration, the
+  uploaded tracks and the bad-case marks are kept when going to another page and
+  back.
+
+### Changed — calibration app: Calibrate
+
+* The sidebar follows the work in steps: **1 · Data**, **2 · Starting
+  configuration**, **3 · Filtering** (the only calibrated part), **Advanced**
+  (every other parameter, in the detector's order, with a count of the values
+  that differ from the defaults) and **4 · Save results**.
+* **Save results** builds one ZIP: `parameters.yaml` (always), one phase table
+  per track (CSV, by default) and one phase figure per track (PNG, on request).
+  It replaces "Export parameters (YAML)" and "Export all (ZIP)"; the YAML has
+  the same content as before.
+* "Load all test cyclones" is now **Sample data (51 TRACK cyclones)**, and
+  "Reset to defaults" is **Defaults**. Non-standard track files are read
+  through a **Custom format…** dialog.
+* With nothing loaded, the page shows a start screen and runs no detection (the
+  example track is no longer loaded silently).
+* The Grid is paged (12, 24 or 48 tracks per page). Only the page's figures are
+  drawn; detection, the consolidated table and the statistics still cover every
+  track. With the 51 sample tracks, a parameter change went from 39.1 s to
+  5.0 s (median server time).
+* **Set statistics** at the end of the Grid: tracks analysed and failed, the
+  share of tracks with each phase, the median duration of each phase and of the
+  whole cycle, and the most common phase sequences. A phase that occurs again in
+  a track is counted under its own name ("intensification 2").
+* The version shown is the installed package's.
+* Without the developer key, the `evaluation` section of a loaded YAML is
+  ignored and listed as "evaluation (developer only)".
+
+### Fixed — calibration app
+
+* A bad-case mark was lost after Grid → Inspector → Grid.
+* The number of Grid columns was lost after Grid → Inspector → Grid.
+
+---
+
 ## [2.1.0] - 2026-10-05
 
 ### Changed default results

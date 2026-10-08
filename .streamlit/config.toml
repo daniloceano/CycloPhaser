@@ -1,0 +1,19 @@
+# Theme of the calibration app (tools/calibration_app/app.py).
+#
+# At the repository ROOT on purpose: Streamlit Community Cloud runs every app
+# from the root of its repository and reads `.streamlit/config.toml` there, even
+# when the entrypoint sits in a subdirectory ("When your entrypoint file is in a
+# subdirectory, the configuration file must stay at the root." —
+# https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/file-organization).
+# Locally, run `streamlit run tools/calibration_app/app.py` from the root too,
+# so the same file applies.
+#
+# Style of andfanilo/streamlit-echarts-demo (dark sidebar, rounded corners),
+# without its external web font. [theme.sidebar] needs streamlit >= 1.44.0.
+[theme]
+baseRadius = "12px"
+
+[theme.sidebar]
+backgroundColor = "#1e293b"
+textColor = "#f1f5f9"
+secondaryBackgroundColor = "#334155"

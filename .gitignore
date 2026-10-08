@@ -216,3 +216,7 @@ research/inert_params/derived_run_log.txt
 
 # PyPI credentials (never version)
 .pypirc
+
+# Streamlit secrets (e.g. the calibration app's developer_mode key) — never committed
+.streamlit/secrets.toml
+tools/calibration_app/.streamlit/secrets.toml

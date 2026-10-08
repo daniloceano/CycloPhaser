@@ -1,0 +1,80 @@
+{
+ "variant": "i3",
+ "root_head": "34285125663682b26acab1346b142b562caac045",
+ "root_tracked_changes": true,
+ "streamlit": "1.63.0",
+ "reps": 5,
+ "steps": [
+  {
+   "png_total": 12,
+   "png_by_caller": {
+    "_render_periods_png": 12
+   },
+   "detection_calls": 51,
+   "stats_calls": 1,
+   "stats_seconds": 0.0155,
+   "script_runs": 1,
+   "server_seconds": 5.0118
+  },
+  {
+   "png_total": 12,
+   "png_by_caller": {
+    "_render_periods_png": 12
+   },
+   "detection_calls": 51,
+   "stats_calls": 1,
+   "stats_seconds": 0.018,
+   "script_runs": 1,
+   "server_seconds": 5.0033
+  },
+  {
+   "png_total": 12,
+   "png_by_caller": {
+    "_render_periods_png": 12
+   },
+   "detection_calls": 51,
+   "stats_calls": 1,
+   "stats_seconds": 0.0196,
+   "script_runs": 1,
+   "server_seconds": 5.034
+  },
+  {
+   "png_total": 12,
+   "png_by_caller": {
+    "_render_periods_png": 12
+   },
+   "detection_calls": 51,
+   "stats_calls": 1,
+   "stats_seconds": 0.0146,
+   "script_runs": 1,
+   "server_seconds": 5.0983
+  },
+  {
+   "png_total": 12,
+   "png_by_caller": {
+    "_render_periods_png": 12
+   },
+   "detection_calls": 51,
+   "stats_calls": 1,
+   "stats_seconds": 0.0133,
+   "script_runs": 1,
+   "server_seconds": 5.0463
+  }
+ ],
+ "median_server_seconds": 5.034,
+ "png_total_per_step": [
+  12,
+  12,
+  12,
+  12,
+  12
+ ],
+ "detection_calls_per_step": [
+  51,
+  51,
+  51,
+  51,
+  51
+ ],
+ "median_stats_seconds": 0.0155
+}

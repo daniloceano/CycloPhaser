@@ -1,0 +1,23 @@
+{
+ "variant": "after_extras",
+ "files": {
+  "label_full.png": {
+   "viewport": {
+    "width": 1600,
+    "height": 1561
+   },
+   "developer_key": true
+  },
+  "calibrate_public.png": {
+   "viewport": {
+    "width": 1600,
+    "height": 1000
+   },
+   "developer_key": false,
+   "menu_text": "Calibration |  | tune |  | Calibrate |  | table_chart |  | Benchmark"
+  }
+ },
+ "root_head": "d339c7d1f0fc17a5e2efa218f0825d2c8a379a86",
+ "root_has_uncommitted_changes": true,
+ "streamlit": "1.63.0"
+}

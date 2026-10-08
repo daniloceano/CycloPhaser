@@ -1,0 +1,1411 @@
+{
+ "root": "<scratch>/wt_i2",
+ "n_sample": 51,
+ "states": {
+  "no data (public)": {
+   "n_pages": 1,
+   "page_first": {},
+   "page_union": {},
+   "tracks": {}
+  },
+  "sample, developer key, Grid 2 columns": {
+   "n_pages": 1,
+   "page_first": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Consolidated diagnostics'": 1,
+    "dataframe[Cyclone, Phases, N phases, Gaps, Residual, Short phases, Warnings]": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "page_union": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Consolidated diagnostics'": 1,
+    "dataframe[Cyclone, Phases, N phases, Gaps, Residual, Short phases, Warnings]": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "tracks": {
+    "20150069": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150377": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150436": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150528": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150532": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150561": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150646": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150656": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150746": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20160030": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20160587": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20160735": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170154": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170225": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170342": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170409": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170520": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170587": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170756": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170760": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170794": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170899": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20171179": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180129": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180170": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180263": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180300": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180608": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180628": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180654": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180733": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180759": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20181046": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190325": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190397": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190639": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190691": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190870": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190879": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20191014": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20191104": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20191155": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20201245": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20202023": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20203373": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20203389": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20203947": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20204655": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20205386": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20206498": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20207822": {
+     "subheader '<track>'": 1,
+     "image": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    }
+   }
+  },
+  "sample, public, Grid 2 columns": {
+   "n_pages": 1,
+   "page_first": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Consolidated diagnostics'": 1,
+    "dataframe[Cyclone, Phases, N phases, Gaps, Residual, Short phases, Warnings]": 1
+   },
+   "page_union": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Consolidated diagnostics'": 1,
+    "dataframe[Cyclone, Phases, N phases, Gaps, Residual, Short phases, Warnings]": 1
+   },
+   "tracks": {
+    "20150069": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150377": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150436": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150528": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150532": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150561": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150646": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150656": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20150746": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20160030": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20160587": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20160735": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170154": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170225": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170342": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170409": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170520": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170587": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170756": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170760": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170794": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20170899": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20171179": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180129": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180170": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180263": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180300": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180608": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180628": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180654": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180733": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20180759": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20181046": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20190325": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20190397": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20190639": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20190691": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20190870": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20190879": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20191014": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20191104": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20191155": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20201245": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20202023": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20203373": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20203389": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20203947": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20204655": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20205386": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20206498": {
+     "subheader '<track>'": 1,
+     "image": 1
+    },
+    "20207822": {
+     "subheader '<track>'": 1,
+     "image": 1
+    }
+   }
+  },
+  "sample, developer key, Grid 1 column": {
+   "n_pages": 1,
+   "page_first": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "page_union": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "tracks": {
+    "20150069": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150377": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150436": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150528": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150532": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150561": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150646": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150656": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20150746": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20160030": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20160587": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20160735": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170154": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170225": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170342": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170409": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170520": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170587": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170756": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170760": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170794": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20170899": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20171179": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180129": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180170": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180263": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180300": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180608": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180628": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180654": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180733": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20180759": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20181046": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20190325": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20190397": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20190639": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20190691": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20190870": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20190879": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20191014": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20191104": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20191155": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20201245": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20202023": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20203373": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20203389": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20203947": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20204655": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20205386": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "warning": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20206498": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    },
+    "20207822": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1,
+     "expander 'Step-by-step analysis'": 1,
+     "expander 'Detailed diagnostics'": 1,
+     "dataframe[Phase, Start, End, Duration (h), ]": 1,
+     "download '⬇ Download CSV'": 1,
+     "download '⬇ Download PNG'": 1
+    }
+   }
+  },
+  "sample, developer key, Grid 2 columns, incipient probe on": {
+   "n_pages": 1,
+   "page_first": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Consolidated diagnostics'": 1,
+    "dataframe[Cyclone, Phases, N phases, Gaps, Residual, Short phases, Warnings]": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "page_union": {
+    "radio 'Display mode' key=view_mode": 1,
+    "select_slider 'Grid columns' key=n_cols": 1,
+    "subheader 'Consolidated diagnostics'": 1,
+    "dataframe[Cyclone, Phases, N phases, Gaps, Residual, Short phases, Warnings]": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "tracks": {
+    "20150069": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150377": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150436": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150528": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150532": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150561": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150646": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150656": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20150746": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20160030": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20160587": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20160735": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170154": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170225": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170342": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170409": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170520": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170587": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170756": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170760": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170794": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20170899": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20171179": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180129": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180170": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180263": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180300": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180608": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180628": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180654": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180733": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20180759": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20181046": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190325": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190397": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190639": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190691": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190870": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20190879": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20191014": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20191104": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20191155": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20201245": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20202023": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20203373": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20203389": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20203947": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20204655": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20205386": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20206498": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    },
+    "20207822": {
+     "subheader '<track>'": 1,
+     "image": 2,
+     "expander 'Incipient probe (raw vs smoothed)'": 1,
+     "checkbox '⚠️ Mark as bad' key=badcase__<track>": 1
+    }
+   }
+  },
+  "sample, developer key, Inspector": {
+   "n_pages": 1,
+   "page_first": {
+    "radio 'Display mode' key=view_mode": 1,
+    "selectbox 'Track to inspect' key=inspector_track": 1,
+    "checkbox 'Shared y scale' key=inspector_normalize": 1,
+    "checkbox 'Pipeline ribbon' key=inspector_ribbon": 1,
+    "checkbox 'Candidate ledger' key=inspector_ledger": 1,
+    "checkbox 'Mature layers' key=inspector_mature": 1,
+    "checkbox 'Incipient layers' key=inspector_incipient": 1,
+    "plotly_chart": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "page_union": {
+    "radio 'Display mode' key=view_mode": 1,
+    "selectbox 'Track to inspect' key=inspector_track": 1,
+    "checkbox 'Shared y scale' key=inspector_normalize": 1,
+    "checkbox 'Pipeline ribbon' key=inspector_ribbon": 1,
+    "checkbox 'Candidate ledger' key=inspector_ledger": 1,
+    "checkbox 'Mature layers' key=inspector_mature": 1,
+    "checkbox 'Incipient layers' key=inspector_incipient": 1,
+    "plotly_chart": 1,
+    "subheader 'Bad-case evaluation'": 1,
+    "metric 'Bad cases'": 1,
+    "button '🗑 Clear bad-case marks'": 1
+   },
+   "tracks": {}
+  }
+ },
+ "widgets_file": "inventory_before_widgets.json"
+}

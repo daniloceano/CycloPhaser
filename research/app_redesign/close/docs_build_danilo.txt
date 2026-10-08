@@ -1,0 +1,4 @@
+label: danilo | mode: worktree | HEAD 4f83334 | patch: 215 lines, sha256 a2360e611fe126ad…; untracked copied: 6 | 2026-10-08T16:17:15Z
+sphinx: 7.2.6 | exit 0
+warnings: 0
+html: $SCRATCH/docs_danilo/docs/_build/html/index.html

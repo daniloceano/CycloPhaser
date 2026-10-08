@@ -1,0 +1,57 @@
+{
+ "variant": "before",
+ "root_head": "63f074f7c79bec6acd8fcd89c1d7a89849b5ebde",
+ "root_tracked_changes": false,
+ "streamlit": "1.63.0",
+ "reps": 5,
+ "steps": [
+  {
+   "png_total": 102,
+   "png_by_caller": {
+    "_render_periods_png": 102
+   },
+   "script_runs": 1,
+   "server_seconds": 37.5329
+  },
+  {
+   "png_total": 102,
+   "png_by_caller": {
+    "_render_periods_png": 102
+   },
+   "script_runs": 1,
+   "server_seconds": 42.7136
+  },
+  {
+   "png_total": 102,
+   "png_by_caller": {
+    "_render_periods_png": 102
+   },
+   "script_runs": 1,
+   "server_seconds": 39.0623
+  },
+  {
+   "png_total": 102,
+   "png_by_caller": {
+    "_render_periods_png": 102
+   },
+   "script_runs": 1,
+   "server_seconds": 41.9475
+  },
+  {
+   "png_total": 102,
+   "png_by_caller": {
+    "_render_periods_png": 102
+   },
+   "script_runs": 1,
+   "server_seconds": 29.9942
+  }
+ ],
+ "median_server_seconds": 39.0623,
+ "png_total_per_step": [
+  102,
+  102,
+  102,
+  102,
+  102
+ ]
+}

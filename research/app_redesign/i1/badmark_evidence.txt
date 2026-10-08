@@ -1,0 +1,2 @@
+develop-worktree @ d339c7d: marked in Grid=True | still marked in Inspector=False | still marked back in Grid=False
+feat/app-redesign (working tree on d339c7d): marked in Grid=True | still marked in Inspector=False | still marked back in Grid=False

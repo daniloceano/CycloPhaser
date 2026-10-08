@@ -1,0 +1,684 @@
+{
+ "root": "~/Documents/Programs_and_scripts/CycloPhaser",
+ "new_layout": true,
+ "widgets": {
+  "start_example": {
+   "kind": "button",
+   "label": "Try example data",
+   "where": "main › 'Check CycloPhaser's phases on your cyclone tracks'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "start_sample": {
+   "kind": "button",
+   "label": "Sample data (51 TRACK cyclones)",
+   "where": "main › 'Check CycloPhaser's phases on your cyclone tracks'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "track_upload": {
+   "kind": "file_uploader",
+   "label": "Upload tracks (.csv, .txt)",
+   "where": "sidebar › '1 · Data'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "open_custom_format": {
+   "kind": "button",
+   "label": "Custom format…",
+   "where": "sidebar › '1 · Data'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "btn_example": {
+   "kind": "button",
+   "label": "Try example data",
+   "where": "sidebar › '1 · Data'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "btn_sample": {
+   "kind": "button",
+   "label": "Sample data (51 TRACK cyclones)",
+   "where": "sidebar › '1 · Data'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "btn_defaults": {
+   "kind": "button",
+   "label": "Defaults",
+   "where": "sidebar › '2 · Starting configuration'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "yaml_import": {
+   "kind": "file_uploader",
+   "label": "Load a saved configuration (YAML)",
+   "where": "sidebar › '2 · Starting configuration'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "use_filter": {
+   "kind": "checkbox",
+   "label": "Apply Lanczos filter",
+   "where": "sidebar › '3 · Filtering'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "True"
+  },
+  "cutoff_low": {
+   "kind": "slider",
+   "label": "Low cutoff (hours)",
+   "where": "sidebar › '3 · Filtering'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "168"
+  },
+  "cutoff_high": {
+   "kind": "slider",
+   "label": "High cutoff (hours)",
+   "where": "sidebar › '3 · Filtering'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "18"
+  },
+  "boundary_padding": {
+   "kind": "selectbox",
+   "label": "Boundary padding",
+   "where": "sidebar › 'Advanced' › expander 'Filtering options'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'reflect'"
+  },
+  "replace_endpoints": {
+   "kind": "slider",
+   "label": "Replace endpoints with lowpass (timesteps) — deprecated",
+   "where": "sidebar › 'Advanced' › expander 'Filtering options'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0"
+  },
+  "sm_mode": {
+   "kind": "selectbox",
+   "label": "Savitzky-Golay pass 1",
+   "where": "sidebar › 'Advanced' › expander 'Filtering options'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'off'"
+  },
+  "sm2_mode": {
+   "kind": "selectbox",
+   "label": "Savitzky-Golay pass 2",
+   "where": "sidebar › 'Advanced' › expander 'Filtering options'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'off'"
+  },
+  "savgol_poly": {
+   "kind": "slider",
+   "label": "Savitzky-Golay polynomial degree",
+   "where": "sidebar › 'Advanced' › expander 'Filtering options'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "3"
+  },
+  "reclassify_index0": {
+   "kind": "checkbox",
+   "label": "Reclassify the extremum at index 0",
+   "where": "sidebar › 'Advanced' › expander 'Extrema'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "True"
+  },
+  "extrema_prominence_enabled": {
+   "kind": "checkbox",
+   "label": "Prominence filter",
+   "where": "sidebar › 'Advanced' › expander 'Extrema'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "True"
+  },
+  "extrema_prominence_mode": {
+   "kind": "radio",
+   "label": "Prominence mode",
+   "where": "sidebar › 'Advanced' › expander 'Extrema'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'relative'"
+  },
+  "extrema_prominence_rel_val": {
+   "kind": "slider",
+   "label": "Fraction of dominant prominence",
+   "where": "sidebar › 'Advanced' › expander 'Extrema'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.3"
+  },
+  "length_scale": {
+   "kind": "radio",
+   "label": "Threshold scale",
+   "where": "sidebar › 'Advanced' › expander 'Threshold scale'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'local'"
+  },
+  "thr_int_len": {
+   "kind": "slider",
+   "label": "Min. intensification length",
+   "where": "sidebar › 'Advanced' › expander 'Intensification'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.075"
+  },
+  "thr_int_gap": {
+   "kind": "slider",
+   "label": "Max. intensification gap",
+   "where": "sidebar › 'Advanced' › expander 'Intensification'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.075"
+  },
+  "intensification_min_depth": {
+   "kind": "slider",
+   "label": "Min. intensification depth",
+   "where": "sidebar › 'Advanced' › expander 'Intensification'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.05"
+  },
+  "thr_dec_len": {
+   "kind": "slider",
+   "label": "Min. decay length",
+   "where": "sidebar › 'Advanced' › expander 'Decay'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.075"
+  },
+  "thr_dec_gap": {
+   "kind": "slider",
+   "label": "Max. decay gap",
+   "where": "sidebar › 'Advanced' › expander 'Decay'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.075"
+  },
+  "mature_method": {
+   "kind": "radio",
+   "label": "Mature stage method",
+   "where": "sidebar › 'Advanced' › expander 'Mature'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'amplitude'"
+  },
+  "thr_mat_len": {
+   "kind": "slider",
+   "label": "Min. mature length",
+   "where": "sidebar › 'Advanced' › expander 'Mature'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.15"
+  },
+  "thr_mat_dist": {
+   "kind": "slider",
+   "label": "Mature distance",
+   "where": "sidebar › 'Advanced' › expander 'Mature'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.18"
+  },
+  "mature_amplitude_fraction": {
+   "kind": "slider",
+   "label": "Mature amplitude fraction",
+   "where": "sidebar › 'Advanced' › expander 'Mature'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.9"
+  },
+  "mature_min_depth": {
+   "kind": "slider",
+   "label": "Mature minimum depth",
+   "where": "sidebar › 'Advanced' › expander 'Mature'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.8"
+  },
+  "decay_tail_enabled": {
+   "kind": "checkbox",
+   "label": "Extend decay over a flat tail",
+   "where": "sidebar › 'Advanced' › expander 'Residual'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "True"
+  },
+  "decay_tail_fraction_val": {
+   "kind": "slider",
+   "label": "Fraction of cycle amplitude",
+   "where": "sidebar › 'Advanced' › expander 'Residual'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.3"
+  },
+  "incipient_method": {
+   "kind": "radio",
+   "label": "Incipient method",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'plateau'"
+  },
+  "incipient_plateau_tau": {
+   "kind": "slider",
+   "label": "Plateau tau (normalised slope)",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "0.2"
+  },
+  "incipient_plateau_signal": {
+   "kind": "radio",
+   "label": "Plateau signal",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'vorticity'"
+  },
+  "incipient_plateau_crossing": {
+   "kind": "radio",
+   "label": "Plateau crossing",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "'sustained'"
+  },
+  "incipient_plateau_k": {
+   "kind": "number_input",
+   "label": "Plateau k (consecutive steps)",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "5"
+  },
+  "incipient_plateau_spare_intensification": {
+   "kind": "checkbox",
+   "label": "Spare an intensification inside the plateau",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "True"
+  },
+  "show_incipient_probe": {
+   "kind": "checkbox",
+   "label": "Show incipient probe",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "False"
+  },
+  "incipient_smooth_window": {
+   "kind": "slider",
+   "label": "Probe smoothing window (0 = off)",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "5"
+  },
+  "incipient_smooth_polyorder": {
+   "kind": "number_input",
+   "label": "Probe smoothing polyorder",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "default (public, as opened)",
+   "first_value": "3"
+  },
+  "btn_save_results": {
+   "kind": "button",
+   "label": "Save results",
+   "where": "sidebar › '4 · Save results'",
+   "first_seen_in_state": "default (public, as opened)"
+  },
+  "view_mode": {
+   "kind": "radio",
+   "label": "Display mode",
+   "where": "main",
+   "first_seen_in_state": "developer key, example loaded, Grid",
+   "first_value": "'Grid'"
+  },
+  "n_cols": {
+   "kind": "select_slider",
+   "label": "Grid columns",
+   "where": "main",
+   "first_seen_in_state": "developer key, example loaded, Grid",
+   "first_value": "2"
+  },
+  "grid_page_size": {
+   "kind": "selectbox",
+   "label": "Tracks per page",
+   "where": "main",
+   "first_seen_in_state": "developer key, example loaded, Grid",
+   "first_value": "12"
+  },
+  "grid_prev_top": {
+   "kind": "button",
+   "label": "◀ Previous",
+   "where": "main",
+   "first_seen_in_state": "developer key, example loaded, Grid"
+  },
+  "grid_next_top": {
+   "kind": "button",
+   "label": "Next ▶",
+   "where": "main",
+   "first_seen_in_state": "developer key, example loaded, Grid"
+  },
+  "badcase__example_file": {
+   "kind": "checkbox",
+   "label": "⚠️ Mark as bad",
+   "where": "main › 'example_file'",
+   "first_seen_in_state": "developer key, example loaded, Grid",
+   "first_value": "False"
+  },
+  "load_synthetic_clean": {
+   "kind": "checkbox",
+   "label": "Synthetic — clean (4)",
+   "where": "sidebar › '1 · Data'",
+   "first_seen_in_state": "developer key, example loaded, Grid",
+   "first_value": "False"
+  },
+  "load_synthetic_noisy": {
+   "kind": "checkbox",
+   "label": "Synthetic — noisy (8, 2 % noise)",
+   "where": "sidebar › '1 · Data'",
+   "first_seen_in_state": "developer key, example loaded, Grid",
+   "first_value": "False"
+  },
+  "btn_clear_data": {
+   "kind": "button",
+   "label": "Clear data",
+   "where": "sidebar › '1 · Data'",
+   "first_seen_in_state": "developer key, example loaded, Grid"
+  },
+  "inspector_track": {
+   "kind": "selectbox",
+   "label": "Track to inspect",
+   "where": "main",
+   "first_seen_in_state": "Inspector view",
+   "first_value": "'example_file'"
+  },
+  "inspector_normalize": {
+   "kind": "checkbox",
+   "label": "Shared y scale",
+   "where": "main",
+   "first_seen_in_state": "Inspector view",
+   "first_value": "False"
+  },
+  "inspector_ribbon": {
+   "kind": "checkbox",
+   "label": "Pipeline ribbon",
+   "where": "main",
+   "first_seen_in_state": "Inspector view",
+   "first_value": "False"
+  },
+  "inspector_ledger": {
+   "kind": "checkbox",
+   "label": "Candidate ledger",
+   "where": "main",
+   "first_seen_in_state": "Inspector view",
+   "first_value": "False"
+  },
+  "inspector_mature": {
+   "kind": "checkbox",
+   "label": "Mature layers",
+   "where": "main",
+   "first_seen_in_state": "Inspector view",
+   "first_value": "False"
+  },
+  "inspector_incipient": {
+   "kind": "checkbox",
+   "label": "Incipient layers",
+   "where": "main",
+   "first_seen_in_state": "Inspector view",
+   "first_value": "False"
+  },
+  "show_advanced_diffs": {
+   "kind": "toggle",
+   "label": "Show which",
+   "where": "sidebar › 'Advanced'",
+   "first_seen_in_state": "manual windows, absolute prominence, amplitude, geometric"
+  },
+  "sm_val": {
+   "kind": "slider",
+   "label": "Pass 1 window (steps, odd)",
+   "where": "sidebar › 'Advanced' › expander 'Filtering options'",
+   "first_seen_in_state": "manual windows, absolute prominence, amplitude, geometric"
+  },
+  "sm2_val": {
+   "kind": "slider",
+   "label": "Pass 2 window (steps, odd)",
+   "where": "sidebar › 'Advanced' › expander 'Filtering options'",
+   "first_seen_in_state": "manual windows, absolute prominence, amplitude, geometric"
+  },
+  "extrema_prominence_val": {
+   "kind": "number_input",
+   "label": "Absolute prominence threshold",
+   "where": "sidebar › 'Advanced' › expander 'Extrema'",
+   "first_seen_in_state": "manual windows, absolute prominence, amplitude, geometric"
+  },
+  "thr_inc_len": {
+   "kind": "slider",
+   "label": "Min. incipient length",
+   "where": "sidebar › 'Advanced' › expander 'Incipient'",
+   "first_seen_in_state": "manual windows, absolute prominence, amplitude, geometric"
+  },
+  "custom_format_done": {
+   "kind": "button",
+   "label": "Done",
+   "where": "dialog",
+   "first_seen_in_state": "custom format shown"
+  },
+  "track_custom_on": {
+   "kind": "checkbox",
+   "label": "Enable custom track format",
+   "where": "dialog",
+   "first_seen_in_state": "custom format shown",
+   "first_value": "False"
+  },
+  "track_custom_header": {
+   "kind": "checkbox",
+   "label": "First line is a header",
+   "where": "dialog",
+   "first_seen_in_state": "custom format enabled"
+  },
+  "track_custom_sep": {
+   "kind": "selectbox",
+   "label": "Separator",
+   "where": "dialog",
+   "first_seen_in_state": "custom format enabled"
+  },
+  "track_custom_date_col": {
+   "kind": "text_input",
+   "label": "Date column",
+   "where": "dialog",
+   "first_seen_in_state": "custom format enabled"
+  },
+  "track_custom_date_format": {
+   "kind": "text_input",
+   "label": "Date format (optional)",
+   "where": "dialog",
+   "first_seen_in_state": "custom format enabled"
+  },
+  "track_custom_vort_col": {
+   "kind": "text_input",
+   "label": "Vorticity column",
+   "where": "dialog",
+   "first_seen_in_state": "custom format enabled"
+  },
+  "save_prepare": {
+   "kind": "button",
+   "label": "Prepare package",
+   "where": "dialog",
+   "first_seen_in_state": "Save results dialog"
+  },
+  "save_close": {
+   "kind": "button",
+   "label": "Done",
+   "where": "dialog",
+   "first_seen_in_state": "Save results dialog"
+  },
+  "save_include_yaml": {
+   "kind": "checkbox",
+   "label": "Configuration (YAML)",
+   "where": "dialog",
+   "first_seen_in_state": "Save results dialog",
+   "first_value": "True"
+  },
+  "save_include_csv": {
+   "kind": "checkbox",
+   "label": "Phase tables (CSV per cyclone)",
+   "where": "dialog",
+   "first_seen_in_state": "Save results dialog",
+   "first_value": "True"
+  },
+  "save_include_png": {
+   "kind": "checkbox",
+   "label": "Figures (PNG)",
+   "where": "dialog",
+   "first_seen_in_state": "Save results dialog",
+   "first_value": "False"
+  },
+  "save_download": {
+   "kind": "download_button",
+   "label": "Download cyclophaser_results.zip",
+   "where": "dialog",
+   "first_seen_in_state": "Save results dialog, package prepared"
+  }
+ },
+ "downloads": {
+  "⬇ Download CSV": "main › 'example_file' › expander 'Detailed diagnostics'",
+  "⬇ Download PNG": "main › 'example_file' › expander 'Detailed diagnostics'",
+  "Download cyclophaser_results.zip": "dialog"
+ },
+ "buttons": {
+  "🗑 Clear bad-case marks": "main › 'Bad-case evaluation'"
+ },
+ "states": [
+  "default (public, as opened)",
+  "developer key, example loaded, Grid",
+  "one-column Grid",
+  "Inspector view",
+  "manual windows, absolute prominence, amplitude, geometric",
+  "plateau, vorticity signal, sustained crossing",
+  "custom format shown",
+  "custom format enabled",
+  "Save results dialog",
+  "Save results dialog, package prepared"
+ ],
+ "defaults": {
+  "n_cols": "2",
+  "view_mode": "'Grid'",
+  "inspector_track": "None",
+  "inspector_ribbon": "True",
+  "inspector_ledger": "True",
+  "inspector_mature": "True",
+  "inspector_incipient": "True",
+  "inspector_normalize": "True",
+  "sm_val": "17",
+  "sm2_val": "17",
+  "extrema_prominence_rel_val": "0.3",
+  "extrema_prominence_val": "1e-06",
+  "decay_tail_fraction_val": "0.3",
+  "use_filter": "True",
+  "cutoff_low": "168",
+  "cutoff_high": "18",
+  "replace_endpoints": "0",
+  "savgol_poly": "3",
+  "boundary_padding": "'reflect'",
+  "thr_int_len": "0.075",
+  "thr_int_gap": "0.075",
+  "intensification_min_depth": "0.05",
+  "thr_mat_dist": "0.18",
+  "thr_mat_len": "0.15",
+  "thr_dec_len": "0.075",
+  "thr_dec_gap": "0.075",
+  "thr_inc_len": "0.4",
+  "length_scale": "'local'",
+  "mature_method": "'amplitude'",
+  "mature_amplitude_fraction": "0.9",
+  "mature_min_depth": "0.8",
+  "reclassify_index0": "True",
+  "incipient_method": "'plateau'",
+  "incipient_plateau_tau": "0.2",
+  "incipient_plateau_signal": "'vorticity'",
+  "incipient_plateau_crossing": "'sustained'",
+  "incipient_plateau_k": "5",
+  "incipient_smooth_window": "5",
+  "incipient_smooth_polyorder": "3",
+  "incipient_plateau_spare_intensification": "True",
+  "sm_mode": "'off'",
+  "sm2_mode": "'off'",
+  "extrema_prominence_enabled": "True",
+  "extrema_prominence_mode": "'relative'",
+  "decay_tail_enabled": "True"
+ },
+ "param_widget_keys": {
+  "use_filter": [
+   "use_filter"
+  ],
+  "cutoff_low": [
+   "cutoff_low"
+  ],
+  "cutoff_high": [
+   "cutoff_high"
+  ],
+  "boundary_padding": [
+   "boundary_padding"
+  ],
+  "replace_endpoints_with_lowpass": [
+   "replace_endpoints"
+  ],
+  "use_smoothing": [
+   "sm_mode",
+   "sm_val"
+  ],
+  "use_smoothing_twice": [
+   "sm2_mode",
+   "sm2_val"
+  ],
+  "savgol_polynomial": [
+   "savgol_poly"
+  ],
+  "prominence": [
+   "extrema_prominence_enabled",
+   "extrema_prominence_mode",
+   "extrema_prominence_val"
+  ],
+  "prominence_relative": [
+   "extrema_prominence_enabled",
+   "extrema_prominence_mode",
+   "extrema_prominence_rel_val"
+  ],
+  "reclassify_index0": [
+   "reclassify_index0"
+  ],
+  "length_scale": [
+   "length_scale"
+  ],
+  "threshold_intensification_length": [
+   "thr_int_len"
+  ],
+  "threshold_intensification_gap": [
+   "thr_int_gap"
+  ],
+  "intensification_min_depth": [
+   "intensification_min_depth"
+  ],
+  "threshold_decay_length": [
+   "thr_dec_len"
+  ],
+  "threshold_decay_gap": [
+   "thr_dec_gap"
+  ],
+  "mature_method": [
+   "mature_method"
+  ],
+  "threshold_mature_length": [
+   "thr_mat_len"
+  ],
+  "threshold_mature_distance": [
+   "thr_mat_dist"
+  ],
+  "mature_amplitude_fraction": [
+   "mature_amplitude_fraction"
+  ],
+  "mature_min_depth": [
+   "mature_min_depth"
+  ],
+  "decay_tail_amplitude_fraction": [
+   "decay_tail_enabled",
+   "decay_tail_fraction_val"
+  ],
+  "incipient_method": [
+   "incipient_method"
+  ],
+  "threshold_incipient_length": [
+   "thr_inc_len"
+  ],
+  "incipient_plateau_tau": [
+   "incipient_plateau_tau"
+  ],
+  "incipient_plateau_signal": [
+   "incipient_plateau_signal"
+  ],
+  "incipient_plateau_crossing": [
+   "incipient_plateau_crossing"
+  ],
+  "incipient_plateau_k": [
+   "incipient_plateau_k"
+  ],
+  "incipient_smooth_window": [
+   "incipient_smooth_window"
+  ],
+  "incipient_smooth_polyorder": [
+   "incipient_smooth_polyorder"
+  ],
+  "incipient_plateau_spare_intensification": [
+   "incipient_plateau_spare_intensification"
+  ]
+ }
+}
