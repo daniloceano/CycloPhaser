@@ -15,7 +15,8 @@ What it is for
   filtering when the tracks are not the data the defaults were tuned on.
 * Inspect one track in detail: the filtered series, the peaks and valleys, and
   what each detection rule decided.
-* Compare configurations side by side (the **Benchmark** page).
+* Compare configurations side by side on the same tracks (the **Compare**
+  page).
 * **Save** the configuration as a YAML file, with the phase tables and figures
   if wanted, and load the configuration back later.
 
@@ -26,12 +27,14 @@ The menu at the top of the sidebar has two pages:
 
 * **Calibrate** — load tracks, check the detected phases, adjust the
   parameters and save the results. Described below.
-* **Benchmark** — run configurations side by side on the same tracks.
+* **Compare** — run configurations side by side on the tracks loaded in
+  Calibrate, and see what changes. Described below.
 
 The app also has pages and functions for the developers who calibrate the
-package (manual labelling of tracks, the synthetic test cases, marking a
-detection as bad). They are not part of the hosted app: they exist only when
-the app is started with a developer key, described in the app's README.
+package (manual labelling of tracks, validating configurations against those
+labels, the synthetic test cases, marking a detection as bad). They are not
+part of the hosted app: they exist only when the app is started with a
+developer key, described in the app's README.
 
 Calibrate
 ---------
@@ -122,6 +125,28 @@ Save results
 
    The Save results dialog.
 
+Compare
+-------
+
+**Compare** answers one question: what changes in the phases of your tracks when
+the configuration changes? It runs on the tracks loaded in Calibrate (it has no
+upload of its own) and compares up to four configurations, each a column:
+**Current settings** (the Calibrate sidebar when the column is added),
+**Defaults**, or a configuration saved earlier (**Upload YAML**). Each column
+can be edited or removed on the page.
+
+Nothing runs until **Run** is pressed; while Run is not possible, a line says
+why. Results are kept per configuration and track, so a second Run after one
+change recomputes only what changed.
+
+The results are measured against a **reference** column of your choice: for
+each other configuration, how many tracks changed their phase sequence, how far
+the phase boundaries moved (on the tracks whose sequence did not change), and
+which phases appeared or disappeared. Then the phase figures of every track,
+side by side or stacked, with an option to show only the tracks whose sequence
+differs from the reference. These numbers are differences between
+configurations, not a quality score.
+
 Using a saved configuration in a script
 ---------------------------------------
 
@@ -167,6 +192,6 @@ From a clone of the repository:
 The app opens at http://localhost:8501. Starting it from the repository root
 applies the same theme as the hosted version.
 
-The app's own documentation (input formats, the developer key, the Benchmark
-page) is in :repo:`tools/calibration_app/README.md`. The screenshots on this
+The app's own documentation (input formats, the developer key, the Compare
+page and the developer pages) is in :repo:`tools/calibration_app/README.md`. The screenshots on this
 page are made by ``docs/figures/make_app_screenshots.py``.

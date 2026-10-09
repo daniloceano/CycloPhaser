@@ -2,7 +2,7 @@
 
 An interactive tool to calibrate CycloPhaser's filtering, smoothing and
 phase-detection parameters on real and synthetic tracks, and to compare
-configurations side by side.
+configurations side by side on the same tracks.
 
 ## Installation
 
@@ -39,20 +39,23 @@ open page runs):
   then the main area is a start screen (what the page does, the four steps,
   **Try example data** and **Sample data (51 TRACK cyclones)** — the same
   actions as the step 1 buttons — and a link to the documentation).
-- **Benchmark** — configurations side by side (below).
-- **Developer → Manual labelling** — only with the developer key: environment
-  variable `CYCLOPHASER_APP_DEV=1`, or `developer_mode = true` in
-  `.streamlit/secrets.toml` (or the app's secrets on Streamlit Cloud). Without
-  the key the page is not in the menu. It writes
-  `research/labels/manual_labels.yaml`; see `research/labels/README.md`.
+- **Compare** — configurations side by side on the tracks loaded in
+  Calibrate (below).
+- **Developer → Manual labelling** and **Developer → Validate against labels**
+  — only with the developer key: environment variable `CYCLOPHASER_APP_DEV=1`,
+  or `developer_mode = true` in `.streamlit/secrets.toml` (or the app's secrets
+  on Streamlit Cloud). Without the key the Developer section is not in the menu.
+  Manual labelling writes `research/labels/manual_labels.yaml` (see
+  `research/labels/README.md`); Validate against labels measures configurations
+  against those labels (below).
 
 Going to another page and back keeps the Calibrate sidebar, the imported YAML's
 values, the dataset choice, the bad-case marks and the uploaded tracks (the
 uploader itself shows empty again; a caption names the tracks still in use),
 and the Grid's columns, page and page size (also across Grid → Inspector → Grid).
 
-**Developer functions** (developer key only): the Manual labelling page, the
-synthetic cases in step 1, the "⚠️ Mark as bad" box under each Grid figure, the
+**Developer functions** (developer key only): the Manual labelling and
+Validate against labels pages, the synthetic cases in step 1, the "⚠️ Mark as bad" box under each Grid figure, the
 bad-case summary with "Clear bad-case marks", and the `evaluation` section of
 the saved YAML. Without the key none of these is shown or written, and a
 loaded YAML's `evaluation` section is not restored: it is listed under
@@ -83,8 +86,8 @@ Top to bottom, under the page menu:
 
 ## Track format
 
-Both upload fields (Calibrate and Benchmark → Exploration) accept `.csv` and
-`.txt`. The format is recognised by **content**, never by extension
+The track upload (Calibrate, step 1) accepts `.csv` and `.txt`; the Compare
+page runs the tracks loaded there. The format is recognised by **content**, never by extension
 (`track_io.py`, the app's only reader).
 
 **Standard format** — a first line with column names separated by `;`,
@@ -99,7 +102,7 @@ Other columns are ignored. Compatible with `example_file.csv` in
 `cyclophaser/example_data/`.
 
 **Custom format** (opt-in, the **Custom format…** dialog on Calibrate, off by
-default; Benchmark's upload reuses its settings) —
+default) —
 separator (`auto`, `;`, `,`, tab, whitespace), header line yes/no, date and
 vorticity columns (by name, or by 1-based number without a header) and an
 optional strftime date format. Dates that do not start with the year need the
@@ -238,101 +241,121 @@ produces on its own (`tests/test_layer_inspector.py`). The same helpers feed the
 app's Plotly renderer and the static matplotlib check render in
 `research/app_layer_inspector/gen_inspector_figures.py`.
 
-## Benchmark page
+## Compare page
 
-Compares N configurations side by side, over the cyclones you choose, aligned by
-cyclone. A column is created from the current sidebar state, an uploaded YAML, a
-file in `research/labels/configs/` (since item 31 only params-15, renamed params-track in the cleanup front; params-1..14
-are recoverable, see `research/labels/diagnostics/item31/recovery_table.md`) or a frozen published-version
-snapshot, and stays editable in the tab itself.
+**What changes in the phases of your tracks when the configuration changes?**
+The page runs several configurations over the same tracks and shows the
+differences between them. Nothing on it is measured against a manual label, and
+nothing on it reads one.
 
-**Each column's header** — one identity line (source hash · running commit), the
-pre-filter-fix warning when it applies, and a `Provenance` drop-down holding all
-five mandatory items:
+**Tracks** are the ones the Calibrate page is running on: the sample tracks, the
+example track and the uploaded files, read by the same reader (`track_io`) with
+their time axis. The page has no uploader of its own; with nothing loaded it
+shows a link to Calibrate. All loaded tracks start selected; **All**, **Invert
+selection**, **Clear** and **Choose individually** change the selection.
 
-1. sha256 of the source YAML, or `edited in session` if it was changed;
-2. the commit of the code actually running (`git rev-parse HEAD`). **Not**
-   `metadata.cyclophaser_version`: it reads `2.0.0` in every calibration file and
-   distinguishes nothing;
-3. keys present in the YAML and ignored by the current signature (`distance`);
-4. keys absent from the YAML and filled by the current default, with the value;
-5. the **"pre-filter-fix config"** warning when `boundary_padding` is missing.
-   This is not cosmetic: the v1–v5 YAMLs carry `use_filter: true`, and in the
-   code of that period `True` was read as the integer window 1 (bool is a
-   subclass of int), so the Lanczos filter was **never** applied. The same line
-   applies the filter today. Without the warning the column shows a result
-   nobody saw at the time and presents it as history.
+**Configurations** are columns, at most 4:
 
-**Both measurements** are always shown, each named by its instrument: the phase
-sequence from `evaluate_against_labels.py / score_phase_sequences` (starts only,
-`tolerance_idx` per label, refuses to pair when the sequence does not match) and
-the mature pairing from `item19_core.pair_by_overlap` (largest overlap, both
-ends, fixed margin 6). They are different instruments and are never summed.
+- **Current settings** — the Calibrate sidebar as it is when the column is
+  added (a later change on Calibrate does not move the column; its card says
+  so, and adding it again takes the new settings);
+- **Defaults** — the values the Calibrate **Defaults** button sets;
+- **Upload YAML** — a configuration saved with **Save results**. Only its
+  `filter_params` and `phase_params` are used. A key the file does not carry is
+  filled by the same rule as Calibrate's YAML import, and the card's warning
+  lists the filled keys whose value differs from the package default, in the
+  same words as that import; keys the package does not read are listed as
+  ignored.
 
-**`evaluation.bad_cases_count` is not a score.** It appears only as a labelled
-historical annotation under `Provenance`: these were visual marks made at
-different times with different knowledge of the problem (v5 and v6 record 0; v9
-records 6).
+Each card shows the column's name, its source, the parameters that differ from
+the reference (`section.key`: this value (reference: its value)), those
+warnings, the full configuration, **Edit** (marks the card "Edited on this
+page") and **Remove**.
 
-**Leakage.** The test split is spent: no score or metric against the label of a
-test-split series appears anywhere on the page. Their labels are withheld from
-the page altogether, so Validation (labelled sources only) does not offer the 16
-test tracks — nor the swell_item30 batch's 3 test cases — and in Exploration a
-test series is an unlabelled one: compared against the reference column, never
-scored. Every aggregate is computed over the train split. Manual labels are
-opt-in.
+**Run.** Nothing is computed until **Run** is pressed. While Run is blocked, a
+visible line says why ("To run, add at least one configuration.", "To run,
+select at least one track."). After a change to the columns or the selection,
+the results are marked out of date until the next Run; when they are up to
+date, a line says "Results are current: N configuration(s) × M track(s)". A
+progress bar shows the run. Each result is kept by (the configuration that
+actually runs, the track's content), so running again after one change
+recomputes only what changed, and renaming a track recomputes nothing.
 
-Frozen reference columns come from `research/snapshots/` (see that directory's
-README): the tab **reads files** and never runs a published version live.
+**Results**, under the **Reference** selector (any column; changing it runs no
+detection):
 
-### Modes, reference column and Run
+- **Relative to <reference>** — per configuration: tracks compared, tracks whose
+  phase sequence changed, boundary shift (median and maximum, in time steps,
+  only on tracks whose sequence is the same as the reference's), and phases
+  that appeared or disappeared. Every row says over how many tracks.
+- **Per configuration** — each column on its own: tracks whose first phase is
+  not incipient, and failed detections.
+- **Per track** — one figure per configuration (**Side by side**) or one
+  figure with a panel per configuration (**Stacked**), the phase legend, an
+  error in the cell of a configuration that failed, and a note on each track
+  whose sequence differs from the reference. **Show only cyclones whose
+  sequence differs from the reference** filters the list; 12, 24 or 48 tracks
+  per page.
 
-**Reading order.** A one-line status bar (configs · cyclones · ground-truth
-badge · reference column), then four numbered sections, each an expander:
-**1 Mode → 2 Data → 3 Configurations → 4 Results**. Each section owns everything
-it governs — the configuration cards render inside section 3, so collapsing the
-section hides them.
+The selection, the columns, the reference, the layout, the filter and the page
+size are kept when going to another page and back.
 
-**Mode is not independent state.** `Validation` and `Exploration` filter what is
-selectable and what is emphasised; they never decide whether a number is
-produced. That is decided per cyclone by whether it carries a manual label, in
-`benchmark_core.scoreable`. A row with no label yields no scoring number in
-either mode.
+## Validate against labels (developer key)
 
-* **Validation** — only labelled sources selectable (51 real + 12 synthetic);
-  scoring panel visible. Switching back from Exploration drops any uploaded
-  track from the selection rather than carrying it into a scored run.
-* **Exploration** — every source selectable, cyclone uploads included; scoring
-  panel collapsed. If labelled rows are in the selection, a note offers to score
-  those rows only.
+**How closely does each configuration agree with the manual labels of the train
+split?** Only in the menu with the developer key. The labels are one labeller's
+evidence, not a ground truth: every number on the page is an agreement with
+them, measured by one of two named instruments, and never called a hit rate,
+an accuracy or a score.
 
-**Without ground truth**, each column is measured against the **reference
-column**, never against truth, and the block is labelled `relative to reference`.
-Four measures: cyclones whose phase sequence changed; boundary displacement in
-timesteps (median and max) for those whose sequence matches; phases that
-appeared or disappeared, per type; and cyclones that refused an incipient phase.
-Boundary displacement is computed only where the sequence matches — pairing
-boundaries across a mismatch would compare two different transitions.
+**Tracks**: the labelled tracks of the train split, read from disk — 47 (35 real
+and 12 synthetic), all selected on arrival; **All real**, **All synthetic**,
+**Invert selection**, **Clear** and **Choose individually** change the
+selection. The 16 tracks of the test split are never offered: their files are
+not opened and their labels are dropped before anything on the page reads them.
+A label written against other data (its `series_sha256` does not match the
+file) is not used, and its track is listed as not offered, with the reason.
+**Include swell_item30 batch** (off by default) adds the batch's 7 train tracks;
+its 3 test tracks are never offered.
 
-**Reference column** is chosen explicitly. It defaults to the manual label when
-one exists, otherwise the first configuration column. The manual label has no
-parameters, so the card diffs fall back to the first configuration column as
-their parameter baseline, and the card says so.
+**Configurations**, at most 6: Current settings, Defaults, Upload YAML (as on
+the Compare page), a **calibration file** from `research/labels/configs/` and a
+**published release** from `research/snapshots/` (phases recorded by that
+release with its own defaults, read from the file; they cover the 51 + 12
+bundled series only, so the batch tracks are "not in this snapshot" and are
+never counted as failures or disagreements). Each card also shows the
+configuration's sha256 and the running code's commit, the pre-filter-fix
+warning when the file has no `boundary_padding`, and a **Provenance** drop-down
+with the five items (sha256 of the source, or "edited in session"; commit; keys
+not read; keys filled, each with the package default; pre-filter-fix) and, for
+an old calibration file, `evaluation.bad_cases_count` as a historical
+annotation, never as a measure.
 
-**A card shows only the parameters that DIFFER from the reference.** Calibration
-YAMLs share roughly fifteen identical parameters; listing all of them hides the
-two or three that separate one configuration from another. The full
-configuration sits behind the card's `Provenance` drop-down.
+**Run**, **Reference** (a column, never the label), out-of-date flag, cache and
+the "relative to" and "per configuration" blocks work as on the Compare page.
 
-**Nothing recomputes on edit.** Results come from an explicit **Run**. A
-fingerprint of (columns × selection × reference) is stored with them; when it
-stops matching, the results are flagged **out of date** instead of being
-silently replaced.
+**Agreement with manual labels** — two instruments, each with its name, its set
+and its n, never added together (`research/labels/README.md`):
 
-**Figures** come in two arrangements over the same data: `Side by side`
-(default) and `Stacked`, which puts the panels on a shared x axis and a shared y
-scale so a boundary that moved is read straight down the figure. The choice is
-kept in session state.
+- **Sequence** (`labels_core.score_phase_sequences`, the function
+  `evaluate_against_labels.py` calls): tracks whose phase sequence agrees with
+  the label; on those, boundaries within the label's own `tolerance_idx`
+  (starts only; across a sequence difference no boundary is paired);
+  boundaries the label marks unsure are counted apart and not compared.
+- **Mature** (`item19_core.pair_by_overlap`): the detected mature block with
+  the largest overlap with the label's first mature block, both ends within a
+  fixed margin of 6 steps.
+
+The **Train** block covers the selected train tracks. With the batch on, the
+tracks whose label was adjudicated to the item-30 counterfactual are measured in
+an **Adjudicated** block of their own, never added to Train. Under each block,
+per configuration, the tracks that disagree with the label, by instrument.
+
+**Per track**: the label panel first (on by default; the hatched band is the
+boundary's tolerance, a dashed line a boundary the label marks unsure), then
+each configuration, side by side or stacked, with per-track notes (sequence
+agrees or differs; mature offsets). **Show only tracks that disagree with the
+label (any column)** filters the list.
 
 ## Advanced groups
 
@@ -370,6 +393,7 @@ holds another.
 
 The app covers the whole detection pipeline: track upload (standard or custom
 format), every filter, smoothing and phase-detection parameter of the package in
-the sidebar, the Grid and Inspector display modes, the Benchmark page, the
-Manual labelling page (developer key), and Save results (parameters as YAML,
+the sidebar, the Grid and Inspector display modes, the Compare page, the
+Manual labelling and Validate against labels pages (developer key), and Save
+results (parameters as YAML,
 phase tables, figures).

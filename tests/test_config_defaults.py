@@ -1,15 +1,16 @@
 """Item 31, decision (a): a config key that is absent is filled with the FROZEN
 cyclophaser 2.0.0 default, and every filled key is listed.
 
-`research/labels/config_defaults.py` holds the rule; the evaluator, the Benchmark
-(`benchmark_core`) and the app's YAML import all go through it. What is pinned:
+`research/labels/config_defaults.py` holds the rule; the evaluator,
+`benchmark_core` (the app's Compare and Validate pages) and the app's YAML
+import all go through it. What is pinned:
 
 * the table IS the stage-0 parameter table's "default" column (never hand-typed),
   and covers exactly the detection parameters of the current signature;
 * the fill touches absent keys only, lists them, and never mutates its input;
 * the source of a filled value is the TABLE, not the live signature — with a
   positive control, since in stage 2a the two still coincide;
-* evaluator and Benchmark resolve a config to the same arguments;
+* evaluator and `benchmark_core` resolve a config to the same arguments;
 * params-track lacks exactly one key (`prominence`), and the app imports it with
   that one key listed and prominence filtering left as the file describes.
 """

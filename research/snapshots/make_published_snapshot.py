@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """Run a PUBLISHED cyclophaser release over the frozen series set and record its phases.
 
-This is the generator behind the Benchmark tab's reference columns. It must be run
+This is the generator behind the "Published release" columns of the calibration
+app's Validate against labels page (developer key). It must be run
 with the interpreter of an ISOLATED virtual environment that has the published
 release installed — never in the `cyclophaser` conda environment, which carries the
 working tree in editable mode:

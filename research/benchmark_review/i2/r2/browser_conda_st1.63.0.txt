@@ -1,0 +1,7 @@
+python: ~/miniconda3/envs/cyclophaser/bin/python (Python 3.12.14) | HEAD b197124 | tracked changes: 5 | 2026-10-09T03:20:23Z
+streamlit 1.63.0 | playwright 1.62.0
+........e1 interactions: {'T5': 0, 'T1': 4, 'T3': 1, 'T4': 1}
+.e1 interactions: {'T2': 4}
+..e1 interactions: {'T9': 0, 'T6': 5, 'T8': 1, 'T7': 2}
+14 passed in 358.41s (0:05:58)
+manual_labels.yaml git status lines: 0

@@ -55,8 +55,8 @@ def live_filter_params(session_state) -> tuple[dict, bool]:
 
     Returns `(params, from_sidebar)`. `params` are the Calibrate sidebar's
     filter settings as that page last published them (`_bench_live_config`,
-    the same document the Benchmark's "Add column from current sidebar state"
-    reads), so an overlay shows what the detector sees under the calibration
+    the same document the "Add Current settings" button of the Compare and
+    Validate pages reads), so an overlay shows what the detector sees under the calibration
     currently being tried. When Calibrate has not run in this session there is
     no sidebar state yet; `params` are then process_vorticity's own signature
     defaults — which is also what a fresh Calibrate sidebar starts from — and

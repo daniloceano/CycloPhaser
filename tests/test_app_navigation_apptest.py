@@ -5,21 +5,26 @@ bookkeeping: switch to the page's file, run, and look at which page actually
 rendered. `AppTest.switch_page` itself cannot be trusted for this across the
 supported range: up to at least streamlit 1.58 it only checks that the FILE
 exists, so it "reaches" an unregistered page too, and st.navigation then
-renders the default page (Calibrate) instead. Each page is recognised by a
-widget only it draws: Calibrate `btn_defaults` (its sidebar's "Defaults"),
-Benchmark `bench_run`, Manual labelling `label_default_tolerance`.
+renders the default page (Calibrate) instead. Each page is recognised by what
+only it draws: Calibrate `btn_defaults` (its sidebar's "Defaults"), Compare its
+title "Compare configurations", Manual labelling `label_default_tolerance`.
 
 Covered here:
 
-* the menu has Calibrate and Benchmark, and Calibrate is the default page;
+* the menu has Calibrate and Compare, and Calibrate is the default page;
+* the old Benchmark page is gone (benchmark review, I3): its files are deleted,
+  app.py does not name it, and its address renders the default page;
 * the Developer section (Manual labelling) is absent without the developer key
   and present with it — by st.secrets or by the CYCLOPHASER_APP_DEV variable —
   and a missing secrets file is not an error;
 * the Calibrate sidebar, the dataset choice and the bad-case marks survive a
-  trip to Benchmark and back — with a NEGATIVE control showing the same trip
+  trip to Compare and back — with a NEGATIVE control showing the same trip
   loses them when the shield in app.py is skipped, so the test is not vacuous;
-* "Add column from current sidebar state" still reflects the Calibrate sidebar;
-* the Benchmark page shows no score or metric against a test-split label.
+* Compare's "Add Current settings" reflects the Calibrate sidebar.
+
+That no test-split label is ever scored is the Validate page's to show
+(tests/test_validate_core.py, tests/test_validate_apptest.py); the Compare page
+reads no label at all (tests/test_compare_apptest.py).
 
 File uploads cannot be driven through AppTest; their carry-over across pages is
 covered in the browser (tests/test_app_pages_browser.py).
@@ -40,10 +45,9 @@ pytest.importorskip("yaml")
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
 sys.path.insert(0, str(REPO_ROOT / "tools" / "calibration_app"))
-import benchmark_core as bc  # noqa: E402
-
 CALIBRATE = "app_pages/calibrate.py"
-BENCHMARK = "app_pages/benchmark.py"
+COMPARE = "app_pages/compare.py"
+OLD_BENCHMARK = "app_pages/benchmark.py"   # retired in I3; the file is gone
 LABEL = "app_pages/label.py"
 
 
@@ -84,7 +88,7 @@ def _rendered(at: AppTest, page: str) -> str:
     assert not at.exception, [str(e) for e in at.exception]
     found = {
         "calibrate": any(b.key == "btn_defaults" for b in at.button),
-        "benchmark": any(b.key == "bench_run" for b in at.button),
+        "compare": [t.value for t in at.title] == ["Compare configurations"],
         "label": any(n.key == "label_default_tolerance" for n in at.number_input),
     }
     assert sum(found.values()) == 1, found
@@ -100,19 +104,42 @@ def _w(at, kind, key):
 
 # ── the menu ──────────────────────────────────────────────────────────────────
 
-def test_the_menu_has_calibrate_and_benchmark_and_calibrate_is_the_default():
+def test_the_menu_has_calibrate_and_compare_and_calibrate_is_the_default():
     at = _app()
     # the default page is Calibrate: its "Defaults" button is on screen
     assert any(b.key == "btn_defaults" for b in at.button)
-    assert _rendered(at, BENCHMARK) == "benchmark"
+    assert _rendered(at, COMPARE) == "compare"
     assert _rendered(at, CALIBRATE) == "calibrate"
+
+
+def test_the_benchmark_page_is_gone(monkeypatch):
+    """Benchmark review, I3: the page and its module are deleted, app.py names
+    neither, and the old address renders the default page — with and without
+    the developer key. Control: from the same state, Compare does render."""
+    app_dir = APP.parent
+    assert not (app_dir / OLD_BENCHMARK).exists()
+    assert not (app_dir / "benchmark_tab.py").exists()
+    assert (app_dir / "benchmark_core.py").exists()          # the module stays
+    src = APP.read_text()
+    assert "benchmark_tab" not in src and "_PAGE_BENCHMARK" not in src
+    assert '_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_COMPARE]}' in src
+    assert '_pages["Developer"] = [_PAGE_LABEL, _PAGE_VALIDATE]' in src
+    for dev in (False, True):
+        if dev:
+            monkeypatch.setenv("CYCLOPHASER_APP_DEV", "1")
+        else:
+            monkeypatch.delenv("CYCLOPHASER_APP_DEV", raising=False)
+        at = _app()
+        assert _rendered(at, OLD_BENCHMARK) == "calibrate"
+        assert _rendered(at, COMPARE) == "compare"           # control
+        assert not any("bench_" in (b.key or "") for b in at.button)
 
 
 def test_the_developer_page_is_absent_without_the_key(monkeypatch):
     monkeypatch.delenv("CYCLOPHASER_APP_DEV", raising=False)
     at = _app()                       # no secrets file at all: not an error
     assert _rendered(at, LABEL) == "calibrate"       # Calibrate, not Label
-    assert _rendered(at, BENCHMARK) == "benchmark"   # positive control: switching works
+    assert _rendered(at, COMPARE) == "compare"       # positive control: switching works
 
 
 def test_the_developer_page_is_absent_when_the_secret_is_false(monkeypatch):
@@ -176,10 +203,10 @@ def _snapshot(at: AppTest) -> dict:
     return out
 
 
-def test_calibrate_state_survives_a_trip_to_benchmark_and_back():
+def test_calibrate_state_survives_a_trip_to_compare_and_back():
     at = _app(data=True)
     before = _edit_calibrate(at)
-    _go(at, BENCHMARK)
+    _go(at, COMPARE)
     _go(at, CALIBRATE)
     assert _snapshot(at) == before
     # no warning beyond the Advanced notice, which these edits trigger on purpose
@@ -187,7 +214,7 @@ def test_calibrate_state_survives_a_trip_to_benchmark_and_back():
     assert not others, others
 
 
-def test_a_bad_case_mark_survives_a_trip_to_benchmark_and_back():
+def test_a_bad_case_mark_survives_a_trip_to_compare_and_back():
     """In Grid, where the marks are drawn. (Switching Grid → Inspector → Grid
     is covered by tests/test_calibrate_i2_apptest.py since I2.) Marking is a
     developer function, so the key is on."""
@@ -195,7 +222,7 @@ def test_a_bad_case_mark_survives_a_trip_to_benchmark_and_back():
     mark = next(cb.key for cb in at.checkbox if cb.key and cb.key.startswith("badcase__"))
     at.checkbox(key=mark).check()
     at.run()
-    _go(at, BENCHMARK)
+    _go(at, COMPARE)
     _go(at, CALIBRATE)
     assert at.checkbox(key=mark).value is True
     assert any(m.value.startswith("1 /") for m in at.metric)
@@ -219,7 +246,7 @@ def test_the_trip_loses_the_state_without_the_shield(tmp_path):
         at.button(key="btn_example").click()
         at.run()
         before = _edit_calibrate(at)
-        _go(at, BENCHMARK)
+        _go(at, COMPARE)
         _go(at, CALIBRATE)
         assert _snapshot(at) != before
     finally:
@@ -227,78 +254,23 @@ def test_the_trip_loses_the_state_without_the_shield(tmp_path):
 
 
 def test_add_column_from_the_sidebar_reflects_the_calibrate_sidebar():
-    at = _app()
+    """Compare's "Add Current settings" (the Benchmark's "Add column from
+    current sidebar state" until I3). Compare draws its controls only with
+    tracks loaded, hence the example track."""
+    at = _app(data=True)
     _w(at, "slider", "cutoff_high").set_value(48)
     at.run()
-    _go(at, BENCHMARK)
-    _w(at, "button", "bench_add_sidebar").click()
+    _go(at, COMPARE)
+    _w(at, "button", "cmp_add_current").click()
     at.run()
-    import yaml
-    col = at.session_state["bench_columns"][-1]
-    assert yaml.safe_load(col["yaml_text"])["filter_params"]["cutoff_high"] == 48
+    col = at.session_state["cmp_columns"][-1]
+    assert col["doc"]["filter_params"]["cutoff_high"] == 48
     # and a later change on Calibrate is what the NEXT column gets
     _go(at, CALIBRATE)
     _w(at, "slider", "cutoff_high").set_value(40)
     at.run()
-    _go(at, BENCHMARK)
-    _w(at, "button", "bench_add_sidebar").click()
+    _go(at, COMPARE)
+    _w(at, "button", "cmp_add_current").click()
     at.run()
-    col = at.session_state["bench_columns"][-1]
-    assert yaml.safe_load(col["yaml_text"])["filter_params"]["cutoff_high"] == 40
-
-
-# ── Benchmark: no score against a test-split label, anywhere ──────────────────
-
-def _test_and_train_ids():
-    m = bc.split_membership()
-    return (sorted(s for s, v in m.items() if v == "test"),
-            sorted(s for s, v in m.items() if v == "train"))
-
-
-def test_validation_does_not_offer_the_test_split():
-    test_ids, _train = _test_and_train_ids()
-    at = _go(_app(), BENCHMARK)
-    opts = {o.split(" ")[0] for o in _w(at, "multiselect", "bench_ids_widget").options}
-    assert opts and not set(test_ids) & opts
-    assert not any(b.key == "bench_pick_test" for b in at.button)
-
-
-def test_exploration_runs_a_test_series_but_never_scores_it():
-    """A test series selected in Exploration is treated as unlabelled: no test
-    block, no manual-label reference metric, no per-cell score note."""
-    test_ids, train_ids = _test_and_train_ids()
-    t, r = test_ids[0], train_ids[0]
-    at = _go(_app(), BENCHMARK)
-    _w(at, "radio", "bench_mode").set_value("Exploration")
-    at.run()
-    # By id: `set_value` takes the multiselect's VALUES. (Its `options` are the
-    # formatted labels, "<id> (<source>/<split>)"; newer AppTest maps a label
-    # back to its value, older ones pass it to format_func and fail.)
-    _w(at, "multiselect", "bench_ids_widget").set_value([r, t])
-    at.run()
-    _w(at, "selectbox", "bench_pick_config").set_value("cyclophaser_params-track.yaml")
-    at.run()
-    _w(at, "button", "bench_add_config").click()
-    at.run()
-    _w(at, "selectbox", "bench_reference").set_value("Manual label")
-    at.run()
-    _w(at, "button", "bench_run").click()
-    at.run()
-    _w(at, "checkbox", "bench_score_labelled_subset").set_value(True)
-    at.run()
-    assert not at.exception, [str(e) for e in at.exception]
-
-    assert set(at.session_state["_bench_run_ids"]) == {t, r}
-    assert not any(e.label.startswith("Test split") for e in at.expander)
-    compared = [df.value for df in at.dataframe
-                if "Cyclones compared" in list(df.value.index)]
-    assert compared and all(int(v) == 1 for v in compared[0].iloc[0]), compared
-    notes = [c.value for c in at.caption]
-    assert "unlabelled — not scored" in notes
-    # POSITIVE CONTROL: with the test label NOT withheld, the same run would
-    # have been compared on both series — the guard above is what stops it.
-    full = bc.labels_for_display()
-    assert t in full
-    ref = {sid: {"runs": bc.label_runs_for(full[sid])} for sid in (t, r)}
-    assert bc.reference_metrics(at.session_state["_bench_runs"][0], ref,
-                                [t, r])["n_compared"] == 2
+    col = at.session_state["cmp_columns"][-1]
+    assert col["doc"]["filter_params"]["cutoff_high"] == 40

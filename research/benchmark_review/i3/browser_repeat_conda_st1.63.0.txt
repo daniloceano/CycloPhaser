@@ -1,0 +1,12 @@
+python: ~/miniconda3/envs/cyclophaser/bin/python (Python 3.12.14) | streamlit 1.63.0 | HEAD ae3a6c7 | tracked changes: 34 | 2026-10-09T15:37:59Z
+run 1: 6 passed in 111.64s (0:01:51)
+run 2: 6 passed in 114.43s (0:01:54)
+run 3: 6 passed in 93.62s (0:01:33)
+run 4: 6 passed in 133.18s (0:02:13)
+run 5: 6 passed in 127.38s (0:02:07)
+run 6: 6 passed in 115.62s (0:01:55)
+run 7: 6 passed in 122.70s (0:02:02)
+run 8: 6 passed in 99.86s (0:01:39)
+run 9: 6 passed in 96.07s (0:01:36)
+run 10: 6 passed in 96.26s (0:01:36)
+manual_labels.yaml git status lines: 0

@@ -1,8 +1,8 @@
 """Streamlit controls for uploading tracks: the custom format and its preview.
 
-Shared by the Calibrate page's uploader and the Benchmark page's Exploration
-uploader, so both accept exactly the same files and show the same messages. The
-reading itself lives in ``track_io`` (no Streamlit there); this module only
+Used by the Calibrate page's uploader (the old Benchmark page's Exploration
+uploader shared it until that page was retired). The Compare page uploads
+nothing: it runs the tracks Calibrate loaded. The reading itself lives in ``track_io`` (no Streamlit there); this module only
 draws the controls, the preview and the errors.
 
 A file in the standard layout is validated and used. A file in any other layout
@@ -22,8 +22,8 @@ import streamlit as st
 
 import track_io as tio
 
-# Widget keys of the custom-format controls (Calibration page). The Benchmark
-# tab reads the same keys through `current_format`, so the two cannot diverge.
+# Widget keys of the custom-format controls (Calibration page); `current_format`
+# reads them.
 K_ON = "track_custom_on"
 K_SEP = "track_custom_sep"
 K_HEADER = "track_custom_header"
@@ -59,7 +59,7 @@ HELP_ON = (
     "is shown in a preview (parsed rows, first and last date, number of points, "
     "vorticity range) and is used only after you confirm it.\n\n"
     "Files in the standard layout are always read as standard, even with this "
-    "on. The Benchmark page's Exploration upload uses these same settings."
+    "on."
 )
 HELP_SEP = (
     "`auto` looks at the first line: the most frequent of `;`, `,` and tab; if "

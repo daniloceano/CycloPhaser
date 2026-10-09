@@ -1,0 +1,45 @@
+streamlit 1.63.0 | python ~/miniconda3/envs/cyclophaser/bin/python
+1 · every P function on the Compare page
+  [OK] count of selected tracks — markdown '51 of 51 track(s) selected'
+  [OK] button All — cmp_all
+  [OK] button Invert — cmp_invert
+  [OK] button Clear — cmp_clear
+  [OK] choose individually — multiselect cmp_tracks inside 'Choose individually'
+  [OK] Run blocked, reason in visible text — st.info next to the disabled Run
+  [OK] add column from the sidebar — button 'Add Current settings'
+  [OK] upload a YAML — file_uploader cmp_yaml_upload (driven in Chromium, T2)
+  [OK] reference selector (columns only) — selectbox cmp_reference, options = the columns
+  [OK] card: name — markdown with the column name
+  [OK] card: the reference names itself — caption on the reference card
+  [OK] card: differences from the reference — caption + table on the Defaults card
+  [OK] card: full configuration — expander 'Full configuration (YAML)' with st.code
+  [OK] card: Edit / Apply — text_area cmp_edit_2 + Apply
+  [OK] card: Remove — button cmp_remove_2
+  [OK] card: ignored keys — warning 'Ignored keys: …' (config_text, the Calibrate import's sentence)
+  [OK] card: filled keys — warning '… filled with the earlier defaults …' (same function as Calibrate)
+  [OK] caption on the run count / cache — caption under Run
+  [OK] no results yet message (before any Run) — st.info in '4 · Results'
+  [OK] relative table: Tracks compared — row of 'Relative to Current settings'
+  [OK] relative table: Sequence changed — row of 'Relative to Current settings'
+  [OK] relative table: Boundary shift, median (steps) — row of 'Relative to Current settings'
+  [OK] relative table: Boundary shift, max (steps) — row of 'Relative to Current settings'
+  [OK] relative table: Phases appeared — row of 'Relative to Current settings'
+  [OK] relative table: Phases disappeared — row of 'Relative to Current settings'
+  [OK] incipient absent, per column, outside the relative table — 'Per configuration' table
+  [OK] boundary-shift caption — caption under the table
+  [OK] figure layout — radio cmp_figure_layout
+  [OK] legend — phase colour key + curve caption
+  [OK] per-track header — markdown with the track name
+  [OK] side-by-side figures — 24 images (12 tracks × 2 columns)
+  [OK] note: sequence differs from reference — caption under a differing cell
+  [OK] stacked figures — 12 images (one per track)
+  [OK] error per cell — 12 st.error 'Defaults: …' (one per track shown)
+2 · the Benchmark page, this checkout vs the base
+  base checkout: /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/b917fb69-1710-4cef-a61d-9be6739aa851/scratchpad/base_39e658c
+  [SAME] widgets (24)
+  [SAME] texts (42)
+  [SAME] frames (4)
+  [SAME] runs (2)
+  [SAME] n_images (3)
+  [SAME] expanders (11)
+RESULT: PASS (0 P item(s) missing, 0 Benchmark part(s) differing)

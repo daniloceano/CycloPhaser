@@ -1,0 +1,115 @@
+streamlit 1.63.0 | python ~/miniconda3/envs/cyclophaser/bin/python | HEAD ae3a6c7 | base /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/572ae7dd-46f6-447b-85ad-6703f6f171e9/scratchpad/base_c1617a0
+1 · every P function on the Compare page (i1/check_inventory.py, part 1, unchanged)
+  [OK] count of selected tracks — markdown '51 of 51 track(s) selected'
+  [OK] button All — cmp_all labelled 'All'
+  [OK] button Invert selection — cmp_invert labelled 'Invert selection'
+  [OK] button Clear — cmp_clear labelled 'Clear'
+  [OK] choose individually — multiselect cmp_tracks inside 'Choose individually'
+  [OK] Run blocked, reason in visible text — st.info next to the disabled Run
+  [OK] add column from the sidebar — button 'Add Current settings'
+  [OK] upload a YAML — file_uploader cmp_yaml_upload (driven in Chromium, T2)
+  [OK] reference selector (columns only) — selectbox cmp_reference, options = the columns
+  [OK] card: name — markdown with the column name
+  [OK] card: the reference names itself — caption on the reference card
+  [MISSING] card: differences from the reference — caption + one line per parameter ('`section.key`: this → reference') on the Defaults card
+  [OK] card: full configuration — expander 'Full configuration (YAML)' with st.code
+  [OK] card: Edit / Apply — text_area cmp_edit_2 + Apply
+  [OK] card: Remove — button cmp_remove_2
+  [MISSING] card: ignored keys — warning 'Ignored keys: …' (config_text, the Calibrate import's sentence)
+  [MISSING] card: filled keys — warning '… filled with the earlier defaults …' (same function as Calibrate)
+  [OK] caption on the run count / cache — caption under Run
+  [OK] no results yet message (before any Run) — st.info in '4 · Results'
+  [OK] relative table: Tracks compared — row of 'Relative to Current settings'
+  [OK] relative table: Sequence changed — row of 'Relative to Current settings'
+  [OK] relative table: Boundary shift, median (steps) — row of 'Relative to Current settings'
+  [OK] relative table: Boundary shift, max (steps) — row of 'Relative to Current settings'
+  [OK] relative table: Phases appeared — row of 'Relative to Current settings'
+  [OK] relative table: Phases disappeared — row of 'Relative to Current settings'
+  [OK] incipient absent, per column, outside the relative table — 'Per configuration' table
+  [OK] boundary-shift caption — caption under the table
+  [OK] figure layout — radio cmp_figure_layout
+  [OK] legend — phase colour key + curve caption
+  [OK] per-track header — markdown with the track name
+  [OK] side-by-side figures — 24 images (12 tracks × 2 columns)
+  [OK] note: sequence differs from reference — caption under a differing cell
+  [OK] stacked figures — 12 images (one per track)
+  [OK] error per cell — 12 st.error 'Defaults: …' (one per track shown)
+2 · every D function on the Validate page (i2/check_inventory.py, part 1, unchanged)
+  [OK] status line: labels available (the old 'ground truth' badge) — markdown status line '… manual labels: 47 of 47 · reference: …'
+  [OK] Include swell_item30 batch — checkbox val_include_batch
+  [OK] All synthetic — button val_all_synthetic
+  [OK] Train (preset) — every offered track is in the train split and all 47 start selected; 'All real' + 'All synthetic' split it by source (no separate Train button: the brief fixes the selection controls)
+  [OK] From a saved configuration (research/labels/configs/) — selectbox val_pick_config + button 'Add file'
+  [OK] From a frozen published version (snapshots) — selectbox val_pick_snapshot + button 'Add release'
+  [OK] batch caption — caption 'swell_item30: 7 train tracks loaded, 5 of them …'
+  [OK] batch error message — st.error when the batch cannot be loaded (source; needs a broken file)
+  [OK] card: short sha256 · commit — caption '`<sha>` · code `<commit>`'
+  [OK] card: pre-filter-fix warning — st.warning on the card
+  [OK] card: snapshot caption — caption on the snapshot card
+  [OK] Provenance 1 · sha256 — caption in 'Provenance'
+  [OK] Provenance 2 · commit — caption in 'Provenance'
+  [OK] Provenance 5 · pre-filter-fix — caption in 'Provenance'
+  [OK] historical annotation, 'not a score' — caption in 'Provenance'
+  [OK] frozen snapshot data — captions in the snapshot card's 'Provenance'
+  [REPLACED] reference selector option 'Manual label' — removed by the I2 brief (A1): the reference is a column, options = ['Defaults', 'params-older', 'published v2.0.0']
+  [REPLACED] caption 'manual label has no parameters… baseline' — existed only for the label as reference (A1)
+  [OK] agreement panel, train block — '#### Agreement with manual labels' → '##### Train — n = 47', two instrument tables
+  [OK] 'Also score the labelled rows' + scoring expander (Exploration) — no modes: the agreement section is always shown, over labelled tracks only (every offered track is labelled)
+  [OK] per-track header: source · split · batch — markdown '**id** · real · train'
+  [OK] Show manual labels (label panel) — toggle 'Show the label panel', on by default
+  [OK] label panel — 12 tracks × (label + 3 columns) images
+  [OK] notes per cell (sequence vs label, mature) — captions under each cell
+  [OK] adjudicated block — '##### Adjudicated — n = 5', apart from '##### Train — n = 49'
+  [OK] 'no longer loaded (swell_item30 batch excluded)' — caption for a batch track of the last run after the batch is switched off
+3 · the Compare page, this checkout vs c1617a0 — raw
+    cells: identical
+    expanders: identical
+    frames: identical
+    n_images: identical
+    texts: identical
+    widgets: identical
+4 · the Validate page, this checkout vs c1617a0 — raw
+    cells: identical
+    expanders: DIFFERS — 6 only in base, 6 only here
+      base: Tracks that disagree with the label — Defaults (adjudicated, n = 5) · sequence: 0 differ, 0 with a boundary outside its tolerance · mature: 0 not within the margin
+      base: Tracks that disagree with the label — Defaults (train, n = 49) · sequence: 17 differ, 10 with a boundary outside its tolerance · mature: 6 not within the margin
+      base: Tracks that disagree with the label — params-track (adjudicated, n = 5) · sequence: 0 differ, 0 with a boundary outside its tolerance · mature: 0 not within the margin
+      base: Tracks that disagree with the label — params-track (train, n = 49) · sequence: 17 differ, 10 with a boundary outside its tolerance · mature: 5 not within the margin
+      base: Tracks that disagree with the label — published v2.0.0 (adjudicated, n = 5) · sequence: 0 differ, 0 with a boundary outside its tolerance · mature: 0 not within the margin · not in this snapshot: 5
+      base: Tracks that disagree with the label — published v2.0.0 (train, n = 49) · sequence: 26 differ, 19 with a boundary outside its tolerance · mature: 14 not within the margin · not in this snapshot: 2
+      here: Tracks that disagree with the label — Defaults (adjudicated, n = 5) · sequence: 0 tracks differ, 0 tracks with a boundary outside its tolerance · mature: 0 not within the margin
+      here: Tracks that disagree with the label — Defaults (train, n = 49) · sequence: 17 tracks differ, 10 tracks with a boundary outside its tolerance · mature: 6 not within the margin
+      here: Tracks that disagree with the label — params-track (adjudicated, n = 5) · sequence: 0 tracks differ, 0 tracks with a boundary outside its tolerance · mature: 0 not within the margin
+      here: Tracks that disagree with the label — params-track (train, n = 49) · sequence: 17 tracks differ, 10 tracks with a boundary outside its tolerance · mature: 5 not within the margin
+      here: Tracks that disagree with the label — published v2.0.0 (adjudicated, n = 5) · sequence: 0 tracks differ, 0 tracks with a boundary outside its tolerance · mature: 0 not within the margin · not in this snapshot: 5
+      here: Tracks that disagree with the label — published v2.0.0 (train, n = 49) · sequence: 26 tracks differ, 19 tracks with a boundary outside its tolerance · mature: 14 not within the margin · not in this snapshot: 2
+    frames: identical
+    ids: identical
+    n_images: identical
+    texts: DIFFERS — 4 only in base, 4 only here
+      base: **2 · running code commit** — `c1617a049fc2b6994c13b54663d55d1eb0863f45`
+      base: **2 · running code commit** — `c1617a049fc2b6994c13b54663d55d1eb0863f45`
+      base: `0bd75e016477` · code `c1617a049fc2`
+      base: `5aa61f2dec71` · code `c1617a049fc2`
+      here: **2 · running code commit** — `ae3a6c72107eb8436737c0dab4a9b0543724cc5b`
+      here: **2 · running code commit** — `ae3a6c72107eb8436737c0dab4a9b0543724cc5b`
+      here: `0bd75e016477` · code `ae3a6c72107e`
+      here: `5aa61f2dec71` · code `ae3a6c72107e`
+    widgets: identical
+  after undoing F5 only:
+    cells: identical
+    expanders: identical
+    frames: identical
+    ids: identical
+    n_images: identical
+    texts: DIFFERS — 4 only in base, 4 only here
+      base: **2 · running code commit** — `c1617a049fc2b6994c13b54663d55d1eb0863f45`
+      base: **2 · running code commit** — `c1617a049fc2b6994c13b54663d55d1eb0863f45`
+      base: `0bd75e016477` · code `c1617a049fc2`
+      base: `5aa61f2dec71` · code `c1617a049fc2`
+      here: **2 · running code commit** — `ae3a6c72107eb8436737c0dab4a9b0543724cc5b`
+      here: **2 · running code commit** — `ae3a6c72107eb8436737c0dab4a9b0543724cc5b`
+      here: `0bd75e016477` · code `ae3a6c72107e`
+      here: `5aa61f2dec71` · code `ae3a6c72107e`
+    widgets: identical
+RESULT: FAIL (3 P item(s) missing, 0 D item(s) missing, 0 Compare part(s) differing raw, 2 Validate part(s) differing raw, 1 after undoing F5)

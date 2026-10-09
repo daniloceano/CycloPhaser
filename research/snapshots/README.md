@@ -2,8 +2,9 @@
 
 Frozen phase detections produced by **published** cyclophaser releases over the
 same 63 series the calibration uses (51 real tracks + the 12 frozen synthetic
-cases). They are the Benchmark tab's reference columns: what the detector did
-before the calibration started.
+cases). They are the "Published release" columns of the calibration app's
+Validate against labels page (developer key): what the detector did before the
+calibration started.
 
 | file | release | series | failures | sha256 |
 |---|---|---|---|---|
