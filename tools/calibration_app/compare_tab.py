@@ -37,7 +37,6 @@ cache lived for one Run only; finding A3.)
 from __future__ import annotations
 
 import hashlib
-import html
 import json
 import sys
 from pathlib import Path
@@ -286,11 +285,16 @@ def _render_card(col: dict, ref: dict | None) -> None:
             st.markdown(_differences_html(diffs), unsafe_allow_html=True)
 
     audit = cc.audit(col["doc"])
+    # `warning_html`: a key name may break after "." or "_" (<wbr>), never
+    # mid-word, in a narrow card (I1 checkpoint, pending item 2); no invisible
+    # character is added, so a copied key is the key (I2 round 2, R1).
     if audit["ignored"]:
-        st.warning(config_text.ignored_keys_sentence(audit["ignored"]))
+        st.markdown(config_text.warning_html(
+            config_text.ignored_keys_sentence(audit["ignored"])),
+            unsafe_allow_html=True)
     filled = config_text.filled_keys_sentence(audit["filled"])
     if filled:
-        st.warning(filled)
+        st.markdown(config_text.warning_html(filled), unsafe_allow_html=True)
 
     with st.expander("Full configuration (YAML)", expanded=False):
         st.code(yaml.safe_dump(cc.effective_document(col["doc"]), sort_keys=False,
@@ -311,16 +315,10 @@ def _render_card(col: dict, ref: dict | None) -> None:
 
 
 def _differences_html(diffs: dict[str, tuple]) -> str:
-    """One line per parameter, "`section.key`: this → reference", never cut:
-    long names and values break across lines inside the card."""
-    style = ("margin:0 0 4px 0;font-size:0.85rem;line-height:1.35;"
-             "overflow-wrap:anywhere;word-break:break-word")
-    code = "white-space:normal;overflow-wrap:anywhere"
-    lines = "".join(
-        f"<div style='{style}'><code style='{code}'>{html.escape(k)}</code>: "
-        f"{html.escape(repr(a))} → {html.escape(repr(b))}</div>"
-        for k, (a, b) in diffs.items())
-    return f"<div>{lines}</div>"
+    """One line per parameter, "`section.key`: this (reference: that)" — the
+    wording and the line breaking are `config_text.differences_html`'s, shared
+    with the Validate page."""
+    return config_text.differences_html(diffs)
 
 
 def _legend() -> None:
@@ -378,8 +376,13 @@ def _render_relative(run_cols, cells, ids, ref) -> None:
                "transitions.")
 
 
-def _render_per_column(run_cols, cells, ids, ref_name: str | None) -> None:
+def _render_per_column(run_cols, cells, ids, ref_name: str | None,
+                       missing: dict | None = None) -> None:
+    """The per-configuration counts. `missing` ({cid: [id, ...]}, the Validate
+    page only) names the tracks a published release never ran on: they get a
+    row of their own and are not counted as failed detections."""
     n = len(ids)
+    missing = missing or {}
     st.markdown("#### Per configuration")
     st.caption(f"Over the {n} selected track(s) of the last run; each configuration "
                "on its own"
@@ -387,10 +390,13 @@ def _render_per_column(run_cols, cells, ids, ref_name: str | None) -> None:
     data = {}
     for c in run_cols:
         k, ran = cc.incipient_absent(cells[c["cid"]], ids)
+        m = len(missing.get(c["cid"], []))
         data[c["name"]] = {
             "Incipient absent (first phase is not incipient)": f"{k} of {ran}",
-            "Detection failed": f"{n - ran} of {n}",
+            "Detection failed": f"{n - ran - m} of {n}",
         }
+        if any(missing.values()):
+            data[c["name"]]["Not in this snapshot (not counted)"] = f"{m} of {n}"
     st.dataframe(pd.DataFrame(data), width="stretch")
 
 
@@ -622,6 +628,12 @@ def render() -> None:
         elif res is None:
             st.caption(f"{len(cols)} configuration(s) × {len(selected)} track(s). "
                        "Nothing runs until you press **Run**.")
+        else:
+            # Always an element in this slot (benchmark review I2, F2): with
+            # nothing here, AppTest on streamlit 1.56.0 kept the out-of-date
+            # warning of the click's own pass after st.rerun().
+            st.caption(f"Results are current: {len(res['columns'])} configuration(s) "
+                       f"× {len(res['ids'])} track(s).")
     st.caption("Results are kept per configuration and track content, so running "
                "again after a change recomputes only what changed.")
 

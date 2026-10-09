@@ -35,6 +35,7 @@ if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
 import benchmark_tab  # noqa: E402
 import compare_tab  # noqa: E402
+import validate_tab  # noqa: E402
 import config_text  # noqa: E402
 import layer_inspector as li  # noqa: E402
 import set_stats  # noqa: E402
@@ -1402,6 +1403,9 @@ _PAGE_BENCHMARK = st.Page(_APP_PAGES_DIR / "benchmark.py", title="Benchmark",
                           icon=":material/table_chart:")
 _PAGE_LABEL = st.Page(_APP_PAGES_DIR / "label.py", title="Manual labelling",
                       icon=":material/edit_note:")
+_PAGE_VALIDATE = st.Page(_APP_PAGES_DIR / "validate.py",
+                         title="Validate against labels",
+                         icon=":material/fact_check:")
 
 
 def _developer_mode() -> bool:
@@ -1458,6 +1462,8 @@ _PAGE_WIDGET_STATE: dict[str, tuple[frozenset, tuple[str, ...]]] = {
                                benchmark_tab.WIDGET_STATE_PREFIXES),
     _PAGE_LABEL.url_path: (frozenset({"label_default_tolerance",
                                       "lab_nav_only_unlabeled"}), ()),
+    _PAGE_VALIDATE.url_path: (validate_tab.WIDGET_STATE_KEYS,
+                              validate_tab.WIDGET_STATE_PREFIXES),
 }
 
 
@@ -1478,13 +1484,13 @@ def _keep_page_state(current: str, arrived: bool) -> None:
 
 _pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_COMPARE, _PAGE_BENCHMARK]}
 if _developer_mode():
-    _pages["Developer"] = [_PAGE_LABEL]
+    _pages["Developer"] = [_PAGE_LABEL, _PAGE_VALIDATE]
 _page = st.navigation(_pages)
 _PREVIOUS_PAGE = st.session_state.get("_app_page")
 st.session_state["_app_page"] = _page.url_path
-# Read by the Compare page, which re-applies its own copies of its widget
-# values on arrival (compare_tab.KEEP_PREFIX explains why the shield below is
-# not enough there).
+# Read by the Compare and Validate pages, which re-apply their own copies of
+# their widget values on arrival (compare_tab.KEEP_PREFIX explains why the
+# shield below is not enough there).
 st.session_state["_app_arrived"] = (_PREVIOUS_PAGE is not None
                                     and _PREVIOUS_PAGE != _page.url_path)
 _keep_page_state(_page.url_path,

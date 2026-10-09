@@ -606,10 +606,16 @@ def test_card_differences_are_a_compact_list_not_a_table():
     _click(at, "cmp_add_defaults")
     assert "Differs from **Current settings** in 1 parameter(s):" in \
         [c.value for c in at.caption]
-    lines = [m.value for m in at.markdown if "filter_params.cutoff_high" in m.value]
+    # I2, pending item 1: the reference value is named, so the line cannot be
+    # read as "changed from → to"; pending item 2: the name breaks only after
+    # "." or "_" (<wbr>), never mid-word.
+    lines = [m.value for m in at.markdown
+             if "filter_params.cutoff_high" in m.value.replace("<wbr>", "")]
     assert len(lines) == 1
-    assert "<code" in lines[0] and "filter_params.cutoff_high</code>: 18 → 48" in lines[0]
-    assert "overflow-wrap:anywhere" in lines[0]
+    line = lines[0].replace("<wbr>", "")
+    assert "<code" in line and "filter_params.cutoff_high</code>: 18 (reference: 48)" in line
+    assert "filter_<wbr>params.<wbr>cutoff_<wbr>high" in lines[0]
+    assert "→" not in line and "overflow-wrap:anywhere" not in line
     assert not at.dataframe                        # no table anywhere before a Run
 
 
@@ -665,3 +671,19 @@ def test_invert_selection_is_labelled_and_explained_on_compare_only():
                       "that are.")
     _go(at, BENCHMARK)
     assert _w(at, "button", "bench_pick_invert").label == "Invert"
+
+
+def test_a_new_run_clears_the_out_of_date_warning():
+    """I2 round 2, F2: after a new Run the out-of-date warning is gone and the
+    slot says the results are current (with nothing drawn there, AppTest on
+    streamlit 1.56.0 kept the warning of the click's own pass)."""
+    at = _two_columns(_app())
+    current = "Results are current: 2 configuration(s) × 51 track(s)."
+    assert current in [c.value for c in at.caption]
+    _click(at, "cmp_add_current")                        # a third column: stale
+    assert any(w.value.startswith("Results out of date") for w in at.warning)
+    assert current not in [c.value for c in at.caption]
+    _click(at, "cmp_run")
+    assert not any(w.value.startswith("Results out of date") for w in at.warning)
+    assert "Results are current: 3 configuration(s) × 51 track(s)." in \
+        [c.value for c in at.caption]

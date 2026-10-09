@@ -1,0 +1,6 @@
+which python: ~/miniconda3/bin/python | interpreter used: /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/b917fb69-1710-4cef-a61d-9be6739aa851/scratchpad/venv_st156/bin/python (Python 3.12.9) | HEAD b197124 | tracked changes: 5 | 2026-10-09T02:57:38Z
+streamlit 1.56.0 | cyclophaser ~/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+E       assert not True
+E        +  where True = any(<generator object test_nothing_recomputes_on_edit_and_the_cache_holds_across_runs.<locals>.<genexpr> at 0x11fbf8d40>)
+FAILED tests/test_validate_apptest.py::test_nothing_recomputes_on_edit_and_the_cache_holds_across_runs
+1 failed, 1550 passed, 1 skipped, 43 deselected in 272.84s (0:04:32)

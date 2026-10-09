@@ -1,0 +1,59 @@
+streamlit 1.63.0 | python ~/miniconda3/envs/cyclophaser/bin/python | HEAD b197124
+1 · every D function on the Validate page
+  [OK] status line: labels available (the old 'ground truth' badge) — markdown status line '… manual labels: 47 of 47 · reference: …'
+  [OK] Include swell_item30 batch — checkbox val_include_batch
+  [OK] All synthetic — button val_all_synthetic
+  [OK] Train (preset) — every offered track is in the train split and all 47 start selected; 'All real' + 'All synthetic' split it by source (no separate Train button: the brief fixes the selection controls)
+  [OK] From a saved configuration (research/labels/configs/) — selectbox val_pick_config + button 'Add file'
+  [OK] From a frozen published version (snapshots) — selectbox val_pick_snapshot + button 'Add release'
+  [OK] batch caption — caption 'swell_item30: 7 train tracks loaded, 5 of them …'
+  [OK] batch error message — st.error when the batch cannot be loaded (source; needs a broken file)
+  [OK] card: short sha256 · commit — caption '`<sha>` · code `<commit>`'
+  [OK] card: pre-filter-fix warning — st.warning on the card
+  [OK] card: snapshot caption — caption on the snapshot card
+  [OK] Provenance 1 · sha256 — caption in 'Provenance'
+  [OK] Provenance 2 · commit — caption in 'Provenance'
+  [OK] Provenance 5 · pre-filter-fix — caption in 'Provenance'
+  [OK] historical annotation, 'not a score' — caption in 'Provenance'
+  [OK] frozen snapshot data — captions in the snapshot card's 'Provenance'
+  [REPLACED] reference selector option 'Manual label' — removed by the I2 brief (A1): the reference is a column, options = ['Defaults', 'params-older', 'published v2.0.0']
+  [REPLACED] caption 'manual label has no parameters… baseline' — existed only for the label as reference (A1)
+  [OK] agreement panel, train block — '#### Agreement with manual labels' → '##### Train — n = 47', two instrument tables
+  [OK] 'Also score the labelled rows' + scoring expander (Exploration) — no modes: the agreement section is always shown, over labelled tracks only (every offered track is labelled)
+  [OK] per-track header: source · split · batch — markdown '**id** · real · train'
+  [OK] Show manual labels (label panel) — toggle 'Show the label panel', on by default
+  [OK] label panel — 12 tracks × (label + 3 columns) images
+  [OK] notes per cell (sequence vs label, mature) — captions under each cell
+  [OK] adjudicated block — '##### Adjudicated — n = 5', apart from '##### Train — n = 49'
+  [OK] 'no longer loaded (swell_item30 batch excluded)' — caption for a batch track of the last run after the batch is switched off
+2 · the Benchmark page, this checkout vs 39e658c
+  base checkout: /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/4996d62c-c34b-436b-938f-0452e3d51fbf/scratchpad/wt_39e658c
+  [SAME] widgets (24)
+  [SAME] texts (42)
+  [SAME] frames (4)
+  [SAME] runs (2)
+  [SAME] n_images (3)
+  [SAME] expanders (11)
+3 · the Compare page, this checkout vs f3008fc (pending items 1-2 undone)
+  base checkout: /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/4996d62c-c34b-436b-938f-0452e3d51fbf/scratchpad/wt_f3008fc
+  raw (every difference listed):
+  [SAME] widgets (19)
+  [DIFFERS] texts (55)
+      only in base: "1 key(s) absent from this file were filled with the earlier defaults older configuration files were written against, which differ from the package's defaults: phase_params.prominence_relative=None (package default 0.3)"
+      only in base: "<div><div style='margin:0 0 4px 0;font-size:0.85rem;line-height:1.35;overflow-wrap:anywhere;word-break:break-word'><code style='white-space:normal;overflow-wrap:anywhere'>filter_params.cutoff_high</code>: 48 → 18</div><div style='margin:0 0 4px 0;font-size:0.85rem;line-height:1.35;overflow-wrap:anywhere;word-break:break-word'><code style='white-space:normal;overflow-wrap:anywh
+      only in base: 'Ignored keys: phase_params.distance'
+      only here:    "1 key(s) absent from this file were filled with the earlier defaults older configuration files were written against, which differ from the package's defaults: phase_\u200bparams.\u200bprominence_\u200brelative=None (package default 0.3)"
+      only here:    "<div><div style='margin:0 0 4px 0;font-size:0.85rem;line-height:1.35;overflow-wrap:break-word'><code style='white-space:normal;overflow-wrap:break-word'>filter_<wbr>params.<wbr>cutoff_<wbr>high</code>: 48 (reference: 18)</div><div style='margin:0 0 4px 0;font-size:0.85rem;line-height:1.35;overflow-wrap:break-word'><code style='white-space:normal;overflow-wrap:break-word'>phase
+      only here:    'Ignored keys: phase_\u200bparams.\u200bdistance'
+  [SAME] frames (2)
+  [SAME] cells (1)
+  [SAME] n_images (12)
+  [SAME] expanders (5)
+  after undoing pending items 1-2 only:
+  [SAME] widgets (19)
+  [SAME] texts (55)
+  [SAME] frames (2)
+  [SAME] cells (1)
+  [SAME] n_images (12)
+  [SAME] expanders (5)
+RESULT: PASS (0 D item(s) missing, 0 Benchmark part(s) differing, 0 Compare part(s) differing beyond pending items 1-2)

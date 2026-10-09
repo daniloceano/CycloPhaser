@@ -26,9 +26,30 @@ import matplotlib.pyplot as plt
 
 RAW_COLOR = "dimgray"
 FILTERED_COLOR = "#e63946"
+TOLERANCE_COLOR = "#222222"
 
 
-def draw_panel(ax, values_tuple, runs, z_tuple, colors, z_lim=None) -> None:
+def draw_tolerances(ax, spans) -> None:
+    """The label's tolerance at each boundary, on `ax`.
+
+    `spans` is ((lo, hi, start, unsure), ...): a hatched band over [lo, hi] (the
+    detected boundaries the sequence instrument accepts, start_idx ±
+    tolerance_idx, clipped to the series) and a thin line at the label's start.
+    A boundary the labeller marked unsure is excluded from that instrument, so
+    it gets a dashed line and no band.
+    """
+    for lo, hi, start, unsure in spans:
+        if unsure:
+            ax.axvline(start, color=TOLERANCE_COLOR, lw=0.8, ls=(0, (2, 2)),
+                       zorder=1)
+            continue
+        ax.axvspan(lo, hi, facecolor="none", edgecolor=TOLERANCE_COLOR,
+                   hatch="////", lw=0, zorder=1)
+        ax.axvline(start, color=TOLERANCE_COLOR, lw=0.8, zorder=1)
+
+
+def draw_panel(ax, values_tuple, runs, z_tuple, colors, z_lim=None,
+               tolerances=None) -> None:
     x = range(len(values_tuple))
     back = ax
     if z_tuple is not None:
@@ -43,6 +64,8 @@ def draw_panel(ax, values_tuple, runs, z_tuple, colors, z_lim=None) -> None:
     for phase, a, b in runs:
         back.axvspan(a, b + 0.999, color=colors.get(phase, "white"),
                      alpha=0.45, lw=0, zorder=0)
+    if tolerances:
+        draw_tolerances(back, tolerances)
     ax.plot(x, values_tuple, color=RAW_COLOR, lw=1.0, alpha=0.9)
 
 
@@ -59,11 +82,13 @@ def png(fig) -> bytes:
 
 
 def cell_figure(values_tuple: tuple, runs_tuple: tuple, title: str,
-                z_tuple: tuple | None, colors):
-    """Raw series, the column's smoothed series and its phases as bands."""
+                z_tuple: tuple | None, colors, tolerances=None):
+    """Raw series, the column's smoothed series and its phases as bands; with
+    `tolerances`, also the label's tolerance spans (see `draw_tolerances`)."""
     matplotlib.use("Agg")
     fig, ax = plt.subplots(figsize=(3.6, 1.7))
-    draw_panel(ax, values_tuple, runs_tuple, z_tuple, colors)
+    draw_panel(ax, values_tuple, runs_tuple, z_tuple, colors,
+               tolerances=tolerances)
     ax.set_title(title, fontsize=7)
     ax.tick_params(labelsize=6)
     ax.set_xlim(0, max(1, len(values_tuple) - 1))
@@ -71,7 +96,7 @@ def cell_figure(values_tuple: tuple, runs_tuple: tuple, title: str,
     return fig
 
 
-def stacked_figure(values_tuple: tuple, panels: tuple, colors):
+def stacked_figure(values_tuple: tuple, panels: tuple, colors, tolerances=None):
     """All columns stacked vertically on a SHARED x axis and a shared y scale.
 
     The point of this arrangement is that a boundary that moved between two
@@ -81,7 +106,8 @@ def stacked_figure(values_tuple: tuple, panels: tuple, colors):
     each panel draws its own column's, and all of them share one range on the
     twin axis, so a column that smoothed harder shows a flatter curve.
 
-    `panels` is ((title, runs, z_tuple or None), ...).
+    `panels` is ((title, runs, z_tuple or None), ...). `tolerances`, when
+    given, is aligned with `panels`: the spans for each panel, or None.
     """
     matplotlib.use("Agg")
     n = len(panels)
@@ -90,8 +116,9 @@ def stacked_figure(values_tuple: tuple, panels: tuple, colors):
     lim = padded(min(values_tuple), max(values_tuple))
     zs = [v for _, _, z in panels if z is not None for v in z if v == v]
     z_lim = padded(min(zs), max(zs)) if zs else None
-    for ax, (title, runs, z) in zip(axes[:, 0], panels):
-        draw_panel(ax, values_tuple, runs, z, colors, z_lim)
+    tols = tolerances or (None,) * n
+    for ax, (title, runs, z), tol in zip(axes[:, 0], panels, tols):
+        draw_panel(ax, values_tuple, runs, z, colors, z_lim, tolerances=tol)
         ax.set_ylabel(title, fontsize=7, rotation=0, ha="right", va="center")
         ax.tick_params(labelsize=6)
         ax.set_ylim(*lim)
