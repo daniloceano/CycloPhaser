@@ -576,10 +576,9 @@ def reference_metrics(col: dict[str, dict], ref: dict[str, dict], ids) -> dict:
     """Four measures of one column AGAINST THE REFERENCE COLUMN.
 
     There is no ground truth on this path, so nothing here is a hit rate and
-    nothing here is an accuracy. Every number answers "how far is this column
-    from the reference", and the UI labels the whole block
-    `relative to reference` for that reason. A column compared against itself
-    returns all zeros, which is the correct reading, not a perfect score.
+    nothing here is an accuracy. Measures 1-3 answer "how far is this column
+    from the reference", and the UI labels the block `relative to reference`
+    for that reason.
 
     1. cyclones whose phase SEQUENCE differs from the reference;
     2. for those whose sequence MATCHES, boundary displacement in timesteps —
@@ -588,6 +587,13 @@ def reference_metrics(col: dict[str, dict], ref: dict[str, dict], ids) -> dict:
        `score_phase_sequences` refuses it);
     3. phases that appeared or disappeared, counted per phase type;
     4. cyclones that refused an incipient phase.
+
+    Two returned numbers are NOT distances from the reference, so a column
+    compared against itself does not return all zeros (benchmark review, A2):
+    `n_compared` counts the cyclones both sides produced phases for, and
+    `n_refused_incipient` (measure 4) counts THIS column's own cyclones whose
+    first phase is not incipient — the reference's phases are not read for it.
+    Compared against itself, measures 1-3 are zero and these two are not.
     """
     n_seq_changed = 0
     shifts: list[int] = []

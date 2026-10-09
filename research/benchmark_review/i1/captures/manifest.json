@@ -1,0 +1,58 @@
+{
+ "python": "~/miniconda3/envs/cyclophaser/bin/python",
+ "streamlit": "1.63.0",
+ "head": "cfd3a87",
+ "tracked_files_changed": 3,
+ "viewport": "1600x1000",
+ "browser_errors": [],
+ "files": {
+  "01_empty.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "02_run_blocked.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "03_columns.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "04_results.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "05_side_by_side.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "06_stacked.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "07_filter.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "08_reference.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "09_filled_warning.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "10_limit.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "11_invert_help.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "full_page.png": {
+   "width_px": 1600,
+   "height_px": 6258
+  }
+ }
+}
