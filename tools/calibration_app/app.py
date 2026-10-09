@@ -33,7 +33,6 @@ from cyclophaser.plots import plot_all_periods, plot_didactic
 # strategy the data paths below use, and for the same reason).
 if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
-import benchmark_tab  # noqa: E402
 import compare_tab  # noqa: E402
 import validate_tab  # noqa: E402
 import config_text  # noqa: E402
@@ -1399,8 +1398,6 @@ _PAGE_CALIBRATE = st.Page(_APP_PAGES_DIR / "calibrate.py", title="Calibrate",
                           icon=":material/tune:", default=True)
 _PAGE_COMPARE = st.Page(_APP_PAGES_DIR / "compare.py", title="Compare",
                         icon=":material/compare_arrows:")
-_PAGE_BENCHMARK = st.Page(_APP_PAGES_DIR / "benchmark.py", title="Benchmark",
-                          icon=":material/table_chart:")
 _PAGE_LABEL = st.Page(_APP_PAGES_DIR / "label.py", title="Manual labelling",
                       icon=":material/edit_note:")
 _PAGE_VALIDATE = st.Page(_APP_PAGES_DIR / "validate.py",
@@ -1458,8 +1455,6 @@ _PAGE_WIDGET_STATE: dict[str, tuple[frozenset, tuple[str, ...]]] = {
         (_BAD_CASE_KEY_PREFIX, "track_custom_", "save_include_")),
     _PAGE_COMPARE.url_path: (compare_tab.WIDGET_STATE_KEYS,
                              compare_tab.WIDGET_STATE_PREFIXES),
-    _PAGE_BENCHMARK.url_path: (benchmark_tab.WIDGET_STATE_KEYS,
-                               benchmark_tab.WIDGET_STATE_PREFIXES),
     _PAGE_LABEL.url_path: (frozenset({"label_default_tolerance",
                                       "lab_nav_only_unlabeled"}), ()),
     _PAGE_VALIDATE.url_path: (validate_tab.WIDGET_STATE_KEYS,
@@ -1482,7 +1477,7 @@ def _keep_page_state(current: str, arrived: bool) -> None:
                     pass
 
 
-_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_COMPARE, _PAGE_BENCHMARK]}
+_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_COMPARE]}
 if _developer_mode():
     _pages["Developer"] = [_PAGE_LABEL, _PAGE_VALIDATE]
 _page = st.navigation(_pages)
@@ -2591,9 +2586,9 @@ _PHASE_PARAMS = dict(
 _phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 
 # The sidebar's live state, in the same shape a calibration YAML uses, so the
-# Benchmark page can spawn a column from "the current sidebar" without
+# Compare and Validate pages can add a "Current settings" column without
 # re-deriving any of it. Written here, next to the values actually passed to the
-# detector, rather than rebuilt inside the tab: a second derivation would be one
+# detector, rather than rebuilt inside those pages: a second derivation would be one
 # more place for the column and the Calibration view to drift apart. The Manual
 # labelling page reads its filter_params too, for its optional overlays
 # (label_overlays.live_filter_params): that page no longer runs this sidebar.

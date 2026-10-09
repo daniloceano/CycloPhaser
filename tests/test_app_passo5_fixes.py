@@ -3,11 +3,13 @@
 * The track upload and the dataset choice live in the Calibration tab only: drawn
   above the tabs, they also showed in the Benchmark tab with a caption that is
   false there ("No file uploaded — using … as default"). Since the app redesign
-  (I1) Calibrate and Benchmark are separate pages, and this is checked per page.
-* The Benchmark preset buttons (All real, All synthetic, Train, Invert, Clear;
-  "Test" was retired in I1) keep the "Choose individually" multiselect in step
-  with the selection: before, any second preset click emptied the selection
-  (e.g. Train, then Test).
+  (I1) each page is its own, and this is checked on the Compare page (the
+  Benchmark page was retired in the benchmark review, I3).
+* (Until I3: the Benchmark preset buttons. Their defect — a selection kept apart
+  from the multiselect, emptied by a second preset click — cannot occur on the
+  Compare and Validate pages, whose selection IS the multiselect's key; their
+  presets are tested in tests/test_compare_apptest.py and
+  tests/test_validate_apptest.py.)
 * A binary upload (Parquet, zip, netCDF/HDF5, GRIB, gzip, or anything with a NUL
   byte) is refused with a message that says so, instead of a decoder error.
 
@@ -53,7 +55,7 @@ def test_a_text_track_is_not_taken_for_binary():
     assert len(tio.read_track(data)) > 2
 
 
-# ── AppTest: upload placement and the Benchmark selection ─────────────────────
+# ── AppTest: upload placement ─────────────────────────────────────────────────
 
 def _app():
     pytest.importorskip("streamlit",
@@ -68,66 +70,23 @@ def _app():
     return at
 
 
-def _bench_app():
+def _compare_app():
     at = _app()
-    at.switch_page("app_pages/benchmark.py").run()
+    at.switch_page("app_pages/compare.py").run()
     assert not at.exception, [str(e) for e in at.exception]
     return at
 
 
 def test_the_track_upload_and_its_caption_are_in_the_calibration_tab_only():
     """Since I2 the track upload is step 1 of the Calibrate sidebar, and the
-    no-data screen is in Calibrate's main area; neither may show on Benchmark.
+    no-data screen is in Calibrate's main area; neither may show on Compare.
     (I3 replaced I2's one-line no-data text with the start screen, so the start
     screen's heading is what is looked for.)"""
     start = "Check CycloPhaser's phases on your cyclone tracks"
     cal = _app()
     assert "track_upload" in [w.key for w in cal.sidebar.get("file_uploader")]
     assert any(h.value == start for h in cal.main.subheader)
-    bench = _bench_app()
-    assert "track_upload" not in [w.key for w in bench.get("file_uploader")]
-    assert not any(h.value == start for h in bench.main.subheader)
-
-
-def _click(at, key):
-    next(b for b in at.button if b.key == key).click()
-    at.run()
-    assert not at.exception, [str(e) for e in at.exception]
-    widget = next(w for w in at.multiselect if w.key == "bench_ids_widget")
-    selected = list(at.session_state["bench_selected_ids"])
-    # the multiselect shows exactly the selection
-    assert len(widget.indices) == len(selected)
-    return selected
-
-
-@pytest.mark.parametrize("first, second", [
-    # ("bench_pick_train", "bench_pick_test") and its reverse were the two
-    # cases here before the "Test" button was retired (app redesign I1); the
-    # same defect is covered by the two-different-presets pairs that remain.
-    ("bench_pick_real", "bench_pick_synth"),
-    ("bench_pick_synth", "bench_pick_train"),
-    ("bench_pick_train", "bench_pick_train"),
-    # Validation offers the train split only since I1, so Train selects every
-    # selectable record and Invert after it is legitimately empty; All real
-    # (the 35 real train tracks) leaves the 12 synthetic ones to invert onto.
-    ("bench_pick_real", "bench_pick_invert"),
-])
-def test_a_second_preset_click_gives_what_the_button_gives_on_its_own(first, second):
-    fresh = _click(_bench_app(), second)
-    at = _bench_app()
-    after_first = _click(at, first)
-    assert after_first, "the first preset selected nothing"
-    after_second = _click(at, second)
-    if second == "bench_pick_invert":
-        # from an empty selection Invert offers everything; after the first
-        # preset it must give everything except that preset's records
-        assert set(after_second) == set(fresh) - set(after_first) and after_second
-    else:
-        assert set(after_second) == set(fresh) and after_second, (
-            "the second preset did not give its own selection")
-
-
-def test_clear_empties_both_the_selection_and_the_widget():
-    at = _bench_app()
-    assert _click(at, "bench_pick_train")
-    assert _click(at, "bench_pick_none") == []
+    other = _compare_app()
+    assert [t.value for t in other.title] == ["Compare configurations"]   # control
+    assert "track_upload" not in [w.key for w in other.get("file_uploader")]
+    assert not any(h.value == start for h in other.main.subheader)

@@ -11,16 +11,16 @@ get wrong, so they live here, where tests reach them without a browser:
   the swell_item30 batch — are taken from the split FIRST, their series files
   are never opened (the loaders' `ids=`), and their labels are dropped from the
   label dictionary right after it is read, before anything else touches it:
-  the rule the Benchmark page follows, applied here to every test id whether or
-  not the batch is on. A label whose `series_sha256` does not match the series
+  the rule the retired Benchmark page followed, applied here to every test id
+  whether or not the batch is on. A label whose `series_sha256` does not match the series
   read from disk was written against other data; it is not used and its track
   is not offered.
 * **Which block a number belongs to.** TRAIN and ADJUDICATED (the item-30
   counterfactual's own labels, which a configuration reproducing it would agree
   with by construction) are kept apart by `benchmark_core.metrics_by_split`,
-  the Benchmark's own function. No test block exists: a test id never reaches
-  it, and `agreement` raises if one ever did.
-* **The instruments.** Both are the Benchmark's, called unchanged: the sequence
+  called unchanged. No test block exists: a test id never reaches it, and
+  `agreement` raises if one ever did.
+* **The instruments.** Both are benchmark_core's, called unchanged: the sequence
   instrument (`benchmark_core.SEQUENCE_INSTRUMENT`) and the mature instrument
   (`benchmark_core.MATURE_INSTRUMENT`). They have different definitions and are
   never added together (research/labels/README.md).
@@ -118,10 +118,10 @@ def load_population(include_batch: bool) -> dict:
     }
 
 
-# ── cells, in the Benchmark's shape ───────────────────────────────────────────
+# ── cells, in benchmark_core's shape ──────────────────────────────────────────
 def as_results(cells: dict[str, dict]) -> dict[str, dict]:
     """A column's cells ({id: {"error", "runs", ...}}) in the shape the
-    Benchmark's instruments read: `runs` and the `starts` derived from them."""
+    instruments of benchmark_core read: `runs` and the `starts` derived from them."""
     out = {}
     for sid, c in cells.items():
         runs = None if c is None else c.get("runs")

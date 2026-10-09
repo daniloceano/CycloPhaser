@@ -1,0 +1,36 @@
+{
+ "results.xml": {
+  "passed": 1280,
+  "failed": 0,
+  "failed_ids": [],
+  "skipped": 40,
+  "skipped_by_reason": {
+   "collection skipped": 18,
+   "Timing not checked for observational cases": 1,
+   "AppTest drives the calibration app; the CI installs only the wheel, pytest and pyyaml": 1,
+   "could not import 'plotly': No module named 'plotly'": 4,
+   "the labelling tab is calibration-app code": 15,
+   "could not import 'streamlit': No module named 'streamlit'": 1
+  },
+  "skipped_by_file": {
+   "(collection)": 18,
+   "test_synthetic_lifecycles": 1,
+   "test_app_passo5_fixes": 1,
+   "test_layer_inspector": 4,
+   "test_manual_labels": 15,
+   "test_phase_colors": 1
+  }
+ },
+ "results-source-tree.xml": {
+  "passed": 1,
+  "failed": 0,
+  "failed_ids": [],
+  "skipped": 18,
+  "skipped_by_reason": {
+   "collection skipped": 18
+  },
+  "skipped_by_file": {
+   "(collection)": 18
+  }
+ }
+}

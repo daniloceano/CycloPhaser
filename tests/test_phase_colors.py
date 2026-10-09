@@ -6,9 +6,11 @@ layer_inspector.PHASE_COLORS, its single source (app.py, the Inspector renderers
 and the set statistics read it). The package file is READ, never imported or
 changed: the literal is taken from its source with `ast`.
 
-The Benchmark and Manual labelling pages still carry copies of their own
-(benchmark_tab.PHASE_COLORS, research/labels/labels_core.PHASE_COLORS); they are
-checked here as well, so no copy can drift.
+The Manual labelling page still carries a copy of its own
+(research/labels/labels_core.PHASE_COLORS); it is checked here as well, so it
+cannot drift. The Compare and Validate pages draw with the single source. (The
+Benchmark page's copy, benchmark_tab.PHASE_COLORS, left with that page in the
+benchmark review, I3.)
 """
 
 from __future__ import annotations
@@ -59,7 +61,14 @@ def test_the_other_pages_copies_have_not_drifted():
     pytest.importorskip("streamlit")
     sys.path.insert(0, str(APP_DIR))
     sys.path.insert(0, str(REPO_ROOT / "research" / "labels"))
-    import benchmark_tab
     import labels_core
-    assert benchmark_tab.PHASE_COLORS == _package_palette()
     assert labels_core.PHASE_COLORS == _package_palette()
+    # Compare and Validate pass the single source to every figure they draw
+    for mod in ("compare_tab.py", "validate_tab.py", "phase_figures.py"):
+        text = (APP_DIR / mod).read_text()
+        assert "PHASE_COLORS = {" not in text, mod
+        for hex_ in _package_palette().values():
+            if hex_.startswith("#"):
+                assert hex_ not in text, (mod, hex_)
+    for mod in ("compare_tab.py", "validate_tab.py"):
+        assert "li.PHASE_COLORS" in (APP_DIR / mod).read_text(), mod

@@ -14,7 +14,7 @@ Two identities matter here:
   series' time index and values (`series_key`).
 * **A configuration is what actually runs, not its text.** The key is the
   sha256 of the arguments passed to the package (`config_key`), after the same
-  filling and dropping the Benchmark and the evaluator apply, and after the
+  filling and dropping benchmark_core and the evaluator apply, and after the
   app's `use_filter` translation — so a key order, a missing key the filling
   restores, or `use_filter: true` against `'auto'` do not make two keys.
 

@@ -1,8 +1,8 @@
 """Translate the app's widget/YAML values into the package's call arguments.
 
 The app keeps ``use_filter`` as a bool everywhere it is shown or stored — the
-"Apply Lanczos filter" checkbox, the YAML export and import, the Benchmark's
-configuration files — because that is what those surfaces mean: filter on or
+"Apply Lanczos filter" checkbox, the YAML export and import, the Compare and
+Validate pages' configuration files — because that is what those surfaces mean: filter on or
 off. The package, however, warns on ``use_filter=True`` ("interpreted as
 'auto'"), a warning addressed to a caller who typed ``True``. Passed straight
 through, it reached the grid once per cyclone, asking the user to change a value

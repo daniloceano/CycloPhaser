@@ -1,18 +1,19 @@
 """The Validate page — configurations measured against the manual labels.
 
 Developer key only (app.py, `_developer_mode`): the developer half of the old
-Benchmark page (benchmark review, I2; the decisions and the control-by-control
-inventory are in research/benchmark_review/stage0/DECISIONS.md). It answers: how
-closely does each configuration agree with the manual labels of the TRAIN split?
-The labels are one labeller's evidence, not a ground truth, so every number here
-is an AGREEMENT with them — never called a hit rate, an accuracy or a score.
+Benchmark page, retired in I3 (benchmark review, I2; the decisions and the
+control-by-control inventory are in research/benchmark_review/stage0/DECISIONS.md).
+It answers: how closely does each configuration agree with the manual labels
+of the TRAIN split? The labels are one labeller's evidence, not a ground truth,
+so every number here is an AGREEMENT with them — never called a hit rate, an
+accuracy or a score.
 
 What is decided where
 ---------------------
 * validate_core.py — which tracks are offered and which labels exist (the test
   split's are withheld before anything reads them, and its files are never
   opened), the TRAIN / ADJUDICATED blocks, and the two instruments, which are
-  the Benchmark's own functions called unchanged.
+  benchmark_core's functions, called unchanged.
 * compare_tab.py — the cached detection (`_cell`, keyed by configuration and
   track content), the figures of each configuration, the "relative to" table
   and the per-configuration block: this page calls them, so the two pages
@@ -524,9 +525,10 @@ def _missing_notes(run_cols, cells, ids) -> list[str]:
 
 def _disagreement_header(name: str, tag: str, d: dict) -> str:
     """Counts per instrument, never a number that pools the two (R2)."""
-    parts = [f"sequence: {len(d['sequence_differs'])} differ, "
-             f"{len(d['outside_tolerance'])} with a boundary outside its tolerance",
-             f"mature: {len(d['mature'])} not within the margin"]
+    parts = [f"sequence: {len(d['sequence_differs'])} tracks differ, "
+             f"{len(d['outside_tolerance'])} tracks with a boundary outside its "
+             "tolerance",
+             f"mature: {len(d['mature'])} tracks not within the margin"]
     if d["failed"]:
         parts.append(f"detection failed: {len(d['failed'])}")
     if d["not_in_snapshot"]:

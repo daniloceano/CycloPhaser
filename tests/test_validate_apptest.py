@@ -8,10 +8,15 @@ drive a file uploader, so the "Upload YAML" path is exercised in Chromium
 What needs a control and has one:
 
 * The page is absent without the key — and present with it.
-* The agreement numbers are the Benchmark's — the Benchmark page itself, run
-  on the same configurations and the same 47 tracks, shows the same counts.
+* The agreement numbers are benchmark_core's — computed outside the app the
+  way the retired Benchmark page computed them (`run_series`,
+  `metrics_by_split`), on the same configurations and the same 47 tracks.
 * No test-split id and none of "hit rate", "accuracy", "score" appear on the
-  page — and the same scanners find them on the Benchmark page.
+  page — and the id scanner finds the test ids on the Manual labelling page;
+  the word scanner finds planted words.
+* No unlabelled id and no test id reaches a run, even forced into the selection
+  — and an offered id forced the same way does.
+* The figure layout and the label panel change no result.
 * The label panel comes first — the call order of the figure functions, which
   would show a column first if the order were wrong.
 """
@@ -45,7 +50,8 @@ import validate_tab as vt  # noqa: E402
 
 CALIBRATE = "app_pages/calibrate.py"
 COMPARE = "app_pages/compare.py"
-BENCHMARK = "app_pages/benchmark.py"
+LABEL = "app_pages/label.py"
+UNLABELLED = "uploaded_track"
 VALIDATE = "app_pages/validate.py"
 CONFIG = "cyclophaser_params-track.yaml"
 WORDS = ("hit rate", "accuracy", "score")
@@ -268,6 +274,9 @@ def test_all_real_all_synthetic_invert_and_clear():
 
 def test_the_batch_checkbox_adds_its_train_tracks_only():
     at = _validate()
+    batch = set(vc.load_population(True)["batch_ids"])
+    assert _w(at, "checkbox", "val_include_batch").value is False   # off by default
+    assert not set(_option_ids(_w(at, "multiselect", "val_tracks"))) & batch
     _w(at, "checkbox", "val_include_batch").check()
     at.run()
     _ok(at)
@@ -281,6 +290,7 @@ def test_the_batch_checkbox_adds_its_train_tracks_only():
     _w(at, "checkbox", "val_include_batch").uncheck()
     at.run()
     assert len(_w(at, "multiselect", "val_tracks").options) == 47
+    assert not set(at.session_state["val_tracks"]) & batch     # none stays selected
 
 
 # ── configurations ────────────────────────────────────────────────────────────
@@ -484,27 +494,33 @@ def test_train_block_shows_both_instruments_with_set_and_n():
         assert mat[c["name"]].iloc[0] == f"{mm['n_hit']} of {mm['n']}"
 
 
-def test_validate_numbers_equal_the_benchmark_train_table():
+def test_validate_numbers_equal_benchmark_core_on_the_train_split():
+    """Until I3 the reference was the Benchmark page's train table; that page is
+    retired, and the reference is what it computed: each configuration through
+    `benchmark_core.split_config` + `run_series` on the 47 train series, then
+    `metrics_by_split` with the split's membership — outside the app."""
     at = _validate()
     _click(at, "val_add_current")
     _add_config(at)
     _click(at, "val_run")
     seq = next(f for f in _frames(at) if any("Sequence agrees" in i for i in f.index))
     mat = next(f for f in _frames(at) if any("Mature paired" in i for i in f.index))
-    _go(at, BENCHMARK)
-    _click(at, "bench_pick_train")
-    _click(at, "bench_add_sidebar")
-    _set(at, "selectbox", "bench_pick_config", CONFIG)
-    _click(at, "bench_add_config")
-    _click(at, "bench_run")
-    bench = next(f for f in _frames(at) if "Sequence match" in list(f.index))
-    assert len(at.session_state["bench_selected_ids"]) == 47
-    for vname, bname in (("Current settings", "sidebar #1"),
-                         ("params-track", "params-track")):
-        assert seq[vname].iloc[0].replace(" of ", "/") == bench[bname]["Sequence match"]
-        assert seq[vname].iloc[1].replace(" of ", "/") == \
-            bench[bname]["Boundaries within margin"]
-        assert mat[vname].iloc[0].replace(" of ", "/") == bench[bname]["Mature paired"]
+    pop = vc.load_population(False)
+    ids = sorted(pop["series"])
+    assert len(ids) == 47 and sorted(at.session_state["_val_results"]["ids"]) == ids
+    membership = {s: m for s, m in bc.split_membership().items() if s in ids}
+    labels = {s: r for s, r in bc.labels_for_display().items() if s in ids}
+    for col in at.session_state["val_columns"]:
+        pv, gp = bc.split_config(col["doc"])
+        results = {s: bc.run_series(pv, gp, pop["series"][s]) for s in ids}
+        m = bc.metrics_by_split(results, labels, ids, membership)
+        assert m["test"]["ids"] == [] and m["adjudicated"]["ids"] == []
+        sq, mm = m["train"]["sequence"], m["train"]["mature"]
+        assert sq["n_series"] == 47
+        assert seq[col["name"]].iloc[0] == f"{sq['n_sequence_match']} of {sq['n_series']}"
+        assert seq[col["name"]].iloc[1] == f"{sq['n_boundaries_hit']} of {sq['n_boundaries']}"
+        assert mat[col["name"]].iloc[0] == f"{mm['n_hit']} of {mm['n']}"
+    assert list(seq.columns) == ["Current settings", "params-track"]
 
 
 def test_adjudicated_block_only_with_the_batch_and_never_pooled():
@@ -537,10 +553,11 @@ def test_disagreeing_tracks_listed_per_column_and_instrument():
     for c in res["columns"]:
         d = vc.disagreements(res["cells"][c["cid"]], res["labels"], res["ids"])
         # R2: one count per instrument, nothing that pools the two
+        # F5 (I3): the two sequence counts say they count tracks
         head = (f"Tracks that disagree with the label — {c['name']} (train, n = 47) · "
-                f"sequence: {len(d['sequence_differs'])} differ, "
-                f"{len(d['outside_tolerance'])} with a boundary outside its tolerance · "
-                f"mature: {len(d['mature'])} not within the margin")
+                f"sequence: {len(d['sequence_differs'])} tracks differ, "
+                f"{len(d['outside_tolerance'])} tracks with a boundary outside its "
+                f"tolerance · mature: {len(d['mature'])} tracks not within the margin")
         assert head in labels, (head, labels)
         assert d["sequence_differs"] and d["mature"]    # control: there are lists
     assert not any(re.search(r"\): \d+$", lab) for lab in labels)
@@ -665,17 +682,14 @@ def test_e2_no_test_id_and_no_forbidden_word_anywhere():
     assert _words_found(texts) == set()
 
 
-def test_e2_the_scanners_find_planted_terms_on_the_benchmark_page():
+def test_e2_the_scanners_find_planted_terms_on_the_labelling_page():
+    """The id scanner, run on a page that does list the test ids: Manual
+    labelling ("[TEST split — locked]"). The word scanner, on planted texts
+    (until I3 also on the Benchmark page's "hit rate", retired with it)."""
     spent = vc.spent_ids()
-    at = _go(_app(), BENCHMARK)
-    _set(at, "radio", "bench_mode", "Exploration")
+    at = _go(_app(), LABEL)
     found = _ids_found(_texts(at), spent)
-    assert len(found) >= 16, found                      # the test ids are offered there
-    _set(at, "radio", "bench_mode", "Validation")
-    _click(at, "bench_pick_synth")
-    _click(at, "bench_add_sidebar")
-    _click(at, "bench_run")
-    assert "hit rate" in _words_found(_texts(at))
+    assert len(found) >= 16, found                      # the test ids are listed there
     assert _words_found(["Accuracy of x", "a Score.", "not a score", "scores",
                          "score_phase_sequences"]) == {"accuracy", "score"}
     assert _ids_found(["id 20150069.", "x201500690"], {"20150069"}) == {"20150069"}
@@ -841,3 +855,50 @@ def test_validate_says_results_are_current_after_a_run():
     assert not any(w.value.startswith("Results out of date") for w in at.warning)
     assert "Results are current: 3 configuration(s) × 47 track(s)." in \
         [c.value for c in at.caption]
+
+
+# ── migrated from the retired Benchmark page's tests (I3) ─────────────────────
+def test_a_forced_unlabelled_or_test_id_never_reaches_a_run():
+    """An unlabelled id and a test-split id forced into the selection — through
+    the page's own plain-key copy, the value a page trip restores — are dropped
+    before anything draws or runs. POSITIVE CONTROL: an offered id forced the
+    same way stays and runs, so the drop is the gate, not a copy that is
+    ignored."""
+    at = _validate()
+    offered = _train_ids()
+    spent = sorted(vc.spent_ids())
+    assert UNLABELLED not in bc.labels_for_display() and spent
+    keep = offered[:2]
+    _set(at, "multiselect", "val_tracks", keep)
+    _click(at, "val_add_defaults")
+    at.session_state[vt.KEEP_PREFIX + "val_tracks"] = keep + [UNLABELLED, spent[0]]
+    _go(at, CALIBRATE)
+    _go(at, VALIDATE)
+    assert list(at.session_state["val_tracks"]) == keep
+    _click(at, "val_run")
+    res = at.session_state["_val_results"]
+    assert res["ids"] == keep and sorted(res["labels"]) == sorted(keep)
+    assert all(sorted(cells) == sorted(keep) for cells in res["cells"].values())
+    texts = _texts(at)
+    assert _ids_found(texts, {UNLABELLED, spent[0]}) == set()
+    # control: an offered id forced the same way stays, and runs
+    at.session_state[vt.KEEP_PREFIX + "val_tracks"] = keep + [offered[2]]
+    _go(at, CALIBRATE)
+    _go(at, VALIDATE)
+    assert list(at.session_state["val_tracks"]) == keep + [offered[2]]
+    _click(at, "val_run")
+    assert at.session_state["_val_results"]["ids"] == keep + [offered[2]]
+
+
+def test_layout_and_label_panel_do_not_change_any_result():
+    at = _defaults_and_track()
+    before = at.session_state["_val_results"]
+    tables = [f.to_csv() for f in _frames(at)]
+    for kind, key, value in (("radio", "val_figure_layout", "Stacked"),
+                             ("toggle", "val_show_label", False),
+                             ("radio", "val_figure_layout", "Side by side"),
+                             ("toggle", "val_show_label", True)):
+        _set(at, kind, key, value)
+        assert at.session_state["_val_results"] == before, (key, value)
+        assert [f.to_csv() for f in _frames(at)] == tables, (key, value)
+        assert not any(w.value.startswith("Results out of date") for w in at.warning)

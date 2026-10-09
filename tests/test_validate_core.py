@@ -3,10 +3,15 @@
 Gated on streamlit like every other test of the calibration app: the CI recipe
 installs only the wheel, pytest and PyYAML, and app tests stay out of it.
 
-Controls: the instruments are checked against direct calls of the Benchmark's
+Controls: the instruments are checked against direct calls of benchmark_core's
 own functions; the disagreement lists against the instruments' counts; the
 figures without the new option against the module as it was at f3008fc, and
 with it against themselves (the option must change the PNG).
+
+Since the Benchmark page was retired (benchmark review, I3) the label-side
+guarantees it carried are tested here, each with its positive control: a row
+without a label is never scored (nor offered), and adjudicated labels are never
+pooled with train ones.
 """
 
 from __future__ import annotations
@@ -219,14 +224,15 @@ def test_figures_without_tolerances_are_byte_identical_and_with_them_differ(tmp_
     runs = (("incipient", 0, 10), ("intensification", 11, 30), ("mature", 31, 45),
             ("decay", 46, 80), ("residual", 81, 89))
     panels = (("a", runs, z), ("b", runs[1:], None))
-    import benchmark_tab
-    for colors in (li.PHASE_COLORS, benchmark_tab.PHASE_COLORS):
-        assert pf.png(pf.cell_figure(v, runs, "a", z, colors)) == \
-            old.png(old.cell_figure(v, runs, "a", z, colors))
-        assert pf.png(pf.cell_figure(v, runs, "a", None, colors)) == \
-            old.png(old.cell_figure(v, runs, "a", None, colors))
-        assert pf.png(pf.stacked_figure(v, panels, colors)) == \
-            old.png(old.stacked_figure(v, panels, colors))
+    # the palette both pages pass (benchmark_tab's own copy left with it in I3;
+    # it had the same values, tests/test_phase_colors.py)
+    colors = li.PHASE_COLORS
+    assert pf.png(pf.cell_figure(v, runs, "a", z, colors)) == \
+        old.png(old.cell_figure(v, runs, "a", z, colors))
+    assert pf.png(pf.cell_figure(v, runs, "a", None, colors)) == \
+        old.png(old.cell_figure(v, runs, "a", None, colors))
+    assert pf.png(pf.stacked_figure(v, panels, colors)) == \
+        old.png(old.stacked_figure(v, panels, colors))
     spans = ((9, 13, 11, False), (40, 50, 46, True))
     plain = pf.png(pf.cell_figure(v, runs, "label", None, li.PHASE_COLORS))
     assert pf.png(pf.cell_figure(v, runs, "label", None, li.PHASE_COLORS,
@@ -272,3 +278,72 @@ def test_snapshot_missing_tracks_are_not_failures():
     m = vc.agreement(cells, pop["labels"], ids, pop["adjudicated"])
     assert m[vc.TRAIN]["sequence"]["n_series"] == 49 - 2       # 2 batch train ids
     assert m[vc.ADJUDICATED]["sequence"]["n_series"] == 0
+
+
+# ── migrated from the retired Benchmark page's tests (benchmark review, I3) ────
+UNLABELLED = "uploaded_track"
+
+
+def test_an_unlabelled_row_is_never_scored():
+    """A row without a label is in no block, no instrument count and no
+    disagreement list. POSITIVE CONTROL: the same row with a label planted on it
+    is counted by both instruments and listed — so "not counted" is the label
+    gate at work, not an empty code path."""
+    pop = vc.load_population(False)
+    labels = pop["labels"]
+    assert UNLABELLED not in bc.labels_for_display()          # the fixture holds
+    labelled = sorted(labels)[0]
+    runs = vc.label_runs(labels[labelled])
+    assert len(runs) > 1
+    cells = {labelled: _cell(runs), UNLABELLED: _cell(runs[:-1])}   # it has phases
+    ids = [labelled, UNLABELLED]
+
+    m = vc.agreement(cells, labels, ids, [])
+    assert m[vc.TRAIN]["ids"] == [labelled] and m[vc.ADJUDICATED]["ids"] == []
+    assert m[vc.TRAIN]["sequence"]["n_series"] == 1
+    assert m[vc.TRAIN]["mature"]["n"] <= 1
+    assert all(r["id"] != UNLABELLED for r in m[vc.TRAIN]["mature"]["rows"])
+    d = vc.disagreements(cells, labels, ids)
+    assert not vc.disagrees([d], UNLABELLED)
+    assert not any(UNLABELLED in v or any(UNLABELLED in x for x in v if isinstance(x, tuple))
+                   for v in d.values())
+
+    planted = {**labels, UNLABELLED: {**labels[labelled], "id": UNLABELLED}}
+    m2 = vc.agreement(cells, planted, ids, [])
+    assert m2[vc.TRAIN]["sequence"]["n_series"] == 2
+    assert m2[vc.TRAIN]["sequence"]["n_sequence_match"] == 1
+    assert UNLABELLED in vc.disagreements(cells, planted, ids)["sequence_differs"]
+
+
+def test_a_track_without_a_label_is_not_offered(monkeypatch):
+    """A train track whose label is missing is not offered, and says why.
+    Control: with its label it is offered."""
+    pop = vc.load_population(False)
+    victim = sorted(pop["series"])[0]
+    assert victim in pop["series"] and victim in pop["labels"]      # control
+    real = bc.labels_for_display
+
+    def without_victim():
+        return {k: v for k, v in real().items() if k != victim}
+    monkeypatch.setattr(bc, "labels_for_display", without_victim)
+    pop2 = vc.load_population(False)
+    assert victim not in pop2["series"] and victim not in pop2["labels"]
+    assert pop2["not_offered"][victim] == "no manual label"
+    assert len(pop2["series"]) == 46
+
+
+def test_the_adjudicated_guard_would_catch_a_pooling():
+    """POSITIVE CONTROL for the train / adjudicated separation: the batch's 7
+    train tracks split 2 + 5 with their labels, and all 7 land in train once the
+    adjudication note is stripped — the pooling the separation forbids."""
+    pop = vc.load_population(True)
+    train7 = pop["batch_ids"]
+    assert len(train7) == 7
+    cells = {s: _cell(vc.label_runs(pop["labels"][s])) for s in train7}
+    m = vc.agreement(cells, pop["labels"], train7, pop["adjudicated"])
+    assert len(m[vc.TRAIN]["ids"]) == 2 and len(m[vc.ADJUDICATED]["ids"]) == 5
+    assert not set(m[vc.TRAIN]["ids"]) & set(m[vc.ADJUDICATED]["ids"])
+    stripped = {s: {k: v for k, v in pop["labels"][s].items() if k != "notes"}
+                for s in train7}
+    pooled = vc.agreement(cells, stripped, train7, [])
+    assert len(pooled[vc.TRAIN]["ids"]) == 7 and pooled[vc.ADJUDICATED]["ids"] == []

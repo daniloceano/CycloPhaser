@@ -9,6 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**The package code did not change**: `cyclophaser/` is identical to 2.1.1. These
+changes are in the calibration app (`tools/calibration_app/`) and its
+documentation.
+
+### Added — calibration app
+
+* **Compare** page (public, after Calibrate): what changes in the phases of the
+  tracks loaded in Calibrate when the configuration changes. Up to four
+  configurations — Current settings, Defaults, or an uploaded YAML — each
+  editable on the page; an explicit **Run** (the reason is shown while it is not
+  possible); a table relative to a chosen reference column (sequence changed,
+  boundary shift, phases appeared or disappeared, each with its number of
+  tracks); a count per configuration; and the phase figures of every track,
+  side by side or stacked, with a filter for the tracks whose sequence differs
+  from the reference.
+* **Validate against labels** page (developer key only): configurations
+  measured against the manual labels of the train split, by two named
+  instruments (phase sequence, mature pairing), in separate train and
+  adjudicated blocks; calibration files and published releases as columns,
+  with their provenance; the label panel and the tracks that disagree with it.
+
+### Removed — calibration app
+
+* The **Benchmark** page. Its public part is the Compare page, its developer
+  part the Validate against labels page. Its Validation / Exploration modes,
+  its own track upload and the manual label as a reference column are gone.
+
+### Fixed — calibration app
+
+* Results are kept between runs, by configuration and track content: running
+  again after one change recomputes only what changed. The Benchmark's caption
+  promised a cache that lasted one run only.
+* The Compare page does not show the "pre-filter-fix config" warning, which the
+  Benchmark showed for any uploaded YAML without `boundary_padding`, whatever
+  its content.
+* The Compare page runs the tracks loaded in Calibrate — uploads included,
+  read by the same reader with their time axis — instead of a separate upload,
+  so both pages detect the same phases on the same file. (A track uploaded on
+  the Benchmark lost its time axis, and with smoothing set to 'auto' a track
+  longer than 8 days could get a different smoothing window than in
+  Calibrate.)
+* Long parameter names in the configuration warnings wrap only after "." or
+  "_", never mid-word.
+
 ---
 
 ## [2.1.1] - 2026-10-08

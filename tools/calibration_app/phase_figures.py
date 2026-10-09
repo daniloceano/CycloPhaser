@@ -1,12 +1,12 @@
-"""The per-cyclone phase figures of the Benchmark and Compare pages — no Streamlit.
+"""The per-cyclone phase figures of the Compare and Validate pages — no Streamlit.
 
-Moved out of benchmark_tab.py unchanged (benchmark review, I1) so the Compare
-page draws exactly what the Benchmark draws. The only addition is the `colors`
-argument: the Benchmark passes its own copy of the phase palette, as before, and
-the Compare page passes the app's single source (`layer_inspector.PHASE_COLORS`).
-The two are the same values (tests/test_phase_colors.py), and
-tests/test_compare_apptest.py checks that the Benchmark's PNGs are byte-identical
-to the ones the code produced before the move.
+Moved out of the old Benchmark page's benchmark_tab.py unchanged (benchmark
+review, I1; that page was retired in I3), so the Compare page draws exactly what
+the Benchmark drew. The `colors` argument was the only addition: both pages pass
+the app's single source (`layer_inspector.PHASE_COLORS`, the package's palette,
+tests/test_phase_colors.py), and tests/test_compare_apptest.py checks that the
+PNGs are byte-identical to the ones benchmark_tab.py produced at 39e658c. The
+Validate page adds `tolerances` (None by default, which changes nothing).
 
 The Grid's compact convention (app.py `_plot_compact`), item 30c: the raw series
 and `vorticity_smoothed2` — the series detection runs on — each on a y axis of

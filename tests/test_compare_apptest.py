@@ -12,9 +12,16 @@ What needs a control and has one:
   their time axis give different phases on at least one track (finding A11), so
   the comparison can fail.
 * The text scan finds nothing on Compare — and finds the planted words on the
-  Benchmark page, with the same scanner.
-* Compare runs with the label readers raising — and the Benchmark page, under
+  Validate page (developer key), with the same scanner.
+* Compare runs with the label readers raising — and the Validate page, under
   the same patch, does not (the patch reaches the app).
+* Each column carries its own configuration — the two configurations are
+  distinguishable on the selected tracks, and swapped columns fail the pin.
+
+Since the Benchmark page was retired (benchmark review, I3), the column
+guarantees its tests carried are pinned here: each column runs its own
+configuration, adding, editing or removing a column moves no other, and the
+figure layout changes no result.
 """
 
 from __future__ import annotations
@@ -42,7 +49,7 @@ import compare_core as cc  # noqa: E402
 
 CALIBRATE = "app_pages/calibrate.py"
 COMPARE = "app_pages/compare.py"
-BENCHMARK = "app_pages/benchmark.py"
+VALIDATE = "app_pages/validate.py"
 
 FORBIDDEN = ("train", "test split", "adjudicated", "manual label", "swell",
              "sha256", "commit", "bad_cases", "ground truth", "research/")
@@ -170,8 +177,7 @@ class _Counter:
 # ── the menu and the empty state ──────────────────────────────────────────────
 def test_compare_is_in_the_calibration_menu_after_calibrate():
     src = APP.read_text()
-    assert ('_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_COMPARE, '
-            '_PAGE_BENCHMARK]}') in src
+    assert '_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_COMPARE]}' in src
     at = _go(_app(None), COMPARE)
     assert [t.value for t in at.title] == ["Compare configurations"]
     assert any("What changes in the phases of your tracks" in m.value
@@ -518,10 +524,11 @@ def test_e2_no_forbidden_term_anywhere_on_the_compare_page():
     assert seen == set()
 
 
-def test_e2_the_scanner_finds_planted_terms_on_the_benchmark_page():
-    at = _go(_app(None), BENCHMARK)
+def test_e2_the_scanner_finds_planted_terms_on_the_validate_page(monkeypatch):
+    monkeypatch.setenv("CYCLOPHASER_APP_DEV", "1")
+    at = _go(_app(None), VALIDATE)
     found = _forbidden_found(_texts(at))
-    assert {"train", "manual label", "swell"} <= found, found
+    assert {"train", "test split", "swell", "adjudicated"} <= found, found
     assert _forbidden_found(["see Research/labels", "Test Split", "a trainee"]) == \
         {"research/", "test split"}
 
@@ -532,6 +539,10 @@ def test_e2_compare_renders_and_runs_with_label_reading_broken(monkeypatch):
     def boom(*_a, **_k):
         raise RuntimeError("labels must not be read on the Compare page")
 
+    # the developer key from the start, so the control below can reach the
+    # Validate page (a page is registered by the run that draws the menu);
+    # the Compare page itself does not depend on it
+    monkeypatch.setenv("CYCLOPHASER_APP_DEV", "1")
     at = _app()
     for mod, names in ((lc, ("read_labels", "read_split")),
                        (bc, ("read_labels", "read_split", "labels_for_display",
@@ -547,16 +558,23 @@ def test_e2_compare_renders_and_runs_with_label_reading_broken(monkeypatch):
     _click(at, "cmp_run")
     assert at.session_state["_cmp_results"]["ids"]
     assert any(m.value == "#### Relative to Current settings" for m in at.markdown)
-    # control: the same patch does reach the app — the Benchmark page fails
-    at.switch_page(BENCHMARK).run()
+    # control: the same patch does reach the app — the Validate page fails.
+    # Its population is in st.cache_data; an earlier test in the same process
+    # would have filled it and the readers would not be called (measured, I3).
+    st.cache_data.clear()
+    at.switch_page(VALIDATE).run()
     assert at.exception
 
 
-# ── the Benchmark is unchanged ────────────────────────────────────────────────
-def test_benchmark_pngs_are_byte_identical_to_before_the_move(tmp_path):
+# ── the figures are the old Benchmark's ───────────────────────────────────────
+def test_compare_pngs_are_byte_identical_to_the_benchmark_of_39e658c(tmp_path):
+    """phase_figures, with the palette the Compare page passes, against the
+    Benchmark page's own drawing code as it was at 39e658c (read with git show;
+    the module itself was retired in I3)."""
     import importlib.util
     import math
-    import benchmark_tab as new
+    import layer_inspector as li
+    import phase_figures as pf
     try:
         old_src = subprocess.run(
             ["git", "show", "39e658c:tools/calibration_app/benchmark_tab.py"],
@@ -572,12 +590,14 @@ def test_benchmark_pngs_are_byte_identical_to_before_the_move(tmp_path):
     z = tuple(math.sin(i / 9) * 4e-6 for i in range(90))
     runs = (("incipient", 0, 10), ("intensification", 11, 30), ("mature", 31, 45),
             ("decay", 46, 80), ("residual", 81, 89))
-    assert new._png(new._cell_figure(v, runs, "a", z)) == \
+    colors = li.PHASE_COLORS
+    assert colors == old.PHASE_COLORS
+    assert pf.png(pf.cell_figure(v, runs, "a", z, colors)) == \
         old._png(old._cell_figure(v, runs, "a", z))
-    assert new._png(new._cell_figure(v, runs, "a")) == \
+    assert pf.png(pf.cell_figure(v, runs, "a", None, colors)) == \
         old._png(old._cell_figure(v, runs, "a"))
     panels = (("a", runs, z), ("b", runs[1:], None))
-    assert new._png(new._stacked_figure(v, panels)) == \
+    assert pf.png(pf.stacked_figure(v, panels, colors)) == \
         old._png(old._stacked_figure(v, panels))
 
 
@@ -663,14 +683,14 @@ def compare_tab_limit() -> str:
     return compare_tab.LIMIT_REASON
 
 
-def test_invert_selection_is_labelled_and_explained_on_compare_only():
+def test_invert_selection_is_labelled_and_explained():
+    """(Until I3 this also checked that the Benchmark kept its own "Invert";
+    the Validate page's button is checked in tests/test_validate_apptest.py.)"""
     at = _go(_app("example"), COMPARE)
     b = _w(at, "button", "cmp_invert")
     assert b.label == "Invert selection"
     assert b.help == ("Selects the tracks that are not selected and clears the ones "
                       "that are.")
-    _go(at, BENCHMARK)
-    assert _w(at, "button", "bench_pick_invert").label == "Invert"
 
 
 def test_a_new_run_clears_the_out_of_date_warning():
@@ -687,3 +707,113 @@ def test_a_new_run_clears_the_out_of_date_warning():
     assert not any(w.value.startswith("Results out of date") for w in at.warning)
     assert "Results are current: 3 configuration(s) × 51 track(s)." in \
         [c.value for c in at.caption]
+
+
+# ── column guarantees, migrated from the retired Benchmark page (I3) ──────────
+def _cells_of(res, cid, ids) -> dict:
+    """{id: (runs, z)} of one column of the last run."""
+    return {s: (res["cells"][cid][s]["runs"], res["cells"][cid][s]["z"]) for s in ids}
+
+
+def _expected(doc, tracks, ids) -> dict:
+    """{id: (runs, z)} computed straight from benchmark_core, outside the app:
+    the configuration through `split_config` and `run_series`, each track read
+    with the Calibrate reader."""
+    import track_io
+    pv, gp = bc.split_config(doc)
+    out = {}
+    for s in ids:
+        r = bc.run_series(pv, gp, track_io.read_track(tracks[s]))
+        assert r["error"] is None, (s, r["error"])
+        out[s] = ([tuple(x) for x in r["runs"]], tuple(float(v) for v in r["z"].values))
+    return out
+
+
+def test_each_column_carries_its_own_configuration_not_its_neighbours():
+    import inspect
+    from cyclophaser.determine_periods import process_vorticity
+    at = _app()
+    _set_cutoff(at, 48)
+    _go(at, COMPARE)
+    _click(at, "cmp_add_current")
+    _click(at, "cmp_add_defaults")
+    names = list(at.session_state["_compare_live_tracks"])
+    sel = names[:8]
+    _w(at, "multiselect", "cmp_tracks").set_value(sel)
+    at.run()
+    _ok(at)
+    assert "_cmp_results" not in at.session_state          # nothing before Run
+    cols = at.session_state["cmp_columns"]
+    a, b = cols[0]["doc"], cols[1]["doc"]
+    # the declared difference, and 48 really is a non-default value
+    assert (a["filter_params"]["cutoff_high"], b["filter_params"]["cutoff_high"]) == (48, 18)
+    assert inspect.signature(process_vorticity).parameters["cutoff_high"].default != 48
+    _click(at, "cmp_run")
+    res = at.session_state["_cmp_results"]
+    tracks = at.session_state["_compare_live_tracks"]
+    assert res["ids"] == sel
+    for c in cols:                                         # aligned on the selection
+        assert list(res["cells"][c["cid"]]) == sel
+    got_a, got_b = (_cells_of(res, c["cid"], sel) for c in cols)
+    exp_a, exp_b = _expected(a, tracks, sel), _expected(b, tracks, sel)
+    assert got_a != got_b                                  # control: distinguishable
+    assert got_a == exp_a and got_b == exp_b               # the pin, z included
+    assert not (got_a == exp_b and got_b == exp_a)         # control: a swap fails it
+    # a new selection, run again: every column reports exactly it
+    sel2 = names[8:11]
+    _w(at, "multiselect", "cmp_tracks").set_value(sel2)
+    at.run()
+    _click(at, "cmp_run")
+    res = at.session_state["_cmp_results"]
+    assert res["ids"] == sel2
+    for c, doc in zip(cols, (a, b)):
+        assert _cells_of(res, c["cid"], sel2) == _expected(doc, tracks, sel2)
+
+
+def test_adding_editing_or_removing_a_column_leaves_the_others_untouched():
+    at = _app()
+    _set_cutoff(at, 48)
+    _go(at, COMPARE)
+    _click(at, "cmp_add_current")
+    _click(at, "cmp_add_defaults")
+    names = list(at.session_state["_compare_live_tracks"])
+    sel = names[:4]
+    _w(at, "multiselect", "cmp_tracks").set_value(sel)
+    at.run()
+    _click(at, "cmp_run")
+    res = at.session_state["_cmp_results"]
+    one, two = (_cells_of(res, cid, sel) for cid in (1, 2))
+    # a third column: the first two do not move
+    _click(at, "cmp_add_defaults")
+    _click(at, "cmp_run")
+    res = at.session_state["_cmp_results"]
+    assert _cells_of(res, 1, sel) == one and _cells_of(res, 2, sel) == two
+    assert _cells_of(res, 3, sel) == two                   # the same configuration
+    # edit column 1 into column 2's configuration: only column 1 moves, and
+    # only column 1 is marked edited
+    doc2 = at.session_state["cmp_columns"][1]["doc"]
+    _w(at, "text_area", "cmp_edit_1").set_value(yaml.safe_dump(doc2))
+    at.run()
+    _click(at, "cmp_apply_1")
+    assert [c["edited"] for c in at.session_state["cmp_columns"]] == [True, False, False]
+    _click(at, "cmp_run")
+    res = at.session_state["_cmp_results"]
+    assert _cells_of(res, 1, sel) == two != one            # moved, to its new config
+    assert _cells_of(res, 2, sel) == two and _cells_of(res, 3, sel) == two
+    # remove column 3: the others do not move
+    _click(at, "cmp_remove_3")
+    _click(at, "cmp_run")
+    res = at.session_state["_cmp_results"]
+    assert [c["cid"] for c in res["columns"]] == [1, 2]
+    assert _cells_of(res, 1, sel) == two and _cells_of(res, 2, sel) == two
+
+
+def test_the_figure_layout_does_not_change_any_result():
+    at = _two_columns(_app())
+    before = at.session_state["_cmp_results"]
+    for layout in ("Stacked", "Side by side"):
+        _w(at, "radio", "cmp_figure_layout").set_value(layout)
+        at.run()
+        _ok(at)
+        assert at.session_state["_cmp_results"] == before
+        assert not any(w.value.startswith("Results out of date") for w in at.warning)

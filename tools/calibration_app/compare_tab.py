@@ -108,8 +108,8 @@ WIDGET_STATE_PREFIXES = (EDIT_PREFIX,)
 # which has no browser side, keeps both. Plain keys are never cleaned up, so the
 # copy follows each widget after it is drawn (`_remember`), and each widget is
 # set from its copy on the first run after arriving on this page and whenever
-# its own key is missing (`_restore`) — the rule the Benchmark page already
-# follows for its column state.
+# its own key is missing (`_restore`) — the rule the old Benchmark page
+# followed for its column state.
 KEEP_PREFIX = "_cmp_kept_"
 ARRIVED = "_app_arrived"         # set by app.py on every run
 

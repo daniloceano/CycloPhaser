@@ -1,4 +1,22 @@
-"""Pure machinery behind the Benchmark tab — no Streamlit, no globals mutated.
+"""Configurations as columns, and the two label instruments — no Streamlit, no globals mutated.
+
+Who uses it
+-----------
+The Benchmark page this module was written for was retired (benchmark review,
+I3); the module stayed, unchanged, because these use it:
+
+* tools/calibration_app/compare_core.py — the Compare page's label-free parts
+  (`split_config`, `signature_audit`, `run_series`, `reference_metrics`,
+  `refused_incipient`);
+* tools/calibration_app/validate_core.py and validate_tab.py — the Validate
+  against labels page: the label and split readers, `metrics_by_split`, the two
+  instruments, the configs/ and snapshot readers, `ColumnSpec`;
+* tools/calibration_app/config_text.py — the provenance text of a card;
+* research/labels/diagnostics/item30/item30_core.py;
+* the tests of those modules and pages.
+
+Some function docstrings below still describe the retired page (its modes and
+its Exploration upload); the behaviour they document is unchanged.
 
 Why this module exists
 ----------------------
@@ -42,7 +60,7 @@ Leakage rule
 Any AGGREGATE number is computed over the TRAIN split. Aggregates involving the
 16 real cyclones of the frozen test split are returned in a separate block,
 labelled test, and never added into the train one. Per-cyclone rows are display,
-not aggregate, and may show either. The item-30 swell batch, when the tab
+not aggregate, and may show either. The item-30 swell batch, when a caller
 includes it (`load_batch`), adds 7 train and 3 test ids under the same rule.
 """
 
@@ -548,8 +566,9 @@ def scoreable(ids, labels: dict[str, dict]) -> list[str]:
     row is scored is decided here, row by row, by the existence of its label.
 
     All 63 bundled records happen to be labelled today, so the unlabelled case
-    arrives through the Exploration mode's cyclone upload. That is exactly the
-    path `tests/test_benchmark_apptest.py` drives for its positive control.
+    arrives through the Exploration mode's cyclone upload. Its guarantee, with
+    a planted label as the positive control, is tested in
+    tests/test_validate_core.py (`test_an_unlabelled_row_is_never_scored`).
     """
     return [s for s in ids if s in labels]
 

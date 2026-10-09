@@ -1,0 +1,4 @@
+label: i3_review | mode: worktree | HEAD ae3a6c7 | patch: 20728 lines, sha256 7eef6afe2c605b0f…; untracked copied: 0 | 2026-10-09T14:50:57Z
+sphinx: 7.2.6 | exit 0
+warnings: 0
+html: $SCRATCH/docs_i3_review/docs/_build/html/index.html
