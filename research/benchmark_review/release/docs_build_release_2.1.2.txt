@@ -1,0 +1,4 @@
+label: release_2.1.2 | mode: worktree | HEAD 865e9a2 | patch: 9180 lines, sha256 2fca7c9cb2bed12e…; untracked copied: 10 | 2026-10-10T02:49:52Z
+sphinx: 7.2.6 | exit 0
+warnings: 0
+html: $SCRATCH/docs_release_2.1.2/docs/_build/html/index.html

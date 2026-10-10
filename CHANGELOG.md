@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.1.2] - 2026-10-10
+
 **The package code did not change**: `cyclophaser/` is identical to 2.1.1. These
 changes are in the calibration app (`tools/calibration_app/`) and its
 documentation.
@@ -1145,7 +1149,8 @@ previously silent or erroneous logic.
 
 *(Previous release — see git history for details.)*
 
-[Unreleased]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/daniloceano/CycloPhaser/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/daniloceano/CycloPhaser/compare/v1.9.4...v2.0.0
