@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.2] - 2026-10-09
+## [2.1.2] - 2026-10-10
 
 **The package code did not change**: `cyclophaser/` is identical to 2.1.1. These
 changes are in the calibration app (`tools/calibration_app/`) and its
