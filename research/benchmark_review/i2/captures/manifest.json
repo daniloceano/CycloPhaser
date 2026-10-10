@@ -1,0 +1,91 @@
+{
+ "python": "~/miniconda3/envs/cyclophaser/bin/python",
+ "streamlit": "1.63.0",
+ "head": "f0d2c33",
+ "tracked_files_changed": 5,
+ "viewport": "1600x1000",
+ "browser_errors": [],
+ "temporary_file_removed": true,
+ "files": {
+  "01_arrival.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "02_run_blocked.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "03_cards.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "04_provenance.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "05_train_block.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "06_disagreements.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "07_side_by_side.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "08_stacked.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "09_filter.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "10_adjudicated.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "11_limit.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "12_validate_filled_warning.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "13_compare_filled_warning.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "14_disagreement_headers.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "15_snapshot_note.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "16_validate_results_current.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "17_compare_results_current.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "18_validate_warning_dark.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "19_compare_warning_dark.png": {
+   "width_px": 1600,
+   "height_px": 1000
+  },
+  "full_page.png": {
+   "width_px": 1600,
+   "height_px": 8679
+  }
+ }
+}

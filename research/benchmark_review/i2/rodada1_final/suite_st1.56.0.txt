@@ -1,0 +1,3 @@
+which python: ~/miniconda3/bin/python | interpreter used: /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/b917fb69-1710-4cef-a61d-9be6739aa851/scratchpad/venv_st156/bin/python (Python 3.12.9) | HEAD b197124 | tracked changes: 5 | 2026-10-09T03:15:32Z
+streamlit 1.56.0 | cyclophaser ~/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+1551 passed, 1 skipped, 43 deselected in 272.55s (0:04:32)

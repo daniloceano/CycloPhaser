@@ -4180,9 +4180,9 @@ Reports: `research/release_v21/passo1/`, `passo2/` (part A); `research/release_v
 * `paper.md` on the branch `joss-submission` states no version.
 
 
-## 34. Calibration app redesign — closed without the usability round (2026-10-08), NOT merged
+## 34. Calibration app redesign — closed without the usability round, merged and released as 2.1.1 (2026-10-08)
 
-Branch `feat/app-redesign` (from `develop` @ `d339c7d`). Reports: `research/app_redesign/i1/`, `i2/`, `i3/` (each with `PREVISOES.md`, `INVENTARIO.md`, `RELATORIO.md`) and `research/app_redesign/close/`. No PR; merging needs Danilo's authorisation. The package (`cyclophaser/`), its defaults and its version are untouched by the whole front (`git diff d339c7d -- cyclophaser/` empty); the app's floor is `streamlit==1.56.0`.
+Branch `feat/app-redesign` (from `develop` @ `d339c7d`). Reports: `research/app_redesign/i1/`, `i2/`, `i3/` (each with `PREVISOES.md`, `INVENTARIO.md`, `RELATORIO.md`) and `research/app_redesign/close/`. No PR. Merge into `develop` and `master` and the 2.1.1 release were authorised by Danilo on 2026-10-08. The package (`cyclophaser/`), its defaults and its version are untouched by the whole front (`git diff d339c7d -- cyclophaser/` empty); the app's floor is `streamlit==1.56.0`.
 
 ### What each increment delivered
 
@@ -4211,7 +4211,18 @@ The set statistics cost about 0.016 s per change (measured by replacing them wit
 
 * **Overlapping script executions, unexplained.** In one CPU-4× Chromium run of I3 (old counter, which did not record the thread), the server log showed two script executions overlapping, i.e. two script threads at once, not a rerun inside one call. Not seen again in 20 runs with the corrected counter, which records the thread. The test does not depend on it.
 * **CI does not test the app.** The CI recipe installs only the wheel, pytest and PyYAML, so every app test is skipped there. At I1 (`63f074f`) the skips hid 211 tests (177 the conda env runs + 34 Chromium); at the end of the front (`4f83334`), 241: the conda suite passes 1485 and the CI recipe 1281 (1280 against the wheel + 1 on the source), so 204 run only in the conda env, plus the 37 Chromium tests, which neither runs (`research/app_redesign/close/`). Only the dedicated conda env and the manual Chromium runs test the app, on the floor (1.56.0) and on the newest version.
-* `docs/calibration_tool.rst` documents the new interface, with screenshots made by `docs/figures/make_app_screenshots.py`; Read the Docs publishes it only after the merge into `master`.
+* `docs/calibration_tool.rst` documents the new interface, with screenshots made by `docs/figures/make_app_screenshots.py` (published with 2.1.1).
+
+### Merge and release 2.1.1 (2026-10-08)
+
+* **Closing commits on `feat/app-redesign`**: `9289df2` docs (the app page and its generated screenshots; clean build as on Read the Docs, 0 warnings), `d915295` this item, `953926f` release (2.1.1 in `setup.py` and `docs/conf.py`, the only places the version is declared; CHANGELOG `[2.1.1] - 2026-10-08`), `6102b03` and `88d5185` run records (`research/app_redesign/close/`).
+* **Package code unchanged**: `git diff v2.1.0 -- cyclophaser/` is empty.
+* **Suites on `6102b03`, before merging**: conda 1485 passed / 0 failed; CI recipe 1280 passed / 0 failed against the wheel and 1 passed / 0 failed on the source; app tests 203 / 0 and Chromium 37 / 0 on streamlit 1.56.0 and on 1.63.0; docs 0 warnings.
+* **`develop`**: merge `feat/app-redesign` with `--no-ff` as **`3ca1c31`** (parents `d339c7d`, `88d5185`; tree identical to the branch). CircleCI `build_test` **#487** success (1281 passed, 0 failed), `test_pypi_publish` **#488** success. TestPyPI 2.1.1 installed in a new venv outside the repository: imported from site-packages, version 2.1.1.
+* **`master`**: merge `develop` with `--no-ff` as **`e268d80`** ("Release 2.1.1"; parents `7260b04`, `3ca1c31`), annotated tag **`v2.1.1`** (object `0936c35` → `e268d80`). The push to `master` bypassed the repository rule "Changes must be made through a pull request" (reported by GitHub on push; the account may bypass it). CircleCI `build_test` **#489** success (1281 passed, 0 failed), `pypi_publish` **#490** success.
+* **PyPI 2.1.1**: wheel `cyclophaser-2.1.1-py3-none-any.whl`, sha256 `91469cb9c79124ddffb22a33c804ef98465cf0900b9b2e751adcd0c988fa8ff9`; sdist `cyclophaser-2.1.1.tar.gz`, sha256 `1d2320647724c4178916bad8f8fed333a7e5f4b8b670272636d529b7af16048d`; `requires_python >=3.12`. The 6 package files and `LICENSE` in the wheel are byte-identical to `master` at `e268d80`; `pip install cyclophaser==2.1.1` in a new venv outside the repository reports 2.1.1. (The TestPyPI wheel, a separate build, has sha256 `0227931711be9808552ac652b4905d662b4adb82176198e49412175d294b973b`.)
+* **Read the Docs**: `latest` and `stable` show 2.1.1, with the new app page and its five screenshots.
+* `feat/app-redesign` stays on the remote (deleting it was not authorised).
 
 ### Lessons
 

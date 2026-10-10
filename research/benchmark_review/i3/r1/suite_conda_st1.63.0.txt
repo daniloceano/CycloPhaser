@@ -1,0 +1,6 @@
+which python: ~/miniconda3/bin/python | interpreter used: ~/miniconda3/envs/cyclophaser/bin/python (Python 3.12.14) | HEAD ae3a6c7 | tracked changes: 34 | 2026-10-09T14:48:14Z
+streamlit 1.63.0 | cyclophaser ~/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+E       AssertionError: assert ElementList()
+E        +  where ElementList() = AppTest(\n    _script_path='~/Documents/Programs_and_scripts/CycloPhaser/tools/calibration_app/...SpecialBlock(\n            type='sidebar'\n        ),\n        2: SpecialBlock(\n            type='event'\n        )\n    }\n).exception
+FAILED tests/test_compare_apptest.py::test_e2_compare_renders_and_runs_with_label_reading_broken
+1 failed, 1507 passed, 1 skipped, 44 deselected in 532.87s (0:08:52)

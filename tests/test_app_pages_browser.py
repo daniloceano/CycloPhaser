@@ -3,12 +3,13 @@
 Read tests/browser_harness.py first. What is here and not in AppTest:
 
 * the menu as a person sees it — sections, entries, and the Developer section
-  absent without the key;
+  absent without the key; the old Benchmark page in no menu, and its address
+  (`/benchmark`) opening the default page (benchmark review, I3);
 * the Manual labelling page end to end: drag a boundary, reveal an overlay, and
   SAVE — into a temporary COPY of manual_labels.yaml (the server is started with
   `labels_path=`), with the real file's bytes checked unchanged afterwards;
 * what AppTest cannot drive at all: file uploads. An uploaded track and an
-  imported YAML must survive a trip to Benchmark and back.
+  imported YAML must survive a trip to Compare and back (to Benchmark until I3).
 """
 
 from __future__ import annotations
@@ -114,28 +115,63 @@ def _go(page, entry: str, wait_text: str) -> None:
 
 # ── the menu ──────────────────────────────────────────────────────────────────
 
-def test_the_public_menu_has_calibrate_and_benchmark_and_no_developer(public_server, pw):
+def test_the_public_menu_has_calibrate_and_compare_and_no_developer(public_server, pw):
     browser, page = _page(pw)
     try:
         page.goto(public_server.url)
         page.wait_for_selector("text=1 · Data", timeout=RENDER_TIMEOUT)
         nav = _nav_text(page)
-        assert "Calibrate" in nav and "Benchmark" in nav, nav
-        assert "Developer" not in nav and "Manual labelling" not in nav, nav
+        assert "Calibrate" in nav and "Compare" in nav, nav
+        for word in ("Developer", "Manual labelling", "Validate against labels",
+                     "Benchmark"):
+            assert word not in nav, (word, nav)
     finally:
         browser.close()
 
 
-def test_the_developer_menu_has_the_labelling_page(dev_server, pw):
+def test_the_developer_menu_has_the_labelling_and_validate_pages(dev_server, pw):
     browser, page = _page(pw)
     try:
         page.goto(dev_server.url)
         page.wait_for_selector("text=1 · Data", timeout=RENDER_TIMEOUT)
         nav = _nav_text(page)
-        for word in ("Calibrate", "Benchmark", "Developer", "Manual labelling"):
+        for word in ("Calibrate", "Compare", "Developer", "Manual labelling",
+                     "Validate against labels"):
             assert word in nav, nav
+        assert "Benchmark" not in nav, nav
     finally:
         browser.close()
+
+
+def test_the_old_benchmark_address_opens_the_default_page(public_server, dev_server, pw):
+    """Benchmark review, I3: no provisional page. `/benchmark` falls to what
+    st.navigation does with an address it does not know, and that is the
+    default page, Calibrate — with and without the developer key. Control: the
+    same session then reaches Compare from the menu. What else Streamlit shows
+    on the way (a "page not found" notice, the address it leaves in the bar) is
+    printed for the record, not asserted."""
+    for server in (public_server, dev_server):
+        browser, page = _page(pw)
+        try:
+            lp = LabelPage(page)
+            page.goto(server.url.rstrip("/") + "/benchmark")
+            page.wait_for_selector("text=1 · Data", timeout=RENDER_TIMEOUT)
+            lp.settle()
+            main = page.locator('[data-testid="stMain"]').inner_text()
+            assert START_SCREEN in main, main[:300]
+            nav = _nav_text(page)
+            assert "Calibrate" in nav and "Benchmark" not in nav, nav
+            dialogs = page.get_by_role("dialog")
+            notice = dialogs.first.inner_text() if dialogs.count() else ""
+            print(f"/benchmark ({'developer' if server is dev_server else 'public'}): "
+                  f"url={page.url} | notice={notice!r}")
+            if notice:                  # a modal notice covers the menu: close it
+                page.keyboard.press("Escape")
+                dialogs.first.wait_for(state="hidden", timeout=RENDER_TIMEOUT)
+            _go(page, "Compare", "Compare configurations")            # control
+            assert not [e for e in lp.errors if e.startswith("pageerror")], lp.errors
+        finally:
+            browser.close()
 
 
 # ── the Manual labelling page: drag, overlay, save (to the copy) ───────────────
@@ -248,7 +284,7 @@ def test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip(dev_server, 
         lp.settle()
         assert selectbox_value(page, "Boundary padding") == "edge"
 
-        _go(page, "Benchmark", "1 · Mode")
+        _go(page, "Compare", "Compare configurations")
         _go(page, "Calibrate", "1 · Data")
 
         body = page.locator("body").inner_text()
@@ -309,7 +345,7 @@ def test_sidebar_values_set_in_the_ui_are_shown_after_page_trips(dev_server, pw)
         assert sum(a != b for a, b in zip(edited, default)) >= 3, (edited, default)
 
         for _ in range(2):
-            _go(page, "Benchmark", "1 · Mode")
+            _go(page, "Compare", "Compare configurations")
             _go(page, "Calibrate", "1 · Data")
             assert _sidebar_snapshot(page) == edited
         # an interaction AFTER the return must not send defaults back
@@ -471,9 +507,9 @@ def _is_media_404(text: str, url: str) -> bool:
 
 def test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser(dev_server, pw):
     """What AppTest cannot see, for the I3 grid: after a trip through the
-    Inspector and the Benchmark page, the browser shows the kept page size, the
-    kept page and a mark set on a page that was not on screen — and only the
-    current page's figures are in the DOM.
+    Inspector and the Compare page (the Benchmark page until I3), the browser
+    shows the kept page size, the kept page and a mark set on a page that was
+    not on screen — and only the current page's figures are in the DOM.
 
     Console errors — the one tolerance, and its condition. Streamlit serves a
     figure from /media/<hash>.png only while the run that drew it is the
@@ -520,7 +556,7 @@ def test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser(dev_server
         _settled(lp, 0)
         _main(page).get_by_text("Grid", exact=True).first.click()
         _settled(lp, 24)
-        _go(page, "Benchmark", "1 · Mode")
+        _go(page, "Compare", "Compare configurations")
         _go(page, "Calibrate", "1 · Data")
         page.wait_for_selector("text=Set statistics", timeout=RENDER_TIMEOUT)
         _settled(lp, 24)

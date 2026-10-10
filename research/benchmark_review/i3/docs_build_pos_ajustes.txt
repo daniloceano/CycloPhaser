@@ -1,0 +1,4 @@
+label: pos_ajustes | mode: worktree | HEAD ae3a6c7 | patch: 20742 lines, sha256 1d8c8f873ca63188…; untracked copied: 0 | 2026-10-09T18:13:17Z
+sphinx: 7.2.6 | exit 0
+warnings: 0
+html: $SCRATCH/docs_pos_ajustes/docs/_build/html/index.html

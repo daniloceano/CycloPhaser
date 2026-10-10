@@ -14,8 +14,9 @@ What is covered:
   custom format, and never reaches the grid.
 * **A custom file is previewed and waits for confirmation** — it is not in the
   grid before the tick, and is after it; the preview warns on positive
-  (northern-hemisphere) vorticity. The Benchmark Exploration upload follows the
-  same settings.
+  (northern-hemisphere) vorticity. (The Benchmark page's Exploration upload
+  followed the same settings until that page was retired, benchmark review I3;
+  the Compare page uploads nothing and runs the tracks loaded here.)
 * **The grid no longer shows the use_filter=True warning** with the filter on
   and many cyclones. Its positive control proves the searched text is what the
   package emits for True, so "zero occurrences" cannot come from a stale string.
@@ -129,22 +130,6 @@ def test_every_custom_format_control_has_help():
         assert _widget(at, kind, key).help == text, key
 
 
-def _to_benchmark(at) -> AppTest:
-    """Benchmark is a page of its own since the app redesign (I1); the custom
-    format set on Calibrate reaches it through app.py's cross-page state."""
-    at.switch_page("app_pages/benchmark.py")
-    return _run(at)
-
-
-def test_benchmark_upload_accepts_txt_and_has_help():
-    at = _to_benchmark(_app())
-    _widget(at, "radio", "bench_mode").set_value("Exploration")
-    _run(at)
-    up = _widget(at, "file_uploader", "bench_data_upload")
-    assert set(up.allowed_type) == {".csv", ".txt"}
-    assert tfu.UPLOAD_HELP in up.help
-
-
 # ── the Calibration uploader ──────────────────────────────────────────────────
 def test_standard_content_with_txt_extension_reaches_the_grid():
     at = _app()
@@ -193,23 +178,6 @@ def test_positive_vorticity_warns_in_the_preview():
     _run(at)
     _custom_dialog(at)
     assert any("SOUTHERN hemisphere" in w.value for w in at.warning)
-
-
-# ── the Benchmark Exploration uploader, same settings ─────────────────────────
-def test_benchmark_exploration_uses_the_same_custom_format():
-    at = _to_benchmark(_enable_custom(_app()))
-    _widget(at, "radio", "bench_mode").set_value("Exploration")
-    _run(at)
-    _widget(at, "file_uploader", "bench_data_upload").set_value(
-        ("odd.txt", _custom_file(), "text/plain"))
-    _run(at)
-    assert "odd" not in at.session_state["bench_extra_series"]
-    [c for c in at.checkbox if c.key.startswith("bench_custom_ok_")][0].check()
-    _run(at)
-    got = at.session_state["bench_extra_series"]["odd"]
-    expected = pd.read_csv(SOURCE, sep=";", index_col="time",
-                           parse_dates=True)["min_max_zeta_850"].tolist()
-    assert got == expected
 
 
 # ── the use_filter warning no longer comes from the app ───────────────────────

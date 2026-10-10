@@ -87,16 +87,16 @@ config by its hash, never by its file name**: an app export called
 | **`cyclophaser_params-track.yaml`** (was `cyclophaser_params-15.yaml`) | `5aa61f2dec710029b46a47668812d14e6d552517b7bca8912a8e00fd130ccf04` | **the calibration preset** — params-14 + `incipient_plateau_spare_intensification` true (item 30); **adotado sem validação independente** (2026-09-27) |
 
 **Do not normalise or reformat params-track.** Its identity is its file hash: the
-Benchmark shows that hash as a column's provenance, and every later record
-cites it. It was written by hand from params-14 (plus one line), so its
+app's Validate against labels page (developer key) shows that hash in a column's
+provenance, and every later record cites it. It was written by hand from params-14 (plus one line), so its
 `metadata` block is params-14's, timestamp included.
 
 **Incomplete configs** (item 31, decision (a)). A key a config does not carry is
 filled with its **pre-item-31 default** from the frozen table
 `defaults_2.0.0.json` (generated from item 31's parameter table, never edited by
 hand; helper `config_defaults.py`), and the filled keys are always listed —
-by `evaluate_against_labels.py` (stderr), by the Benchmark column's provenance
-(item 4) and by the app's YAML import (a warning). A key present is never
+by `evaluate_against_labels.py` (stderr), by a column's provenance on the app's
+Validate against labels page (item 4) and by the app's YAML import (a warning). A key present is never
 changed. This keeps an old or hand-trimmed config meaning what it meant when it
 was written, whatever the package defaults become.
 

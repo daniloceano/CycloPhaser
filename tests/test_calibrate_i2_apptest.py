@@ -231,7 +231,7 @@ def test_a_bad_case_mark_survives_grid_inspector_grid_and_a_page_trip():
     at.radio(key="view_mode").set_value("Grid")
     _run(at)
     assert at.checkbox(key=mark).value is True
-    at.switch_page("app_pages/benchmark.py")
+    at.switch_page("app_pages/compare.py")
     _run(at)
     at.switch_page("app_pages/calibrate.py")
     _run(at)

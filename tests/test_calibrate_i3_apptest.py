@@ -164,7 +164,7 @@ def test_the_pages_cover_every_track_once_and_a_new_set_starts_at_page_one(sampl
     assert at.button(key="grid_prev_top").disabled
 
 
-def test_a_bad_case_mark_on_page_one_survives_page_two_the_inspector_and_benchmark(
+def test_a_bad_case_mark_on_page_one_survives_page_two_the_inspector_and_compare(
         sample_names):
     at = _click(_app(dev=True), "btn_sample")
     first = _track_headings(at, set(sample_names))[0]
@@ -179,7 +179,7 @@ def test_a_bad_case_mark_on_page_one_survives_page_two_the_inspector_and_benchma
     assert at.session_state[mark] is True
     at.radio(key="view_mode").set_value("Grid")
     _run(at)
-    at.switch_page("app_pages/benchmark.py")
+    at.switch_page("app_pages/compare.py")
     _run(at)
     at.switch_page("app_pages/calibrate.py")
     _run(at)
@@ -199,7 +199,7 @@ def test_the_page_size_survives_the_inspector_and_a_page_trip():
     at.radio(key="view_mode").set_value("Grid")
     _run(at)
     assert at.selectbox(key="grid_page_size").value == 48
-    at.switch_page("app_pages/benchmark.py")
+    at.switch_page("app_pages/compare.py")
     _run(at)
     at.switch_page("app_pages/calibrate.py")
     _run(at)
@@ -216,7 +216,7 @@ def test_the_grid_columns_survive_the_inspector_and_a_page_trip():
     at.radio(key="view_mode").set_value("Grid")
     _run(at)
     assert at.select_slider(key="n_cols").value == 3
-    at.switch_page("app_pages/benchmark.py")
+    at.switch_page("app_pages/compare.py")
     _run(at)
     at.switch_page("app_pages/calibrate.py")
     _run(at)

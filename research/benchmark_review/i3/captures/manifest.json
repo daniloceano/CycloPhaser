@@ -1,0 +1,59 @@
+{
+ "python": "~/miniconda3/envs/cyclophaser/bin/python",
+ "streamlit": "1.63.0",
+ "head": "ae3a6c7",
+ "tracked_files_changed": 34,
+ "benchmark_address": {
+  "public": {
+   "url_after": "<server>/",
+   "notice": "Page not found\nThe page that you have requested does not seem to exist. Running the app's main page."
+  },
+  "developer": {
+   "url_after": "<server>/",
+   "notice": "Page not found\nThe page that you have requested does not seem to exist. Running the app's main page."
+  }
+ },
+ "f5_headers": [
+  "Tracks that disagree with the label — Defaults (train, n = 47) · sequence: 16 tracks differ, 10 tracks with a boundary outside its tolerance · mature: 6 not within the margin",
+  "Tracks that disagree with the label — params-track (train, n = 47) · sequence: 16 tracks differ, 10 tracks with a boundary outside its tolerance · mature: 5 not within the margin",
+  "Show only tracks that disagree with the label (any column)"
+ ],
+ "browser_errors": [
+  "public /benchmark: console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "public /benchmark: console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "public /benchmark: console.error: The page that you have requested does not seem to exist. Running the app's main page.",
+  "developer /benchmark: console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "developer /benchmark: console.error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "developer /benchmark: console.error: The page that you have requested does not seem to exist. Running the app's main page."
+ ],
+ "png": {
+  "01_public_menu.png": [
+   1600,
+   1000
+  ],
+  "02_public_benchmark_address.png": [
+   1600,
+   1000
+  ],
+  "03_public_after_notice.png": [
+   1600,
+   1000
+  ],
+  "04_developer_menu.png": [
+   1600,
+   1000
+  ],
+  "05_developer_benchmark_address.png": [
+   1600,
+   1000
+  ],
+  "06_f5_headers.png": [
+   1600,
+   1000
+  ],
+  "07_f5_header_open.png": [
+   1600,
+   1000
+  ]
+ }
+}

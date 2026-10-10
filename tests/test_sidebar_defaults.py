@@ -9,13 +9,15 @@ returns there. Pinned here, against the REAL app (AppTest, public API only):
   applied to the signature, key by key. The expectation is re-derived HERE from
   the signature, not read from the app's code, so an app that drifted back to a
   table of its own fails;
-* the published live config (what the Grid and a Benchmark sidebar column run)
+* the published live config (what the Grid and a "Current settings" column run)
   equals the signature defaults, key by key;
 * Reset returns to them after edits;
-* app <-> package: an UNTOUCHED sidebar column gives the same phase map as
-  `determine_periods(series)` with no arguments, on 3 TRAIN series (2 real of
-  the split, 1 of the swell batch) — with its positive control: one non-default
-  sidebar value (cutoff_high=48) makes at least one of the 3 differ.
+* app <-> package: an UNTOUCHED "Current settings" column gives the same phase
+  map as `determine_periods(series)` with no arguments, on 3 TRAIN series (2
+  real of the split, 1 of the swell batch) — with its positive control: one
+  non-default sidebar value (cutoff_high=48) makes at least one of the 3 differ.
+  The column is run on the Validate page (developer key), the page that offers
+  the swell batch since the Benchmark page was retired (benchmark review, I3).
 """
 
 from __future__ import annotations
@@ -129,7 +131,7 @@ def test_sidebar_start_up_values_are_the_signature_defaults():
 
 
 def test_the_published_live_config_is_the_signature_defaults_key_by_key():
-    """What the Grid and a Benchmark sidebar column actually run."""
+    """What the Grid and a "Current settings" column actually run."""
     live = _app().session_state["_bench_live_config"]
     sig = _sig()
     pv = set(inspect.signature(process_vorticity).parameters) - NON_PARAMS
@@ -170,24 +172,37 @@ def _three_train_ids() -> list[str]:
 
 
 def _sidebar_column_runs(set_cutoff_high=None) -> dict:
-    at = _app()
-    if set_cutoff_high is not None:     # the sidebar is the Calibrate page's
-        _widget(at, "slider", "cutoff_high").set_value(set_cutoff_high)
+    """The "Current settings" column on the Validate page (developer key), run
+    on the 3 ids: {id: [[phase, start, end], ...]}."""
+    import os
+    old = os.environ.get("CYCLOPHASER_APP_DEV")
+    os.environ["CYCLOPHASER_APP_DEV"] = "1"
+    try:
+        at = _app()
+        if set_cutoff_high is not None:     # the sidebar is the Calibrate page's
+            _widget(at, "slider", "cutoff_high").set_value(set_cutoff_high)
+            at.run()
+        at.switch_page("app_pages/validate.py").run()
+        _widget(at, "checkbox", "val_include_batch").set_value(True)
         at.run()
-    at.switch_page("app_pages/benchmark.py").run()   # a page of its own since I1
-    _widget(at, "checkbox", "bench_include_swell_batch").set_value(True)
-    at.run()
-    ids = _three_train_ids()
-    _widget(at, "multiselect", "bench_ids_widget").set_value(ids)
-    at.run()
-    _widget(at, "button", "bench_add_sidebar").click()
-    at.run()
-    _widget(at, "button", "bench_run").click()
-    at.run()
-    assert not at.exception, [str(e) for e in at.exception]
-    (col,) = at.session_state["bench_last_results"]
-    assert list(col["series"]) == ids
-    return col["series"]
+        ids = _three_train_ids()
+        _widget(at, "multiselect", "val_tracks").set_value(ids)
+        at.run()
+        _widget(at, "button", "val_add_current").click()
+        at.run()
+        _widget(at, "button", "val_run").click()
+        at.run()
+        assert not at.exception, [str(e) for e in at.exception]
+    finally:
+        if old is None:
+            os.environ.pop("CYCLOPHASER_APP_DEV", None)
+        else:
+            os.environ["CYCLOPHASER_APP_DEV"] = old
+    res = at.session_state["_val_results"]
+    (col,) = res["columns"]
+    assert res["ids"] == ids
+    cells = res["cells"][col["cid"]]
+    return {sid: [list(r) for r in cells[sid]["runs"]] for sid in ids}
 
 
 def _package_runs() -> dict:

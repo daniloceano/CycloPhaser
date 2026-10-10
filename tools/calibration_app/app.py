@@ -33,7 +33,9 @@ from cyclophaser.plots import plot_all_periods, plot_didactic
 # strategy the data paths below use, and for the same reason).
 if str(Path(__file__).parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).parent))
-import benchmark_tab  # noqa: E402
+import compare_tab  # noqa: E402
+import validate_tab  # noqa: E402
+import config_text  # noqa: E402
 import layer_inspector as li  # noqa: E402
 import set_stats  # noqa: E402
 import track_format_ui  # noqa: E402
@@ -1394,10 +1396,13 @@ def _run_get_periods(
 _APP_PAGES_DIR = Path(__file__).parent / "app_pages"
 _PAGE_CALIBRATE = st.Page(_APP_PAGES_DIR / "calibrate.py", title="Calibrate",
                           icon=":material/tune:", default=True)
-_PAGE_BENCHMARK = st.Page(_APP_PAGES_DIR / "benchmark.py", title="Benchmark",
-                          icon=":material/table_chart:")
+_PAGE_COMPARE = st.Page(_APP_PAGES_DIR / "compare.py", title="Compare",
+                        icon=":material/compare_arrows:")
 _PAGE_LABEL = st.Page(_APP_PAGES_DIR / "label.py", title="Manual labelling",
                       icon=":material/edit_note:")
+_PAGE_VALIDATE = st.Page(_APP_PAGES_DIR / "validate.py",
+                         title="Validate against labels",
+                         icon=":material/fact_check:")
 
 
 def _developer_mode() -> bool:
@@ -1448,10 +1453,12 @@ _PAGE_WIDGET_STATE: dict[str, tuple[frozenset, tuple[str, ...]]] = {
             "show_incipient_probe", "load_all_test_cyclones", "show_advanced_diffs",
             "load_synthetic_clean", "load_synthetic_noisy", "grid_page_size"}),
         (_BAD_CASE_KEY_PREFIX, "track_custom_", "save_include_")),
-    _PAGE_BENCHMARK.url_path: (benchmark_tab.WIDGET_STATE_KEYS,
-                               benchmark_tab.WIDGET_STATE_PREFIXES),
+    _PAGE_COMPARE.url_path: (compare_tab.WIDGET_STATE_KEYS,
+                             compare_tab.WIDGET_STATE_PREFIXES),
     _PAGE_LABEL.url_path: (frozenset({"label_default_tolerance",
                                       "lab_nav_only_unlabeled"}), ()),
+    _PAGE_VALIDATE.url_path: (validate_tab.WIDGET_STATE_KEYS,
+                              validate_tab.WIDGET_STATE_PREFIXES),
 }
 
 
@@ -1470,12 +1477,17 @@ def _keep_page_state(current: str, arrived: bool) -> None:
                     pass
 
 
-_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_BENCHMARK]}
+_pages = {"Calibration": [_PAGE_CALIBRATE, _PAGE_COMPARE]}
 if _developer_mode():
-    _pages["Developer"] = [_PAGE_LABEL]
+    _pages["Developer"] = [_PAGE_LABEL, _PAGE_VALIDATE]
 _page = st.navigation(_pages)
 _PREVIOUS_PAGE = st.session_state.get("_app_page")
 st.session_state["_app_page"] = _page.url_path
+# Read by the Compare and Validate pages, which re-apply their own copies of
+# their widget values on arrival (compare_tab.KEEP_PREFIX explains why the
+# shield below is not enough there).
+st.session_state["_app_arrived"] = (_PREVIOUS_PAGE is not None
+                                    and _PREVIOUS_PAGE != _page.url_path)
 _keep_page_state(_page.url_path,
                  arrived=_PREVIOUS_PAGE is not None and _PREVIOUS_PAGE != _page.url_path)
 if _page.url_path != _PAGE_CALIBRATE.url_path:
@@ -1872,6 +1884,10 @@ with st.sidebar:
     if _uploaded_tracks:
         files.update(_uploaded_tracks)
     cyclone_names = list(files.keys())
+    # The tracks the detection below runs on, for the Compare page — the same
+    # bytes, published here rather than re-read there, so the two pages cannot
+    # disagree on what "the loaded tracks" are (benchmark review, A6).
+    st.session_state[compare_tab.LIVE_TRACKS] = dict(files)
 
     if files:
         _parts = ([f"{len(_uploaded_tracks)} uploaded"] if _uploaded_tracks else []) + (
@@ -1917,14 +1933,11 @@ with st.sidebar:
             st.error(f"Import failed: {_r['error']}")
         else:
             st.success(f"Loaded {_r['count']} parameters from YAML.")
+            # The same sentences as a Compare column (config_text.py).
             if _r["ignored"]:
-                st.warning(f"Ignored keys: {', '.join(_r['ignored'])}")
-            if _r.get("filled"):
-                st.warning(
-                    f"{len(_r['filled'])} key(s) absent from this file were filled "
-                    "with the earlier defaults older configuration files were "
-                    "written against: "
-                    + ", ".join(f"{k}={v!r}" for k, v in _r["filled"]))
+                st.warning(config_text.ignored_keys_sentence(_r["ignored"]))
+            if config_text.filled_keys_sentence(_r.get("filled") or []):
+                st.warning(config_text.filled_keys_sentence(_r["filled"]))
     _active_config_line = st.empty()
 
     st.divider()
@@ -2573,9 +2586,9 @@ _PHASE_PARAMS = dict(
 _phase_params_tuple = tuple(sorted(_PHASE_PARAMS.items()))
 
 # The sidebar's live state, in the same shape a calibration YAML uses, so the
-# Benchmark page can spawn a column from "the current sidebar" without
+# Compare and Validate pages can add a "Current settings" column without
 # re-deriving any of it. Written here, next to the values actually passed to the
-# detector, rather than rebuilt inside the tab: a second derivation would be one
+# detector, rather than rebuilt inside those pages: a second derivation would be one
 # more place for the column and the Calibration view to drift apart. The Manual
 # labelling page reads its filter_params too, for its optional overlays
 # (label_overlays.live_filter_params): that page no longer runs this sidebar.
@@ -2593,7 +2606,6 @@ st.session_state["_bench_live_config"] = {
     # Item 31: None kept (OFF), for the reason given at _phase_params_tuple.
     "phase_params": dict(_PHASE_PARAMS),
 }
-
 # ── Sidebar: the Advanced notice and the active configuration ───────────────────
 # Both are drawn ABOVE the widgets they describe but filled here, once every
 # widget has produced its value for this run.
@@ -2620,6 +2632,17 @@ if _K_CONFIG_SNAPSHOT not in st.session_state:
         "filter_params": dict(_live["filter_params"]),
         "phase_params": dict(_live["phase_params"])}
 _edited = _changed_keys(_live, st.session_state[_K_CONFIG_SNAPSHOT])
+# The Compare page's "Defaults" column: the live config above, taken whenever
+# the sidebar shows the Defaults unedited — on a session's first run (the
+# widgets start at `_DEFAULTS`) and after the "Defaults" button (`_reset` to
+# `_DEFAULTS`). It is therefore what that button sets, values and types alike,
+# with no second derivation of the sidebar (the signature's cutoff_high is
+# 18.0 where the slider gives 18, for one). tests/test_compare_apptest.py
+# checks that pressing Defaults makes the live config equal to it.
+if st.session_state.get(_K_CONFIG_SOURCE, "Defaults") == "Defaults" and not _edited:
+    st.session_state[compare_tab.DEFAULTS_CONFIG] = {
+        "filter_params": dict(_live["filter_params"]),
+        "phase_params": dict(_live["phase_params"])}
 _active_config_line.markdown(
     f"Active: **{st.session_state.get(_K_CONFIG_SOURCE, 'Defaults')}**"
     + (f" · edited ({len(_edited)} change{'s' if len(_edited) != 1 else ''})"
