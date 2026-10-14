@@ -4427,6 +4427,46 @@ Branch `feat/benchmark-review` (from `develop` @ `39e658c`); release branch `rel
 4. **A CircleCI pipeline with no workflow is "not run yet", not a failure.** Re-check over hours before concluding (pipeline 399: 2 h 10 min).
 5. **Compare published artefacts by content, not by bytes.** Wheels built by separate jobs differ in zip metadata.
 
+## 36. Calibration-app tests in CI (CircleCI `app_test`, floor + newest) — implemented on `ci/app-tests`, not merged (2026-10-14)
+
+Branch `ci/app-tests` (from `develop` @ `3f410df`). Reports: `research/ci_app_tests/etapa0/` (stage 0: measurements and design, `PREVISOES.md` `c5174d1`, `RELATORIO.md` `9efc74f`; design approved by Danilo 2026-10-14) and `research/ci_app_tests/etapa1/` (stage 1: implementation, `PREVISOES_passo1..3.md`, `RELATORIO.md`). No PR. `git diff 3f410df -- cyclophaser setup.py` is empty: the package and its `install_requires` are untouched. Merge awaits Danilo's explicit authorisation.
+
+### What changed
+
+* **`.circleci/config.yml`**: a new job `app_test`, parameter `leg` (`floor` = `streamlit==1.56.0`, `newest` = streamlit unpinned), `resource_class: medium`, run as a matrix with fixed names `app_test_floor` / `app_test_newest`, only on `develop`, `master` and `/^ci\/.*/`. It builds the wheel of the commit, installs it with streamlit, plotly, pyyaml and pytest in one pip call, stores the `pip freeze` as an artifact, and runs `pytest --import-mode=append -m "not browser and not source_tree"` from the checkout root with `CYCLOPHASER_REQUIRE_INSTALLED=1` and `CYCLOPHASER_REQUIRE_APP_DEPS=1`. `test_pypi_publish` and `pypi_publish` now require `build_test` + both legs. `build_test` is unchanged except `when: always` on `store_test_results` (also in `app_test`). The header comment records the gaps below.
+* **`.circleci/check_app_skips.py`** (standard library only): the job fails unless the junit skips are **exactly** 5 ids — the 4 browser modules (playwright absent) and `test_lifecycle_phase_timing[IcIt_observational]` — by junit id, never by skip-reason text.
+* **`tests/conftest.py`**: `CYCLOPHASER_REQUIRE_APP_DEPS`. Set, `pytest_configure` imports streamlit, plotly and yaml and raises `pytest.UsageError` naming every one that fails, including an installed-but-broken import. Unset, nothing changes and nothing is imported.
+* **`tests/sample_tracks/`** (new, versioned): 2 TRACK CSVs copied from `tools/calibration_app/sample_tracks/` (git-ignored). `tests/test_compare_core.py::test_the_series_key_is_the_content_not_the_name` reads them, so it no longer skips on every clean clone. A grep showed no other test globs that folder.
+
+### Measured (predictions committed and pushed before every measurement; suite counts are passed / failed)
+
+* **Stage 0** (local, `c5174d1`): wheel = `cyclophaser/` + dist-info only; CI baseline (job 516) 1280 / 0 + 1 / 0; 226 non-browser app tests (181 AppTest in 12 files, 45 core in 6) + 44 browser, all 226 skipped by the lean recipe; 1506 / 0 on streamlit 1.56.0, 1.65.0 and the local pins; 58 / 58 local stability runs (29 per leg).
+* **Stage 1, step 1** (`425a72f`): local lean 1280 / 0 + 1 / 0; conda `-m "not browser"` 1508 / 0; local floor and newest legs 1507 / 0 with the skip check OK and every `cyclophaser*` module from the venv. CircleCI pipeline [411](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/411): `build_test` (521) 1280 / 0 + 1 / 0; `app_test_floor` ([519](https://circleci.com/gh/daniloceano/CycloPhaser/519)) and `app_test_newest` ([520](https://circleci.com/gh/daniloceano/CycloPhaser/520)) 1507 / 0, skip check OK, no publishing job; freezes: streamlit 1.56.0 / 1.65.0, pandas 3.0.6, numpy 2.5.4, plotly 7.1.0.
+* **Step 2, controls** (disposable branch `ci/app-tests-controls`):
+  * (e) positive, a real app-code regression (the `vorticity_smoothed2` overlay layer dropped from `label_overlays.py`, outside the 4 app modules `build_test` imports): pipeline [412](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/412), both legs red with 1505 / 2 and exactly the 2 declared ids (`test_label_apptest.py::test_toggling_overlay_layers_does_not_move_any_phase`, `::test_revealing_an_overlay_records_it_and_unblinds_the_case`) listed as `failure` by the `/tests` API (jobs [522](https://circleci.com/gh/daniloceano/CycloPhaser/522), [524](https://circleci.com/gh/daniloceano/CycloPhaser/524); proves `when: always`); `build_test` green. Revert: pipeline [413](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/413), both legs 1507 / 0 (jobs 525, 526).
+  * (c) negative, a leg without plotly: job [528](https://circleci.com/gh/daniloceano/CycloPhaser/528), `UsageError … plotly (ModuleNotFoundError …)`, exit 4, red.
+  * (d) negative, `python -m pytest` from the root: job [532](https://circleci.com/gh/daniloceano/CycloPhaser/532), `UsageError` of `CYCLOPHASER_REQUIRE_INSTALLED` (cyclophaser from `/home/circleci/project/cyclophaser/`), exit 4, red.
+* **Step 3, stability (f)** (disposable branch `ci/app-tests-stability`, pipeline [415](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/415)): leg × run(1..29) = 58 jobs on one commit, `medium`: **58 / 58 green, each 1507 / 0 with the skip check OK**. Detects a per-run flake rate p ≥ 9.81 % with 95 %. Durations: floor 9.3–12.2 min, newest 9.8–12.9 min. Credits: 6 181 (exact seconds) / 6 460 (rounded up per job), above the stage-0 estimate of 2 999–5 023, because assumption A3 (`medium` as fast as the estimate) failed: in steps 1–2 the test step took 560–642 s on CI against 223–243 s locally (step 1).
+* **Cost**: per push to `develop`/`master`/`ci/*`, the two legs cost ~220 credits. At ~41 such pushes a month plus the current CI (8 574), the projection is ~17 700 credits/month, under the 25 000 stop rule (stop threshold 20.03 min per leg). The whole front spent ~7 430 credits on 2026-10-14.
+
+### Gaps that remain
+
+* **Chromium is not in CI.** The 44 browser tests stay manual. Three defects were visible only in Chromium (item 35, Lessons 1): A12, F1, and the `st.toggle` role.
+* **The app is tested only after the merge into `develop`**: feature branches run `build_test` only (Free plan). Before a merge, run the app tests in the conda env.
+* **Streamlit Cloud redeploys on every push to `master` without waiting for CI.** `app_test` detects, it does not prevent. Rule (now in `CLAUDE.md`): merge into `master` only with both legs green on the same commit in `develop`.
+* A red `newest` with no code change is an upstream release; it also blocks publishing until decided. The leg's `pip freeze` artifact attributes it.
+
+### Backlog
+
+* **Packaging** (needs `setup.py` and a new release, so outside this front by criterion (a)):
+  * `cmocean>=4.0` is a real defect of the published package: 4.0.1 satisfies it and breaks `import cmocean`, and therefore `import cyclophaser` (`rgb/inverted/` missing). The real floor is 4.0.3.
+  * `pandas>=2.2` and `pyyaml>=6.0` are imprecise but harmless (pip never picks 2.2.0/2.2.1 with `numpy>=2.1`; 6.0 has no cp312 wheel). The real floors are 2.2.2 and 6.0.1.
+  * The broader `install_requires` debt (pinned build/test tooling among runtime requirements) goes with it.
+  * The app's declared floors (`tools/calibration_app/requirements.txt`) do not install together. A "all floors" leg is possible only after they are fixed.
+* **Two `sys.path.insert(0, <repo root>)`** in `research/labels/evaluate_against_labels.py:83` and `research/labels/diagnostics/item19/item19_core.py:23` put the checkout ahead of site-packages in every test run. They are harmless today only because `cyclophaser` is already in `sys.modules`; the provenance lock would catch a change. Switching them to `append` is a small front of its own.
+* **Option: run `app_test` on every branch** once real consumption is known. The open-source quota (400 000 credits/month for a public repo) cannot be confirmed in the CircleCI UI, so the conservative filter stays until consumption data supports widening it.
+* A scheduled (weekly) Chromium job could be a front of its own; browser tests have shown real flakiness before (item 35, I3).
+
 ---
 
 ## Note
