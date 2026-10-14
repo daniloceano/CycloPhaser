@@ -1,0 +1,27 @@
+{
+  "build_test": {
+    "n": 168,
+    "total_min": 420.5,
+    "mean_s": 150.2,
+    "median_s": 149.5,
+    "max_s": 215.3
+  },
+  "test_pypi_publish": {
+    "n": 10,
+    "total_min": 6.4,
+    "mean_s": 38.2,
+    "median_s": 36.5,
+    "max_s": 56.2
+  },
+  "pypi_publish": {
+    "n": 3,
+    "total_min": 1.8,
+    "mean_s": 36.5,
+    "median_s": 36.5,
+    "max_s": 36.7
+  },
+  "_statuses": {
+    "failed": 3,
+    "success": 178
+  }
+}

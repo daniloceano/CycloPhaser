@@ -1,0 +1,12 @@
+label=floor_st
+which_python=/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_floor_st/bin/python
+which_pytest=/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_floor_st/bin/pytest
+checkout=/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/checkout commit=c5174d1dfc499c9a0ca6333f7d4c50511cc9b276
+marker=not browser and not source_tree
+start=2026-10-13T23:38:37Z
+exit_code=0
+wall_s=226.0
+end=2026-10-13T23:42:23Z
+git_status_after=0
+CYCLOPHASER_REQUIRE_INSTALLED: cyclophaser.__file__ = /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_floor_st/lib/python3.12/site-packages/cyclophaser/__init__.py
+cyclophaser.__file__ (in session) = /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_floor_st/lib/python3.12/site-packages/cyclophaser/__init__.py

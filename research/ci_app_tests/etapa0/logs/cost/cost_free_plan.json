@@ -1,0 +1,75 @@
+{
+  "pipelines_total": 172,
+  "by_class": {
+    "permanent": 40,
+    "ci": 1,
+    "tag": 4,
+    "feature": 127
+  },
+  "by_branch": {
+    "permanent": {
+      "develop": 10,
+      "master": 3,
+      "develop-v2.1": 27
+    },
+    "ci": {
+      "ci/app-tests": 1
+    },
+    "tag": {
+      "v2.1.2": 1,
+      "v2.1.1": 1,
+      "v2.1.0": 1,
+      "archive/research-diagnostics-pre-cleanup": 1
+    },
+    "feature": {
+      "release/v2.1.2": 3,
+      "feat/benchmark-review": 8,
+      "feat/app-redesign": 10,
+      "release/v2.1": 4,
+      "fix/relabel-recovery": 2,
+      "chore/repo-cleanup": 19,
+      "research/item31-params15-default": 7,
+      "research/item31-stage2b-checkpoint": 1,
+      "research/item30-plateau-overwrite": 18,
+      "fix/inspector-depth-params": 1,
+      "feat/app-flexible-track-reader": 2,
+      "frontA-idx0-c2": 5,
+      "fix/inspector-min-depth-params": 1,
+      "docs/item13-close": 1,
+      "research/frontA-reverify": 1,
+      "research/incipient-refusal-stage1": 2,
+      "research/frontD-stage0-census": 2,
+      "docs/frontC-hash-provenance": 2,
+      "research/frontC-intensification-depth": 2,
+      "research/item20c-duration-ratio": 3,
+      "research/item20b-depth-rule": 3,
+      "research/item5-benchmark-tab": 7,
+      "research/item20a-maf-090": 3,
+      "research/item19-mature-prominence": 5,
+      "chore/b-remove-distance": 2,
+      "diag/front-b-distance-inert": 1,
+      "research/v3-topology-proxy": 1,
+      "docs/memory-g-e-closing": 2,
+      "docs/front-g-closing": 1,
+      "feat/front-g-manual-labels-source": 1,
+      "feat/label-tab-toplevel": 1,
+      "feat/label-tab-navigation-overlays": 6
+    }
+  },
+  "app_pushes_30d(permanent+ci)": 41,
+  "current_credits_30d": 8574,
+  "lower_app_credits_per_push_medium": 103,
+  "lower_app_credits_30d_medium": 4239,
+  "lower_total_30d": 12813,
+  "lower_f_one_off_58_jobs": 2999,
+  "lower_month_with_f": 15812,
+  "lower_month_with_f_below_free": true,
+  "upper_app_credits_per_push_medium": 173,
+  "upper_app_credits_30d_medium": 7101,
+  "upper_total_30d": 15675,
+  "upper_f_one_off_58_jobs": 5023,
+  "upper_month_with_f": 20698,
+  "upper_month_with_f_below_free": true,
+  "stop_rule_max_min_per_push": 40.06,
+  "stop_rule_max_min_per_leg": 20.03
+}

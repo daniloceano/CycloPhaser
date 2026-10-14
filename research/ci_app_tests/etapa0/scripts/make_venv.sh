@@ -10,7 +10,12 @@
 #   lean        the CI recipe today: wheel + pytest + pyyaml
 #   newest      wheel + streamlit plotly pyyaml pytest, nothing pinned
 #   floor_st    as newest, streamlit==1.56.0                       (0.5 i)
-#   floors_all  every app requirement at its requirements.txt floor (0.5 i')
+#   floors_all  every app requirement at its requirements.txt floor (0.5 i'):
+#               the LOWEST RELEASE satisfying each `>=` (cmocean>=4.0 -> 4.0.1:
+#               there is no 4.0 on PyPI; first attempt used ==4.0 and pip
+#               stopped before resolving -- instrument correction, see RELATORIO;
+#               pyyaml>=6.0 -> 6.0.1: 6.0 has no cp312 wheel and its sdist
+#               fails to build, a finding about the floor, see RELATORIO)
 #   floors_all_pd222  floors_all with pandas==2.2.2 (extra, declared up front)
 #   pins_local  requirements-app.txt pins, wheel instead of `-e ../..` (0.5 iii)
 source "$(dirname "$0")/common.sh"
@@ -22,11 +27,16 @@ case "$VARIANT" in
   floor_st)   DEPS=("streamlit==1.56.0" plotly pyyaml pytest) ;;
   floors_all) DEPS=("streamlit==1.56.0" "pandas==2.2.0" "matplotlib==3.9.0"
                     "plotly==5.24.0" "xarray==2024.9.0" "numpy==2.1.0"
-                    "scipy==1.14.0" "cmocean==4.0" "pyyaml==6.0" pytest) ;;
+                    "scipy==1.14.0" "cmocean==4.0.1" "pyyaml==6.0.1" pytest) ;;
   floors_all_pd222)
               DEPS=("streamlit==1.56.0" "pandas==2.2.2" "matplotlib==3.9.0"
                     "plotly==5.24.0" "xarray==2024.9.0" "numpy==2.1.0"
-                    "scipy==1.14.0" "cmocean==4.0" "pyyaml==6.0" pytest) ;;
+                    "scipy==1.14.0" "cmocean==4.0.1" "pyyaml==6.0.1" pytest) ;;
+  floors_all_cm403)   # NOT declared in PREVISOES: exploratory, added after
+                      # cmocean 4.0.1 broke floors_all_pd222 (see RELATORIO)
+              DEPS=("streamlit==1.56.0" "pandas==2.2.2" "matplotlib==3.9.0"
+                    "plotly==5.24.0" "xarray==2024.9.0" "numpy==2.1.0"
+                    "scipy==1.14.0" "cmocean==4.0.3" "pyyaml==6.0.1" pytest) ;;
   pins_local) DEPS=("streamlit==1.58.0" "pandas==2.3.3" "matplotlib==3.9.2"
                     "plotly==7.0.0" "xarray==2026.1.0" "numpy==2.4.0"
                     "scipy==1.17.1" "cmocean==4.0.3" "pyyaml==6.0.3" pytest) ;;

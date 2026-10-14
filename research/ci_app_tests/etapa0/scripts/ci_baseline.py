@@ -9,6 +9,7 @@
 Read-only GETs against circleci.com. Raw JSON is saved next to the summary.
 """
 
+import gzip
 import json
 import sys
 import urllib.parse
@@ -20,8 +21,13 @@ SLUG_V2 = "gh/daniloceano/CycloPhaser"
 
 
 def get(url):
-    with urllib.request.urlopen(url, timeout=60) as r:
-        return json.load(r)
+    req = urllib.request.Request(url, headers={"Accept": "application/json",
+                                               "User-Agent": "curl/8"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        raw = r.read()
+    if raw[:2] == b"\x1f\x8b":          # step logs come gzip-compressed
+        raw = gzip.decompress(raw)
+    return json.loads(raw)
 
 
 def _pytest_summary(step):

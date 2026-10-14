@@ -1,0 +1,14 @@
+# commit c5174d1dfc499c9a0ca6333f7d4c50511cc9b276
+# wheel  cyclophaser-2.1.2-py3-none-any.whl  sha256 1538d8b4038fa62c3705ad72bedb7da94060d6623eda2107f54ad2261bce6054
+File Name                                             Modified             Size
+cyclophaser/__init__.py                        2026-10-13 23:20:22          164
+cyclophaser/determine_periods.py               2026-10-13 23:20:22       111979
+cyclophaser/find_stages.py                     2026-10-13 23:20:22        69428
+cyclophaser/lanczos_filter.py                  2026-10-13 23:20:22        10706
+cyclophaser/plots.py                           2026-10-13 23:20:22        18990
+cyclophaser/example_data/example_file.csv      2026-10-13 23:20:22        13248
+cyclophaser-2.1.2.dist-info/licenses/LICENSE   2026-10-13 23:20:36        35149
+cyclophaser-2.1.2.dist-info/METADATA           2026-10-13 23:20:36         9134
+cyclophaser-2.1.2.dist-info/WHEEL              2026-10-13 23:20:36           91
+cyclophaser-2.1.2.dist-info/top_level.txt      2026-10-13 23:20:36           12
+cyclophaser-2.1.2.dist-info/RECORD             2026-10-13 23:20:36          934
