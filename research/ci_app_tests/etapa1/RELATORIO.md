@@ -16,7 +16,8 @@ mantidas (o destino delas se decide no fechamento).
 | controles (branch `ci/app-tests-controls`): E1 / E2 / CD | `12a618d` / `7116992` / `cf92957` |
 | registros do passo 2 + previsões do passo 3 | `8875ff6` |
 | matriz (f) (branch `ci/app-tests-stability`) | `6fb3808` |
-| documentação e registro (passo 4) | o commit deste arquivo; ver "Verificação final" |
+| documentação (passo 4) | `66ac34e` (verificado: pipeline 416) |
+| registro da verificação final (ponta) | o commit deste texto |
 
 Os commits só de registro levam `[skip ci]` no título, para não gastar duas
 pernas do app em cada um. A ponta final não leva (ver verificação final).
@@ -143,8 +144,20 @@ as duas pernas 1507 / 0 com a checagem OK, nenhuma publicação; local, receita
 enxuta 1280 / 0 + 1 / 0; conda `-m "not browser"` 1508 / 0. (Desde `425a72f`
 só mudaram comentários do config, `CLAUDE.md`, `docs/` e `research/`.)
 
-Os resultados ficam no resumo da frente entregue ao orquestrador e em
-`logs/passo4/`.
+Medido em **`66ac34e`** (commit de documentação do passo 4):
+
+| o quê | previsto | medido | |
+|---|---|---|---|
+| pipeline [416](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/416) | 3 jobs, nenhuma publicação | `build_test`, `app_test_floor`, `app_test_newest` | ✔ |
+| `build_test` ([593](https://circleci.com/gh/daniloceano/CycloPhaser/593)) | 1280 / 0 + 1 / 0 | **1280 / 0 + 1 / 0** | ✔ |
+| `app_test_floor` ([592](https://circleci.com/gh/daniloceano/CycloPhaser/592)) | 1507 / 0, checagem OK | **1507 / 0**, OK, 605,4 s | ✔ |
+| `app_test_newest` ([591](https://circleci.com/gh/daniloceano/CycloPhaser/591)) | 1507 / 0, checagem OK | **1507 / 0**, OK, 658,4 s | ✔ |
+| local, receita enxuta | 1280 / 0 + 1 / 0 | **1280 / 0 + 1 / 0** | ✔ |
+| local, conda `-m "not browser"` | 1508 / 0 | **1508 / 0** (`which python` = env `cyclophaser`, árvore limpa) | ✔ |
+
+Logs: `logs/passo4/`. O commit seguinte (este registro) só muda `research/`
+e roda o CI de novo, para que a própria ponta tenha pipeline; o resultado dele
+fica no resumo da frente.
 
 ## Critérios (a)–(k)
 
