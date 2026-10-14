@@ -1,0 +1,7 @@
+skipped: tests.test_app_pages_browser
+skipped: tests.test_compare_browser
+skipped: tests.test_label_browser
+skipped: tests.test_validate_browser
+skipped: tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]
+OK: skips are exactly the 5 allowed ids
+skipcheck_exit=0

@@ -83,12 +83,18 @@ def test_the_sidebar_steps_come_in_order():
 
 def test_no_expander_inside_an_expander_in_the_sidebar():
     at = _app()
-    # `.expander` on a block lists every expander in its subtree, the block
-    # itself included: an expander holding no other one yields exactly one.
+    # Count the expanders BELOW each group, the group itself excluded by
+    # identity. `.expander` on an expander block lists the block itself in
+    # streamlit 1.56.0 and 1.65.0 and does not in 1.66.0 (AppTest change), so
+    # `len(exp.expander)` means different things across versions; the
+    # descendants alone do not
+    # (research/ci_app_tests/etapa1/logs/fechamento_3b/diag_expander_*.json).
+    # Streamlit itself allows nesting, so this is the app's own layout rule.
     groups = at.sidebar.expander
     assert len(groups) == 8, [e.label for e in groups]   # positive control
     for exp in groups:
-        assert len(exp.expander) == 1, f"'{exp.label}' holds an expander"
+        nested = [e for e in exp.expander if e is not exp]
+        assert not nested, f"'{exp.label}' holds {[e.label for e in nested]}"
 
 
 def test_only_the_filtering_basics_are_outside_the_advanced_groups():

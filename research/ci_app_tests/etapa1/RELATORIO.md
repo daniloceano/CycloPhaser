@@ -241,3 +241,81 @@ ponta e roda o CI.
 Desvio de instrumento: o primeiro laço de shell não separou os argumentos (zsh
 não quebra `$k` em palavras), e nenhum arquivo de resultado chegou a ser
 escrito. A rodada foi refeita com chamadas explícitas.
+
+## Fechamento — merge em `develop` e passo 3b (streamlit 1.66.0)
+
+**Merge** (autorizado pelo Danilo): `ci/app-tests` → `develop` com `--no-ff`, commit
+**`06f56e8`**. As previsões do pipeline (`PREVISOES_fechamento.md`, `f734d45`)
+foram commitadas antes do push.
+
+**Pipeline [419](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/419)
+— vermelho.**
+
+| job | status |
+|---|---|
+| `build_test` (601) | success |
+| `app_test_floor` (600) | success, streamlit 1.56.0 |
+| `app_test_newest` (602) | **failed**, **1506 / 1**, streamlit **1.66.0** |
+| `test_pypi_publish` (603) | **`not_run`** (ficou `blocked` até o fim das pernas; não publicou nada) |
+
+O teste que falhou foi
+`test_calibrate_i2_apptest.py::test_no_expander_inside_an_expander_in_the_sidebar`.
+O streamlit 1.66.0 saiu no PyPI às 16:07Z, 29 min antes do pipeline (16:36Z).
+Desvios: M3 (newest 1506 / 1) e M5 (sem `test_pypi_publish`, então sem linha de
+`--skip-existing`); M1, M2 e M4 conferiram. Reprodução local com a mesma
+seleção no 1.66.0: 1506 / 1, o mesmo id (`logs/fechamento/`).
+
+**Correção de uma afirmação feita no relato ao Danilo:** "o app público já roda
+no 1.66.0" estava errado. O Streamlit Cloud instala as dependências quando
+reconstrói o app, e o último push na `master` foi em 2026-10-10, antes do
+1.66.0. **Pendência da próxima release:** conferir o app no 1.66.0 no navegador
+(manual).
+
+### Passo 3b — diagnóstico e correção do teste
+
+Branch `ci/fix-apptest-expander-count`, de `06f56e8`. Previsões em
+`PREVISOES_3b.md` (`9e76ab5`, com push antes de medir).
+
+**Diagnóstico.** `scripts/diag_expander.py` roda com `AppTest.from_string`,
+em venvs novos com o wheel de `06f56e8`
+(`logs/fechamento_3b/diag_expander_*.json`):
+
+| streamlit | `grupo.expander` num grupo sem aninhados | contém o próprio grupo | aninhar expander em expander | contagem corrigida (plano / externo aninhado) |
+|---|---|---|---|---|
+| 1.56.0 | `[o grupo]` | sim | **permitido**, sem exceção | 0 / **1** |
+| 1.65.0 | `[o grupo]` | sim | **permitido**, sem exceção | 0 / **1** |
+| 1.66.0 | `[]` | **não** | **permitido**, sem exceção | 0 / **1** |
+
+O resultado é o mesmo na sidebar e no corpo. Em todas as versões,
+`at.sidebar.expander` e `at.main.expander` listam o externo e o interno. A
+mudança do 1.66.0 é do AppTest, no `.expander` de um bloco expander. Ela não
+mexe na estrutura do app: o mesmo app plano dá 0 aninhados nas três versões.
+D1, D2 e D4 conferiram. D3 não estava previsto; o medido é que aninhar é
+permitido nas três versões, então a regra "sem expander dentro de expander" é
+do próprio app, não do streamlit.
+
+**Correção** (`cd8c043`, só esse teste): o teste conta os descendentes de cada
+grupo, excluindo o próprio grupo por identidade
+(`[e for e in exp.expander if e is not exp]`), e exige nenhum. O controle
+`len(groups) == 8` foi mantido e o comentário dá o motivo. `git diff 06f56e8 --
+cyclophaser setup.py tools` é vazio.
+
+**Controle positivo.** No app aninhado, a contagem corrigida do externo é 1 nas
+três versões (tabela acima). O teste antigo também fica explicado: ele daria
+`len == 2` (≠ 1) no aninhado do 1.56.0/1.65.0, mas `len == 0` (≠ 1) no app
+plano do 1.66.0. Ou seja, o teste antigo acusava aninhamento onde não havia.
+
+**Local** (`cd8c043`, `logs/fechamento_3b/local_cd8c043/`), seleção do job com
+as duas travas:
+
+| streamlit | resultado |
+|---|---|
+| 1.56.0 | **1507 / 0**, checagem `OK` |
+| 1.65.0 | **1507 / 0**, checagem `OK` |
+| 1.66.0 | **1507 / 0**, checagem `OK` |
+| receita enxuta | **1280 / 0 + 1 / 0** |
+
+Em todas, o `cyclophaser*` veio do venv (sonda). L1 e L2 conferiram.
+
+**CI.** O pipeline do push desta ponta é a previsão C1. O resultado fica no
+resumo da frente. O merge em `develop` exige nova autorização do Danilo.
