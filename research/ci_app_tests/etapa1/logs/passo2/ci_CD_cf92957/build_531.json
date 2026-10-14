@@ -1,0 +1,400 @@
+{
+  "all_commit_details": [
+    {
+      "author_date": "2026-10-14T12:22:42.000Z",
+      "author_email": "danilo.oceano@gmail.com",
+      "author_login": "daniloceano",
+      "author_name": "daniloceano",
+      "body": "Disposable branch ci/app-tests-controls only; both must go red.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+      "branch": "ci/app-tests-controls",
+      "commit": "cf929571912ac58ab5290ae6a94d75e1e9d278fd",
+      "commit_url": "https://github.com/daniloceano/CycloPhaser/commit/cf929571912ac58ab5290ae6a94d75e1e9d278fd",
+      "committer_date": "2026-10-14T12:22:42.000Z",
+      "committer_email": "danilo.oceano@gmail.com",
+      "committer_login": "daniloceano",
+      "committer_name": "daniloceano",
+      "subject": "control(c)(d) CD: negative-control jobs app_control_noplotly and app_control_python_m"
+    }
+  ],
+  "all_commit_details_truncated": false,
+  "author_date": "2026-10-14T12:22:42.000Z",
+  "author_email": "danilo.oceano@gmail.com",
+  "author_name": "daniloceano",
+  "body": "Disposable branch ci/app-tests-controls only; both must go red.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+  "branch": "ci/app-tests-controls",
+  "build_num": 531,
+  "build_parameters": {},
+  "build_time_millis": 637270,
+  "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/531",
+  "canceled": false,
+  "canceler": null,
+  "circle_yml": {
+    "string": "version: 2\njobs:\n  build_test:\n    docker:\n    - image: cimg/python:3.12.3\n    steps:\n    - checkout\n    - run:\n        name: Install build tools\n        command: pip install --upgrade pip build\n    - run:\n        name: Build sdist and wheel\n        command: python -m build\n    - run:\n        name: Install package from wheel\n        command: pip install dist/*.whl\n    - run:\n        name: Install test dependencies\n        command: pip install pytest pyyaml\n    - run:\n        name: Run tests against the installed wheel\n        environment:\n          CYCLOPHASER_REQUIRE_INSTALLED: '1'\n        command: pytest --import-mode=append -m \"not source_tree\" --junitxml=test-reports/results.xml\n    - run:\n        name: Run source-tree tests against the checkout\n        command: python -m pytest -m source_tree --junitxml=test-reports/results-source-tree.xml\n    - store_test_results:\n        path: test-reports\n        when: always\n  app_test_floor:\n    docker:\n    - image: cimg/python:3.12.3\n    resource_class: medium\n    steps:\n    - checkout\n    - run:\n        name: Install build tools\n        command: pip install --upgrade pip build\n    - run:\n        name: Build sdist and wheel\n        command: python -m build\n    - run:\n        name: Install wheel and app test dependencies (floor)\n        command: |\n          if [ \"floor\" = \"floor\" ]; then\n            STREAMLIT=\"streamlit==1.56.0\"\n          else\n            STREAMLIT=\"streamlit\"\n          fi\n          pip install dist/*.whl \"$STREAMLIT\" plotly pyyaml pytest\n          mkdir -p artifacts\n          pip freeze > artifacts/pip-freeze-floor.txt\n          cat artifacts/pip-freeze-floor.txt\n    - run:\n        name: Run tests against the installed wheel, with the app\n        environment:\n          CYCLOPHASER_REQUIRE_INSTALLED: '1'\n          CYCLOPHASER_REQUIRE_APP_DEPS: '1'\n        command: pytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml\n    - run:\n        name: Check that only the allowed tests skipped\n        command: python .circleci/check_app_skips.py test-reports/results.xml\n    - store_test_results:\n        path: test-reports\n        when: always\n    - store_artifacts:\n        path: artifacts\n        when: always\n  app_control_python_m:\n    docker:\n    - image: cimg/python:3.12.3\n    resource_class: medium\n    steps:\n    - checkout\n    - run:\n        name: Install build tools\n        command: pip install --upgrade pip build\n    - run:\n        name: Build sdist and wheel\n        command: python -m build\n    - run:\n        name: Install (python_m)\n        command: |\n          if [ \"python_m\" = \"noplotly\" ]; then\n            pip install dist/*.whl streamlit pyyaml pytest\n          else\n            pip install dist/*.whl \"streamlit==1.56.0\" plotly pyyaml pytest\n          fi\n          pip freeze\n    - run:\n        name: Run tests (python_m)\n        environment:\n          CYCLOPHASER_REQUIRE_INSTALLED: '1'\n          CYCLOPHASER_REQUIRE_APP_DEPS: '1'\n        command: |\n          if [ \"python_m\" = \"noplotly\" ]; then\n            pytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml\n          else\n            python -m pytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml\n          fi\n    - store_test_results:\n        path: test-reports\n        when: always\n  app_control_noplotly:\n    docker:\n    - image: cimg/python:3.12.3\n    resource_class: medium\n    steps:\n    - checkout\n    - run:\n        name: Install build tools\n        command: pip install --upgrade pip build\n    - run:\n        name: Build sdist and wheel\n        command: python -m build\n    - run:\n        name: Install (noplotly)\n        command: |\n          if [ \"noplotly\" = \"noplotly\" ]; then\n            pip install dist/*.whl streamlit pyyaml pytest\n          else\n            pip install dist/*.whl \"streamlit==1.56.0\" plotly pyyaml pytest\n          fi\n          pip freeze\n    - run:\n        name: Run tests (noplotly)\n        environment:\n          CYCLOPHASER_REQUIRE_INSTALLED: '1'\n          CYCLOPHASER_REQUIRE_APP_DEPS: '1'\n        command: |\n          if [ \"noplotly\" = \"noplotly\" ]; then\n            pytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml\n          else\n            python -m pytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml\n          fi\n    - store_test_results:\n        path: test-reports\n        when: always\n  app_test_newest:\n    docker:\n    - image: cimg/python:3.12.3\n    resource_class: medium\n    steps:\n    - checkout\n    - run:\n        name: Install build tools\n        command: pip install --upgrade pip build\n    - run:\n        name: Build sdist and wheel\n        command: python -m build\n    - run:\n        name: Install wheel and app test dependencies (newest)\n        command: |\n          if [ \"newest\" = \"floor\" ]; then\n            STREAMLIT=\"streamlit==1.56.0\"\n          else\n            STREAMLIT=\"streamlit\"\n          fi\n          pip install dist/*.whl \"$STREAMLIT\" plotly pyyaml pytest\n          mkdir -p artifacts\n          pip freeze > artifacts/pip-freeze-newest.txt\n          cat artifacts/pip-freeze-newest.txt\n    - run:\n        name: Run tests against the installed wheel, with the app\n        environment:\n          CYCLOPHASER_REQUIRE_INSTALLED: '1'\n          CYCLOPHASER_REQUIRE_APP_DEPS: '1'\n        command: pytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml\n    - run:\n        name: Check that only the allowed tests skipped\n        command: python .circleci/check_app_skips.py test-reports/results.xml\n    - store_test_results:\n        path: test-reports\n        when: always\n    - store_artifacts:\n        path: artifacts\n        when: always\nworkflows:\n  build_test_publish:\n    jobs:\n    - build_test\n    - app_test_floor: {}\n    - app_test_newest: {}\n    - app_control_noplotly: {}\n    - app_control_python_m: {}\n  version: 2\n"
+  },
+  "committer_date": "2026-10-14T12:22:42.000Z",
+  "committer_email": "danilo.oceano@gmail.com",
+  "committer_name": "daniloceano",
+  "compare": null,
+  "context_ids": [],
+  "dont_build": null,
+  "fail_reason": null,
+  "failed": false,
+  "infrastructure_fail": false,
+  "is_first_green_build": false,
+  "job_name": null,
+  "lifecycle": "finished",
+  "messages": [],
+  "node": null,
+  "oss": true,
+  "outcome": "success",
+  "owners": [],
+  "parallel": 1,
+  "picard": {
+    "executor": "docker",
+    "resource_class": {
+      "class": "medium",
+      "name": "Medium",
+      "cpu": 2,
+      "ram": 4096
+    }
+  },
+  "platform": "2.0",
+  "previous": {
+    "build_num": 527,
+    "build_time_millis": 153194,
+    "status": "success"
+  },
+  "previous_successful_build": {
+    "build_num": 527,
+    "build_time_millis": 153194,
+    "status": "success"
+  },
+  "pull_requests": [],
+  "queued_at": "2026-10-14T12:22:45.865Z",
+  "reponame": "CycloPhaser",
+  "retries": null,
+  "retry_of": null,
+  "ssh_disabled": false,
+  "ssh_users": [],
+  "start_time": "2026-10-14T12:22:47.316Z",
+  "status": "success",
+  "steps": [
+    {
+      "name": "Spin up environment",
+      "actions": [
+        {
+          "index": 0,
+          "step": 0,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Spin up environment",
+          "type": "test",
+          "start_time": "2026-10-14T12:22:46.669Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": null,
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:23:04.774Z",
+          "exit_code": null,
+          "run_time_millis": 18105,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/0?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Preparing environment variables",
+      "actions": [
+        {
+          "index": 0,
+          "step": 99,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Preparing environment variables",
+          "type": "test",
+          "start_time": "2026-10-14T12:23:04.994Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": null,
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:23:05.01Z",
+          "exit_code": null,
+          "run_time_millis": 16,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/99?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Checkout code",
+      "actions": [
+        {
+          "index": 0,
+          "step": 101,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Checkout code",
+          "type": "test",
+          "start_time": "2026-10-14T12:23:05.141Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": null,
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:23:06.756Z",
+          "exit_code": null,
+          "run_time_millis": 1615,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/101?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Install build tools",
+      "actions": [
+        {
+          "index": 0,
+          "step": 102,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Install build tools",
+          "type": "test",
+          "start_time": "2026-10-14T12:23:06.819Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": "#!/bin/bash -eo pipefail\npip install --upgrade pip build",
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:23:10.02Z",
+          "exit_code": 0,
+          "run_time_millis": 3201,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/102?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Build sdist and wheel",
+      "actions": [
+        {
+          "index": 0,
+          "step": 103,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Build sdist and wheel",
+          "type": "test",
+          "start_time": "2026-10-14T12:23:10.086Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": "#!/bin/bash -eo pipefail\npython -m build",
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:23:14.343Z",
+          "exit_code": 0,
+          "run_time_millis": 4257,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/103?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Install wheel and app test dependencies (floor)",
+      "actions": [
+        {
+          "index": 0,
+          "step": 104,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Install wheel and app test dependencies (floor)",
+          "type": "test",
+          "start_time": "2026-10-14T12:23:14.404Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": "#!/bin/bash -eo pipefail\nif [ \"floor\" = \"floor\" ]; then\n  STREAMLIT=\"streamlit==1.56.0\"\nelse\n  STREAMLIT=\"streamlit\"\nfi\npip install dist/*.whl \"$STREAMLIT\" plotly pyyaml pytest\nmkdir -p artifacts\npip freeze > artifacts/pip-freeze-floor.txt\ncat artifacts/pip-freeze-floor.txt\n",
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:23:58.997Z",
+          "exit_code": 0,
+          "run_time_millis": 44593,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/104?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Run tests against the installed wheel, with the app",
+      "actions": [
+        {
+          "index": 0,
+          "step": 105,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Run tests against the installed wheel, with the app",
+          "type": "test",
+          "start_time": "2026-10-14T12:23:59.044Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": "#!/bin/bash -eo pipefail\npytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml",
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:33:23.774Z",
+          "exit_code": 0,
+          "run_time_millis": 564730,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/105?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Check that only the allowed tests skipped",
+      "actions": [
+        {
+          "index": 0,
+          "step": 106,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Check that only the allowed tests skipped",
+          "type": "test",
+          "start_time": "2026-10-14T12:33:23.825Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": "#!/bin/bash -eo pipefail\npython .circleci/check_app_skips.py test-reports/results.xml",
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:33:23.928Z",
+          "exit_code": 0,
+          "run_time_millis": 103,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/106?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Uploading test results",
+      "actions": [
+        {
+          "index": 0,
+          "step": 107,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Uploading test results",
+          "type": "test",
+          "start_time": "2026-10-14T12:33:23.979Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": null,
+          "background": false,
+          "insignificant": true,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:33:24.22Z",
+          "exit_code": null,
+          "run_time_millis": 241,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/107?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    },
+    {
+      "name": "Uploading artifacts",
+      "actions": [
+        {
+          "index": 0,
+          "step": 108,
+          "allocation_id": "6acf741555158239c0cc8388-0-build/ABCDEFGH",
+          "name": "Uploading artifacts",
+          "type": "test",
+          "start_time": "2026-10-14T12:33:24.281Z",
+          "truncated": false,
+          "parallel": true,
+          "bash_command": null,
+          "background": false,
+          "insignificant": false,
+          "has_output": true,
+          "continue": null,
+          "end_time": "2026-10-14T12:33:24.417Z",
+          "exit_code": null,
+          "run_time_millis": 136,
+          "output_url": "https://circleci.com/api/private/output/presigned/cb2c24c4-eb86-4e58-b923-61b5cdab279c/0/108?token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2tzLW91dHB1dC1qd3QtdjEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTE5ODE2MDQsImlzcyI6ImNpcmNsZWNpLmNvbSIsInN1YiI6ImNiMmMyNGM0LWViODYtNGU1OC1iOTIzLTYxYjVjZGFiMjc5YyJ9.yTKZhmkXoFPMm6V0i4tJWfTR-0vW077Pu741dELM9NVtriqAUHbHIYPCTfCgoVrgvR-q5ECDyqqOLOmyeEZXHA",
+          "status": "success",
+          "failed": null,
+          "infrastructure_fail": null,
+          "timedout": null,
+          "canceled": null
+        }
+      ]
+    }
+  ],
+  "stop_time": "2026-10-14T12:33:24.586Z",
+  "subject": "control(c)(d) CD: negative-control jobs app_control_noplotly and app_control_python_m",
+  "timedout": false,
+  "usage_queued_at": "2026-10-14T12:22:45.696Z",
+  "user": {
+    "avatar_url": "https://avatars.githubusercontent.com/u/56005607?v=4",
+    "id": 56005607,
+    "is_user": true,
+    "login": "daniloceano",
+    "name": "Danilo Couto de Souza",
+    "vcs_type": "github"
+  },
+  "username": "daniloceano",
+  "vcs_revision": "cf929571912ac58ab5290ae6a94d75e1e9d278fd",
+  "vcs_tag": null,
+  "vcs_type": "github",
+  "vcs_url": "https://github.com/daniloceano/CycloPhaser",
+  "why": "github",
+  "workflows": {
+    "job_id": "cb2c24c4-eb86-4e58-b923-61b5cdab279c",
+    "job_name": "app_test_floor",
+    "upstream_concurrency_map": {},
+    "upstream_job_ids": [],
+    "workflow_id": "a946b73e-431e-4102-a0ff-ba922e85ad4d",
+    "workflow_name": "build_test_publish",
+    "workspace_id": "a946b73e-431e-4102-a0ff-ba922e85ad4d"
+  }
+}
