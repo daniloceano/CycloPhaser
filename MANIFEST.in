@@ -1,0 +1,5 @@
+# The sdist carries the package only. tests/ is left out: setuptools would add
+# the top-level tests/test_*.py by default, without the conftest.py, data and
+# subpackages they need, so a test suite from the sdist could not run anyway
+# (release 2.1.3, research/release_v213/etapa0, M6).
+prune tests
