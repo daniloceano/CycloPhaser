@@ -24,17 +24,21 @@ version: 2.1
 # * Streamlit Cloud redeploys the public app on every push to master WITHOUT
 #   waiting for CI. app_test detects an app break, it does not prevent one
 #   reaching the public. The protection is the merge rule: merge into master
-#   only with app_test_floor and app_test_newest green on the same commit in
-#   develop.
-# * app_test runs only on develop, master and ci/* branches, because this
-#   project is on CircleCI's Free plan (30 000 credits/month; at 0 every job
-#   stops until the next month, publishing included). An app break on a feature
-#   branch shows up only after the merge into develop; before that, run the app
-#   tests in the conda env. ci/* exists to test this config itself.
+#   only after app_test_floor and app_test_newest are green on the exact
+#   commit being merged (develop or a release/* branch).
+# * app_test runs only on develop, master, release/* and ci/* branches, because
+#   this project is on CircleCI's Free plan (30 000 credits/month; at 0 every
+#   job stops until the next month, publishing included). develop and master
+#   are where the package is published; release/* is how a release reaches
+#   master (e.g. release/v2.1.2), so the exact commit merged into master must
+#   be tested there; ci/* exists to test this config itself. An app break on a
+#   feature branch shows up only after the merge into develop; before that, run
+#   the app tests in the conda env.
 # * Cost stop rule: app_test runs in `medium`. If its real duration projects the
 #   monthly total (current CI + app) above 25 000 credits -- about 20 min per
-#   leg at ~41 develop/master/ci pushes a month -- stop and revisit this design
-#   before going on. Measured in 2026-10 (66 leg runs): 9.3-12.9 min per leg.
+#   leg at ~41 develop/master/ci pushes a month, plus the few release/* pushes
+#   of a release -- stop and revisit this design before going on. Measured in
+#   2026-10 (66 leg runs): 9.3-12.9 min per leg.
 
 jobs:
   build_test:
@@ -214,6 +218,7 @@ workflows:
               only:
                 - develop
                 - master
+                - /^release\/.*/
                 - /^ci\/.*/
       - test_pypi_publish:
           requires:

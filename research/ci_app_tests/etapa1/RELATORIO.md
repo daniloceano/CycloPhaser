@@ -209,3 +209,35 @@ fica no resumo da frente.
 * `logs/` — `grep_globs_before_sample_tracks.txt`, `passo1/`, `passo2/`,
   `passo3/`, `cost/`, `passo4/` (com gzip nos junit, saídas de pytest e
   `/tests` grandes)
+
+## Correção antes do merge — `release/*` no filtro do `app_test` (2026-10-14)
+
+Previsões: `PREVISOES_correcao.md` (`b30a176`, com push antes de medir).
+
+**Motivo.** Releases saem de `release/*` direto para a `master`. Sem `app_test`
+nessas branches, a regra "verde no mesmo commit em `develop`" não podia ser
+cumprida numa release, e o Streamlit Cloud reimplanta assim que o commit chega
+à `master`.
+
+**Mudança.** No `.circleci/config.yml`, `/^release\/.*/` entrou no filtro do
+`app_test`; esta é a única linha que não é comentário. O comentário do topo
+passou a dar o motivo de cada branch do filtro. No `CLAUDE.md`, a linha do
+Danilo, verbatim. No `docs/future_work.md` item 36, uma seção nova com a
+correção e o motivo.
+
+| id | previsão | medido | |
+|---|---|---|---|
+| K1 | config novo: schema OK; F1–F4 verdadeiros | schema 0 erros; `release/v9.9.9` e `ci/x` → `build_test` + as 2 pernas; `feat/x` → só `build_test`; `test_pypi_publish` só em `develop`, `pypi_publish` só em `master`; saída 0 | ✔ |
+| K2 | controle, config de `fb516c5`: F1 falso | `release/v9.9.9` → só `build_test`; F1 False, F2–F4 True; saída 1 | ✔ |
+| K3 | controle, `release/*` também no `test_pypi_publish`: F4 falso | `release/v9.9.9` ganha `test_pypi_publish`; F4 False; saída 1 | ✔ |
+| K4 | diff do config, sem comentários: só `- /^release\/.*/` | só essa linha | ✔ |
+| K6 (a) | diff `cyclophaser setup.py` vazio | vazio | ✔ |
+
+O `validate_config.py` original também passa no config novo
+(`logs/correcao/validate_config.json`). Nenhuma branch `release/*` foi criada no
+remoto. K5 (pipeline da nova ponta) fica no resumo da frente; este commit é a
+ponta e roda o CI.
+
+Desvio de instrumento: o primeiro laço de shell não separou os argumentos (zsh
+não quebra `$k` em palavras), e nenhum arquivo de resultado chegou a ser
+escrito. A rodada foi refeita com chamadas explícitas.

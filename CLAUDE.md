@@ -22,9 +22,10 @@ what was measured, what was decided, what is still open — lives in
   hand.
 - **State suite predictions as passed and failed only** — never the
   skipped/deselected split. See the last section for why.
-- **Merge into `master` only with `app_test_floor` and `app_test_newest` green
-  on the same commit in `develop`.** Streamlit Cloud redeploys the public app on
-  every push to `master` without waiting for CI (`docs/future_work.md` item 36).
+- **Merge into `master` only after `app_test_floor` and `app_test_newest` are
+  green on the exact commit being merged (develop or a release/* branch).**
+  Streamlit Cloud redeploys the public app on every push to `master` without
+  waiting for CI (`docs/future_work.md` item 36).
 
 ## Ground truth for the synthetic suite
 

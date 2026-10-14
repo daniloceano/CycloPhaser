@@ -4433,7 +4433,7 @@ Branch `ci/app-tests` (from `develop` @ `3f410df`). Reports: `research/ci_app_te
 
 ### What changed
 
-* **`.circleci/config.yml`**: a new job `app_test`, parameter `leg` (`floor` = `streamlit==1.56.0`, `newest` = streamlit unpinned), `resource_class: medium`, run as a matrix with fixed names `app_test_floor` / `app_test_newest`, only on `develop`, `master` and `/^ci\/.*/`. It builds the wheel of the commit, installs it with streamlit, plotly, pyyaml and pytest in one pip call, stores the `pip freeze` as an artifact, and runs `pytest --import-mode=append -m "not browser and not source_tree"` from the checkout root with `CYCLOPHASER_REQUIRE_INSTALLED=1` and `CYCLOPHASER_REQUIRE_APP_DEPS=1`. `test_pypi_publish` and `pypi_publish` now require `build_test` + both legs. `build_test` is unchanged except `when: always` on `store_test_results` (also in `app_test`). The header comment records the gaps below.
+* **`.circleci/config.yml`**: a new job `app_test`, parameter `leg` (`floor` = `streamlit==1.56.0`, `newest` = streamlit unpinned), `resource_class: medium`, run as a matrix with fixed names `app_test_floor` / `app_test_newest`, only on `develop`, `master`, `/^release\/.*/` and `/^ci\/.*/` (`release/*` added by the pre-merge correction below). It builds the wheel of the commit, installs it with streamlit, plotly, pyyaml and pytest in one pip call, stores the `pip freeze` as an artifact, and runs `pytest --import-mode=append -m "not browser and not source_tree"` from the checkout root with `CYCLOPHASER_REQUIRE_INSTALLED=1` and `CYCLOPHASER_REQUIRE_APP_DEPS=1`. `test_pypi_publish` and `pypi_publish` now require `build_test` + both legs. `build_test` is unchanged except `when: always` on `store_test_results` (also in `app_test`). The header comment records the gaps below.
 * **`.circleci/check_app_skips.py`** (standard library only): the job fails unless the junit skips are **exactly** 5 ids — the 4 browser modules (playwright absent) and `test_lifecycle_phase_timing[IcIt_observational]` — by junit id, never by skip-reason text.
 * **`tests/conftest.py`**: `CYCLOPHASER_REQUIRE_APP_DEPS`. Set, `pytest_configure` imports streamlit, plotly and yaml and raises `pytest.UsageError` naming every one that fails, including an installed-but-broken import. Unset, nothing changes and nothing is imported.
 * **`tests/sample_tracks/`** (new, versioned): 2 TRACK CSVs copied from `tools/calibration_app/sample_tracks/` (git-ignored). `tests/test_compare_core.py::test_the_series_key_is_the_content_not_the_name` reads them, so it no longer skips on every clean clone. A grep showed no other test globs that folder.
@@ -4449,11 +4449,21 @@ Branch `ci/app-tests` (from `develop` @ `3f410df`). Reports: `research/ci_app_te
 * **Step 3, stability (f)** (disposable branch `ci/app-tests-stability`, pipeline [415](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/415)): leg × run(1..29) = 58 jobs on one commit, `medium`: **58 / 58 green, each 1507 / 0 with the skip check OK**. Detects a per-run flake rate p ≥ 9.81 % with 95 %. Durations: floor 9.3–12.2 min, newest 9.8–12.9 min. Credits: 6 181 (exact seconds) / 6 460 (rounded up per job), above the stage-0 estimate of 2 999–5 023, because assumption A3 (`medium` as fast as the estimate) failed: in steps 1–2 the test step took 560–642 s on CI against 223–243 s locally (step 1).
 * **Cost**: per push to `develop`/`master`/`ci/*`, the two legs cost ~220 credits. At ~41 such pushes a month plus the current CI (8 574), the projection is ~17 700 credits/month, under the 25 000 stop rule (stop threshold 20.03 min per leg). The whole front spent ~7 430 credits on 2026-10-14.
 
+### Pre-merge correction: `release/*` in the `app_test` filter (2026-10-14)
+
+Releases are cut on `release/*` branches (e.g. `release/v2.1.2`, item 35) and merged straight into `master`. The approved filter (`develop`, `master`, `ci/*`) did not run `app_test` there. So the first `CLAUDE.md` rule ("green on the same commit in `develop`") could not be met for a release: the commit that reaches `master` is the release branch's, not a `develop` commit. Streamlit Cloud redeploys as soon as it lands. The fix:
+
+* `/^release\/.*/` was added to the `app_test` filter; nothing else in the jobs changed.
+* The rule now reads "green on the exact commit being merged (develop or a release/* branch)".
+* Publishing stays `develop` (TestPyPI) / `master` (PyPI) only.
+
+The filter check (`research/ci_app_tests/etapa1/scripts/check_filters.py`, predictions `PREVISOES_correcao.md`) has controls in both directions. On the new config, `release/v9.9.9` and `ci/x` get both legs, `feat/x` does not, and publishing stays `develop` / `master` only. The previous config fails the `release/*` fact, and a config with `release/*` on `test_pypi_publish` fails the publishing fact. No `release/*` branch was created on the remote to test it. Cost: a release adds a few pushes a month, at ~220 credits each.
+
 ### Gaps that remain
 
 * **Chromium is not in CI.** The 44 browser tests stay manual. Three defects were visible only in Chromium (item 35, Lessons 1): A12, F1, and the `st.toggle` role.
 * **The app is tested only after the merge into `develop`**: feature branches run `build_test` only (Free plan). Before a merge, run the app tests in the conda env.
-* **Streamlit Cloud redeploys on every push to `master` without waiting for CI.** `app_test` detects, it does not prevent. Rule (now in `CLAUDE.md`): merge into `master` only with both legs green on the same commit in `develop`.
+* **Streamlit Cloud redeploys on every push to `master` without waiting for CI.** `app_test` detects, it does not prevent. Rule (now in `CLAUDE.md`): merge into `master` only after both legs are green on the exact commit being merged (`develop` or a `release/*` branch).
 * A red `newest` with no code change is an upstream release; it also blocks publishing until decided. The leg's `pip freeze` artifact attributes it.
 
 ### Backlog
