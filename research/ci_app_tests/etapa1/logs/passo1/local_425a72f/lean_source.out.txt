@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/checkout_425a72f
+configfile: pyproject.toml
+collected 1303 items / 1302 deselected / 18 skipped / 1 selected
+
+tests/test_item30_spare_intensification.py .                             [100%]
+
+=============================== warnings summary ===============================
+../venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+../venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+../venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+../venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_lean_425a72f/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/ci_app_tests/etapa1/logs/passo1/local_425a72f/lean_source.xml -
+cyclophaser.__file__ (in session) = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/checkout_425a72f/cyclophaser/__init__.py
+========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 2.15s ==========

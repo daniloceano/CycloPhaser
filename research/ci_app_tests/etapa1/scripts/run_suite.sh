@@ -8,7 +8,7 @@
 source "$(dirname "$0")/common.sh"
 VENV="$1"; CHECKOUT="$2"; OUTDIR="$3"; LABEL="$4"; MARK="$5"
 shift 5
-mkdir -p "$OUTDIR"
+mkdir -p "$OUTDIR"; OUTDIR="$(cd "$OUTDIR" && pwd)"
 cd "$CHECKOUT"
 export PATH="$VENV/bin:$PATH"
 unset PYTHONPATH PYTHONHOME VIRTUAL_ENV CONDA_PREFIX || true

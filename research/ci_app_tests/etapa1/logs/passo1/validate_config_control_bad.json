@@ -1,0 +1,101 @@
+{
+  "config_sha256": "caa58c612671920fed86c2b8c2fdbbe8a4543c40e05ec76629db1995f1627b7d",
+  "schema_sha256": "bcc3e60a5a1e137fc45ad2cb435953de5f525ae881c5f0fd371b82a9f20bdb7a",
+  "schema_errors": [
+    "['jobs', 'app_test']: {'parameters': {'leg': {'type': 'enum', 'enum': ['floor', 'newest']}}, 'docker': [{'image': 'cimg/python:3.12.3'}], 'resource_class': 'medium', 'steps': ['checkout', {'run': {'name': 'Install build tools', 'command': 'pip install --upgrade pip build'}}, {'run': {'name': 'Build sdist and wheel', 'command': 'python -m build'}}, {'run': {'name': 'Install wheel and app test dependencies (<< parameters.leg >>)', 'command': 'if [ \"<< parameters.leg >>\" = \"floor\" ]; then\\n  STREAMLIT=\"streamlit==1.56.0\"\\nelse\\n  STREAMLIT=\"streamlit\"\\nfi\\npip install dist/*.whl \"$STREAMLIT\" plotly pyyaml pytest\\nmkdir -p artifacts\\npip freeze > artifacts/pip-freeze-<< parameters.leg >>.txt\\ncat artifacts/pip-freeze-<< parameters.leg >>.txt\\n'}}, {'run': {'name': 'Run tests against the installed wheel, with the app', 'environment': {'CYCLOPHASER_REQUIRE_INSTALLED': '1', 'CYCLOPHASER_REQUIRE_APP_DEPS': '1'}, 'command': 'pytest --import-mode=append -m \"not browser and not source_tree\" --junitxml=test-reports/results.xml'}}, {'run': {'name': 'Check that only the allowed tests skipped', 'command': 'python .circleci/check_app_skips.py test-reports/results.xml'}}, {'store_test_results': {'path': 'test-reports', 'when': 'sometimes'}}, {'store_artifacts': {'path': 'artifacts', 'when': 'sometimes'}}]} is not valid under any of the given schemas",
+    "['jobs', 'build_test']: {'docker': [{'image': 'cimg/python:3.12.3'}], 'steps': ['checkout', {'run': {'name': 'Install build tools', 'command': 'pip install --upgrade pip build'}}, {'run': {'name': 'Build sdist and wheel', 'command': 'python -m build'}}, {'run': {'name': 'Install package from wheel', 'command': 'pip install dist/*.whl'}}, {'run': {'name': 'Install test dependencies', 'command': 'pip install pytest pyyaml'}}, {'run': {'name': 'Run tests against the installed wheel', 'environment': {'CYCLOPHASER_REQUIRE_INSTALLED': '1'}, 'command': 'pytest --import-mode=append -m \"not source_tree\" --junitxml=test-reports/results.xml'}}, {'run': {'name': 'Run source-tree tests against the checkout', 'command': 'python -m pytest -m source_tree --junitxml=test-reports/results-source-tree.xml'}}, {'store_test_results': {'path': 'test-reports', 'when': 'sometimes'}}]} is not valid under any of the given schemas"
+  ],
+  "workflows": {
+    "build_test_publish": {
+      "jobs": [
+        "app_test_floor",
+        "app_test_newest",
+        "build_test",
+        "pypi_publish",
+        "test_pypi_publish"
+      ],
+      "per_branch": {
+        "develop": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test",
+          "test_pypi_publish"
+        ],
+        "master": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test",
+          "pypi_publish"
+        ],
+        "ci/app-tests": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test"
+        ],
+        "ci/app-tests-controls": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test"
+        ],
+        "feat/anything": [
+          "build_test"
+        ]
+      },
+      "requires": {
+        "test_pypi_publish": [
+          "build_test",
+          "app_test_floor",
+          "app_test_newest"
+        ],
+        "pypi_publish": [
+          "build_test",
+          "app_test_floor",
+          "app_test_newest"
+        ]
+      },
+      "unknown_requires": []
+    }
+  },
+  "facts": [
+    {
+      "fact": "build_test_publish: no publishing job on ci/app-tests",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: no publishing job on ci/app-tests-controls",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: test_pypi_publish requires build_test + both app legs",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: every job test_pypi_publish requires runs on develop",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: pypi_publish requires build_test + both app legs",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: every job pypi_publish requires runs on master",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: no unknown requires",
+      "ok": true
+    },
+    {
+      "fact": "app_test resource_class is medium",
+      "ok": true
+    },
+    {
+      "fact": "build_test: store_test_results when: always",
+      "ok": false
+    },
+    {
+      "fact": "app_test: store_test_results when: always",
+      "ok": false
+    }
+  ]
+}

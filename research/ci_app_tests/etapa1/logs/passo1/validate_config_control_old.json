@@ -1,0 +1,84 @@
+{
+  "config_sha256": "af2b8d2d5e3e5a514f178b16ed35a3ba1a78773ede41cf797dde4145f8ff8a70",
+  "schema_sha256": "bcc3e60a5a1e137fc45ad2cb435953de5f525ae881c5f0fd371b82a9f20bdb7a",
+  "schema_errors": [],
+  "workflows": {
+    "build_test_publish": {
+      "jobs": [
+        "build_test",
+        "pypi_publish",
+        "test_pypi_publish"
+      ],
+      "per_branch": {
+        "develop": [
+          "build_test",
+          "test_pypi_publish"
+        ],
+        "master": [
+          "build_test",
+          "pypi_publish"
+        ],
+        "ci/app-tests": [
+          "build_test"
+        ],
+        "ci/app-tests-controls": [
+          "build_test"
+        ],
+        "feat/anything": [
+          "build_test"
+        ]
+      },
+      "requires": {
+        "test_pypi_publish": [
+          "build_test"
+        ],
+        "pypi_publish": [
+          "build_test"
+        ]
+      },
+      "unknown_requires": []
+    }
+  },
+  "facts": [
+    {
+      "fact": "build_test_publish: no publishing job on ci/app-tests",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: no publishing job on ci/app-tests-controls",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: test_pypi_publish requires build_test + both app legs",
+      "ok": false
+    },
+    {
+      "fact": "build_test_publish: every job test_pypi_publish requires runs on develop",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: pypi_publish requires build_test + both app legs",
+      "ok": false
+    },
+    {
+      "fact": "build_test_publish: every job pypi_publish requires runs on master",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: no unknown requires",
+      "ok": true
+    },
+    {
+      "fact": "app_test resource_class is medium",
+      "ok": false
+    },
+    {
+      "fact": "build_test: store_test_results when: always",
+      "ok": false
+    },
+    {
+      "fact": "app_test: store_test_results when: always",
+      "ok": false
+    }
+  ]
+}
