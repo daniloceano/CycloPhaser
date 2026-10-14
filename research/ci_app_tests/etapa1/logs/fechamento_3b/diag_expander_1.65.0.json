@@ -1,0 +1,80 @@
+{
+  "streamlit": "1.65.0",
+  "flat": {
+    "exceptions": [],
+    "sidebar": [
+      {
+        "label": "S-group",
+        "expander_labels": [
+          "S-group"
+        ],
+        "contains_itself": true,
+        "corrected_count": 0
+      }
+    ],
+    "main": [
+      {
+        "label": "M-group",
+        "expander_labels": [
+          "M-group"
+        ],
+        "contains_itself": true,
+        "corrected_count": 0
+      }
+    ]
+  },
+  "nested_sidebar": {
+    "allowed": true,
+    "exceptions": [],
+    "all_expanders": [
+      "S-outer",
+      "S-inner"
+    ],
+    "groups": [
+      {
+        "label": "S-outer",
+        "expander_labels": [
+          "S-outer",
+          "S-inner"
+        ],
+        "contains_itself": true,
+        "corrected_count": 1
+      },
+      {
+        "label": "S-inner",
+        "expander_labels": [
+          "S-inner"
+        ],
+        "contains_itself": true,
+        "corrected_count": 0
+      }
+    ]
+  },
+  "nested_main": {
+    "allowed": true,
+    "exceptions": [],
+    "all_expanders": [
+      "M-outer",
+      "M-inner"
+    ],
+    "groups": [
+      {
+        "label": "M-outer",
+        "expander_labels": [
+          "M-outer",
+          "M-inner"
+        ],
+        "contains_itself": true,
+        "corrected_count": 1
+      },
+      {
+        "label": "M-inner",
+        "expander_labels": [
+          "M-inner"
+        ],
+        "contains_itself": true,
+        "corrected_count": 0
+      }
+    ]
+  }
+}
