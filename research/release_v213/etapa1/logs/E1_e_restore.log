@@ -1,0 +1,11 @@
+# (e) restore, 2026-10-14 19:36:01
+  Successfully uninstalled streamlit-1.56.0
+Channel "defaults" has the following notices:
+  [warning] -- Wed Sep 30 00:00:00 2026
+  Anaconda will stop building new Python 3.10 packages on the main channel after October 31, 2026. Existing Python 3.10 packages will stay available but will no longer get new builds or security fixes. We recommend upgrading to Python 3.11 or later. Details: https://www.anaconda.com/docs/reference/policies-practices/python-version-support?utm_source=channel_notices
+
+streamlit 1.63.0 /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/streamlit/__init__.py
+## diff pip list before/after:
+(identical)
+## diff conda list before/after:
+(identical)

@@ -1,0 +1,50 @@
+== wheel: dist/cyclophaser-2.1.3-py3-none-any.whl
+   Name: cyclophaser
+   Version: 2.1.3
+   Requires-Python: >=3.12
+   License-File: LICENSE
+   Requires-Dist: cmocean>=4.0.3
+   Requires-Dist: matplotlib>=3.9
+   Requires-Dist: numpy>=2.1
+   Requires-Dist: pandas>=2.2.2
+   Requires-Dist: scipy>=1.14
+   Requires-Dist: xarray>=2024.9
+   Provides-Extra: test
+   Requires-Dist: pytest>=8.3; extra == "test"
+   files: ['cyclophaser-2.1.3.dist-info/METADATA', 'cyclophaser-2.1.3.dist-info/RECORD', 'cyclophaser-2.1.3.dist-info/WHEEL', 'cyclophaser-2.1.3.dist-info/licenses/LICENSE', 'cyclophaser-2.1.3.dist-info/top_level.txt', 'cyclophaser/__init__.py', 'cyclophaser/determine_periods.py', 'cyclophaser/example_data/example_file.csv', 'cyclophaser/find_stages.py', 'cyclophaser/lanczos_filter.py', 'cyclophaser/plots.py']
+   LICENSE present: True
+== sdist: dist/cyclophaser-2.1.3.tar.gz entries: 22
+    cyclophaser-2.1.3
+    cyclophaser-2.1.3/LICENSE
+    cyclophaser-2.1.3/MANIFEST.in
+    cyclophaser-2.1.3/PKG-INFO
+    cyclophaser-2.1.3/README.md
+    cyclophaser-2.1.3/cyclophaser
+    cyclophaser-2.1.3/cyclophaser.egg-info
+    cyclophaser-2.1.3/cyclophaser.egg-info/PKG-INFO
+    cyclophaser-2.1.3/cyclophaser.egg-info/SOURCES.txt
+    cyclophaser-2.1.3/cyclophaser.egg-info/dependency_links.txt
+    cyclophaser-2.1.3/cyclophaser.egg-info/requires.txt
+    cyclophaser-2.1.3/cyclophaser.egg-info/top_level.txt
+    cyclophaser-2.1.3/cyclophaser/__init__.py
+    cyclophaser-2.1.3/cyclophaser/determine_periods.py
+    cyclophaser-2.1.3/cyclophaser/example_data
+    cyclophaser-2.1.3/cyclophaser/example_data/example_file.csv
+    cyclophaser-2.1.3/cyclophaser/find_stages.py
+    cyclophaser-2.1.3/cyclophaser/lanczos_filter.py
+    cyclophaser-2.1.3/cyclophaser/plots.py
+    cyclophaser-2.1.3/pyproject.toml
+    cyclophaser-2.1.3/setup.cfg
+    cyclophaser-2.1.3/setup.py
+   entries under tests/: 0 []
+== package files, direct wheel vs wheel from sdist
+    cyclophaser/__init__.py def8202ae41fb9e4a9f160b6fde090db31d0a31d95c079678522a174578ab9e8 def8202ae41fb9e4a9f160b6fde090db31d0a31d95c079678522a174578ab9e8 SAME
+    cyclophaser/determine_periods.py 8fd5b6f2c215de43c79b543dba70cc41c8a500b54df79e42a362d08843fc8217 8fd5b6f2c215de43c79b543dba70cc41c8a500b54df79e42a362d08843fc8217 SAME
+    cyclophaser/example_data/example_file.csv d60ab4e130b36bfb27b8c47678c77cc1f19648564ebf2770da1a6d211d1656e1 d60ab4e130b36bfb27b8c47678c77cc1f19648564ebf2770da1a6d211d1656e1 SAME
+    cyclophaser/find_stages.py 0ffb9792e63b5eaba8487a12ab7729685f4660c469dfeceb3a1b0ffad20d54f2 0ffb9792e63b5eaba8487a12ab7729685f4660c469dfeceb3a1b0ffad20d54f2 SAME
+    cyclophaser/lanczos_filter.py 041cc4251f84be674b46c774cf50b897c1ada1ee9221b18ff1aae233ab47f30e 041cc4251f84be674b46c774cf50b897c1ada1ee9221b18ff1aae233ab47f30e SAME
+    cyclophaser/plots.py 685a11de4a0f0d8c01175e50316d72da362ffa9478f2508dbbd9874c6c14ef62 685a11de4a0f0d8c01175e50316d72da362ffa9478f2508dbbd9874c6c14ef62 SAME
+   identical by content: True (6 files)
+   METADATA identical: True
+Checking dist/cyclophaser-2.1.3-py3-none-any.whl: [32mPASSED[0m
+Checking dist/cyclophaser-2.1.3.tar.gz: [32mPASSED[0m

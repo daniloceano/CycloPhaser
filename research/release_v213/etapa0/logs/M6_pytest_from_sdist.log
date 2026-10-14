@@ -1,0 +1,15 @@
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/test_app_passo5_fixes.py
+ERROR tests/test_config_defaults.py
+ERROR tests/test_evaluate_batch_train.py
+ERROR tests/test_incipient_plateau.py
+ERROR tests/test_integration_prominence.py
+ERROR tests/test_layer_inspector.py
+ERROR tests/test_manual_labels.py
+ERROR tests/test_regression_baseline.py
+ERROR tests/test_swell_batch.py
+ERROR tests/test_track_io.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 10 errors during collection !!!!!!!!!!!!!!!!!!!
+18 skipped, 89 warnings, 10 errors in 3.66s
