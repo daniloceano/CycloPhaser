@@ -77,6 +77,9 @@ jobs:
       leg:
         type: enum
         enum: ["floor", "newest"]
+      run:
+        type: integer
+        default: 0
     docker:
       - image: cimg/python:3.12.3
     resource_class: medium
@@ -176,35 +179,15 @@ jobs:
           command: twine upload --skip-existing dist/* --verbose
 
 workflows:
-  build_test_publish:
+  stability_f:
     jobs:
-      - build_test
       - app_test:
-          name: app_test_<< matrix.leg >>
+          name: app_test_<< matrix.leg >>_<< matrix.run >>
           matrix:
             parameters:
               leg: ["floor", "newest"]
+              run: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
           filters:
             branches:
               only:
-                - develop
-                - master
-                - /^ci\/.*/
-      - test_pypi_publish:
-          requires:
-            - build_test
-            - app_test_floor
-            - app_test_newest
-          filters:
-            branches:
-              only:
-                - develop
-      - pypi_publish:
-          requires:
-            - build_test
-            - app_test_floor
-            - app_test_newest
-          filters:
-            branches:
-              only:
-                - master
+                - ci/app-tests-stability
