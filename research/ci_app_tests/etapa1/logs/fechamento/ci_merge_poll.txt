@@ -1,0 +1,43 @@
+13:36:35 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:37:36 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:38:36 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:39:37 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:40:38 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:41:39 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:42:40 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:43:42 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:44:42 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:45:43 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:46:44 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+13:47:45 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'success', 'test_pypi_publish': 'blocked'}
+13:48:46 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'success', 'test_pypi_publish': 'blocked'}
+Traceback (most recent call last):
+  File "/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/ci_app_tests/etapa1/scripts/ci_pipeline.py", line 150, in <module>
+    main()
+  File "/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/ci_app_tests/etapa1/scripts/ci_pipeline.py", line 134, in main
+    rows = [detail(j, out) if j.get("job_number") and j["status"] not in OPEN else j
+            ^^^^^^^^^^^^^^
+  File "/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/ci_app_tests/etapa1/scripts/ci_pipeline.py", line 94, in detail
+    full = get(f"https://circleci.com/api/v1.1/project/{SLUG_V1}/{num}")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/ci_app_tests/etapa1/scripts/ci_pipeline.py", line 33, in get
+    with urllib.request.urlopen(req, timeout=60) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.9/Frameworks/Python.framework/Versions/3.12/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.9/Frameworks/Python.framework/Versions/3.12/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.9/Frameworks/Python.framework/Versions/3.12/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.9/Frameworks/Python.framework/Versions/3.12/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.9/Frameworks/Python.framework/Versions/3.12/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.9/Frameworks/Python.framework/Versions/3.12/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found

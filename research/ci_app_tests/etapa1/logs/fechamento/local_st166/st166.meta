@@ -1,0 +1,13 @@
+label=st166
+which_python=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/venv_st166/bin/python
+which_pytest=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/venv_st166/bin/pytest
+commit=66ac34e00337ee768e60ba3ec225c3c2c926774c
+marker=not browser and not source_tree
+CYCLOPHASER_REQUIRE_APP_DEPS=1
+start=2026-10-14T16:52:21Z
+exit_code=1
+wall_s=213.0
+end=2026-10-14T16:55:54Z
+git_status_after=0
+CYCLOPHASER_REQUIRE_INSTALLED: cyclophaser.__file__ = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_st166/lib/python3.12/site-packages/cyclophaser/__init__.py
+cyclophaser.__file__ (in session) = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_st166/lib/python3.12/site-packages/cyclophaser/__init__.py
