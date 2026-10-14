@@ -38,6 +38,9 @@ LABEL_OVERLAY_STYLE = {
                           "color": "#1f9e89"},
     "vorticity_smoothed": {"label": "vorticity_smoothed — 1st Savitzky-Golay pass",
                           "color": "#e8702a"},
+    "vorticity_smoothed2": {"label": "vorticity_smoothed2 — 2nd pass (what phase "
+                                    "detection is actually run against)",
+                           "color": "#8856a7"},
 }
 
 # process_vorticity's own argument names — the same keys the Calibrate page
