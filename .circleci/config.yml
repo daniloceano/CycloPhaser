@@ -131,6 +131,47 @@ jobs:
           path: artifacts
           when: always
 
+  app_control:
+    # NEGATIVE CONTROLS (c)/(d), disposable branch only. Each must go red.
+    parameters:
+      control:
+        type: enum
+        enum: ["noplotly", "python_m"]
+    docker:
+      - image: cimg/python:3.12.3
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Install build tools
+          command: pip install --upgrade pip build
+      - run:
+          name: Build sdist and wheel
+          command: python -m build
+      - run:
+          name: Install (<< parameters.control >>)
+          command: |
+            if [ "<< parameters.control >>" = "noplotly" ]; then
+              pip install dist/*.whl streamlit pyyaml pytest
+            else
+              pip install dist/*.whl "streamlit==1.56.0" plotly pyyaml pytest
+            fi
+            pip freeze
+      - run:
+          name: Run tests (<< parameters.control >>)
+          environment:
+            CYCLOPHASER_REQUIRE_INSTALLED: "1"
+            CYCLOPHASER_REQUIRE_APP_DEPS: "1"
+          command: |
+            if [ "<< parameters.control >>" = "noplotly" ]; then
+              pytest --import-mode=append -m "not browser and not source_tree" --junitxml=test-reports/results.xml
+            else
+              python -m pytest --import-mode=append -m "not browser and not source_tree" --junitxml=test-reports/results.xml
+            fi
+      - store_test_results:
+          path: test-reports
+          when: always
+
   test_pypi_publish:
     docker:
       - image: cimg/python:3.12.3
@@ -190,6 +231,15 @@ workflows:
                 - develop
                 - master
                 - /^ci\/.*/
+      - app_control:
+          name: app_control_<< matrix.control >>
+          matrix:
+            parameters:
+              control: ["noplotly", "python_m"]
+          filters:
+            branches:
+              only:
+                - ci/app-tests-controls
       - test_pypi_publish:
           requires:
             - build_test
