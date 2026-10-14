@@ -4427,9 +4427,9 @@ Branch `feat/benchmark-review` (from `develop` @ `39e658c`); release branch `rel
 4. **A CircleCI pipeline with no workflow is "not run yet", not a failure.** Re-check over hours before concluding (pipeline 399: 2 h 10 min).
 5. **Compare published artefacts by content, not by bytes.** Wheels built by separate jobs differ in zip metadata.
 
-## 36. Calibration-app tests in CI (CircleCI `app_test`, floor + newest) — implemented on `ci/app-tests`, not merged (2026-10-14)
+## 36. Calibration-app tests in CI (CircleCI `app_test`, floor + newest) — closed, merged into `develop` (2026-10-14)
 
-Branch `ci/app-tests` (from `develop` @ `3f410df`). Reports: `research/ci_app_tests/etapa0/` (stage 0: measurements and design, `PREVISOES.md` `c5174d1`, `RELATORIO.md` `9efc74f`; design approved by Danilo 2026-10-14) and `research/ci_app_tests/etapa1/` (stage 1: implementation, `PREVISOES_passo1..3.md`, `RELATORIO.md`). No PR. `git diff 3f410df -- cyclophaser setup.py` is empty: the package and its `install_requires` are untouched. Merge awaits Danilo's explicit authorisation.
+Branch `ci/app-tests` (from `develop` @ `3f410df`). Reports: `research/ci_app_tests/etapa0/` (stage 0: measurements and design, `PREVISOES.md` `c5174d1`, `RELATORIO.md` `9efc74f`; design approved by Danilo 2026-10-14) and `research/ci_app_tests/etapa1/` (stage 1: implementation, `PREVISOES_passo1..3.md`, `PREVISOES_correcao.md`, `PREVISOES_fechamento.md`, `PREVISOES_3b.md`, `PREVISOES_fechamento_final.md`, `RELATORIO.md`). No PR. `git diff 3f410df -- cyclophaser setup.py` is empty: the package and its `install_requires` are untouched. Two merges into `develop`, each authorised in writing by Danilo: `06f56e8` (`ci/app-tests`) and `0eb614e` (`ci/fix-apptest-expander-count`, the streamlit 1.66.0 test fix below). Not on `master` yet.
 
 ### What changed
 
@@ -4458,6 +4458,52 @@ Releases are cut on `release/*` branches (e.g. `release/v2.1.2`, item 35) and me
 * Publishing stays `develop` (TestPyPI) / `master` (PyPI) only.
 
 The filter check (`research/ci_app_tests/etapa1/scripts/check_filters.py`, predictions `PREVISOES_correcao.md`) has controls in both directions. On the new config, `release/v9.9.9` and `ci/x` get both legs, `feat/x` does not, and publishing stays `develop` / `master` only. The previous config fails the `release/*` fact, and a config with `release/*` on `test_pypi_publish` fails the publishing fact. No `release/*` branch was created on the remote to test it. Cost: a release adds a few pushes a month, at ~220 credits each.
+
+### Merge, a red `develop` and the streamlit 1.66.0 fix (2026-10-14)
+
+* **First merge** `06f56e8` (`--no-ff`). Its pipeline [419](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/419) went **red**:
+  * `build_test` (601) and `app_test_floor` (600, streamlit 1.56.0) green.
+  * `app_test_newest` ([602](https://circleci.com/gh/daniloceano/CycloPhaser/602)) **1506 / 1** on streamlit **1.66.0**, published to PyPI at 16:07Z, 29 min before the pipeline started (16:36Z).
+  * `test_pypi_publish` (603) was `not_run`: the `requires` gate held, and nothing was published.
+  * The failing test, `tests/test_calibrate_i2_apptest.py::test_no_expander_inside_an_expander_in_the_sidebar`, also failed locally with the same selection on 1.66.0 (1506 / 1).
+* **Cause: an AppTest change, not an app defect.** A minimal diagnostic (`research/ci_app_tests/etapa1/scripts/diag_expander.py`, fresh venvs, `logs/fechamento_3b/`) measured three things:
+  * `.expander` on an expander block lists the block itself in 1.56.0 and 1.65.0, and does not in 1.66.0.
+  * The app structure is the same in all three.
+  * Streamlit **allows** an expander inside an expander in all three versions, so "no nested expander" is the app's own layout rule.
+* **The old test was wrong in both directions on 1.66.0.** It asserted `len(exp.expander) == 1`. That gave 0 on a flat group, which turned the job red with no nesting present. It gave 1 on an outer group that did hold another, so it would also have missed real nesting.
+* **Fix** `cd8c043` (only that test): count the descendants of each group, the group itself excluded by identity (`[e for e in exp.expander if e is not exp]`), and require none. The `len(groups) == 8` control stays.
+  * Positive control: the corrected count is 1 for the outer group of a nested app, in all three versions.
+  * Local, job selection: 1507 / 0 on 1.56.0, 1.65.0 and 1.66.0; lean recipe 1280 / 0 + 1 / 0.
+  * Branch pipeline [420](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/420): build_test 1280 / 0 + 1 / 0; both legs 1507 / 0, newest on 1.66.0.
+* **Second merge** `0eb614e` (`--no-ff`). Its pipeline [421](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/421) is **green**:
+
+  | job | result |
+  |---|---|
+  | `build_test` (607) | 1280 / 0 + 1 / 0 |
+  | `app_test_floor` (609) | 1507 / 0, streamlit 1.56.0 |
+  | `app_test_newest` (608) | 1507 / 0, streamlit 1.66.0 |
+  | `test_pypi_publish` (610) | green; started 19:13:04Z, after the last of the three stopped at 19:13:01Z |
+
+  The skip check was OK on both legs. TestPyPI published nothing: twine got `400 File already exists` for each file, and `--skip-existing` turned that into `WARNING  Skipping cyclophaser-2.1.2-py3-none-any.whl because it appears to already exist` and `WARNING  Skipping cyclophaser-2.1.2.tar.gz because it appears to already exist`.
+* A claim made during the closing was wrong and is corrected here: the public app does **not** run 1.66.0 yet. Streamlit Cloud installs dependencies when it rebuilds the app, and the last push to `master` was on 2026-10-10.
+
+### Archive
+
+The disposable branches are kept as annotated tags:
+* `archive/ci/app-tests-controls` → `cf92957` (controls (e), (c), (d); pipelines 412–414);
+* `archive/ci/app-tests-stability` → `6fb3808` (stability matrix; pipeline 415).
+
+The tag pushes created pipelines 422 and 423 with no workflow.
+
+The remote branches `ci/app-tests-controls`, `ci/app-tests-stability`, `ci/app-tests` and `ci/fix-apptest-expander-count` were then deleted. Before deletion, the last two were checked as ancestors of `develop` with `git merge-base --is-ancestor`. The remote now holds `develop` and `master` only.
+
+### Pending
+
+1. **Check the app on streamlit 1.66.0 in the browser (manual) before the next release.** CI covers AppTest only, and 1.66.0 already changed AppTest behaviour once.
+2. **The new CI and the `CLAUDE.md` merge rule reach `master` with the next release.** Until then `master` still runs the old workflow, and its `pypi_publish` requires `build_test` only.
+3. The packaging backlog (`cmocean>=4.0`; the `pandas`/`pyyaml` floors; `install_requires`), see Backlog.
+4. The two `insert(0)` of the repository root in `research/labels`, see Backlog.
+5. Option: widen `app_test` to every branch, see Backlog.
 
 ### Gaps that remain
 

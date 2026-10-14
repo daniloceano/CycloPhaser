@@ -319,3 +319,41 @@ Em todas, o `cyclophaser*` veio do venv (sonda). L1 e L2 conferiram.
 
 **CI.** O pipeline do push desta ponta é a previsão C1. O resultado fica no
 resumo da frente. O merge em `develop` exige nova autorização do Danilo.
+
+## Fechamento final (2026-10-14)
+
+Autorização do Danilo para o segundo merge: dada por escrito. Pré-checagem:
+`origin/develop` = `06f56e8`, `origin/ci/fix-apptest-expander-count` =
+`04ea018`. As previsões (`PREVISOES_fechamento_final.md`, `dba5d84`, em
+`develop` com `[skip ci]`) tiveram push antes do merge.
+
+**Merge `0eb614e`** (`--no-ff`). Pipeline
+[421](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/421)
+(`logs/fechamento_final/`):
+
+| job | resultado |
+|---|---|
+| `build_test` (607) | 1280 / 0 + 1 / 0 |
+| `app_test_floor` (609) | 1507 / 0, `OK`, streamlit 1.56.0 |
+| `app_test_newest` (608) | 1507 / 0, `OK`, streamlit 1.66.0 |
+| `test_pypi_publish` (610) | `success`, começou 19:13:04Z; o último dos três parou 19:13:01Z |
+
+O TestPyPI devolveu `400 File already exists` para os dois arquivos, e o
+`--skip-existing` os pulou: `WARNING  Skipping cyclophaser-2.1.2-py3-none-any.whl
+because it appears to already exist` e `WARNING  Skipping
+cyclophaser-2.1.2.tar.gz because it appears to already exist`. Nada foi
+publicado. N1–N6 conferiram.
+
+**Arquivamento:**
+* `archive/ci/app-tests-controls` → `cf92957` e `archive/ci/app-tests-stability`
+  → `6fb3808` (anotadas; conferidas no `ls-remote`, peeled);
+* pipelines 422 e 423 das tags, sem workflow;
+* apagadas no remoto `ci/app-tests-controls`, `ci/app-tests-stability`,
+  `ci/app-tests` (`f734d45`) e `ci/fix-apptest-expander-count` (`04ea018`), as
+  duas últimas depois de conferidas com `git merge-base --is-ancestor` em
+  `develop`. As cópias locais também foram apagadas: seus commits ficam nas
+  tags e em `develop`.
+
+**Desvio de instrumento:** o `ci_pipeline.py` quebrava com 404 ao detalhar um
+job `not_run` (pipeline 419). Agora ele pula o detalhe desses jobs e guarda o
+log do passo `Publish`.

@@ -101,10 +101,10 @@ def detail(job, out):
                "run_time_s": round(sum((a.get("run_time_millis") or 0)
                                        for a in s["actions"]) / 1000, 1),
                "status": [a.get("status") for a in s["actions"]]}
-        if s["name"].startswith(("Run ", "Check ", "Require ")):
+        if s["name"].startswith(("Run ", "Check ", "Require ", "Publish ")):
             lines = _step_lines(s)
             row["pytest_summary"] = _pytest_line(lines)
-            row["tail"] = lines[-12:]
+            row["tail"] = lines[-40:] if s["name"].startswith("Publish ") else lines[-12:]
         steps.append(row)
     by_result, ids = {}, {}
     for t in tests.get("tests", []):
@@ -131,8 +131,9 @@ def main():
             break
         print(time.strftime("%H:%M:%S"), {j["name"]: j["status"] for j in jobs}, flush=True)
         time.sleep(60)
-    rows = [detail(j, out) if j.get("job_number") and j["status"] not in OPEN else j
-            for j in jobs]
+    # a `not_run` job (requires not met) has a number but no build: 404 on v1.1
+    rows = [detail(j, out) if j.get("job_number") and j["status"] not in OPEN | {"not_run"}
+            else j for j in jobs]
     summary = {"branch": branch, "commit": sha,
                "pipelines": [{"number": p["number"], "id": p["id"],
                               "url": f"https://app.circleci.com/pipelines/{SLUG_V2}/{p['number']}"}

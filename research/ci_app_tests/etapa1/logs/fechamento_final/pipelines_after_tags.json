@@ -1,0 +1,592 @@
+{
+  "next_page_token" : "AO9ui9-3Jsg29sjGZmEJdsVfnROlv4yGiZ07rSSzOoafazJUqhMh2xBgizRDsz0i3miy0RnowGdkigeiWPlr8ljotn0sdKtcaiRSxyX-sareI3jrD4M56oXDtsielEQyviyaDBkQOnWM",
+  "items" : [ {
+    "id" : "f2bee94a-34ee-4a0a-a3f1-9dfabd84cf49",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T19:15:24.357Z",
+    "number" : 423,
+    "state" : "created",
+    "created_at" : "2026-10-14T19:15:24.147Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T19:15:23.847Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "6fb38082c0c3e75e578f4b67045311bac4aad473",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "tag" : "archive/ci/app-tests-stability"
+    }
+  }, {
+    "id" : "a0fe9e90-1ba7-4123-9066-5d18fbbc95b9",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T19:15:23.881Z",
+    "number" : 422,
+    "state" : "created",
+    "created_at" : "2026-10-14T19:15:23.673Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T19:15:23.452Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "cf929571912ac58ab5290ae6a94d75e1e9d278fd",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "tag" : "archive/ci/app-tests-controls"
+    }
+  }, {
+    "id" : "4c4a61a6-be5f-467b-a698-3134cc080044",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T19:01:21.107Z",
+    "number" : 421,
+    "state" : "created",
+    "created_at" : "2026-10-14T19:01:20.914Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T19:01:20.586Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "0eb614e1ba9f0151beb2312c2d6bc871df9d842f",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Fixes the red develop pipeline 419. Authorised by Danilo (2026-10-14).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "Merge ci/fix-apptest-expander-count into develop: version-independent nested-expander count (streamlit 1.66.0)"
+      },
+      "branch" : "develop"
+    }
+  }, {
+    "id" : "fc1d6ea9-dd9a-4894-bab9-5bc72493233e",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T18:46:43.171Z",
+    "number" : 420,
+    "state" : "created",
+    "created_at" : "2026-10-14T18:46:42.919Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T18:46:42.479Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "04ea0187ec313482530de50b4b9fb424745ca9d9",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "research(ci-app-tests): 3b diagnostic, control and local runs (1507/0 on 1.56.0/1.65.0/1.66.0)"
+      },
+      "branch" : "ci/fix-apptest-expander-count"
+    }
+  }, {
+    "id" : "fe2baa7d-3308-4608-8c61-44a17709c408",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T16:36:29.072Z",
+    "number" : 419,
+    "state" : "created",
+    "created_at" : "2026-10-14T16:36:28.878Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T16:36:28.595Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "06f56e89dedafae81ced1df14e38bb4f6e78e726",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "app_test (floor + newest, medium) on develop/master/release/*/ci/*, the\napp-deps lock, the closed skip list, versioned sample tracks; publishing\nrequires build_test + both legs. Authorised by Danilo (2026-10-14).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "Merge ci/app-tests into develop: calibration-app tests in CI (item 36)"
+      },
+      "branch" : "develop"
+    }
+  }, {
+    "id" : "d837d1b9-2cc8-4f2e-a653-a177ddf13236",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T15:52:58.883Z",
+    "number" : 418,
+    "state" : "created",
+    "created_at" : "2026-10-14T15:52:58.686Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T15:52:58.423Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "52737509267b7bec9b076a0caea7a7d89e2ed102",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Releases reach master from release/* (e.g. release/v2.1.2), where app_test did\nnot run, so the CLAUDE.md rule could not be met for a release. Adds\n/^release\\/.*/ to the app_test filter (nothing else in the jobs changes),\nrewords the CLAUDE.md rule, records it in future_work item 36. Filter check\nwith controls both ways: research/ci_app_tests/etapa1/logs/correcao/.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "ci: run app_test on release/* too; merge rule = green on the exact commit merged"
+      },
+      "branch" : "ci/app-tests"
+    }
+  }, {
+    "id" : "37cb498b-9154-41f2-bd2c-c6ece22bcf2b",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T13:15:48.341Z",
+    "number" : 417,
+    "state" : "created",
+    "created_at" : "2026-10-14T13:15:48.142Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T13:15:47.856Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "fb516c51cd010c57868840f633aaca37ef577c74",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "research(ci-app-tests): etapa 1 final verification records (pipeline 416, local lean + conda)"
+      },
+      "branch" : "ci/app-tests"
+    }
+  }, {
+    "id" : "c33e69b7-f1d4-4c15-ab27-af6c0f3f24f3",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T13:03:53.530Z",
+    "number" : 416,
+    "state" : "created",
+    "created_at" : "2026-10-14T13:03:53.296Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T13:03:52.976Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "66ac34e00337ee768e60ba3ec225c3c2c926774c",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "- .circleci/config.yml: comments only (Chromium gap with A12/F1/st.toggle,\n  Streamlit Cloud gap, branch filter and Free plan, cost stop rule)\n- CLAUDE.md: merge into master only with both app_test legs green on the same\n  develop commit (for Danilo's review)\n- docs/future_work.md item 36\n- research/ci_app_tests/etapa1: RELATORIO, passo 3 logs (58/58), cost\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "docs(ci-app-tests): etapa 1 passo 4 — config comment (j), CLAUDE.md merge rule, future_work item 36 (k), report"
+      },
+      "branch" : "ci/app-tests"
+    }
+  }, {
+    "id" : "2101d749-e1e2-476e-a980-c4243204791c",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T12:35:39.411Z",
+    "number" : 415,
+    "state" : "created",
+    "created_at" : "2026-10-14T12:35:39.153Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T12:35:38.818Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "6fb38082c0c3e75e578f4b67045311bac4aad473",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Disposable branch ci/app-tests-stability only; never merged.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "stability (f): leg x run(1..29) = 58 app_test jobs, no build_test, no publishing"
+      },
+      "branch" : "ci/app-tests-stability"
+    }
+  }, {
+    "id" : "0c117689-1e83-4987-9b49-b99aadc9de21",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T12:22:45.349Z",
+    "number" : 414,
+    "state" : "created",
+    "created_at" : "2026-10-14T12:22:45.153Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T12:22:44.892Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "cf929571912ac58ab5290ae6a94d75e1e9d278fd",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Disposable branch ci/app-tests-controls only; both must go red.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "control(c)(d) CD: negative-control jobs app_control_noplotly and app_control_python_m"
+      },
+      "branch" : "ci/app-tests-controls"
+    }
+  }, {
+    "id" : "8777848a-3292-41eb-9506-0a4339cfeb6b",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T12:09:59.818Z",
+    "number" : 413,
+    "state" : "created",
+    "created_at" : "2026-10-14T12:09:59.650Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T12:09:59.342Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "711699209c137744de99f070280b6787b657c6f2",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "control(e) E2: revert E1 (restore the vorticity_smoothed2 overlay layer)"
+      },
+      "branch" : "ci/app-tests-controls"
+    }
+  }, {
+    "id" : "48151508-2b83-4362-8ab6-9cedba8029b9",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T11:57:11.595Z",
+    "number" : 412,
+    "state" : "created",
+    "created_at" : "2026-10-14T11:57:11.398Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T11:57:11.122Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "12a618dead1834a81c4cc217513573022bfdcd2c",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Disposable branch ci/app-tests-controls; never merged.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "control(e) E1: deliberate app regression — drop the vorticity_smoothed2 overlay layer"
+      },
+      "branch" : "ci/app-tests-controls"
+    }
+  }, {
+    "id" : "9bca3739-f4dc-4473-87e2-bab83bbfff43",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T11:43:15.333Z",
+    "number" : 411,
+    "state" : "created",
+    "created_at" : "2026-10-14T11:43:15.109Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T11:43:13.850Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "425a72fd7b66b95fa9c0c5647c7d044e374e4727",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "- app_test job, legs floor (streamlit==1.56.0) and newest, resource_class\n  medium, only on develop, master and ci/*; installs the wheel of the commit\n  plus streamlit/plotly/pyyaml/pytest in one pip call, runs the suite minus\n  browser/source_tree with the provenance lock and the new app-deps lock\n- .circleci/check_app_skips.py: skips must be exactly the 5 allowed junit ids\n- tests/conftest.py: CYCLOPHASER_REQUIRE_APP_DEPS (off = no change, no import)\n- test_compare_core: SAMPLE_DIR -> versioned tests/sample_tracks/ (2 TRACK CSVs)\n- publishing jobs require build_test + both app legs\n- store_test_results when: always in both test jobs; pip freeze artifact\n\nDesign: research/ci_app_tests/etapa0/RELATORIO.md (approved 2026-10-14).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "ci: run the calibration-app tests on CircleCI (app_test, floor + newest legs)"
+      },
+      "branch" : "ci/app-tests"
+    }
+  }, {
+    "id" : "14daecc5-5875-4eb1-bc98-6fdf9ccf0b84",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T11:18:22.657Z",
+    "number" : 410,
+    "state" : "created",
+    "created_at" : "2026-10-14T11:18:22.480Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T11:18:22.159Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "6d8f4f0b43c57f79fb8b8ce119b5b41070f404dd",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "research(ci-app-tests): etapa 1 passo 1 predictions and scripts, before implementation"
+      },
+      "branch" : "ci/app-tests"
+    }
+  }, {
+    "id" : "b4ab2efa-5317-404f-b9c2-b4a1ecac4b01",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-14T03:24:42.510Z",
+    "number" : 409,
+    "state" : "created",
+    "created_at" : "2026-10-14T03:24:42.338Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-14T03:24:41.923Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "9efc74f6f5be4b08059928400c54ece21111796d",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Wheel contents, CI baseline (pipeline 408 / job 516: 1280/0 + 1/0), app-test\ninventory (226 non-browser + 44 browser), provenance (lock passes; app imported\nfrom the checkout), streamlit/dependency matrix (1506/0 on 1.56.0, 1.65.0 and\nlocal pins; declared floors do not install), stability 58/58 runs PASS,\nFree-plan cost of the recommended design, skip guard (A), and criteria\n(a)-(k) with PASS/FAIL reachability recomputed by reach_check.py.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "research(ci-app-tests): etapa 0 measurements, design and criteria (no CI change)"
+      },
+      "branch" : "ci/app-tests"
+    }
+  }, {
+    "id" : "cc34c547-4dd2-45b3-be02-b0a43adb4879",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-13T23:20:25.902Z",
+    "number" : 408,
+    "state" : "created",
+    "created_at" : "2026-10-13T23:20:25.720Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-13T23:20:25.463Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "c5174d1dfc499c9a0ca6333f7d4c50511cc9b276",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Front: app tests in CircleCI, stage 0 (design and measurement only; CI\nunchanged). Predictions P1-P11, N=29 per version for stability, reading\ncriteria, and the scripts the measurements will use.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "research(ci-app-tests): etapa 0 predictions and scripts, before any measurement"
+      },
+      "branch" : "ci/app-tests"
+    }
+  }, {
+    "id" : "90c1cb93-2b56-4d85-aeb1-4fce5cf2d40b",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-10T12:43:16.609Z",
+    "number" : 407,
+    "state" : "created",
+    "created_at" : "2026-10-10T12:43:16.425Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-10T12:43:16.083Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "3f410dfb87c44b51777466d758d359b4d79169ec",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "docs(future_work): item 35 — restore findings A4 and A8 from the stage 0 audit"
+      },
+      "branch" : "develop"
+    }
+  }, {
+    "id" : "74fa114f-3298-45c9-9160-28380db20630",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-10T12:26:18.089Z",
+    "number" : 406,
+    "state" : "created",
+    "created_at" : "2026-10-10T12:26:17.911Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-10T12:26:17.444Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "61b472222b2dbb7effcaca679b279fff997d8d18",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "docs(future_work): item 35 — benchmark review closed, merged and released as 2.1.2"
+      },
+      "branch" : "develop"
+    }
+  }, {
+    "id" : "99ef7dd9-aeb7-4924-b1ef-9f8184faaeba",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-10T11:34:25.462Z",
+    "number" : 405,
+    "state" : "created",
+    "created_at" : "2026-10-10T11:34:25.337Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-10T11:34:25.096Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "aa7ee3a494b8568c2d9407398d575cd72f53cebd",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "tag" : "v2.1.2"
+    }
+  }, {
+    "id" : "5e3fa277-40b1-480d-b5a8-e8ce7556bad6",
+    "errors" : [ ],
+    "project_slug" : "gh/daniloceano/CycloPhaser",
+    "updated_at" : "2026-10-10T11:34:24.504Z",
+    "number" : 404,
+    "state" : "created",
+    "created_at" : "2026-10-10T11:34:24.388Z",
+    "warnings" : [ ],
+    "trigger" : {
+      "received_at" : "2026-10-10T11:34:24.132Z",
+      "type" : "webhook",
+      "actor" : {
+        "login" : "daniloceano",
+        "avatar_url" : "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs" : {
+      "origin_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url" : "https://github.com/daniloceano/CycloPhaser",
+      "review_url" : "",
+      "revision" : "aa7ee3a494b8568c2d9407398d575cd72f53cebd",
+      "review_id" : "",
+      "provider_name" : "GitHub",
+      "commit" : {
+        "body" : "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject" : "Release 2.1.2"
+      },
+      "branch" : "master"
+    }
+  } ]
+}
