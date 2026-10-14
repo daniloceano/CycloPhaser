@@ -1,0 +1,39 @@
+{
+  "app_tests_measured_c0": 226,
+  "app_tests_after_sample_fix": 227,
+  "b_baseline_wheel_passed": 1280,
+  "b_if_app_deps_leak_into_wheel_job_passed": 1507,
+  "c_measured_app_job_passed_c0": 1506,
+  "c_expected_app_job_passed": 1507,
+  "c_if_streamlit_missing_and_no_lock_passed": 1280,
+  "c_tests_lost_without_streamlit": 227,
+  "c_allowed_skips_after_fix": 5,
+  "collection_closes_c0": "1506 + 6 + 1 - 4 + 44 = 1553",
+  "collection_closes_after_fix": "1507 + 5 + 1 - 4 + 44 = 1553",
+  "e_red_expected": {
+    "passed": "1507 - k",
+    "failed": "k (1 <= k <= 227), ids == declared",
+    "build_test_passed": 1280
+  },
+  "e_red_k_range": [
+    1,
+    227
+  ],
+  "e_app_modules_build_test_imports": [
+    "benchmark_core",
+    "layer_inspector",
+    "package_args",
+    "track_io"
+  ],
+  "e_green_expected": {
+    "passed": 1507,
+    "failed": 0
+  },
+  "f_N_per_leg": 29,
+  "f_jobs": 58,
+  "f_min_p_detected_95": 0.0981,
+  "f_local_runs_pass": {
+    "floor_st": "29/29",
+    "newest": "29/29"
+  }
+}

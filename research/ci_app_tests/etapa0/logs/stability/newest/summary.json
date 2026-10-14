@@ -1,0 +1,5077 @@
+[
+  {
+    "file": "run_01.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 241.6,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.47
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.86
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 8.4
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.44
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.13
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 6.98
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 6.24
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 27.93
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 60.87
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.92
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.11
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.11
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.53
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.1
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.72
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.62
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 11.16
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.08
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.19
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 23.03
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.82
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.73
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 8.01
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.21
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.15
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 54.04
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.48
+      }
+    }
+  },
+  {
+    "file": "run_02.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 224.0,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.24
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.59
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 2.33
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 9.33
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.5
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 7.34
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 6.29
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 27.07
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 56.95
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.76
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.08
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.41
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.15
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.65
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.83
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.78
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.21
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.68
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.62
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.58
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.22
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 43.6
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.11
+      }
+    }
+  },
+  {
+    "file": "run_03.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 228.8,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.75
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 8.08
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.5
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 6.8
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.95
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.76
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 55.08
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.03
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 2.21
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.13
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.66
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.16
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.95
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 4.35
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.05
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 12.98
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.49
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.27
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.72
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.09
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.09
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 24.69
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.91
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.8
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.2
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.84
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.15
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 48.95
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.13
+      }
+    }
+  },
+  {
+    "file": "run_04.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 223.9,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.18
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.5
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.89
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 7.1
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 6.21
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 6.51
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 23.68
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 59.48
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.77
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.09
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.47
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.15
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.66
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.68
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.65
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.61
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.61
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.65
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 21.97
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.88
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.75
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.21
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.76
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 45.15
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.03
+      }
+    }
+  },
+  {
+    "file": "run_05.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 216.9,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.78
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.99
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 6.0
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.43
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.75
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 54.85
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 2.1
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.04
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.81
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.06
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.97
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 4.11
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.86
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.08
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.48
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.04
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.72
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.09
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.92
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.54
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.66
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.56
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.15
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 46.77
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.43
+      }
+    }
+  },
+  {
+    "file": "run_06.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 236.4,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.17
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.48
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 2.01
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 8.53
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.46
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 6.77
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.66
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 24.48
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 59.63
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 2.2
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.17
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.11
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.64
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.22
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.75
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.72
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 11.13
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 15.12
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.16
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.64
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 24.52
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.57
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.65
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.49
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 50.08
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.21
+      }
+    }
+  },
+  {
+    "file": "run_07.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 208.1,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.17
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.45
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.98
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 7.12
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.43
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.98
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.56
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 22.05
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 53.31
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.82
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.06
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.39
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.04
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.68
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.54
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.26
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.88
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.19
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.63
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.57
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.52
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.64
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.16
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.76
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 1.96
+      }
+    }
+  },
+  {
+    "file": "run_08.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 203.4,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.45
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.72
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.72
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.62
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.33
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.08
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 51.03
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.86
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.06
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.41
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.06
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.77
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.53
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.28
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.8
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.19
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.54
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.53
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.63
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.27
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.42
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 1.97
+      }
+    }
+  },
+  {
+    "file": "run_09.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 233.4,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.51
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.75
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.83
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 6.32
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.48
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.07
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 56.62
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.03
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 2.06
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.11
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.1
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.71
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.23
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.84
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.83
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 11.44
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 14.62
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.29
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.72
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.03
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.12
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.12
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 25.01
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.63
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.8
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.22
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 9.31
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 53.36
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.15
+      }
+    }
+  },
+  {
+    "file": "run_10.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 226.0,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.2
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.63
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 2.16
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 7.33
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.48
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.12
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 7.04
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.81
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 22.57
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 61.82
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.87
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.12
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.14
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.76
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 2.28
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 4.6
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.07
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.89
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.41
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.24
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.64
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.09
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 21.75
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.61
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.66
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.33
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.16
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.17
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 44.58
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.01
+      }
+    }
+  },
+  {
+    "file": "run_11.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 212.0,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.73
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.89
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.48
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.95
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.45
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.46
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 54.46
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.92
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.11
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.16
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.54
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.19
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.73
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.82
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.85
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.84
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.21
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.65
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 21.1
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.59
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.57
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.26
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.16
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 43.48
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.14
+      }
+    }
+  },
+  {
+    "file": "run_12.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 215.5,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.75
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.79
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.8
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.4
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.27
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 52.53
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.81
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.02
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.39
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.68
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.58
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.29
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.84
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.38
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.54
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.57
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.25
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 52.72
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.06
+      }
+    }
+  },
+  {
+    "file": "run_13.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 227.4,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.17
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.47
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.85
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 8.49
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.5
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 7.06
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 9.27
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 23.91
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 53.27
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.84
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.07
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.48
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.16
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.86
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.81
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 12.23
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 15.32
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.27
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.66
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 22.52
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 3.29
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.79
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.19
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 8.31
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.15
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 43.83
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 1.99
+      }
+    }
+  },
+  {
+    "file": "run_14.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 207.6,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.75
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.79
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.76
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.47
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.34
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 51.58
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.74
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.07
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.54
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.14
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.72
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.6
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.51
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.61
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.99
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.7
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.72
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.19
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.51
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 43.26
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.05
+      }
+    }
+  },
+  {
+    "file": "run_15.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 206.8,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.72
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.91
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.68
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.35
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.37
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 52.41
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.04
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.85
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.01
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.4
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.1
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.71
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.66
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.65
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.96
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.18
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.63
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.61
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.64
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.29
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.23
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.95
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.03
+      }
+    }
+  },
+  {
+    "file": "run_16.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 209.0,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.73
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.76
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.83
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.56
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.19
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 52.28
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 2.07
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.11
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.06
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.7
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.13
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.8
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.95
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 11.07
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 12.18
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.19
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.63
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 21.2
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.57
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.64
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.24
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 43.24
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 1.97
+      }
+    }
+  },
+  {
+    "file": "run_17.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 205.0,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.72
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.73
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.73
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.51
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.97
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 52.15
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.8
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.01
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.4
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.64
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.57
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.5
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.82
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.55
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.53
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.64
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.16
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.69
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.02
+      }
+    }
+  },
+  {
+    "file": "run_18.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 203.0,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.43
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.71
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.72
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.41
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.68
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.42
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.79
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 51.13
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.8
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.01
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.38
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.68
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.53
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.21
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.78
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.71
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.57
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.63
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.12
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.27
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.03
+      }
+    }
+  },
+  {
+    "file": "run_19.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 201.9,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.43
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.71
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.68
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.64
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.29
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.7
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 50.69
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.73
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.06
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.39
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.63
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.54
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.3
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.78
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.02
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.41
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.58
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.57
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.16
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.23
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.02
+      }
+    }
+  },
+  {
+    "file": "run_20.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 202.5,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.71
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.66
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.61
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.29
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.82
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 51.29
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.8
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.05
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.38
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.02
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.68
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.52
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.17
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.7
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.18
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.41
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.59
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.57
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.17
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.27
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.04
+      }
+    }
+  },
+  {
+    "file": "run_21.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 201.8,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.72
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.65
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.41
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.61
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.27
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.67
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 50.37
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.81
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.0
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.44
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.02
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.62
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.5
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.13
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.9
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.2
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.61
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.56
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.51
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.63
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.32
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.42
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 1.95
+      }
+    }
+  },
+  {
+    "file": "run_22.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 201.7,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.71
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.67
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.58
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.28
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.76
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 50.65
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.79
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.03
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.39
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.7
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.52
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.18
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.71
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.13
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.36
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.6
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.63
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.18
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.22
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.01
+      }
+    }
+  },
+  {
+    "file": "run_23.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 203.8,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.43
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.7
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 7.03
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.11
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.92
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.43
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.69
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 51.6
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.86
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.01
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.41
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.12
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.7
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.56
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.23
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.8
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.41
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.57
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.57
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.18
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.2
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.22
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.02
+      }
+    }
+  },
+  {
+    "file": "run_24.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 201.1,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.72
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.66
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.41
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.58
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.26
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.54
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 50.48
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.81
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.05
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.38
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.62
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.6
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.2
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.7
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.22
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.39
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.5
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.63
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.16
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.06
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 1.95
+      }
+    }
+  },
+  {
+    "file": "run_25.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 202.7,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.71
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.66
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.41
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.64
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.58
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.14
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 50.76
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.8
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.0
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.39
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.07
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.69
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.54
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.27
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.76
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.37
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.56
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.56
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.19
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.25
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.02
+      }
+    }
+  },
+  {
+    "file": "run_26.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 203.5,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.77
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.7
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.43
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.72
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.3
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 21.37
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 51.09
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.8
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.01
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.39
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.08
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.67
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.56
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.29
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.74
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.19
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.62
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.52
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.57
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.57
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.22
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.37
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.03
+      }
+    }
+  },
+  {
+    "file": "run_27.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 202.3,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.15
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.44
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.71
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.67
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.41
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.65
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.28
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.74
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 51.01
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.74
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.06
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.38
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.07
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.65
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.54
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.07
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.28
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.8
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.14
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.61
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.42
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.58
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.57
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.21
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.18
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.01
+      }
+    }
+  },
+  {
+    "file": "run_28.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 201.6,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.45
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.79
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.86
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.42
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 5.62
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.27
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.67
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 50.61
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.79
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 0.99
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.37
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.07
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.62
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.56
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.23
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.75
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.13
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.02
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.61
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.07
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.36
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.5
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.63
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.13
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.15
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.11
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.0
+      }
+    }
+  },
+  {
+    "file": "run_29.xml.gz",
+    "passed": 1506,
+    "failed": 0,
+    "error": 0,
+    "skipped": 6,
+    "sum_testcase_time_s": 201.9,
+    "failures": [],
+    "errors": [],
+    "skip_reasons": {
+      "collection skipped": 4,
+      "Timing not checked for observational cases": 1,
+      "sample tracks not present": 1
+    },
+    "per_file": {
+      ".py": {
+        "skipped": 4,
+        "time_s": 0.0
+      },
+      "tests/synthetic/test_length_scale_regression.py": {
+        "passed": 4,
+        "time_s": 0.16
+      },
+      "tests/synthetic/test_synthetic_lifecycles.py": {
+        "passed": 23,
+        "skipped": 1,
+        "time_s": 0.43
+      },
+      "tests/test_app_distance_removed.py": {
+        "passed": 16,
+        "time_s": 1.71
+      },
+      "tests/test_app_navigation_apptest.py": {
+        "passed": 10,
+        "time_s": 6.69
+      },
+      "tests/test_app_passo5_fixes.py": {
+        "passed": 16,
+        "time_s": 0.41
+      },
+      "tests/test_app_yaml_null_export.py": {
+        "passed": 4,
+        "time_s": 0.1
+      },
+      "tests/test_boundary_padding.py": {
+        "passed": 448,
+        "time_s": 6.17
+      },
+      "tests/test_calibrate_i2_apptest.py": {
+        "passed": 13,
+        "time_s": 5.26
+      },
+      "tests/test_calibrate_i3_apptest.py": {
+        "passed": 14,
+        "time_s": 20.69
+      },
+      "tests/test_compare_apptest.py": {
+        "passed": 30,
+        "time_s": 50.56
+      },
+      "tests/test_compare_core.py": {
+        "passed": 8,
+        "skipped": 1,
+        "time_s": 0.01
+      },
+      "tests/test_config_defaults.py": {
+        "passed": 8,
+        "time_s": 0.02
+      },
+      "tests/test_decay_tail_amplitude_fraction.py": {
+        "passed": 27,
+        "time_s": 1.74
+      },
+      "tests/test_determine_periods.py": {
+        "passed": 1,
+        "time_s": 0.1
+      },
+      "tests/test_evaluate_batch_train.py": {
+        "passed": 9,
+        "time_s": 1.05
+      },
+      "tests/test_incipient_plateau.py": {
+        "passed": 83,
+        "time_s": 1.39
+      },
+      "tests/test_inspector_apptest.py": {
+        "passed": 2,
+        "time_s": 1.07
+      },
+      "tests/test_integration_prominence.py": {
+        "passed": 106,
+        "time_s": 1.63
+      },
+      "tests/test_intensification_min_depth.py": {
+        "passed": 24,
+        "time_s": 3.53
+      },
+      "tests/test_item30_spare_intensification.py": {
+        "passed": 19,
+        "time_s": 0.04
+      },
+      "tests/test_label_apptest.py": {
+        "passed": 16,
+        "time_s": 10.18
+      },
+      "tests/test_layer_inspector.py": {
+        "passed": 280,
+        "time_s": 11.75
+      },
+      "tests/test_manual_labels.py": {
+        "passed": 82,
+        "time_s": 1.15
+      },
+      "tests/test_peaks_valleys_plateau.py": {
+        "passed": 5,
+        "time_s": 0.01
+      },
+      "tests/test_phase_colors.py": {
+        "passed": 3,
+        "time_s": 0.03
+      },
+      "tests/test_phase_figures.py": {
+        "passed": 4,
+        "time_s": 0.61
+      },
+      "tests/test_prominence.py": {
+        "passed": 17,
+        "time_s": 0.02
+      },
+      "tests/test_reclassify_index0.py": {
+        "passed": 14,
+        "time_s": 0.08
+      },
+      "tests/test_regression_baseline.py": {
+        "passed": 4,
+        "time_s": 0.08
+      },
+      "tests/test_sidebar_coverage.py": {
+        "passed": 38,
+        "time_s": 20.31
+      },
+      "tests/test_sidebar_defaults.py": {
+        "passed": 5,
+        "time_s": 2.56
+      },
+      "tests/test_swell_batch.py": {
+        "passed": 11,
+        "time_s": 0.56
+      },
+      "tests/test_track_io.py": {
+        "passed": 93,
+        "time_s": 0.17
+      },
+      "tests/test_track_upload_apptest.py": {
+        "passed": 8,
+        "time_s": 7.28
+      },
+      "tests/test_use_filter_bool.py": {
+        "passed": 14,
+        "time_s": 0.15
+      },
+      "tests/test_use_smoothing_false_derivatives.py": {
+        "passed": 6,
+        "time_s": 0.14
+      },
+      "tests/test_validate_apptest.py": {
+        "passed": 28,
+        "time_s": 42.13
+      },
+      "tests/test_validate_core.py": {
+        "passed": 13,
+        "time_s": 2.0
+      }
+    }
+  }
+]

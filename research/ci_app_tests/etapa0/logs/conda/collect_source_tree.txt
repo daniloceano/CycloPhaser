@@ -1,0 +1,37 @@
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-19' coro=<Connection.run.<locals>.init() running at /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/playwright/_impl/_connection.py:344> wait_for=<Future finished result=None>>
+Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-27' coro=<Connection.run.<locals>.init() running at /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/playwright/_impl/_connection.py:344> wait_for=<Future finished result=None>>
+Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-35' coro=<Connection.run.<locals>.init() running at /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/playwright/_impl/_connection.py:344> wait_for=<Future finished result=None>>
+Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+tests/test_item30_spare_intensification.py::test_params_track_reproduces_the_counterfactual_in_the_five
+
+=============================== warnings summary ===============================
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+cyclophaser.__file__ (in session) = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+1/1553 tests collected (1552 deselected) in 6.52s

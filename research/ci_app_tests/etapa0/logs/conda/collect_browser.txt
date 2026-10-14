@@ -1,0 +1,80 @@
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-19' coro=<Connection.run.<locals>.init() running at /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/playwright/_impl/_connection.py:344> wait_for=<Future finished result=None>>
+Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-27' coro=<Connection.run.<locals>.init() running at /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/playwright/_impl/_connection.py:344> wait_for=<Future finished result=None>>
+Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-35' coro=<Connection.run.<locals>.init() running at /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/playwright/_impl/_connection.py:344> wait_for=<Future finished result=None>>
+Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+tests/test_app_pages_browser.py::test_the_public_menu_has_calibrate_and_compare_and_no_developer
+tests/test_app_pages_browser.py::test_the_developer_menu_has_the_labelling_and_validate_pages
+tests/test_app_pages_browser.py::test_the_old_benchmark_address_opens_the_default_page
+tests/test_app_pages_browser.py::test_label_page_drag_reveal_overlay_and_save
+tests/test_app_pages_browser.py::test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip
+tests/test_app_pages_browser.py::test_sidebar_values_set_in_the_ui_are_shown_after_page_trips
+tests/test_app_pages_browser.py::test_save_results_downloads_what_the_options_say
+tests/test_app_pages_browser.py::test_the_custom_format_dialog_reads_a_non_standard_file
+tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser
+tests/test_compare_browser.py::test_e1_tasks_t5_t1_t3_t4_within_budget
+tests/test_compare_browser.py::test_e1_task_t2_upload_a_yaml_within_budget
+tests/test_compare_browser.py::test_the_compare_state_survives_a_trip_to_calibrate_in_the_browser
+tests/test_label_browser.py::test_the_chart_component_actually_mounts
+tests/test_label_browser.py::test_no_javascript_errors_on_the_page
+tests/test_label_browser.py::test_the_table_shows_a_row_per_phase
+tests/test_label_browser.py::test_dragging_a_bar_right_moves_the_boundary_in_python
+tests/test_label_browser.py::test_dragging_a_bar_back_left_moves_it_back
+tests/test_label_browser.py::test_the_same_drag_twice_is_delivered_twice
+tests/test_label_browser.py::test_a_bar_cannot_be_dragged_past_its_neighbour
+tests/test_label_browser.py::test_dragging_the_edge_widens_the_margin_in_python
+tests/test_label_browser.py::test_dragging_the_edge_back_narrows_the_margin
+tests/test_label_browser.py::test_releasing_the_pointer_outside_the_svg_still_commits
+tests/test_label_browser.py::test_a_drag_survives_a_rerender_underneath_it
+tests/test_label_browser.py::test_the_chart_survives_a_rerun_with_no_drag_in_flight
+tests/test_label_browser.py::test_arrow_keys_move_the_selected_boundary_one_step
+tests/test_label_browser.py::test_shift_arrow_moves_five_steps
+tests/test_label_browser.py::test_up_and_down_adjust_the_margin
+tests/test_label_browser.py::test_a_number_typed_in_the_table_moves_the_bar
+tests/test_label_browser.py::test_a_drag_updates_the_number
+tests/test_label_browser.py::test_dragging_never_changes_the_number_of_phases
+tests/test_label_browser.py::test_a_margin_typed_in_the_table_resizes_the_bar
+tests/test_label_browser.py::test_the_first_row_start_is_not_editable
+tests/test_label_browser.py::test_not_sure_is_per_boundary_and_survives_a_drag
+tests/test_label_browser.py::test_row_zero_start_unsure_is_settable_it_is_the_series_opening_edge
+tests/test_label_browser.py::test_end_unsure_of_one_row_mirrors_start_unsure_of_the_next
+tests/test_label_browser.py::test_dragging_a_boundary_gives_the_same_start_idx_with_overlays_on
+tests/test_label_browser.py::test_the_working_area_fits_in_the_viewport[1440-800]
+tests/test_label_browser.py::test_the_working_area_fits_in_the_viewport[1680-950]
+tests/test_label_browser.py::test_the_working_area_fits_in_the_viewport[1920-1080]
+tests/test_label_browser.py::test_the_chart_resizes_with_the_window_without_losing_the_marks
+tests/test_label_browser.py::test_nothing_the_detector_produced_is_on_the_page
+tests/test_validate_browser.py::test_e1_tasks_t9_t6_t8_t7_within_budget
+tests/test_validate_browser.py::test_the_validate_state_survives_a_trip_to_calibrate_in_the_browser
+tests/test_validate_browser.py::test_the_filled_keys_warning_breaks_no_word_in_a_narrow_card
+
+=============================== warnings summary ===============================
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:56: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map = colors.ListedColormap(rgb_with_alpha, N=rgb.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:60: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])
+
+../../../miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings
+  /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.
+    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+cyclophaser.__file__ (in session) = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+44/1553 tests collected (1509 deselected) in 6.87s

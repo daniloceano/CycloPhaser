@@ -1,0 +1,4 @@
+commit=66ac34e00337ee768e60ba3ec225c3c2c926774c wheel=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/wheel_66ac34e/cyclophaser-2.1.2-py3-none-any.whl checkout=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/checkout_66ac34e
+========== 1280 passed, 40 skipped, 1 deselected, 1 warning in 32.89s ==========
+========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 2.00s ==========
+=== 1508 passed, 1 skipped, 44 deselected, 89 warnings in 479.59s (0:07:59) ====

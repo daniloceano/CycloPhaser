@@ -1,0 +1,94 @@
+Processing /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/wheel/cyclophaser-2.1.2-py3-none-any.whl
+Collecting streamlit==1.56.0
+  Using cached streamlit-1.56.0-py3-none-any.whl.metadata (9.8 kB)
+Collecting pandas==2.2.0
+  Using cached pandas-2.2.0-cp312-cp312-macosx_11_0_arm64.whl.metadata (19 kB)
+Collecting matplotlib==3.9.0
+  Using cached matplotlib-3.9.0-cp312-cp312-macosx_11_0_arm64.whl.metadata (11 kB)
+Collecting plotly==5.24.0
+  Using cached plotly-5.24.0-py3-none-any.whl.metadata (7.3 kB)
+Collecting xarray==2024.9.0
+  Using cached xarray-2024.9.0-py3-none-any.whl.metadata (11 kB)
+Collecting numpy==2.1.0
+  Using cached numpy-2.1.0-cp312-cp312-macosx_14_0_arm64.whl.metadata (60 kB)
+Collecting scipy==1.14.0
+  Using cached scipy-1.14.0-cp312-cp312-macosx_14_0_arm64.whl.metadata (60 kB)
+Collecting cmocean==4.0.1
+  Using cached cmocean-4.0.1-py3-none-any.whl.metadata (4.2 kB)
+Collecting pyyaml==6.0.1
+  Downloading PyYAML-6.0.1-cp312-cp312-macosx_11_0_arm64.whl.metadata (2.1 kB)
+Collecting pytest
+  Using cached pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+Collecting contourpy>=1.3 (from cyclophaser==2.1.2)
+  Using cached contourpy-1.4.0-cp312-cp312-macosx_11_0_arm64.whl.metadata (3.8 kB)
+Collecting cycler>=0.12 (from cyclophaser==2.1.2)
+  Using cached cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting fonttools>=4.53 (from cyclophaser==2.1.2)
+  Using cached fonttools-4.66.1-cp312-cp312-macosx_10_13_universal2.whl.metadata (130 kB)
+Collecting iniconfig>=2.0 (from cyclophaser==2.1.2)
+  Using cached iniconfig-2.3.1-py3-none-any.whl.metadata (2.8 kB)
+Collecting kiwisolver>=1.4 (from cyclophaser==2.1.2)
+  Using cached kiwisolver-1.5.1-cp312-cp312-macosx_11_0_arm64.whl.metadata (5.2 kB)
+Collecting packaging>=24.1 (from cyclophaser==2.1.2)
+  Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pillow>=10.4 (from cyclophaser==2.1.2)
+  Using cached pillow-12.3.0-cp312-cp312-macosx_11_0_arm64.whl.metadata (9.1 kB)
+Collecting pluggy>=1.5 (from cyclophaser==2.1.2)
+  Using cached pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Collecting pyparsing>=3.1 (from cyclophaser==2.1.2)
+  Using cached pyparsing-3.3.3-py3-none-any.whl.metadata (5.9 kB)
+Collecting python-dateutil>=2.9 (from cyclophaser==2.1.2)
+  Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting pytz>=2024.2 (from cyclophaser==2.1.2)
+  Using cached pytz-2026.5-py2.py3-none-any.whl.metadata (22 kB)
+Collecting setuptools>=72 (from cyclophaser==2.1.2)
+  Using cached setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting six>=1.16 (from cyclophaser==2.1.2)
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting tzdata>=2024.1 (from cyclophaser==2.1.2)
+  Using cached tzdata-2026.5-py2.py3-none-any.whl.metadata (1.4 kB)
+Collecting wheel>=0.44 (from cyclophaser==2.1.2)
+  Using cached wheel-0.48.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting altair!=5.4.0,!=5.4.1,<7,>=4.0 (from streamlit==1.56.0)
+  Using cached altair-6.3.0-py3-none-any.whl.metadata (11 kB)
+Collecting blinker<2,>=1.5.0 (from streamlit==1.56.0)
+  Using cached blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting cachetools<8,>=5.5 (from streamlit==1.56.0)
+  Using cached cachetools-7.2.1-py3-none-any.whl.metadata (5.5 kB)
+Collecting click<9,>=7.0 (from streamlit==1.56.0)
+  Using cached click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting gitpython!=3.1.19,<4,>=3.0.7 (from streamlit==1.56.0)
+  Using cached gitpython-3.2.0-py3-none-any.whl.metadata (13 kB)
+Collecting pydeck<1,>=0.8.0b4 (from streamlit==1.56.0)
+  Using cached pydeck-0.9.3-py2.py3-none-any.whl.metadata (4.2 kB)
+Collecting protobuf<8,>=3.20 (from streamlit==1.56.0)
+  Using cached protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl.metadata (595 bytes)
+Collecting pyarrow>=7.0 (from streamlit==1.56.0)
+  Using cached pyarrow-26.0.0-cp312-cp312-macosx_12_0_arm64.whl.metadata (3.0 kB)
+Collecting requests<3,>=2.27 (from streamlit==1.56.0)
+  Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting tenacity<10,>=8.1.0 (from streamlit==1.56.0)
+  Using cached tenacity-9.2.1-py3-none-any.whl.metadata (1.4 kB)
+Collecting toml<2,>=0.10.1 (from streamlit==1.56.0)
+  Using cached toml-0.10.2-py2.py3-none-any.whl.metadata (7.1 kB)
+Collecting tornado!=6.5.0,<7,>=6.0.3 (from streamlit==1.56.0)
+  Using cached tornado-6.5.10-cp39-abi3-macosx_10_9_universal2.whl.metadata (2.8 kB)
+Collecting typing-extensions<5,>=4.10.0 (from streamlit==1.56.0)
+  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+INFO: pip is looking at multiple versions of pandas to determine which version is compatible with other requirements. This could take a while.
+ERROR: Cannot install cyclophaser==2.1.2, numpy==2.1.0, pandas==2.2.0 and streamlit==1.56.0 because these package versions have conflicting dependencies.
+
+The conflict is caused by:
+    The user requested numpy==2.1.0
+    cyclophaser 2.1.2 depends on numpy>=2.1
+    streamlit 1.56.0 depends on numpy<3 and >=1.23
+    pandas 2.2.0 depends on numpy<2 and >=1.26.0; python_version >= "3.12"
+
+Additionally, some packages in these conflicts have no matching distributions available for your environment:
+    numpy
+
+To fix this you could try to:
+1. loosen the range of package versions you've specified
+2. remove package versions to allow pip to attempt to solve the dependency conflict
+
+ERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts

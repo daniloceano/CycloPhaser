@@ -1,0 +1,14 @@
+{
+  "ci/app-tests-stability": {
+    "jobs": 58,
+    "credits_est": 6184
+  },
+  "ci/app-tests-controls": {
+    "jobs": 11,
+    "credits_est": 861
+  },
+  "ci/app-tests": {
+    "jobs": 5,
+    "credits_est": 383
+  }
+}

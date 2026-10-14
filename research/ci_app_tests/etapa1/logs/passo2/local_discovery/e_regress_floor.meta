@@ -1,0 +1,13 @@
+label=e_regress_floor
+which_python=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/venv_floor_425a72f/bin/python
+which_pytest=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/venv_floor_425a72f/bin/pytest
+commit=425a72fd7b66b95fa9c0c5647c7d044e374e4727
+marker=not browser and not source_tree
+CYCLOPHASER_REQUIRE_APP_DEPS=1
+start=2026-10-14T11:43:26Z
+exit_code=1
+wall_s=198.5
+end=2026-10-14T11:46:45Z
+git_status_after=1
+CYCLOPHASER_REQUIRE_INSTALLED: cyclophaser.__file__ = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_floor_425a72f/lib/python3.12/site-packages/cyclophaser/__init__.py
+cyclophaser.__file__ (in session) = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_floor_425a72f/lib/python3.12/site-packages/cyclophaser/__init__.py

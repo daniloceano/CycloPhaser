@@ -1,0 +1,102 @@
+[
+  {
+    "build_num": 516,
+    "job": "build_test",
+    "workflow_id": "e8ff3e70-f001-4efc-bd7a-a691f3f19a2d",
+    "pipeline_url": "https://circleci.com/gh/daniloceano/CycloPhaser/516",
+    "status": "success",
+    "commit": "c5174d1dfc499c9a0ca6333f7d4c50511cc9b276",
+    "start": "2026-10-13T23:20:28.141Z",
+    "stop": "2026-10-13T23:23:03.734Z",
+    "build_time_s": 155.6,
+    "steps": [
+      {
+        "name": "Spin up environment",
+        "run_time_s": 5.4,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      },
+      {
+        "name": "Preparing environment variables",
+        "run_time_s": 0.0,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      },
+      {
+        "name": "Checkout code",
+        "run_time_s": 1.3,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      },
+      {
+        "name": "Install build tools",
+        "run_time_s": 4.4,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      },
+      {
+        "name": "Build sdist and wheel",
+        "run_time_s": 5.0,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      },
+      {
+        "name": "Install package from wheel",
+        "run_time_s": 29.9,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      },
+      {
+        "name": "Install test dependencies",
+        "run_time_s": 3.0,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      },
+      {
+        "name": "Run tests against the installed wheel",
+        "run_time_s": 100.3,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": "===== 1280 passed, 40 skipped, 1 deselected, 1 warning in 96.98s (0:01:36) ====="
+      },
+      {
+        "name": "Run source-tree tests against the checkout",
+        "run_time_s": 5.5,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": "========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 4.60s =========="
+      },
+      {
+        "name": "Uploading test results",
+        "run_time_s": 0.3,
+        "status": [
+          "success"
+        ],
+        "pytest_summary": null
+      }
+    ],
+    "test_results_by_source": {
+      "?": {
+        "skipped": 58,
+        "success": 1281
+      }
+    },
+    "n_tests_reported": 1339
+  }
+]

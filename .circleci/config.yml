@@ -10,6 +10,35 @@ version: 2.1
 # docs/future_work.md items 10-12 -- a real, measured failure mode this same
 # thin environment surfaced that a conda-provisioned CI would not have.
 # See docs/future_work.md item 12 for the full record of that decision.
+#
+# The calibration app is tested by a SEPARATE job, app_test (docs/future_work.md
+# item 36; design and measurements in research/ci_app_tests/). What it does NOT
+# cover, on purpose:
+#
+# * Chromium is not run in CI. The browser tests (-m browser) stay manual, on
+#   the floor and the newest streamlit. AppTest is not the browser: three app
+#   defects were visible ONLY in Chromium (item 35, Lessons 1) -- A12, widget
+#   values lost on a page switch; F1, a widget first drawn on a later run shows
+#   its own default; and the role of st.toggle differing between streamlit
+#   versions. A green app_test says nothing about defects of that kind.
+# * Streamlit Cloud redeploys the public app on every push to master WITHOUT
+#   waiting for CI. app_test detects an app break, it does not prevent one
+#   reaching the public. The protection is the merge rule: merge into master
+#   only after app_test_floor and app_test_newest are green on the exact
+#   commit being merged (develop or a release/* branch).
+# * app_test runs only on develop, master, release/* and ci/* branches, because
+#   this project is on CircleCI's Free plan (30 000 credits/month; at 0 every
+#   job stops until the next month, publishing included). develop and master
+#   are where the package is published; release/* is how a release reaches
+#   master (e.g. release/v2.1.2), so the exact commit merged into master must
+#   be tested there; ci/* exists to test this config itself. An app break on a
+#   feature branch shows up only after the merge into develop; before that, run
+#   the app tests in the conda env.
+# * Cost stop rule: app_test runs in `medium`. If its real duration projects the
+#   monthly total (current CI + app) above 25 000 credits -- about 20 min per
+#   leg at ~41 develop/master/ci pushes a month, plus the few release/* pushes
+#   of a release -- stop and revisit this design before going on. Measured in
+#   2026-10 (66 leg runs): 9.3-12.9 min per leg.
 
 jobs:
   build_test:
@@ -63,6 +92,73 @@ jobs:
 
       - store_test_results:
           path: test-reports
+          when: always
+
+  app_test:
+    # The calibration app's tests (AppTest and the app's core modules) against
+    # the wheel of this commit, plus the whole package suite again with the app
+    # dependencies installed. Two legs: `floor` pins streamlit to the app's
+    # declared floor (1.56.0), `newest` installs whatever pip resolves today --
+    # what the public app gets on its next deploy -- so a red `newest` with no
+    # code change is an upstream release breaking the app. The pip freeze of
+    # each leg is stored as an artifact to attribute such a red.
+    parameters:
+      leg:
+        type: enum
+        enum: ["floor", "newest"]
+    docker:
+      - image: cimg/python:3.12.3
+    resource_class: medium
+    steps:
+      - checkout
+
+      - run:
+          name: Install build tools
+          command: pip install --upgrade pip build
+
+      - run:
+          name: Build sdist and wheel
+          command: python -m build
+
+      - run:
+          name: Install wheel and app test dependencies (<< parameters.leg >>)
+          # One pip call, so pip resolves the wheel and the app dependencies
+          # together, as a user installing both would.
+          command: |
+            if [ "<< parameters.leg >>" = "floor" ]; then
+              STREAMLIT="streamlit==1.56.0"
+            else
+              STREAMLIT="streamlit"
+            fi
+            pip install dist/*.whl "$STREAMLIT" plotly pyyaml pytest
+            mkdir -p artifacts
+            pip freeze > artifacts/pip-freeze-<< parameters.leg >>.txt
+            cat artifacts/pip-freeze-<< parameters.leg >>.txt
+
+      - run:
+          name: Run tests against the installed wheel, with the app
+          # Same provenance lock and import mode as build_test. The second
+          # variable makes tests/conftest.py stop the session with a UsageError
+          # if streamlit, plotly or yaml does not import, instead of letting the
+          # app tests skip themselves into a green job.
+          environment:
+            CYCLOPHASER_REQUIRE_INSTALLED: "1"
+            CYCLOPHASER_REQUIRE_APP_DEPS: "1"
+          command: pytest --import-mode=append -m "not browser and not source_tree" --junitxml=test-reports/results.xml
+
+      - run:
+          name: Check that only the allowed tests skipped
+          # Exactly the 5 ids in .circleci/check_app_skips.py, by junit id,
+          # never by skip-reason text.
+          command: python .circleci/check_app_skips.py test-reports/results.xml
+
+      - store_test_results:
+          path: test-reports
+          when: always
+
+      - store_artifacts:
+          path: artifacts
+          when: always
 
   test_pypi_publish:
     docker:
@@ -112,9 +208,23 @@ workflows:
   build_test_publish:
     jobs:
       - build_test
+      - app_test:
+          name: app_test_<< matrix.leg >>
+          matrix:
+            parameters:
+              leg: ["floor", "newest"]
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+                - /^release\/.*/
+                - /^ci\/.*/
       - test_pypi_publish:
           requires:
             - build_test
+            - app_test_floor
+            - app_test_newest
           filters:
             branches:
               only:
@@ -122,6 +232,8 @@ workflows:
       - pypi_publish:
           requires:
             - build_test
+            - app_test_floor
+            - app_test_newest
           filters:
             branches:
               only:

@@ -1,0 +1,442 @@
+{
+  "totals": {
+    "collected_conda_all": 1553,
+    "browser_collected": 44,
+    "app_tests_non_browser": 226,
+    "app_time_s": 178.1,
+    "by_kind": {
+      "AppTest": {
+        "files": 12,
+        "tests": 181,
+        "time_s": 174.7
+      },
+      "browser": {
+        "files": 4,
+        "tests": 44,
+        "time_s": 0.0
+      },
+      "core (streamlit/plotly, no AppTest)": {
+        "files": 6,
+        "tests": 45,
+        "time_s": 3.4
+      }
+    },
+    "newest_counts": {
+      "passed": 1506,
+      "failed": 0,
+      "error": 0,
+      "skipped": 6
+    },
+    "lean_counts": {
+      "passed": 1280,
+      "failed": 0,
+      "error": 0,
+      "skipped": 40
+    },
+    "newest_skips": [
+      "tests/synthetic/test_synthetic_lifecycles.py: Timing not checked for observational cases",
+      "tests/test_app_pages_browser.py: module: playwright is not installed (browser tests",
+      "tests/test_compare_browser.py: module: playwright is not installed (browser tests",
+      "tests/test_compare_core.py: sample tracks not present",
+      "tests/test_label_browser.py: module: playwright is not installed (browser tests",
+      "tests/test_validate_browser.py: module: playwright is not installed (browser tests"
+    ]
+  },
+  "files": [
+    {
+      "file": "tests/test_app_distance_removed.py",
+      "kind": "AppTest",
+      "collected_conda": 16,
+      "browser": 0,
+      "app_tests": 16,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 1.8,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_app_navigation_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 10,
+      "browser": 0,
+      "app_tests": 10,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 7.0,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_app_pages_browser.py",
+      "kind": "browser",
+      "collected_conda": 9,
+      "browser": 9,
+      "app_tests": 0,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 0.0,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": true,
+      "markers": [
+        "browser"
+      ],
+      "lean_skip_reasons": {
+        "module: playwright is not installed (browser tests": 1
+      }
+    },
+    {
+      "file": "tests/test_app_passo5_fixes.py",
+      "kind": "AppTest",
+      "collected_conda": 16,
+      "browser": 0,
+      "app_tests": 1,
+      "pkg_tests_same_file": 15,
+      "app_time_s": 0.4,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "AppTest drives the calibration app; the CI installs only the wheel, pytest and pyyaml": 1
+      }
+    },
+    {
+      "file": "tests/test_calibrate_i2_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 13,
+      "browser": 0,
+      "app_tests": 13,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 5.5,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_calibrate_i3_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 14,
+      "browser": 0,
+      "app_tests": 14,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 21.3,
+      "guards": [
+        "pandas",
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_compare_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 30,
+      "browser": 0,
+      "app_tests": 30,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 51.7,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_compare_browser.py",
+      "kind": "browser",
+      "collected_conda": 3,
+      "browser": 3,
+      "app_tests": 0,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 0.0,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": false,
+      "markers": [
+        "browser"
+      ],
+      "lean_skip_reasons": {
+        "module: playwright is not installed (browser tests": 1
+      }
+    },
+    {
+      "file": "tests/test_compare_core.py",
+      "kind": "core (streamlit/plotly, no AppTest)",
+      "collected_conda": 9,
+      "browser": 0,
+      "app_tests": 8,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 0.0,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": false,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_inspector_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 2,
+      "browser": 0,
+      "app_tests": 2,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 1.2,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_label_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 16,
+      "browser": 0,
+      "app_tests": 16,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 10.7,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_label_browser.py",
+      "kind": "browser",
+      "collected_conda": 29,
+      "browser": 29,
+      "app_tests": 0,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 0.0,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": false,
+      "markers": [
+        "browser"
+      ],
+      "lean_skip_reasons": {
+        "module: playwright is not installed (browser tests": 1
+      }
+    },
+    {
+      "file": "tests/test_layer_inspector.py",
+      "kind": "core (streamlit/plotly, no AppTest)",
+      "collected_conda": 280,
+      "browser": 0,
+      "app_tests": 4,
+      "pkg_tests_same_file": 276,
+      "app_time_s": 0.6,
+      "guards": [
+        "plotly"
+      ],
+      "uses_apptest": false,
+      "markers": [],
+      "lean_skip_reasons": {
+        "could not import 'plotly': No module named 'plotly'": 4
+      }
+    },
+    {
+      "file": "tests/test_manual_labels.py",
+      "kind": "core (streamlit/plotly, no AppTest)",
+      "collected_conda": 82,
+      "browser": 0,
+      "app_tests": 15,
+      "pkg_tests_same_file": 67,
+      "app_time_s": 0.1,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": false,
+      "markers": [],
+      "lean_skip_reasons": {
+        "the labelling tab is calibration-app code": 15
+      }
+    },
+    {
+      "file": "tests/test_phase_colors.py",
+      "kind": "core (streamlit/plotly, no AppTest)",
+      "collected_conda": 3,
+      "browser": 0,
+      "app_tests": 1,
+      "pkg_tests_same_file": 2,
+      "app_time_s": 0.0,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": false,
+      "markers": [],
+      "lean_skip_reasons": {
+        "could not import 'streamlit': No module named 'streamlit'": 1
+      }
+    },
+    {
+      "file": "tests/test_phase_figures.py",
+      "kind": "core (streamlit/plotly, no AppTest)",
+      "collected_conda": 4,
+      "browser": 0,
+      "app_tests": 4,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 0.6,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": false,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_sidebar_coverage.py",
+      "kind": "AppTest",
+      "collected_conda": 38,
+      "browser": 0,
+      "app_tests": 38,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 20.8,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_sidebar_defaults.py",
+      "kind": "AppTest",
+      "collected_conda": 5,
+      "browser": 0,
+      "app_tests": 5,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 2.6,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_track_upload_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 8,
+      "browser": 0,
+      "app_tests": 8,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 7.3,
+      "guards": [
+        "streamlit"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_validate_apptest.py",
+      "kind": "AppTest",
+      "collected_conda": 28,
+      "browser": 0,
+      "app_tests": 28,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 44.4,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": true,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    },
+    {
+      "file": "tests/test_validate_browser.py",
+      "kind": "browser",
+      "collected_conda": 3,
+      "browser": 3,
+      "app_tests": 0,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 0.0,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": false,
+      "markers": [
+        "browser"
+      ],
+      "lean_skip_reasons": {
+        "module: playwright is not installed (browser tests": 1
+      }
+    },
+    {
+      "file": "tests/test_validate_core.py",
+      "kind": "core (streamlit/plotly, no AppTest)",
+      "collected_conda": 13,
+      "browser": 0,
+      "app_tests": 13,
+      "pkg_tests_same_file": 0,
+      "app_time_s": 2.1,
+      "guards": [
+        "streamlit",
+        "yaml"
+      ],
+      "uses_apptest": false,
+      "markers": [],
+      "lean_skip_reasons": {
+        "module: could not import 'streamlit': No module named 'streamlit": 1
+      }
+    }
+  ]
+}

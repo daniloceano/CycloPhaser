@@ -1,0 +1,38 @@
+{
+  "config": "/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/fd26cd7e-361b-4348-9278-c1d0d5236262/scratchpad/cfg_k3.yml",
+  "schema_errors": [],
+  "per_branch": {
+    "develop": [
+      "app_test_floor",
+      "app_test_newest",
+      "build_test",
+      "test_pypi_publish"
+    ],
+    "master": [
+      "app_test_floor",
+      "app_test_newest",
+      "build_test",
+      "pypi_publish"
+    ],
+    "release/v9.9.9": [
+      "app_test_floor",
+      "app_test_newest",
+      "build_test",
+      "test_pypi_publish"
+    ],
+    "ci/x": [
+      "app_test_floor",
+      "app_test_newest",
+      "build_test"
+    ],
+    "feat/x": [
+      "build_test"
+    ]
+  },
+  "facts": {
+    "F1 app legs run on release/v9.9.9": true,
+    "F2 app legs run on ci/x": true,
+    "F3 app legs do NOT run on feat/x": true,
+    "F4 publishing only on develop (TestPyPI) / master (PyPI)": false
+  }
+}

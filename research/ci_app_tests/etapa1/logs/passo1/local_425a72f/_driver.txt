@@ -1,0 +1,10 @@
+commit=425a72fd7b66b95fa9c0c5647c7d044e374e4727 wheel=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/wheel_425a72f/cyclophaser-2.1.2-py3-none-any.whl checkout=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/checkout_425a72f
+========== 1280 passed, 40 skipped, 1 deselected, 1 warning in 33.57s ==========
+========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 2.15s ==========
+===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 223.20s (0:03:43) =====
+OK: skips are exactly the 5 allowed ids
+skipcheck_exit=0
+===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 242.78s (0:04:02) =====
+OK: skips are exactly the 5 allowed ids
+skipcheck_exit=0
+=== 1508 passed, 1 skipped, 44 deselected, 89 warnings in 483.60s (0:08:03) ====

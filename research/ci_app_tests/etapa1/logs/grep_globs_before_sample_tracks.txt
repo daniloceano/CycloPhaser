@@ -1,0 +1,16 @@
+# grep, before adding tests/sample_tracks/: every glob/rglob/walk/listdir/iterdir/scandir in tests/
+# commit 9efc74f6f5be4b08059928400c54ece21111796d, 2026-10-14T11:17:31Z
+tests/test_track_io.py:41:ALL_SERIES = sorted(CAL.glob("*.csv")) + sorted(SYN.glob("*.csv")) + [EXAMPLE]
+tests/test_swell_batch.py:96:    assert sorted(p.stem for p in d.glob("*.csv")) == sorted(VAL)
+tests/test_calibrate_i3_apptest.py:21:SAMPLE = sorted((REPO_ROOT / "tests" / "calibration_data").glob("*.csv"))
+tests/test_decay_tail_amplitude_fraction.py:137:    os.path.basename(f)[:-4] for f in glob.glob(f"{_CALIBRATION_DATA_DIR}/*.csv")
+tests/test_intensification_min_depth.py:113:    os.path.basename(f)[:-4] for f in glob.glob(f"{_CALIBRATION_DATA_DIR}/*.csv")
+tests/test_layer_inspector.py:70:ALL_TRACKS = sorted(p.stem for p in CALIB.glob("*.csv"))
+tests/test_use_smoothing_false_derivatives.py:123:    for path in sorted(glob.glob(f"{_CALIBRATION_DATA_DIR}/*.csv")):
+tests/test_boundary_padding.py:107:    os.path.basename(f)[:-4] for f in glob.glob(f"{_CALIBRATION_DATA_DIR}/*.csv")
+tests/test_manual_labels.py:338:    assert [q.name for q in tmp_path.iterdir()] == ["l.yaml"]
+tests/test_compare_core.py:84:    files = sorted(SAMPLE_DIR.glob("*.csv"))
+# directories those calls read (resolved by reading each line):
+#   tests/calibration_data (boundary_padding, decay_tail, intensification_min_depth, use_smoothing_false, layer_inspector, track_io, calibrate_i3)
+#   tests/synthetic/data (track_io)  tests/calibration_data/swell_item30_val (swell_batch, data_dir from split.yaml)  tmp_path (manual_labels)  tools/calibration_app/sample_tracks (compare_core, the test being repointed)
+# none is recursive and none reads tests/ itself or tests/sample_tracks/

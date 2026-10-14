@@ -1,0 +1,14 @@
+10:04:11 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:05:11 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:06:12 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:07:13 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:08:14 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:09:15 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:10:16 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:11:17 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:12:17 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:13:18 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running'}
+10:14:19 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'success'}
+build_test 593 success {'class': 'large', 'name': 'Large', 'cpu': 4, 'ram': 8192} 144.8 {'skipped': 58, 'success': 1281} ['===== 1280 passed, 40 skipped, 1 deselected, 1 warning in 96.89s (0:01:36) =====', '========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 3.83s ==========']
+app_test_newest 591 success {'class': 'medium', 'name': 'Medium', 'cpu': 2, 'ram': 4096} 658.4 {'skipped': 5, 'success': 1507} ['===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 603.81s (0:10:03) =====']
+app_test_floor 592 success {'class': 'medium', 'name': 'Medium', 'cpu': 2, 'ram': 4096} 605.4 {'skipped': 5, 'success': 1507} ['===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 539.20s (0:08:59) =====']

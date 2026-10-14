@@ -1,0 +1,13 @@
+label=lean_wheel
+which_python=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/venv_lean_425a72f/bin/python
+which_pytest=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/venv_lean_425a72f/bin/pytest
+commit=425a72fd7b66b95fa9c0c5647c7d044e374e4727
+marker=not source_tree
+CYCLOPHASER_REQUIRE_APP_DEPS=<unset>
+start=2026-10-14T11:22:45Z
+exit_code=0
+wall_s=66.8
+end=2026-10-14T11:23:51Z
+git_status_after=0
+CYCLOPHASER_REQUIRE_INSTALLED: cyclophaser.__file__ = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_lean_425a72f/lib/python3.12/site-packages/cyclophaser/__init__.py
+cyclophaser.__file__ (in session) = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_lean_425a72f/lib/python3.12/site-packages/cyclophaser/__init__.py

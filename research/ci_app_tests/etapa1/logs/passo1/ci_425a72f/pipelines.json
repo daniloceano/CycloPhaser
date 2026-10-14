@@ -1,0 +1,33 @@
+[
+  {
+    "id": "9bca3739-f4dc-4473-87e2-bab83bbfff43",
+    "errors": [],
+    "project_slug": "gh/daniloceano/CycloPhaser",
+    "updated_at": "2026-10-14T11:43:15.333Z",
+    "number": 411,
+    "state": "created",
+    "created_at": "2026-10-14T11:43:15.109Z",
+    "warnings": [],
+    "trigger": {
+      "received_at": "2026-10-14T11:43:13.850Z",
+      "type": "webhook",
+      "actor": {
+        "login": "daniloceano",
+        "avatar_url": "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs": {
+      "origin_repository_url": "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url": "https://github.com/daniloceano/CycloPhaser",
+      "review_url": "",
+      "revision": "425a72fd7b66b95fa9c0c5647c7d044e374e4727",
+      "review_id": "",
+      "provider_name": "GitHub",
+      "commit": {
+        "body": "- app_test job, legs floor (streamlit==1.56.0) and newest, resource_class\n  medium, only on develop, master and ci/*; installs the wheel of the commit\n  plus streamlit/plotly/pyyaml/pytest in one pip call, runs the suite minus\n  browser/source_tree with the provenance lock and the new app-deps lock\n- .circleci/check_app_skips.py: skips must be exactly the 5 allowed junit ids\n- tests/conftest.py: CYCLOPHASER_REQUIRE_APP_DEPS (off = no change, no import)\n- test_compare_core: SAMPLE_DIR -> versioned tests/sample_tracks/ (2 TRACK CSVs)\n- publishing jobs require build_test + both app legs\n- store_test_results when: always in both test jobs; pip freeze artifact\n\nDesign: research/ci_app_tests/etapa0/RELATORIO.md (approved 2026-10-14).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject": "ci: run the calibration-app tests on CircleCI (app_test, floor + newest legs)"
+      },
+      "branch": "ci/app-tests"
+    }
+  }
+]

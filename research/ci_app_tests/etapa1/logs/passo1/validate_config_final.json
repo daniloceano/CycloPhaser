@@ -1,0 +1,98 @@
+{
+  "config_sha256": "c57efdc25b9b2c710f1948c6c3fca9962141f39e3b4f42a5272f1e47c36b55f2",
+  "schema_sha256": "bcc3e60a5a1e137fc45ad2cb435953de5f525ae881c5f0fd371b82a9f20bdb7a",
+  "schema_errors": [],
+  "workflows": {
+    "build_test_publish": {
+      "jobs": [
+        "app_test_floor",
+        "app_test_newest",
+        "build_test",
+        "pypi_publish",
+        "test_pypi_publish"
+      ],
+      "per_branch": {
+        "develop": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test",
+          "test_pypi_publish"
+        ],
+        "master": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test",
+          "pypi_publish"
+        ],
+        "ci/app-tests": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test"
+        ],
+        "ci/app-tests-controls": [
+          "app_test_floor",
+          "app_test_newest",
+          "build_test"
+        ],
+        "feat/anything": [
+          "build_test"
+        ]
+      },
+      "requires": {
+        "test_pypi_publish": [
+          "build_test",
+          "app_test_floor",
+          "app_test_newest"
+        ],
+        "pypi_publish": [
+          "build_test",
+          "app_test_floor",
+          "app_test_newest"
+        ]
+      },
+      "unknown_requires": []
+    }
+  },
+  "facts": [
+    {
+      "fact": "build_test_publish: no publishing job on ci/app-tests",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: no publishing job on ci/app-tests-controls",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: test_pypi_publish requires build_test + both app legs",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: every job test_pypi_publish requires runs on develop",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: pypi_publish requires build_test + both app legs",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: every job pypi_publish requires runs on master",
+      "ok": true
+    },
+    {
+      "fact": "build_test_publish: no unknown requires",
+      "ok": true
+    },
+    {
+      "fact": "app_test resource_class is medium",
+      "ok": true
+    },
+    {
+      "fact": "build_test: store_test_results when: always",
+      "ok": true
+    },
+    {
+      "fact": "app_test: store_test_results when: always",
+      "ok": true
+    }
+  ]
+}

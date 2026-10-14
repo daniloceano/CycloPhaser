@@ -1,0 +1,40 @@
+tests/test_layer_inspector.py .......................................... [ 61%]
+........................................................................ [ 66%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+......................                                                   [ 77%]
+tests/test_manual_labels.py ............................................ [ 80%]
+......................................                                   [ 82%]
+tests/test_peaks_valleys_plateau.py .....                                [ 82%]
+tests/test_phase_colors.py ...                                           [ 83%]
+tests/test_phase_figures.py ....                                         [ 83%]
+tests/test_prominence.py .................                               [ 84%]
+tests/test_reclassify_index0.py ..............                           [ 85%]
+tests/test_regression_baseline.py ....                                   [ 85%]
+tests/test_sidebar_coverage.py ......................................    [ 88%]
+tests/test_sidebar_defaults.py .....                                     [ 88%]
+tests/test_swell_batch.py ...........                                    [ 89%]
+tests/test_track_io.py ................................................. [ 92%]
+............................................                             [ 95%]
+tests/test_track_upload_apptest.py ........                              [ 95%]
+tests/test_use_filter_bool.py ..............                             [ 96%]
+tests/test_use_smoothing_false_derivatives.py ......                     [ 97%]
+tests/test_validate_apptest.py ............................              [ 99%]
+tests/test_validate_core.py .............                                [100%]
+
+=============================== warnings summary ===============================
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/checkout/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/stab_tmp_newest/run_17.xml -
+cyclophaser.__file__ (in session) = /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_stab_newest/lib/python3.12/site-packages/cyclophaser/__init__.py
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_app_pages_browser.py:29: playwright is not installed (browser tests)
+SKIPPED [1] tests/test_compare_browser.py:27: playwright is not installed (browser tests)
+SKIPPED [1] tests/test_label_browser.py:40: playwright is not installed (browser tests)
+SKIPPED [1] tests/test_validate_browser.py:26: playwright is not installed (browser tests)
+SKIPPED [1] tests/synthetic/test_synthetic_lifecycles.py:244: Timing not checked for observational cases
+SKIPPED [1] tests/test_compare_core.py:86: sample tracks not present
+===== 1506 passed, 6 skipped, 1 deselected, 1 warning in 206.07s (0:03:26) =====

@@ -13,7 +13,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 APP_DIR = REPO_ROOT / "tools" / "calibration_app"
-SAMPLE_DIR = APP_DIR / "sample_tracks"
+SAMPLE_DIR = REPO_ROOT / "tests" / "sample_tracks"
 
 pytest.importorskip("streamlit")
 pytest.importorskip("yaml")
