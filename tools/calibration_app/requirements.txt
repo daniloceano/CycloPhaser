@@ -6,7 +6,9 @@
 # Lower-bound (>=) pins are intentional: Streamlit Cloud uses `uv`, which
 # selects prebuilt wheels compatible with the running Python. Exact pins
 # forced source compilation (numpy/scipy) and ~45 min build times. The
-# floors below match cyclophaser's own dependency floors (see setup.py).
+# floors of the libraries cyclophaser also declares (matplotlib, numpy, pandas,
+# scipy, xarray, cmocean) match its own (see setup.py); pyyaml is not a
+# dependency of cyclophaser, its floor is the app's.
 # The Python version is not read from any file in this repository: it is set
 # in the app's settings on Streamlit Community Cloud.
 # streamlit's floor is the app's, not cyclophaser's: 1.56.0. The app keeps widget
@@ -18,12 +20,12 @@
 # [theme.sidebar] of .streamlit/config.toml from 1.44.0 (streamlit#10772),
 # st.navigation with sections and Material page icons from 1.36.0.
 streamlit>=1.56.0
-pandas>=2.2
+pandas>=2.2.2
 matplotlib>=3.9
 plotly>=5.24
 xarray>=2024.9
 numpy>=2.1
 scipy>=1.14
-cmocean>=4.0
-pyyaml>=6.0
+cmocean>=4.0.3
+pyyaml>=6.0.1
 cyclophaser>=2.1.0

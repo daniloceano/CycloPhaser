@@ -1,0 +1,27 @@
+warning: The `UV_NATIVE_TLS` environment variable is deprecated and will be removed in a future release. Use `UV_SYSTEM_CERTS` instead.
+Using Python 3.12.3 environment at: m4
+Resolved 22 packages in 408ms
+Prepared 1 package in 455ms
+Installed 22 packages in 64ms
+ + cmocean==4.0.3
+ + contourpy==1.3.0
+ + cycler==0.12.0
+ + cyclophaser==2.1.2
+ + fonttools==4.53.0
+ + iniconfig==2.0.0
+ + kiwisolver==1.4.5
+ + matplotlib==3.9.0
+ + numpy==2.1.0
+ + packaging==24.1
+ + pandas==2.2.2
+ + pillow==10.4.0
+ + pluggy==1.5.0
+ + pyparsing==3.1.0
+ + python-dateutil==2.9.0
+ + pytz==2024.2
+ + scipy==1.14.0
+ + setuptools==72.1.0
+ + six==1.16.0
+ + tzdata==2024.1
+ + wheel==0.44.0
+ + xarray==2024.9.0

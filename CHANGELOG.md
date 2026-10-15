@@ -11,6 +11,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.3] - DATE TO BE SET ON PUBLICATION DAY
+
+**The package code did not change**: `cyclophaser/` is identical to 2.1.2, so
+no default, no parameter and no result moves. This release fixes how the package
+is declared and distributed.
+
+### Fixed — packaging
+
+* **cmocean floor raised to `>=4.0.3`.** `cmocean` 4.0.1 satisfies the old
+  `cmocean>=4.0` but ships without some of its colormap files, and
+  `import cyclophaser` fails with it (`FileNotFoundError` for
+  `cmocean/rgb/inverted/thermal_i-rgb.txt`, raised through
+  `cyclophaser.plots`, which imports `cmocean.cm`). A fresh install already got
+  4.0.3; an environment that had 4.0.1 installed kept it, because pip saw the
+  requirement as satisfied, and an install at the declared floors picked 4.0.1
+  itself.
+* **`install_requires` reduced to the six libraries the package imports**:
+  `cmocean>=4.0.3`, `matplotlib>=3.9`, `numpy>=2.1`, `pandas>=2.2.2`,
+  `scipy>=1.14`, `xarray>=2024.9`. Removed — dependencies of those libraries or
+  build and test tools, never imported by `cyclophaser`: `contourpy`, `cycler`,
+  `fonttools`, `iniconfig`, `kiwisolver`, `packaging`, `pillow`, `pluggy`,
+  `pyparsing`, `python-dateutil`, `pytz`, `setuptools`, `six`, `tzdata`,
+  `wheel`. They are still installed when the libraries above need them. The
+  `test` extra (`pytest>=8.3`) is unchanged.
+* **The sdist no longer carries `tests/`.** It held the top-level test modules
+  without `conftest.py`, the test data or the test subpackages, so the suite
+  could not run from it. The tests are run from a clone of the repository
+  (see the Testing page of the documentation).
+
+### Changed — calibration app
+
+* `tools/calibration_app/requirements.txt`: floors `cmocean>=4.0.3`,
+  `pandas>=2.2.2` and `pyyaml>=6.0.1`. Nothing else in the app changes; it
+  still installs `cyclophaser>=2.1.0` from PyPI.
+
+### Changed — continuous integration
+
+* New `app_test` job: the calibration app's tests run against the wheel of each
+  commit on `develop`, `master`, `release/*` and `ci/*`, in two legs — `floor`
+  (streamlit 1.56.0, the app's declared minimum) and `newest` (the latest
+  streamlit pip resolves). Publishing to TestPyPI and PyPI now requires both
+  legs to pass, besides `build_test`. The browser (Chromium) tests are still run
+  by hand.
+
+### Fixed — tests
+
+* `tests/test_compare_core.py` reads two track files versioned in
+  `tests/sample_tracks/` instead of the git-ignored
+  `tools/calibration_app/sample_tracks/`, so it no longer skips on a clean clone.
+* The nested-expander count in the calibration-app tests no longer depends on
+  the streamlit version: from 1.66.0, AppTest's `.expander` on an expander no
+  longer lists the expander itself.
+
+---
+
 ## [2.1.2] - 2026-10-10
 
 **The package code did not change**: `cyclophaser/` is identical to 2.1.1. These
@@ -1149,7 +1204,8 @@ previously silent or erroneous logic.
 
 *(Previous release — see git history for details.)*
 
-[Unreleased]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.3...HEAD
+[2.1.3]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/daniloceano/CycloPhaser/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/daniloceano/CycloPhaser/compare/v2.0.0...v2.1.0

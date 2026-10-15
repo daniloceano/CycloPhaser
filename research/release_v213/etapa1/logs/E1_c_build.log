@@ -1,0 +1,10 @@
+# build at 6ce1bb5e81fa41c53ff48069d45d2c31188d66aa, Darwin 23.1.0 arm64, build 1.6.1 (<scratch>/e1/buildenv/lib/python3.12/site-packages/build)
+removing 'cyclophaser-2.1.3' (and everything under it)
+Successfully built cyclophaser-2.1.3.tar.gz
+removing build/bdist.macosx-14.0-arm64/wheel
+Successfully built cyclophaser-2.1.3-py3-none-any.whl
+removing build/bdist.macosx-14.0-arm64/wheel
+Successfully built cyclophaser-2.1.3-py3-none-any.whl
+c41898574b2cb3c1a06e2e0bbe5f0cd98270cfe652f3ee196b099fecb59a684c  <scratch>/e1/dist/cyclophaser-2.1.3-py3-none-any.whl
+f617a0767d74f3bffc4c33944fe26fd83d9081272a99d70dcf6e30d0b64dc897  <scratch>/e1/dist/cyclophaser-2.1.3.tar.gz
+6e234d908c643dc80dbac68a2d67d76685b5bcea4e0c663c1a6d7ce883af0d65  <scratch>/e1/dist_from_sdist/cyclophaser-2.1.3-py3-none-any.whl

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = '2.1.2'
+VERSION = '2.1.3'
 DESCRIPTION = 'Determine phases from extratropical cyclone life cycle'
 
 setup(
@@ -19,26 +19,11 @@ setup(
     python_requires=">=3.12",
     license_files=["LICENSE"],
     install_requires=[
-        "cmocean>=4.0",
-        "contourpy>=1.3",
-        "cycler>=0.12",
-        "fonttools>=4.53",
-        "iniconfig>=2.0",
-        "kiwisolver>=1.4",
+        "cmocean>=4.0.3",
         "matplotlib>=3.9",
         "numpy>=2.1",
-        "packaging>=24.1",
-        "pandas>=2.2",
-        "pillow>=10.4",
-        "pluggy>=1.5",
-        "pyparsing>=3.1",
-        "python-dateutil>=2.9",
-        "pytz>=2024.2",
+        "pandas>=2.2.2",
         "scipy>=1.14",
-        "setuptools>=72",
-        "six>=1.16",
-        "tzdata>=2024.1",
-        "wheel>=0.44",
         "xarray>=2024.9"
     ],
     extras_require={
