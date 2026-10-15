@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/smoke.py", line 2, in <module>
+    import cyclophaser, cmocean, numpy, pandas, scipy, matplotlib
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/cyclophaser/__init__.py", line 1, in <module>
+    from .determine_periods import determine_periods
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/cyclophaser/determine_periods.py", line 28, in <module>
+    from cyclophaser.plots import plot_all_periods, plot_didactic
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/cyclophaser/plots.py", line 5, in <module>
+    import cmocean.cm as cmo
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/cmocean/__init__.py", line 11, in <module>
+    from . import cm, tools, data
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/cmocean/cm.py", line 64, in <module>
+    rgb_i = np.loadtxt(os.path.join(datadir, 'inverted', cmapname + '_i-rgb.txt'))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 1381, in loadtxt
+    arr = _read(fname, dtype=dtype, comment=comment, delimiter=delimiter,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 1011, in _read
+    fh = np.lib._datasource.open(fname, 'rt', encoding=encoding)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/numpy/lib/_datasource.py", line 192, in open
+    return ds.open(path, mode, encoding=encoding, newline=newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/numpy/lib/_datasource.py", line 526, in open
+    return _file_openers[ext](found, mode=mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m2/lib/python3.12/site-packages/cmocean/rgb/inverted/thermal_i-rgb.txt'

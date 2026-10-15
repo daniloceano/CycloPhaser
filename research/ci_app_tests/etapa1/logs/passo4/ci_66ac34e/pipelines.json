@@ -1,0 +1,33 @@
+[
+  {
+    "id": "c33e69b7-f1d4-4c15-ab27-af6c0f3f24f3",
+    "errors": [],
+    "project_slug": "gh/daniloceano/CycloPhaser",
+    "updated_at": "2026-10-14T13:03:53.530Z",
+    "number": 416,
+    "state": "created",
+    "created_at": "2026-10-14T13:03:53.296Z",
+    "warnings": [],
+    "trigger": {
+      "received_at": "2026-10-14T13:03:52.976Z",
+      "type": "webhook",
+      "actor": {
+        "login": "daniloceano",
+        "avatar_url": "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs": {
+      "origin_repository_url": "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url": "https://github.com/daniloceano/CycloPhaser",
+      "review_url": "",
+      "revision": "66ac34e00337ee768e60ba3ec225c3c2c926774c",
+      "review_id": "",
+      "provider_name": "GitHub",
+      "commit": {
+        "body": "- .circleci/config.yml: comments only (Chromium gap with A12/F1/st.toggle,\n  Streamlit Cloud gap, branch filter and Free plan, cost stop rule)\n- CLAUDE.md: merge into master only with both app_test legs green on the same\n  develop commit (for Danilo's review)\n- docs/future_work.md item 36\n- research/ci_app_tests/etapa1: RELATORIO, passo 3 logs (58/58), cost\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject": "docs(ci-app-tests): etapa 1 passo 4 \u2014 config comment (j), CLAUDE.md merge rule, future_work item 36 (k), report"
+      },
+      "branch": "ci/app-tests"
+    }
+  }
+]

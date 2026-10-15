@@ -1,0 +1,9 @@
+cyclophaser.__file__ /tmp/claude-0/-home-claude/00afa05e-acb1-5b89-91ee-1f773d2f403b/scratchpad/etapa0/work/m1/lib/python3.12/site-packages/cyclophaser/__init__.py
+cyclophaser 2.1.2
+cmocean 4.0.3
+numpy 2.5.4
+pandas 3.0.6
+scipy 1.18.1
+matplotlib 3.11.2
+xarray 2026.9.0
+determine_periods OK, rows: 65 phases: ['19.47475002522233', '19.54918737331957', '19.62161419114817', '19.852167084377466', '19.946033644217835', '20.35927519656333']

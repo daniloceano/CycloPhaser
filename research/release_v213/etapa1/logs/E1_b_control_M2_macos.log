@@ -1,0 +1,9 @@
+# EXTRA CONTROL (no committed prediction): M2 on macOS — cyclophaser 2.1.2 from PyPI with cmocean==4.0.1 pre-installed; 2026-10-14 19:20:57; Darwin 23.1.0 arm64; cwd <scratch>/e1/b
+Successfully installed cmocean-4.0.1 contourpy-1.4.0 cycler-0.12.1 fonttools-4.67.0 kiwisolver-1.5.1 matplotlib-3.11.2 numpy-2.5.4 packaging-26.3 pillow-12.3.0 pyparsing-3.3.3 python-dateutil-2.9.0.post0 six-1.17.0
+Requirement already satisfied: cmocean>=4.0 in ./venv_ctl/lib/python3.12/site-packages (from cyclophaser==2.1.2) (4.0.1)
+Successfully installed cyclophaser-2.1.2 iniconfig-2.3.1 pandas-3.0.6 pluggy-1.6.0 pytz-2026.5 scipy-1.18.1 setuptools-84.0.0 tzdata-2026.5 wheel-0.48.0 xarray-2026.9.0
+  File "<scratch>/e1/b/venv_ctl/lib/python3.12/site-packages/numpy/lib/_datasource.py", line 529, in open
+    raise FileNotFoundError(f"{path} not found.")
+FileNotFoundError: <scratch>/e1/b/venv_ctl/lib/python3.12/site-packages/cmocean/rgb/inverted/thermal_i-rgb.txt not found.
+smoke_exit=0
+NOTE: in this control the smoke ran through '| tail -3', so smoke_exit above is tail's exit status, not smoke.py's; the traceback shows the import failed.

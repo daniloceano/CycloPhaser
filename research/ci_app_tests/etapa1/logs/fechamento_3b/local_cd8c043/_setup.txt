@@ -1,0 +1,1 @@
+commit=cd8c0435ac416d65637c63f374c6546c7098aa75 wheel=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/wheel_cd8c043/cyclophaser-2.1.2-py3-none-any.whl checkout=/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T//ci_app_tests_etapa1/checkout_cd8c043

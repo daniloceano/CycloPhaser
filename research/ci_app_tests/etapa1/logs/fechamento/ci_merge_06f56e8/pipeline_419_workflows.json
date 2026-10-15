@@ -1,0 +1,13 @@
+[
+  {
+    "pipeline_id": "fe2baa7d-3308-4608-8c61-44a17709c408",
+    "id": "3ea80ed5-6357-441b-ae3f-19ec6780341f",
+    "name": "build_test_publish",
+    "project_slug": "gh/daniloceano/CycloPhaser",
+    "status": "failed",
+    "started_by": "8d253be1-3263-44e7-8a6c-8ab05f051367",
+    "pipeline_number": 419,
+    "created_at": "2026-10-14T16:36:29Z",
+    "stopped_at": "2026-10-14T16:49:07Z"
+  }
+]

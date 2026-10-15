@@ -1,0 +1,54 @@
+# (a) 2026-10-14 19:16:21 main checkout /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser, conda env: /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+python 3.12.14 numpy 2.5.3 scipy 1.18.0 pandas 3.0.5
+## git diff v2.1.2 6ce1bb5 -- cyclophaser | wc -c:
+       0
+## git diff --name-only v2.1.2 6ce1bb5 (top-level dirs/files):
+   1 .circleci/check_app_skips.py
+   1 .circleci/config.yml
+   1 CHANGELOG.md
+   1 CLAUDE.md
+   1 MANIFEST.in
+   1 docs/conf.py
+   1 docs/future_work.md
+ 670 research/ci_app_tests
+  11 research/release_v213
+   1 setup.py
+   1 tests/conftest.py
+   2 tests/sample_tracks
+   1 tests/test_calibrate_i2_apptest.py
+   1 tests/test_compare_core.py
+   1 tools/calibration_app
+## blob of generator at v2.1.2 and 6ce1bb5:
+d06027745d77d0cdba93e7c28324b17f06e0ab73
+d06027745d77d0cdba93e7c28324b17f06e0ab73
+## RUN 1: checkout v2.1.2
+aa7ee3a494b8568c2d9407398d575cd72f53cebd
+cyclophaser.__file__ = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+series_sha256 verified for all 47 training series.
+n_series = 47
+SHA256   = 7552bc67ed87b0ea8ac4c46aec1013e5034422b4bbbca53743acd9df77aa500f
+provenance:
+  commit  : aa7ee3a494b8568c2d9407398d575cd72f53cebd
+  python  : 3.12.14
+  numpy   : 2.5.3
+  scipy   : 1.18.0
+  pandas  : 3.0.5
+
+appended a new record to /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/front_b/default_behaviour_sha256.txt
+exit=0
+## RUN 2: checkout 6ce1bb5
+6ce1bb5e81fa41c53ff48069d45d2c31188d66aa
+cyclophaser.__file__ = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+series_sha256 verified for all 47 training series.
+n_series = 47
+SHA256   = 7552bc67ed87b0ea8ac4c46aec1013e5034422b4bbbca53743acd9df77aa500f
+provenance:
+  commit  : 6ce1bb5e81fa41c53ff48069d45d2c31188d66aa
+  python  : 3.12.14
+  numpy   : 2.5.3
+  scipy   : 1.18.0
+  pandas  : 3.0.5
+
+appended a new record to /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/labels/diagnostics/front_b/default_behaviour_sha256.txt
+exit=0
+release/v2.1.3

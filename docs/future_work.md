@@ -4233,6 +4233,298 @@ The set statistics cost about 0.016 s per change (measured by replacing them wit
 
 ---
 
+## 35. Benchmark page review — Compare and Validate against labels, Benchmark retired; closed, merged and released as 2.1.2 (2026-10-10)
+
+Branch `feat/benchmark-review` (from `develop` @ `39e658c`); release branch `release/v2.1.2` (from `develop` @ `33d3f08`). Reports: `research/benchmark_review/stage0/DECISIONS.md`, `i1/`, `i2/`, `i3/` (each with `PREVISOES.md` and `RELATORIO.md`; I1 and I2 also `PREVISOES_r2.md`; I3 also `TESTES.md` and `REFERENCIAS.md`) and `research/benchmark_review/release/`. No PR. Each merge, the release and the deletion of the two branches were authorised in writing by Danilo. The package (`cyclophaser/`), its defaults and its behaviour are untouched by the whole front: `git diff v2.1.1 -- cyclophaser/` is empty, and the 6 package files in the published 2.1.2 wheel have the same sha256 as in the 2.1.1 wheel.
+
+### Stage 0 decisions (approved 2026-10-08, `2eeb85d`)
+
+* **Split.** The Benchmark page mixed two tools, so it became two pages. **Compare** is public and sits in the Calibration menu after Calibrate. It compares configurations on the user's own tracks and reads no label. **Validate against labels** sits in the Developer menu and needs the developer key. It measures configurations against the manual labels. The work was split into three increments: I1 Compare, with the old Benchmark unchanged; I2 Validate; I3 retire the Benchmark and update the docs. The front ends with release 2.1.2, because I1 alone would not reach the public.
+* **Inventory, one to one.** Every Benchmark control got a destination in `DECISIONS.md`:
+  * **P** (Compare): the selection buttons, "Current settings" (formerly "from the sidebar"), "Upload YAML", the cards with differences and ignored and filled keys, Edit and Remove, Run, the relative table, and the per-track figures.
+  * **D** (Validate): the swell batch, "All synthetic", labels as the first column, saved configurations, published snapshots, sha256 and commit provenance, the pre-filter-fix warning, the score panels, and the split and batch per track.
+  * **Retired**: the Validation / Exploration mode, the page's own track upload (the Compare uses the tracks loaded in Calibrate), the manual label as a reference option (A1), and the "Train" preset (A8; I2 decision).
+* **Usability criterion (e)**, with fixed budgets counted in interactions from Calibrate with "Sample data":
+
+  | task | budget |
+  |---|---|
+  | T1 | ≤ 5 |
+  | T2 | ≤ 5 |
+  | T3 | ≤ 2 |
+  | T4 | ≤ 3 |
+  | T5 (reason a Run is blocked, visible) | 0 |
+  | T6 (Validate, I2) | ≤ 6 |
+  | T7 (Validate, I2) | ≤ 3 |
+  | T8 (Validate, I2) | ≤ 2 |
+  | T9 (Validate, I2) | 0 |
+
+  * **(e1)**: a Chromium test runs the tasks from zero and counts the interactions. Every new browser test runs 10 times in a row without failure before it is accepted.
+  * **(e2)**: an AppTest scan of all Compare text for forbidden words (`train`, `test split`, `adjudicated`, `manual label`, `swell`, `sha256`, `commit`, `bad_cases`, `ground truth`, `research/`). Another test proves the Compare renders and runs with label reading broken. Each has a positive control.
+  * **(e3)**: Danilo walks the tasks at each checkpoint (d).
+* **Gate of every increment.** It passes only with all seven conditions; failing any one fails the gate:
+  * (a) `cyclophaser/` diff empty;
+  * (b) inventory complete;
+  * (c) suites with no failure in the conda env, on the floor streamlit 1.56.0 and on 1.63, in the CI recipe, and in Chromium on both versions;
+  * (d) visual checkpoint and a pause for Danilo's approval;
+  * (e) e1 and e2 met;
+  * (f) every number states its set and its reference, and nothing is scored on the test split;
+  * (g) the release is declared.
+
+### Increments (predictions committed before measuring; suite counts are passed / failed)
+
+* **I1 — Compare, PASS** (predictions `2eeb85d` and round 2 `cfd3a87`; approved "aprovo" 2026-10-08, committed as `f3008fc`).
+  * **New modules**: `compare_core.py`, `compare_tab.py`, `phase_figures.py` (figure code extracted from the Benchmark, logic unchanged), `config_text.py` (the ignored-keys and filled-keys sentences, shared with Calibrate's YAML import).
+  * **Defaults** are captured from the Calibrate sidebar, not re-derived. The package signature gives `cutoff_high = 18.0` and the slider gives `18`: equal under `==`, but different cache keys.
+  * The cache spans runs, keyed by (effective config sha256, series content sha256).
+  * Figures are paged by track.
+  * Widget values survive a page switch in the browser (A12 mechanism; `_cmp_kept_*` copies).
+  * Round 2 fixes from the checkpoint:
+    * differences shown as a list;
+    * the Reference selector moved to the top of Results;
+    * filled keys listed only where they differ from the package default;
+    * a column limit of **4** (Danilo's decision);
+    * "Invert selection" with help text (from e3).
+  * **Suites**, predicted equal to measured in both rounds:
+
+    | run | round 1 | round 2 |
+    |---|---|---|
+    | conda, 1.63.0 | 1515 / 0 | 1520 / 0 |
+    | 1.56.0 | 1515 / 0 | 1520 / 0 |
+    | CI recipe | 1280 / 0 + 1 / 0 | 1280 / 0 + 1 / 0 |
+    | Chromium, each version | 11 / 0 | 11 / 0 |
+
+  * **e1**: T1 4, T2 4, T3 1, T4 1, T5 0. The Compare browser test ran 10/10 on each version.
+  * **Run cost**: all 12 cells landed inside the predicted ranges. Compare cold runs took 3.04 / 5.82 / 11.37 s for 1 / 2 / 4 columns, against 6.54 / 12.18 / 23.83 s on the Benchmark. Compare warm runs took ≤ 0.34 s.
+  * One ordinal prediction missed: Benchmark warm ≥ 0.4 × cold measured 0.37 and 0.36 at 2 and 4 columns.
+  * **Instrument deviations recorded**:
+    * `full_page.png` in round 1 was byte-identical to `04_results.png`, a viewport capture (fixed in round 2, 1600 × 6258).
+    * The round 2 inventory first gave FAIL because its scenario removed a key that the new rule no longer lists. The scenario was fixed; the app was right.
+  * **Gate (f) reading**, accepted by Danilo: running detection on the 51 sample tracks without labels is allowed; scoring against labels is not.
+* **I2 — Validate against labels, PASS** (predictions `b197124` and round 2 `f0d2c33`; approved "aprovo" 2026-10-09, committed as `c1617a0`).
+  * **New modules**: `validate_core.py` and `validate_tab.py`.
+  * **Offered population**: the train split.
+    * Test ids are removed before any file is opened, and test labels are discarded right after reading.
+    * Each label's `series_sha256` is checked (54/54 match).
+    * TRAIN and ADJUDICATED are separate blocks, never summed.
+    * The reference is always a column.
+    * Snapshots appear as read-only columns.
+    * The page is born with the A12 fix (`_mark`, F1).
+  * **Round 2 changes**: R1, R2 and R3 (destinations below), and the "Results are current" line on both pages (F2).
+  * **Suites**:
+
+    | run | predicted | round 1 | round 2 (final) |
+    |---|---|---|---|
+    | conda, 1.63.0 | 1551 / 0 | 1551 / 0 | — |
+    | 1.56.0 | 1551 / 0 | **1550 / 1** | — |
+    | Chromium 1.56.0 | 14 / 0 | **13 / 1** | — |
+    | all runs (conda, 1.56.0, CI, Chromium) | 1557 / 0 | — | 1557 / 0 (CI 1280 / 0 + 1 / 0; Chromium 14 / 0 each) |
+
+  * **e1**: T6 5, T7 2, T8 1, T9 0. The Validate browser test ran 10/10 on each version.
+  * **Run cost** (cold / warm): 6.44 / 0.37 s with 2 columns, 17.03 / 0.75 s with 6, both inside the predicted ranges.
+  * **e3**: "nenhum problema" (no problem).
+  * **Recorded deviations, not erased**:
+    * The suite failure on 1.56.0 was an AppTest artefact: after `st.rerun()`, a slot the next pass leaves empty kept its old element (F2). It was fixed in the app, and everything was rerun.
+    * The Chromium failure on 1.56.0 was an instrument deviation: in 1.56.0, `st.toggle` has no `switch` role. It was fixed in the test.
+    * F4 was fixed in the app.
+    * A round 2 Chromium attempt ran no test at all: zsh did not split the argument variable, and `set -u` stopped the script without writing output. It was rerun with explicit arguments.
+* **I3 — Benchmark retired and docs, PASS** (prediction and test migration table `ae3a6c7`; approved "sim" for the visual checkpoint and for the docs build on 2026-10-09, committed as `004dc1a`).
+  * **Removed**: `benchmark_tab.py`, `app_pages/benchmark.py` and `tests/test_benchmark_apptest.py`. Of `benchmark_core.py`, only docstrings changed.
+  * **Tests**: 62 removed, 13 new non-browser tests, 1 new browser test. Every guarantee is either covered or migrated to a named test, per `TESTES.md`.
+  * **Menus**: Calibration = Calibrate, Compare; Developer = Manual labelling, Validate against labels.
+  * `/benchmark` falls back to Streamlit's default behaviour (F6).
+  * **Docs updated**: the app README (A9), `docs/calibration_tool.rst`, the CHANGELOG, and two research READMEs.
+  * **Reference sweep** (`REFERENCIAS.md`): 0 live references and 0 ambiguous ones, after Danilo decided the 3 ambiguous cases.
+  * **Suites**:
+
+    | run | predicted | round 1 | final, after the approved text adjustments |
+    |---|---|---|---|
+    | conda, 1.63.0 | 1508 / 0 | **1507 / 1** | 1508 / 0 |
+    | 1.56.0 | 1508 / 0 | **1507 / 1** | 1508 / 0 |
+    | CI recipe | 1280 / 0 + 1 / 0 | — | 1280 / 0 + 1 / 0 |
+    | Chromium, each version | 15 / 0 | — | 15 / 0 |
+    | 6 new or changed browser tests, repeated | 10/10 each | — | 10/10 each |
+    | docs build | 0 warnings | — | 0 warnings |
+
+  * **e1** on both pages matched the prediction.
+  * **Recorded deviations**:
+    * The round 1 suite failure was in an instrument control. The Validate population sits in `st.cache_data`, so the patched label readers were never called. It was fixed in the test with `st.cache_data.clear()`.
+    * The round 1 inventory gave FAIL. Three detectors in the I1 script read the I1 text formats, and the commit of the running code differs by construction between two checkouts. Part 1b and a normalisation were added; the I1 script was not edited.
+    * The predictions "34 P present by the I1 script" and "no difference after undoing F5" both missed, on the instrument.
+
+### Findings and their destination
+
+* **A1** — "Manual label" as a reference was a third, unnamed instrument. With the swell batch on, it summed adjudicated and train labels. → **Removed**: the Validate reference is always a column, and train and adjudicated are separate blocks.
+* **A2** — `reference_metrics`: `n_refused_incipient` is absolute, and the docstring claimed a column against itself gives all zeros. → Docstring corrected in I1. On the Compare, "incipient absent (first phase is not incipient)" is a per-column count, outside the relative table.
+* **A3** — the Benchmark cache lasted one run, despite its caption "cached per config × cyclone pair", and there was no progress bar. → The Compare and Validate cache spans runs and is keyed by content; both pages have a progress bar. Listed under Fixed in the CHANGELOG.
+* **A4** — the public page exposed functions the app redesign had made developer-only: "All synthetic", the `evaluation.bad_cases_count` annotation, scoring against manual labels, the swell_item30 batch, the `research/labels/configs/` path and the code commit on every card. → Resolved by the split: all of it moved to Validate against labels (I2); the Compare's e2 scan pins their absence by test. (Omitted from the I1 opening brief and restored at closing from the stage 0 audit.)
+* **A8** — the "Train" preset was redundant in Validation mode: with the test labels withheld it selected the same tracks as "All real" + "All synthetic". → Retired: the Compare has no "Train"; the Validate has none either (Danilo's I2 decision — the offered population is the whole train split). (Omitted from the I1 opening brief and restored at closing from the stage 0 audit.)
+* **A5** — the pre-filter-fix warning fires for any YAML without `boundary_padding`. → Not shown on the Compare. It stays in Validate's provenance (developer only), with the rule itself unchanged (`benchmark_core.signature_audit`).
+* **A6** — the Benchmark did not see the tracks loaded in Calibrate. → The Compare uses them (`_compare_live_tracks`) and has no upload of its own.
+* **A7** — snapshots cover only the 63 bundled series. → Snapshots are Validate-only. Tracks missing from a snapshot are shown as "not in this snapshot" (R3).
+* **A9** — the app README was out of date ("51 real + 12 synthetic", "filled by the current default"). → Corrected in I3.
+* **A10** — the Benchmark page had no title and no explanation. → Both new pages open with a title and the question they answer.
+* **A11** — a track uploaded on the Benchmark lost its time axis. With smoothing 'auto', a track longer than 8 days could get a different Savitzky-Golay window than in Calibrate; with package defaults nothing changes. → The Compare reads tracks with `track_io.read_track` and keeps the time index, with a test. Gone with the Benchmark.
+* **A12** — in the browser, Benchmark widget values were lost on a trip to Calibrate (on 1.56.0 and 1.63.0). → Not fixed on the Benchmark (retired in I3). The Compare (`_cmp_kept_*`) and the Validate (`_mark`) were born with the fix.
+* **R1** (I2 round 2) — the zero-width spaces (U+200B) used to break long names were removed. Warnings became an HTML block with `<wbr>` only after "." and "_", so a copied key is exactly the key. → Shipped on both pages.
+* **R2** (I2 round 2) — disagreement headers are per instrument, and no number sums instruments. → Shipped, worded with "tracks" by F5.
+* **R3** (I2 round 2) — tracks missing from a snapshot are separated: their own list, notes under the tables, and a "Not in this snapshot (not counted)" row. → Shipped. The Compare output is unchanged.
+* **F1** — in the browser, a widget first drawn on a later run than the one that set its value shows its own default. → Fixed on the Validate (`_mark`).
+* **F2** — AppTest 1.56.0 keeps the element of a slot left empty after `st.rerun()`. → Fixed in the app with the "Results are current: N configuration(s) × M track(s)." line, on both pages.
+* **F3** — snapshot columns counted missing tracks as "Detection failed". → Separated by R3.
+* **F4** — `html.escape` turned `'` into `&#x27;` in the warning text. → Fixed in the app (escape only `& < >`).
+* **F5** — the disagreement headers count tracks, not boundaries. → Now reads "N tracks differ, N tracks with a boundary outside its tolerance · mature: N tracks not within the margin".
+* **F6** (I3) — `/benchmark` shows Streamlit's "Page not found" modal, logs two 404s, then opens Calibrate. → Accepted, default behaviour.
+* **F7** (I3) — controls that relied on the Benchmark page were moved to Validate and Manual labelling. The Validate "hit rate" control now has only planted text. → Recorded.
+
+### Merges and release 2.1.2
+
+* **Merge into `develop`** (`--no-ff`): **`33d3f08`**, parents `39e658c` and `004dc1a` (2026-10-09). CircleCI pipeline **399**:
+  * Created at 20:09:59Z, but its workflow was created only at **22:20:39Z, 2 h 10 min later**. A first read at 21:26Z found "created" with no workflow: not run yet, not failed.
+  * `build_test` **#503** success: 1281 passed, 0 failed.
+  * `test_pypi_publish` **#504** success.
+* **Release phase 1** (`release/v2.1.2`):
+  * Prediction `865e9a2`.
+  * `b13bbb4`: `setup.py` and `docs/conf.py` set to 2.1.2, CHANGELOG entry, `docs/generated/app_start.png` showing 2.1.2, `app_save.png` re-rendered. The other three generated figures came out byte-identical; none of them shows the version.
+  * All runs matched the prediction: 1508 / 0 on both versions, CI 1280 / 0 + 1 / 0, Chromium 15 / 0 on both, docs 0 warnings.
+* **Release phase 2** (2026-10-10):
+  * **CHANGELOG date**: changed to `[2.1.2] - 2026-10-10` in `caf495e`, with a clean docs build (0 warnings).
+  * **Merge into `develop`**: **`8eb04c8`** (parents `33d3f08`, `caf495e`; tree identical to the release branch). CircleCI pipeline **403**:
+    * `build_test` **#508** success: 1280 / 0 against the wheel, 1 / 0 on the source.
+    * `test_pypi_publish` **#509** success.
+  * **TestPyPI 2.1.2**: `Requires-Python >=3.12`, the same as 2.1.1. The wheel's package files are identical to the 2.1.1 wheel.
+  * **`master`**: merge `develop` with `--no-ff` as **`aa7ee3a`** ("Release 2.1.2"; parents `e268d80`, `8eb04c8`). Annotated tag **`v2.1.2`** (object `070f0f7` → `aa7ee3a`). CircleCI pipeline **404**:
+    * `build_test` **#510** success: 1280 / 0 + 1 / 0.
+    * `pypi_publish` **#511** success.
+  * **PyPI 2.1.2**:
+    * wheel `cyclophaser-2.1.2-py3-none-any.whl`, sha256 `44a71f7ff7ad9630b0ade71c73fa809126f55d25410eb5226e66957fdc51624d`;
+    * sdist `cyclophaser-2.1.2.tar.gz`, sha256 `7e4bbf714939e804c7821810773073dd66652368c216e8627fe254c54755cdc5`;
+    * `requires_python >=3.12`;
+    * the 6 package files in the wheel have the same sha256 as in the 2.1.1 wheel;
+    * `pip install cyclophaser==2.1.2` in a new venv outside the repository reports 2.1.2 and imports.
+    * The TestPyPI wheel is a separate build and differs byte-wise, but has the same contents.
+  * **Published app and Read the Docs**, checked by Danilo: the public app runs 2.1.2 with the Compare page, and Read the Docs `latest` and `stable` show 2.1.2.
+  * Deleting branches `feat/benchmark-review` and `release/v2.1.2` (remote and local) was authorised in writing. The deletion happens after this item is committed, once `004dc1a` and `caf495e` are confirmed ancestors of `develop`.
+
+### Known pending items
+
+* **CI does not test the app.** The CI recipe installs only the wheel, pytest and PyYAML. At the end of this front, the conda suite passes 1508 tests and the CI recipe 1281, and the 15 Chromium tests run in neither. Only the dedicated conda env and the manual Chromium runs, on 1.56.0 and 1.63.0, test the app.
+* **The repository rule "Changes must be made through a pull request" was bypassed** on every push to `master`: 2.1.1 and 2.1.2. GitHub reports it on push; the account may bypass it.
+* **No CircleCI job runs for tags.** The push of `v2.1.2` created pipeline 405 with no work. Publication depends on the `master` branch filter, not on the tag.
+* **Criterion (e3) was met by Danilo alone**, not by outside users.
+* **Stacked layout**: for a configuration that filters more, the smoothed curve can look detached from the raw one, because the panels share one vertical scale. Inherited from the Benchmark's figure code; not changed.
+* **Installed-version anomaly**: before the reinstall in release phase 1, `pip show` in the conda env reported 2.1.0 while the app (and the I3 figures) showed 2.1.1. The reinstall replaced the metadata, so the cause (probably two dist-info folders) cannot be reconstructed. It affects no measurement of this front.
+
+### Lessons
+
+1. **AppTest is not the browser.** Three defects were visible only in Chromium:
+   * widget values lost on a page switch (A12);
+   * a widget first drawn on a later run (F1);
+   * the toggle role differing between versions.
+
+   One was visible only in AppTest 1.56.0 (F2). Each page needs both instruments, on the floor and on the newest version.
+2. **A control under a monkeypatch must clear `st.cache_data` first.** Otherwise an earlier test in the same process makes the control pass or fail vacuously.
+3. **An instrument written for an earlier increment keeps that increment's text formats.** Re-detect in the current format in a new part instead of editing the old script.
+4. **A CircleCI pipeline with no workflow is "not run yet", not a failure.** Re-check over hours before concluding (pipeline 399: 2 h 10 min).
+5. **Compare published artefacts by content, not by bytes.** Wheels built by separate jobs differ in zip metadata.
+
+## 36. Calibration-app tests in CI (CircleCI `app_test`, floor + newest) — closed, merged into `develop` (2026-10-14)
+
+Branch `ci/app-tests` (from `develop` @ `3f410df`). Reports: `research/ci_app_tests/etapa0/` (stage 0: measurements and design, `PREVISOES.md` `c5174d1`, `RELATORIO.md` `9efc74f`; design approved by Danilo 2026-10-14) and `research/ci_app_tests/etapa1/` (stage 1: implementation, `PREVISOES_passo1..3.md`, `PREVISOES_correcao.md`, `PREVISOES_fechamento.md`, `PREVISOES_3b.md`, `PREVISOES_fechamento_final.md`, `RELATORIO.md`). No PR. `git diff 3f410df -- cyclophaser setup.py` is empty: the package and its `install_requires` are untouched. Two merges into `develop`, each authorised in writing by Danilo: `06f56e8` (`ci/app-tests`) and `0eb614e` (`ci/fix-apptest-expander-count`, the streamlit 1.66.0 test fix below). Not on `master` yet.
+
+### What changed
+
+* **`.circleci/config.yml`**: a new job `app_test`, parameter `leg` (`floor` = `streamlit==1.56.0`, `newest` = streamlit unpinned), `resource_class: medium`, run as a matrix with fixed names `app_test_floor` / `app_test_newest`, only on `develop`, `master`, `/^release\/.*/` and `/^ci\/.*/` (`release/*` added by the pre-merge correction below). It builds the wheel of the commit, installs it with streamlit, plotly, pyyaml and pytest in one pip call, stores the `pip freeze` as an artifact, and runs `pytest --import-mode=append -m "not browser and not source_tree"` from the checkout root with `CYCLOPHASER_REQUIRE_INSTALLED=1` and `CYCLOPHASER_REQUIRE_APP_DEPS=1`. `test_pypi_publish` and `pypi_publish` now require `build_test` + both legs. `build_test` is unchanged except `when: always` on `store_test_results` (also in `app_test`). The header comment records the gaps below.
+* **`.circleci/check_app_skips.py`** (standard library only): the job fails unless the junit skips are **exactly** 5 ids — the 4 browser modules (playwright absent) and `test_lifecycle_phase_timing[IcIt_observational]` — by junit id, never by skip-reason text.
+* **`tests/conftest.py`**: `CYCLOPHASER_REQUIRE_APP_DEPS`. Set, `pytest_configure` imports streamlit, plotly and yaml and raises `pytest.UsageError` naming every one that fails, including an installed-but-broken import. Unset, nothing changes and nothing is imported.
+* **`tests/sample_tracks/`** (new, versioned): 2 TRACK CSVs copied from `tools/calibration_app/sample_tracks/` (git-ignored). `tests/test_compare_core.py::test_the_series_key_is_the_content_not_the_name` reads them, so it no longer skips on every clean clone. A grep showed no other test globs that folder.
+
+### Measured (predictions committed and pushed before every measurement; suite counts are passed / failed)
+
+* **Stage 0** (local, `c5174d1`): wheel = `cyclophaser/` + dist-info only; CI baseline (job 516) 1280 / 0 + 1 / 0; 226 non-browser app tests (181 AppTest in 12 files, 45 core in 6) + 44 browser, all 226 skipped by the lean recipe; 1506 / 0 on streamlit 1.56.0, 1.65.0 and the local pins; 58 / 58 local stability runs (29 per leg).
+* **Stage 1, step 1** (`425a72f`): local lean 1280 / 0 + 1 / 0; conda `-m "not browser"` 1508 / 0; local floor and newest legs 1507 / 0 with the skip check OK and every `cyclophaser*` module from the venv. CircleCI pipeline [411](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/411): `build_test` (521) 1280 / 0 + 1 / 0; `app_test_floor` ([519](https://circleci.com/gh/daniloceano/CycloPhaser/519)) and `app_test_newest` ([520](https://circleci.com/gh/daniloceano/CycloPhaser/520)) 1507 / 0, skip check OK, no publishing job; freezes: streamlit 1.56.0 / 1.65.0, pandas 3.0.6, numpy 2.5.4, plotly 7.1.0.
+* **Step 2, controls** (disposable branch `ci/app-tests-controls`):
+  * (e) positive, a real app-code regression (the `vorticity_smoothed2` overlay layer dropped from `label_overlays.py`, outside the 4 app modules `build_test` imports): pipeline [412](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/412), both legs red with 1505 / 2 and exactly the 2 declared ids (`test_label_apptest.py::test_toggling_overlay_layers_does_not_move_any_phase`, `::test_revealing_an_overlay_records_it_and_unblinds_the_case`) listed as `failure` by the `/tests` API (jobs [522](https://circleci.com/gh/daniloceano/CycloPhaser/522), [524](https://circleci.com/gh/daniloceano/CycloPhaser/524); proves `when: always`); `build_test` green. Revert: pipeline [413](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/413), both legs 1507 / 0 (jobs 525, 526).
+  * (c) negative, a leg without plotly: job [528](https://circleci.com/gh/daniloceano/CycloPhaser/528), `UsageError … plotly (ModuleNotFoundError …)`, exit 4, red.
+  * (d) negative, `python -m pytest` from the root: job [532](https://circleci.com/gh/daniloceano/CycloPhaser/532), `UsageError` of `CYCLOPHASER_REQUIRE_INSTALLED` (cyclophaser from `/home/circleci/project/cyclophaser/`), exit 4, red.
+* **Step 3, stability (f)** (disposable branch `ci/app-tests-stability`, pipeline [415](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/415)): leg × run(1..29) = 58 jobs on one commit, `medium`: **58 / 58 green, each 1507 / 0 with the skip check OK**. Detects a per-run flake rate p ≥ 9.81 % with 95 %. Durations: floor 9.3–12.2 min, newest 9.8–12.9 min. Credits: 6 181 (exact seconds) / 6 460 (rounded up per job), above the stage-0 estimate of 2 999–5 023, because assumption A3 (`medium` as fast as the estimate) failed: in steps 1–2 the test step took 560–642 s on CI against 223–243 s locally (step 1).
+* **Cost**: per push to `develop`/`master`/`ci/*`, the two legs cost ~220 credits. At ~41 such pushes a month plus the current CI (8 574), the projection is ~17 700 credits/month, under the 25 000 stop rule (stop threshold 20.03 min per leg). The whole front spent ~7 430 credits on 2026-10-14.
+
+### Pre-merge correction: `release/*` in the `app_test` filter (2026-10-14)
+
+Releases are cut on `release/*` branches (e.g. `release/v2.1.2`, item 35) and merged straight into `master`. The approved filter (`develop`, `master`, `ci/*`) did not run `app_test` there. So the first `CLAUDE.md` rule ("green on the same commit in `develop`") could not be met for a release: the commit that reaches `master` is the release branch's, not a `develop` commit. Streamlit Cloud redeploys as soon as it lands. The fix:
+
+* `/^release\/.*/` was added to the `app_test` filter; nothing else in the jobs changed.
+* The rule now reads "green on the exact commit being merged (develop or a release/* branch)".
+* Publishing stays `develop` (TestPyPI) / `master` (PyPI) only.
+
+The filter check (`research/ci_app_tests/etapa1/scripts/check_filters.py`, predictions `PREVISOES_correcao.md`) has controls in both directions. On the new config, `release/v9.9.9` and `ci/x` get both legs, `feat/x` does not, and publishing stays `develop` / `master` only. The previous config fails the `release/*` fact, and a config with `release/*` on `test_pypi_publish` fails the publishing fact. No `release/*` branch was created on the remote to test it. Cost: a release adds a few pushes a month, at ~220 credits each.
+
+### Merge, a red `develop` and the streamlit 1.66.0 fix (2026-10-14)
+
+* **First merge** `06f56e8` (`--no-ff`). Its pipeline [419](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/419) went **red**:
+  * `build_test` (601) and `app_test_floor` (600, streamlit 1.56.0) green.
+  * `app_test_newest` ([602](https://circleci.com/gh/daniloceano/CycloPhaser/602)) **1506 / 1** on streamlit **1.66.0**, published to PyPI at 16:07Z, 29 min before the pipeline started (16:36Z).
+  * `test_pypi_publish` (603) was `not_run`: the `requires` gate held, and nothing was published.
+  * The failing test, `tests/test_calibrate_i2_apptest.py::test_no_expander_inside_an_expander_in_the_sidebar`, also failed locally with the same selection on 1.66.0 (1506 / 1).
+* **Cause: an AppTest change, not an app defect.** A minimal diagnostic (`research/ci_app_tests/etapa1/scripts/diag_expander.py`, fresh venvs, `logs/fechamento_3b/`) measured three things:
+  * `.expander` on an expander block lists the block itself in 1.56.0 and 1.65.0, and does not in 1.66.0.
+  * The app structure is the same in all three.
+  * Streamlit **allows** an expander inside an expander in all three versions, so "no nested expander" is the app's own layout rule.
+* **The old test was wrong in both directions on 1.66.0.** It asserted `len(exp.expander) == 1`. That gave 0 on a flat group, which turned the job red with no nesting present. It gave 1 on an outer group that did hold another, so it would also have missed real nesting.
+* **Fix** `cd8c043` (only that test): count the descendants of each group, the group itself excluded by identity (`[e for e in exp.expander if e is not exp]`), and require none. The `len(groups) == 8` control stays.
+  * Positive control: the corrected count is 1 for the outer group of a nested app, in all three versions.
+  * Local, job selection: 1507 / 0 on 1.56.0, 1.65.0 and 1.66.0; lean recipe 1280 / 0 + 1 / 0.
+  * Branch pipeline [420](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/420): build_test 1280 / 0 + 1 / 0; both legs 1507 / 0, newest on 1.66.0.
+* **Second merge** `0eb614e` (`--no-ff`). Its pipeline [421](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/421) is **green**:
+
+  | job | result |
+  |---|---|
+  | `build_test` (607) | 1280 / 0 + 1 / 0 |
+  | `app_test_floor` (609) | 1507 / 0, streamlit 1.56.0 |
+  | `app_test_newest` (608) | 1507 / 0, streamlit 1.66.0 |
+  | `test_pypi_publish` (610) | green; started 19:13:04Z, after the last of the three stopped at 19:13:01Z |
+
+  The skip check was OK on both legs. TestPyPI published nothing: twine got `400 File already exists` for each file, and `--skip-existing` turned that into `WARNING  Skipping cyclophaser-2.1.2-py3-none-any.whl because it appears to already exist` and `WARNING  Skipping cyclophaser-2.1.2.tar.gz because it appears to already exist`.
+* A claim made during the closing was wrong and is corrected here: the public app does **not** run 1.66.0 yet. Streamlit Cloud installs dependencies when it rebuilds the app, and the last push to `master` was on 2026-10-10.
+
+### Archive
+
+The disposable branches are kept as annotated tags:
+* `archive/ci/app-tests-controls` → `cf92957` (controls (e), (c), (d); pipelines 412–414);
+* `archive/ci/app-tests-stability` → `6fb3808` (stability matrix; pipeline 415).
+
+The tag pushes created pipelines 422 and 423 with no workflow.
+
+The remote branches `ci/app-tests-controls`, `ci/app-tests-stability`, `ci/app-tests` and `ci/fix-apptest-expander-count` were then deleted. Before deletion, the last two were checked as ancestors of `develop` with `git merge-base --is-ancestor`. The remote now holds `develop` and `master` only.
+
+### Pending
+
+1. **Check the app on streamlit 1.66.0 in the browser (manual) before the next release.** CI covers AppTest only, and 1.66.0 already changed AppTest behaviour once.
+2. **The new CI and the `CLAUDE.md` merge rule reach `master` with the next release.** Until then `master` still runs the old workflow, and its `pypi_publish` requires `build_test` only.
+3. The packaging backlog (`cmocean>=4.0`; the `pandas`/`pyyaml` floors; `install_requires`), see Backlog.
+4. The two `insert(0)` of the repository root in `research/labels`, see Backlog.
+5. Option: widen `app_test` to every branch, see Backlog.
+
+### Gaps that remain
+
+* **Chromium is not in CI.** The 44 browser tests stay manual. Three defects were visible only in Chromium (item 35, Lessons 1): A12, F1, and the `st.toggle` role.
+* **The app is tested only after the merge into `develop`**: feature branches run `build_test` only (Free plan). Before a merge, run the app tests in the conda env.
+* **Streamlit Cloud redeploys on every push to `master` without waiting for CI.** `app_test` detects, it does not prevent. Rule (now in `CLAUDE.md`): merge into `master` only after both legs are green on the exact commit being merged (`develop` or a `release/*` branch).
+* A red `newest` with no code change is an upstream release; it also blocks publishing until decided. The leg's `pip freeze` artifact attributes it.
+
+### Backlog
+
+* **Packaging** (needs `setup.py` and a new release, so outside this front by criterion (a)):
+  * `cmocean>=4.0` is a real defect of the published package: 4.0.1 satisfies it and breaks `import cmocean`, and therefore `import cyclophaser` (`rgb/inverted/` missing). The real floor is 4.0.3.
+  * `pandas>=2.2` and `pyyaml>=6.0` are imprecise but harmless (pip never picks 2.2.0/2.2.1 with `numpy>=2.1`; 6.0 has no cp312 wheel). The real floors are 2.2.2 and 6.0.1.
+  * The broader `install_requires` debt (pinned build/test tooling among runtime requirements) goes with it.
+  * The app's declared floors (`tools/calibration_app/requirements.txt`) do not install together. A "all floors" leg is possible only after they are fixed.
+* **Two `sys.path.insert(0, <repo root>)`** in `research/labels/evaluate_against_labels.py:83` and `research/labels/diagnostics/item19/item19_core.py:23` put the checkout ahead of site-packages in every test run. They are harmless today only because `cyclophaser` is already in `sys.modules`; the provenance lock would catch a change. Switching them to `append` is a small front of its own.
+* **Option: run `app_test` on every branch** once real consumption is known. The open-source quota (400 000 credits/month for a public repo) cannot be confirmed in the CircleCI UI, so the conservative filter stays until consumption data supports widening it.
+* A scheduled (weekly) Chromium job could be a front of its own; browser tests have shown real flakiness before (item 35, I3).
+
+---
+
 ## Note
 
 All items above were identified during the code review and testing phase that preceded

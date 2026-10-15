@@ -1,0 +1,10 @@
+# baseline suite, develop 4287d5b, conda env cyclophaser, 2026-10-14
+which python: /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python
+python 3.12.14, streamlit 1.63.0, playwright 1.62.0, numpy 2.5.3, pandas 3.0.5, scipy 1.18.0, cmocean 4.0.3; macOS Darwin 23.1.0 arm64
+command: python -m pytest -m "not browser" -q -p no:cacheprovider
+--- tail ---
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+cyclophaser.__file__ (in session) = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+1508 passed, 1 skipped, 44 deselected, 89 warnings in 520.92s (0:08:40)

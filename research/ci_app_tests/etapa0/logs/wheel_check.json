@@ -1,0 +1,12 @@
+{
+  "wheel": "cyclophaser-2.1.2-py3-none-any.whl",
+  "commit": "c5174d1",
+  "n_files": 11,
+  "top_level": [
+    "cyclophaser",
+    "cyclophaser-2.1.2.dist-info"
+  ],
+  "has_tools": false,
+  "has_research": false,
+  "has_tests": false
+}

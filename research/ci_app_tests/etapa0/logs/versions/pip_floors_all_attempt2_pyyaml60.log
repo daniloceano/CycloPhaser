@@ -1,0 +1,100 @@
+Processing /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/wheel/cyclophaser-2.1.2-py3-none-any.whl
+Collecting streamlit==1.56.0
+  Using cached streamlit-1.56.0-py3-none-any.whl.metadata (9.8 kB)
+Collecting pandas==2.2.0
+  Using cached pandas-2.2.0-cp312-cp312-macosx_11_0_arm64.whl.metadata (19 kB)
+Collecting matplotlib==3.9.0
+  Using cached matplotlib-3.9.0-cp312-cp312-macosx_11_0_arm64.whl.metadata (11 kB)
+Collecting plotly==5.24.0
+  Using cached plotly-5.24.0-py3-none-any.whl.metadata (7.3 kB)
+Collecting xarray==2024.9.0
+  Using cached xarray-2024.9.0-py3-none-any.whl.metadata (11 kB)
+Collecting numpy==2.1.0
+  Using cached numpy-2.1.0-cp312-cp312-macosx_14_0_arm64.whl.metadata (60 kB)
+Collecting scipy==1.14.0
+  Using cached scipy-1.14.0-cp312-cp312-macosx_14_0_arm64.whl.metadata (60 kB)
+Collecting cmocean==4.0.1
+  Downloading cmocean-4.0.1-py3-none-any.whl.metadata (4.2 kB)
+Collecting pyyaml==6.0
+  Downloading PyYAML-6.0.tar.gz (124 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'error'
+  error: subprocess-exited-with-error
+  
+  × Getting requirements to build wheel did not run successfully.
+  │ exit code: 1
+  ╰─> [68 lines of output]
+      /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/wheel/bdist_wheel.py:4: FutureWarning: The 'wheel' package is no longer the canonical location of the 'bdist_wheel' command, and will be removed in a future release. Please update to setuptools v70.1 or later which contains an integrated version of this command.
+        warn(
+      /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+      !!
+      
+              ********************************************************************************
+              Please consider removing the following classifiers in favor of a SPDX license expression:
+      
+              License :: OSI Approved :: MIT License
+      
+              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+              ********************************************************************************
+      
+      !!
+        self._finalize_license_expression()
+      running egg_info
+      writing lib/PyYAML.egg-info/PKG-INFO
+      writing dependency_links to lib/PyYAML.egg-info/dependency_links.txt
+      writing top-level names to lib/PyYAML.egg-info/top_level.txt
+      Traceback (most recent call last):
+        File "/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_floors_all/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 389, in <module>
+          main()
+        File "/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_floors_all/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 373, in main
+          json_out["return_val"] = hook(**hook_input["kwargs"])
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/ed7de25b-31e9-4bbc-9f25-0bda38806e36/scratchpad/ci_app/venv_floors_all/lib/python3.12/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 143, in get_requires_for_build_wheel
+          return hook(config_settings)
+                 ^^^^^^^^^^^^^^^^^^^^^
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/build_meta.py", line 333, in get_requires_for_build_wheel
+          return self._get_build_requires(config_settings, requirements=[])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/build_meta.py", line 301, in _get_build_requires
+          self.run_setup()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/build_meta.py", line 317, in run_setup
+          exec(code, locals())  # noqa: S102 # exec is intentional here
+          ^^^^^^^^^^^^^^^^^^^^
+        File "<string>", line 288, in <module>
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/__init__.py", line 117, in setup
+          return distutils.core.setup(**attrs)  # type: ignore[return-value]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/_distutils/core.py", line 168, in setup
+          return run_commands(dist)
+                 ^^^^^^^^^^^^^^^^^^
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/_distutils/core.py", line 184, in run_commands
+          dist.run_commands()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/_distutils/dist.py", line 1028, in run_commands
+          self.run_command(cmd)
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/dist.py", line 1106, in run_command
+          super().run_command(command)
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/_distutils/dist.py", line 1047, in run_command
+          cmd_obj.run()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/command/egg_info.py", line 342, in run
+          self.find_sources()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/command/egg_info.py", line 350, in find_sources
+          mm.run()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/command/egg_info.py", line 572, in run
+          self.add_defaults()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/command/egg_info.py", line 610, in add_defaults
+          sdist.add_defaults(self)
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/command/sdist.py", line 113, in add_defaults
+          super().add_defaults()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/_distutils/command/sdist.py", line 256, in add_defaults
+          self._add_defaults_ext()
+        File "/private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/pip-build-env-v9lndnc6/overlay/lib/python3.12/site-packages/setuptools/_distutils/command/sdist.py", line 341, in _add_defaults_ext
+          self.filelist.extend(build_ext.get_source_files())
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File "<string>", line 204, in get_source_files
+      AttributeError: 'build_ext' object has no attribute 'cython_sources'
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+ERROR: Failed to build 'pyyaml' when getting requirements to build wheel

@@ -1,0 +1,76 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.9, pytest-9.1.1, pluggy-1.6.0
+CYCLOPHASER_REQUIRE_INSTALLED: cyclophaser.__file__ = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_newest_425a72f/lib/python3.12/site-packages/cyclophaser/__init__.py
+rootdir: /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/checkout_425a72f
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collected 1509 items / 1 deselected / 4 skipped / 1508 selected
+
+tests/synthetic/test_length_scale_regression.py ....                     [  0%]
+tests/synthetic/test_synthetic_lifecycles.py .....................s..    [  1%]
+tests/test_app_distance_removed.py ................                      [  2%]
+tests/test_app_navigation_apptest.py ..........                          [  3%]
+tests/test_app_passo5_fixes.py ................                          [  4%]
+tests/test_app_yaml_null_export.py ....                                  [  4%]
+tests/test_boundary_padding.py ......................................... [  7%]
+........................................................................ [ 12%]
+........................................................................ [ 17%]
+........................................................................ [ 21%]
+........................................................................ [ 26%]
+........................................................................ [ 31%]
+...............................................                          [ 34%]
+tests/test_calibrate_i2_apptest.py .............                         [ 35%]
+tests/test_calibrate_i3_apptest.py ..............                        [ 36%]
+tests/test_compare_apptest.py ..............................             [ 38%]
+tests/test_compare_core.py .........                                     [ 38%]
+tests/test_config_defaults.py ........                                   [ 39%]
+tests/test_decay_tail_amplitude_fraction.py ...........................  [ 41%]
+tests/test_determine_periods.py .                                        [ 41%]
+tests/test_evaluate_batch_train.py .........                             [ 41%]
+tests/test_incipient_plateau.py ........................................ [ 44%]
+...........................................                              [ 47%]
+tests/test_inspector_apptest.py ..                                       [ 47%]
+tests/test_integration_prominence.py ................................... [ 49%]
+.......................................................................  [ 54%]
+tests/test_intensification_min_depth.py ........................         [ 56%]
+tests/test_item30_spare_intensification.py ...................           [ 57%]
+tests/test_label_apptest.py ................                             [ 58%]
+tests/test_layer_inspector.py .......................................... [ 61%]
+........................................................................ [ 66%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+......................                                                   [ 77%]
+tests/test_manual_labels.py ............................................ [ 80%]
+......................................                                   [ 82%]
+tests/test_peaks_valleys_plateau.py .....                                [ 82%]
+tests/test_phase_colors.py ...                                           [ 83%]
+tests/test_phase_figures.py ....                                         [ 83%]
+tests/test_prominence.py .................                               [ 84%]
+tests/test_reclassify_index0.py ..............                           [ 85%]
+tests/test_regression_baseline.py ....                                   [ 85%]
+tests/test_sidebar_coverage.py ......................................    [ 88%]
+tests/test_sidebar_defaults.py .....                                     [ 88%]
+tests/test_swell_batch.py ...........                                    [ 89%]
+tests/test_track_io.py ................................................. [ 92%]
+............................................                             [ 95%]
+tests/test_track_upload_apptest.py ........                              [ 95%]
+tests/test_use_filter_bool.py ..............                             [ 96%]
+tests/test_use_smoothing_false_derivatives.py ......                     [ 97%]
+tests/test_validate_apptest.py ............................              [ 99%]
+tests/test_validate_core.py .............                                [100%]
+
+=============================== warnings summary ===============================
+tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error
+  /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/checkout_425a72f/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/research/ci_app_tests/etapa1/logs/passo1/local_425a72f/newest.xml -
+cyclophaser.__file__ (in session) = /private/var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/venv_newest_425a72f/lib/python3.12/site-packages/cyclophaser/__init__.py
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_app_pages_browser.py:29: playwright is not installed (browser tests)
+SKIPPED [1] tests/test_compare_browser.py:27: playwright is not installed (browser tests)
+SKIPPED [1] tests/test_label_browser.py:40: playwright is not installed (browser tests)
+SKIPPED [1] tests/test_validate_browser.py:26: playwright is not installed (browser tests)
+SKIPPED [1] tests/synthetic/test_synthetic_lifecycles.py:244: Timing not checked for observational cases
+===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 242.78s (0:04:02) =====

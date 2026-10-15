@@ -1,0 +1,39 @@
+cyclophaser/__init__.py
+cyclophaser/determine_periods.py
+cyclophaser/find_stages.py
+cyclophaser/lanczos_filter.py
+cyclophaser/plots.py
+cyclophaser/example_data/example_file.csv
+cyclophaser-2.1.2.dist-info/licenses/LICENSE
+cyclophaser-2.1.2.dist-info/METADATA
+cyclophaser-2.1.2.dist-info/WHEEL
+cyclophaser-2.1.2.dist-info/top_level.txt
+cyclophaser-2.1.2.dist-info/RECORD
+---- METADATA Requires ----
+Version: 2.1.2
+License: GPL-3.0-or-later
+Requires-Python: >=3.12
+License-File: LICENSE
+Requires-Dist: cmocean>=4.0
+Requires-Dist: contourpy>=1.3
+Requires-Dist: cycler>=0.12
+Requires-Dist: fonttools>=4.53
+Requires-Dist: iniconfig>=2.0
+Requires-Dist: kiwisolver>=1.4
+Requires-Dist: matplotlib>=3.9
+Requires-Dist: numpy>=2.1
+Requires-Dist: packaging>=24.1
+Requires-Dist: pandas>=2.2
+Requires-Dist: pillow>=10.4
+Requires-Dist: pluggy>=1.5
+Requires-Dist: pyparsing>=3.1
+Requires-Dist: python-dateutil>=2.9
+Requires-Dist: pytz>=2024.2
+Requires-Dist: scipy>=1.14
+Requires-Dist: setuptools>=72
+Requires-Dist: six>=1.16
+Requires-Dist: tzdata>=2024.1
+Requires-Dist: wheel>=0.44
+Requires-Dist: xarray>=2024.9
+Provides-Extra: test
+Requires-Dist: pytest>=8.3; extra == "test"

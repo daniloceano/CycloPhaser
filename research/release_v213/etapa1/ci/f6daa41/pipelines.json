@@ -1,0 +1,33 @@
+[
+  {
+    "id": "0e3eaf86-21c2-4090-8510-3e7caf86b702",
+    "errors": [],
+    "project_slug": "gh/daniloceano/CycloPhaser",
+    "updated_at": "2026-10-14T22:45:27.541Z",
+    "number": 426,
+    "state": "created",
+    "created_at": "2026-10-14T22:45:27.422Z",
+    "warnings": [],
+    "trigger": {
+      "received_at": "2026-10-14T22:45:27.153Z",
+      "type": "webhook",
+      "actor": {
+        "login": "daniloceano",
+        "avatar_url": "https://avatars.githubusercontent.com/u/56005607?v=4"
+      }
+    },
+    "vcs": {
+      "origin_repository_url": "https://github.com/daniloceano/CycloPhaser",
+      "target_repository_url": "https://github.com/daniloceano/CycloPhaser",
+      "review_url": "",
+      "revision": "f6daa410e35d9ed45c0d3fb306c0d5a79959e31b",
+      "review_id": "",
+      "provider_name": "GitHub",
+      "commit": {
+        "body": "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+        "subject": "research(release-v213): force-add the etapa 0 and etapa 1 .log files (*.log is git-ignored)"
+      },
+      "branch": "release/v2.1.3"
+    }
+  }
+]

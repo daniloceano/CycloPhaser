@@ -1,0 +1,26 @@
+# (e) newest streamlit, 2026-10-14 19:22:32, Darwin 23.1.0 arm64, /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python, HEAD 6ce1bb5e81fa41c53ff48069d45d2c31188d66aa
+pip index: streamlit (1.66.0)
+  Attempting uninstall: streamlit
+      Successfully uninstalled streamlit-1.63.0
+Successfully installed streamlit-1.66.0
+streamlit 1.66.0
+collected 15 items
+ERROR    asyncio:base_events.py:1833 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1833 Future exception was never retrieved
+cyclophaser.__file__ (in session) = None
+PASSED tests/test_app_pages_browser.py::test_the_public_menu_has_calibrate_and_compare_and_no_developer
+PASSED tests/test_app_pages_browser.py::test_the_developer_menu_has_the_labelling_and_validate_pages
+PASSED tests/test_app_pages_browser.py::test_the_old_benchmark_address_opens_the_default_page
+PASSED tests/test_app_pages_browser.py::test_label_page_drag_reveal_overlay_and_save
+PASSED tests/test_app_pages_browser.py::test_an_uploaded_track_and_an_imported_yaml_survive_a_page_trip
+PASSED tests/test_app_pages_browser.py::test_sidebar_values_set_in_the_ui_are_shown_after_page_trips
+PASSED tests/test_app_pages_browser.py::test_save_results_downloads_what_the_options_say
+PASSED tests/test_app_pages_browser.py::test_the_custom_format_dialog_reads_a_non_standard_file
+PASSED tests/test_app_pages_browser.py::test_the_paged_grid_keeps_page_size_page_and_marks_in_the_browser
+PASSED tests/test_compare_browser.py::test_e1_tasks_t5_t1_t3_t4_within_budget
+PASSED tests/test_compare_browser.py::test_e1_task_t2_upload_a_yaml_within_budget
+PASSED tests/test_compare_browser.py::test_the_compare_state_survives_a_trip_to_calibrate_in_the_browser
+PASSED tests/test_validate_browser.py::test_e1_tasks_t9_t6_t8_t7_within_budget
+PASSED tests/test_validate_browser.py::test_the_validate_state_survives_a_trip_to_calibrate_in_the_browser
+PASSED tests/test_validate_browser.py::test_the_filled_keys_warning_breaks_no_word_in_a_narrow_card
+======================== 15 passed in 358.15s (0:05:58) ========================

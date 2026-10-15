@@ -1,0 +1,17 @@
+16:01:30 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:02:31 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:03:32 {'build_test': 'running', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:04:33 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:05:34 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:06:35 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:07:36 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:08:37 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:09:38 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:10:39 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:11:39 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'running', 'test_pypi_publish': 'blocked'}
+16:12:40 {'build_test': 'success', 'app_test_newest': 'running', 'app_test_floor': 'success', 'test_pypi_publish': 'blocked'}
+16:13:41 {'build_test': 'success', 'app_test_newest': 'success', 'app_test_floor': 'success', 'test_pypi_publish': 'running'}
+build_test 607 success {'class': 'large', 'name': 'Large', 'cpu': 4, 'ram': 8192} 152.1 {'skipped': 58, 'success': 1281} ['===== 1280 passed, 40 skipped, 1 deselected, 1 warning in 95.70s (0:01:35) =====', '========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 4.06s ==========']
+app_test_newest 608 success {'class': 'medium', 'name': 'Medium', 'cpu': 2, 'ram': 4096} 698.2 {'skipped': 5, 'success': 1507} ['===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 628.04s (0:10:28) =====']
+app_test_floor 609 success {'class': 'medium', 'name': 'Medium', 'cpu': 2, 'ram': 4096} 624.0 {'skipped': 5, 'success': 1507} ['===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 551.76s (0:09:11) =====']
+test_pypi_publish 610 success {'class': 'large', 'name': 'Large', 'cpu': 4, 'ram': 8192} 37.9 {} []

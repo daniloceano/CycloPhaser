@@ -1,0 +1,25 @@
+cmocean==4.0.3
+contourpy==1.4.0
+cycler==0.12.1
+cyclophaser @ file:///var/folders/bh/y994_xnx7kg9z0q_bglc3sbm0000gn/T/ci_app_tests_etapa1/wheel_66ac34e/cyclophaser-2.1.2-py3-none-any.whl#sha256=fb383f4b7ff1455a2d00c8940913bafb0a4acef967c7f9c08ab093775cb6a9e6
+fonttools==4.66.1
+iniconfig==2.3.1
+kiwisolver==1.5.1
+matplotlib==3.11.2
+numpy==2.5.4
+packaging==26.3
+pandas==3.0.6
+pillow==12.3.0
+pluggy==1.6.0
+Pygments==2.21.0
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+PyYAML==6.0.3
+scipy==1.18.1
+setuptools==84.0.0
+six==1.17.0
+tzdata==2026.5
+wheel==0.48.0
+xarray==2026.9.0

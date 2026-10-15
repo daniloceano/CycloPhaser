@@ -1,0 +1,6 @@
+# suite at tip, 2026-10-14 19:37:22, HEAD 6ce1bb5e81fa41c53ff48069d45d2c31188d66aa, /Users/danilocoutodesouza/miniconda3/envs/cyclophaser/bin/python, Darwin 23.1.0 arm64
+/Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py streamlit 1.63.0
+command: python -m pytest -m "not browser" -q -p no:cacheprovider
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+cyclophaser.__file__ (in session) = /Users/danilocoutodesouza/Documents/Programs_and_scripts/CycloPhaser/cyclophaser/__init__.py
+1508 passed, 1 skipped, 44 deselected, 89 warnings in 424.90s (0:07:04)

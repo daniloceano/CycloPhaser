@@ -1,0 +1,786 @@
+{
+  "pipeline": [
+    {
+      "number": 415,
+      "id": "2101d749-e1e2-476e-a980-c4243204791c",
+      "url": "https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/415"
+    }
+  ],
+  "n_jobs": 58,
+  "n_pass": 58,
+  "per_leg": {
+    "floor": {
+      "n": 29,
+      "pass": 29,
+      "min_s": 556.8,
+      "median_s": 609.4,
+      "max_s": 730.6
+    },
+    "newest": {
+      "n": 29,
+      "pass": 29,
+      "min_s": 586.3,
+      "median_s": 657.2,
+      "max_s": 773.1
+    }
+  },
+  "credits_exact": 6181,
+  "credits_ceil_min": 6460,
+  "not_pass": [],
+  "jobs": [
+    {
+      "name": "app_test_newest_9",
+      "job": 548,
+      "status": "success",
+      "build_time_s": 685.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 612.31s (0:10:12) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_8",
+      "job": 584,
+      "status": "success",
+      "build_time_s": 705.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 647.40s (0:10:47) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_7",
+      "job": 578,
+      "status": "success",
+      "build_time_s": 631.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 579.35s (0:09:39) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_6",
+      "job": 565,
+      "status": "success",
+      "build_time_s": 691.8,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 618.12s (0:10:18) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_5",
+      "job": 587,
+      "status": "success",
+      "build_time_s": 631.8,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 569.33s (0:09:29) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_4",
+      "job": 568,
+      "status": "success",
+      "build_time_s": 685.8,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 608.25s (0:10:08) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_3",
+      "job": 544,
+      "status": "success",
+      "build_time_s": 702.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 644.34s (0:10:44) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_29",
+      "job": 570,
+      "status": "success",
+      "build_time_s": 649.6,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 581.48s (0:09:41) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_28",
+      "job": 573,
+      "status": "success",
+      "build_time_s": 647.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 591.97s (0:09:51) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_27",
+      "job": 569,
+      "status": "success",
+      "build_time_s": 630.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 579.16s (0:09:39) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_26",
+      "job": 581,
+      "status": "success",
+      "build_time_s": 631.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 569.59s (0:09:29) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_25",
+      "job": 590,
+      "status": "success",
+      "build_time_s": 661.0,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 592.64s (0:09:52) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_24",
+      "job": 542,
+      "status": "success",
+      "build_time_s": 682.4,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 623.72s (0:10:23) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_23",
+      "job": 550,
+      "status": "success",
+      "build_time_s": 655.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 586.86s (0:09:46) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_22",
+      "job": 553,
+      "status": "success",
+      "build_time_s": 631.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 575.32s (0:09:35) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_21",
+      "job": 572,
+      "status": "success",
+      "build_time_s": 681.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 623.53s (0:10:23) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_20",
+      "job": 576,
+      "status": "success",
+      "build_time_s": 686.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 618.02s (0:10:18) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_2",
+      "job": 557,
+      "status": "success",
+      "build_time_s": 648.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 575.36s (0:09:35) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_19",
+      "job": 541,
+      "status": "success",
+      "build_time_s": 680.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 617.85s (0:10:17) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_18",
+      "job": 535,
+      "status": "success",
+      "build_time_s": 684.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 624.78s (0:10:24) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_17",
+      "job": 554,
+      "status": "success",
+      "build_time_s": 657.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 597.24s (0:09:57) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_16",
+      "job": 562,
+      "status": "success",
+      "build_time_s": 641.3,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 576.39s (0:09:36) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_15",
+      "job": 563,
+      "status": "success",
+      "build_time_s": 683.0,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 614.62s (0:10:14) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_14",
+      "job": 534,
+      "status": "success",
+      "build_time_s": 621.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 561.41s (0:09:21) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_13",
+      "job": 551,
+      "status": "success",
+      "build_time_s": 586.3,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 525.22s (0:08:45) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_12",
+      "job": 575,
+      "status": "success",
+      "build_time_s": 685.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 629.10s (0:10:29) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_11",
+      "job": 583,
+      "status": "success",
+      "build_time_s": 614.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 545.33s (0:09:05) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_10",
+      "job": 567,
+      "status": "success",
+      "build_time_s": 643.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 566.13s (0:09:26) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_newest_1",
+      "job": 589,
+      "status": "success",
+      "build_time_s": 773.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 708.26s (0:11:48) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_9",
+      "job": 533,
+      "status": "success",
+      "build_time_s": 609.4,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 536.06s (0:08:56) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_8",
+      "job": 537,
+      "status": "success",
+      "build_time_s": 604.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 547.54s (0:09:07) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_7",
+      "job": 586,
+      "status": "success",
+      "build_time_s": 560.7,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 510.08s (0:08:30) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_6",
+      "job": 561,
+      "status": "success",
+      "build_time_s": 556.8,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 490.96s (0:08:10) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_5",
+      "job": 574,
+      "status": "success",
+      "build_time_s": 646.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 568.85s (0:09:28) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_4",
+      "job": 556,
+      "status": "success",
+      "build_time_s": 591.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 541.15s (0:09:01) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_3",
+      "job": 566,
+      "status": "success",
+      "build_time_s": 559.7,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 511.97s (0:08:31) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_29",
+      "job": 579,
+      "status": "success",
+      "build_time_s": 570.0,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 512.27s (0:08:32) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_28",
+      "job": 538,
+      "status": "success",
+      "build_time_s": 563.0,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 501.50s (0:08:21) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_27",
+      "job": 559,
+      "status": "success",
+      "build_time_s": 616.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 548.99s (0:09:08) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_26",
+      "job": 555,
+      "status": "success",
+      "build_time_s": 626.8,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 558.47s (0:09:18) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_25",
+      "job": 588,
+      "status": "success",
+      "build_time_s": 595.6,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 536.62s (0:08:56) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_24",
+      "job": 558,
+      "status": "success",
+      "build_time_s": 606.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 547.87s (0:09:07) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_23",
+      "job": 582,
+      "status": "success",
+      "build_time_s": 557.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 507.42s (0:08:27) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_22",
+      "job": 577,
+      "status": "success",
+      "build_time_s": 602.6,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 538.48s (0:08:58) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_21",
+      "job": 564,
+      "status": "success",
+      "build_time_s": 582.3,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 526.81s (0:08:46) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_20",
+      "job": 549,
+      "status": "success",
+      "build_time_s": 616.4,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 543.05s (0:09:03) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_2",
+      "job": 560,
+      "status": "success",
+      "build_time_s": 646.0,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 577.66s (0:09:37) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_19",
+      "job": 545,
+      "status": "success",
+      "build_time_s": 628.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 570.82s (0:09:30) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_18",
+      "job": 546,
+      "status": "success",
+      "build_time_s": 646.9,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 570.36s (0:09:30) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_17",
+      "job": 543,
+      "status": "success",
+      "build_time_s": 639.6,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 583.75s (0:09:43) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_16",
+      "job": 536,
+      "status": "success",
+      "build_time_s": 725.2,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 659.51s (0:10:59) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_15",
+      "job": 580,
+      "status": "success",
+      "build_time_s": 642.7,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 574.98s (0:09:34) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_14",
+      "job": 547,
+      "status": "success",
+      "build_time_s": 664.6,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 586.69s (0:09:46) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_13",
+      "job": 539,
+      "status": "success",
+      "build_time_s": 645.6,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 566.80s (0:09:26) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_12",
+      "job": 585,
+      "status": "success",
+      "build_time_s": 730.6,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 666.89s (0:11:06) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_11",
+      "job": 552,
+      "status": "success",
+      "build_time_s": 597.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 542.64s (0:09:02) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_10",
+      "job": 540,
+      "status": "success",
+      "build_time_s": 656.5,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 586.66s (0:09:46) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    },
+    {
+      "name": "app_test_floor_1",
+      "job": 571,
+      "status": "success",
+      "build_time_s": 593.1,
+      "pytest": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 539.70s (0:08:59) =====",
+      "skipcheck": "OK: skips are exactly the 5 allowed ids",
+      "PASS": true,
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      }
+    }
+  ]
+}

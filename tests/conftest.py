@@ -1,10 +1,11 @@
-"""Marker registration, plus the CI's installed-package lock.
+"""Marker registration, plus the CI's installed-package and app-dependency locks.
 
 Deliberately minimal. The package's CI installs the wheel plus pytest and
 nothing else, and a conftest is imported at COLLECTION time — anything it tries
 to import that is not a package dependency would fail the entire suite rather
 than one module, which is how this research front broke the package's CI once
-already. So nothing outside the package is imported here.
+already. So nothing outside the package is imported here, except by the
+app-dependency lock below, and only when its variable is set.
 
 The lock. With CYCLOPHASER_REQUIRE_INSTALLED=1 the session refuses to run unless
 `cyclophaser` resolves to a site-packages copy (the wheel CI just installed), and
@@ -14,8 +15,17 @@ source tree instead of the wheel. Unset, the variable changes nothing: no
 import, no check. In every run the terminal summary prints the
 `cyclophaser.__file__` the session actually used (read from sys.modules, never
 imported for the purpose).
+
+The app-dependency lock. With CYCLOPHASER_REQUIRE_APP_DEPS=1 (set by the CI's
+app_test job) the session refuses to run unless streamlit, plotly and yaml all
+import in this process, and the UsageError lists every one that failed — missing
+or installed-but-broken alike. Without it the calibration-app tests would skip
+themselves quietly and the job would go green having tested only the package.
+Unset, the variable changes nothing and nothing is imported: the wheel-only job
+never sees those modules.
 """
 
+import importlib
 import os
 import sys
 from pathlib import Path
@@ -23,10 +33,16 @@ from pathlib import Path
 import pytest
 
 _LOCK_ENV = "CYCLOPHASER_REQUIRE_INSTALLED"
+_APP_DEPS_ENV = "CYCLOPHASER_REQUIRE_APP_DEPS"
+_APP_DEPS = ("streamlit", "plotly", "yaml")
 
 
 def _lock_on():
     return os.environ.get(_LOCK_ENV, "") not in ("", "0")
+
+
+def _app_deps_on():
+    return os.environ.get(_APP_DEPS_ENV, "") not in ("", "0")
 
 
 def _installed(path):
@@ -59,6 +75,17 @@ def pytest_configure(config):
             raise pytest.UsageError(
                 f"{_LOCK_ENV} is set but cyclophaser was imported from "
                 f"{cyclophaser.__file__}, not from site-packages")
+    if _app_deps_on():
+        failed = []
+        for name in _APP_DEPS:
+            try:
+                importlib.import_module(name)
+            except Exception as exc:   # broken installs raise more than ImportError
+                failed.append(f"{name} ({type(exc).__name__}: {exc})")
+        if failed:
+            raise pytest.UsageError(
+                f"{_APP_DEPS_ENV} is set but these app dependencies do not "
+                f"import: {'; '.join(failed)}")
 
 
 def pytest_report_header(config):

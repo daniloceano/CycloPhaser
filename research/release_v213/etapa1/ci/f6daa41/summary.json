@@ -1,0 +1,462 @@
+{
+  "branch": "release/v2.1.3",
+  "commit": "f6daa410e35d9ed45c0d3fb306c0d5a79959e31b",
+  "pipelines": [
+    {
+      "number": 426,
+      "id": "0e3eaf86-21c2-4090-8510-3e7caf86b702",
+      "url": "https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/426"
+    }
+  ],
+  "jobs": [
+    {
+      "pipeline": 426,
+      "workflow": "build_test_publish",
+      "workflow_id": "496fd43d-925f-4e43-9040-c7ce97d82a48",
+      "workflow_status": "success",
+      "name": "build_test",
+      "status": "success",
+      "job_number": 619,
+      "started_at": "2026-10-14T22:45:29Z",
+      "stopped_at": "2026-10-14T22:47:36Z",
+      "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/619",
+      "resource_class": {
+        "class": "large",
+        "name": "Large",
+        "cpu": 4,
+        "ram": 8192
+      },
+      "build_time_s": 127.1,
+      "outcome": "success",
+      "steps": [
+        {
+          "name": "Spin up environment",
+          "run_time_s": 1.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Preparing environment variables",
+          "run_time_s": 0.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Checkout code",
+          "run_time_s": 1.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install build tools",
+          "run_time_s": 2.8,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Build sdist and wheel",
+          "run_time_s": 3.5,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install package from wheel",
+          "run_time_s": 21.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install test dependencies",
+          "run_time_s": 2.3,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Run tests against the installed wheel",
+          "run_time_s": 88.7,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "===== 1280 passed, 40 skipped, 1 deselected, 1 warning in 85.79s (0:01:25) =====",
+          "tail": [
+            "tests/test_use_filter_bool.py ..............                             [ 99%]",
+            "tests/test_use_smoothing_false_derivatives.py ......                     [100%]",
+            "",
+            "=============================== warnings summary ===============================",
+            "tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error",
+            "  /home/circleci/project/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.",
+            "    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "----- generated xml file: /home/circleci/project/test-reports/results.xml ------",
+            "cyclophaser.__file__ (in session) = /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cyclophaser/__init__.py",
+            "===== 1280 passed, 40 skipped, 1 deselected, 1 warning in 85.79s (0:01:25) ====="
+          ]
+        },
+        {
+          "name": "Run source-tree tests against the checkout",
+          "run_time_s": 4.1,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 3.54s ==========",
+          "tail": [
+            "../.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings",
+            "  /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.",
+            "    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])",
+            "",
+            "../.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings",
+            "  /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.",
+            "    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "- generated xml file: /home/circleci/project/test-reports/results-source-tree.xml -",
+            "cyclophaser.__file__ (in session) = /home/circleci/project/cyclophaser/__init__.py",
+            "========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 3.54s =========="
+          ]
+        },
+        {
+          "name": "Uploading test results",
+          "run_time_s": 0.3,
+          "status": [
+            "success"
+          ]
+        }
+      ],
+      "tests_by_result": {
+        "skipped": 58,
+        "success": 1281
+      },
+      "tests_non_success_ids": {
+        "skipped": [
+          "pytest::tests.test_app_distance_removed",
+          "pytest::tests.test_app_navigation_apptest",
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_calibrate_i2_apptest",
+          "pytest::tests.test_calibrate_i3_apptest",
+          "pytest::tests.test_compare_apptest",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_compare_core",
+          "pytest::tests.test_inspector_apptest",
+          "pytest::tests.test_label_apptest",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_phase_figures",
+          "pytest::tests.test_sidebar_coverage",
+          "pytest::tests.test_sidebar_defaults",
+          "pytest::tests.test_track_upload_apptest",
+          "pytest::tests.test_validate_apptest",
+          "pytest::tests.test_validate_browser",
+          "pytest::tests.test_validate_core",
+          "pytest::tests.test_app_distance_removed",
+          "pytest::tests.test_app_navigation_apptest",
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_calibrate_i2_apptest",
+          "pytest::tests.test_calibrate_i3_apptest",
+          "pytest::tests.test_compare_apptest",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_compare_core",
+          "pytest::tests.test_inspector_apptest",
+          "pytest::tests.test_label_apptest",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_phase_figures",
+          "pytest::tests.test_sidebar_coverage",
+          "pytest::tests.test_sidebar_defaults",
+          "pytest::tests.test_track_upload_apptest",
+          "pytest::tests.test_validate_apptest",
+          "pytest::tests.test_validate_browser",
+          "pytest::tests.test_validate_core",
+          "tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]",
+          "tests.test_app_passo5_fixes::test_the_track_upload_and_its_caption_are_in_the_calibration_tab_only",
+          "tests.test_layer_inspector::test_plotly_inspector_starts_with_every_layer_on",
+          "tests.test_layer_inspector::test_plotly_inspector_rescales_in_the_package_s_own_groups",
+          "tests.test_layer_inspector::test_plotly_inspector_without_rescaling_plots_true_units",
+          "tests.test_layer_inspector::test_no_hardcoded_derivative_formula_under_vorticity_signal",
+          "tests.test_manual_labels::test_each_phase_is_drawn_in_its_own_standard_colour",
+          "tests.test_manual_labels::test_the_opening_scaffold_is_a_valid_partition",
+          "tests.test_manual_labels::test_the_chart_is_told_the_raw_series_and_the_labellers_marks_and_nothing_else",
+          "tests.test_manual_labels::test_the_chart_payload_is_json_serialisable",
+          "tests.test_manual_labels::test_a_drag_result_moves_the_boundary_it_names",
+          "tests.test_manual_labels::test_a_drag_result_is_re_clamped_on_arrival",
+          "tests.test_manual_labels::test_a_malformed_or_mismatched_drag_result_is_ignored",
+          "tests.test_manual_labels::test_an_unchanged_drag_result_reports_no_change",
+          "tests.test_manual_labels::test_the_same_drag_result_is_only_acted_on_once",
+          "tests.test_manual_labels::test_a_chart_that_cannot_mount_says_so_instead_of_drawing_something_else",
+          "tests.test_manual_labels::test_the_component_key_can_never_contain_the_reserved_delimiter",
+          "tests.test_manual_labels::test_the_shipped_chart_js_never_reads_a_vertical_coordinate",
+          "tests.test_manual_labels::test_the_shipped_chart_js_listens_on_window_not_on_the_svg",
+          "tests.test_manual_labels::test_the_shipped_chart_js_reports_a_failure_to_reach_python",
+          "tests.test_manual_labels::test_the_shipped_chart_js_supports_the_keyboard",
+          "tests.test_phase_colors::test_the_other_pages_copies_have_not_drifted"
+        ]
+      },
+      "n_tests_reported": 1339
+    },
+    {
+      "pipeline": 426,
+      "workflow": "build_test_publish",
+      "workflow_id": "496fd43d-925f-4e43-9040-c7ce97d82a48",
+      "workflow_status": "success",
+      "name": "app_test_newest",
+      "status": "success",
+      "job_number": 620,
+      "started_at": "2026-10-14T22:45:29Z",
+      "stopped_at": "2026-10-14T22:56:35Z",
+      "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/620",
+      "resource_class": {
+        "class": "medium",
+        "name": "Medium",
+        "cpu": 2,
+        "ram": 4096
+      },
+      "build_time_s": 666.2,
+      "outcome": "success",
+      "steps": [
+        {
+          "name": "Spin up environment",
+          "run_time_s": 2.4,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Preparing environment variables",
+          "run_time_s": 0.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Checkout code",
+          "run_time_s": 1.8,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install build tools",
+          "run_time_s": 3.2,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Build sdist and wheel",
+          "run_time_s": 4.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install wheel and app test dependencies (newest)",
+          "run_time_s": 41.8,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Run tests against the installed wheel, with the app",
+          "run_time_s": 611.7,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 606.93s (0:10:06) =====",
+          "tail": [
+            "tests/test_validate_apptest.py ............................              [ 99%]",
+            "tests/test_validate_core.py .............                                [100%]",
+            "",
+            "=============================== warnings summary ===============================",
+            "tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error",
+            "  /home/circleci/project/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.",
+            "    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "----- generated xml file: /home/circleci/project/test-reports/results.xml ------",
+            "cyclophaser.__file__ (in session) = /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cyclophaser/__init__.py",
+            "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 606.93s (0:10:06) ====="
+          ]
+        },
+        {
+          "name": "Check that only the allowed tests skipped",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": null,
+          "tail": [
+            "skipped: tests.test_app_pages_browser",
+            "skipped: tests.test_compare_browser",
+            "skipped: tests.test_label_browser",
+            "skipped: tests.test_validate_browser",
+            "skipped: tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]",
+            "OK: skips are exactly the 5 allowed ids"
+          ]
+        },
+        {
+          "name": "Uploading test results",
+          "run_time_s": 0.3,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Uploading artifacts",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ]
+        }
+      ],
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      },
+      "tests_non_success_ids": {
+        "skipped": [
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_validate_browser",
+          "tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]"
+        ]
+      },
+      "n_tests_reported": 1512
+    },
+    {
+      "pipeline": 426,
+      "workflow": "build_test_publish",
+      "workflow_id": "496fd43d-925f-4e43-9040-c7ce97d82a48",
+      "workflow_status": "success",
+      "name": "app_test_floor",
+      "status": "success",
+      "job_number": 618,
+      "started_at": "2026-10-14T22:45:29Z",
+      "stopped_at": "2026-10-14T22:54:58Z",
+      "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/618",
+      "resource_class": {
+        "class": "medium",
+        "name": "Medium",
+        "cpu": 2,
+        "ram": 4096
+      },
+      "build_time_s": 568.8,
+      "outcome": "success",
+      "steps": [
+        {
+          "name": "Spin up environment",
+          "run_time_s": 2.1,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Preparing environment variables",
+          "run_time_s": 0.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Checkout code",
+          "run_time_s": 1.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install build tools",
+          "run_time_s": 3.1,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Build sdist and wheel",
+          "run_time_s": 4.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install wheel and app test dependencies (floor)",
+          "run_time_s": 38.1,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Run tests against the installed wheel, with the app",
+          "run_time_s": 518.8,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 514.75s (0:08:34) =====",
+          "tail": [
+            "tests/test_validate_apptest.py ............................              [ 99%]",
+            "tests/test_validate_core.py .............                                [100%]",
+            "",
+            "=============================== warnings summary ===============================",
+            "tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error",
+            "  /home/circleci/project/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.",
+            "    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "----- generated xml file: /home/circleci/project/test-reports/results.xml ------",
+            "cyclophaser.__file__ (in session) = /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cyclophaser/__init__.py",
+            "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 514.75s (0:08:34) ====="
+          ]
+        },
+        {
+          "name": "Check that only the allowed tests skipped",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": null,
+          "tail": [
+            "skipped: tests.test_app_pages_browser",
+            "skipped: tests.test_compare_browser",
+            "skipped: tests.test_label_browser",
+            "skipped: tests.test_validate_browser",
+            "skipped: tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]",
+            "OK: skips are exactly the 5 allowed ids"
+          ]
+        },
+        {
+          "name": "Uploading test results",
+          "run_time_s": 0.3,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Uploading artifacts",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ]
+        }
+      ],
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      },
+      "tests_non_success_ids": {
+        "skipped": [
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_validate_browser",
+          "tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]"
+        ]
+      },
+      "n_tests_reported": 1512
+    }
+  ]
+}
