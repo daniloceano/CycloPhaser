@@ -4523,6 +4523,63 @@ The remote branches `ci/app-tests-controls`, `ci/app-tests-stability`, `ci/app-t
 * **Option: run `app_test` on every branch** once real consumption is known. The open-source quota (400 000 credits/month for a public repo) cannot be confirmed in the CircleCI UI, so the conservative filter stays until consumption data supports widening it.
 * A scheduled (weekly) Chromium job could be a front of its own; browser tests have shown real flakiness before (item 35, I3).
 
+## 37. Release 2.1.3 — packaging fixes, the new CI and the `CLAUDE.md` rule on `master` — closed, released 2026-10-15
+
+Branch `release/v2.1.3` (from `develop` @ `4287d5b`). Reports: `research/release_v213/etapa0/` (stage 0, measurements of 2.1.2), `etapa1/` (build on the branch), `etapa2/` (TestPyPI rehearsal), `etapa3/` (release). Each stage has a `PREVISOES_*.md` committed and pushed before its measurements (stage 0's predictions were sent in chat, since that session could not push), a `RELATORIO_*.md` and `logs/` (the `.log` files are force-added: `*.log` is git-ignored). No PR. **`cyclophaser/` did not change**: `git diff v2.1.2 v2.1.3 -- cyclophaser` is empty.
+
+Merges, each authorised in writing by Danilo: `1177c7e` (`release/v2.1.3` → `develop`, AUTORIZAÇÃO 1), `b1c2df7` "Release 2.1.3" (`develop` @ `0dcc57a` → `master`, AUTORIZAÇÃO 2), tag `v2.1.3` (object `5c5b598`) on `b1c2df7`; `7213226` brings the stage 2 records into `develop`.
+
+### What changed
+
+* **`setup.py`**: version 2.1.3; `install_requires` is exactly the six libraries the package imports — `cmocean>=4.0.3`, `matplotlib>=3.9`, `numpy>=2.1`, `pandas>=2.2.2`, `scipy>=1.14`, `xarray>=2024.9`. Removed (dependencies of those, or build/test tools, never imported by `cyclophaser`): `contourpy`, `cycler`, `fonttools`, `iniconfig`, `kiwisolver`, `packaging`, `pillow`, `pluggy`, `pyparsing`, `python-dateutil`, `pytz`, `setuptools`, `six`, `tzdata`, `wheel`. The `test` extra (`pytest>=8.3`) is unchanged.
+* **`MANIFEST.in`** (new): `prune tests`. The sdist carries the package only.
+* **`tools/calibration_app/requirements.txt`**: `cmocean>=4.0.3`, `pandas>=2.2.2`, `pyyaml>=6.0.1`, and the comment no longer says every floor matches the package's (pyyaml is not a package dependency). `cyclophaser>=2.1.0` did **not** move: with `>=2.1.3`, the rebuild that the `master` push triggers would have broken until 2.1.3 reached PyPI.
+* **`docs/conf.py`**: 2.1.3. **`CHANGELOG.md`**: section `[2.1.3] - 2026-10-15`, reviewed by Danilo (two wording fixes), links `v2.1.2...v2.1.3` and `[Unreleased]` from `v2.1.3`.
+* With the merge, `master` now has item 36's CI (`app_test` floor + newest, publishing gated on both) and the `CLAUDE.md` merge rule — item 36, Pending 2, is resolved.
+
+### Danilo's decisions (2026-10-14)
+
+The six `install_requires` above; sdist without `tests/`; the app floors; `cyclophaser>=2.1.0` stays in the app; version 2.1.3; Danilo reviews the CHANGELOG text before the merge. User documentation that lists dependencies is reported, not edited (see Gaps).
+
+### Measured (suite counts are passed / failed)
+
+* **Stage 0** (2.1.2 from PyPI, clean Linux container, Python 3.12, outside the repo):
+  * M1 fresh install: cmocean 4.0.3, `import cyclophaser` OK.
+  * M2 cmocean 4.0.1 installed first: pip keeps it ("Requirement already satisfied: cmocean>=4.0 … (4.0.1)"), and `import cyclophaser` **fails** with `FileNotFoundError …/cmocean/rgb/inverted/thermal_i-rgb.txt` (`cyclophaser/__init__` → `determine_periods.py:28` → `plots.py:5` `import cmocean.cm`).
+  * M3 at the declared floors (`uv --resolution lowest-direct --only-binary :all:`): cmocean 4.0.1, import fails. M4 = M3 with `cmocean>=4.0.3`: OK.
+  * M5 wheel 2.1.2: `cyclophaser/` + LICENSE, 21 `Requires-Dist`. M6 sdist 2.1.2: 40 entries under `tests/` (top-level `test_*.py` only, no `conftest.py`, data or subpackages); pytest from it: 10 collection errors.
+  * M8 public app: "Made with Streamlit v1.66.0", "CycloPhaser 2.1.2" — the prediction (not 1.66.0) was **wrong**, see the wake-up finding below.
+* **Stage 1** (`release/v2.1.3`; changes `6ce1bb5`; local platform macOS 14 arm64 — Docker was not running, declared before measuring):
+  * Suite, conda `-m "not browser"`: base `develop` 4287d5b 1508 / 0; tip 1508 / 0.
+  * (a) `git diff v2.1.2 6ce1bb5 -- cyclophaser`: 0 bytes. `default_behaviour_hash.py` (same blob `d060277` at both commits), main checkout, same session and env (numpy 2.5.3, scipy 1.18.0, pandas 3.0.5): **`7552bc67…aa500f` at both v2.1.2 and the tip**.
+  * (b) clean installs of the local wheel (new venv per case, CWD outside the repo, `python -I`, `smoke.py` asserting `cyclophaser.__file__` in the venv): B1 newest → cmocean 4.0.3; B2 floors → cmocean 4.0.3, matplotlib 3.9.0, numpy 2.1.0, pandas 2.2.2, scipy 1.14.0, xarray 2024.9.0; B3 cmocean 4.0.1 first → **pip upgrades it to 4.0.3**. All smoke OK. Extra control (no committed prediction): M2 reproduces on macOS.
+  * (c) wheel `Requires-Dist` = the six + `pytest>=8.3; extra == "test"`, `Requires-Python >=3.12`, LICENSE present; sdist 22 entries, **0 under `tests/`**; the wheel built from the sdist has the 6 package files identical by SHA256 to the direct wheel; install from the sdist OK; `twine check --strict` PASSED.
+  * (e) Chromium, conda env: `test_app_pages_browser.py`, `test_compare_browser.py`, `test_validate_browser.py`, 15 collected — **15 / 0 on streamlit 1.66.0** (newest of the day) and **15 / 0 on 1.56.0**, one run each; the env's streamlit returned to 1.63.0 (conda-forge), `pip list` and `conda list` identical to before. This closes item 36, Pending 1 (the app on 1.66.0 in the browser) for those 15 tests.
+  * CI, pipeline [426](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/426) (tip `f6daa41`): build_test 1280 / 0 + 1 / 0, both legs 1507 / 0, no publishing job (branch filters).
+* **Stage 2** (merge `1177c7e` in `develop`): tree identical to the release tip. Pipeline [427](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/427): build_test 1280 / 0 + 1 / 0, both legs 1507 / 0, `test_pypi_publish` **uploaded** 2.1.3 (`200 OK` × 2). Every member of the TestPyPI wheel and sdist identical by content to a local build of the same commit. (b) from TestPyPI (`--no-deps`, dependencies from PyPI): B1, B2 (same floors as above), B3 (4.0.1 → 4.0.3) all OK.
+* **Stage 3**:
+  * CHANGELOG date commit `0dcc57a`; pipeline [428](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/428) — the definitive (d): build_test 1280 / 0 + 1 / 0; `app_test_floor` 1507 / 0 on streamlit 1.56.0; `app_test_newest` 1507 / 0 on 1.66.0 (artifact freezes); `test_pypi_publish` skipped both files (`400 File already exists` → `--skip-existing`).
+  * `master` merge `b1c2df7` = exactly `0dcc57a`'s tree. Pipeline [429](https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/429): build_test 1280 / 0 + 1 / 0, both legs 1507 / 0, `pypi_publish` success (`200 OK` × 2). It depended on both legs in the config file and in the pipeline graph (API `dependencies` = the three jobs; it started 12:04:00Z, after the last leg stopped at 12:03:58Z).
+  * PyPI 2.1.3: every member (wheel 11, sdist 18) identical by content to TestPyPI and to a local build of `master`; (b) B1 and B3 from PyPI OK.
+  * Checked independently by Claude for Danilo (2026-10-15, ~10:45): the public app shows "CycloPhaser 2.1.3" and "Made with Streamlit v1.66.0" with no reboot; "Try example data" draws 3 figures with 0 exceptions and 0 alerts; PyPI files identical to an independent Linux build of `f6daa41`; B3 from PyPI on Linux OK; Read the Docs latest and stable show "CycloPhaser 2.1.3 documentation"; pipeline 429 duration (12m12s = slowest leg 11m22s + publish 46s) consistent with the dependency.
+
+### Left out (decided)
+
+* The two `sys.path.insert(0, <repo root>)` in `research/labels` (item 36, Backlog).
+* Python versions beyond 3.12.
+* A CI job on tags.
+* `app_test` on every branch.
+* Chromium in CI.
+* Any change to detection, defaults or the app; labels; the split.
+
+### Gaps that remain
+
+* **A Streamlit Cloud wake-up installs the newest dependencies without a push and without CI.** Waking the public app from sleep brought it up on the newest PyPI versions, with no push and no reboot — which explains stage 0's M8 (the app was already on 1.66.0 before any `master` push). So a new dependency release, or a new `cyclophaser` on PyPI, can reach production on a wake-up without passing through CI. The `newest` leg detects such a break on the next push; it does not prevent it. This also corrects item 36's closing remark that the app would only move to 1.66.0 on the next `master` push.
+* **`tests/test_label_browser.py` was not run for this release** (it is run by hand by Danilo).
+* The `v2.1.3` tag message ("CycloPhaser 2.1.3") is shorter than earlier tags'; kept because it had already been pushed.
+* User documentation, reported and not edited: `docs/installation.rst:26` lists "NumPy, SciPy, pandas, xarray, Matplotlib, among others" (still true, but partial; it does not name cmocean). `docs/requirements.txt` (the Read the Docs build environment) still pins several of the removed libraries; it satisfies the new floors and does not change what the package declares.
+* The clean installs of stages 1–3 ran on macOS arm64, not Linux; the Linux checks of the published files are Claude's independent ones listed above.
+
 ---
 
 ## Note

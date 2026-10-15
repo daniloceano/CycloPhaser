@@ -1,0 +1,584 @@
+{
+  "branch": "develop",
+  "commit": "0dcc57a3b87d05783685f388a500a3b6c80febcc",
+  "pipelines": [
+    {
+      "number": 428,
+      "id": "c5b4abee-6389-4959-9165-ade4b52e4d27",
+      "url": "https://app.circleci.com/pipelines/gh/daniloceano/CycloPhaser/428"
+    }
+  ],
+  "jobs": [
+    {
+      "pipeline": 428,
+      "workflow": "build_test_publish",
+      "workflow_id": "4b07d4cb-9789-4606-8d29-7057fc2ecd70",
+      "workflow_status": "success",
+      "name": "build_test",
+      "status": "success",
+      "job_number": 627,
+      "started_at": "2026-10-15T11:39:34Z",
+      "stopped_at": "2026-10-15T11:42:08Z",
+      "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/627",
+      "resource_class": {
+        "class": "large",
+        "name": "Large",
+        "cpu": 4,
+        "ram": 8192
+      },
+      "build_time_s": 153.6,
+      "outcome": "success",
+      "steps": [
+        {
+          "name": "Spin up environment",
+          "run_time_s": 16.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Preparing environment variables",
+          "run_time_s": 0.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Checkout code",
+          "run_time_s": 1.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install build tools",
+          "run_time_s": 2.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Build sdist and wheel",
+          "run_time_s": 3.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install package from wheel",
+          "run_time_s": 23.2,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install test dependencies",
+          "run_time_s": 2.3,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Run tests against the installed wheel",
+          "run_time_s": 98.0,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "===== 1280 passed, 40 skipped, 1 deselected, 1 warning in 94.77s (0:01:34) =====",
+          "tail": [
+            "tests/test_use_filter_bool.py ..............                             [ 99%]",
+            "tests/test_use_smoothing_false_derivatives.py ......                     [100%]",
+            "",
+            "=============================== warnings summary ===============================",
+            "tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error",
+            "  /home/circleci/project/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.",
+            "    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "----- generated xml file: /home/circleci/project/test-reports/results.xml ------",
+            "cyclophaser.__file__ (in session) = /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cyclophaser/__init__.py",
+            "===== 1280 passed, 40 skipped, 1 deselected, 1 warning in 94.77s (0:01:34) ====="
+          ]
+        },
+        {
+          "name": "Run source-tree tests against the checkout",
+          "run_time_s": 5.3,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 4.41s ==========",
+          "tail": [
+            "../.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:74: 22 warnings",
+            "  /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:74: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.",
+            "    reg_map_i = colors.ListedColormap(rgb_with_alpha, N=rgb_i.shape[0])",
+            "",
+            "../.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:76: 22 warnings",
+            "  /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cmocean/cm.py:76: MatplotlibDeprecationWarning: Passing 'N' to ListedColormap is deprecated since 3.11 and will be removed in 3.13. Please ensure the list of passed colors is the required length instead.",
+            "    reg_map_r_i = colors.ListedColormap(rgb_with_alpha[::-1,:], N=rgb_i.shape[0])",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "- generated xml file: /home/circleci/project/test-reports/results-source-tree.xml -",
+            "cyclophaser.__file__ (in session) = /home/circleci/project/cyclophaser/__init__.py",
+            "========= 1 passed, 18 skipped, 1302 deselected, 88 warnings in 4.41s =========="
+          ]
+        },
+        {
+          "name": "Uploading test results",
+          "run_time_s": 0.3,
+          "status": [
+            "success"
+          ]
+        }
+      ],
+      "tests_by_result": {
+        "skipped": 58,
+        "success": 1281
+      },
+      "tests_non_success_ids": {
+        "skipped": [
+          "pytest::tests.test_app_distance_removed",
+          "pytest::tests.test_app_navigation_apptest",
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_calibrate_i2_apptest",
+          "pytest::tests.test_calibrate_i3_apptest",
+          "pytest::tests.test_compare_apptest",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_compare_core",
+          "pytest::tests.test_inspector_apptest",
+          "pytest::tests.test_label_apptest",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_phase_figures",
+          "pytest::tests.test_sidebar_coverage",
+          "pytest::tests.test_sidebar_defaults",
+          "pytest::tests.test_track_upload_apptest",
+          "pytest::tests.test_validate_apptest",
+          "pytest::tests.test_validate_browser",
+          "pytest::tests.test_validate_core",
+          "pytest::tests.test_app_distance_removed",
+          "pytest::tests.test_app_navigation_apptest",
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_calibrate_i2_apptest",
+          "pytest::tests.test_calibrate_i3_apptest",
+          "pytest::tests.test_compare_apptest",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_compare_core",
+          "pytest::tests.test_inspector_apptest",
+          "pytest::tests.test_label_apptest",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_phase_figures",
+          "pytest::tests.test_sidebar_coverage",
+          "pytest::tests.test_sidebar_defaults",
+          "pytest::tests.test_track_upload_apptest",
+          "pytest::tests.test_validate_apptest",
+          "pytest::tests.test_validate_browser",
+          "pytest::tests.test_validate_core",
+          "tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]",
+          "tests.test_app_passo5_fixes::test_the_track_upload_and_its_caption_are_in_the_calibration_tab_only",
+          "tests.test_layer_inspector::test_plotly_inspector_starts_with_every_layer_on",
+          "tests.test_layer_inspector::test_plotly_inspector_rescales_in_the_package_s_own_groups",
+          "tests.test_layer_inspector::test_plotly_inspector_without_rescaling_plots_true_units",
+          "tests.test_layer_inspector::test_no_hardcoded_derivative_formula_under_vorticity_signal",
+          "tests.test_manual_labels::test_each_phase_is_drawn_in_its_own_standard_colour",
+          "tests.test_manual_labels::test_the_opening_scaffold_is_a_valid_partition",
+          "tests.test_manual_labels::test_the_chart_is_told_the_raw_series_and_the_labellers_marks_and_nothing_else",
+          "tests.test_manual_labels::test_the_chart_payload_is_json_serialisable",
+          "tests.test_manual_labels::test_a_drag_result_moves_the_boundary_it_names",
+          "tests.test_manual_labels::test_a_drag_result_is_re_clamped_on_arrival",
+          "tests.test_manual_labels::test_a_malformed_or_mismatched_drag_result_is_ignored",
+          "tests.test_manual_labels::test_an_unchanged_drag_result_reports_no_change",
+          "tests.test_manual_labels::test_the_same_drag_result_is_only_acted_on_once",
+          "tests.test_manual_labels::test_a_chart_that_cannot_mount_says_so_instead_of_drawing_something_else",
+          "tests.test_manual_labels::test_the_component_key_can_never_contain_the_reserved_delimiter",
+          "tests.test_manual_labels::test_the_shipped_chart_js_never_reads_a_vertical_coordinate",
+          "tests.test_manual_labels::test_the_shipped_chart_js_listens_on_window_not_on_the_svg",
+          "tests.test_manual_labels::test_the_shipped_chart_js_reports_a_failure_to_reach_python",
+          "tests.test_manual_labels::test_the_shipped_chart_js_supports_the_keyboard",
+          "tests.test_phase_colors::test_the_other_pages_copies_have_not_drifted"
+        ]
+      },
+      "n_tests_reported": 1339
+    },
+    {
+      "pipeline": 428,
+      "workflow": "build_test_publish",
+      "workflow_id": "4b07d4cb-9789-4606-8d29-7057fc2ecd70",
+      "workflow_status": "success",
+      "name": "app_test_newest",
+      "status": "success",
+      "job_number": 626,
+      "started_at": "2026-10-15T11:39:34Z",
+      "stopped_at": "2026-10-15T11:49:50Z",
+      "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/626",
+      "resource_class": {
+        "class": "medium",
+        "name": "Medium",
+        "cpu": 2,
+        "ram": 4096
+      },
+      "build_time_s": 616.4,
+      "outcome": "success",
+      "steps": [
+        {
+          "name": "Spin up environment",
+          "run_time_s": 16.4,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Preparing environment variables",
+          "run_time_s": 0.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Checkout code",
+          "run_time_s": 1.8,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install build tools",
+          "run_time_s": 2.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Build sdist and wheel",
+          "run_time_s": 3.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install wheel and app test dependencies (newest)",
+          "run_time_s": 35.5,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Run tests against the installed wheel, with the app",
+          "run_time_s": 555.3,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 550.62s (0:09:10) =====",
+          "tail": [
+            "tests/test_validate_apptest.py ............................              [ 99%]",
+            "tests/test_validate_core.py .............                                [100%]",
+            "",
+            "=============================== warnings summary ===============================",
+            "tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error",
+            "  /home/circleci/project/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.",
+            "    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "----- generated xml file: /home/circleci/project/test-reports/results.xml ------",
+            "cyclophaser.__file__ (in session) = /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cyclophaser/__init__.py",
+            "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 550.62s (0:09:10) ====="
+          ]
+        },
+        {
+          "name": "Check that only the allowed tests skipped",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": null,
+          "tail": [
+            "skipped: tests.test_app_pages_browser",
+            "skipped: tests.test_compare_browser",
+            "skipped: tests.test_label_browser",
+            "skipped: tests.test_validate_browser",
+            "skipped: tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]",
+            "OK: skips are exactly the 5 allowed ids"
+          ]
+        },
+        {
+          "name": "Uploading test results",
+          "run_time_s": 0.3,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Uploading artifacts",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ]
+        }
+      ],
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      },
+      "tests_non_success_ids": {
+        "skipped": [
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_validate_browser",
+          "tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]"
+        ]
+      },
+      "n_tests_reported": 1512
+    },
+    {
+      "pipeline": 428,
+      "workflow": "build_test_publish",
+      "workflow_id": "4b07d4cb-9789-4606-8d29-7057fc2ecd70",
+      "workflow_status": "success",
+      "name": "app_test_floor",
+      "status": "success",
+      "job_number": 625,
+      "started_at": "2026-10-15T11:39:34Z",
+      "stopped_at": "2026-10-15T11:50:44Z",
+      "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/625",
+      "resource_class": {
+        "class": "medium",
+        "name": "Medium",
+        "cpu": 2,
+        "ram": 4096
+      },
+      "build_time_s": 670.1,
+      "outcome": "success",
+      "steps": [
+        {
+          "name": "Spin up environment",
+          "run_time_s": 16.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Preparing environment variables",
+          "run_time_s": 0.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Checkout code",
+          "run_time_s": 1.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install build tools",
+          "run_time_s": 2.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Build sdist and wheel",
+          "run_time_s": 3.7,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install wheel and app test dependencies (floor)",
+          "run_time_s": 35.1,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Run tests against the installed wheel, with the app",
+          "run_time_s": 610.1,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 606.12s (0:10:06) =====",
+          "tail": [
+            "tests/test_validate_apptest.py ............................              [ 99%]",
+            "tests/test_validate_core.py .............                                [100%]",
+            "",
+            "=============================== warnings summary ===============================",
+            "tests/test_track_io.py::test_standard_layout_with_text_dates_is_an_error",
+            "  /home/circleci/project/tools/calibration_app/track_io.py:202: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.",
+            "    df = pd.read_csv(io.BytesIO(data), sep=STANDARD_SEP, index_col=TIME_COL,",
+            "",
+            "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+            "----- generated xml file: /home/circleci/project/test-reports/results.xml ------",
+            "cyclophaser.__file__ (in session) = /home/circleci/.pyenv/versions/3.12.3/lib/python3.12/site-packages/cyclophaser/__init__.py",
+            "===== 1507 passed, 5 skipped, 1 deselected, 1 warning in 606.12s (0:10:06) ====="
+          ]
+        },
+        {
+          "name": "Check that only the allowed tests skipped",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": null,
+          "tail": [
+            "skipped: tests.test_app_pages_browser",
+            "skipped: tests.test_compare_browser",
+            "skipped: tests.test_label_browser",
+            "skipped: tests.test_validate_browser",
+            "skipped: tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]",
+            "OK: skips are exactly the 5 allowed ids"
+          ]
+        },
+        {
+          "name": "Uploading test results",
+          "run_time_s": 0.4,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Uploading artifacts",
+          "run_time_s": 0.1,
+          "status": [
+            "success"
+          ]
+        }
+      ],
+      "tests_by_result": {
+        "skipped": 5,
+        "success": 1507
+      },
+      "tests_non_success_ids": {
+        "skipped": [
+          "pytest::tests.test_app_pages_browser",
+          "pytest::tests.test_compare_browser",
+          "pytest::tests.test_label_browser",
+          "pytest::tests.test_validate_browser",
+          "tests.synthetic.test_synthetic_lifecycles::test_lifecycle_phase_timing[IcIt_observational]"
+        ]
+      },
+      "n_tests_reported": 1512
+    },
+    {
+      "pipeline": 428,
+      "workflow": "build_test_publish",
+      "workflow_id": "4b07d4cb-9789-4606-8d29-7057fc2ecd70",
+      "workflow_status": "success",
+      "name": "test_pypi_publish",
+      "status": "success",
+      "job_number": 628,
+      "started_at": "2026-10-15T11:50:46Z",
+      "stopped_at": "2026-10-15T11:51:20Z",
+      "build_url": "https://circleci.com/gh/daniloceano/CycloPhaser/628",
+      "resource_class": {
+        "class": "large",
+        "name": "Large",
+        "cpu": 4,
+        "ram": 8192
+      },
+      "build_time_s": 33.8,
+      "outcome": "success",
+      "steps": [
+        {
+          "name": "Spin up environment",
+          "run_time_s": 16.8,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Preparing environment variables",
+          "run_time_s": 0.0,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Checkout code",
+          "run_time_s": 1.8,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Install build and publish tools",
+          "run_time_s": 9.5,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Build sdist and wheel",
+          "run_time_s": 4.3,
+          "status": [
+            "success"
+          ]
+        },
+        {
+          "name": "Check distribution",
+          "run_time_s": 0.4,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": null,
+          "tail": [
+            "Checking dist/cyclophaser-2.1.3-py3-none-any.whl: PASSED",
+            "Checking dist/cyclophaser-2.1.3.tar.gz: PASSED"
+          ]
+        },
+        {
+          "name": "Publish to TestPyPI",
+          "run_time_s": 0.8,
+          "status": [
+            "success"
+          ],
+          "pytest_summary": null,
+          "tail": [
+            "         &#x27;5aef7a03f6eb3385b619ec40997edc6aef3c6b58bd98b5f25bfc85c4be494a03&",
+            "         #x27;). See https://test.pypi.org/help/#file-name-reuse for more       ",
+            "         information.                                                           ",
+            "                                                                                ",
+            "                                                                                ",
+            "          </body>                                                               ",
+            "         </html>                                                                ",
+            "WARNING  Skipping cyclophaser-2.1.3-py3-none-any.whl because it appears to      ",
+            "         already exist                                                          ",
+            "Uploading cyclophaser-2.1.3.tar.gz",
+            "100% \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 96.4/96.4 kB \u2022 00:00 \u2022 102.7 MB/s",
+            "",
+            "INFO     Response from https://test.pypi.org/legacy/:                           ",
+            "         400 Bad Request                                                        ",
+            "INFO     <html>                                                                 ",
+            "          <head>                                                                ",
+            "           <title>400 File already exists ('cyclophaser-2.1.3.tar.gz', with     ",
+            "         blake2_256 hash                                                        ",
+            "         '5b083a34268d97baa3a4089e2e7d6cd2802cccb3678b4f7c3f58e8e4e6ee955e').   ",
+            "         See https://test.pypi.org/help/#file-name-reuse for more               ",
+            "         information.</title>                                                   ",
+            "          </head>                                                               ",
+            "          <body>                                                                ",
+            "           <h1>400 File already exists ('cyclophaser-2.1.3.tar.gz', with        ",
+            "         blake2_256 hash                                                        ",
+            "         '5b083a34268d97baa3a4089e2e7d6cd2802cccb3678b4f7c3f58e8e4e6ee955e').   ",
+            "         See https://test.pypi.org/help/#file-name-reuse for more               ",
+            "         information.</h1>                                                      ",
+            "           The server could not comply with the request since it is either      ",
+            "         malformed or otherwise incorrect.<br/><br/>                            ",
+            "         File already exists (&#x27;cyclophaser-2.1.3.tar.gz&#x27;, with        ",
+            "         blake2_256 hash                                                        ",
+            "         &#x27;5b083a34268d97baa3a4089e2e7d6cd2802cccb3678b4f7c3f58e8e4e6ee955e&",
+            "         #x27;). See https://test.pypi.org/help/#file-name-reuse for more       ",
+            "         information.                                                           ",
+            "                                                                                ",
+            "                                                                                ",
+            "          </body>                                                               ",
+            "         </html>                                                                ",
+            "WARNING  Skipping cyclophaser-2.1.3.tar.gz because it appears to already exist  "
+          ]
+        }
+      ],
+      "tests_by_result": {},
+      "tests_non_success_ids": {},
+      "n_tests_reported": 0
+    }
+  ]
+}

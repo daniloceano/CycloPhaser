@@ -1,0 +1,47 @@
+# PyPI 2.1.3 vs local build of master b1c2df79422bea82388362be63d6998b51d5bc21, Darwin 23.1.0 arm64, 2026-10-15 09:05:38; compare_dists.py from 67b126d
+19802f9d3ce8406f061113723dfb5bf19c0befed5bd68bcf7a6320d88adcad8e  <scratchpad>/e3/master/cyclophaser-2.1.3-py3-none-any.whl
+37831e8354190df44c0d76feb27e651941ec78d49ed1d4c8f008de29acec97d4  <scratchpad>/e3/master/cyclophaser-2.1.3.tar.gz
+88ef3c328fd91d544cd85d8d1483e5fd62f7420a138cfecf0b9657981f2897cc  <scratchpad>/e3/pypi/cyclophaser-2.1.3-py3-none-any.whl
+02a3af0829fff3016e1f644a4ae9838a7b936e1bb36c91418d06833d75e6ed96  <scratchpad>/e3/pypi/cyclophaser-2.1.3.tar.gz
+== wheel: 11 local members, 11 index members
+   SAME  cyclophaser-2.1.3.dist-info/METADATA  a733cdec3e0e2293  a733cdec3e0e2293
+   SAME  cyclophaser-2.1.3.dist-info/RECORD  6334c0cdd9f27f48  6334c0cdd9f27f48
+   SAME  cyclophaser-2.1.3.dist-info/WHEEL  61532836a2b3111b  61532836a2b3111b
+   SAME  cyclophaser-2.1.3.dist-info/licenses/LICENSE  3972dc9744f6499f  3972dc9744f6499f
+   SAME  cyclophaser-2.1.3.dist-info/top_level.txt  264797d61b23c012  264797d61b23c012
+   SAME  cyclophaser/__init__.py  def8202ae41fb9e4  def8202ae41fb9e4
+   SAME  cyclophaser/determine_periods.py  8fd5b6f2c215de43  8fd5b6f2c215de43
+   SAME  cyclophaser/example_data/example_file.csv  d60ab4e130b36bfb  d60ab4e130b36bfb
+   SAME  cyclophaser/find_stages.py  0ffb9792e63b5eab  0ffb9792e63b5eab
+   SAME  cyclophaser/lanczos_filter.py  041cc4251f84be67  041cc4251f84be67
+   SAME  cyclophaser/plots.py  685a11de4a0f0d8c  685a11de4a0f0d8c
+   package files cyclophaser/* identical: True (6 files)
+   METADATA local: ['Version: 2.1.3', 'Requires-Python: >=3.12', 'Requires-Dist: cmocean>=4.0.3', 'Requires-Dist: matplotlib>=3.9', 'Requires-Dist: numpy>=2.1', 'Requires-Dist: pandas>=2.2.2', 'Requires-Dist: scipy>=1.14', 'Requires-Dist: xarray>=2024.9', 'Requires-Dist: pytest>=8.3; extra == "test"']
+   METADATA index: ['Version: 2.1.3', 'Requires-Python: >=3.12', 'Requires-Dist: cmocean>=4.0.3', 'Requires-Dist: matplotlib>=3.9', 'Requires-Dist: numpy>=2.1', 'Requires-Dist: pandas>=2.2.2', 'Requires-Dist: scipy>=1.14', 'Requires-Dist: xarray>=2024.9', 'Requires-Dist: pytest>=8.3; extra == "test"']
+   Requires-Dist/Requires-Python/Version identical: True
+== sdist: 18 local members, 18 index members
+   SAME  LICENSE  3972dc9744f6499f  3972dc9744f6499f
+   SAME  MANIFEST.in  c6ddebc703e989bd  c6ddebc703e989bd
+   SAME  PKG-INFO  a733cdec3e0e2293  a733cdec3e0e2293
+   SAME  README.md  b2d34176b108a62b  b2d34176b108a62b
+   SAME  cyclophaser.egg-info/PKG-INFO  a733cdec3e0e2293  a733cdec3e0e2293
+   SAME  cyclophaser.egg-info/SOURCES.txt  bc35ec525e5c6bf8  bc35ec525e5c6bf8
+   SAME  cyclophaser.egg-info/dependency_links.txt  01ba4719c80b6fe9  01ba4719c80b6fe9
+   SAME  cyclophaser.egg-info/requires.txt  de0e8ad5fa79699d  de0e8ad5fa79699d
+   SAME  cyclophaser.egg-info/top_level.txt  264797d61b23c012  264797d61b23c012
+   SAME  cyclophaser/__init__.py  def8202ae41fb9e4  def8202ae41fb9e4
+   SAME  cyclophaser/determine_periods.py  8fd5b6f2c215de43  8fd5b6f2c215de43
+   SAME  cyclophaser/example_data/example_file.csv  d60ab4e130b36bfb  d60ab4e130b36bfb
+   SAME  cyclophaser/find_stages.py  0ffb9792e63b5eab  0ffb9792e63b5eab
+   SAME  cyclophaser/lanczos_filter.py  041cc4251f84be67  041cc4251f84be67
+   SAME  cyclophaser/plots.py  685a11de4a0f0d8c  685a11de4a0f0d8c
+   SAME  pyproject.toml  62d1911b56fe6838  62d1911b56fe6838
+   SAME  setup.cfg  1c473cbaee8da5fc  1c473cbaee8da5fc
+   SAME  setup.py  d44e2aede22f3196  d44e2aede22f3196
+   package files cyclophaser/* identical: True (6 files)
+   sdist setup.py identical: True
+   sdist MANIFEST.in identical: True
+   sdist README.md identical: True
+   sdist LICENSE identical: True
+   sdist entries under tests/ (index): []
+VERDICT wheel_pkg True sdist_pkg True metadata True
