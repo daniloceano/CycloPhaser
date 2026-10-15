@@ -1,0 +1,43 @@
+# case B1  artifact testpypi:2.1.3  2026-10-15 08:12:42
+# platform: Darwin 23.1.0 arm64; cwd: /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/e3e656bf-bc74-431c-a3fa-1a60e129f533/scratchpad/e2/b
+# python: 3.12.9 /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/e3e656bf-bc74-431c-a3fa-1a60e129f533/scratchpad/e2/b/venv_B1
+Downloading cyclophaser-2.1.3-py3-none-any.whl (81 kB)
+Installing collected packages: cyclophaser
+Successfully installed cyclophaser-2.1.3
+## deps from PyPI: cmocean>=4.0.3
+matplotlib>=3.9
+numpy>=2.1
+pandas>=2.2.2
+scipy>=1.14
+xarray>=2024.9
+Successfully installed cmocean-4.0.3 contourpy-1.4.0 cycler-0.12.1 fonttools-4.67.0 kiwisolver-1.5.1 matplotlib-3.11.2 numpy-2.5.4 packaging-26.3 pandas-3.0.6 pillow-12.3.0 pyparsing-3.3.3 python-dateutil-2.9.0.post0 scipy-1.18.1 six-1.17.0 xarray-2026.9.0
+## pip freeze
+cmocean==4.0.3
+contourpy==1.4.0
+cycler==0.12.1
+cyclophaser==2.1.3
+fonttools==4.67.0
+kiwisolver==1.5.1
+matplotlib==3.11.2
+numpy==2.5.4
+packaging==26.3
+pandas==3.0.6
+pillow==12.3.0
+pyparsing==3.3.3
+python-dateutil==2.9.0.post0
+scipy==1.18.1
+six==1.17.0
+xarray==2026.9.0
+## pip check
+No broken requirements found.
+## smoke
+cyclophaser.__file__ /private/tmp/claude-501/-Users-danilocoutodesouza-Documents-Programs-and-scripts-CycloPhaser/e3e656bf-bc74-431c-a3fa-1a60e129f533/scratchpad/e2/b/venv_B1/lib/python3.12/site-packages/cyclophaser/__init__.py
+cyclophaser 2.1.3
+cmocean 4.0.3
+numpy 2.5.4
+pandas 3.0.6
+scipy 1.18.1
+matplotlib 3.11.2
+xarray 2026.9.0
+determine_periods OK, rows: 65 columns: ['z', 'z_unfil', 'dz', 'dz2', 'z_peaks_valleys', 'dz_peaks_valleys']
+smoke_exit=0
