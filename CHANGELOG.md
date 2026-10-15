@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.1.3] - DATE TO BE SET ON PUBLICATION DAY
+## [2.1.3] - 2026-10-15
 
 **The package code did not change**: `cyclophaser/` is identical to 2.1.2, so
 no default, no parameter and no result moves. This release fixes how the package
