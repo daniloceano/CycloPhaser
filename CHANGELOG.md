@@ -25,7 +25,8 @@ is declared and distributed.
   `cmocean/rgb/inverted/thermal_i-rgb.txt`, raised through
   `cyclophaser.plots`, which imports `cmocean.cm`). A fresh install already got
   4.0.3; an environment that had 4.0.1 installed kept it, because pip saw the
-  requirement as satisfied, and so did an install at the declared floors.
+  requirement as satisfied, and an install at the declared floors picked 4.0.1
+  itself.
 * **`install_requires` reduced to the six libraries the package imports**:
   `cmocean>=4.0.3`, `matplotlib>=3.9`, `numpy>=2.1`, `pandas>=2.2.2`,
   `scipy>=1.14`, `xarray>=2024.9`. Removed — dependencies of those libraries or
@@ -48,7 +49,7 @@ is declared and distributed.
 ### Changed — continuous integration
 
 * New `app_test` job: the calibration app's tests run against the wheel of each
-  commit on `develop`, `master` and `release/*`, in two legs — `floor`
+  commit on `develop`, `master`, `release/*` and `ci/*`, in two legs — `floor`
   (streamlit 1.56.0, the app's declared minimum) and `newest` (the latest
   streamlit pip resolves). Publishing to TestPyPI and PyPI now requires both
   legs to pass, besides `build_test`. The browser (Chromium) tests are still run

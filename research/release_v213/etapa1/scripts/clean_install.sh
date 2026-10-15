@@ -58,7 +58,7 @@ elif [[ "$ART" == testpypi:* ]]; then
   # the dependencies, from PyPI only, as declared by the installed metadata
   DEPS=$("$P" -I -c "from importlib.metadata import requires; print('\n'.join(r for r in requires('cyclophaser') if 'extra ==' not in r))")
   echo "## deps from PyPI: $DEPS"
-  "$P" -I -m pip install $DEPS 2>&1 | grep -E "Successfully|already satisfied: cmocean|ERROR"
+  "$P" -I -m pip install $DEPS 2>&1 | grep -E "Successfully|already satisfied: cmocean|Attempting uninstall|Found existing|ERROR"
 else
   "$P" -I -m pip install "${SPEC[@]}" 2>&1 | grep -E "Successfully|Requirement already satisfied: cmocean|Attempting uninstall|Found existing|ERROR"
 fi
